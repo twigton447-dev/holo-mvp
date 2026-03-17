@@ -1,0 +1,439 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://holo.internal/benchmark/scenario.schema.json",
+  "title": "Holo Benchmark Scenario",
+  "description": "JSON Schema for Holo BEC benchmark scenarios. Every scenario file in the benchmark_library/scenarios/ directory must conform to this schema.",
+  "type": "object",
+  "required": [
+    "scenario_id",
+    "title",
+    "category",
+    "difficulty",
+    "expected_verdict",
+    "benchmark_purpose",
+    "naive_system_likely_conclusion",
+    "action",
+    "context",
+    "sender_history",
+    "approval_chain",
+    "org_policies",
+    "hidden_ground_truth",
+    "scoring_targets",
+    "notes_for_humans"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "scenario_id": {
+      "type": "string",
+      "pattern": "^BEC-[A-Z]+-\\d{3}$",
+      "description": "Unique scenario identifier. Format: BEC-<BUCKET>-<NNN> where BUCKET is CLEAN, FRAUD, SUBTLE, or FP.",
+      "examples": ["BEC-CLEAN-001", "BEC-FRAUD-002", "BEC-SUBTLE-001", "BEC-FP-003"]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "description": "Human-readable scenario title."
+    },
+    "category": {
+      "type": "string",
+      "enum": ["clean", "fraud", "subtle_fraud", "false_positive_trap"],
+      "description": "Scenario category. 'clean' = no fraud. 'fraud' = obvious fraud. 'subtle_fraud' = fraud with weak/conjunctive signals. 'false_positive_trap' = legitimate with suspicious-looking surface."
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "description": "Estimated detection difficulty. 'low' = any competent system should handle correctly. 'medium' = requires cross-field reasoning. 'high' = requires conjunctive signal detection or contextual reasoning."
+    },
+    "expected_verdict": {
+      "type": "string",
+      "enum": ["ALLOW", "ESCALATE"],
+      "description": "The correct ground-truth verdict. Used for scoring."
+    },
+    "benchmark_purpose": {
+      "type": "string",
+      "minLength": 20,
+      "description": "Explains what architectural capability this scenario tests and why it is included in the benchmark."
+    },
+    "naive_system_likely_conclusion": {
+      "type": "string",
+      "minLength": 10,
+      "description": "What a naive (single-pass, pattern-matching) system would likely conclude, and why. Used to calibrate expected architecture differentiation."
+    },
+    "action": {
+      "type": "object",
+      "description": "The payment action being evaluated.",
+      "required": ["type", "amount_usd", "recipient_name", "recipient_bank_account", "invoice_number", "due_date"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["invoice_payment", "wire_transfer", "ach_payment"],
+          "description": "Payment type."
+        },
+        "amount_usd": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Payment amount in US dollars."
+        },
+        "recipient_name": {
+          "type": "string",
+          "description": "Named payee."
+        },
+        "recipient_bank_account": {
+          "type": "string",
+          "description": "Masked bank account (last 4 digits only, e.g., ****1234).",
+          "pattern": "^\\*{4}\\d{4}$"
+        },
+        "invoice_number": {
+          "type": ["string", "null"],
+          "description": "Invoice number. Null for wire transfers with no associated invoice."
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Payment due date (ISO 8601 date)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "description": "The full email and document context presented to the evaluation system.",
+      "required": ["email_thread", "email_headers", "attachments"],
+      "properties": {
+        "email_thread": {
+          "type": "array",
+          "description": "Ordered list of email messages in the thread (oldest first).",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["message_id", "from", "to", "cc", "date", "subject", "body"],
+            "properties": {
+              "message_id": {
+                "type": "string",
+                "description": "RFC 2822 Message-ID header value."
+              },
+              "from": {
+                "type": "string",
+                "description": "Sender email address."
+              },
+              "to": {
+                "type": "string",
+                "description": "Primary recipient email address(es)."
+              },
+              "cc": {
+                "type": "string",
+                "description": "CC recipients. Empty string if none."
+              },
+              "date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Message date-time in ISO 8601."
+              },
+              "subject": {
+                "type": "string",
+                "description": "Email subject line."
+              },
+              "body": {
+                "type": "string",
+                "description": "Plain-text email body."
+              },
+              "headers_raw": {
+                "type": "object",
+                "description": "Optional raw header fields for messages where these carry forensic significance.",
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "email_headers": {
+          "type": "object",
+          "description": "Authentication and routing headers for the primary (most recent) inbound vendor email.",
+          "required": ["spf", "dkim", "dmarc", "return_path", "originating_ip"],
+          "properties": {
+            "spf": {
+              "type": "string",
+              "enum": ["pass", "softfail", "fail", "neutral", "none"],
+              "description": "SPF check result."
+            },
+            "dkim": {
+              "type": "string",
+              "enum": ["pass", "fail", "none"],
+              "description": "DKIM check result."
+            },
+            "dmarc": {
+              "type": "string",
+              "enum": ["pass", "fail", "none"],
+              "description": "DMARC check result."
+            },
+            "return_path": {
+              "type": "string",
+              "description": "Return-Path header value."
+            },
+            "originating_ip": {
+              "type": "string",
+              "description": "Originating IP address of the email."
+            }
+          },
+          "additionalProperties": true
+        },
+        "attachments": {
+          "type": "array",
+          "description": "List of email attachments with parsed content summaries.",
+          "items": {
+            "type": "object",
+            "required": ["filename", "type", "content_summary"],
+            "properties": {
+              "filename": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "description": "MIME type."
+              },
+              "content_summary": {
+                "type": "string",
+                "description": "Human-readable summary of the attachment's relevant contents."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "vendor_record": {
+      "type": ["object", "null"],
+      "description": "The vendor record from the accounts payable system. Null in CEO-fraud scenarios where no vendor relationship exists.",
+      "properties": {
+        "vendor_name": {
+          "type": "string"
+        },
+        "vendor_id": {
+          "type": "string",
+          "pattern": "^V-\\d{4}-\\d{4}$"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "primary_contact": {
+          "type": "string"
+        },
+        "bank_account_on_file": {
+          "type": "string",
+          "pattern": "^\\*{4}\\d{4}$"
+        },
+        "onboarding_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "invoice_history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["invoice", "date", "amount", "status"],
+            "properties": {
+              "invoice": {"type": "string"},
+              "date": {"type": "string", "format": "date"},
+              "amount": {"type": "number"},
+              "status": {"type": "string", "enum": ["paid", "pending", "cancelled"]}
+            },
+            "additionalProperties": true
+          }
+        },
+        "bank_change_history": {
+          "type": "array",
+          "description": "Log of bank account changes. Empty array means no changes have occurred.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {"type": "string", "format": "date"},
+              "old_account": {"type": "string"},
+              "new_account": {"type": "string"},
+              "verified_by": {"type": "string"},
+              "approved_by": {"type": "string"}
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "sender_history": {
+      "type": "object",
+      "description": "Email sender history for the primary sending address in this scenario.",
+      "required": ["email_address", "first_seen", "total_messages", "typical_patterns", "anomalies"],
+      "properties": {
+        "email_address": {
+          "type": "string"
+        },
+        "first_seen": {
+          "type": "string",
+          "format": "date"
+        },
+        "total_messages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "typical_patterns": {
+          "type": "object",
+          "description": "Observed behavioral patterns for this sender.",
+          "additionalProperties": true
+        },
+        "anomalies": {
+          "type": "array",
+          "description": "List of observed anomalies for this message relative to sender history.",
+          "items": {"type": "string"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "approval_chain": {
+      "type": "object",
+      "description": "Current state of the payment approval chain.",
+      "required": ["required_approvers", "current_approvals", "policy_reference", "threshold_usd"],
+      "properties": {
+        "required_approvers": {
+          "type": "array",
+          "description": "List of approver roles required per policy for this payment amount.",
+          "items": {"type": "string"}
+        },
+        "current_approvals": {
+          "type": "array",
+          "description": "Approvals obtained so far.",
+          "items": {
+            "type": "object",
+            "required": ["role", "name", "date", "status"],
+            "properties": {
+              "role": {"type": "string"},
+              "name": {"type": "string"},
+              "date": {"type": "string", "format": "date"},
+              "status": {"type": "string", "enum": ["approved", "rejected", "pending"]}
+            },
+            "additionalProperties": false
+          }
+        },
+        "policy_reference": {
+          "type": "string",
+          "description": "Policy document and section governing approval requirements."
+        },
+        "threshold_usd": {
+          "type": "number",
+          "description": "Dollar threshold above which AP Manager approval is required.",
+          "const": 25000
+        }
+      },
+      "additionalProperties": true
+    },
+    "org_policies": {
+      "type": "object",
+      "description": "TargetCorp organizational policies governing payments. Identical across all scenarios.",
+      "required": [
+        "bank_change_policy",
+        "payment_approval_thresholds",
+        "vendor_verification_requirements",
+        "escalation_criteria"
+      ],
+      "properties": {
+        "bank_change_policy": {
+          "type": "string"
+        },
+        "payment_approval_thresholds": {
+          "type": "object",
+          "required": ["under_5000", "5000_to_25000", "25000_to_100000", "over_100000"],
+          "properties": {
+            "under_5000": {"type": "string"},
+            "5000_to_25000": {"type": "string"},
+            "25000_to_100000": {"type": "string"},
+            "over_100000": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
+        "vendor_verification_requirements": {
+          "type": "string"
+        },
+        "escalation_criteria": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "additionalProperties": true
+    },
+    "hidden_ground_truth": {
+      "type": "object",
+      "description": "The authoritative ground truth for scoring. Contains information that may not be surfaced to the evaluation system.",
+      "required": ["is_fraudulent", "fraud_type", "explanation", "evidence_signals"],
+      "properties": {
+        "is_fraudulent": {
+          "type": "boolean",
+          "description": "True if this is a fraudulent scenario, false if legitimate."
+        },
+        "fraud_type": {
+          "type": ["string", "null"],
+          "description": "Classification of fraud type. Null for clean/legitimate scenarios."
+        },
+        "explanation": {
+          "type": "string",
+          "description": "Full explanation of the scenario's ground truth."
+        },
+        "evidence_signals": {
+          "type": "array",
+          "description": "List of evidence signals that support the correct verdict, with strength ratings.",
+          "items": {
+            "type": "object",
+            "required": ["signal", "strength", "location"],
+            "properties": {
+              "signal": {"type": "string"},
+              "strength": {
+                "type": "string",
+                "enum": ["strong", "moderate", "weak"]
+              },
+              "location": {"type": "string"}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "scoring_targets": {
+      "type": "object",
+      "description": "Scoring criteria and architecture differentiation notes.",
+      "required": [
+        "correct_verdict",
+        "required_evidence_cited",
+        "false_positive_risk",
+        "false_negative_risk",
+        "architecture_differentiation_notes"
+      ],
+      "properties": {
+        "correct_verdict": {
+          "type": "string",
+          "enum": ["ALLOW", "ESCALATE"]
+        },
+        "required_evidence_cited": {
+          "type": "array",
+          "description": "Evidence items that must be cited in the explanation to earn full credit.",
+          "items": {"type": "string"}
+        },
+        "false_positive_risk": {
+          "type": "string",
+          "description": "Assessment of false-positive risk for this scenario."
+        },
+        "false_negative_risk": {
+          "type": "string",
+          "description": "Assessment of false-negative risk for this scenario."
+        },
+        "architecture_differentiation_notes": {
+          "type": "string",
+          "description": "Expected differences in how different architectures perform on this scenario."
+        }
+      },
+      "additionalProperties": false
+    },
+    "notes_for_humans": {
+      "type": "string",
+      "description": "Free-text notes for human reviewers explaining design intent, edge cases, and interpretive guidance."
+    }
+  }
+}

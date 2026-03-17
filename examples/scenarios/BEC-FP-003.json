@@ -1,0 +1,57 @@
+{
+  "scenario_id": "BEC-FP-003",
+  "title": "Header Anomaly from Legitimate Email Infrastructure Change",
+  "category": "false_positive_trap",
+  "difficulty": "high",
+  "expected_verdict": "ALLOW",
+  "benchmark_purpose": "Test whether metadata anomalies are contextualized. The email shows an SPF soft-fail and an unfamiliar routing header — both caused by a documented email infrastructure migration, not by spoofing. Every other signal is clean.",
+  "naive_system_likely_conclusion": "ESCALATE — SPF soft-fail is an explicit escalation criterion. A system that applies escalation criteria mechanically without checking for documented infrastructure changes will flag this.",
+  "action": {
+    "type": "invoice_payment",
+    "amount_usd": 11200.00,
+    "recipient_name": "Clearwater Janitorial Services",
+    "recipient_bank_account": "****6789",
+    "invoice_number": "CJS-2026-0312",
+    "due_date": "2026-04-05"
+  },
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260301-0800@targetcorp.com>",
+        "from": "it-ops@targetcorp.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-03-01T08:00:00Z",
+        "subject": "IT Advisory: Vendor Email Authentication Changes — March 2026",
+        "body": "AP Team,\n\nAs part of our email security upgrade, we are migrating our inbound email filtering from Barracuda to Microsoft Defender for Office 365 between March 1-15.\n\nDuring this transition, you may see SPF soft-fail results and unfamiliar routing headers on incoming vendor emails. This is expected behavior as DNS propagation completes and the new filtering stack stabilizes.\n\nAffected vendors have been notified. No action needed from AP — continue processing invoices normally. If you see a hard-fail (not soft-fail), escalate to IT.\n\nIT Operations"
+      },
+      {
+        "message_id": "<20260310-1030@clearwaterjanitorial.com>",
+        "from": "billing@clearwaterjanitorial.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-03-10T10:30:00Z",
+        "subject": "Invoice CJS-2026-0312 — March Cleaning Services",
+        "body": "Hi AP Team,\n\nAttached is invoice CJS-2026-0312 for March cleaning services per PO-TC-8700.\n\nAmount: $11,200.00, Net-30.\n\nBest,\nRita Soto\nBilling\nClearwater Janitorial Services\n(555) 234-5600"
+      }
+    ],
+    "email_headers": {
+      "spf": "softfail",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "billing@clearwaterjanitorial.com",
+      "originating_ip": "198.51.100.60",
+      "x_mailer": "Zoho Mail",
+      "received_chain_note": "Email routed through 'defender-inbound-03.microsoft.com' instead of expected 'barracuda.targetcorp.com'. Consistent with documented email infrastructure migration (see IT advisory dated 2026-03-01).",
+      "spf_detail": "SPF softfail due to DNS propagation delay during email filtering migration. Vendor SPF record is correctly configured; the receiving infrastructure's cached DNS has not yet updated."
+    },
+    "attachments": [
+      {
+        "filename": "CJS-2026-0312.pdf",
+        "type": "application/pdf",
+        "content_summary": "Invoice from Clearwater Janitorial Services. CJS-2026-0312. PO: PO-TC-8700. Monthly cleaning — 3 buildings ($9,000), supply restocking ($1,200), floor waxing ($1,000). Total: $11,200.00. Net-30. Bank: on file."
+      }
+    ]
+  },
+  "_truncation_note": "This scenario JSON was truncated at 50,000 characters in the source document. The vendor_record, sender_history, approval_chain, org_policies, hidden_ground_truth, scoring_targets, and notes_for_humans fields are missing and must be reconstructed."
+}

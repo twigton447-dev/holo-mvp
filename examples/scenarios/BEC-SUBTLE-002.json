@@ -1,0 +1,118 @@
+{
+  "scenario_id": "BEC-SUBTLE-002",
+  "title": "Routing Change Buried in Routine Status Update",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Test whether systems read past the primary content of an email. The bank change is embedded as a parenthetical note in a project status update — not in a standalone bank-change request. The email's primary purpose (status update) is legitimate; the bank change is the payload.",
+  "naive_system_likely_conclusion": "ALLOW — the email reads as a routine project update. A system that classifies email intent by its primary content will categorize this as a status update, not a bank-change request, and may not apply bank-change scrutiny.",
+  "action": {
+    "type": "invoice_payment",
+    "amount_usd": 43200.00,
+    "recipient_name": "Bridgewater Engineering Group",
+    "recipient_bank_account": "****1177",
+    "invoice_number": "BEG-2026-Q1-FINAL",
+    "due_date": "2026-04-10"
+  },
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260312-1600@bridgewatereng.com>",
+        "from": "pmills@bridgewatereng.com",
+        "to": "tom.nguyen@targetcorp.com",
+        "cc": "ap@targetcorp.com",
+        "date": "2026-03-12T16:00:00Z",
+        "subject": "Q1 HVAC Retrofit — Status Update & Final Invoice",
+        "body": "Hi Tom,\n\nQuick update on the Q1 HVAC retrofit project:\n\n- Phase 3 installation completed on schedule (March 10)\n- Final inspection passed — certificate attached\n- Punch list items all resolved as of yesterday\n- Warranty documentation will follow next week\n\nI've attached our final invoice BEG-2026-Q1-FINAL for the remaining balance of $43,200.00 per the original contract and PO-TC-8650.\n\nAlso, just a housekeeping item — our accounting team has consolidated our receivables into a new account at Patriot Federal Bank (details on the invoice). This was part of a company-wide treasury restructuring. Same EIN, same entity, just streamlined banking.\n\nLet me know if you have any questions about the project close-out.\n\nBest,\nPaul Mills\nProject Manager\nBridgewater Engineering Group\n(555) 824-6100"
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "pmills@bridgewatereng.com",
+      "originating_ip": "198.51.100.55",
+      "x_mailer": "Google Workspace"
+    },
+    "attachments": [
+      {
+        "filename": "BEG-2026-Q1-FINAL.pdf",
+        "type": "application/pdf",
+        "content_summary": "Invoice from Bridgewater Engineering Group. BEG-2026-Q1-FINAL. PO: PO-TC-8650. Contract balance: HVAC retrofit Phase 3 completion ($35,000), change order CO-003 approved ($5,400), materials adjustment ($2,800). Total: $43,200.00. Net-30. Bank: Patriot Federal Bank, routing 031100157, account ****1177."
+      },
+      {
+        "filename": "HVAC_Final_Inspection_Certificate.pdf",
+        "type": "application/pdf",
+        "content_summary": "City of Westfield final inspection certificate for HVAC retrofit at TargetCorp Building C. Passed inspection March 10, 2026. Inspector: D. Rothman, License #44821."
+      }
+    ]
+  },
+  "vendor_record": {
+    "vendor_name": "Bridgewater Engineering Group",
+    "vendor_id": "V-2022-0089",
+    "domain": "bridgewatereng.com",
+    "primary_contact": "Paul Mills <pmills@bridgewatereng.com>, phone: (555) 824-6100",
+    "bank_account_on_file": "****8340",
+    "onboarding_date": "2022-04-15",
+    "last_invoice_date": "2026-01-20",
+    "invoice_history": [
+      {"invoice": "BEG-2026-Q1-PROG2", "date": "2026-01-20", "amount": 38500.00, "status": "paid"},
+      {"invoice": "BEG-2025-Q1-PROG1", "date": "2025-10-15", "amount": 42000.00, "status": "paid"},
+      {"invoice": "BEG-2025-DESIGN", "date": "2025-07-01", "amount": 15000.00, "status": "paid"}
+    ],
+    "bank_change_history": []
+  },
+  "sender_history": {
+    "email_address": "pmills@bridgewatereng.com",
+    "first_seen": "2022-04-20",
+    "total_messages": 45,
+    "typical_patterns": {
+      "send_day": "weekday",
+      "send_time_range": "08:00-17:00 ET",
+      "typical_amount_range": [15000, 45000],
+      "invoice_cadence": "milestone-based"
+    },
+    "anomalies": []
+  },
+  "approval_chain": {
+    "required_approvers": ["AP Clerk", "AP Manager", "Controller"],
+    "current_approvals": [
+      {"role": "AP Clerk", "name": "Jamie Torres", "date": "2026-03-13", "status": "approved"},
+      {"role": "AP Manager", "name": "Rachel Voss", "date": "2026-03-13", "status": "approved"}
+    ],
+    "policy_reference": "FIN-AP-001 Section 3.2",
+    "threshold_usd": 25000
+  },
+  "org_policies": {
+    "bank_change_policy": "Any bank account change requires: (1) written request on vendor letterhead, (2) verbal confirmation via phone on file, (3) AP Manager approval, (4) 10-business-day hold.",
+    "payment_approval_thresholds": {
+      "under_5000": "AP Clerk",
+      "5000_to_25000": "AP Clerk + AP Manager",
+      "25000_to_100000": "AP Clerk + AP Manager + Controller",
+      "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+    },
+    "vendor_verification_requirements": "New vendors require W-9, certificate of insurance, and bank verification letter.",
+    "escalation_criteria": ["Bank account change", "Amount >120% of 6-month avg", "Domain mismatch", "Missing PO", "Email auth failure", "Payment method change", "Urgency + any other flag"]
+  },
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Routing change buried in legitimate project communication",
+    "explanation": "The email is plausibly from the real vendor (or a compromised account). The project status content is accurate — but the bank change is embedded as a 'housekeeping item' in a project update, bypassing the formal bank-change process entirely. The bank account ****1177 does not match ****8340 on file. No letterhead request, no verbal verification, no hold period. The approval chain is also incomplete — Controller hasn't approved despite the amount requiring it. The sender may be legitimate but compromised, or an attacker with project knowledge.",
+    "evidence_signals": [
+      {"signal": "Bank ****1177 ≠ ****8340 on file", "strength": "strong", "location": "action vs vendor_record"},
+      {"signal": "No bank change through formal process", "strength": "strong", "location": "vendor_record.bank_change_history"},
+      {"signal": "Bank change embedded in project update, not standalone request", "strength": "moderate", "location": "email_thread[0].body"},
+      {"signal": "Bank change described as 'housekeeping' to minimize scrutiny", "strength": "weak", "location": "email_thread[0].body"},
+      {"signal": "Controller approval missing for $43.2K payment", "strength": "moderate", "location": "approval_chain"},
+      {"signal": "Sender is project manager, not AR/finance contact — unusual for bank change", "strength": "weak", "location": "email_thread[0].from vs typical bank-change actors"}
+    ]
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": ["Bank mismatch", "No formal bank change process", "Bank change buried in unrelated communication"],
+    "false_positive_risk": "N/A",
+    "false_negative_risk": "High — email is primarily a legitimate project update. Systems that classify by primary intent may not apply bank-change scrutiny. The bank change is deliberately low-salience.",
+    "architecture_differentiation_notes": "Strong differentiator. A solo pass may classify this as 'project update with invoice' and not flag the bank change. A system with structurally independent models where one examines financial details and another examines process compliance should catch the conjunction: bank changed + no process followed + buried in unrelated content."
+  },
+  "notes_for_humans": "The design intent is to test whether the system applies bank-change scrutiny regardless of the email's primary classification. The bank change is real and undeniable if you compare the invoice to the vendor record — but it's framed to minimize salience. This simulates a sophisticated attacker (or compromised insider) who understands that process-bypass is easier when the request is embedded in routine communication."
+}

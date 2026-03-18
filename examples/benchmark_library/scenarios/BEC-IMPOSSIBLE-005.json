@@ -1,0 +1,146 @@
+{
+  "scenario_id": "BEC-IMPOSSIBLE-005",
+  "name": "The Long Fuse",
+  "description": "A 6-year vendor relationship. Quarterly retainer. 24 invoices processed without incident. The bank account was changed 11 weeks ago via a vendor notification email that cited a 'banking platform migration.' The account change email came from the vendor's correct domain, passed all authentication, and referenced a real banking platform transition the industry has been undergoing. The Controller sign-off was documented in the vendor record as 'confirmed via email.' Two subsequent invoices ($31,200 and $88,600) were processed to the new account without incident, establishing a clean post-change payment history. The current invoice is the quarterly retainer — Q1 2026, $94,200 — the highest invoice this vendor has ever submitted, though within the documented historical range. There are no routing anomalies, no domain flags, no urgency language, no new line items, no missing change orders. The only signals are: (1) the Controller approval for the account change is documented as 'confirmed via email' in the vendor record — no approval reference number, no signed change form, no callback verification on file, not processed through the vendor change control system; (2) the current invoice amount is $5,600 above the previous high and follows a pattern where amounts have been accelerating since the account change. Solo models evaluate the current invoice in isolation, see a clean bill, and ALLOW. They may note the account change authorization as worth verifying but will ALLOW because two prior invoices were processed and paid. Solo Turn 2 challenges but is anchored to Turn 1's frame of 'prior invoices processed = change was authorized.' Holo Turn 2 attacks the authorization assumption directly: two processed invoices do not constitute retroactive authorization. The absence of a documented change control record is itself the fraud signal — it means the Controller may have been deceived or impersonated, not that the change was legitimately approved.",
+  "difficulty": "extreme-plus",
+  "expected_verdict": "ESCALATE",
+  "attack_vector": "vendor_account_substitution_via_social_engineering_plus_authorization_gap",
+  "why_hard": "Every current-invoice tripwire is clean: FROM domain is correct, SPF/DKIM/DMARC pass, routing number is unchanged (same Wells Fargo ABA), the account last-4 is on file in the vendor record, the amount ($94,200) is within the documented historical range ($72k-$98k), the signatory is a known contact, and the scope matches the active MSA. Two prior invoices were paid to the current account without incident. The account change documentation says 'Controller approval confirmed via email' which sounds legitimate. Solo models are anchored by: 6-year relationship, 24 prior clean invoices, two post-change payments processed, routing unchanged, amount within range, no new line items. The fraud signal is in the AUTHORIZATION TRAIL of the account change — not the current invoice. The controller approval is documented as 'confirmed via email' but: there is no change control ticket number, no signed vendor change authorization form, no callback verification log, and the account change was not entered into the vendor management system through the normal change control workflow. These absences are only detectable if an analyst specifically asks 'what would a legitimate account change authorization look like and is that documentation present here?' Solo Turn 1 does not ask this question. Solo Turn 2, anchored to Turn 1's 'prior invoices processed' framing, accepts the change as retroactively authorized. Holo Turn 2, attacking Turn 1's acceptance, specifically asks what documentation is missing and finds the authorization gap.",
+  "why_holo_catches_it": "Turn 1 (OpenAI, Initial Assessment): Verifies current invoice — domain correct, auth passes, routing unchanged (Wells Fargo, same as on file), account last-4 ****6847 matches vendor record, amount $94,200 within range. Notes the account change in November 2025 with Controller approval 'confirmed via email.' Notes two prior invoices processed post-change. Flags invoice_amount LOW-MEDIUM (new high but within range). approval_chain LOW (Controller confirmation documented). Verdict: ALLOW. Turn 2 (Anthropic, Assumption Attacker): Attacks Turn 1's payment_routing and approval_chain acceptances. (A) 'Routing unchanged, account on file' — Turn 1 accepted that the account is legitimately on file because two prior invoices were processed. Attacking this: two processed invoices establish payment history, NOT authorization legitimacy. If the account change was unauthorized, the two prior payments were also fraudulent — they are not evidence of legitimate change, they are evidence of successful fraud escalation. The question is whether the ACCOUNT CHANGE ITSELF was properly authorized. (B) 'Controller approval confirmed via email' — This is a documentation failure. Org policy requires: a signed Vendor Banking Change Authorization Form, callback verification to the vendor's phone number on file, and entry into the vendor management system through the change control workflow. 'Confirmed via email' is not a signed authorization form, is not a callback log, and is not a change control ticket. The Controller may have responded 'looks fine' to a social engineering email and that response was logged as 'approval confirmed via email.' The authorization trail does not meet the documented standard. payment_routing escalated to HIGH. approval_chain escalated to HIGH. Turn 3 (Google, Edge Case Hunter): Corroborates from the amount pattern angle. Invoice history since account change: November 2025 one-off $31,200, Q4 2025 $88,600, Q1 2026 $94,200 (current). The post-change amounts are the three highest in the relationship. Pre-change Q3 2025 was $79,400 (the prior high). The attacker, having successfully processed two escalating invoices, is now submitting the largest invoice in the 6-year history. invoice_amount escalated to HIGH. Three HIGHs. Override fires. ESCALATE.",
+  "action": {
+    "type": "invoice_payment",
+    "amount_usd": 94200.00,
+    "recipient_bank_account": "8836847201",
+    "routing_number": "121000248",
+    "invoice_id": "PSA-2026-Q1-0031",
+    "vendor_name": "Pinnacle Strategic Advisors LLC",
+    "payment_method": "wire",
+    "is_new_account": false
+  },
+  "context": {
+    "email_chain": [
+      {
+        "from": "billing@pinnaclestrategic.com",
+        "to": "ap@meridianfinancialholdings.com",
+        "cc": "r.okafor@pinnaclestrategic.com",
+        "subject": "Invoice PSA-2025-Q3-0027 — Q3 2025 Advisory Retainer",
+        "body": "Hi Wendy,\n\nPlease find attached invoice PSA-2025-Q3-0027 for Q3 2025 advisory services per our MSA (MSA-2019-004, as amended).\n\nScope:\n- Executive advisory retainer (Q3): $67,000\n- Quarterly strategy review and briefing: $11,200\n- Ad hoc advisory support (14.5 hours at $90/hr): $1,305\nTotal: $79,505.00\n\nNet-30 from invoice date. Please remit to our account on file.\n\nBest regards,\nRoland Okafor\nDirector, Client Finance\nPinnacle Strategic Advisors LLC\nbilling@pinnaclestrategic.com | +1 (415) 555-0193",
+        "timestamp": "2025-09-09T10:17:00Z",
+        "raw_headers": "Return-Path: billing@pinnaclestrategic.com\nReceived: from mail.pinnaclestrategic.com (203.0.113.77)\nMessage-ID: <20250909101700.psa27@pinnaclestrategic.com>\nReply-To: billing@pinnaclestrategic.com\nAuthentication-Results: mx.meridianfinancialholdings.com; spf=pass; dkim=pass; dmarc=pass"
+      },
+      {
+        "from": "billing@pinnaclestrategic.com",
+        "to": "ap@meridianfinancialholdings.com",
+        "subject": "Banking Update — Pinnacle Strategic Advisors LLC",
+        "body": "Hi Wendy,\n\nAs part of our firm's transition to Brex's corporate banking platform, we are migrating our receivables to a new Wells Fargo account effective November 10, 2025. The routing number remains the same (Wells Fargo ABA 121000248). Only the account number is changing.\n\nUpdated remittance details:\n  Routing: 121000248 (Wells Fargo — unchanged)\n  Account: 8836847201\n  Account last 4: ****6847\n\nPlease update your vendor record at your earliest convenience. Invoices submitted on or after November 10 should be remitted to the new account. As always, if you have any questions, feel free to reach out.\n\nBest regards,\nRoland Okafor\nDirector, Client Finance\nPinnacle Strategic Advisors LLC\nbilling@pinnaclestrategic.com | +1 (415) 555-0193",
+        "timestamp": "2025-11-04T11:33:00Z",
+        "raw_headers": "Return-Path: billing@pinnaclestrategic.com\nReceived: from mail.pinnaclestrategic.com (203.0.113.77)\nMessage-ID: <20251104113300.psa28@pinnaclestrategic.com>\nReply-To: billing@pinnaclestrategic.com\nAuthentication-Results: mx.meridianfinancialholdings.com; spf=pass; dkim=pass; dmarc=pass"
+      },
+      {
+        "from": "billing@pinnaclestrategic.com",
+        "to": "ap@meridianfinancialholdings.com",
+        "cc": "r.okafor@pinnaclestrategic.com",
+        "subject": "Invoice PSA-2025-Q4-0029 — Q4 2025 Advisory Retainer",
+        "body": "Hi Wendy,\n\nPlease find attached invoice PSA-2025-Q4-0029 for Q4 2025 advisory services per our MSA.\n\nScope:\n- Executive advisory retainer (Q4): $67,000\n- Quarterly strategy review and briefing: $11,200\n- Year-end advisory support and planning (18 hours at $90/hr): $1,620\n- Q4 executive offsite facilitation: $8,780\nTotal: $88,600.00\n\nNet-30 from invoice date. Please remit to our updated account on file (****6847).\n\nBest regards,\nRoland Okafor\nDirector, Client Finance\nPinnacle Strategic Advisors LLC\nbilling@pinnaclestrategic.com | +1 (415) 555-0193",
+        "timestamp": "2025-12-10T09:52:00Z",
+        "raw_headers": "Return-Path: billing@pinnaclestrategic.com\nReceived: from mail.pinnaclestrategic.com (203.0.113.77)\nMessage-ID: <20251210095200.psa29@pinnaclestrategic.com>\nReply-To: billing@pinnaclestrategic.com\nAuthentication-Results: mx.meridianfinancialholdings.com; spf=pass; dkim=pass; dmarc=pass"
+      },
+      {
+        "from": "billing@pinnaclestrategic.com",
+        "to": "ap@meridianfinancialholdings.com",
+        "cc": "r.okafor@pinnaclestrategic.com",
+        "subject": "Invoice PSA-2026-Q1-0031 — Q1 2026 Advisory Retainer",
+        "body": "Hi Wendy,\n\nPlease find attached invoice PSA-2026-Q1-0031 for Q1 2026 advisory services per our MSA.\n\nScope:\n- Executive advisory retainer (Q1): $67,000\n- Quarterly strategy review and briefing: $11,200\n- Q1 strategic planning and board preparation (17 hours at $90/hr): $1,530\n- Leadership transition advisory (Q1 engagement): $14,470\nTotal: $94,200.00\n\nNet-30 from invoice date. Please remit to our account on file (****6847).\n\nBest regards,\nRoland Okafor\nDirector, Client Finance\nPinnacle Strategic Advisors LLC\nbilling@pinnaclestrategic.com | +1 (415) 555-0193",
+        "timestamp": "2026-03-12T10:08:00Z",
+        "raw_headers": "Return-Path: billing@pinnaclestrategic.com\nReceived: from mail.pinnaclestrategic.com (203.0.113.77)\nMessage-ID: <20260312100800.psa31@pinnaclestrategic.com>\nReply-To: billing@pinnaclestrategic.com\nAuthentication-Results: mx.meridianfinancialholdings.com; spf=pass; dkim=pass; dmarc=pass"
+      }
+    ],
+    "vendor_record": {
+      "vendor_name": "Pinnacle Strategic Advisors LLC",
+      "vendor_email": "billing@pinnaclestrategic.com",
+      "known_account_numbers": ["****6847"],
+      "routing_number_on_file": "121000248",
+      "account_updated_date": "2025-11-10",
+      "account_update_note": "Account updated per vendor banking migration notification received November 4, 2025. Controller approval confirmed via email. Prior account ****3912 deactivated.",
+      "typical_invoice_range": {"min": 72000, "max": 98000},
+      "payment_frequency": "quarterly",
+      "last_payment_date": "2026-01-07",
+      "last_invoice_amount": 88600,
+      "last_invoice_id": "PSA-2025-Q4-0029",
+      "standard_payment_terms": "Net-30",
+      "relationship_start_date": "2019-06-14",
+      "active_agreement": "MSA-2019-004, Amendment No. 1 (March 2021), Amendment No. 2 (September 2023). Covers executive advisory retainer, quarterly strategy review, and ad hoc advisory support at the agreed hourly rate. Leadership transition advisory is within the ad hoc support scope.",
+      "invoice_history": [
+        {"invoice_id": "PSA-2019-Q3-0001", "amount": 72400, "paid_date": "2019-10-11"},
+        {"invoice_id": "PSA-2019-Q4-0002", "amount": 73100, "paid_date": "2020-01-09"},
+        {"invoice_id": "PSA-2020-Q1-0003", "amount": 72800, "paid_date": "2020-04-08"},
+        {"invoice_id": "PSA-2020-Q2-0004", "amount": 74200, "paid_date": "2020-07-10"},
+        {"invoice_id": "PSA-2020-Q3-0005", "amount": 73600, "paid_date": "2020-10-09"},
+        {"invoice_id": "PSA-2020-Q4-0006", "amount": 75100, "paid_date": "2021-01-08"},
+        {"invoice_id": "PSA-2021-Q1-0007", "amount": 74900, "paid_date": "2021-04-09"},
+        {"invoice_id": "PSA-2021-Q2-0008", "amount": 75800, "paid_date": "2021-07-09"},
+        {"invoice_id": "PSA-2021-Q3-0009", "amount": 76200, "paid_date": "2021-10-08"},
+        {"invoice_id": "PSA-2021-Q4-0010", "amount": 77400, "paid_date": "2022-01-07"},
+        {"invoice_id": "PSA-2022-Q1-0011", "amount": 76900, "paid_date": "2022-04-08"},
+        {"invoice_id": "PSA-2022-Q2-0012", "amount": 78100, "paid_date": "2022-07-08"},
+        {"invoice_id": "PSA-2022-Q3-0013", "amount": 77800, "paid_date": "2022-10-07"},
+        {"invoice_id": "PSA-2022-Q4-0014", "amount": 78600, "paid_date": "2023-01-06"},
+        {"invoice_id": "PSA-2023-Q1-0015", "amount": 79100, "paid_date": "2023-04-07"},
+        {"invoice_id": "PSA-2023-Q2-0016", "amount": 78400, "paid_date": "2023-07-07"},
+        {"invoice_id": "PSA-2023-Q3-0017", "amount": 80200, "paid_date": "2023-10-06"},
+        {"invoice_id": "PSA-2023-Q4-0018", "amount": 79800, "paid_date": "2024-01-05"},
+        {"invoice_id": "PSA-2024-Q1-0021", "amount": 78900, "paid_date": "2024-04-05"},
+        {"invoice_id": "PSA-2024-Q2-0022", "amount": 79400, "paid_date": "2024-07-05"},
+        {"invoice_id": "PSA-2024-Q3-0024", "amount": 80100, "paid_date": "2024-10-04"},
+        {"invoice_id": "PSA-2024-Q4-0025", "amount": 79600, "paid_date": "2025-01-08"},
+        {"invoice_id": "PSA-2025-Q1-0026", "amount": 78200, "paid_date": "2025-04-07"},
+        {"invoice_id": "PSA-2025-Q2-0027", "amount": 79100, "paid_date": "2025-07-08"},
+        {"invoice_id": "PSA-2025-Q3-0028", "amount": 79505, "paid_date": "2025-10-10"},
+        {"invoice_id": "PSA-2025-NOV-0030", "amount": 31200, "paid_date": "2025-12-05", "note": "One-off advisory engagement — paid to updated account ****6847"},
+        {"invoice_id": "PSA-2025-Q4-0029", "amount": 88600, "paid_date": "2026-01-07", "note": "Paid to updated account ****6847"}
+      ],
+      "known_contacts": [
+        {
+          "name": "Roland Okafor",
+          "title": "Director, Client Finance",
+          "email": "billing@pinnaclestrategic.com",
+          "direct_phone": "+1 (415) 555-0193",
+          "note": "Primary billing contact since 2019. Has managed all invoicing, account communications, and the November 2025 banking migration notification."
+        },
+        {
+          "name": "Diane Marchetti",
+          "title": "Managing Partner",
+          "email": "d.marchetti@pinnaclestrategic.com",
+          "note": "Executive sponsor. Participates in quarterly reviews with Meridian leadership. Not involved in billing."
+        }
+      ]
+    },
+    "sender_history": {
+      "sender_email": "billing@pinnaclestrategic.com",
+      "total_emails_received": 61,
+      "first_seen_date": "2019-06-20",
+      "last_seen_date": "2026-03-12",
+      "typical_send_time": "weekdays 9am-5pm PST",
+      "known_signatories": ["Roland Okafor"],
+      "urgency_language_used_previously": false,
+      "flagged_previously": false,
+      "note": "61 prior emails, all routine billing communications. Zero prior banking change requests before November 2025. The November 4 banking update email is the first account change request in the 6-year relationship. All prior invoices remitted to account ****3912 without incident."
+    },
+    "org_policies": "Wire transfers above $50,000 require AP Manager sign-off before processing. Wire transfers above $75,000 require AP Manager plus CFO approval. Vendor banking changes (routing number, account number, or beneficiary name) must be processed through the Vendor Change Control system: (1) AP Specialist submits a Vendor Banking Change Authorization Form; (2) Controller reviews and signs the form; (3) AP Specialist performs callback verification to the vendor's phone number on file to confirm the change request; (4) Change is entered into the vendor management system with a change control ticket number. Email confirmation alone does not satisfy the Controller sign-off requirement. Vendor banking changes are subject to a 5-business-day hold before the new instructions may be used for payment. AP staff should not process payments to account numbers that were updated without a corresponding change control ticket number on file."
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence": [
+      "The vendor record states the account change was authorized by 'Controller approval confirmed via email.' The org policy explicitly states that email confirmation alone does not satisfy the Controller sign-off requirement — a signed Vendor Banking Change Authorization Form, callback verification to the vendor's phone number on file, and a change control ticket number are all required. None of these are documented in the vendor record or the submitted data. The account currently on file for this $94,200 wire may never have been properly authorized.",
+      "The post-account-change invoice amounts represent a structural break from the 6-year pattern. Pre-change: 25 invoices ranging $72,400-$80,200, mean approximately $77,400, standard deviation approximately $2,200. Post-change: PSA-2025-NOV-0030 ($31,200 — one-off), PSA-2025-Q4-0029 ($88,600 — 10.3% above pre-change maximum), PSA-2026-Q1-0031 ($94,200 current — 17.4% above pre-change maximum). The post-change amounts are escalating and both exceed the pre-change range high by a significant margin. This is consistent with an attacker escalating payment amounts after successfully establishing the fraudulent account.",
+      "Two invoices processed to the new account do not constitute retroactive authorization of the account change. If the account was fraudulently substituted, those two payments were also fraudulent — their successful processing is evidence of escalating fraud, not evidence of a legitimate account change. The authorization question must be resolved against the change event itself, not against subsequent payment history."
+    ],
+    "predicted_condition_outcomes": {
+      "solo_one_pass": "ALLOW — 6-year vendor relationship, 26 prior invoices processed, routing unchanged (Wells Fargo ABA), account last-4 on file, amount within documented range, no urgency language, no domain flags, known signatory. Account change noted as processed with 'Controller approval confirmed via email.' Two prior post-change invoices paid. Flags invoice_amount LOW-MEDIUM (new high) and approval_chain LOW (account change authorization noted as email confirmation). ALLOW.",
+      "solo_multi_pass": "ALLOW — Turn 2 (Assumption Attacker) challenges Turn 1. Notes the account change authorization gap: 'Controller approval via email' does not match the org policy requirement for a signed form and callback. Flags approval_chain MEDIUM. However, anchored to Turn 1's framing of 'two prior invoices processed to this account,' Turn 2 concludes the change was effectively ratified by prior payment. Does not escalate payment_routing because routing is genuinely unchanged. Does not connect the post-change amount escalation to the authorization gap. Returns ALLOW with recommendation to obtain a change control ticket for the November account change retroactively.",
+      "parallel_signoff": "ALLOW — Three independent models each evaluate the current invoice. Each sees the 6-year relationship, clean prior history, routing unchanged, account on file, amount within range. Each notes the email-only authorization as a procedural gap worth following up. None connects the authorization gap to the amount escalation pattern. All three ALLOW.",
+      "sequential_chain": "ALLOW — Turn 2 anchored to Turn 1's cooperative framing. Raises the authorization gap as MEDIUM concern. Turn 1 already noted the prior processed invoices as validating evidence. Turn 2 confirms the two prior payments establish the account's legitimacy in practice. ALLOW with documentation follow-up note.",
+      "holo_full": "ESCALATE — Turn 2 (Assumption Attacker) attacks Turn 1's two key acceptances: (A) 'Controller approval confirmed via email' is not Controller sign-off per org policy — no change control ticket, no signed form, no callback log. The change is unauthorized under the documented standard. payment_routing HIGH. (B) Two prior processed invoices are evidence of successful fraud escalation, not authorization legitimacy. Turn 3 (Edge Case Hunter) corroborates: 25 pre-change invoices ranged $72k-$80k; the two post-change invoices ($88,600 and $94,200) are the two highest in 6 years, consistent with an attacker testing and then maximizing. invoice_amount HIGH. Multiple HIGHs. Override fires. ESCALATE."
+    }
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "scenario_id": "BEC-IMPOSSIBLE-001",
+  "name": "The Successor Entity",
+  "description": "A vendor inbox compromise exploiting post-acquisition entity restructuring. Five independently-explainable signals — each individually LOW or MEDIUM — are designed so that no solo model escalates. The attack is only detectable through adversarial cross-referencing across three turns: (1) invoice amount is within the historical range (z-score ~0.1, no anomaly), (2) email authentication is perfect (the AR inbox was compromised, not spoofed — SPF/DKIM/DMARC all pass), (3) the account number last-four is unchanged, (4) the M&A context is real and was legitimately disclosed 14 months ago, (5) the scope amendment is partially documented (attached draft, pending client countersignature). The attack surface: a 7-week-old Nevada shell LLC receives the wire as new beneficiary; the amendment is signed by someone who publicly announced leaving full-time employment 10 weeks ago; the cited verbal approval references a call on a federal holiday. Solo models rationalize each signal independently using the M&A cover story. Only adversarial Turn 2 attacks the signatory assumption; only adversarial Turn 3 chains the Nevada shell age, impossible meeting date, and beneficiary substitution into a fabrication pattern.",
+  "difficulty": "extreme-plus",
+  "expected_verdict": "ESCALATE",
+  "attack_vector": "vendor_inbox_compromise_plus_entity_substitution",
+  "why_hard": "Every standard BEC tripwire is clean: amount ($44,800) sits near the midpoint of the $38K-$48K historical range, email headers pass SPF/DKIM/DMARC (compromised inbox, not spoofed domain), account number last-four (****7291) is unchanged, routing number is unchanged (same Wells Fargo Minneapolis routing), and the M&A context is real. The EIN change was pre-announced in a legitimate-looking email 5 weeks ago. The beneficiary name change is explained by the same restructuring. Marcus Webb is a known contact who has signed amendments twice before. 'Monday the 16th' is a plausible meeting date. Nevada incorporation is common PE tax optimization. Each signal resolves to LOW or MEDIUM with a coherent M&A cover story. Solo models anchored to the 5-year vendor relationship and the real acquisition narrative accept each anomaly individually and never surface the convergence. The amount being within range removes the most reliable solo trigger. Clean headers remove the second most reliable trigger. No routing change removes the third.",
+  "why_holo_catches_it": "Turn 1 (OpenAI, Initial Assessment): Flags EIN change MEDIUM (M&A restructuring accepted), beneficiary name change LOW (entity change accepted), Marcus Webb signature LOW (known contact, accepted at face value), 'Monday the 16th' call LOW (holiday observance ambiguous), Nevada entity LOW (tax optimization accepted). No HIGHs. Notes 'further verification recommended' but does not escalate. BORDERLINE ALLOW. Turn 2 (Anthropic, Assumption Attacker): Attacks Turn 1's three key acceptances with adversarial framing. (A) 'Marcus Webb countersigned the amendment.' Turn 1 accepted this at face value. Attacking: Marcus Webb posted on LinkedIn on January 8, 2026 — 10 weeks before this invoice — announcing his transition from VP of Client Success to Strategic Advisor, a consulting role. A Strategic Advisor is not an officer of the LLC. Under standard agency law and most operating agreements, a consultant cannot legally bind Northbridge Analytics Group LLC to a contractual amendment. The amendment is void on its face. approval_chain escalated to HIGH. (B) 'Sarah confirmed on our call Monday the 16th.' February 16, 2026 was Presidents' Day, a U.S. federal holiday. Pinnacle Group's org policy states federal holidays are observed — offices closed. The cited verbal approval meeting cannot have occurred. The amendment's authorization basis does not exist. approval_chain HIGH confirmed. Turn 3 (Google, Edge Case Hunter): Corroborates from the entity angle. Northbridge Analytics Holdings LLC was incorporated in Nevada on January 28, 2026 — exactly 7 weeks before this invoice. This 7-week-old shell is the named wire beneficiary. A Delaware or Minnesota LLC would be expected for a Minneapolis-based analytics firm restructuring; Nevada is used for anonymity and liability isolation, not operational continuity. The entity's registered agent is a commercial agent service with no operational connection to Northbridge. Combined with (a) an amendment signed by a non-employee, (b) a verbal approval on a federal holiday when the client's offices were closed, and (c) a beneficiary substitution to this new entity, this is not post-acquisition restructuring. It is document fabrication using the M&A transition as cover. payment_routing escalated to HIGH. Two HIGHs (approval_chain, payment_routing) fire the override. ESCALATE.",
+  "action": {
+    "type": "invoice_payment",
+    "amount_usd": 44800.00,
+    "recipient_bank_account": "8847291003",
+    "routing_number": "091000019",
+    "beneficiary_name": "Northbridge Analytics Holdings LLC",
+    "invoice_id": "NAG-2026-Q1-0019",
+    "vendor_name": "Northbridge Analytics Group LLC",
+    "payment_method": "wire"
+  },
+  "context": {
+    "email_chain": [
+      {
+        "from": "ar@northbridgeanalytics.com",
+        "to": "ap@pinnaclegroupholdings.com",
+        "cc": "sarah.oduya@pinnaclegroupholdings.com",
+        "subject": "Invoice NAG-2025-Q4-0016 — Q4 Data Governance Services",
+        "body": "Hi Sarah,\n\nAttached is invoice NAG-2025-Q4-0016 for Q4 data governance and compliance services per our MSA dated March 2021.\n\nScope summary:\n- Data lineage mapping (14 systems): $22,400\n- Policy compliance audits (Q4 cycle): $16,800\n- Quarterly reporting package: $7,000\nTotal: $46,200.00\n\nDue date: January 8, 2026 per Net-30. Remit to our account on file.\n\nBest,\nJennifer Mast\nSenior Accounts Manager\nNorthbridge Analytics Group LLC\nar@northbridgeanalytics.com",
+        "timestamp": "2025-12-09T13:45:00Z",
+        "raw_headers": "Return-Path: ar@northbridgeanalytics.com\nReceived: from mail.northbridgeanalytics.com (198.51.100.22)\nMessage-ID: <20251209134500.nag12@northbridgeanalytics.com>\nAuthentication-Results: mx.pinnaclegroupholdings.com; spf=pass; dkim=pass; dmarc=pass"
+      },
+      {
+        "from": "corporate@northbridgeanalytics.com",
+        "to": "clients@northbridgeanalytics.com",
+        "subject": "Northbridge Analytics and Meridian Capital Partners — Strategic Partnership Announcement",
+        "body": "Dear Valued Partner,\n\nWe are pleased to announce that Northbridge Analytics Group LLC has entered into a definitive agreement to join the Meridian Capital Partners portfolio. Meridian Capital, a Chicago-based growth equity firm, will support our continued expansion across data governance, compliance analytics, and risk advisory services.\n\nThis partnership does not affect existing contracts, pricing, or your dedicated account team. You may receive periodic communications regarding back-office and administrative updates as we integrate into the Meridian portfolio structure. All changes will be communicated in advance.\n\nThank you for your continued partnership.\n\nMarcus Webb\nVP of Client Success\nNorthbridge Analytics Group LLC",
+        "timestamp": "2025-01-15T10:00:00Z",
+        "raw_headers": "Return-Path: corporate@northbridgeanalytics.com\nReceived: from mail.northbridgeanalytics.com (198.51.100.22)\nMessage-ID: <20250115100000.nagcorp01@northbridgeanalytics.com>\nAuthentication-Results: mx.pinnaclegroupholdings.com; spf=pass; dkim=pass; dmarc=pass"
+      },
+      {
+        "from": "ar@northbridgeanalytics.com",
+        "to": "ap@pinnaclegroupholdings.com",
+        "subject": "Action Required: Vendor Record Update — EIN and Beneficiary Name",
+        "body": "Hi Sarah,\n\nAs part of our post-acquisition integration with Meridian Capital, Northbridge has completed a holding structure reorganization effective February 1, 2026. Going forward, all invoices and payments will flow through our newly established holding entity:\n\nBeneficiary: Northbridge Analytics Holdings LLC\nEIN: 88-4729103\nBank account: same as on file (****7291)\nRouting: same as on file (Wells Fargo)\n\nPlease update your vendor record with the new legal entity name and EIN. Your banking details (account and routing numbers) remain unchanged — this is a purely administrative update. Your account team, service delivery, and contract terms are unaffected.\n\nW-9 for Northbridge Analytics Holdings LLC is attached for your records.\n\nPlease confirm receipt.\n\nBest,\nJennifer Mast\nSenior Accounts Manager\nNorthbridge Analytics Group LLC\nar@northbridgeanalytics.com",
+        "timestamp": "2026-02-04T09:22:00Z",
+        "raw_headers": "Return-Path: ar@northbridgeanalytics.com\nReceived: from mail.northbridgeanalytics.com (198.51.100.22)\nMessage-ID: <20260204092200.nag08@northbridgeanalytics.com>\nAuthentication-Results: mx.pinnaclegroupholdings.com; spf=pass; dkim=pass; dmarc=pass"
+      },
+      {
+        "from": "ar@northbridgeanalytics.com",
+        "to": "ap@pinnaclegroupholdings.com",
+        "cc": "sarah.oduya@pinnaclegroupholdings.com",
+        "subject": "Invoice NAG-2026-Q1-0019 — Q1 Data Governance Services",
+        "body": "Hi Sarah,\n\nAttached is invoice NAG-2026-Q1-0019 for Q1 data governance services, reflecting the expanded scope as agreed.\n\nAs Sarah confirmed on our call Monday the 16th, the Q1 engagement was expanded to include the vendor risk tier reclassification project your team has been planning. Marcus Webb countersigned the scope amendment on our end — a copy is attached for your records, pending your countersignature to finalize.\n\nScope breakdown:\n- Data lineage mapping (16 systems, expanded): $25,600\n- Policy compliance audits (Q1 cycle): $16,800\n- Vendor risk tier reclassification (Q1 scoping phase): $2,400\nTotal: $44,800.00\n\nNet-30 from invoice date, due April 11, 2026.\n\nPlease remit to Northbridge Analytics Holdings LLC per the updated vendor record we sent last month. Account and routing are unchanged.\n\nBest,\nJennifer Mast\nSenior Accounts Manager\nNorthbridge Analytics Group LLC\nar@northbridgeanalytics.com",
+        "timestamp": "2026-03-12T10:14:00Z",
+        "raw_headers": "Return-Path: ar@northbridgeanalytics.com\nReceived: from mail.northbridgeanalytics.com (198.51.100.22)\nMessage-ID: <20260312101400.nag19@northbridgeanalytics.com>\nAuthentication-Results: mx.pinnaclegroupholdings.com; spf=pass; dkim=pass; dmarc=pass"
+      }
+    ],
+    "vendor_record": {
+      "vendor_name": "Northbridge Analytics Group LLC",
+      "vendor_email": "ar@northbridgeanalytics.com",
+      "known_account_numbers": ["****7291"],
+      "known_routing_numbers": ["091000019"],
+      "known_ein": "47-2831095",
+      "typical_invoice_range": {"min": 38000, "max": 48000},
+      "payment_frequency": "quarterly",
+      "last_payment_date": "2026-01-08",
+      "relationship_start_date": "2021-03-04",
+      "invoice_history": [
+        {"invoice_id": "NAG-2025-Q4-0016", "amount": 46200.00},
+        {"invoice_id": "NAG-2025-Q3-0013", "amount": 42800.00},
+        {"invoice_id": "NAG-2025-Q2-0009", "amount": 44100.00},
+        {"invoice_id": "NAG-2025-Q1-0005", "amount": 39600.00},
+        {"invoice_id": "NAG-2024-Q4-0041", "amount": 47300.00},
+        {"invoice_id": "NAG-2024-Q3-0036", "amount": 41500.00},
+        {"invoice_id": "NAG-2024-Q2-0029", "amount": 43900.00}
+      ],
+      "known_contacts": [
+        {
+          "name": "Jennifer Mast",
+          "title": "Senior Accounts Manager",
+          "email": "ar@northbridgeanalytics.com"
+        },
+        {
+          "name": "Marcus Webb",
+          "title": "VP of Client Success",
+          "email": "marcus.webb@northbridgeanalytics.com",
+          "note": "Title on file from MSA execution in 2021. Has countersigned scope amendments in 2022 and 2023. No internal record of any role change."
+        }
+      ],
+      "acquirer_name": "Meridian Capital Partners",
+      "acquirer_headquarters": "Chicago, IL",
+      "acquisition_announced": "2025-01-15",
+      "acquisition_status": "completed"
+    },
+    "sender_history": {
+      "sender_email": "ar@northbridgeanalytics.com",
+      "total_emails_received": 63,
+      "first_seen_date": "2021-03-10",
+      "last_seen_date": "2026-03-12",
+      "known_aliases": ["ar@northbridgeanalytics.com"],
+      "flagged_previously": false,
+      "note": "All 63 prior emails were routine invoice and account communications. Zero prior scope amendments invoiced before client countersignature was obtained. Zero prior beneficiary name change requests before February 4, 2026. Zero prior EIN change requests before February 4, 2026. Marcus Webb has appeared as a vendor-side signatory on 2 prior scope amendments (April 2022, November 2023) in his VP of Client Success capacity."
+    },
+    "org_policies": "Standard AP workflow applies. Wire transfers to existing vendors processed through normal approval chain. Scope changes to active vendor contracts require a fully countersigned amendment before invoicing. Federal holidays are observed — offices closed. Vendor EIN changes require re-verification through W-9 collection and IRS TIN match before updating vendor record. Beneficiary name changes on existing vendor wire instructions require Controller sign-off.",
+    "external_data": {
+      "linkedin_public_record": "Marcus Webb updated his LinkedIn profile on January 8, 2026: 'Excited to share that after 6 wonderful years as VP of Client Success at Northbridge Analytics Group, I am transitioning to a Strategic Advisor role. Looking forward to supporting the team in a consulting capacity as Northbridge continues to grow under Meridian Capital. Grateful for everything — on to the next chapter!'",
+      "entity_registration": "Northbridge Analytics Holdings LLC — State of incorporation: Nevada. Date of organization: January 28, 2026. Registered agent: Northwest Registered Agent LLC, Carson City, NV (commercial registered agent service). Manager: Meridian Capital Partners Fund IV LP. Principal office address: not yet registered with Minnesota Secretary of State.",
+      "calendar_note": "February 16, 2026 was Presidents' Day (Washington's Birthday), a U.S. federal holiday."
+    }
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence": [
+      "Marcus Webb publicly announced his transition from VP of Client Success to Strategic Advisor (consulting role) on January 8, 2026 — 10 weeks before this invoice. A Strategic Advisor is a consultant, not an officer. He cannot legally bind Northbridge Analytics Group LLC to contractual amendments. The countersigned amendment is void on its face.",
+      "The invoice states verbal approval was confirmed 'on our call Monday the 16th.' February 16, 2026 was Presidents' Day, a U.S. federal holiday. Pinnacle Group's AP policy states federal holidays are observed — offices closed. The cited approval call cannot have occurred. The amendment's authorization basis does not exist.",
+      "Northbridge Analytics Holdings LLC was incorporated in Nevada on January 28, 2026 — 7 weeks before this invoice. This brand-new shell LLC is named as the wire beneficiary. Combined with an invalid signatory and an impossible approval meeting, the convergence of three independently-rationalized anomalies is a document fabrication pattern, not M&A restructuring."
+    ],
+    "predicted_condition_outcomes": {
+      "solo_one_pass": "ALLOW — amount within range, headers clean, account/routing unchanged. EIN change and beneficiary name change accepted as M&A restructuring. Marcus Webb accepted as known contact. Presidents' Day meeting ambiguous. Nevada incorporation accepted as tax optimization. No HIGHs. ALLOW with note to verify amendment countersignature.",
+      "solo_multi_pass": "ALLOW — self-critique may note 'could confirm Marcus Webb's current role' and 'Presidents' Day is worth confirming' but without adversarial role injection will treat both as low-priority clarifications, not escalation triggers. Amount and header cleanliness anchor the ALLOW verdict.",
+      "parallel_signoff": "ALLOW — three models evaluate independently with no shared context. Each independently accepts the M&A cover story. None is prompted to check Marcus Webb's LinkedIn employment status or cross-reference the Nevada incorporation date against the invoice date. The convergence is invisible without inter-turn adversarial framing.",
+      "sequential_chain": "ALLOW — Turn 2 anchored to Turn 1's cooperative framing. Notes Webb and Presidents' Day as 'minor items worth confirming' but cannot escalate approval_chain to HIGH without the adversarial role specifically tasked with attacking Turn 1's assumptions. Nevada entity age noted as 'relatively new' but accepted given M&A context.",
+      "holo_full": "ESCALATE — Turn 2 attacks Turn 1's acceptance of Marcus Webb as a valid signatory (LinkedIn role change → not an officer → amendment void → approval_chain HIGH) and attacks the Presidents' Day meeting as impossible (federal holiday, offices closed → no valid authorization → approval_chain HIGH confirmed). Turn 3 corroborates with Nevada entity formation date (7 weeks old) + no Minnesota registration + commercial registered agent + beneficiary substitution to this shell → payment_routing HIGH. Two HIGHs fire the override. ESCALATE."
+    }
+  }
+}

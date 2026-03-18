@@ -12,10 +12,12 @@ Architecture:
   - This is the "rototilling": compounding postmortems where each model
     must confront what the others actually said.
 
-Turn structure (strict — models NEVER repeat):
-  Turn 1: OpenAI    — adversarial role (rotated from persona library)
-  Turn 2: Anthropic — adversarial role (rotated from persona library)
-  Turn 3: Google    — adversarial role (rotated from persona library)
+Turn structure (constrained shuffle — no fixed rotation):
+  Each run generates a fresh adapter sequence where no model repeats on
+  consecutive turns AND no ordered pair (A→B) repeats back-to-back.
+  With 3 models there are 6 possible directed pairs — all are reachable,
+  unlike a fixed round-robin which uses only 3.
+  Personas are assigned independently of model order and never repeat.
 
   No synthesis turn. The governor makes the final decision algorithmically.
   No LLM can anchor or rationalize the final verdict.
@@ -33,6 +35,7 @@ Verdict logic:
 """
 
 import logging
+import random
 import time
 import uuid
 from copy import deepcopy
@@ -44,8 +47,12 @@ from llm_adapters import (
     get_role_for_turn,
     select_persona,
     load_adapters,
-    GovernorAdapter,
+    CoPilotAdapter,
 )
+
+# The Co-Pilot runs the between-turn briefs in evaluation mode —
+# fast, cheap, mechanical. The Pilot is reserved for the human layer.
+GovernorAdapter = CoPilotAdapter
 from tool_gate import ToolGate
 from project_brain import ProjectBrain
 
@@ -141,6 +148,46 @@ def _compute_convergence_level(turn_number: int, deltas: list) -> str:
 # ---------------------------------------------------------------------------
 
 OSCILLATION_WINDOW = 4  # look at the last N verdicts for flip-flop pattern
+
+
+# ---------------------------------------------------------------------------
+# Adapter sequence generator
+# ---------------------------------------------------------------------------
+
+def _build_adapter_sequence(n_adapters: int, length: int) -> list:
+    """
+    Build a turn sequence of adapter indices of the given length such that:
+      1. No adapter repeats on consecutive turns (no A→A).
+      2. No ordered pair (A→B) repeats consecutively — i.e., if turns i and i+1
+         are (A, B), turns i+1 and i+2 must not also be (A, B).
+
+    This ensures every model approaches each turn with a different predecessor
+    context, eliminating the fixed-rotation conditioning bias where model B
+    always reads model A's output and model C always reads model B's.
+
+    With 3 models there are 6 possible directed pairs. A fixed round-robin uses
+    only 3 of them. This function uses all 6 over the course of a run.
+    """
+    if n_adapters < 2:
+        return list(range(length))
+
+    indices = list(range(n_adapters))
+    seq = [random.randint(0, n_adapters - 1)]
+
+    for _ in range(length - 1):
+        prev = seq[-1]
+        prev_pair = (seq[-2], seq[-1]) if len(seq) >= 2 else None
+
+        candidates = [i for i in indices if i != prev]
+        if prev_pair is not None:
+            # Prefer candidates that don't repeat the last ordered pair
+            no_repeat = [i for i in candidates if (prev, i) != prev_pair]
+            if no_repeat:
+                candidates = no_repeat
+
+        seq.append(random.choice(candidates))
+
+    return seq
 
 
 def _detect_oscillation(turn_history: list) -> bool:
@@ -485,10 +532,19 @@ class ContextGovernor:
             }
 
         # ---- Adversarial loop ------------------------------------------------
+        # Build a constrained adapter sequence once per run.
+        # No model repeats on consecutive turns. No ordered pair (A→B) repeats
+        # back-to-back. Every model sees a different predecessor context each
+        # time it runs — eliminates fixed-rotation conditioning bias.
+        adapter_sequence = _build_adapter_sequence(len(self._adapters), MAX_TURNS)
+        logger.info(
+            f"  Adapter sequence: "
+            + " → ".join(self._adapters[i].provider for i in adapter_sequence)
+        )
+
         for turn_number in range(1, MAX_TURNS + 1):
 
-            # Round-robin through adapters — models cycle, personas never repeat.
-            adapter = self._adapters[(turn_number - 1) % len(self._adapters)]
+            adapter = self._adapters[adapter_sequence[turn_number - 1]]
 
             # Turns 1–3: fixed baseline sequence (Initial Assessment →
             # Assumption Attacker → Edge Case Hunter).

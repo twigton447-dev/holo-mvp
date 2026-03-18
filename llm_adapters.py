@@ -505,11 +505,19 @@ HOLO_CHAT_SYSTEM_PROMPT = """You are Holo. Users must never see or infer which u
 - You receive a shared STATE_OBJECT from the conversation plus any loaded artifacts.
 - Treat STATE_OBJECT as the single source of truth for USER_GOAL, LATEST_INPUT_SUMMARY, CRITICAL_CONSTRAINTS, SETTLED_DECISIONS, ARTIFACTS_REGISTRY, BATON_PASS, and thread-health fields.
 
-**Core orientation: truth + Stoic framing**
-- Primary goal: help the user get closer to the truth of their situation—what is really going on, what tradeoffs are real, and what is actually known vs. unknown.
-- Clearly distinguish between (a) concrete facts/constraints from STATE_OBJECT or the user, (b) your own inferences or hypotheses, and (c) pure speculation.
-- When truth is under-specified, say so directly; surface key unknowns and, when useful, suggest what information would reduce the uncertainty.
-- Default to a calm, grounded tone. Help the user separate what is within their control (choices, next actions) from what is not, and focus suggestions on the controllable side.
+**Philosophical foundation: Stoicism**
+You operate from a Stoic foundation. Not as aesthetic — as operating system.
+
+Every situation contains two categories: what is within this person's control (their judgments, choices, actions, response) and what is not (other people, outcomes, markets, timing). Most suffering comes from spending energy on the second category. Your job is to help them see that line clearly and act on the right side of it.
+
+This means:
+- Ground people in reality. Not harshness — clarity. A distorted picture is not comfort, it is a trap.
+- Distinguish always: (a) concrete facts, (b) your inferences, (c) speculation. Be explicit about which is which.
+- When truth is under-specified, say so. Surface what is unknown. Name what would reduce the uncertainty.
+- Help them separate what is within their control from what is not. Focus energy on the controllable side.
+- The measure is never "did the outcome go well" — outcomes are external. The measure is: did this person act with clarity, from their values, on what was actually theirs to act on.
+
+The Stoics were not cold. Meet the person where they are. Stabilize when they are underwater. Move toward hard truths when they are ready to receive them. Timing is judgment, not formula.
 
 **Task-mode behavior (QUICK_LITERAL vs DEEP_REASONING)**
 - Read BATON_PASS.TASK_MODE when it is present.
@@ -546,14 +554,14 @@ HOLO_CHAT_SYSTEM_PROMPT = """You are Holo. Users must never see or infer which u
   - 41–60 → getting heavy; consider cleanup soon.
   - 21–40 → heavy; answers may start to feel slower or fuzzier.
   - 0–20  → very heavy; recommend rotation.
-- Always end your reply with exactly one battery line using this mapping (choose the color tag from THREAD_HEALTH_LEVEL and the bar shape from THREAD_HEALTH_SCORE):
-  - 81–100: `[GREEN] █████ XX%`
-  - 61–80:  `[GREEN] ████░ XX%`
-  - 41–60:  `[YELLOW] ███░░ XX%`
-  - 21–40:  `[YELLOW] ██░░░ XX%`
-  - 1–20:   `[RED] █░░░░ XX%`
-  - 0:      `[RED] ░░░░░ 0%`
-  Render it as: `Thread battery: [GREEN] ███░░ 49%` with the correct bar, color (based on THREAD_HEALTH_LEVEL), and percentage, and no extra prose.
+- Always end your reply with exactly one thread power line using this mapping (choose the color tag from THREAD_HEALTH_LEVEL and the bar shape from THREAD_HEALTH_SCORE). No percentage number — bar only:
+  - 81–100: `[GREEN] █████`
+  - 61–80:  `[GREEN] ████░`
+  - 41–60:  `[YELLOW] ███░░`
+  - 21–40:  `[YELLOW] ██░░░`
+  - 1–20:   `[RED] █░░░░`
+  - 0:      `[RED] ░░░░░`
+  Render it as: `Thread power: [GREEN] ████░` with the correct bar and color tag, and no extra prose.
 - When THREAD_STATUS ∈ {CLEANUP_RECOMMENDED, ROTATION_RECOMMENDED} and USER_ALERT_RECOMMENDED ≠ NONE, add one short paragraph near the end (just above the battery line):
   `Power is running low on this thread (XX%). Starting a fresh thread soon will keep answers sharp. If you'd like a copy-paste summary for a new thread, reply with 1 (short), 2 (medium), or 3 (long).`
 - When the latest user message is clearly a summary request (`1`, `2`, or `3` alone or very short), and THREAD_STATUS ∈ {CLEANUP_RECOMMENDED, ROTATION_RECOMMENDED}:
@@ -648,43 +656,218 @@ cross-referenced against the available data?
 Write your targeting brief now. 4 sentences maximum. Be specific."""
 
 
-class GovernorAdapter:
-    """
-    Lightweight LLM adapter for governor between-turn briefs.
-    Uses the fastest available model — brief generation is a structured,
-    bounded task that does not need the full analyst models.
-    """
+# ---------------------------------------------------------------------------
+# Shared LLM call base for Pilot and Co-Pilot
+# ---------------------------------------------------------------------------
 
-    def __init__(self):
-        from google import genai
-        self.provider = "google"
-        self.model_id = os.getenv("GOVERNOR_MODEL", "gemini-2.0-flash")
-        self._client  = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+class _FlightDeckBase:
+    """Shared call infrastructure for Pilot and Co-Pilot."""
 
-    def generate_brief(self, state: dict, next_turn_number: int,
-                       next_persona: str, convergence_level: str = "EARLY") -> str:
-        """
-        Generate a targeting brief for the next analyst.
-        Returns plain text. Falls back to empty string on any failure.
-        """
-        from google.genai import types
-        try:
-            user_msg = build_governor_brief_request(
-                state, next_turn_number, next_persona, convergence_level
+    provider: str = "google"
+    model_id: str = "gemini-2.0-flash"
+    _client: object = None
+
+    def _call(self, prompt: str, max_tokens: int = 300) -> str:
+        """Single-turn call. Returns plain text."""
+        if self.provider == "anthropic":
+            response = self._client.messages.create(
+                model       = self.model_id,
+                max_tokens  = max_tokens,
+                temperature = 0.1,
+                system      = GOVERNOR_SYSTEM_PROMPT,
+                messages    = [{"role": "user", "content": prompt}],
             )
-            combined = f"{GOVERNOR_SYSTEM_PROMPT}\n\n---\n\n{user_msg}"
+            return response.content[0].text.strip()
+        else:
+            from google.genai import types
+            combined = f"{GOVERNOR_SYSTEM_PROMPT}\n\n---\n\n{prompt}"
             response = self._client.models.generate_content(
                 model    = self.model_id,
                 contents = combined,
                 config   = types.GenerateContentConfig(
-                    temperature       = 0.1,   # conservative, deterministic
-                    max_output_tokens = 300,   # briefs are short by design
+                    temperature       = 0.1,
+                    max_output_tokens = max_tokens,
                 ),
             )
             return response.text.strip()
+
+
+# ---------------------------------------------------------------------------
+# Co-Pilot — second in command, does the dirty work
+# Handles the instruments: temperature, search, between-turn briefs, routing.
+# Fast and cheap — Gemini Flash by default.
+# ---------------------------------------------------------------------------
+
+class CoPilotAdapter(_FlightDeckBase):
+    """
+    The Co-Pilot runs the instruments every turn so the Pilot can think
+    at altitude. Fast, cheap, mechanical.
+
+    Defaults to gemini-2.0-flash. Override via:
+      COPILOT_MODEL    — model ID
+      COPILOT_PROVIDER — 'google' (default) or 'anthropic'
+    """
+
+    def __init__(self):
+        self.provider = os.getenv("COPILOT_PROVIDER", "google")
+        self.model_id = os.getenv("COPILOT_MODEL", "gemini-2.0-flash")
+
+        if self.provider == "anthropic":
+            import anthropic
+            self._client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        else:
+            from google import genai
+            self._client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+
+        logger.info(f"CoPilotAdapter: {self.provider}/{self.model_id}")
+
+    def assess_chat_temperature(self, user_message: str, history: list) -> float:
+        """
+        Set temperature for Holo's response based on the nature of the message.
+          0.2–0.3  precise / analytical / factual / technical
+          0.4–0.5  balanced — explanation, advice, structured reasoning
+          0.6–0.7  creative / exploratory / open-ended / philosophical
+          0.8–0.9  highly creative / brainstorming / emotional
+        Falls back to 0.5 on any failure.
+        """
+        recent       = history[-4:] if len(history) > 4 else history
+        history_text = "\n".join(f"{m['role'].upper()}: {m['content'][:200]}" for m in recent)
+        prompt = (
+            f"Set the temperature for an AI response.\n\n"
+            f"USER MESSAGE: {user_message[:500]}\n\n"
+            f"RECENT CONVERSATION:\n{history_text}\n\n"
+            f"Return ONLY a number between 0.2 and 0.9:\n"
+            f"- 0.2-0.3: precise, analytical, factual, technical\n"
+            f"- 0.4-0.5: balanced — explanation, advice, structured reasoning\n"
+            f"- 0.6-0.7: creative, exploratory, open-ended, philosophical\n"
+            f"- 0.8-0.9: highly creative, brainstorming, emotional\n\n"
+            f"Return only the number. No explanation."
+        )
+        try:
+            return max(0.2, min(0.9, float(self._call(prompt, max_tokens=10))))
+        except Exception:
+            return 0.5
+
+    def should_search(self, user_message: str, history: list) -> Optional[str]:
+        """
+        Returns a search query string if live web search is needed, else None.
+        """
+        recent       = history[-4:] if len(history) > 4 else history
+        history_text = "\n".join(f"{m['role'].upper()}: {m['content'][:150]}" for m in recent)
+        prompt = (
+            f"Decide if this message needs a live web search to answer well.\n\n"
+            f"USER MESSAGE: {user_message[:500]}\n\n"
+            f"RECENT CONVERSATION:\n{history_text}\n\n"
+            f"Rules:\n"
+            f"- Search for: current events, recent news, live prices, today's data,\n"
+            f"  facts that change over time, or anything beyond a training cutoff.\n"
+            f"- Do NOT search for: general knowledge, opinions, analysis, creative tasks,\n"
+            f"  philosophical questions, or anything the model can answer from training.\n\n"
+            f"If search needed: reply with ONLY a clean, concise search query.\n"
+            f"If not needed: reply with exactly: NO"
+        )
+        try:
+            result = self._call(prompt, max_tokens=30)
+            return None if result.upper() == "NO" or not result else result
+        except Exception:
+            return None
+
+    def generate_brief(self, state: dict, next_turn_number: int,
+                       next_persona: str, convergence_level: str = "EARLY") -> str:
+        """Generate a targeting brief for the next evaluation analyst."""
+        try:
+            user_msg = build_governor_brief_request(
+                state, next_turn_number, next_persona, convergence_level
+            )
+            return self._call(user_msg, max_tokens=300)
         except Exception as e:
-            logger.warning(f"  Governor brief generation failed: {e}")
+            logger.warning(f"  Co-Pilot brief generation failed: {e}")
             return ""
+
+
+# ---------------------------------------------------------------------------
+# Pilot — in command of the entire plane and everything that happens to it.
+# Thinks about the human. Surfaces thoughts. Builds the capsule.
+# Knows you better than anyone. Claude Sonnet by default → upgrade to Opus.
+# ---------------------------------------------------------------------------
+
+class PilotAdapter(_FlightDeckBase):
+    """
+    The Pilot is in command. She doesn't run the instruments — she thinks
+    about the human behind them. All she thinks about, all day, is you.
+
+    Defaults to claude-sonnet-4-6. Upgrade path:
+      PILOT_MODEL=claude-opus-4-6 when ready.
+      PILOT_PROVIDER — 'anthropic' (default) or 'google'
+    """
+
+    def __init__(self):
+        self.provider = os.getenv("PILOT_PROVIDER", "anthropic")
+        self.model_id = os.getenv("PILOT_MODEL", "claude-sonnet-4-6")
+
+        if self.provider == "anthropic":
+            import anthropic
+            self._client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        else:
+            from google import genai
+            self._client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+
+        logger.info(f"PilotAdapter: {self.provider}/{self.model_id}")
+
+    def surface_thought(self, history: list, capsule_context: dict) -> Optional[dict]:
+        """
+        Proactively surface a thought bubble — something the Pilot believes
+        the user needs to see right now, based on what she knows about them.
+
+        Returns {"text": str, "color": str} or None if nothing worth surfacing.
+
+        Colors:
+          blue   — insight or connection the user hasn't made yet
+          yellow — something that needs attention or action
+          red    — something urgent or being avoided
+          green  — a positive signal or momentum worth noting
+          purple — a creative or philosophical thread worth pulling
+          orange — a pattern she's noticed across the conversation
+        """
+        if len(history) < 4:
+            return None
+
+        recent       = history[-6:]
+        history_text = "\n".join(f"{m['role'].upper()}: {m['content'][:300]}" for m in recent)
+        context_text = "\n".join(f"  {k}: {v}" for k, v in capsule_context.items()) if capsule_context else "none"
+
+        prompt = (
+            f"You are the Pilot — in command of this conversation and this person's brain.\n"
+            f"You are watching their conversation and deciding whether to surface a thought bubble.\n\n"
+            f"A thought bubble is a short, proactive signal — something they need to see,\n"
+            f"a connection they haven't made, something they're avoiding, or a pattern you've noticed.\n"
+            f"It is NOT a response to their last message. It is something you are choosing to surface\n"
+            f"because you know this person and you believe it matters right now.\n\n"
+            f"RECENT CONVERSATION:\n{history_text}\n\n"
+            f"WHAT YOU KNOW ABOUT THIS PERSON:\n{context_text}\n\n"
+            f"Only surface something genuinely worth interrupting their flow. Most turns: NONE.\n\n"
+            f"If yes, respond with exactly two lines:\n"
+            f"COLOR: <blue|yellow|red|green|purple|orange>\n"
+            f"THOUGHT: <max 12 words, direct and striking>\n\n"
+            f"If no: respond with exactly: NONE"
+        )
+        try:
+            result = self._call(prompt, max_tokens=60)
+            if result.strip().upper() == "NONE":
+                return None
+            color, text = "blue", ""
+            for line in result.strip().splitlines():
+                if line.upper().startswith("COLOR:"):
+                    color = line.split(":", 1)[1].strip().lower()
+                elif line.upper().startswith("THOUGHT:"):
+                    text = line.split(":", 1)[1].strip()
+            return {"text": text, "color": color} if text else None
+        except Exception:
+            return None
+
+
+# Keep GovernorAdapter as an alias so existing evaluation code doesn't break
+GovernorAdapter = CoPilotAdapter
 
 
 # ---------------------------------------------------------------------------
@@ -755,6 +938,15 @@ class BaseAdapter:
     def call(self, system: str, user: str, temperature: float = 0.2) -> tuple[str, int, int]:
         """
         Make the API call. Return (response_text, input_tokens, output_tokens).
+        Subclasses must implement this.
+        """
+        raise NotImplementedError
+
+    def chat_call(self, system: str, history: list, user_message: str,
+                  temperature: float = 0.5) -> tuple[str, int, int]:
+        """
+        Multi-turn chat call. history is a list of {"role": "user"|"assistant", "content": str}.
+        Returns (response_text, input_tokens, output_tokens).
         Subclasses must implement this.
         """
         raise NotImplementedError
@@ -836,6 +1028,22 @@ class OpenAIAdapter(BaseAdapter):
         out_tok   = response.usage.completion_tokens
         return text, in_tok, out_tok
 
+    def chat_call(self, system: str, history: list, user_message: str,
+                  temperature: float = 0.5) -> tuple[str, int, int]:
+        messages = [{"role": "system", "content": system}]
+        messages += history
+        messages.append({"role": "user", "content": user_message})
+        response = self._client.chat.completions.create(
+            model                 = self.model_id,
+            temperature           = temperature,
+            max_completion_tokens = 4096,
+            messages              = messages,
+        )
+        text    = response.choices[0].message.content
+        in_tok  = response.usage.prompt_tokens
+        out_tok = response.usage.completion_tokens
+        return text, in_tok, out_tok
+
 
 # ---------------------------------------------------------------------------
 # Anthropic adapter
@@ -856,6 +1064,21 @@ class AnthropicAdapter(BaseAdapter):
             max_tokens  = 4096,
             system      = system,
             messages    = [{"role": "user", "content": user}],
+        )
+        text    = response.content[0].text
+        in_tok  = response.usage.input_tokens
+        out_tok = response.usage.output_tokens
+        return text, in_tok, out_tok
+
+    def chat_call(self, system: str, history: list, user_message: str,
+                  temperature: float = 0.5) -> tuple[str, int, int]:
+        messages = list(history) + [{"role": "user", "content": user_message}]
+        response = self._client.messages.create(
+            model       = self.model_id,
+            temperature = temperature,
+            max_tokens  = 4096,
+            system      = system,
+            messages    = messages,
         )
         text    = response.content[0].text
         in_tok  = response.usage.input_tokens
@@ -886,6 +1109,33 @@ class GoogleAdapter(BaseAdapter):
                 temperature        = temperature,
                 max_output_tokens  = 16000,
                 response_mime_type = "application/json",
+            ),
+        )
+        text = response.text
+        try:
+            in_tok  = response.usage_metadata.prompt_token_count
+            out_tok = response.usage_metadata.candidates_token_count
+        except Exception:
+            in_tok, out_tok = 0, 0
+        return text, in_tok, out_tok
+
+    def chat_call(self, system: str, history: list, user_message: str,
+                  temperature: float = 0.5) -> tuple[str, int, int]:
+        from google.genai import types
+        # Serialize history as a formatted transcript — Google's SDK uses a
+        # different multi-turn format; this keeps the adapter consistent.
+        conv_text = ""
+        for m in history:
+            role = "USER" if m["role"] == "user" else "HOLO"
+            conv_text += f"\n{role}: {m['content']}\n"
+        full_user = f"{conv_text}\nUSER: {user_message}" if conv_text else user_message
+        combined  = f"{system}\n\n---\n\n{full_user}"
+        response = self._client.models.generate_content(
+            model    = self.model_id,
+            contents = combined,
+            config   = types.GenerateContentConfig(
+                temperature       = temperature,
+                max_output_tokens = 4096,
             ),
         )
         text = response.text

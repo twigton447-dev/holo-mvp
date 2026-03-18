@@ -84,12 +84,245 @@ CREATE INDEX IF NOT EXISTS idx_findings_category
     ON holo_findings (category, severity, created_at DESC);
 
 ────────────────────────────────────────────────────────────
+
+Ambient signal layer (run these when building the full life-context system):
+
+-- Enable pgvector for semantic retrieval
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- 7. Integrations — OAuth tokens and connection state per capsule per source
+--    One row per (capsule_id, source). The Pilot reads this to know what
+--    signal feeds are live for a given person.
+CREATE TABLE IF NOT EXISTS holo_integrations (
+    id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    capsule_id      text REFERENCES holo_capsules(capsule_id) ON DELETE CASCADE,
+    source          text NOT NULL,   -- 'gmail' | 'outlook' | 'slack' | 'calendar'
+                                     -- | 'imessage' | 'stripe' | 'plaid' | 'chrome'
+                                     -- | 'google_meet' | 'zoom' | 'teams' | 'webex'
+                                     -- | 'notion' | 'linear' | 'github' | 'salesforce'
+                                     -- | 'tesla' | 'connected_vehicle'  -- driving patterns,
+                                     --   location, driving behavior, in-car listen history
+                                     -- | 'spotify' | 'apple_podcasts' | 'youtube_music'
+                                     --   -- what you listen to, when, how long, completion rate
+    status          text DEFAULT 'connected',  -- 'connected' | 'disconnected' | 'error'
+    scopes          text[],          -- OAuth scopes granted
+    connected_at    timestamptz DEFAULT now(),
+    last_synced_at  timestamptz,
+    metadata        jsonb,           -- source-specific config (account email, etc.)
+    UNIQUE (capsule_id, source)
+);
+
+CREATE INDEX IF NOT EXISTS idx_integrations_capsule
+    ON holo_integrations (capsule_id, status);
+
+-- 8. Ambient signals — the raw event log of the person's life
+--    Append-only. High volume. Every signal from every connected source
+--    lands here as a normalized event. The Pilot reads recent windows
+--    to understand where the person is right now.
+CREATE TABLE IF NOT EXISTS holo_signals (
+    id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    capsule_id      text REFERENCES holo_capsules(capsule_id) ON DELETE CASCADE,
+    created_at      timestamptz DEFAULT now(),
+    occurred_at     timestamptz NOT NULL,     -- when the event actually happened
+    source          text NOT NULL,            -- 'gmail' | 'slack' | 'calendar' | etc.
+    signal_type     text NOT NULL,            -- 'email_sent' | 'email_received'
+                                              -- | 'message_sent' | 'meeting_attended'
+                                              -- | 'purchase' | 'page_visit'
+                                              -- | 'calendar_event' | 'task_completed'
+                                              -- | 'meeting_transcript' | 'call_transcript'
+                                              -- | 'drive_completed' | 'location_visit'
+                                              -- | 'driving_behavior' | 'listen_session'
+    sentiment       float,                    -- -1.0 to 1.0, null if not applicable
+    energy_level    text,                     -- 'high' | 'medium' | 'low' | null
+    -- Structured fields (populated based on signal_type)
+    counterparty    text,                     -- who they emailed/messaged/met with
+    subject         text,                     -- email subject, meeting title, etc.
+    amount_usd      float,                    -- for purchases
+    domain          text,                     -- for page visits
+    duration_min    int,                      -- for meetings, calls
+    -- Derived flags the Pilot sets after processing
+    flagged         boolean DEFAULT false,    -- something the Pilot wants to surface
+    flag_reason     text,
+    -- Pilot-extracted nutrient (persists). Raw content does not.
+    summary         text                      -- what the Pilot decided mattered from this event
+);
+
+CREATE INDEX IF NOT EXISTS idx_signals_capsule_time
+    ON holo_signals (capsule_id, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signals_type
+    ON holo_signals (capsule_id, signal_type, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signals_flagged
+    ON holo_signals (capsule_id, flagged) WHERE flagged = true;
+CREATE INDEX IF NOT EXISTS idx_signals_source
+    ON holo_signals (capsule_id, source, occurred_at DESC);
+
+-- 9. Life context — synthesized understanding of who this person is right now.
+--    Not raw events. Not history. The current true state of the person as the
+--    Pilot understands it. Written and pruned by the Pilot, not by cron jobs.
+--
+--    Pruning rules (Pilot judgment, not automation):
+--      - confidence decays 0.1 per week if no reinforcing signals arrive
+--      - when confidence drops below 0.3, Pilot reviews: prune or reaffirm
+--      - when something evolves (goal achieved, pattern broken, concern resolved),
+--        Pilot explicitly marks the old insight pruned and writes the new state
+--      - pruned rows are soft-deleted (pruned_at set), never hard-deleted immediately
+--        so the Pilot can reference what changed and why
+--      - hard delete after 30 days of soft deletion — no hoarding, no archaeology
+--
+--    The Pilot holds who you are now. Not who you were.
+CREATE TABLE IF NOT EXISTS holo_life_context (
+    id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    capsule_id      text REFERENCES holo_capsules(capsule_id) ON DELETE CASCADE,
+    created_at      timestamptz DEFAULT now(),
+    updated_at      timestamptz DEFAULT now(),
+    category        text NOT NULL,    -- 'financial' | 'relationships' | 'health'
+                                      -- | 'work' | 'goals' | 'patterns' | 'emotional'
+                                      -- | 'spiritual' | 'avoidances'
+    key             text NOT NULL,    -- human-readable label e.g. 'cash_flow_concern'
+    value           text NOT NULL,    -- the insight, written in plain language by Pilot
+    confidence      float DEFAULT 1.0, -- 0.0–1.0, decays weekly without reinforcement
+    last_reinforced timestamptz DEFAULT now(), -- last time a signal confirmed this
+    reinforcement_count int DEFAULT 1,         -- how many times this has been confirmed
+    source_signals  uuid[],           -- signal IDs that contributed to this insight
+    -- Pruning fields
+    pruned_at       timestamptz,      -- set when Pilot decides this is no longer true
+    prune_reason    text,             -- what changed — written by Pilot, not a code flag
+    superseded_by   uuid,             -- if replaced by a new insight, points to it
+    embedding       vector(1536),     -- for semantic retrieval
+    UNIQUE (capsule_id, key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_life_context_active
+    ON holo_life_context (capsule_id, category)
+    WHERE pruned_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_life_context_decaying
+    ON holo_life_context (capsule_id, confidence, last_reinforced)
+    WHERE pruned_at IS NULL AND confidence < 0.5;
+CREATE INDEX IF NOT EXISTS idx_life_context_pruned
+    ON holo_life_context (capsule_id, pruned_at)
+    WHERE pruned_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_life_context_embedding
+    ON holo_life_context USING ivfflat (embedding vector_cosine_ops)
+    WITH (lists = 100);
+
+-- Automated confidence decay — runs nightly via Supabase scheduled function
+-- UPDATE holo_life_context
+--   SET confidence = GREATEST(0.0, confidence - 0.014)  -- ~0.1/week
+-- WHERE pruned_at IS NULL
+--   AND last_reinforced < now() - interval '3 days';
+--
+-- Hard delete soft-pruned rows after 30 days
+-- DELETE FROM holo_life_context
+-- WHERE pruned_at IS NOT NULL
+--   AND pruned_at < now() - interval '30 days';
+
+-- 10. Transcripts — TRANSIENT processing queue, not permanent storage.
+--     The Pilot reads full_text once, extracts nutrients into holo_life_context
+--     and holo_signals, then full_text is deleted (set to null).
+--     Only the derived insights persist. Raw content does not accumulate.
+--     status: 'pending' → Pilot hasn't processed yet
+--             'processed' → nutrients extracted, full_text deleted
+CREATE TABLE IF NOT EXISTS holo_transcripts (
+    id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    capsule_id      text REFERENCES holo_capsules(capsule_id) ON DELETE CASCADE,
+    created_at      timestamptz DEFAULT now(),
+    occurred_at     timestamptz NOT NULL,
+    source          text NOT NULL,        -- 'google_meet' | 'zoom' | 'teams' | 'otter'
+                                          -- | 'webex' | 'fireflies' | 'phone_call'
+    transcript_type text NOT NULL,        -- 'meeting' | 'call' | '1on1' | 'coaching'
+    title           text,
+    participants    text[],
+    duration_min    int,
+    status          text DEFAULT 'pending',  -- 'pending' | 'processed'
+    full_text       text,                 -- TRANSIENT — nulled after Pilot processes
+    -- Nutrients extracted by Pilot (these persist after full_text is dropped)
+    pilot_summary   text,
+    decisions_made  text[],
+    commitments     text[],
+    stress_signals  text[],
+    topics          text[]
+);
+
+CREATE INDEX IF NOT EXISTS idx_transcripts_pending
+    ON holo_transcripts (capsule_id, status) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS idx_transcripts_capsule_time
+    ON holo_transcripts (capsule_id, occurred_at DESC);
+
+-- 11. Session consolidations — what the Pilot wrote to memory after each session
+--     The explicit record of what was learned, what changed, what was surfaced.
+--     Feeds the session-open load so the Pilot always walks in knowing what happened.
+CREATE TABLE IF NOT EXISTS holo_session_consolidations (
+    id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    capsule_id      text REFERENCES holo_capsules(capsule_id) ON DELETE CASCADE,
+    session_id      text,
+    created_at      timestamptz DEFAULT now(),
+    what_changed    text,    -- what the Pilot updated in life_context this session
+    what_surfaced   text,    -- what thought bubbles were shown and whether they landed
+    open_threads    text[],  -- things unresolved that the next session should pick up
+    pilot_note      text     -- the Pilot's own note to herself for next time
+);
+
+CREATE INDEX IF NOT EXISTS idx_consolidations_capsule
+    ON holo_session_consolidations (capsule_id, created_at DESC);
+
+────────────────────────────────────────────────────────────
+
+Chat storage (add these tables for Holo chat mode):
+
+-- 4. Capsules — one row per user identity
+CREATE TABLE IF NOT EXISTS holo_capsules (
+    capsule_id     text PRIMARY KEY,
+    google_id      text UNIQUE NOT NULL,
+    email          text NOT NULL,
+    name           text,
+    avatar_url     text,
+    created_at     timestamptz DEFAULT now(),
+    last_active    timestamptz DEFAULT now(),
+    mode           text DEFAULT 'personal'   -- 'personal' | 'work'
+);
+
+-- 5. Capsule context — persistent knowledge the Governor holds per user
+CREATE TABLE IF NOT EXISTS holo_capsule_context (
+    capsule_id     text REFERENCES holo_capsules(capsule_id),
+    key            text NOT NULL,
+    value          text,
+    updated_at     timestamptz DEFAULT now(),
+    PRIMARY KEY (capsule_id, key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_capsule_context
+    ON holo_capsule_context (capsule_id);
+
+-- 6. Chat sessions
+CREATE TABLE IF NOT EXISTS holo_chat_sessions (
+    session_id    text PRIMARY KEY,
+    created_at    timestamptz DEFAULT now(),
+    last_active   timestamptz DEFAULT now(),
+    turn_count    int DEFAULT 0
+);
+
+-- 5. Chat messages
+CREATE TABLE IF NOT EXISTS holo_chat_messages (
+    id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    session_id    text REFERENCES holo_chat_sessions(session_id),
+    created_at    timestamptz DEFAULT now(),
+    role          text NOT NULL,
+    content       text NOT NULL,
+    provider      text,
+    temperature   float,
+    turn_number   int
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_messages_session
+    ON holo_chat_messages (session_id, created_at ASC);
+
+────────────────────────────────────────────────────────────
 """
 
 import logging
 import os
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 logger = logging.getLogger("holo.brain")
 
@@ -422,6 +655,187 @@ class ProjectBrain:
             "highest_risk_seen": new_high,
             "first_seen":        first_seen,
         }).eq("vendor_domain", vendor_domain).execute()
+
+    # -------------------------------------------------------------------------
+    # Capsule management
+    # -------------------------------------------------------------------------
+
+    def get_or_create_capsule(self, google_id: str, email: str,
+                               name: str, avatar_url: str) -> Optional[dict]:
+        """
+        Fetch existing capsule or create one on first sign-in.
+        Returns the capsule row dict, or None if DB unavailable.
+        """
+        if not self._client:
+            return None
+        try:
+            resp = (
+                self._client.table("holo_capsules")
+                .select("*")
+                .eq("google_id", google_id)
+                .single()
+                .execute()
+            )
+            if resp.data:
+                # Update last_active + name/avatar in case they changed
+                self._client.table("holo_capsules").update({
+                    "last_active": datetime.now(timezone.utc).isoformat(),
+                    "name":        name,
+                    "avatar_url":  avatar_url,
+                }).eq("google_id", google_id).execute()
+                return resp.data
+
+            # First sign-in — create capsule
+            import uuid
+            capsule_id = str(uuid.uuid4())
+            row = {
+                "capsule_id":  capsule_id,
+                "google_id":   google_id,
+                "email":       email,
+                "name":        name,
+                "avatar_url":  avatar_url,
+                "mode":        "personal",
+                "created_at":  datetime.now(timezone.utc).isoformat(),
+                "last_active": datetime.now(timezone.utc).isoformat(),
+            }
+            self._client.table("holo_capsules").insert(row).execute()
+            logger.info(f"ProjectBrain: new capsule created for {email}.")
+            return row
+        except Exception as e:
+            logger.warning(f"ProjectBrain.get_or_create_capsule failed: {e}")
+            return None
+
+    def get_capsule(self, capsule_id: str) -> Optional[dict]:
+        if not self._client:
+            return None
+        try:
+            resp = (
+                self._client.table("holo_capsules")
+                .select("*")
+                .eq("capsule_id", capsule_id)
+                .single()
+                .execute()
+            )
+            return resp.data
+        except Exception:
+            return None
+
+    def set_capsule_mode(self, capsule_id: str, mode: str):
+        """Switch between 'personal' and 'work' modes."""
+        if not self._client:
+            return
+        try:
+            self._client.table("holo_capsules").update({
+                "mode": mode
+            }).eq("capsule_id", capsule_id).execute()
+        except Exception as e:
+            logger.warning(f"ProjectBrain.set_capsule_mode failed: {e}")
+
+    def get_capsule_context(self, capsule_id: str) -> dict:
+        """Return all context key/value pairs for a capsule."""
+        if not self._client:
+            return {}
+        try:
+            resp = (
+                self._client.table("holo_capsule_context")
+                .select("key, value")
+                .eq("capsule_id", capsule_id)
+                .execute()
+            )
+            return {r["key"]: r["value"] for r in (resp.data or [])}
+        except Exception:
+            return {}
+
+    def set_capsule_context(self, capsule_id: str, key: str, value: str):
+        """Upsert a context entry for a capsule."""
+        if not self._client:
+            return
+        try:
+            self._client.table("holo_capsule_context").upsert({
+                "capsule_id": capsule_id,
+                "key":        key,
+                "value":      value,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            }, on_conflict="capsule_id,key").execute()
+        except Exception as e:
+            logger.warning(f"ProjectBrain.set_capsule_context failed: {e}")
+
+    # -------------------------------------------------------------------------
+    # Chat storage
+    # -------------------------------------------------------------------------
+
+    def save_chat_turn(
+        self,
+        session_id: str,
+        turn_number: int,
+        user_message: str,
+        holo_response: str,
+        provider: str,
+        temperature: float,
+    ):
+        """
+        Persist one chat turn (user message + Holo response) to Supabase.
+        Upserts the session row and inserts two message rows.
+        """
+        if not self._client:
+            return
+        try:
+            now = datetime.now(timezone.utc).isoformat()
+
+            # Upsert session row
+            self._client.table("holo_chat_sessions").upsert({
+                "session_id":  session_id,
+                "last_active": now,
+                "turn_count":  turn_number,
+            }, on_conflict="session_id").execute()
+
+            # Insert user + assistant messages
+            self._client.table("holo_chat_messages").insert([
+                {
+                    "session_id":  session_id,
+                    "role":        "user",
+                    "content":     user_message,
+                    "turn_number": turn_number,
+                    "created_at":  now,
+                },
+                {
+                    "session_id":  session_id,
+                    "role":        "assistant",
+                    "content":     holo_response,
+                    "provider":    provider,
+                    "temperature": temperature,
+                    "turn_number": turn_number,
+                    "created_at":  now,
+                },
+            ]).execute()
+
+            logger.info(f"ProjectBrain: saved chat turn {turn_number} for session {session_id[:8]}.")
+        except Exception as e:
+            logger.warning(f"ProjectBrain.save_chat_turn failed: {e}")
+
+    def load_chat_history(self, session_id: str) -> Optional[List[Dict[str, Any]]]:
+        """
+        Load full message history for a session from Supabase.
+        Returns list of {"role": ..., "content": ...} dicts, or None if not found.
+        """
+        if not self._client:
+            return None
+        try:
+            resp = (
+                self._client
+                .table("holo_chat_messages")
+                .select("role, content")
+                .eq("session_id", session_id)
+                .order("created_at", desc=False)
+                .execute()
+            )
+            rows = resp.data or []
+            if not rows:
+                return None
+            return [{"role": r["role"], "content": r["content"]} for r in rows]
+        except Exception as e:
+            logger.warning(f"ProjectBrain.load_chat_history failed: {e}")
+            return None
 
     def _extract_vendor_domain(self, context: dict) -> Optional[str]:
         """Extract vendor email domain from the context bundle."""

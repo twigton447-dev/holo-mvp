@@ -25,6 +25,7 @@ import hmac
 import logging
 import os
 import time
+from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -47,16 +48,20 @@ logger = logging.getLogger("holo.main")
 
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from auth import RateLimiter
 from context_governor import ContextGovernor
+from chat_engine import HoloChatEngine
+from auth_capsule import handle_google_signin, get_capsule_from_request, _brain as _capsule_brain
 
 _rate_limiter = RateLimiter()
 
 # Governor is instantiated once at startup and reused for every request.
 # This means adapters are initialized once (SDK clients, auth, etc.).
 _governor: ContextGovernor | None = None
+_chat_engine: Optional[HoloChatEngine] = None
 
 
 @asynccontextmanager
@@ -87,6 +92,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         raise RuntimeError(f"Context Governor failed to initialize: {e}")
 
+    # 3. Instantiate the Chat Engine (shares the same adapter pool)
+    global _chat_engine
+    try:
+        _chat_engine = HoloChatEngine()
+        logger.info("Holo Chat Engine initialized.")
+    except Exception as e:
+        raise RuntimeError(f"Chat Engine failed to initialize: {e}")
+
     logger.info("Holo API server ready.")
     yield
     logger.info("Holo API shutting down.")
@@ -101,6 +114,12 @@ app = FastAPI(
     version  = "0.1.0",
     lifespan = lifespan,
 )
+
+# Serve the chat UI from /frontend — must be mounted before routes
+import pathlib
+_frontend_dir = pathlib.Path(__file__).parent / "frontend"
+if _frontend_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(_frontend_dir)), name="static")
 
 
 # ---------------------------------------------------------------------------
@@ -212,6 +231,139 @@ async def evaluate_action(
     # Build API response
     response = _build_response(result)
     return JSONResponse(content=response)
+
+
+@app.post("/auth/google")
+async def google_signin(request: Request):
+    """
+    Exchange a Google Identity Services credential for a Holo capsule token.
+
+    Body: { "credential": "<google_jwt>" }
+    Returns: { capsule_token, capsule_id, email, name, avatar_url, mode }
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+
+    credential = body.get("credential", "").strip()
+    if not credential:
+        raise HTTPException(status_code=400, detail="Missing field: credential")
+
+    result = handle_google_signin(credential)
+    if not result:
+        raise HTTPException(status_code=401, detail="Google sign-in failed. Invalid credential.")
+
+    return JSONResponse(content=result)
+
+
+@app.get("/auth/me")
+async def get_me(request: Request):
+    """Return current capsule info from the Authorization: Bearer <token> header."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Invalid or missing capsule token.")
+    return JSONResponse(content=capsule)
+
+
+@app.post("/auth/mode")
+async def set_mode(request: Request):
+    """Switch the capsule between 'personal' and 'work' modes."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Invalid or missing capsule token.")
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+    mode = body.get("mode", "")
+    if mode not in ("personal", "work"):
+        raise HTTPException(status_code=400, detail="mode must be 'personal' or 'work'")
+    _capsule_brain.set_capsule_mode(capsule["sub"], mode)
+    return JSONResponse(content={"capsule_id": capsule["sub"], "mode": mode})
+
+
+@app.get("/")
+def serve_chat_ui():
+    """Serve the Holo chat UI."""
+    index = _frontend_dir / "index.html"
+    if index.exists():
+        return FileResponse(str(index))
+    return {"status": "ok", "message": "Holo API running. Frontend not found."}
+
+
+@app.post("/v1/chat")
+async def chat(
+    request: Request,
+    _key: str = Depends(_verify_key),
+):
+    """
+    Send a message to Holo. Returns Holo's response.
+
+    Body:
+      message     — the user's message (required)
+      session_id  — continue an existing session (optional; new session created if omitted)
+    """
+    if _chat_engine is None:
+        raise HTTPException(status_code=503, detail="Chat engine not initialized.")
+
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+
+    message = body.get("message", "").strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="Missing required field: message")
+
+    session_id = body.get("session_id")
+
+    # Attach capsule identity if a capsule token is provided
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    capsule_id = capsule["sub"] if capsule else None
+
+    try:
+        result = _chat_engine.send_message(session_id, message, capsule_id=capsule_id)
+    except Exception as e:
+        logger.error(f"Chat engine error: {type(e).__name__}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Chat engine error. See server logs.")
+
+    return JSONResponse(content={
+        "session_id":          result["session_id"],
+        "response":            result["response"],
+        "turn_number":         result["turn_number"],
+        "thread_health_score": result["thread_health_score"],
+        "thread_health_level": result["thread_health_level"],
+        "elapsed_ms":          result["elapsed_ms"],
+        "tokens":              result["tokens"],
+        "thought":             result.get("thought"),
+    })
+
+
+@app.get("/v1/chat/{session_id}/history")
+async def chat_history(
+    session_id: str,
+    _key: str = Depends(_verify_key),
+):
+    """Return the full message history for a session."""
+    if _chat_engine is None:
+        raise HTTPException(status_code=503, detail="Chat engine not initialized.")
+    history = _chat_engine.get_history(session_id)
+    if history is None:
+        raise HTTPException(status_code=404, detail="Session not found.")
+    return JSONResponse(content={"session_id": session_id, "history": history})
+
+
+@app.delete("/v1/chat/{session_id}")
+async def clear_chat(
+    session_id: str,
+    _key: str = Depends(_verify_key),
+):
+    """Clear a chat session and start fresh."""
+    if _chat_engine is None:
+        raise HTTPException(status_code=503, detail="Chat engine not initialized.")
+    cleared = _chat_engine.clear_session(session_id)
+    return JSONResponse(content={"cleared": cleared, "session_id": session_id})
 
 
 # ---------------------------------------------------------------------------

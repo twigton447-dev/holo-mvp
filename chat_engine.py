@@ -130,6 +130,9 @@ class HoloChatEngine:
         session             = self.get_or_create_session(session_id)
         session.last_active = time.time()
 
+        # Load capsule context early — needed by both Pilot and system prompt
+        capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+
         # Co-Pilot runs the instruments: temperature + search decision
         temperature  = self._copilot.assess_chat_temperature(user_message, session.history)
         search_query = self._copilot.should_search(user_message, session.history)
@@ -156,7 +159,6 @@ class HoloChatEngine:
         )
 
         # Inject thread-health context + capsule context into the system prompt
-        capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
         system_prompt = (
             HOLO_CHAT_SYSTEM_PROMPT
             + "\n\n" + _health_context(session)

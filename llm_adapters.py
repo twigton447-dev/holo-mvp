@@ -945,9 +945,11 @@ class BaseAdapter:
         raise NotImplementedError
 
     def chat_call(self, system: str, history: list, user_message: str,
-                  temperature: float = 0.5) -> tuple[str, int, int]:
+                  temperature: float = 0.5,
+                  images: Optional[list] = None) -> tuple[str, int, int]:
         """
         Multi-turn chat call. history is a list of {"role": "user"|"assistant", "content": str}.
+        images is an optional list of {"name": str, "data": str, "mimeType": str} (base64).
         Returns (response_text, input_tokens, output_tokens).
         Subclasses must implement this.
         """
@@ -1031,10 +1033,22 @@ class OpenAIAdapter(BaseAdapter):
         return text, in_tok, out_tok
 
     def chat_call(self, system: str, history: list, user_message: str,
-                  temperature: float = 0.5) -> tuple[str, int, int]:
+                  temperature: float = 0.5,
+                  images: Optional[list] = None) -> tuple[str, int, int]:
         messages = [{"role": "system", "content": system}]
         messages += history
-        messages.append({"role": "user", "content": user_message})
+        if images:
+            content: list = [{"type": "text", "text": user_message}]
+            for img in images:
+                content.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:{img['mimeType']};base64,{img['data']}"
+                    },
+                })
+            messages.append({"role": "user", "content": content})
+        else:
+            messages.append({"role": "user", "content": user_message})
         response = self._client.chat.completions.create(
             model                 = self.model_id,
             temperature           = temperature,
@@ -1073,8 +1087,22 @@ class AnthropicAdapter(BaseAdapter):
         return text, in_tok, out_tok
 
     def chat_call(self, system: str, history: list, user_message: str,
-                  temperature: float = 0.5) -> tuple[str, int, int]:
-        messages = list(history) + [{"role": "user", "content": user_message}]
+                  temperature: float = 0.5,
+                  images: Optional[list] = None) -> tuple[str, int, int]:
+        if images:
+            user_content: list = [{"type": "text", "text": user_message}]
+            for img in images:
+                user_content.append({
+                    "type": "image",
+                    "source": {
+                        "type":       "base64",
+                        "media_type": img["mimeType"],
+                        "data":       img["data"],
+                    },
+                })
+            messages = list(history) + [{"role": "user", "content": user_content}]
+        else:
+            messages = list(history) + [{"role": "user", "content": user_message}]
         response = self._client.messages.create(
             model       = self.model_id,
             temperature = temperature,
@@ -1122,7 +1150,8 @@ class GoogleAdapter(BaseAdapter):
         return text, in_tok, out_tok
 
     def chat_call(self, system: str, history: list, user_message: str,
-                  temperature: float = 0.5) -> tuple[str, int, int]:
+                  temperature: float = 0.5,
+                  images: Optional[list] = None) -> tuple[str, int, int]:
         from google.genai import types
         # Serialize history as a formatted transcript — Google's SDK uses a
         # different multi-turn format; this keeps the adapter consistent.
@@ -1132,9 +1161,17 @@ class GoogleAdapter(BaseAdapter):
             conv_text += f"\n{role}: {m['content']}\n"
         full_user = f"{conv_text}\nUSER: {user_message}" if conv_text else user_message
         combined  = f"{system}\n\n---\n\n{full_user}"
+        if images:
+            contents: list = [combined]
+            for img in images:
+                import base64
+                raw_bytes = base64.b64decode(img["data"])
+                contents.append(types.Part.from_bytes(data=raw_bytes, mime_type=img["mimeType"]))
+        else:
+            contents = combined
         response = self._client.models.generate_content(
             model    = self.model_id,
-            contents = combined,
+            contents = contents,
             config   = types.GenerateContentConfig(
                 temperature       = temperature,
                 max_output_tokens = 4096,

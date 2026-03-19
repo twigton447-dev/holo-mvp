@@ -122,7 +122,8 @@ class HoloChatEngine:
         return session
 
     def send_message(self, session_id: str, user_message: str,
-                     capsule_id: Optional[str] = None) -> Dict[str, Any]:
+                     capsule_id: Optional[str] = None,
+                     images: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
         """
         Process one user message. Returns Holo's response + metadata.
         The caller should use session_id from the returned dict for follow-up turns.
@@ -170,7 +171,8 @@ class HoloChatEngine:
         # Call the adapter — enriched_message includes search results if any
         start = time.time()
         response_text, in_tok, out_tok = adapter.chat_call(
-            system_prompt, session.history, enriched_message, temperature
+            system_prompt, session.history, enriched_message, temperature,
+            images=images or None,
         )
         elapsed_ms = int((time.time() - start) * 1000)
 

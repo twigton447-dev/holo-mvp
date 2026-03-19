@@ -54,7 +54,7 @@ from fastapi.staticfiles import StaticFiles
 from auth import RateLimiter
 from context_governor import ContextGovernor
 from chat_engine import HoloChatEngine
-from auth_capsule import handle_google_signin, get_capsule_from_request, _brain as _capsule_brain
+from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, _brain as _capsule_brain
 
 _rate_limiter = RateLimiter()
 
@@ -257,6 +257,32 @@ async def google_signin(request: Request):
     return JSONResponse(content=result)
 
 
+@app.post("/auth/email")
+async def email_signin(request: Request):
+    """
+    Sign in with just a name and email — no Google OAuth required.
+    Creates or loads a Capsule and returns a Holo capsule token.
+
+    Body: { "email": "...", "name": "..." }
+    Returns: { capsule_token, capsule_id, email, name, avatar_url, mode }
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+
+    email = body.get("email", "").strip()
+    name  = body.get("name", "").strip()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="A valid email is required.")
+
+    result = handle_email_signin(email, name)
+    if not result:
+        raise HTTPException(status_code=500, detail="Failed to create capsule.")
+
+    return JSONResponse(content=result)
+
+
 @app.get("/auth/me")
 async def get_me(request: Request):
     """Return current capsule info from the Authorization: Bearer <token> header."""
@@ -317,13 +343,15 @@ async def chat(
         raise HTTPException(status_code=400, detail="Missing required field: message")
 
     session_id = body.get("session_id")
+    images     = body.get("images") or None  # list of {name, data, mimeType} or None
 
     # Attach capsule identity if a capsule token is provided
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     capsule_id = capsule["sub"] if capsule else None
 
     try:
-        result = _chat_engine.send_message(session_id, message, capsule_id=capsule_id)
+        result = _chat_engine.send_message(session_id, message, capsule_id=capsule_id,
+                                           images=images)
     except Exception as e:
         logger.error(f"Chat engine error: {type(e).__name__}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Chat engine error. See server logs.")

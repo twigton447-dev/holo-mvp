@@ -147,7 +147,8 @@
 
     /* Header */
     #header { padding: 12px 16px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    #header h1 { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; margin: 0; flex-shrink: 0; }
+    #header h1 { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; margin: 0; flex-shrink: 0; display: flex; align-items: baseline; gap: 6px; }
+    #brand-sub { font-size: 17px; font-weight: 400; color: var(--text2); letter-spacing: 0.3px; transition: opacity 0.4s ease; }
     #header-right { display: flex; align-items: center; gap: 8px; }
     #new-thread { background: none; border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
     #new-thread:hover { border-color: var(--text2); color: var(--text5); }
@@ -223,7 +224,7 @@
 
 <div id="app">
   <div id="header">
-    <h1>Holo</h1>
+    <h1>Holo <span id="brand-sub">Chat</span></h1>
     <div id="header-right">
       <div class="mode-toggle" id="mode-toggle" style="display:none">
         <button class="mode-btn active" id="btn-personal" onclick="switchMode('personal')">Personal</button>
@@ -328,6 +329,20 @@
     document.body.classList.add("light");
     document.getElementById("theme-toggle").textContent = "☾";
   }
+
+  // ---- Brand sub-word cycle ------------------------------------------------
+  const BRAND_WORDS = ["Chat", "Protect", "Legal", "Learn", "Shop", "Listen", "Homes"];
+  let _brandIndex = 0;
+  const _brandEl  = document.getElementById("brand-sub");
+
+  setInterval(() => {
+    _brandEl.style.opacity = "0";
+    setTimeout(() => {
+      _brandIndex = (_brandIndex + 1) % BRAND_WORDS.length;
+      _brandEl.textContent = BRAND_WORDS[_brandIndex];
+      _brandEl.style.opacity = "1";
+    }, 400);
+  }, 3000);
 
   // ---- Thought bubbles -----------------------------------------------------
 

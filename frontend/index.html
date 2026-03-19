@@ -185,9 +185,19 @@
     #signin-overlay.hidden { display: none; }
 
     /* Empty state */
-    #empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text3); padding: 32px; text-align: center; }
+    #empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; color: var(--text3); padding: 32px; text-align: center; }
     #empty h2 { font-size: 22px; font-weight: 600; color: var(--text2); margin: 0; }
     #empty p { font-size: 14px; line-height: 1.6; max-width: 300px; margin: 0; }
+    /* Connector strip */
+    #connector { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 4px; }
+    #tier-toggle { display: flex; background: var(--bg2); border: 1px solid var(--border); border-radius: 999px; padding: 3px; gap: 2px; }
+    .tier-btn { border: none; background: none; color: var(--text3); font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 999px; cursor: pointer; transition: all 0.15s; }
+    .tier-btn.active { background: var(--bg); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+    #model-row { display: flex; align-items: center; gap: 6px; }
+    .model-badge { display: flex; align-items: center; gap: 5px; background: var(--bg2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px 4px 8px; font-size: 11px; color: var(--text2); font-weight: 500; }
+    .model-badge .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .model-badge .dot.green { background: #22c55e; }
+    .connector-sep { color: var(--border); font-size: 14px; }
   </style>
 </head>
 <body>
@@ -257,8 +267,16 @@
 
   <div id="messages">
     <div id="empty">
-      <h2>What's on your mind?</h2>
-      <p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p>
+      <h2 id="greeting"></h2>
+      <p id="greeting-sub"></p>
+      <div id="connector">
+        <div id="tier-toggle">
+          <button class="tier-btn" onclick="setTier('core')">Core</button>
+          <button class="tier-btn active" onclick="setTier('pro')">Pro</button>
+          <button class="tier-btn" onclick="setTier('elite')">Elite</button>
+        </div>
+        <div id="model-row"></div>
+      </div>
     </div>
   </div>
 
@@ -389,6 +407,42 @@
 
   // ---- Brand sub-word (static for now) ------------------------------------
   document.getElementById("brand-sub").textContent = "Chat";
+
+  // ---- Rotating greeting ---------------------------------------------------
+  const GREETINGS = [
+    { h: "What's on your mind?",              sub: "Holo is here — wherever you want to go." },
+    { h: "What do you feel like exploring?",  sub: "Let's figure it out together." },
+    { h: "Good to see you.",                  sub: "Pick up where you left off, or start something new." },
+    { h: "What are you working through?",     sub: "Holo is listening." },
+    { h: "Where do you want to start?",       sub: "No wrong answer." },
+    { h: "What's pulling your attention?",    sub: "Let's dig in." },
+    { h: "Ready when you are.",               sub: "Ask anything. Go anywhere." },
+    { h: "What's the thing you keep circling back to?", sub: "Holo is here for it." },
+    { h: "What would be most useful right now?", sub: "Holo is on it." },
+    { h: "Start a conversation.",             sub: "Holo learns as you go." },
+  ];
+  const _g = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+  document.getElementById("greeting").textContent     = _g.h;
+  document.getElementById("greeting-sub").textContent = _g.sub;
+
+  // ---- Tier / connector mockup --------------------------------------------
+  const TIERS = {
+    core:  { models: ["GPT-4o mini", "Claude Haiku", "Gemini Flash"],  label: "Core"  },
+    pro:   { models: ["GPT-4o",      "Claude Sonnet", "Gemini Pro"],   label: "Pro"   },
+    elite: { models: ["GPT-5.4",     "Claude Sonnet 4.6", "Gemini 3.1 Pro"], label: "Elite" },
+  };
+  let _activeTier = "pro";
+
+  function setTier(tier) {
+    _activeTier = tier;
+    document.querySelectorAll(".tier-btn").forEach(b => b.classList.toggle("active", b.textContent.toLowerCase() === tier));
+    const row = document.getElementById("model-row");
+    row.innerHTML = TIERS[tier].models.map((m, i) =>
+      `${i > 0 ? '<span class="connector-sep">·</span>' : ''}
+       <span class="model-badge"><span class="dot green"></span>${m}</span>`
+    ).join("");
+  }
+  setTier("pro");
 
   // ---- Load Google Client ID from backend and init GSI --------------------
   fetch("/config")

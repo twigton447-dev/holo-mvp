@@ -75,24 +75,27 @@
     #thought-layer { position: fixed; bottom: 80px; left: 0; right: 0; max-width: 760px; margin: 0 auto; pointer-events: none; z-index: 50; overflow: hidden; height: 100dvh; }
     .thought-bubble {
       position: absolute; bottom: 0; pointer-events: all;
-      padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 500;
-      cursor: pointer; max-width: 260px; text-align: center; line-height: 1.4;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-      animation: floatUp 12s ease-in forwards;
+      padding: 14px 22px; border-radius: 999px; font-size: 15px; font-weight: 400;
+      cursor: pointer; max-width: 340px; text-align: center; line-height: 1.5;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+      letter-spacing: 0.01em;
+      animation: floatUp 16s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
       opacity: 0;
     }
-    .thought-bubble.blue   { background: #1a3a6e; color: #93c5fd; border: 1px solid #1d4ed8; }
-    .thought-bubble.yellow { background: #3a2e00; color: #fde68a; border: 1px solid #d97706; }
-    .thought-bubble.red    { background: #3a0a0a; color: #fca5a5; border: 1px solid #dc2626; }
-    .thought-bubble.green  { background: #0a2e1a; color: #86efac; border: 1px solid #16a34a; }
-    .thought-bubble.purple { background: #1e1040; color: #c4b5fd; border: 1px solid #7c3aed; }
-    .thought-bubble.orange { background: #2e1800; color: #fdba74; border: 1px solid #ea580c; }
+    .thought-bubble.blue   { background: rgba(26,58,110,0.35); color: #bfdbfe; border: 1px solid rgba(29,78,216,0.3); }
+    .thought-bubble.yellow { background: rgba(58,46,0,0.35);  color: #fef08a; border: 1px solid rgba(217,119,6,0.3); }
+    .thought-bubble.red    { background: rgba(58,10,10,0.35); color: #fecaca; border: 1px solid rgba(220,38,38,0.3); }
+    .thought-bubble.green  { background: rgba(10,46,26,0.35); color: #bbf7d0; border: 1px solid rgba(22,163,74,0.3); }
+    .thought-bubble.purple { background: rgba(30,16,64,0.35); color: #ddd6fe; border: 1px solid rgba(124,58,237,0.3); }
+    .thought-bubble.orange { background: rgba(46,24,0,0.35);  color: #fed7aa; border: 1px solid rgba(234,88,12,0.3); }
     @keyframes floatUp {
-      0%   { opacity: 0; transform: translateY(0) scale(0.85); }
-      8%   { opacity: 1; transform: translateY(-20px) scale(1); }
-      75%  { opacity: 1; transform: translateY(-55vh) scale(1); }
-      88%  { opacity: 0.6; transform: translateY(-72vh) scale(0.95); }
-      100% { opacity: 0; transform: translateY(-82vh) scale(0.9); }
+      0%   { opacity: 0;    transform: translateY(0)     scale(0.8)  rotate(-1deg); }
+      6%   { opacity: 0.55; transform: translateY(-18px) scale(1.02) rotate(0.5deg); }
+      40%  { opacity: 0.45; transform: translateY(-35vh) scale(1)    rotate(-0.5deg); }
+      75%  { opacity: 0.35; transform: translateY(-60vh) scale(0.97) rotate(0.3deg); }
+      90%  { opacity: 0.15; transform: translateY(-75vh) scale(0.93) rotate(-0.2deg); }
+      100% { opacity: 0;    transform: translateY(-85vh) scale(0.88) rotate(0deg); }
     }
 
     /* Header */
@@ -128,6 +131,8 @@
 <div id="signin-overlay">
   <h2>Holo</h2>
   <p>Your second brain. Sign in to bring your capsule with you.</p>
+
+  <!-- Google sign-in (requires Google Client ID to be configured) -->
   <div id="g_id_onload"
     data-client_id="GOOGLE_CLIENT_ID_PLACEHOLDER"
     data-callback="onGoogleSignIn"
@@ -141,7 +146,28 @@
     data-shape="pill"
     data-logo_alignment="left">
   </div>
-  <button onclick="skipSignIn()" style="background:none;border:none;color:#333;font-size:13px;cursor:pointer;margin-top:8px;">Continue without signing in</button>
+
+  <!-- Divider -->
+  <div style="display:flex;align-items:center;gap:12px;width:100%;max-width:280px;margin:4px 0;">
+    <div style="flex:1;height:1px;background:#222;"></div>
+    <span style="color:#333;font-size:12px;">or</span>
+    <div style="flex:1;height:1px;background:#222;"></div>
+  </div>
+
+  <!-- Email sign-in -->
+  <div id="email-signin-form" style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;">
+    <input id="signin-name"  type="text"  placeholder="Your name"  autocomplete="name"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;" />
+    <input id="signin-email" type="email" placeholder="Your email" autocomplete="email"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;" />
+    <button onclick="emailSignIn()"
+      style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
+      Continue
+    </button>
+    <div id="signin-error" style="color:#ef4444;font-size:12px;text-align:center;display:none;"></div>
+  </div>
+
+  <button onclick="skipSignIn()" style="background:none;border:none;color:#333;font-size:13px;cursor:pointer;margin-top:4px;">Continue without signing in</button>
 </div>
 
 <div id="app">
@@ -153,6 +179,7 @@
         <button class="mode-btn" id="btn-work" onclick="switchMode('work')">Work</button>
       </div>
       <button id="new-thread" onclick="newThread()">New thread</button>
+      <button id="demo-thought-btn" onclick="demoThought()" title="Demo thought bubbles" style="background:none;border:1px solid #2a2a2a;color:#555;border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;flex-shrink:0;">✦ demo</button>
       <div id="user-avatar" style="display:none"></div>
     </div>
   </div>
@@ -248,6 +275,21 @@
     setTimeout(() => bubble.remove(), 13000);
   }
 
+  const _DEMO_THOUGHTS = [
+    { text: "You haven't taken a real break in weeks.",       color: "red"    },
+    { text: "This problem and the last one are the same one.", color: "blue"   },
+    { text: "You keep circling this — what are you afraid of?", color: "yellow" },
+    { text: "You're building something that matters.",         color: "green"  },
+    { text: "There's a pattern here you haven't named yet.",  color: "orange" },
+    { text: "What if the constraint is actually the insight?", color: "purple" },
+  ];
+  let _demoIdx = 0;
+
+  function demoThought() {
+    spawnThought(_DEMO_THOUGHTS[_demoIdx % _DEMO_THOUGHTS.length]);
+    _demoIdx++;
+  }
+
   // ---- Auth ----------------------------------------------------------------
 
   function onGoogleSignIn(response) {
@@ -266,6 +308,38 @@
       document.getElementById("signin-overlay").classList.add("hidden");
     })
     .catch(() => skipSignIn());
+  }
+
+  async function emailSignIn() {
+    const name  = document.getElementById("signin-name").value.trim();
+    const email = document.getElementById("signin-email").value.trim();
+    const errEl = document.getElementById("signin-error");
+    errEl.style.display = "none";
+
+    if (!email || !email.includes("@")) {
+      errEl.textContent = "Please enter a valid email.";
+      errEl.style.display = "block";
+      return;
+    }
+
+    try {
+      const res  = await fetch("/auth/email", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+        body:    JSON.stringify({ email, name }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Sign-in failed.");
+      capsuleToken = data.capsule_token;
+      capsuleMode  = data.mode || "personal";
+      localStorage.setItem("holo_capsule_token", capsuleToken);
+      localStorage.setItem("holo_capsule_mode",  capsuleMode);
+      showCapsule(data);
+      document.getElementById("signin-overlay").classList.add("hidden");
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.style.display = "block";
+    }
   }
 
   function skipSignIn() {
@@ -448,14 +522,7 @@
   }
 
   function renderBattery(line) {
-    const m     = line.match(/\[(GREEN|YELLOW|RED)\]\s+([█░]+)/);
-    if (!m) return "";
-    const color = m[1].toLowerCase();
-    const bar   = m[2];
-    return `<div class="thread-power">
-      <span class="thread-power-label">Thread power</span>
-      <span class="thread-power-bar ${color}">${bar}</span>
-    </div>`;
+    return "";
   }
 
   function parseResponse(text) {
@@ -478,6 +545,7 @@
     let mainText = text
       .replace(/\n*Next-step suggestions[:\s\n]+([\s\S]*?)(?:\n\nThread power:|$)/i, "")
       .replace(/\n*Thread power:[^\n]+/, "")
+      .replace(/\s*\[(GREEN|YELLOW|RED)\]\s*[█░]+/g, "")
       .trim();
 
     return { mainText, battery, suggestions };

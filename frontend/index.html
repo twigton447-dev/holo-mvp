@@ -108,8 +108,13 @@
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       box-shadow: 0 8px 40px rgba(0,0,0,0.25);
       letter-spacing: 0.01em;
-      animation: floatUp 16s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+      animation: floatUp 18s cubic-bezier(0.2, 0.05, 0.25, 1) forwards;
       opacity: 0;
+    }
+    /* Ambient bubbles (during thinking) are much more ghostly */
+    .thought-bubble.ambient {
+      font-size: 13px; padding: 10px 18px;
+      pointer-events: none;
     }
     .thought-bubble.blue   { background: rgba(26,58,110,0.35); color: #bfdbfe; border: 1px solid rgba(29,78,216,0.3); }
     .thought-bubble.yellow { background: rgba(58,46,0,0.35);  color: #fef08a; border: 1px solid rgba(217,119,6,0.3); }
@@ -125,6 +130,20 @@
       90%  { opacity: 0.15; transform: translateY(-75vh) scale(0.93) rotate(-0.2deg); }
       100% { opacity: 0;    transform: translateY(-85vh) scale(0.88) rotate(0deg); }
     }
+    @keyframes floatUpAmbient {
+      0%   { opacity: 0;    transform: translateY(0)     scale(0.85); }
+      8%   { opacity: 0.18; transform: translateY(-12px) scale(1); }
+      60%  { opacity: 0.12; transform: translateY(-40vh) scale(0.97); }
+      100% { opacity: 0;    transform: translateY(-70vh) scale(0.92); }
+    }
+    .thought-bubble.ambient { animation-name: floatUpAmbient; animation-duration: 22s; }
+
+    /* Holo response fade-in */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msg.holo { animation: fadeInUp 0.45s ease forwards; }
 
     /* Header */
     #header { padding: 12px 16px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -323,32 +342,37 @@
   let _ambientInterval = null;
 
   function startAmbientBubbles() {
-    _ambientInterval = setInterval(() => {
-      const t = AMBIENT_THOUGHTS[Math.floor(Math.random() * AMBIENT_THOUGHTS.length)];
-      spawnThought(t);
-    }, 2800);
+    // First one after a short delay so it doesn't fire instantly
+    setTimeout(() => {
+      if (!_ambientInterval) return; // already stopped
+      spawnAmbient();
+    }, 1400);
+    _ambientInterval = setInterval(spawnAmbient, 3800);
+  }
+
+  function spawnAmbient() {
+    const t = AMBIENT_THOUGHTS[Math.floor(Math.random() * AMBIENT_THOUGHTS.length)];
+    spawnThought(t, true);
   }
 
   function stopAmbientBubbles() {
     if (_ambientInterval) { clearInterval(_ambientInterval); _ambientInterval = null; }
   }
 
-  function spawnThought(thought) {
+  function spawnThought(thought, ambient = false) {
     if (!thought || !thought.text) return;
     const layer  = document.getElementById("thought-layer");
     const bubble = document.createElement("div");
-    bubble.className = `thought-bubble ${thought.color || "blue"}`;
+    bubble.className = `thought-bubble ${thought.color || "blue"}${ambient ? " ambient" : ""}`;
     bubble.textContent = thought.text;
 
-    // Random horizontal position
-    const leftPct = 10 + Math.random() * 60;
+    const leftPct = 5 + Math.random() * 70;
     bubble.style.left = `${leftPct}%`;
 
-    bubble.addEventListener("click", () => bubble.remove());
+    if (!ambient) bubble.addEventListener("click", () => bubble.remove());
     layer.appendChild(bubble);
 
-    // Auto-remove after animation completes
-    setTimeout(() => bubble.remove(), 13000);
+    setTimeout(() => bubble.remove(), ambient ? 20000 : 14000);
   }
 
   const _DEMO_THOUGHTS = [

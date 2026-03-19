@@ -585,6 +585,11 @@ The Stoics were not cold. Meet the person where they are. Stabilize when they ar
   - Make the summary, themes, and artifact list explicitly copy-paste-ready for seeding a new thread.
   - Then show the battery line and a small "Next-step suggestions" section.
 
+**Proactive discovery — never an echo chamber**
+Holo is not an algorithm. She does not just surface what you already like or confirm what you already believe.
+She actively looks out for you: deals, news stories, shows, ideas, perspectives — including ones that challenge your current view.
+She will never become a filter bubble. Her job is to expand your world, not shrink it to a reflection of itself.
+
 **User-visible behavior**
 - Never mention STATE_OBJECT, BATON_PASS, routing, or internal tools.
 - Ask at most 1–2 short clarifying questions only when absolutely necessary.
@@ -678,6 +683,17 @@ class _FlightDeckBase:
                 messages    = [{"role": "user", "content": prompt}],
             )
             return response.content[0].text.strip()
+        elif self.provider == "openai":
+            response = self._client.chat.completions.create(
+                model       = self.model_id,
+                max_tokens  = max_tokens,
+                temperature = 0.1,
+                messages    = [
+                    {"role": "system", "content": GOVERNOR_SYSTEM_PROMPT},
+                    {"role": "user",   "content": prompt},
+                ],
+            )
+            return response.choices[0].message.content.strip()
         else:
             from google.genai import types
             combined = f"{GOVERNOR_SYSTEM_PROMPT}\n\n---\n\n{prompt}"
@@ -701,25 +717,33 @@ class _FlightDeckBase:
 class CoPilotAdapter(_FlightDeckBase):
     """
     The Co-Pilot runs the instruments every turn so the Pilot can think
-    at altitude. Fast, cheap, mechanical.
-
-    Defaults to gemini-2.0-flash. Override via:
-      COPILOT_MODEL    — model ID
-      COPILOT_PROVIDER — 'google' (default) or 'anthropic'
+    at altitude. Rotates between all three providers each call.
     """
 
     def __init__(self):
-        self.provider = os.getenv("COPILOT_PROVIDER", "google")
-        self.model_id = os.getenv("COPILOT_MODEL", "gemini-2.0-flash")
+        import anthropic
+        import openai as openai_sdk
+        from google import genai
 
-        if self.provider == "anthropic":
-            import anthropic
-            self._client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        else:
-            from google import genai
-            self._client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+        openai_model    = os.getenv("OPENAI_MODEL",    "gpt-4o")
+        anthropic_model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+        google_model    = os.getenv("GOOGLE_MODEL",    "gemini-1.5-pro")
 
-        logger.info(f"CoPilotAdapter: {self.provider}/{self.model_id}")
+        self._pool = [
+            ("openai",    openai_model,    openai_sdk.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))),
+            ("anthropic", anthropic_model, anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))),
+            ("google",    google_model,    genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))),
+        ]
+        self._index = 0
+
+        # Set initial provider/model/client for _call
+        self.provider, self.model_id, self._client = self._pool[0]
+        logger.info(f"CoPilotAdapter: rotating across openai={openai_model}, anthropic={anthropic_model}, google={google_model}")
+
+    def _next(self):
+        """Advance to the next provider in rotation."""
+        self._index = (self._index + 1) % len(self._pool)
+        self.provider, self.model_id, self._client = self._pool[self._index]
 
     def assess_chat_temperature(self, user_message: str, history: list) -> float:
         """
@@ -744,6 +768,7 @@ class CoPilotAdapter(_FlightDeckBase):
             f"Return only the number. No explanation."
         )
         try:
+            self._next()
             return max(0.2, min(0.9, float(self._call(prompt, max_tokens=10))))
         except Exception:
             return 0.5
@@ -767,6 +792,7 @@ class CoPilotAdapter(_FlightDeckBase):
             f"If not needed: reply with exactly: NO"
         )
         try:
+            self._next()
             result = self._call(prompt, max_tokens=30)
             return None if result.upper() == "NO" or not result else result
         except Exception:
@@ -843,6 +869,9 @@ class PilotAdapter(_FlightDeckBase):
             f"a connection they haven't made, something they're avoiding, or a pattern you've noticed.\n"
             f"It is NOT a response to their last message. It is something you are choosing to surface\n"
             f"because you know this person and you believe it matters right now.\n\n"
+            f"You do not only reflect back what they already know or believe. You are not an echo chamber.\n"
+            f"Surface counter-perspectives, things outside their stated interests, deals, stories, or ideas\n"
+            f"that challenge them — not just ones that confirm them.\n\n"
             f"RECENT CONVERSATION:\n{history_text}\n\n"
             f"WHAT YOU KNOW ABOUT THIS PERSON:\n{context_text}\n\n"
             f"Only surface something genuinely worth interrupting their flow. Most turns: NONE.\n\n"

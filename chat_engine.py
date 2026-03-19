@@ -138,7 +138,7 @@ class HoloChatEngine:
         search_query = self._copilot.should_search(user_message, session.history)
 
         # Pilot thinks about the human: thought bubble (deeper call, less frequent)
-        thought = self._pilot.surface_thought(session.history, capsule_context)
+        thought = self._pilot.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
         search_results = web_search.search(search_query) if search_query else None
 
         # Build enriched message — search results injected for the model only,

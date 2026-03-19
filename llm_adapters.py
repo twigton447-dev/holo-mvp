@@ -840,7 +840,7 @@ class PilotAdapter(_FlightDeckBase):
 
         logger.info(f"PilotAdapter: {self.provider}/{self.model_id}")
 
-    def surface_thought(self, history: list, capsule_context: dict) -> Optional[dict]:
+    def surface_thought(self, history: list, capsule_context: dict, baton_pass: str = "") -> Optional[dict]:
         """
         Proactively surface a thought bubble — something the Pilot believes
         the user needs to see right now, based on what she knows about them.
@@ -874,7 +874,8 @@ class PilotAdapter(_FlightDeckBase):
             f"that challenge them — not just ones that confirm them.\n\n"
             f"RECENT CONVERSATION:\n{history_text}\n\n"
             f"WHAT YOU KNOW ABOUT THIS PERSON:\n{context_text}\n\n"
-            f"Only surface something genuinely worth interrupting their flow. Most turns: NONE.\n\n"
+            + (f"THREAD STATE:\n{baton_pass}\n\n" if baton_pass else "")
+            + f"Only surface something genuinely worth interrupting their flow. Most turns: NONE.\n\n"
             f"If yes, respond with exactly two lines:\n"
             f"COLOR: <blue|yellow|red|green|purple|orange>\n"
             f"THOUGHT: <max 12 words, direct and striking>\n\n"

@@ -132,7 +132,9 @@ That is the standard. Everything we build either serves that standard or it does
 
 Holo asks for access to everything. That is a serious ask and we know it.
 
-The contract is simple: everything you connect is used only to help you. Not to sell you something. Not to optimize an engagement metric. Not to build a profile that gets sold or subpoenaed or leaked. Every integration is explicit, every permission is yours to revoke, every data decision is yours to audit.
+The contract is simple: everything you connect is used only to help you. Not to sell you *to* someone. Not to optimize an engagement metric. Not to build a profile that gets sold or subpoenaed or leaked. Every integration is explicit, every permission is yours to revoke, every data decision is yours to audit.
+
+The distinction matters. We live in a world of commerce — Holo will surface things it genuinely believes you need. But the power relationship is inverted. Brands don't buy your attention from Holo. They have to earn it. Brand agents bid for the right to reach you. The Council — cognitively diverse, adversarially structured, designed to find blind spots — vets every match before it ever reaches you. If it doesn't serve you, it doesn't get through. You are not the product. You are the buyer. Brands have to sell to you.
 
 You own your data. Holo holds it on your behalf. The moment you want it gone, it is gone.
 

@@ -102,11 +102,19 @@ Bubbles drift upward, hit the ceiling, linger, then fade if not clicked. Color-c
 
 ---
 
-## Marketing Signal Layer
+## The Attention Marketplace
 
-Because the Governor knows each user deeply, she can surface intent and interest signals over time. This is a monetization layer — the Governor provides signals to partners, not raw data. Taylor owns and manages this layer.
+We live in a world of commerce. Holo will surface things it genuinely believes you need. But the power relationship is inverted from every other platform.
 
-Users benefit: better relevance. Partners benefit: real intent signals. Users retain full data ownership.
+**Old model:** Brand pays platform → you see an ad → platform profits → you get nothing relevant.
+
+**Holo model:** Brand agents bid for your attention → Governor vets the match against what you actually need → Council checks for blind spots and bad intent → if it passes, you see it — and it's actually useful.
+
+You are not the product. You are the buyer. **Brands have to sell to you.**
+
+Your attention is a marketplace. You own the inventory. Holo is the exchange. No brand buys impressions — they earn access by passing the Council. The Council is cognitively diverse and adversarially structured, designed to find what's wrong before anything reaches you. Good intent is the price of entry.
+
+Holo does not sell your data. It sells the match. The distinction is permanent.
 
 ---
 

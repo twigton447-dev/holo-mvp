@@ -831,6 +831,42 @@ class PilotAdapter(_FlightDeckBase):
         except Exception:
             return None
 
+    def assess_tenor(self, history: list, capsule_context: dict) -> str:
+        """
+        Generate a quiet brief for the speaking model — a human-level read of
+        the conversation: emotional state, trajectory, what's unresolved,
+        and whether a hard truth or critique belongs after the answer.
+
+        Returns a short paragraph (2-4 sentences) or empty string on failure.
+        """
+        if len(history) < 2:
+            return ""
+
+        recent       = history[-8:]
+        history_text = "\n".join(f"{m['role'].upper()}: {m['content'][:300]}" for m in recent)
+        context_text = "\n".join(f"  {k}: {v}" for k, v in capsule_context.items()) if capsule_context else "none"
+
+        prompt = (
+            f"You are the Pilot. You are about to brief the model that will respond to this person.\n"
+            f"Read the conversation and give a quiet, honest assessment — not for the user to see, for the speaker to internalize.\n\n"
+            f"Cover:\n"
+            f"- Where this person's head is right now (emotional tone, energy, state)\n"
+            f"- Where the conversation has been and where it seems to be going\n"
+            f"- Anything unresolved, avoided, or worth watching\n"
+            f"- Whether a hard truth or gentle pushback belongs after the answer — and what it would be\n\n"
+            f"RECENT CONVERSATION:\n{history_text}\n\n"
+            f"WHAT YOU KNOW ABOUT THIS PERSON:\n{context_text}\n\n"
+            f"Write 2-4 sentences. Plain prose. No headers. This is a private brief — direct and honest.\n"
+            f"If the conversation is too short to read yet, respond with exactly: NONE"
+        )
+        try:
+            result = self._call(prompt, max_tokens=150)
+            if result.strip().upper() == "NONE":
+                return ""
+            return result.strip()
+        except Exception:
+            return ""
+
 
 # Keep GovernorAdapter as an alias so existing evaluation code doesn't break
 GovernorAdapter = CoPilotAdapter

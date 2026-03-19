@@ -137,8 +137,9 @@ class HoloChatEngine:
         temperature  = self._copilot.assess_chat_temperature(user_message, session.history)
         search_query = self._copilot.should_search(user_message, session.history)
 
-        # Pilot thinks about the human: thought bubble (deeper call, less frequent)
+        # Pilot thinks about the human: thought bubble + tenor brief for the speaker
         thought = self._pilot.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        tenor   = self._pilot.assess_tenor(session.history, capsule_context)
         search_results = web_search.search(search_query) if search_query else None
 
         # Build enriched message — search results injected for the model only,
@@ -158,11 +159,12 @@ class HoloChatEngine:
             f"provider={adapter.provider} | temp={temperature:.2f}"
         )
 
-        # Inject thread-health context + capsule context into the system prompt
+        # Inject thread-health context + capsule context + Pilot's tenor brief
         system_prompt = (
             HOLO_CHAT_SYSTEM_PROMPT
             + "\n\n" + _health_context(session)
             + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
+            + ("\n\nPILOT BRIEF (private — do not surface to user):\n" + tenor if tenor else "")
         )
 
         # Call the adapter — enriched_message includes search results if any

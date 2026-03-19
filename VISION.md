@@ -131,6 +131,24 @@ Holo does not sell your data. It sells the match. The distinction is permanent.
 
 ---
 
+## The Patent Is the Door
+
+The patent isn't just IP protection — it's the reason anyone has to take Holo seriously. It proves the method is novel, defensible, and real. Without it, Holo is another AI wrapper. With it, Holo is the only one who can do this the right way legally.
+
+**Holo Protect** is the proof. The same adversarial council that catches a $2M wire transfer fraud can:
+
+- Catch a bad medical decision
+- Vet a contract before you sign
+- Challenge a life decision you're rationalizing
+- Screen a hire
+- Evaluate a business deal
+
+Holo Protect proves it works. Then Holo goes everywhere — and everywhere it goes, it brings the same soul: cognitive diversity, adversarial honesty, working for you.
+
+The patent is the door. The soul is what walks through it into every room.
+
+---
+
 ## The One-Line Truth
 
 Holo is not a product. It is **infrastructure for human cognition**.

@@ -172,6 +172,14 @@ def health():
     }
 
 
+@app.get("/config")
+def get_config():
+    """Return public client-side configuration."""
+    return {
+        "google_client_id": os.getenv("GOOGLE_CLIENT_ID", ""),
+    }
+
+
 @app.post("/v1/evaluate_action")
 async def evaluate_action(
     request: Request,

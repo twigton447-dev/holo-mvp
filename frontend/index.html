@@ -383,19 +383,30 @@
     document.getElementById("theme-toggle").textContent = "☾";
   }
 
-  // ---- Brand sub-word cycle ------------------------------------------------
-  const BRAND_WORDS = ["Chat", "Protect", "Legal", "Learn", "Shop", "Listen", "Homes"];
-  let _brandIndex = 0;
-  const _brandEl  = document.getElementById("brand-sub");
+  // ---- Brand sub-word (static for now) ------------------------------------
+  document.getElementById("brand-sub").textContent = "Chat";
 
-  setInterval(() => {
-    _brandEl.style.opacity = "0";
-    setTimeout(() => {
-      _brandIndex = (_brandIndex + 1) % BRAND_WORDS.length;
-      _brandEl.textContent = BRAND_WORDS[_brandIndex];
-      _brandEl.style.opacity = "1";
-    }, 400);
-  }, 3000);
+  // ---- Load Google Client ID from backend and init GSI --------------------
+  fetch("/config")
+    .then(r => r.json())
+    .then(cfg => {
+      const clientId = cfg.google_client_id;
+      if (!clientId) return;  // Google Sign-In not configured — email login still works
+      const onloadDiv = document.getElementById("g_id_onload");
+      if (onloadDiv) onloadDiv.setAttribute("data-client_id", clientId);
+      // Re-initialize Google Identity Services with the real client ID
+      if (window.google && window.google.accounts) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback:  onGoogleSignIn,
+        });
+        window.google.accounts.id.renderButton(
+          document.querySelector(".g_id_signin"),
+          { theme: "filled_black", size: "large", shape: "pill", text: "sign_in_with" }
+        );
+      }
+    })
+    .catch(() => {});  // silently ignore — email login always works
 
   // ---- Thought bubbles -----------------------------------------------------
 

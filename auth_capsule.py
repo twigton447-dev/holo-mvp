@@ -134,6 +134,42 @@ def handle_google_signin(credential: str) -> Optional[dict]:
     }
 
 
+def handle_email_signin(email: str, name: str) -> Optional[dict]:
+    """
+    Simple email-based sign-in — no Google OAuth required.
+    Creates or loads a capsule keyed by email, issues a Holo capsule token.
+    """
+    email = email.strip().lower()
+    name  = name.strip() or email.split("@")[0]
+
+    # Use a stable synthetic ID so the same email always maps to the same capsule
+    import hashlib
+    synthetic_id = "email:" + hashlib.sha256(email.encode()).hexdigest()[:32]
+
+    capsule = _brain.get_or_create_capsule(synthetic_id, email, name, "")
+    if not capsule:
+        import uuid
+        capsule = {
+            "capsule_id": str(uuid.uuid4()),
+            "email":      email,
+            "name":       name,
+            "avatar_url": "",
+            "mode":       "personal",
+        }
+        logger.warning("Email capsule created without Supabase persistence.")
+
+    token = issue_capsule_token(capsule["capsule_id"], email, capsule.get("mode", "personal"))
+
+    return {
+        "capsule_token": token,
+        "capsule_id":    capsule["capsule_id"],
+        "email":         email,
+        "name":          name,
+        "avatar_url":    "",
+        "mode":          capsule.get("mode", "personal"),
+    }
+
+
 def get_capsule_from_request(auth_header: Optional[str]) -> Optional[dict]:
     """
     Extract and decode the capsule token from an Authorization header.

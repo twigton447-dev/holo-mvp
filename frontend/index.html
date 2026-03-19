@@ -185,19 +185,21 @@
     #signin-overlay.hidden { display: none; }
 
     /* Empty state */
-    #empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; color: var(--text3); padding: 32px; text-align: center; }
-    #empty h2 { font-size: 22px; font-weight: 600; color: var(--text2); margin: 0; }
-    #empty p { font-size: 14px; line-height: 1.6; max-width: 300px; margin: 0; }
-    /* Connector strip */
-    #connector { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 4px; }
-    #tier-toggle { display: flex; background: var(--bg2); border: 1px solid var(--border); border-radius: 999px; padding: 3px; gap: 2px; }
-    .tier-btn { border: none; background: none; color: var(--text3); font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 999px; cursor: pointer; transition: all 0.15s; }
-    .tier-btn.active { background: var(--bg); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
-    #model-row { display: flex; align-items: center; gap: 6px; }
-    .model-badge { display: flex; align-items: center; gap: 5px; background: var(--bg2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px 4px 8px; font-size: 11px; color: var(--text2); font-weight: 500; }
-    .model-badge .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .model-badge .dot.green { background: #22c55e; }
-    .connector-sep { color: var(--border); font-size: 14px; }
+    #empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: var(--text3); padding: 24px 16px 16px; text-align: center; overflow-y: auto; }
+    #empty h2 { font-size: 20px; font-weight: 600; color: var(--text2); margin: 0; }
+    #empty p { font-size: 13px; line-height: 1.6; max-width: 280px; margin: 0; }
+    /* Space grid */
+    #space-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 420px; }
+    .space-card { border: 1px solid var(--border); border-radius: 16px; padding: 14px 10px 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.18s; background: var(--bg2); }
+    .space-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+    .space-card.active { border-color: var(--space-color, #1a56e8); box-shadow: 0 0 0 2px var(--space-color, #1a56e8); }
+    .space-card .space-icon { font-size: 22px; line-height: 1; }
+    .space-card .space-name { font-size: 12px; font-weight: 600; color: var(--text2); }
+    .space-card .space-desc { font-size: 10px; color: var(--text3); line-height: 1.3; }
+    .space-card.gated { opacity: 0.5; cursor: not-allowed; }
+    .space-card.gated:hover { transform: none; box-shadow: none; }
+    /* Active space accent in header */
+    #space-label { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 999px; margin-left: 4px; vertical-align: middle; }
   </style>
 </head>
 <body>
@@ -253,7 +255,7 @@
 
 <div id="app">
   <div id="header">
-    <h1>Holo <span id="brand-sub">Chat</span></h1>
+    <h1>Holo <span id="brand-sub">Chat</span><span id="space-label"></span></h1>
     <div id="header-right">
       <div class="mode-toggle" id="mode-toggle" style="display:none">
         <button class="mode-btn active" id="btn-personal" onclick="switchMode('personal')">Personal</button>
@@ -269,14 +271,7 @@
     <div id="empty">
       <h2 id="greeting"></h2>
       <p id="greeting-sub"></p>
-      <div id="connector">
-        <div id="tier-toggle">
-          <button class="tier-btn" onclick="setTier('core')">Core</button>
-          <button class="tier-btn active" onclick="setTier('pro')">Pro</button>
-          <button class="tier-btn" onclick="setTier('elite')">Elite</button>
-        </div>
-        <div id="model-row"></div>
-      </div>
+      <div id="space-grid"></div>
     </div>
   </div>
 
@@ -405,44 +400,65 @@
     document.getElementById("theme-toggle").textContent = "☾";
   }
 
-  // ---- Brand sub-word (static for now) ------------------------------------
-  document.getElementById("brand-sub").textContent = "Chat";
+  // ---- Brand sub-word (hidden — space label takes over once space is picked)
+  document.getElementById("brand-sub").textContent = "";
 
   // ---- Rotating greeting ---------------------------------------------------
   const GREETINGS = [
-    { h: "What's on your mind?",              sub: "Holo is here — wherever you want to go." },
-    { h: "What do you feel like exploring?",  sub: "Let's figure it out together." },
-    { h: "Good to see you.",                  sub: "Pick up where you left off, or start something new." },
-    { h: "What are you working through?",     sub: "Holo is listening." },
-    { h: "Where do you want to start?",       sub: "No wrong answer." },
-    { h: "What's pulling your attention?",    sub: "Let's dig in." },
-    { h: "Ready when you are.",               sub: "Ask anything. Go anywhere." },
-    { h: "What's the thing you keep circling back to?", sub: "Holo is here for it." },
-    { h: "What would be most useful right now?", sub: "Holo is on it." },
-    { h: "Start a conversation.",             sub: "Holo learns as you go." },
+    { h: "Welcome to Holo.",                  sub: "One brain. Every part of your life. Pick a space to start." },
+    { h: "Good to have you here.",            sub: "Where do you want to go today?" },
+    { h: "Everything in one place.",          sub: "Select a space — Holo is ready." },
+    { h: "Your world, all in one app.",       sub: "Pick where you want to start." },
+    { h: "Holo is here.",                     sub: "Same voice. Every context. Choose your space." },
+    { h: "One brain. Everywhere you go.",     sub: "Select a space to begin." },
   ];
   const _g = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
   document.getElementById("greeting").textContent     = _g.h;
   document.getElementById("greeting-sub").textContent = _g.sub;
 
-  // ---- Tier / connector mockup --------------------------------------------
-  const TIERS = {
-    core:  { models: ["GPT-4o mini", "Claude Haiku", "Gemini Flash"],  label: "Core"  },
-    pro:   { models: ["GPT-4o",      "Claude Sonnet", "Gemini Pro"],   label: "Pro"   },
-    elite: { models: ["GPT-5.4",     "Claude Sonnet 4.6", "Gemini 3.1 Pro"], label: "Elite" },
-  };
-  let _activeTier = "pro";
+  // ---- Space selector -------------------------------------------------------
+  const SPACES = [
+    { id: "life",        icon: "✦",  name: "Life",        desc: "Personal",          color: "#1a56e8", gated: false },
+    { id: "protect",     icon: "🛡",  name: "Protect",     desc: "Security",          color: "#ef4444", gated: false },
+    { id: "news",        icon: "◉",  name: "News",        desc: "Always on",         color: "#f59e0b", gated: false },
+    { id: "health",      icon: "♡",  name: "Health",      desc: "Records & Rx",      color: "#10b981", gated: false },
+    { id: "legal",       icon: "⚖",  name: "Legal",       desc: "Contracts & law",   color: "#8b5cf6", gated: false },
+    { id: "shop",        icon: "◈",  name: "Shop",        desc: "Commerce",          color: "#f97316", gated: false },
+    { id: "sports",      icon: "◎",  name: "Sports",      desc: "Scores & fantasy",  color: "#22c55e", gated: false },
+    { id: "enjoy",       icon: "◐",  name: "Enjoy",       desc: "Entertainment",     color: "#a855f7", gated: false },
+    { id: "enterprise",  icon: "◆",  name: "Enterprise",  desc: "Business",          color: "#64748b", gated: false },
+    { id: "diagnostics", icon: "⊕",  name: "Diagnostics", desc: "Certified only",    color: "#06b6d4", gated: true  },
+  ];
 
-  function setTier(tier) {
-    _activeTier = tier;
-    document.querySelectorAll(".tier-btn").forEach(b => b.classList.toggle("active", b.textContent.toLowerCase() === tier));
-    const row = document.getElementById("model-row");
-    row.innerHTML = TIERS[tier].models.map((m, i) =>
-      `${i > 0 ? '<span class="connector-sep">·</span>' : ''}
-       <span class="model-badge"><span class="dot green"></span>${m}</span>`
-    ).join("");
+  let _activeSpace = localStorage.getItem("holo_space") || "life";
+
+  function setSpace(id) {
+    const space = SPACES.find(s => s.id === id);
+    if (!space || space.gated) return;
+    _activeSpace = id;
+    localStorage.setItem("holo_space", id);
+    // Update card highlights
+    document.querySelectorAll(".space-card").forEach(c => c.classList.toggle("active", c.dataset.id === id));
+    // Update header accent
+    const lbl = document.getElementById("space-label");
+    if (lbl) { lbl.textContent = space.name; lbl.style.background = space.color + "22"; lbl.style.color = space.color; }
+    // Hide empty state and focus input
+    document.getElementById("empty").style.display = "none";
+    document.getElementById("input").focus();
   }
-  setTier("pro");
+
+  function buildSpaceGrid() {
+    const grid = document.getElementById("space-grid");
+    grid.innerHTML = SPACES.map(s => `
+      <div class="space-card${s.gated ? " gated" : ""}" data-id="${s.id}"
+           style="--space-color:${s.color}${_activeSpace === s.id ? ';border-color:'+s.color+';box-shadow:0 0 0 2px '+s.color : ''}"
+           onclick="setSpace('${s.id}')">
+        <div class="space-icon">${s.icon}</div>
+        <div class="space-name">${s.name}</div>
+        <div class="space-desc">${s.desc}${s.gated ? " 🔒" : ""}</div>
+      </div>`).join("");
+  }
+  buildSpaceGrid();
 
   // ---- Load Google Client ID from backend and init GSI --------------------
   fetch("/config")

@@ -760,8 +760,15 @@
       headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
       body:    JSON.stringify({ credential: response.credential }),
     })
-    .then(r => r.json())
-    .then(data => {
+    .then(async r => {
+      const data = await r.json();
+      if (!r.ok) {
+        if (data.detail === "account_cap_reached") {
+          alert("We are not taking new accounts right now. Check back soon.");
+          return;
+        }
+        skipSignIn(); return;
+      }
       capsuleToken = data.capsule_token;
       capsuleMode  = data.mode || "personal";
       localStorage.setItem("holo_capsule_token", capsuleToken);
@@ -797,7 +804,10 @@
         body:    JSON.stringify({ email, name, password, invite_code }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Something went wrong.");
+      if (!res.ok) {
+        if (data.detail === "account_cap_reached") throw new Error("We are not taking new accounts right now. Check back soon.");
+        throw new Error(data.detail || "Something went wrong.");
+      }
       capsuleToken = data.capsule_token;
       capsuleMode  = data.mode || "personal";
       localStorage.setItem("holo_capsule_token", capsuleToken);

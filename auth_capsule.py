@@ -112,7 +112,12 @@ def handle_google_signin(credential: str) -> Optional[dict]:
     name       = user_info.get("name", "")
     avatar_url = user_info.get("picture", "")
 
-    capsule = _brain.get_or_create_capsule(google_id, email, name, avatar_url)
+    try:
+        capsule = _brain.get_or_create_capsule(google_id, email, name, avatar_url)
+    except ValueError as e:
+        if "account_cap_reached" in str(e):
+            raise
+        capsule = None
     if not capsule:
         # No Supabase — create an ephemeral capsule for this session
         import uuid

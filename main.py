@@ -331,7 +331,12 @@ async def google_signin(request: Request):
     if not credential:
         raise HTTPException(status_code=400, detail="Missing field: credential")
 
-    result = handle_google_signin(credential)
+    try:
+        result = handle_google_signin(credential)
+    except ValueError as e:
+        if "account_cap_reached" in str(e):
+            raise HTTPException(status_code=503, detail="account_cap_reached")
+        raise HTTPException(status_code=401, detail="Google sign-in failed.")
     if not result:
         raise HTTPException(status_code=401, detail="Google sign-in failed. Invalid credential.")
 
@@ -363,7 +368,9 @@ async def email_signin(request: Request):
 
     try:
         result = handle_email_signin(email, name, password, invite_code)
-    except ValueError:
+    except ValueError as e:
+        if "account_cap_reached" in str(e):
+            raise HTTPException(status_code=503, detail="account_cap_reached")
         raise HTTPException(status_code=403, detail="Invalid invite code.")
     if not result:
         raise HTTPException(status_code=401, detail="Incorrect password.")

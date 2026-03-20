@@ -298,8 +298,13 @@ CREATE TABLE IF NOT EXISTS holo_chat_sessions (
     session_id    text PRIMARY KEY,
     created_at    timestamptz DEFAULT now(),
     last_active   timestamptz DEFAULT now(),
-    turn_count    int DEFAULT 0
+    turn_count    int DEFAULT 0,
+    capsule_id    text REFERENCES holo_capsules(capsule_id),
+    title         text
 );
+-- If the table already exists, run these migrations:
+-- ALTER TABLE holo_chat_sessions ADD COLUMN IF NOT EXISTS capsule_id text REFERENCES holo_capsules(capsule_id);
+-- ALTER TABLE holo_chat_sessions ADD COLUMN IF NOT EXISTS title text;
 
 -- 5. Chat messages
 CREATE TABLE IF NOT EXISTS holo_chat_messages (
@@ -685,7 +690,13 @@ class ProjectBrain:
                 }).eq("google_id", google_id).execute()
                 return rows[0]
 
-            # First sign-in — create capsule
+            # First sign-in — check account cap before creating
+            MAX_ACCOUNTS = int(os.getenv("MAX_ACCOUNTS", "100"))
+            count_resp = self._client.table("holo_capsules").select("capsule_id", count="exact").execute()
+            if (count_resp.count or 0) >= MAX_ACCOUNTS:
+                logger.warning(f"Account cap ({MAX_ACCOUNTS}) reached. Rejecting new signup for {email}.")
+                raise ValueError("account_cap_reached")
+
             import uuid
             capsule_id = str(uuid.uuid4())
             row = {
@@ -871,6 +882,7 @@ class ProjectBrain:
                 self._client.table("holo_chat_sessions")
                 .select("session_id, created_at, last_active, turn_count, title")
                 .eq("capsule_id", capsule_id)
+                .gt("turn_count", 0)
                 .order("last_active", desc=True)
                 .limit(limit)
                 .execute()

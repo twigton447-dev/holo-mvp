@@ -701,6 +701,25 @@ async def clear_chat(
     return JSONResponse(content={"cleared": cleared, "session_id": session_id})
 
 
+@app.delete("/v1/session/{session_id}")
+async def delete_session(
+    session_id: str,
+    request: Request,
+    _key: str = Depends(_verify_key),
+):
+    """Permanently delete a session and all its messages. User must own the session."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Authentication required.")
+    capsule_id = capsule["sub"]
+    if _chat_engine:
+        _chat_engine.clear_session(session_id)
+    deleted = _brain.delete_session(capsule_id, session_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Session not found or access denied.")
+    return JSONResponse(content={"deleted": True, "session_id": session_id})
+
+
 # ---------------------------------------------------------------------------
 # Billing routes
 # ---------------------------------------------------------------------------

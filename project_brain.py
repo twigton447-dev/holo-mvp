@@ -869,6 +869,35 @@ class ProjectBrain:
             logger.warning(f"ProjectBrain.load_chat_history failed: {e}")
             return None
 
+    def delete_session(self, capsule_id: str, session_id: str) -> bool:
+        """
+        Permanently delete a chat session and all its messages.
+        Verifies the session belongs to the given capsule before deleting.
+        Returns True on success, False if not found or not owned by capsule.
+        """
+        if not self._client or not capsule_id or not session_id:
+            return False
+        try:
+            # Verify ownership
+            check = (
+                self._client.table("holo_chat_sessions")
+                .select("session_id")
+                .eq("session_id", session_id)
+                .eq("capsule_id", capsule_id)
+                .limit(1)
+                .execute()
+            ).data or []
+            if not check:
+                return False
+            # Delete messages first, then session
+            self._client.table("holo_chat_messages").delete().eq("session_id", session_id).execute()
+            self._client.table("holo_chat_sessions").delete().eq("session_id", session_id).execute()
+            logger.info(f"ProjectBrain: deleted session {session_id} for capsule {capsule_id}.")
+            return True
+        except Exception as e:
+            logger.warning(f"ProjectBrain.delete_session failed: {e}")
+            return False
+
     def list_sessions(self, capsule_id: str, limit: int = 40) -> list:
         """
         Return all chat sessions for a capsule, newest first.

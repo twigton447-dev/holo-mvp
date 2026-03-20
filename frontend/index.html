@@ -271,6 +271,8 @@
     #thread-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
     .thread-item { padding: 9px 10px 9px 12px; border-radius: 8px; cursor: pointer; transition: background 0.12s; margin-bottom: 2px; border-left: 3px solid transparent; }
     .thread-item:hover { background: var(--bg2); }
+    .thread-item:hover .thread-delete-btn { opacity: 1 !important; }
+    .thread-delete-btn:hover { color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
     .thread-item.active { background: var(--bg2); border-left-color: var(--accent); }
     .thread-item.topic-work    { border-left-color: #5b7ae5; }
     .thread-item.topic-money   { border-left-color: #f59e0b; }
@@ -1784,7 +1786,10 @@
       const topic = threadTopic(label);
       const active = s.id === sessionId ? " active" : "";
       return `<div class="thread-item${active}${topic ? " " + topic : ""}" onclick="loadSession('${escHtml(s.id)}')">
-        <div class="thread-preview">${escHtml(label)}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+          <div class="thread-preview" style="flex:1;min-width:0;">${escHtml(label)}</div>
+          <button onclick="event.stopPropagation();deleteThread('${escHtml(s.id)}')" title="Delete thread" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 4px;border-radius:4px;font-size:13px;opacity:0;transition:opacity 0.15s;flex-shrink:0;" class="thread-delete-btn">✕</button>
+        </div>
         <div class="thread-time">${timeAgo(s.at)}</div>
       </div>`;
     };
@@ -1793,6 +1798,26 @@
       .filter(sec => sec.items.length > 0)
       .map(sec => `<div class="thread-section-header">${sec.label}</div>${sec.items.map(renderItem).join("")}`)
       .join("");
+  }
+
+  async function deleteThread(sid) {
+    if (!confirm("Delete this thread? This cannot be undone.")) return;
+    try {
+      const res = await fetch(`/v1/session/${sid}`, {
+        method: "DELETE",
+        headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` },
+      });
+      if (!res.ok) throw new Error("Delete failed.");
+      _sessionList = _sessionList.filter(s => s.id !== sid);
+      if (sid === sessionId) {
+        sessionId = null;
+        document.getElementById("messages").innerHTML = "";
+        document.getElementById("empty")?.remove();
+      }
+      renderThreadList();
+    } catch (e) {
+      alert("Could not delete thread. Try again.");
+    }
   }
 
   async function loadSession(sid) {

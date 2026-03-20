@@ -854,7 +854,7 @@ class ProjectBrain:
         try:
             rows = (
                 self._client.table("holo_chat_sessions")
-                .select("session_id, created_at, last_active, turn_count")
+                .select("session_id, created_at, last_active, turn_count, title")
                 .eq("capsule_id", capsule_id)
                 .order("last_active", desc=True)
                 .limit(limit)
@@ -884,7 +884,7 @@ class ProjectBrain:
                     pass
 
             for r in rows:
-                r["preview"] = previews.get(r["session_id"], "New conversation")
+                r["preview"] = r.get("title") or previews.get(r["session_id"], "New conversation")
 
             return rows
         except Exception as e:
@@ -1035,34 +1035,13 @@ class ProjectBrain:
             logger.warning(f"ProjectBrain.append_session_history failed: {e}")
 
     def update_session_name(self, capsule_id: str, session_id: str, name: str) -> None:
-        """Update the Pilot-generated title for a session in the session history list."""
-        import json
+        """Write the Pilot-generated title directly to holo_chat_sessions."""
         if not self._client or not name:
             return
         try:
-            resp = (
-                self._client.table("holo_capsule_context")
-                .select("value")
-                .eq("capsule_id", capsule_id)
-                .eq("key", "_session_history")
-                .maybe_single()
-                .execute()
-            )
-            if not resp.data:
-                return
-            entries = json.loads(resp.data["value"]) or []
-            updated = False
-            for e in entries:
-                if e.get("id") == session_id:
-                    e["title"] = name
-                    updated = True
-                    break
-            if not updated:
-                return
-            self._client.table("holo_capsule_context").update({
-                "value":      json.dumps(entries),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
-            }).eq("capsule_id", capsule_id).eq("key", "_session_history").execute()
+            self._client.table("holo_chat_sessions").update({
+                "title": name,
+            }).eq("session_id", session_id).execute()
             logger.info(f"ProjectBrain: session {session_id[:8]} named '{name}'.")
         except Exception as e:
             logger.warning(f"ProjectBrain.update_session_name failed: {e}")

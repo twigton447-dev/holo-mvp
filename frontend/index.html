@@ -192,7 +192,7 @@
     /* Header */
     #header { padding: 12px 20px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     #header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0; margin: 0; flex-shrink: 0; display: flex; align-items: baseline; gap: 6px; }
-    #brand-sub { font-size: 15px; font-weight: 400; color: var(--text2); transition: opacity 0.4s ease; }
+    #brand-sub { font-size: 15px; font-weight: 400; color: var(--text3); opacity: 0.5; transition: opacity 0.4s ease; }
     #header-right { display: flex; align-items: center; gap: 8px; }
     #new-thread { background: none; border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.15s; }
     #new-thread:hover { border-color: var(--text2); color: var(--text5); }
@@ -259,7 +259,7 @@
     .thread-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
     #thread-empty { color: var(--text3); font-size: 13px; text-align: center; padding: 32px 16px; line-height: 1.6; }
     /* Thread toggle in header */
-    #thread-toggle { background: none; border: 1px solid var(--border); color: var(--text3); border-radius: 8px; padding: 5px 9px; font-size: 14px; cursor: pointer; display: block; transition: all 0.15s; flex-shrink: 0; line-height: 1; }
+    #thread-toggle { background: none; border: 1px solid var(--border); color: var(--text3); border-radius: 8px; padding: 5px 12px; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; display: block; transition: all 0.15s; flex-shrink: 0; letter-spacing: 0.04em; }
     #thread-toggle:hover { border-color: var(--text2); color: var(--text5); }
     #thread-toggle.open { border-color: var(--accent); color: var(--accent); }
 
@@ -347,13 +347,13 @@
   <div id="header">
     <h1>Holo <span id="brand-sub">Chat</span><span id="space-label"></span></h1>
     <div id="header-right">
-      <button id="thread-toggle" onclick="toggleThreadPanel()" title="Thread history">☰</button>
       <div class="mode-toggle" id="mode-toggle" style="display:none">
         <button class="mode-btn active" id="btn-personal" onclick="switchMode('personal')">Personal</button>
         <button class="mode-btn" id="btn-work" onclick="switchMode('work')">Work</button>
       </div>
       <div id="incognito-badge">◉ Incognito</div>
-      <button id="incognito-btn" onclick="toggleIncognito()" title="Blind test — no memory injected">Incognito</button>
+      <button id="thread-toggle" onclick="toggleThreadPanel()" title="Your threads">Your threads</button>
+      <button id="incognito-btn" onclick="toggleIncognito()" title="Incognito threads">Incognito threads</button>
       <button id="new-thread" onclick="newThread()">New thread</button>
       <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀</button>
       <div id="user-avatar" style="display:none"></div>
@@ -854,6 +854,39 @@
     scrollToBottom();
   }
 
+  const _BIO_PROMPT = `Write me a short personal brief — 150–250 words — that I can share with a new AI so it understands me immediately. Cover: who I am and what I do, what I'm actively working on right now, how I like to think and communicate, what I care most about, and anything else that would help someone get up to speed on me fast. Write it in plain, direct language as if I wrote it myself.`;
+
+  function copyBioPrompt() {
+    navigator.clipboard.writeText(_BIO_PROMPT).then(() => {
+      const btn = document.getElementById("copy-bio-btn");
+      if (btn) { btn.textContent = "Copied ✓"; setTimeout(() => { btn.textContent = "Copy prompt"; }, 2000); }
+    });
+  }
+
+  async function seedBio() {
+    const ta = document.getElementById("bio-paste-area");
+    if (!ta) return;
+    const text = ta.value.trim();
+    if (!text || !capsuleToken) return;
+    const btn = document.getElementById("seed-bio-btn");
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+    try {
+      await fetch("/v1/capsule/context", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` },
+        body:    JSON.stringify({ about_me: text }),
+      });
+      // Remove the onboarding card and drop into chat with the bio pre-filled
+      document.getElementById("holo-onboarding")?.remove();
+      document.getElementById("empty")?.remove();
+      refreshMemoryContext();
+      // Send it as the first message so Holo acknowledges and responds
+      document.getElementById("input").value = text;
+      sendMessage();
+    } catch { btn.disabled = false; btn.textContent = "Seed to Holo"; }
+  }
+
   function injectOnboarding(firstName) {
     // Only inject once per session
     if (document.getElementById("holo-onboarding")) return;
@@ -866,7 +899,18 @@
     msg.innerHTML = `
       <div class="holo-icon">✦</div>
       <div class="holo-body">
-        <div class="bubble">What's actually going on?</div>
+        <div class="bubble">
+          <p>Hey${firstName && firstName !== 'hey' ? ' ' + firstName : ''}. Holo learns who you are over time — but we can skip the slow part.</p>
+          <p>Go to your ChatGPT, Claude, or Gemini and paste this prompt. It'll write a brief on you based on your history with it. Paste the result back here and Holo starts knowing you from day one.</p>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:4px 0 16px;font-family:'SF Mono','Fira Code',monospace;font-size:12.5px;line-height:1.7;color:var(--text2);">${escHtml(_BIO_PROMPT)}</div>
+          <button id="copy-bio-btn" onclick="copyBioPrompt()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:20px;">Copy prompt</button>
+          <p style="margin-bottom:8px;">Paste what it gives you:</p>
+          <textarea id="bio-paste-area" rows="6" placeholder="Paste your AI bio here…" style="width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;line-height:1.65;resize:vertical;outline:none;"></textarea>
+          <div style="display:flex;gap:10px;margin-top:10px;align-items:center;">
+            <button id="seed-bio-btn" onclick="seedBio()" style="background:var(--accent);border:none;color:#fff;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;">Seed to Holo</button>
+            <button onclick="document.getElementById('holo-onboarding').remove();document.getElementById('empty')?.remove();" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;">Skip — I'll just start chatting</button>
+          </div>
+        </div>
       </div>`;
     container.appendChild(msg);
     scrollToBottom();

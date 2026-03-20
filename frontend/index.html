@@ -1016,7 +1016,7 @@
       }
 
       // YELLOW nudge — warn early before context gets too heavy
-      if (data.thread_health_level === "YELLOW" && !document.getElementById("thread-nudge")) {
+      if (data.thread_health_level === "YELLOW" && data.turn_number >= 14 && !document.getElementById("thread-nudge")) {
         const nudge = document.createElement("div");
         nudge.id = "thread-nudge";
         nudge.style.cssText = "text-align:center;padding:8px 16px;font-size:12px;color:var(--text4);";

@@ -313,9 +313,39 @@
       Continue
     </button>
     <div id="signin-error" style="color:#ef4444;font-size:12px;text-align:center;display:none;"></div>
+    <button onclick="showForgotPassword()" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;text-align:center;padding:0;">Forgot password?</button>
+  </div>
+
+  <!-- Forgot password form (hidden by default) -->
+  <div id="forgot-form" style="display:none;flex-direction:column;gap:10px;width:100%;max-width:280px;">
+    <p style="color:#888;font-size:13px;margin:0;text-align:center;line-height:1.6;">Enter your email and we'll send a reset link.</p>
+    <input id="forgot-email" type="email" placeholder="Your email" autocomplete="email"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;" />
+    <button onclick="sendResetEmail()"
+      style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
+      Send reset link
+    </button>
+    <div id="forgot-msg" style="font-size:12px;text-align:center;display:none;"></div>
+    <button onclick="showEmailSignIn()" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;">← Back to sign in</button>
   </div>
 
   <button onclick="skipSignIn()" style="background:none;border:none;color:#333;font-size:13px;cursor:pointer;margin-top:4px;">Continue without signing in</button>
+</div>
+
+<!-- Reset password modal — shown when ?reset= and ?email= are in the URL -->
+<div id="reset-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px 28px;width:calc(100% - 48px);max-width:340px;display:flex;flex-direction:column;gap:14px;">
+    <h3 style="margin:0;font-size:18px;font-weight:700;color:#e8e8e8;">Set a new password</h3>
+    <input id="reset-password"  type="password" placeholder="New password (min 6 chars)" autocomplete="new-password"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
+    <input id="reset-password2" type="password" placeholder="Confirm new password"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
+    <button onclick="submitReset()"
+      style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
+      Save new password
+    </button>
+    <div id="reset-msg" style="font-size:12px;text-align:center;display:none;"></div>
+  </div>
 </div>
 
 <!-- Thread panel — left sidebar showing all past threads -->
@@ -356,6 +386,8 @@
       <button id="incognito-btn" onclick="toggleIncognito()" title="Start incognito thread">Start incognito thread</button>
       <button id="new-thread" onclick="newThread()">Start new thread</button>
       <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀</button>
+      <button id="signin-btn" onclick="document.getElementById('signin-overlay').classList.remove('hidden')" style="background:var(--accent);border:none;color:#fff;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;">Sign in</button>
+      <button id="signout-btn" onclick="signOut()" style="display:none;background:none;border:1px solid var(--border);color:var(--text3);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;">Log out</button>
       <div id="user-avatar" style="display:none"></div>
     </div>
   </div>
@@ -696,11 +728,102 @@
     document.getElementById("signin-overlay").classList.add("hidden");
   }
 
+  function showForgotPassword() {
+    document.getElementById("email-signin-form").style.display = "none";
+    document.getElementById("forgot-form").style.display = "flex";
+    document.getElementById("forgot-msg").style.display = "none";
+  }
+
+  function showEmailSignIn() {
+    document.getElementById("forgot-form").style.display = "none";
+    document.getElementById("email-signin-form").style.display = "flex";
+  }
+
+  async function sendResetEmail() {
+    const email  = document.getElementById("forgot-email").value.trim();
+    const msgEl  = document.getElementById("forgot-msg");
+    msgEl.style.display = "none";
+    if (!email || !email.includes("@")) {
+      msgEl.style.color = "#ef4444";
+      msgEl.textContent = "Please enter a valid email.";
+      msgEl.style.display = "block";
+      return;
+    }
+    try {
+      await fetch("/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+        body: JSON.stringify({ email }),
+      });
+      msgEl.style.color = "#22c55e";
+      msgEl.textContent = "Check your email — we sent a reset link.";
+      msgEl.style.display = "block";
+    } catch {
+      msgEl.style.color = "#ef4444";
+      msgEl.textContent = "Something went wrong. Try again.";
+      msgEl.style.display = "block";
+    }
+  }
+
+  // On load: check for ?reset= and ?email= params → show reset modal
+  (function checkResetParam() {
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get("reset");
+    const email  = params.get("email");
+    if (!token || !email) return;
+    // Clean URL without reloading
+    history.replaceState({}, "", window.location.pathname);
+    const modal = document.getElementById("reset-modal");
+    modal.style.display = "flex";
+    modal.dataset.token = token;
+    modal.dataset.email = email;
+    document.getElementById("signin-overlay").classList.add("hidden");
+  })();
+
+  async function submitReset() {
+    const modal   = document.getElementById("reset-modal");
+    const token   = modal.dataset.token;
+    const email   = modal.dataset.email;
+    const pw1     = document.getElementById("reset-password").value;
+    const pw2     = document.getElementById("reset-password2").value;
+    const msgEl   = document.getElementById("reset-msg");
+    msgEl.style.display = "none";
+
+    if (pw1.length < 6) {
+      msgEl.style.color = "#ef4444"; msgEl.textContent = "Password must be at least 6 characters."; msgEl.style.display = "block"; return;
+    }
+    if (pw1 !== pw2) {
+      msgEl.style.color = "#ef4444"; msgEl.textContent = "Passwords don't match."; msgEl.style.display = "block"; return;
+    }
+    try {
+      const res  = await fetch("/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+        body: JSON.stringify({ email, token, password: pw1 }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        msgEl.style.color = "#ef4444"; msgEl.textContent = err.detail || "Reset failed. Link may have expired."; msgEl.style.display = "block"; return;
+      }
+      msgEl.style.color = "#22c55e"; msgEl.textContent = "Password updated. Sign in below."; msgEl.style.display = "block";
+      setTimeout(() => {
+        modal.style.display = "none";
+        document.getElementById("signin-overlay").classList.remove("hidden");
+        document.getElementById("signin-email").value = email;
+        document.getElementById("signin-password").focus();
+      }, 1800);
+    } catch {
+      msgEl.style.color = "#ef4444"; msgEl.textContent = "Something went wrong. Try again."; msgEl.style.display = "block";
+    }
+  }
+
   function showCapsule(data) {
     const avatarEl = document.getElementById("user-avatar");
     const modeEl   = document.getElementById("mode-toggle");
     avatarEl.style.display = "";
     modeEl.style.display   = "";
+    document.getElementById("signin-btn").style.display  = "none";
+    document.getElementById("signout-btn").style.display = "";
 
     const name = data.name || data.email || "?";
     const avatarClick = `toggleAvatarMenu()`;

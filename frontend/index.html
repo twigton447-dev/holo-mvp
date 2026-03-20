@@ -298,9 +298,11 @@
 
   <!-- Email sign-in -->
   <div id="email-signin-form" style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;">
-    <input id="signin-name"  type="text"  placeholder="Your name"  autocomplete="name"
+    <input id="signin-name"     type="text"     placeholder="Your name"  autocomplete="name"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;" />
-    <input id="signin-email" type="email" placeholder="Your email" autocomplete="email"
+    <input id="signin-email"    type="email"    placeholder="Your email" autocomplete="email"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;" />
+    <input id="signin-password" type="password" placeholder="Password"   autocomplete="current-password"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;" />
     <button onclick="emailSignIn()"
       style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
@@ -653,13 +655,19 @@
   }
 
   async function emailSignIn() {
-    const name  = document.getElementById("signin-name").value.trim();
-    const email = document.getElementById("signin-email").value.trim();
-    const errEl = document.getElementById("signin-error");
+    const name     = document.getElementById("signin-name").value.trim();
+    const email    = document.getElementById("signin-email").value.trim();
+    const password = document.getElementById("signin-password").value;
+    const errEl    = document.getElementById("signin-error");
     errEl.style.display = "none";
 
     if (!email || !email.includes("@")) {
       errEl.textContent = "Please enter a valid email.";
+      errEl.style.display = "block";
+      return;
+    }
+    if (!password) {
+      errEl.textContent = "Please enter a password.";
       errEl.style.display = "block";
       return;
     }
@@ -668,7 +676,7 @@
       const res  = await fetch("/auth/email", {
         method:  "POST",
         headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
-        body:    JSON.stringify({ email, name }),
+        body:    JSON.stringify({ email, name, password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Sign-in failed.");

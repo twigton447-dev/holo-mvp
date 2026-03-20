@@ -352,14 +352,17 @@ async def email_signin(request: Request):
     except Exception:
         raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
 
-    email = body.get("email", "").strip()
-    name  = body.get("name", "").strip()
+    email    = body.get("email", "").strip()
+    name     = body.get("name", "").strip()
+    password = body.get("password", "").strip()
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="A valid email is required.")
+    if not password:
+        raise HTTPException(status_code=400, detail="A password is required.")
 
-    result = handle_email_signin(email, name)
+    result = handle_email_signin(email, name, password)
     if not result:
-        raise HTTPException(status_code=500, detail="Failed to create capsule.")
+        raise HTTPException(status_code=401, detail="Incorrect password.")
 
     return JSONResponse(content=result)
 
@@ -608,8 +611,19 @@ async def list_sessions(request: Request):
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     if not capsule:
         raise HTTPException(status_code=401, detail="Sign in required.")
-    sessions = _capsule_brain.load_session_list(capsule["sub"])
-    return JSONResponse(content={"sessions": sessions})
+    # Direct table query — requires capsule_id column on holo_chat_sessions
+    sessions = _capsule_brain.list_sessions(capsule["sub"])
+    # Map to the shape the frontend expects: {id, at, preview, title}
+    mapped = [
+        {
+            "id":      s.get("session_id"),
+            "at":      s.get("last_active") or s.get("created_at"),
+            "preview": s.get("preview", ""),
+            "title":   s.get("title") or s.get("preview", ""),
+        }
+        for s in sessions
+    ]
+    return JSONResponse(content={"sessions": mapped})
 
 
 @app.get("/v1/chat/{session_id}/history")

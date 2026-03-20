@@ -16,11 +16,13 @@ Environment variables required:
   HOLO_JWT_SECRET    — any long random string (used to sign capsule tokens)
 """
 
+import hashlib
 import logging
 import os
 import time
 from typing import Optional
 
+import bcrypt
 import jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
@@ -134,17 +136,36 @@ def handle_google_signin(credential: str) -> Optional[dict]:
     }
 
 
-def handle_email_signin(email: str, name: str) -> Optional[dict]:
+def handle_email_signin(email: str, name: str, password: str) -> Optional[dict]:
     """
-    Simple email-based sign-in — no Google OAuth required.
-    Creates or loads a capsule keyed by email, issues a Holo capsule token.
+    Email + password sign-in.
+    - First time: creates capsule, hashes and stores password.
+    - Subsequent: verifies password against stored hash.
+    Returns None if password is wrong.
     """
-    email = email.strip().lower()
-    name  = name.strip() or email.split("@")[0]
+    email    = email.strip().lower()
+    name     = name.strip() or email.split("@")[0]
+    password = password.strip()
 
-    # Use a stable synthetic ID so the same email always maps to the same capsule
-    import hashlib
+    if not password:
+        logger.warning("Email sign-in attempted with no password.")
+        return None
+
     synthetic_id = "email:" + hashlib.sha256(email.encode()).hexdigest()[:32]
+
+    # Check if capsule already exists
+    existing_ctx = _brain.get_capsule_context(synthetic_id) if _brain._client else {}
+    stored_hash  = existing_ctx.get("_password_hash")
+
+    if stored_hash:
+        # Existing user — verify password
+        if not bcrypt.checkpw(password.encode(), stored_hash.encode()):
+            logger.warning(f"Password mismatch for {email}")
+            return None
+    else:
+        # New user — hash and store password
+        hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        _brain.set_capsule_context(synthetic_id, "_password_hash", hashed)
 
     capsule = _brain.get_or_create_capsule(synthetic_id, email, name, "")
     if not capsule:

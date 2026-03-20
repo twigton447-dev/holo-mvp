@@ -742,7 +742,7 @@ class CoPilotAdapter(_FlightDeckBase):
 
         openai_model    = os.getenv("OPENAI_MODEL",    "gpt-5.4")
         anthropic_model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
-        google_model    = os.getenv("GOOGLE_MODEL",    "gemini-3.1-pro-preview")
+        google_model    = os.getenv("GOOGLE_MODEL",    "gemini-2.5-pro-preview-03-25")
 
         self._pool = [
             ("openai",    openai_model,    openai_sdk.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))),
@@ -1096,7 +1096,7 @@ class PilotAdapter(_FlightDeckBase):
         )
         try:
             resp = self._client.messages.create(
-                model   = self.model,
+                model   = self.model_id,
                 max_tokens = 20,
                 system  = (
                     "You generate ultra-short thread titles. "
@@ -1482,7 +1482,7 @@ class GoogleAdapter(BaseAdapter):
     def __init__(self):
         from google import genai
         self.provider = "google"
-        self.model_id = os.getenv("GOOGLE_MODEL", "gemini-3.1-pro-preview")
+        self.model_id = os.getenv("GOOGLE_MODEL", "gemini-2.5-pro-preview-03-25")
         self._client  = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
     def call(self, system, user, temperature: float = 0.2):

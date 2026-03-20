@@ -1084,7 +1084,7 @@ class ProjectBrain:
                 .maybe_single()
                 .execute()
             )
-            if not resp.data:
+            if not resp or not resp.data:
                 return []
             entries = json.loads(resp.data["value"]) or []
             return list(reversed(entries))  # newest first

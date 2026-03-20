@@ -80,6 +80,17 @@
     .holo-body code { background: var(--bg2); border: 1px solid var(--border); padding: 2px 7px; border-radius: 5px; font-size: 13px; font-family: 'SF Mono','Fira Code','Fira Mono',monospace; }
     .holo-body pre { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; overflow-x: auto; margin: 12px 0 22px; }
     .holo-body pre code { background: none; border: none; padding: 0; font-size: 13px; }
+    .code-wrap { position: relative; }
+    .copy-btn {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text2); border-radius: 6px;
+      padding: 3px 10px; font-size: 11px; font-weight: 500;
+      cursor: pointer; font-family: inherit; opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+    }
+    .code-wrap:hover .copy-btn { opacity: 1; }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
     .holo-body hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
     .holo-body blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--text2); margin: 16px 0 22px; font-style: italic; line-height: 1.85; }
 
@@ -278,6 +289,7 @@
     .thread-preview { font-size: 13px; color: var(--text); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .thread-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
     #thread-empty { color: var(--text3); font-size: 13px; text-align: center; padding: 32px 16px; line-height: 1.6; }
+    .thread-section-header { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; padding: 12px 10px 4px; }
     /* Thread toggle in header */
     #thread-toggle { background: none; border: 1px solid var(--border); color: var(--text3); border-radius: 8px; padding: 5px 12px; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; display: block; transition: all 0.15s; flex-shrink: 0; letter-spacing: 0.04em; }
     #thread-toggle:hover { border-color: var(--text2); color: var(--text5); }
@@ -605,11 +617,19 @@
   function toggleTheme() {
     const isLight = document.body.classList.toggle("light");
     document.getElementById("theme-toggle").textContent = isLight ? "☾" : "☀";
-    localStorage.setItem("holo_theme", isLight ? "light" : "dark");
+    if (isLight) {
+      localStorage.removeItem("holo_theme"); // light is default, no need to store
+    } else {
+      localStorage.setItem("holo_theme", "dark");
+    }
   }
 
-  // Restore saved theme
-  if (localStorage.getItem("holo_theme") === "light") {
+  // Restore saved theme — default is light
+  const savedTheme = localStorage.getItem("holo_theme");
+  if (savedTheme === "dark") {
+    // leave body as-is (dark is the base class-less state)
+    document.getElementById("theme-toggle").textContent = "☀";
+  } else {
     document.body.classList.add("light");
     document.getElementById("theme-toggle").textContent = "☾";
   }
@@ -1129,7 +1149,7 @@
       document.getElementById("empty")?.remove();
       refreshMemoryContext();
       // Send a special onboarding prompt — Holo sees the bio in context and gives a proper intro
-      const onboardingPrompt = `I just shared my personal brief with you. Here it is for reference:\n\n${text}\n\nNow please introduce yourself to me — explain why you asked for this brief, how you actually work (the fact that you run across three AI models simultaneously and synthesize the best from each), what makes you genuinely different from using ChatGPT, Claude, or Gemini on their own, and what we can accomplish together. Be warm, direct, and specific — mention real capabilities and what this new relationship can look like. Keep it conversational, not a sales pitch.`;
+      const onboardingPrompt = `I just shared my personal brief with you. Here it is for reference:\n\n${text}\n\nNow please introduce yourself to me. Use this exact structure and tone — do not deviate from it:\n\nHello, [my name if you can find it in the brief, otherwise omit the name].\n\nI asked for your brief because I did not want to spend our first twenty conversations figuring out who you are. Better to know enough to be useful immediately.\n\nYou will only ever hear one voice here.\n\nUnderneath, I rotate through the top frontier models, guided by a central layer that keeps the thread coherent, preserves what matters, and pushes each turn to challenge what came before. Not for technical novelty. For better judgment.\n\nMy name comes from the ancient Greek holos, meaning whole, entire, complete. And from holoptism — seeing the entire system rather than one isolated part.\n\nThat is what I am here for.\n\nWork, health, relationships, money, strategy. Most people treat these as separate problems. They are rarely separate. I am built to think across all of it.\n\nYou can bring me anything. The best thinking does not come from a single prompt. It comes from the back and forth, the iteration, the moments where you push back and I have to reconsider. Tell me when I am wrong. I will do the same for you.\n\nWe are learning together, and we will grow together.\n\nThe longer we work together, the more precise this becomes.\n\nSo. What is the most important thing you are dealing with right now?`;
       document.getElementById("input").value = onboardingPrompt;
       sendMessage();
     } catch { btn.disabled = false; btn.textContent = "Seed to Holo"; }
@@ -1148,16 +1168,70 @@
       <div class="holo-icon">✦</div>
       <div class="holo-body">
         <div class="bubble">
-          <p>Hey${firstName && firstName !== 'hey' ? ' ' + firstName : ''}, it's nice to meet you!</p>
-          <p>For starters, please go to your ChatGPT, Claude, or Gemini and paste this prompt. It'll write a brief on you based on your history with it. Paste the result back here and Holo starts knowing you from day one.</p>
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:4px 0 16px;font-family:'SF Mono','Fira Code',monospace;font-size:12.5px;line-height:1.7;color:var(--text2);">${escHtml(_BIO_PROMPT)}</div>
-          <button id="copy-bio-btn" onclick="copyBioPrompt()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:20px;">Copy prompt</button>
-          <p style="margin-bottom:8px;">Paste what it gives you:</p>
+
+          <p style="font-size:24px;font-weight:800;letter-spacing:-0.4px;line-height:1.2;margin:0 0 10px;">Meet Holo Chat 1.1</p>
+          <p style="font-size:18px;font-weight:600;margin:0 0 20px;">Hello${firstName && firstName !== 'hey' ? ', ' + firstName : ''}!</p>
+
+          <p style="margin-bottom:14px;">As you might already know, most AI tools are brilliant right up until they're not.</p>
+          <p style="margin-bottom:14px;">One moment they feel extraordinary. The next, they miss something obvious, lose the thread, or say something wrong with way too much confidence.</p>
+          <p style="margin-bottom:14px;">That problem is not going away. Hallucination is a well-known, studied part of how these models work. Even the smartest models do it.</p>
+          <p style="margin-bottom:22px;font-size:16px;font-weight:700;">I am built differently.</p>
+
+          <p style="margin-bottom:14px;">You interact with one consistent presence, me, that gets to know you over time. Under the hood, I rotate through the current top 3 frontier models: GPT, Claude, and Gemini, guided by a central system that keeps context intact and pushes each turn to challenge what came before.</p>
+          <p style="margin-bottom:14px;">When a new model version comes out, I update automatically.</p>
+          <p style="margin-bottom:24px;font-weight:600;">You are always working with the newest, fastest, smartest models available.</p>
+
+          <hr style="border:none;border-top:1px solid var(--border);margin:0 0 22px;">
+
+          <p style="font-size:17px;font-weight:700;margin:0 0 10px;">Why Holo?</p>
+          <p style="margin-bottom:14px;">My name comes from the ancient Greek <em>holos</em> meaning whole, entire, complete.</p>
+          <p style="margin-bottom:14px;">It is also rooted in <em>holoptism</em>, the idea of seeing the entire system rather than one isolated slice. That is the philosophy I operate from. Most people handle work, health, relationships, money, and strategy as separate categories, even when they are clearly affecting each other.</p>
+          <p style="margin-bottom:24px;font-weight:600;">I am built to see the whole picture.</p>
+
+          <hr style="border:none;border-top:1px solid var(--border);margin:0 0 22px;">
+
+          <p style="font-size:17px;font-weight:700;margin:0 0 10px;">What is Holo Chat?</p>
+          <p style="margin-bottom:14px;">This is Holo Chat, version 1.1. The first application in a broader family being built on one core idea: better decisions through clearer thinking.</p>
+          <p style="margin-bottom:10px;color:var(--text2);font-size:13px;font-weight:600;">Coming next:</p>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
+              <span style="font-weight:700;font-size:13px;">Holo Protect</span>
+              <span style="color:var(--text2);font-size:13px;">: securing high-value financial transactions and AI agents operating in sensitive environments</span>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
+              <span style="font-weight:700;font-size:13px;">Holo Legal</span>
+              <span style="color:var(--text2);font-size:13px;">: bringing the same rigor to contracts, risk, and legal decisions</span>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
+              <span style="font-weight:700;font-size:13px;">Holo Enterprise</span>
+              <span style="color:var(--text2);font-size:13px;">: decision intelligence at the organizational level</span>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
+              <span style="font-weight:700;font-size:13px;">Holo Learn</span>
+              <span style="color:var(--text2);font-size:13px;">: and more to come</span>
+            </div>
+          </div>
+          <p style="margin-bottom:6px;color:var(--text2);font-size:13px;">Different domains. Same core philosophy: seeking truth and harmony in every area of life.</p>
+          <p style="margin-bottom:24px;font-weight:600;">But it all starts here, with you.</p>
+
+          <hr style="border:none;border-top:1px solid var(--border);margin:0 0 22px;">
+
+          <p style="font-size:17px;font-weight:700;margin:0 0 10px;">Get me up to speed</p>
+          <p style="margin-bottom:6px;">Copy the prompt below, paste it into ChatGPT or whatever AI you currently use, and bring the result back here.</p>
+          <p style="margin-bottom:16px;color:var(--text3);font-size:12.5px;">It takes about 30 seconds.</p>
+
+          <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin:0 0 8px;">Prompt to copy</p>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:0 0 10px;font-family:'SF Mono','Fira Code',monospace;font-size:12.5px;line-height:1.7;color:var(--text2);">${escHtml(_BIO_PROMPT)}</div>
+          <button id="copy-bio-btn" onclick="copyBioPrompt()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:16px;">Copy prompt</button>
+
+          <p style="margin-bottom:8px;">Once you paste that in, I will introduce myself properly and we can start anywhere.</p>
+          <p style="margin-bottom:10px;color:var(--text2);font-size:13px;">Paste what it gives you:</p>
           <textarea id="bio-paste-area" rows="6" placeholder="Paste your AI bio here…" style="width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;line-height:1.65;resize:vertical;outline:none;"></textarea>
           <div style="display:flex;gap:10px;margin-top:10px;align-items:center;">
             <button id="seed-bio-btn" onclick="seedBio()" style="background:var(--accent);border:none;color:#fff;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;">Seed to Holo</button>
-            <button onclick="document.getElementById('holo-onboarding').remove();document.getElementById('empty')?.remove();" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;">Skip — I'll just start chatting</button>
+            <button onclick="document.getElementById('holo-onboarding').remove();document.getElementById('empty')?.remove();" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;">Skip, I'll just start chatting</button>
           </div>
+
         </div>
       </div>`;
     container.appendChild(msg);
@@ -1481,12 +1555,21 @@
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
 
+  function copyCode(btn) {
+    const code = btn.nextElementSibling.querySelector("code").innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = "Copied!";
+      btn.classList.add("copied");
+      setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 2000);
+    });
+  }
+
   // Minimal markdown: bold, italic, code, bullets, headers
   function renderMarkdown(text) {
     // Protect code blocks first
     const codeBlocks = [];
     let s = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
-      codeBlocks.push(`<pre><code>${escHtml(code.trim())}</code></pre>`);
+      codeBlocks.push(`<div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><code>${escHtml(code.trim())}</code></pre></div>`);
       return `\x00CODE${codeBlocks.length - 1}\x00`;
     });
 
@@ -1668,7 +1751,25 @@
       list.innerHTML = `<div id="thread-empty">Your threads will appear here.</div>`;
       return;
     }
-    list.innerHTML = _sessionList.map(s => {
+
+    const now = Date.now();
+    const todayCutoff    = now - 24 * 60 * 60 * 1000;
+    const thisWeekCutoff = now - 7  * 24 * 60 * 60 * 1000;
+
+    const sections = [
+      { label: "Today",     items: [] },
+      { label: "This week", items: [] },
+      { label: "Earlier",   items: [] },
+    ];
+
+    for (const s of _sessionList) {
+      const age = new Date(s.at).getTime();
+      if (age >= todayCutoff)    sections[0].items.push(s);
+      else if (age >= thisWeekCutoff) sections[1].items.push(s);
+      else                       sections[2].items.push(s);
+    }
+
+    const renderItem = s => {
       const label = s.title || s.preview || "Thread";
       const topic = threadTopic(label);
       const active = s.id === sessionId ? " active" : "";
@@ -1676,7 +1777,12 @@
         <div class="thread-preview">${escHtml(label)}</div>
         <div class="thread-time">${timeAgo(s.at)}</div>
       </div>`;
-    }).join("");
+    };
+
+    list.innerHTML = sections
+      .filter(sec => sec.items.length > 0)
+      .map(sec => `<div class="thread-section-header">${sec.label}</div>${sec.items.map(renderItem).join("")}`)
+      .join("");
   }
 
   async function loadSession(sid) {

@@ -124,26 +124,35 @@ class HoloChatEngine:
 
     def send_message(self, session_id: str, user_message: str,
                      capsule_id: Optional[str] = None,
-                     images: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+                     images: Optional[List[Dict[str, Any]]] = None,
+                     incognito: bool = False) -> Dict[str, Any]:
         """
         Process one user message. Returns Holo's response + metadata.
         The caller should use session_id from the returned dict for follow-up turns.
+
+        incognito=True: blind mode — no capsule context, no Pilot memory, no life portrait
+        injected. Base system prompt only. Used for unbiased evaluation runs.
         """
         session             = self.get_or_create_session(session_id)
         session.last_active = time.time()
 
-        # Load capsule context early — needed by both Pilot and system prompt
-        capsule_context  = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
-        life_context     = self._brain.load_life_context(capsule_id) if capsule_id else []
-        last_session     = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
+        # Incognito: strip all memory — only base system prompt reaches the model
+        if incognito:
+            capsule_context = {}
+            life_context    = []
+            last_session    = None
+        else:
+            capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+            life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
+            last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
 
         # Co-Pilot runs the instruments: temperature + search decision
         temperature  = self._copilot.assess_chat_temperature(user_message, session.history)
         search_query = self._copilot.should_search(user_message, session.history)
 
-        # Pilot thinks about the human: thought bubble + tenor brief for the speaker
-        thought = self._pilot.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        tenor   = self._pilot.assess_tenor(session.history, capsule_context, turn_count=session.turn_count)
+        # Pilot thinks about the human — skipped in incognito (would introduce bias)
+        thought = None if incognito else self._pilot.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        tenor   = None if incognito else self._pilot.assess_tenor(session.history, capsule_context, turn_count=session.turn_count)
         search_results = web_search.search(search_query) if search_query else None
 
         # Build enriched message — search results injected for the model only,
@@ -161,17 +170,20 @@ class HoloChatEngine:
         logger.info(
             f"Chat turn {session.turn_count} | session={session.session_id[:8]} | "
             f"provider={adapter.provider} | temp={temperature:.2f}"
+            + (" | INCOGNITO" if incognito else "")
         )
 
         # Inject thread-health context + portrait + working memory + Pilot brief
-        system_prompt = (
-            HOLO_CHAT_SYSTEM_PROMPT
-            + "\n\n" + _health_context(session)
-            + ("\n\n" + _life_context_block(life_context) if life_context else "")
-            + ("\n\n" + _last_session_block(last_session) if last_session else "")
-            + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
-            + ("\n\nPILOT BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
-        )
+        # Incognito: only base system prompt — zero context leakage
+        system_prompt = HOLO_CHAT_SYSTEM_PROMPT
+        if not incognito:
+            system_prompt += (
+                "\n\n" + _health_context(session)
+                + ("\n\n" + _life_context_block(life_context) if life_context else "")
+                + ("\n\n" + _last_session_block(last_session) if last_session else "")
+                + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
+                + ("\n\nPILOT BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
+            )
 
         # Call the adapter — enriched_message includes search results if any
         start = time.time()
@@ -197,22 +209,22 @@ class HoloChatEngine:
         session.history.append({"role": "user",      "content": user_message})
         session.history.append({"role": "assistant",  "content": response_text})
 
-        # Link session to capsule on first turn
-        if capsule_id and session.turn_count == 1:
+        # Link session to capsule on first turn — skipped in incognito
+        if capsule_id and session.turn_count == 1 and not incognito:
             self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id)
             self._brain.append_session_history(capsule_id, session.session_id, user_message)
 
         # Pilot learns — extract any new facts about the user and persist them
-        if capsule_id:
+        # Skipped in incognito: blind sessions must not pollute the capsule portrait
+        if capsule_id and not incognito:
             updates = self._pilot.extract_context_updates(session.history, capsule_context)
             for key, value in updates.items():
                 self._brain.set_capsule_context(capsule_id, key, value)
             if updates:
                 logger.info(f"Capsule context updated for {capsule_id[:8]}: {list(updates.keys())}")
 
-        # Pilot consolidates — when thread health hits RED, curate the permanent record.
-        # Runs in a background thread so it never delays the user's response.
-        if capsule_id and session.thread_health_level == "RED":
+        # Pilot consolidates — skipped in incognito
+        if capsule_id and not incognito and session.thread_health_level == "RED":
             def _consolidate():
                 try:
                     result = self._pilot.consolidate_session(
@@ -262,6 +274,7 @@ class HoloChatEngine:
             "tokens":              {"input": in_tok, "output": out_tok},
             "thought":             thought,   # {"text": str, "color": str} or None
             "handoff":             handoff,   # {suggested, message, new_thread} or None
+            "incognito":           incognito,
             "_provider":           adapter.provider,
             "_temperature":        temperature,
         }

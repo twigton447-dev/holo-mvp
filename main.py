@@ -540,15 +540,17 @@ async def chat(
 
     session_id = body.get("session_id")
     images     = body.get("images") or None  # list of {name, data, mimeType} or None
+    incognito  = bool(body.get("incognito", False))  # blind mode — no memory injected
 
     # Attach capsule identity if a capsule token is provided
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
-    capsule_id = capsule["sub"] if capsule else None
+    # Incognito: treat as anonymous regardless of sign-in state
+    capsule_id = (capsule["sub"] if capsule else None) if not incognito else None
 
     t0 = time.time()
     try:
         result = _chat_engine.send_message(session_id, message, capsule_id=capsule_id,
-                                           images=images)
+                                           images=images, incognito=incognito)
     except Exception as e:
         logger.error(f"Chat engine error: {type(e).__name__}: {e}", exc_info=True)
         _track_usage(_key, "/v1/chat", 500)

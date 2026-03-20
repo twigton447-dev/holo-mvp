@@ -26,7 +26,7 @@
       --text4:    #777;
       --text5:    #aaa;
       --input-bg: #2a2a2a;
-      --accent:   #cc785c;
+      --accent:   #3b5bdb;
     }
     body.light {
       --bg:       #fafaf8;
@@ -40,7 +40,7 @@
       --text4:    #666;
       --text5:    #444;
       --input-bg: #ffffff;
-      --accent:   #cc785c;
+      --accent:   #3b5bdb;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; transition: background 0.2s, color 0.2s; }
@@ -190,9 +190,11 @@
     .msg.holo { animation: fadeInUp 0.45s ease forwards; }
 
     /* Header */
-    #header { padding: 12px 20px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    #header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0; margin: 0; flex-shrink: 0; display: flex; align-items: baseline; gap: 6px; }
-    #brand-sub { font-size: 15px; font-weight: 400; color: var(--text3); opacity: 0.5; transition: opacity 0.4s ease; }
+    #header { padding: 10px 20px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    #header-brand { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
+    #header h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; margin: 0; display: flex; align-items: baseline; gap: 5px; }
+    #brand-sub { font-size: 12px; font-weight: 400; color: var(--text3); opacity: 0.35; transition: opacity 0.4s ease; letter-spacing: 0.02em; }
+    #brand-tagline { font-size: 10px; font-weight: 500; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.5; }
     #header-right { display: flex; align-items: center; gap: 8px; }
     #new-thread { background: none; border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.15s; }
     #new-thread:hover { border-color: var(--text2); color: var(--text5); }
@@ -288,7 +290,7 @@
 <!-- Sign-in overlay -->
 <div id="signin-overlay">
   <h2>Holo</h2>
-  <p>Your second brain. Sign in to bring your capsule with you.</p>
+  <p>Three AI minds. One voice. A memory that builds with you.</p>
 
   <div id="g_signin_btn"></div>
 
@@ -312,13 +314,11 @@
 
   <!-- Create account form -->
   <div id="form-create" style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;">
-    <input id="create-name"     type="text"     placeholder="Your name"        autocomplete="name"
+    <input id="create-name"     type="text"     placeholder="Your name"              autocomplete="name"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
-    <input id="create-email"    type="email"    placeholder="Email"            autocomplete="email"
+    <input id="create-email"    type="email"    placeholder="Email"                  autocomplete="email"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <input id="create-password" type="password" placeholder="Password (min 8 chars)" autocomplete="new-password"
-      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
-    <input id="create-invite" type="text" placeholder="Invite code"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <button onclick="doCreateAccount()"
       style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
@@ -404,7 +404,10 @@
 
 <div id="app">
   <div id="header">
-    <h1>Holo <span id="brand-sub">Chat</span><span id="space-label"></span></h1>
+    <div id="header-brand">
+      <h1>Holo <span id="brand-sub">Chat</span><span id="space-label"></span></h1>
+      <span id="brand-tagline">Three models · One memory · No drift</span>
+    </div>
     <div id="header-right">
       <div id="incognito-badge">◉ Incognito</div>
       <button id="thread-toggle" onclick="toggleThreadPanel()" title="See my threads">See my threads</button>
@@ -870,10 +873,12 @@
   }
 
   function showCapsule(data) {
-    const avatarEl = document.getElementById("user-avatar");
-    const modeEl   = document.getElementById("mode-toggle");
-    if (avatarEl) avatarEl.style.display = "";
-    if (modeEl)   modeEl.style.display   = "";
+    const avatarEl  = document.getElementById("user-avatar");
+    const signinBtn = document.getElementById("signin-btn");
+    const signoutBtn= document.getElementById("signout-btn");
+    if (avatarEl)   avatarEl.style.display   = "";
+    if (signinBtn)  signinBtn.style.display  = "none";
+    if (signoutBtn) signoutBtn.style.display = "none"; // avatar menu handles sign-out
 
     const name = data.name || data.email || "?";
     const avatarClick = `toggleAvatarMenu()`;
@@ -1007,7 +1012,11 @@
     localStorage.removeItem("holo_capsule_token");
     localStorage.removeItem("holo_capsule_mode");
     capsuleToken = null;
-    location.reload();
+    location.reload(); // simplest — clears all state cleanly
+  }
+
+  function showSignInOverlayFromHeader() {
+    document.getElementById("signin-overlay").classList.remove("hidden");
   }
 
   // ── Memory panel ─────────────────────────────────────────────────────────────
@@ -1134,8 +1143,8 @@
   }
 
   function updateModeUI(mode) {
-    document.getElementById("btn-personal").classList.toggle("active", mode === "personal");
-    document.getElementById("btn-work").classList.toggle("active", mode === "work");
+    document.getElementById("btn-personal")?.classList.toggle("active", mode === "personal");
+    document.getElementById("btn-work")?.classList.toggle("active", mode === "work");
   }
 
   // Restore capsule UI if already signed in

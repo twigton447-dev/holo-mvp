@@ -140,7 +140,7 @@ class HoloChatEngine:
 
         # Pilot thinks about the human: thought bubble + tenor brief for the speaker
         thought = self._pilot.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        tenor   = self._pilot.assess_tenor(session.history, capsule_context)
+        tenor   = self._pilot.assess_tenor(session.history, capsule_context, turn_count=session.turn_count)
         search_results = web_search.search(search_query) if search_query else None
 
         # Build enriched message — search results injected for the model only,
@@ -165,7 +165,7 @@ class HoloChatEngine:
             HOLO_CHAT_SYSTEM_PROMPT
             + "\n\n" + _health_context(session)
             + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
-            + ("\n\nPILOT BRIEF (private — do not surface to user):\n" + tenor if tenor else "")
+            + ("\n\nPILOT BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
         )
 
         # Call the adapter — enriched_message includes search results if any
@@ -176,6 +176,18 @@ class HoloChatEngine:
         )
         elapsed_ms = int((time.time() - start) * 1000)
 
+        # Hallucination check — Co-Pilot scans for specific low-confidence claims
+        # and verifies them against live search. Silent on clean responses.
+        response_text, flagged_claims = self._copilot.verify_claims(
+            response_text, web_search.search
+        )
+        if flagged_claims:
+            corrections = [f["correction"] for f in flagged_claims if f.get("correction")]
+            if corrections:
+                # Quietly inline the correction so the user gets accurate information
+                note = " · ".join(corrections)
+                response_text += f"\n\n*One thing worth correcting: {note}*"
+
         # Commit both turns to history
         session.history.append({"role": "user",      "content": user_message})
         session.history.append({"role": "assistant",  "content": response_text})
@@ -183,6 +195,14 @@ class HoloChatEngine:
         # Link session to capsule on first turn
         if capsule_id and session.turn_count == 1:
             self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id)
+
+        # Pilot learns — extract any new facts about the user and persist them
+        if capsule_id:
+            updates = self._pilot.extract_context_updates(session.history, capsule_context)
+            for key, value in updates.items():
+                self._brain.set_capsule_context(capsule_id, key, value)
+            if updates:
+                logger.info(f"Capsule context updated for {capsule_id[:8]}: {list(updates.keys())}")
 
         # Persist to Supabase
         self._brain.save_chat_turn(

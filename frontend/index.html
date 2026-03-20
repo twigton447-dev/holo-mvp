@@ -6,85 +6,96 @@
   <meta name="theme-color" content="#0a0a0a" />
   <title>Holo</title>
   <link rel="manifest" href="/static/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
   <style>
     :root {
-      --bg:       #0a0a0a;
-      --bg2:      #141414;
-      --bg3:      #1a1a1a;
-      --border:   #2a2a2a;
-      --border2:  #1a1a1a;
-      --text:     #e8e8e8;
-      --text2:    #555;
-      --text3:    #444;
-      --text4:    #666;
+      --bg:       #1e1e1e;
+      --bg2:      #2a2a2a;
+      --bg3:      #333333;
+      --border:   #3a3a3a;
+      --border2:  #2a2a2a;
+      --text:     #ececec;
+      --text2:    #888;
+      --text3:    #555;
+      --text4:    #777;
       --text5:    #aaa;
-      --input-bg: #141414;
+      --input-bg: #2a2a2a;
+      --accent:   #cc785c;
     }
     body.light {
-      --bg:       #f5f5f5;
-      --bg2:      #efefef;
-      --bg3:      #e8e8e8;
-      --border:   #d0d0d0;
-      --border2:  #e0e0e0;
-      --text:     #111111;
-      --text2:    #888;
+      --bg:       #fafaf8;
+      --bg2:      #f0eeeb;
+      --bg3:      #e8e5e0;
+      --border:   #d8d5cf;
+      --border2:  #e8e5e0;
+      --text:     #1a1a1a;
+      --text2:    #777;
       --text3:    #aaa;
       --text4:    #666;
       --text5:    #444;
       --input-bg: #ffffff;
+      --accent:   #cc785c;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; transition: background 0.2s, color 0.2s; }
-    #app { display: flex; flex-direction: column; height: 100dvh; max-width: 760px; margin: 0 auto; }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; transition: background 0.2s, color 0.2s; }
+    #app { display: flex; flex-direction: column; height: 100dvh; max-width: 800px; margin: 0 auto; }
 
     /* Messages */
-    #messages { flex: 1; overflow-y: auto; padding: 20px 20px 8px; display: flex; flex-direction: column; gap: 0; }
+    #messages { flex: 1; overflow-y: auto; padding: 36px 28px 12px; display: flex; flex-direction: column; gap: 0; }
     #messages::-webkit-scrollbar { width: 4px; }
     #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
     /* Each turn */
-    .msg { width: 100%; padding: 18px 0; }
+    .msg { width: 100%; padding: 26px 0; }
 
-    /* User message — neutral pill, right-aligned */
+    /* User message — subtle pill, right-aligned */
     .msg.user { display: flex; justify-content: flex-end; }
-    .msg.user .bubble { background: var(--bg2); color: var(--text); border-radius: 18px 18px 4px 18px; padding: 10px 15px; max-width: 72%; font-size: 15px; line-height: 1.65; word-break: break-word; }
+    .msg.user .bubble { background: var(--bg2); color: var(--text); border-radius: 18px 18px 4px 18px; padding: 12px 18px; max-width: 75%; font-size: 15px; line-height: 1.75; word-break: break-word; font-weight: 500; }
 
     /* Holo message — icon + full-width content */
-    .msg.holo { display: flex; flex-direction: row; align-items: flex-start; gap: 14px; }
-    .holo-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--bg2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+    .msg.holo { display: flex; flex-direction: row; align-items: flex-start; gap: 16px; }
+    .holo-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 3px; color: #fff; }
     .holo-body { flex: 1; min-width: 0; }
-    .holo-body .bubble { font-size: 15.5px; line-height: 1.75; color: var(--text); }
+    .holo-body .bubble { font-family: 'Lora', Georgia, serif; font-size: 16.5px; font-weight: 400; line-height: 1.95; color: #efefef; letter-spacing: 0.01em; }
+    body.light .holo-body .bubble { color: #1a1a1a; }
 
-    /* Markdown */
-    .holo-body h1 { font-size: 21px; font-weight: 700; margin: 4px 0 12px; color: var(--text); line-height: 1.3; }
-    .holo-body h2 { font-size: 17px; font-weight: 700; margin: 18px 0 8px; color: var(--text); line-height: 1.35; }
-    .holo-body h3 { font-size: 15px; font-weight: 600; margin: 14px 0 5px; color: var(--text); }
-    .holo-body p  { margin: 0 0 11px; }
+    /* Markdown — dramatic size jumps so hierarchy is unmissable */
+    .holo-body h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 800; margin: 8px 0 20px; color: var(--text); line-height: 1.12; letter-spacing: -1px; }
+    .holo-body h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 700; margin: 36px 0 12px; color: var(--text); line-height: 1.2; letter-spacing: -0.5px; border-top: 1px solid var(--border); padding-top: 26px; }
+    .holo-body h2:first-child { border-top: none; padding-top: 0; margin-top: 4px; }
+    .holo-body h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; margin: 26px 0 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.14em; }
+    .holo-body p  { margin: 0 0 22px; }
     .holo-body p:last-child { margin-bottom: 0; }
-    .holo-body strong { font-weight: 660; }
-    .holo-body em { font-style: italic; color: var(--text2); }
-    .holo-body ul, .holo-body ol { margin: 6px 0 11px 0; padding-left: 22px; }
-    .holo-body li { margin-bottom: 5px; line-height: 1.65; }
-    .holo-body code { background: var(--bg2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 5px; font-size: 13px; font-family: 'SF Mono','Fira Code',monospace; }
-    .holo-body pre { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin: 10px 0; }
+    .holo-body strong { font-weight: 800; color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.01em; }
+    body.light .holo-body strong { color: #000000; }
+    .holo-body em { font-style: italic; color: var(--text5); }
+    .holo-body ul, .holo-body ol { margin: 10px 0 22px 0; padding-left: 24px; }
+    .holo-body li { margin-bottom: 12px; line-height: 1.85; }
+    .holo-body code { background: var(--bg2); border: 1px solid var(--border); padding: 2px 7px; border-radius: 5px; font-size: 13px; font-family: 'SF Mono','Fira Code','Fira Mono',monospace; }
+    .holo-body pre { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; overflow-x: auto; margin: 12px 0 22px; }
     .holo-body pre code { background: none; border: none; padding: 0; font-size: 13px; }
-    .holo-body hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
-    .holo-body blockquote { border-left: 3px solid var(--border); padding-left: 14px; color: var(--text2); margin: 10px 0; font-style: italic; }
+    .holo-body hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+    .holo-body blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--text2); margin: 16px 0 22px; font-style: italic; line-height: 1.85; }
 
     /* Feedback row under each Holo response */
-    .msg-actions { display: flex; gap: 2px; margin-top: 10px; }
+    .msg-actions { display: flex; gap: 2px; margin-top: 12px; }
     .msg-action { background: none; border: none; cursor: pointer; padding: 5px 7px; border-radius: 7px; color: var(--text3); font-size: 13px; display: flex; align-items: center; transition: background 0.12s, color 0.12s; }
     .msg-action:hover { background: var(--bg2); color: var(--text2); }
     .msg-action.copied { color: #22c55e; }
 
     .label { font-size: 11px; color: var(--text2); padding: 0 4px; }
-    .chips { display: none; }
+    .chips { display: flex; flex-direction: column; gap: 7px; margin-top: 18px; }
+    .chip { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border); background: none; color: var(--text2); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 500; cursor: pointer; text-align: left; transition: all 0.15s; width: 100%; }
+    .chip:hover { background: var(--bg2); border-color: var(--text3); color: var(--text); }
+    .chip-num { font-size: 10px; font-weight: 700; color: var(--text3); min-width: 16px; letter-spacing: 0.05em; }
 
-    /* Typing indicator — just the icon pulsing */
+    /* Typing indicator */
     @keyframes holoPulse { 0%,100%{opacity:0.3;transform:scale(0.85)} 50%{opacity:1;transform:scale(1.05)} }
     .holo-thinking { animation: holoPulse 1.4s ease-in-out infinite; }
 
@@ -92,38 +103,37 @@
     .thread-power { display: none; }
 
     /* Input bar */
-    #input-bar { padding: 10px 16px 24px; border-top: 1px solid var(--border2); background: var(--bg); }
-    #input-wrap { position: relative; display: flex; align-items: flex-end; background: var(--input-bg); border: 1px solid var(--border); border-radius: 20px; transition: border-color 0.15s; padding: 10px 10px 10px 12px; gap: 8px; }
-    #input-wrap:focus-within { border-color: #1a56e8; }
-    #input { flex: 1; background: transparent; border: none; color: var(--text); font-size: 15px; padding: 0; resize: none; outline: none; min-height: 26px; max-height: 140px; line-height: 1.6; font-family: inherit; }
+    #input-bar { padding: 10px 20px 24px; border-top: 1px solid var(--border2); background: var(--bg); }
+    #input-wrap { position: relative; display: flex; align-items: flex-end; background: var(--input-bg); border: 1px solid var(--border); border-radius: 16px; transition: border-color 0.15s; padding: 10px 10px 10px 14px; gap: 8px; }
+    #input-wrap:focus-within { border-color: var(--text3); }
+    #input { flex: 1; background: transparent; border: none; color: var(--text); font-size: 15px; padding: 0; resize: none; outline: none; min-height: 26px; max-height: 140px; line-height: 1.65; font-family: inherit; }
     #input::placeholder { color: var(--text3); }
-    #attach { width: 32px; height: 32px; border-radius: 50%; background: var(--bg2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; align-self: flex-end; }
+    #attach { width: 32px; height: 32px; border-radius: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; align-self: flex-end; }
     #attach:hover { background: var(--bg3); }
     #attach svg { stroke: var(--text2); }
     #file-input { display: none; }
     .attachment-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--bg2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; font-size: 12px; color: var(--text2); margin: 4px 0; }
     .attachment-pill button { background: none; border: none; color: var(--text2); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; }
-    #attachments-bar { padding: 0 16px 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+    #attachments-bar { padding: 0 20px 4px; display: flex; flex-wrap: wrap; gap: 6px; }
     #input-actions { display: flex; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-    #send { width: 34px; height: 34px; border-radius: 50%; background: #1a56e8; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
-    #send:hover { background: #1545c0; }
-    #send:disabled { background: var(--bg3); cursor: not-allowed; }
-    #send svg { fill: #fff; }
+    #send { width: 32px; height: 32px; border-radius: 8px; background: var(--text); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.15s; }
+    #send:hover { opacity: 0.85; }
+    #send:disabled { opacity: 0.2; cursor: not-allowed; }
+    #send svg { stroke: var(--bg) !important; fill: none !important; }
 
     /* Mic button */
-    #mic { width: 34px; height: 34px; border-radius: 50%; background: var(--bg2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+    #mic { width: 32px; height: 32px; border-radius: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
     #mic:hover { background: var(--bg3); }
     #mic svg { fill: var(--text2); transition: fill 0.15s; }
     #mic.listening { background: rgba(239,68,68,0.15); }
     #mic.listening svg { fill: #ef4444; }
-    #mic.listening svg { fill: #ef4444; }
 
     /* Free-limit banner */
-    #free-limit-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 20px; background: rgba(10,10,10,0.92); border-top: 1px solid #2a2a2a; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-size: 14px; color: var(--text5); flex-wrap: wrap; }
+    #free-limit-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 20px; background: rgba(30,30,30,0.95); border-top: 1px solid var(--border); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-size: 14px; color: var(--text5); flex-wrap: wrap; }
     #free-limit-banner.hidden { display: none; }
     #free-limit-banner button { padding: 6px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; border: none; font-weight: 500; }
-    #free-limit-banner .btn-signup { background: #1a56e8; color: #fff; }
-    #free-limit-banner .btn-signup:hover { background: #1545c0; }
+    #free-limit-banner .btn-signup { background: var(--text); color: var(--bg); }
+    #free-limit-banner .btn-signup:hover { opacity: 0.85; }
     #free-limit-banner .btn-dismiss { background: none; border: 1px solid var(--border) !important; color: var(--text2); }
     #free-limit-banner .btn-dismiss:hover { border-color: var(--text2) !important; color: var(--text5); }
 
@@ -175,48 +185,55 @@
     .msg.holo { animation: fadeInUp 0.45s ease forwards; }
 
     /* Header */
-    #header { padding: 12px 16px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    #header h1 { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; margin: 0; flex-shrink: 0; display: flex; align-items: baseline; gap: 6px; }
-    #brand-sub { font-size: 17px; font-weight: 400; color: var(--text2); letter-spacing: 0.3px; transition: opacity 0.4s ease; }
+    #header { padding: 12px 20px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    #header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0; margin: 0; flex-shrink: 0; display: flex; align-items: baseline; gap: 6px; }
+    #brand-sub { font-size: 15px; font-weight: 400; color: var(--text2); transition: opacity 0.4s ease; }
     #header-right { display: flex; align-items: center; gap: 8px; }
-    #new-thread { background: none; border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    #new-thread { background: none; border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.15s; }
     #new-thread:hover { border-color: var(--text2); color: var(--text5); }
 
     /* Theme toggle */
-    #theme-toggle { background: none; border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 5px 10px; font-size: 13px; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+    #theme-toggle { background: none; border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 5px 10px; font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
     #theme-toggle:hover { border-color: var(--text2); color: var(--text5); }
 
     /* Mode toggle */
     .mode-toggle { display: flex; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-    .mode-btn { padding: 4px 10px; font-size: 11px; border: none; background: none; color: var(--text2); cursor: pointer; transition: all 0.15s; }
-    .mode-btn.active { background: #1a56e8; color: #fff; }
+    .mode-btn { padding: 4px 10px; font-size: 11px; border: none; background: none; color: var(--text2); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .mode-btn.active { background: var(--text); color: var(--bg); }
 
     /* User avatar */
     .avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 1px solid var(--border); }
-    .avatar-placeholder { width: 28px; height: 28px; border-radius: 50%; background: #1a56e8; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; cursor: pointer; flex-shrink: 0; }
+    .avatar-placeholder { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; cursor: pointer; flex-shrink: 0; }
+    #user-avatar { position: relative; display: flex; align-items: center; }
+    #memory-badge { position: absolute; top: -4px; right: -4px; background: var(--accent); color: #fff; font-size: 9px; font-weight: 700; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+
+    /* Memory panel */
+    #memory-panel { position: fixed; top: 0; right: 0; height: 100vh; width: 300px; background: var(--bg); border-left: 1px solid var(--border); z-index: 90; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.22s ease; }
+    #memory-panel.open { transform: translateX(0); }
+    #memory-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+    #memory-panel-header h3 { margin: 0; font-size: 14px; font-weight: 600; letter-spacing: -0.2px; }
+    #memory-panel-close { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 18px; line-height: 1; padding: 0; }
+    #memory-list { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+    .memory-item { background: var(--bg2); border-radius: 8px; padding: 10px 12px; }
+    .memory-key { font-size: 10px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .memory-val { font-size: 13px; color: var(--text); line-height: 1.5; }
+    #memory-empty { color: var(--text3); font-size: 13px; text-align: center; margin-top: 40px; line-height: 1.6; }
+    #memory-panel-footer { padding: 14px 20px; border-top: 1px solid var(--border); }
+    #seed-input { width: 100%; background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-family: inherit; resize: none; outline: none; line-height: 1.5; }
+    #seed-btn { margin-top: 6px; width: 100%; background: var(--accent); border: none; color: #fff; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
 
     /* Sign-in overlay */
     #signin-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; z-index: 100; }
-    #signin-overlay h2 { font-size: 28px; font-weight: 600; margin: 0; }
-    #signin-overlay p { color: var(--text2); font-size: 15px; margin: 0; text-align: center; max-width: 280px; line-height: 1.6; }
+    #signin-overlay h2 { font-size: 26px; font-weight: 600; margin: 0; letter-spacing: -0.3px; }
+    #signin-overlay p { color: var(--text2); font-size: 15px; margin: 0; text-align: center; max-width: 280px; line-height: 1.65; }
     #signin-overlay.hidden { display: none; }
 
     /* Empty state */
-    #empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: var(--text3); padding: 24px 16px 16px; text-align: center; overflow-y: auto; }
-    #empty h2 { font-size: 20px; font-weight: 600; color: var(--text2); margin: 0; }
-    #empty p { font-size: 13px; line-height: 1.6; max-width: 280px; margin: 0; }
-    /* Space grid */
-    #space-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 420px; }
-    .space-card { border: 1px solid var(--border); border-radius: 16px; padding: 14px 10px 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.18s; background: var(--bg2); }
-    .space-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
-    .space-card.active { border-color: var(--space-color, #1a56e8); box-shadow: 0 0 0 2px var(--space-color, #1a56e8); }
-    .space-card .space-icon { font-size: 22px; line-height: 1; }
-    .space-card .space-name { font-size: 12px; font-weight: 600; color: var(--text2); }
-    .space-card .space-desc { font-size: 10px; color: var(--text3); line-height: 1.3; }
-    .space-card.gated { opacity: 0.5; cursor: not-allowed; }
-    .space-card.gated:hover { transform: none; box-shadow: none; }
+    #empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--text3); padding: 28px 24px 20px; text-align: center; overflow-y: auto; }
+    #empty h2 { font-size: 38px; font-weight: 800; color: var(--text); margin: 0; letter-spacing: -1.2px; line-height: 1.12; }
+    #empty p { font-size: 16.5px; line-height: 1.7; max-width: 340px; margin: 0; color: var(--text2); font-weight: 400; }
     /* Active space accent in header */
-    #space-label { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 999px; margin-left: 4px; vertical-align: middle; }
+    #space-label { display: none; }
   </style>
 </head>
 <body>
@@ -232,20 +249,8 @@
   <h2>Holo</h2>
   <p>Your second brain. Sign in to bring your capsule with you.</p>
 
-  <!-- Google sign-in (requires Google Client ID to be configured) -->
-  <div id="g_id_onload"
-    data-client_id="GOOGLE_CLIENT_ID_PLACEHOLDER"
-    data-callback="onGoogleSignIn"
-    data-auto_prompt="false">
-  </div>
-  <div class="g_id_signin"
-    data-type="standard"
-    data-size="large"
-    data-theme="filled_black"
-    data-text="sign_in_with"
-    data-shape="pill"
-    data-logo_alignment="left">
-  </div>
+  <!-- Google sign-in button — rendered by JS once GSI library + client ID are both ready -->
+  <div id="g_signin_btn"></div>
 
   <!-- Divider -->
   <div style="display:flex;align-items:center;gap:12px;width:100%;max-width:280px;margin:4px 0;">
@@ -270,6 +275,21 @@
   <button onclick="skipSignIn()" style="background:none;border:none;color:#333;font-size:13px;cursor:pointer;margin-top:4px;">Continue without signing in</button>
 </div>
 
+<!-- Memory panel — what Holo knows about you -->
+<div id="memory-panel">
+  <div id="memory-panel-header">
+    <h3>What Holo knows</h3>
+    <button id="memory-panel-close" onclick="closeMemoryPanel()">×</button>
+  </div>
+  <div id="memory-list">
+    <div id="memory-empty">Sign in and start talking.<br>Holo builds your picture over time.</div>
+  </div>
+  <div id="memory-panel-footer">
+    <textarea id="seed-input" rows="3" placeholder="Tell Holo something about yourself…&#10;e.g. I'm building a startup in health tech"></textarea>
+    <button id="seed-btn" onclick="seedMemory()">Save to Holo's memory</button>
+  </div>
+</div>
+
 <div id="app">
   <div id="header">
     <h1>Holo <span id="brand-sub">Chat</span><span id="space-label"></span></h1>
@@ -288,7 +308,6 @@
     <div id="empty">
       <h2 id="greeting"></h2>
       <p id="greeting-sub"></p>
-      <div id="space-grid"></div>
     </div>
   </div>
 
@@ -305,7 +324,7 @@
           <svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zm-1 3a1 1 0 0 1 2 0v8a1 1 0 0 1-2 0V4zm-4 7a5 5 0 0 0 10 0h2a7 7 0 0 1-6 6.93V21h2v2H9v-2h2v-2.07A7 7 0 0 1 5 11H7z"/></svg>
         </button>
         <button id="send" onclick="sendMessage()" title="Send">
-          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
     </div>
@@ -314,7 +333,7 @@
 </div>
 
 <script>
-  const API_KEY      = "holo_sk_d3b9785eeec3a522b228058e0bc8c43d";
+  const API_KEY      = "holo_sk_e65ac27708c3abca80c2e1be27b04985";
   let   sessionId    = null;
   let   isLoading    = false;
   let   capsuleToken = localStorage.getItem("holo_capsule_token") || null;
@@ -422,80 +441,46 @@
 
   // ---- Rotating greeting ---------------------------------------------------
   const GREETINGS = [
-    { h: "Welcome to Holo.",                  sub: "One brain. Every part of your life. Pick a space to start." },
-    { h: "Good to have you here.",            sub: "Where do you want to go today?" },
-    { h: "Everything in one place.",          sub: "Select a space — Holo is ready." },
-    { h: "Your world, all in one app.",       sub: "Pick where you want to start." },
-    { h: "Holo is here.",                     sub: "Same voice. Every context. Choose your space." },
-    { h: "One brain. Everywhere you go.",     sub: "Select a space to begin." },
+    { h: "Welcome to Holo.",           sub: "One brain. Every part of your life." },
+    { h: "Good to have you here.",     sub: "What's on your mind?" },
+    { h: "Everything in one place.",   sub: "Holo is ready." },
+    { h: "Your world, all in one.",    sub: "Start anywhere." },
+    { h: "Holo is here.",             sub: "Same voice. Every context." },
+    { h: "One brain. Everywhere.",     sub: "What do you want to work on?" },
   ];
   const _g = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
   document.getElementById("greeting").textContent     = _g.h;
   document.getElementById("greeting-sub").textContent = _g.sub;
 
-  // ---- Space selector -------------------------------------------------------
-  const SPACES = [
-    { id: "life",        icon: "✦",  name: "Life",        desc: "Personal",          color: "#1a56e8", gated: false },
-    { id: "protect",     icon: "🛡",  name: "Protect",     desc: "Security",          color: "#ef4444", gated: false },
-    { id: "news",        icon: "◉",  name: "News",        desc: "Always on",         color: "#f59e0b", gated: false },
-    { id: "health",      icon: "♡",  name: "Health",      desc: "Records & Rx",      color: "#10b981", gated: false },
-    { id: "legal",       icon: "⚖",  name: "Legal",       desc: "Contracts & law",   color: "#8b5cf6", gated: false },
-    { id: "shop",        icon: "◈",  name: "Shop",        desc: "Commerce",          color: "#f97316", gated: false },
-    { id: "sports",      icon: "◎",  name: "Sports",      desc: "Scores & fantasy",  color: "#22c55e", gated: false },
-    { id: "enjoy",       icon: "◐",  name: "Enjoy",       desc: "Entertainment",     color: "#a855f7", gated: false },
-    { id: "enterprise",  icon: "◆",  name: "Enterprise",  desc: "Business",          color: "#64748b", gated: false },
-    { id: "diagnostics", icon: "⊕",  name: "Diagnostics", desc: "Certified only",    color: "#06b6d4", gated: true  },
-  ];
 
-  let _activeSpace = localStorage.getItem("holo_space") || "life";
+  // ---- Google Sign-In init --------------------------------------------------
+  // onGoogleLibraryLoad fires once the GSI script is fully ready.
+  // We fetch the client ID at the same time and init only when both are done.
+  let _gsiReady = false;
+  let _googleClientId = null;
 
-  function setSpace(id) {
-    const space = SPACES.find(s => s.id === id);
-    if (!space || space.gated) return;
-    _activeSpace = id;
-    localStorage.setItem("holo_space", id);
-    // Update card highlights
-    document.querySelectorAll(".space-card").forEach(c => c.classList.toggle("active", c.dataset.id === id));
-    // Update header accent
-    const lbl = document.getElementById("space-label");
-    if (lbl) { lbl.textContent = space.name; lbl.style.background = space.color + "22"; lbl.style.color = space.color; }
-    // Hide empty state and focus input
-    document.getElementById("empty").style.display = "none";
-    document.getElementById("input").focus();
+  function _initGSI() {
+    if (!_gsiReady || !_googleClientId) return;  // wait for both
+    google.accounts.id.initialize({
+      client_id: _googleClientId,
+      callback:  onGoogleSignIn,
+    });
+    google.accounts.id.renderButton(
+      document.getElementById("g_signin_btn"),
+      { theme: "filled_black", size: "large", shape: "pill", text: "sign_in_with" }
+    );
   }
 
-  function buildSpaceGrid() {
-    const grid = document.getElementById("space-grid");
-    grid.innerHTML = SPACES.map(s => `
-      <div class="space-card${s.gated ? " gated" : ""}" data-id="${s.id}"
-           style="--space-color:${s.color}${_activeSpace === s.id ? ';border-color:'+s.color+';box-shadow:0 0 0 2px '+s.color : ''}"
-           onclick="setSpace('${s.id}')">
-        <div class="space-icon">${s.icon}</div>
-        <div class="space-name">${s.name}</div>
-        <div class="space-desc">${s.desc}${s.gated ? " 🔒" : ""}</div>
-      </div>`).join("");
-  }
-  buildSpaceGrid();
+  window.onGoogleLibraryLoad = function() {
+    _gsiReady = true;
+    _initGSI();
+  };
 
-  // ---- Load Google Client ID from backend and init GSI --------------------
   fetch("/config")
     .then(r => r.json())
     .then(cfg => {
-      const clientId = cfg.google_client_id;
-      if (!clientId) return;  // Google Sign-In not configured — email login still works
-      const onloadDiv = document.getElementById("g_id_onload");
-      if (onloadDiv) onloadDiv.setAttribute("data-client_id", clientId);
-      // Re-initialize Google Identity Services with the real client ID
-      if (window.google && window.google.accounts) {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback:  onGoogleSignIn,
-        });
-        window.google.accounts.id.renderButton(
-          document.querySelector(".g_id_signin"),
-          { theme: "filled_black", size: "large", shape: "pill", text: "sign_in_with" }
-        );
-      }
+      _googleClientId = cfg.google_client_id || null;
+      _initGSI();
     })
     .catch(() => {});  // silently ignore — email login always works
 
@@ -631,13 +616,128 @@
     avatarEl.style.display = "";
     modeEl.style.display   = "";
 
+    const name = data.name || data.email || "?";
     if (data.avatar_url) {
-      avatarEl.innerHTML = `<img class="avatar" src="${data.avatar_url}" title="${data.name || data.email}" />`;
+      avatarEl.innerHTML = `<img class="avatar" src="${data.avatar_url}" title="${name}" onclick="openMemoryPanel()" /><div id="memory-badge" style="display:none"></div>`;
     } else {
-      const initial = (data.name || data.email || "?")[0].toUpperCase();
-      avatarEl.innerHTML = `<div class="avatar-placeholder" title="${data.name || data.email}">${initial}</div>`;
+      const initial = name[0].toUpperCase();
+      avatarEl.innerHTML = `<div class="avatar-placeholder" title="${name}" onclick="openMemoryPanel()">${initial}</div><div id="memory-badge" style="display:none"></div>`;
     }
     updateModeUI(capsuleMode);
+    fetchCapsuleContext(name);
+  }
+
+  let _memoryContext = {};
+
+  async function fetchCapsuleContext(userName) {
+    if (!capsuleToken) return;
+    try {
+      const res = await fetch("/v1/capsule/context", {
+        headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
+      });
+      if (!res.ok) return;
+      const { context } = await res.json();
+      _memoryContext = context || {};
+      updateMemoryBadge();
+      renderMemoryList();
+
+      // Onboarding: if Holo knows nothing yet, inject a welcome message
+      const knownCount = Object.keys(_memoryContext).length;
+      if (knownCount === 0) {
+        const firstName = (userName || "").split(/[\s@]/)[0] || "hey";
+        injectOnboarding(firstName);
+      }
+    } catch (e) {}
+  }
+
+  async function refreshMemoryContext() {
+    if (!capsuleToken) return;
+    try {
+      const res = await fetch("/v1/capsule/context", {
+        headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
+      });
+      if (!res.ok) return;
+      const { context } = await res.json();
+      _memoryContext = context || {};
+      updateMemoryBadge();
+      if (document.getElementById("memory-panel").classList.contains("open")) renderMemoryList();
+    } catch (e) {}
+  }
+
+  function updateMemoryBadge() {
+    const badge = document.getElementById("memory-badge");
+    if (!badge) return;
+    const count = Object.keys(_memoryContext).length;
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = "flex";
+    } else {
+      badge.style.display = "none";
+    }
+  }
+
+  function renderMemoryList() {
+    const list = document.getElementById("memory-list");
+    const entries = Object.entries(_memoryContext);
+    if (entries.length === 0) {
+      list.innerHTML = `<div id="memory-empty">Holo is still getting to know you.<br>Just keep talking — it builds over time.</div>`;
+      return;
+    }
+    list.innerHTML = entries.map(([k, v]) => `
+      <div class="memory-item">
+        <div class="memory-key">${escHtml(k.replace(/_/g, " "))}</div>
+        <div class="memory-val">${escHtml(v)}</div>
+      </div>`).join("");
+  }
+
+  function openMemoryPanel() {
+    renderMemoryList();
+    document.getElementById("memory-panel").classList.add("open");
+  }
+
+  function closeMemoryPanel() {
+    document.getElementById("memory-panel").classList.remove("open");
+  }
+
+  async function seedMemory() {
+    if (!capsuleToken) return;
+    const input = document.getElementById("seed-input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Parse the freeform text into key-value via a simple heuristic:
+    // send as a single "about_me" seed, then let the Pilot reshape it over time
+    const seed = { about_me: text };
+    try {
+      await fetch("/v1/capsule/context", {
+        method: "POST",
+        headers: { ...authHeaders() },
+        body: JSON.stringify({ context: seed }),
+      });
+      input.value = "";
+      await refreshMemoryContext();
+    } catch (e) {}
+  }
+
+  function injectOnboarding(firstName) {
+    // Only inject once per session
+    if (document.getElementById("holo-onboarding")) return;
+    document.getElementById("empty")?.remove();
+
+    const container = document.getElementById("messages");
+    const msg = document.createElement("div");
+    msg.className = "msg holo";
+    msg.id = "holo-onboarding";
+    const greeting = firstName && firstName.length > 1
+      ? `Hey ${firstName}.`
+      : "Hey.";
+    msg.innerHTML = `
+      <div class="holo-icon">✦</div>
+      <div class="holo-body">
+        <div class="bubble">${greeting} I'm glad you're here. Before we start — tell me a bit about yourself. What you're working on, what's been weighing on you, what you want me to understand about who you are. No format required. Just talk.</div>
+      </div>`;
+    container.appendChild(msg);
+    scrollToBottom();
   }
 
   function switchMode(mode) {
@@ -669,7 +769,7 @@
     .then(r => r.ok ? r.json() : null)
     .then(data => {
       if (data) {
-        showCapsule({ ...data, name: data.email });
+        showCapsule({ ...data, name: data.name || data.email });
         document.getElementById("signin-overlay").classList.add("hidden");
       }
     })
@@ -752,6 +852,9 @@
       if (data.thought) {
         setTimeout(() => spawnThought(data.thought), 1800);
       }
+
+      // Silently refresh what Holo knows — Pilot may have extracted new facts
+      setTimeout(() => refreshMemoryContext(), 2000);
     } catch (e) {
       stopAmbientBubbles();
       typingEl.remove();
@@ -780,10 +883,16 @@
     const { mainText, battery, suggestions } = parseResponse(data.response);
     const responseId = "r" + Date.now();
 
+    const chipsHtml = suggestions.length ? `
+      <div class="chips">
+        ${suggestions.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}
+      </div>` : "";
+
     msg.innerHTML = `
       <div class="holo-icon">✦</div>
       <div class="holo-body">
         <div class="bubble" id="${responseId}">${renderMarkdown(mainText)}</div>
+        ${chipsHtml}
         <div class="msg-actions">
           <button class="msg-action" title="Copy" onclick="copyMsg('${responseId}', this)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -858,9 +967,11 @@
 
   function useChip(el) {
     const input = document.getElementById("input");
-    input.value = el.textContent;
+    // Strip the number prefix from chip text
+    const text = el.innerText.replace(/^\d+\s*/, "").trim();
+    input.value = text;
     autoResize(input);
-    input.focus();
+    sendMessage();
   }
 
   function newThread() {

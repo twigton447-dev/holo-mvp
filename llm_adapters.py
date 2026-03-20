@@ -740,9 +740,9 @@ class CoPilotAdapter(_FlightDeckBase):
         import openai as openai_sdk
         from google import genai
 
-        openai_model    = os.getenv("OPENAI_MODEL",    "gpt-4o")
+        openai_model    = os.getenv("OPENAI_MODEL",    "gpt-5.4")
         anthropic_model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
-        google_model    = os.getenv("GOOGLE_MODEL",    "gemini-1.5-pro")
+        google_model    = os.getenv("GOOGLE_MODEL",    "gemini-3.1-pro-preview")
 
         self._pool = [
             ("openai",    openai_model,    openai_sdk.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))),
@@ -1081,6 +1081,35 @@ class PilotAdapter(_FlightDeckBase):
             return updates
         except Exception:
             return {}
+
+    def name_session(self, history: list) -> str:
+        """
+        Generate a 2-4 word title for a thread based on its opening turns.
+        Fast call — only looks at first 4 messages.
+        Returns plain text, no punctuation.
+        """
+        sample = history[:4]
+        if not sample:
+            return ""
+        msgs = "\n".join(
+            f"{m['role'].upper()}: {m['content'][:200]}" for m in sample
+        )
+        try:
+            resp = self._client.messages.create(
+                model   = self.model,
+                max_tokens = 20,
+                system  = (
+                    "You generate ultra-short thread titles. "
+                    "Return ONLY 2-4 words. No punctuation. No quotes. No explanation. "
+                    "Examples: startup funding strategy · relationship with parents · "
+                    "career pivot decision · anxiety about launch · managing the team"
+                ),
+                messages = [{"role": "user", "content": f"Title this conversation:\n{msgs}"}],
+            )
+            return resp.content[0].text.strip()[:60]
+        except Exception as e:
+            logger.warning(f"PilotAdapter.name_session failed: {e}")
+            return ""
 
     def consolidate_session(
         self,
@@ -1453,7 +1482,7 @@ class GoogleAdapter(BaseAdapter):
     def __init__(self):
         from google import genai
         self.provider = "google"
-        self.model_id = os.getenv("GOOGLE_MODEL", "gemini-2.5-pro-preview")
+        self.model_id = os.getenv("GOOGLE_MODEL", "gemini-3.1-pro-preview")
         self._client  = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
     def call(self, system, user, temperature: float = 0.2):

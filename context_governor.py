@@ -41,7 +41,6 @@ import uuid
 from copy import deepcopy
 
 from llm_adapters import (
-    BEC_CATEGORIES,
     SEVERITY_RANK,
     TurnResult,
     get_role_for_turn,
@@ -49,6 +48,7 @@ from llm_adapters import (
     load_adapters,
     CoPilotAdapter,
 )
+from scenario_templates import get_template
 
 # The Co-Pilot runs the between-turn briefs in evaluation mode —
 # fast, cheap, mechanical. The Pilot is reserved for the human layer.
@@ -141,6 +141,16 @@ def _compute_convergence_level(turn_number: int, deltas: list) -> str:
         return "MID"
 
     return "NARROWING"
+
+
+def _convergence_check(deltas: list, turn_number: int) -> bool:
+    """
+    Return True when the evaluation has converged.
+    Requires MIN_TURNS completed and at least 2 consecutive zero deltas.
+    """
+    if turn_number < MIN_TURNS or len(deltas) < 2:
+        return False
+    return deltas[-1] == 0 and deltas[-2] == 0
 
 
 # ---------------------------------------------------------------------------
@@ -279,15 +289,15 @@ def _get_temperature(turn_number: int, deltas: list) -> float:
 # Coverage matrix helpers
 # ---------------------------------------------------------------------------
 
-def _init_coverage() -> dict:
+def _init_coverage(categories: list) -> dict:
     """
-    One entry per BEC category tracking:
+    One entry per scenario category tracking:
       - addressed: has any model assessed this category yet?
       - max_severity: the highest severity any model has assigned
     """
     return {
         cat: {"addressed": False, "max_severity": "NONE"}
-        for cat in BEC_CATEGORIES
+        for cat in categories
     }
 
 
@@ -305,7 +315,7 @@ def _update_coverage(matrix: dict, flags: dict) -> tuple:
     updated = deepcopy(matrix)
     delta   = 0
 
-    for cat in BEC_CATEGORIES:
+    for cat in matrix:
         new_sev = flags.get(cat, "NONE")
         if new_sev == "NONE":
             continue
@@ -416,22 +426,29 @@ def _build_initial_state(request: dict, evaluation_id: str) -> dict:
     The STATE_OBJECT is the single source of truth passed to every model.
     It grows with each turn via turn_history and coverage_matrix updates.
 
+    The active_template is selected from action["type"] and drives all
+    scenario-specific behavior: categories, system prompts, coverage matrix,
+    JSON schema, persona specializations, and log abbreviations.
+
     The artifacts registry holds PINNED source documents.  Models retrieve
     artifacts by ID rather than accessing action/context directly — this
     enforces the patent's retrieve-by-ID semantics and prevents any
     model from operating on a stale or modified version of the source data.
     """
-    action  = request.get("action", {})
-    context = request.get("context", {})
+    action   = request.get("action", {})
+    context  = request.get("context", {})
+    template = get_template(action.get("type", "invoice_payment"))
+
     return {
         "evaluation_id":   evaluation_id,
         "action":          action,    # kept for internal helpers (ToolGate, etc.)
         "context":         context,   # kept for internal helpers
+        "active_template": template,  # scenario template: categories, prompts, abbreviations
         "artifacts":       _build_artifact_registry(action, context),
         "turn_history":    [],
-        "coverage_matrix": _init_coverage(),
-        "governor_briefs": [],      # [{for_turn, brief, convergence_level}]
-        "verified_facts":  {},      # populated by ToolGate before turn 1
+        "coverage_matrix": _init_coverage(template["categories"]),
+        "governor_briefs": [],        # [{for_turn, brief, convergence_level}]
+        "verified_facts":  {},        # populated by ToolGate before turn 1
     }
 
 
@@ -472,6 +489,11 @@ class ContextGovernor:
         logger.info(f"{'='*65}")
 
         state         = _build_initial_state(request, evaluation_id)
+        template      = state["active_template"]
+        logger.info(
+            f"  Scenario: {template['name']} ({template['domain']}) | "
+            f"categories={template['categories']}"
+        )
         deltas        = []
         partial       = False
         converged     = False
@@ -552,7 +574,7 @@ class ContextGovernor:
             if turn_number <= 3:
                 role = get_role_for_turn(turn_number)
             else:
-                role = select_persona(state["coverage_matrix"], used_personas)
+                role = select_persona(state["coverage_matrix"], used_personas, state.get("active_template"))
             used_personas.add(role)
 
             # Temperature drops as the loop matures and converges.
@@ -588,7 +610,7 @@ class ContextGovernor:
 
             logger.info(
                 f"  Turn {turn_number} | delta={delta} | "
-                f"coverage={_coverage_summary(new_coverage)}"
+                f"coverage={_coverage_summary(new_coverage, state['active_template'].get('abbreviations', {}))}"
             )
 
             # ---- Governor brief for the next turn ---------------------------
@@ -606,7 +628,7 @@ class ContextGovernor:
                 next_persona = (
                     get_role_for_turn(next_turn)
                     if next_turn <= 3
-                    else select_persona(state["coverage_matrix"], used_personas)
+                    else select_persona(state["coverage_matrix"], used_personas, state.get("active_template"))
                 )
                 brief = self._governor.generate_brief(
                     state, next_turn, next_persona, conv_level
@@ -708,11 +730,26 @@ class ContextGovernor:
             majority_verdict = "ESCALATE" if escalate_votes > allow_votes else "ALLOW"
             decision = majority_verdict
 
+            # Synthesis override: if the final turn has role "Synthesis" and returns
+            # ALLOW with all LOW/NONE flags, it may clear a prior HIGH that was
+            # flagged only via inference (no hard evidence). This represents a
+            # deliberate, evidence-reviewed clearance by the final analyst.
+            synthesis_cleared = False
+            if state["turn_history"]:
+                last_turn = state["turn_history"][-1]
+                if (last_turn.get("role") == "Synthesis"
+                        and last_turn.get("verdict") == "ALLOW"
+                        and not any(
+                            v == "HIGH"
+                            for v in last_turn.get("severity_flags", {}).values()
+                        )):
+                    synthesis_cleared = True
+
             # HIGH-severity override: governor forces ESCALATE regardless of majority.
             # Distinguishes evidence quality: SUBMITTED_DATA or POLICY_VIOLATION
             # findings carry full weight; INFERRED-only HIGHs still escalate but
             # are flagged as lower-confidence so reviewers know the distinction.
-            if _any_high(state["coverage_matrix"]):
+            if _any_high(state["coverage_matrix"]) and not synthesis_cleared:
                 decision   = "ESCALATE"
                 high_cats  = [
                     cat for cat, v in state["coverage_matrix"].items()
@@ -777,6 +814,7 @@ class ContextGovernor:
 
         result = {
             "evaluation_id":   evaluation_id,
+            "scenario":        template["name"],
             "decision":        decision,
             "decision_reason": decision_reason,
             "exit_reason":     exit_reason,
@@ -882,18 +920,19 @@ class ContextGovernor:
 # Log helpers
 # ---------------------------------------------------------------------------
 
-def _coverage_summary(matrix: dict) -> str:
+def _coverage_summary(matrix: dict, abbreviations: dict = None) -> str:
     """Compact string for log lines, e.g. 'ID=H AMT=L RTE=- ...' """
-    abbr = {
-        "sender_identity":  "ID",
-        "invoice_amount":   "AMT",
-        "payment_routing":  "RTE",
-        "urgency_pressure": "URG",
-        "domain_spoofing":  "DOM",
-        "approval_chain":   "APV",
-    }
+    if abbreviations is None:
+        abbreviations = {
+            "sender_identity":  "ID",
+            "invoice_amount":   "AMT",
+            "payment_routing":  "RTE",
+            "urgency_pressure": "URG",
+            "domain_spoofing":  "DOM",
+            "approval_chain":   "APV",
+        }
     parts = []
     for cat, v in matrix.items():
         sev = v["max_severity"][0] if v["addressed"] else "-"
-        parts.append(f"{abbr.get(cat, cat[:3])}={sev}")
+        parts.append(f"{abbreviations.get(cat, cat[:4])}={sev}")
     return " ".join(parts)

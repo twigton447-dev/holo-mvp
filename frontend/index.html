@@ -692,7 +692,7 @@
     updateModeUI(capsuleMode);
     fetchCapsuleContext(name);
     restoreLastSession();
-    document.getElementById("thread-toggle").style.display = "";
+    document.getElementById("thread-toggle").style.display = "block";
     loadSessionList();
   }
 
@@ -955,10 +955,12 @@
       const data = await res.json();
       sessionId = data.session_id;
       appendHoloMessage(data);
-      // Add new thread to panel immediately after first turn
+      // Add new thread to panel on first turn; refresh after turn 2 so Pilot name replaces preview
       if (data.turn_number === 1) {
-        const firstMsg = document.getElementById("input")?.value || "";
-        prependSession(data.session_id, document.querySelector(".msg.user .bubble")?.innerText || "");
+        const firstMsg = document.querySelectorAll(".msg.user .bubble")[0]?.innerText || "";
+        prependSession(data.session_id, firstMsg);
+      } else if (data.turn_number === 2) {
+        setTimeout(() => loadSessionList(), 3000); // Pilot names the thread async ~2s after turn 2
       }
 
       // Track turns and show free-limit banner if needed
@@ -1282,7 +1284,7 @@
     }
     list.innerHTML = _sessionList.map(s => `
       <div class="thread-item${s.id === sessionId ? " active" : ""}" onclick="loadSession('${escHtml(s.id)}')">
-        <div class="thread-preview">${escHtml(s.preview || "Thread")}</div>
+        <div class="thread-preview">${escHtml(s.title || s.preview || "Thread")}</div>
         <div class="thread-time">${timeAgo(s.at)}</div>
       </div>`).join("");
   }

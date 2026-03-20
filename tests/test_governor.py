@@ -246,9 +246,16 @@ class TestContextGovernorWithMocks:
 
     def _governor_with(self, results):
         """Create a ContextGovernor wired to a single MockAdapter repeating results."""
+        from unittest.mock import MagicMock
         adapter = MockAdapter(results)
         gov = ContextGovernor.__new__(ContextGovernor)
         gov._adapters = [adapter, adapter, adapter]
+        gov._brain = MagicMock()
+        gov._brain.retrieve_context.return_value = {"total_evaluations": 0, "evaluations": [], "allow_count": 0, "escalate_count": 0, "vendor_domain": "unknown"}
+        gov._tool_gate = MagicMock()
+        gov._tool_gate.verify.return_value = {}
+        gov._governor = MagicMock()
+        gov._governor.generate_brief.return_value = ""
         return gov
 
     def _minimal_request(self):
@@ -294,8 +301,15 @@ class TestContextGovernorWithMocks:
             def call(self, s, u):
                 raise RuntimeError("API down")
 
+        from unittest.mock import MagicMock
         gov = ContextGovernor.__new__(ContextGovernor)
         gov._adapters = [FailAdapter(), FailAdapter(), FailAdapter()]
+        gov._brain = MagicMock()
+        gov._brain.retrieve_context.return_value = {"total_evaluations": 0, "evaluations": [], "allow_count": 0, "escalate_count": 0, "vendor_domain": "unknown"}
+        gov._tool_gate = MagicMock()
+        gov._tool_gate.verify.return_value = {}
+        gov._governor = MagicMock()
+        gov._governor.generate_brief.return_value = ""
         result = gov.evaluate(self._minimal_request())
         assert result["decision"] == "ESCALATE"
         assert result["partial"] is True

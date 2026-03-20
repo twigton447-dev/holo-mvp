@@ -244,6 +244,20 @@ class HoloChatEngine:
                     logger.warning(f"Consolidation failed: {e}")
             threading.Thread(target=_consolidate, daemon=True).start()
 
+        # Pilot names the thread after turn 2 — enough context to know the topic
+        if capsule_id and session.turn_count == 2 and not incognito:
+            _hist = list(session.history)
+            _sid  = session.session_id
+            _cid  = capsule_id
+            def _name_thread():
+                try:
+                    name = self._pilot.name_session(_hist)
+                    if name:
+                        self._brain.update_session_name(_cid, _sid, name)
+                except Exception as e:
+                    logger.warning(f"Thread naming failed: {e}")
+            threading.Thread(target=_name_thread, daemon=True).start()
+
         # Persist to Supabase — capsule_id links session to user permanently
         self._brain.save_chat_turn(
             session_id    = session.session_id,

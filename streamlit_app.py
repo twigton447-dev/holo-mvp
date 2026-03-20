@@ -42,6 +42,9 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+    /* ---- Google Fonts ---- */
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
     /* ---- CSS Variables ---- */
     :root {
         --brass: #C9A84C;
@@ -51,6 +54,15 @@ st.markdown("""
         --escalate-red: #E74C3C;
         --bg-card: #16181D;
         --border-subtle: #2A2D35;
+    }
+
+    /* ---- Base Typography ---- */
+    html, body, [class*="css"] {
+        font-family: 'Space Grotesk', sans-serif;
+    }
+    code, pre, .stTextArea textarea, .stCode {
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 0.82rem !important;
     }
 
     /* ---- Sidebar ---- */
@@ -63,52 +75,187 @@ st.markdown("""
         letter-spacing: 0.15em;
     }
 
+    /* ---- Sidebar Brand Block ---- */
+    .sidebar-brand {
+        padding: 0.5rem 0 1rem 0;
+    }
+    .sidebar-brand .brand-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        letter-spacing: 0.25em;
+        color: var(--brass);
+        text-shadow: 0 0 30px rgba(201, 168, 76, 0.4);
+        display: block;
+        line-height: 1;
+    }
+    .sidebar-brand .brand-sub {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #666;
+        margin-top: 0.4rem;
+        display: block;
+    }
+    .sidebar-brand .brand-tagline {
+        font-size: 0.78rem;
+        color: #888;
+        font-style: italic;
+        margin-top: 0.6rem;
+        display: block;
+        line-height: 1.4;
+    }
+
+    /* ---- Status Indicator ---- */
+    .status-online {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.78rem;
+        color: var(--allow-green);
+        font-weight: 500;
+    }
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--allow-green);
+        box-shadow: 0 0 6px var(--allow-green);
+        animation: pulse-dot 2s infinite;
+        display: inline-block;
+    }
+    .status-offline {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.78rem;
+        color: #666;
+    }
+    .status-dot-off {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #444;
+        display: inline-block;
+    }
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+
+    /* ---- Page Hero ---- */
+    .page-hero {
+        padding: 1.5rem 0 0.5rem 0;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1.5rem;
+    }
+    .page-hero h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        margin: 0 0 0.4rem 0;
+        line-height: 1.1;
+        background: linear-gradient(90deg, var(--brass-light) 0%, var(--brass) 60%, var(--brass-dark) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .page-hero .hero-sub {
+        font-size: 0.9rem;
+        color: #888;
+        line-height: 1.5;
+        max-width: 680px;
+        font-weight: 400;
+    }
+    .page-hero .hero-sub strong {
+        color: #aaa;
+        font-weight: 600;
+    }
+
     /* ---- Verdict Banners ---- */
+    @keyframes verdict-glow-allow {
+        0%, 100% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.2), inset 0 0 30px rgba(46, 204, 113, 0.05); }
+        50% { box-shadow: 0 0 40px rgba(46, 204, 113, 0.4), inset 0 0 50px rgba(46, 204, 113, 0.1); }
+    }
+    @keyframes verdict-glow-escalate {
+        0%, 100% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.2), inset 0 0 30px rgba(231, 76, 60, 0.05); }
+        50% { box-shadow: 0 0 40px rgba(231, 76, 60, 0.4), inset 0 0 50px rgba(231, 76, 60, 0.1); }
+    }
     .verdict-allow {
         background: linear-gradient(135deg, #0d2818 0%, #1a4731 50%, #0d2818 100%);
         color: var(--allow-green);
-        padding: 1.8rem 1rem;
+        padding: 2rem 1rem;
         border-radius: 12px;
         text-align: center;
-        font-size: 2.2rem;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2.4rem;
         font-weight: 700;
-        letter-spacing: 0.2em;
+        letter-spacing: 0.25em;
         border: 2px solid var(--allow-green);
-        margin: 1rem 0 1.5rem 0;
-        text-shadow: 0 0 20px rgba(46, 204, 113, 0.3);
+        margin: 1rem 0 0.5rem 0;
+        text-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
+        animation: verdict-glow-allow 3s ease-in-out infinite;
+    }
+    .verdict-allow .verdict-sub {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        color: rgba(46, 204, 113, 0.65);
+        margin-top: 0.4rem;
+        text-transform: uppercase;
     }
     .verdict-escalate {
         background: linear-gradient(135deg, #2a0a10 0%, #4a1520 50%, #2a0a10 100%);
         color: var(--escalate-red);
-        padding: 1.8rem 1rem;
+        padding: 2rem 1rem;
         border-radius: 12px;
         text-align: center;
-        font-size: 2.2rem;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2.4rem;
         font-weight: 700;
-        letter-spacing: 0.2em;
+        letter-spacing: 0.25em;
         border: 2px solid var(--escalate-red);
-        margin: 1rem 0 1.5rem 0;
-        text-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
+        margin: 1rem 0 0.5rem 0;
+        text-shadow: 0 0 20px rgba(231, 76, 60, 0.4);
+        animation: verdict-glow-escalate 2s ease-in-out infinite;
+    }
+    .verdict-escalate .verdict-sub {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        color: rgba(231, 76, 60, 0.65);
+        margin-top: 0.4rem;
+        text-transform: uppercase;
     }
 
     /* ---- Risk Heatmap Cells ---- */
     .risk-cell {
-        padding: 0.75rem 0.5rem;
+        padding: 0.85rem 0.5rem;
         border-radius: 8px;
         text-align: center;
         margin-bottom: 0.6rem;
         border: 1px solid var(--border-subtle);
+        transition: transform 0.15s ease;
     }
+    .risk-cell:hover { transform: translateY(-1px); }
     .risk-cell .risk-label {
-        font-size: 0.75rem;
-        color: #888;
-        margin-bottom: 0.3rem;
+        font-size: 0.68rem;
+        color: #777;
+        margin-bottom: 0.35rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
+        font-weight: 600;
     }
     .risk-cell .risk-value {
-        font-size: 1.1rem;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.05rem;
         font-weight: 700;
+        letter-spacing: 0.05em;
     }
     .risk-low {
         background-color: #0d2818;
@@ -128,50 +275,68 @@ st.markdown("""
     .risk-none {
         background-color: var(--bg-card);
     }
-    .risk-none .risk-value { color: #555; }
+    .risk-none .risk-value { color: #444; }
 
     /* ---- Stat Cards ---- */
     .stat-card {
-        background-color: var(--bg-card);
+        background: linear-gradient(160deg, #18191f 0%, var(--bg-card) 100%);
         border: 1px solid var(--border-subtle);
-        border-radius: 10px;
-        padding: 1.2rem 0.8rem;
+        border-radius: 12px;
+        padding: 1.4rem 0.8rem;
         text-align: center;
+        transition: border-color 0.2s ease;
     }
+    .stat-card:hover { border-color: var(--brass-dark); }
     .stat-card .stat-value {
-        font-size: 1.8rem;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem;
         font-weight: 700;
         color: var(--brass);
-        line-height: 1.2;
+        line-height: 1.1;
     }
     .stat-card .stat-label {
-        color: #777;
-        font-size: 0.8rem;
-        margin-top: 0.3rem;
+        color: #666;
+        font-size: 0.72rem;
+        margin-top: 0.35rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.1em;
+        font-weight: 600;
     }
 
     /* ---- Section Headers ---- */
     .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
         color: var(--brass);
-        font-size: 0.85rem;
-        font-weight: 600;
-        letter-spacing: 0.12em;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
         text-transform: uppercase;
-        border-bottom: 1px solid var(--border-subtle);
         padding-bottom: 0.5rem;
-        margin: 1.5rem 0 1rem 0;
+        margin: 1.8rem 0 1rem 0;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+    .section-header::before {
+        content: '';
+        display: inline-block;
+        width: 3px;
+        height: 12px;
+        background: var(--brass);
+        border-radius: 2px;
+        box-shadow: 0 0 8px rgba(201, 168, 76, 0.5);
     }
 
     /* ---- Convergence Pill ---- */
     .converge-pill {
         display: inline-block;
-        padding: 0.35rem 1rem;
+        padding: 0.4rem 1.1rem;
         border-radius: 20px;
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         font-weight: 600;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
+        font-family: 'Space Grotesk', sans-serif;
     }
     .converge-yes {
         background-color: #1a4731;
@@ -184,23 +349,200 @@ st.markdown("""
         border: 1px solid var(--brass-dark);
     }
 
+    /* ---- Results Banner Label ---- */
+    .results-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #555;
+        text-align: center;
+        margin: 0.5rem 0 0 0;
+    }
+
+    /* ---- History Section Header ---- */
+    .history-hero {
+        padding: 1rem 0 1.2rem 0;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1.5rem;
+    }
+    .history-hero h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: var(--brass);
+        margin: 0 0 0.3rem 0;
+    }
+    .history-hero .history-sub {
+        font-size: 0.82rem;
+        color: #666;
+    }
+
     /* ---- Mobile Responsiveness ---- */
     @media (max-width: 768px) {
         .verdict-allow, .verdict-escalate {
-            font-size: 1.5rem;
-            padding: 1.2rem 0.8rem;
-            letter-spacing: 0.1em;
+            font-size: 1.6rem;
+            padding: 1.5rem 0.8rem;
+            letter-spacing: 0.12em;
         }
-        .stat-card .stat-value { font-size: 1.4rem; }
+        .stat-card .stat-value { font-size: 1.5rem; }
         .risk-cell .risk-value { font-size: 0.95rem; }
+        .page-hero h1 { font-size: 1.5rem; }
     }
 
     /* ---- Hide Streamlit Hamburger & Footer ---- */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
 
-    /* ---- Slightly tighten default padding ---- */
-    .block-container { padding-top: 2rem; }
+    /* ---- Tighten default padding ---- */
+    .block-container { padding-top: 1.5rem; }
+
+    /* ---- Tab styling ---- */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2px;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+    .stTabs [data-baseweb="tab"] {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        padding: 0.6rem 1.2rem;
+    }
+
+    /* ---- Follow-up Cards ---- */
+    .followup-header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #555;
+        margin: 2rem 0 0.8rem 0;
+    }
+    .followup-header span {
+        flex: 1;
+        height: 1px;
+        background: var(--border-subtle);
+    }
+
+    /* ---- Chat Response Area ---- */
+    .holo-response {
+        background: linear-gradient(160deg, #0f1118 0%, #13151c 100%);
+        border: 1px solid var(--border-subtle);
+        border-left: 3px solid var(--brass);
+        border-radius: 0 10px 10px 0;
+        padding: 1.2rem 1.4rem;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+        line-height: 1.7;
+        color: #d0d0d0;
+    }
+    .holo-response .holo-response-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--brass);
+        margin-bottom: 0.6rem;
+        display: block;
+    }
+    .chat-thread {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .chat-user-msg {
+        align-self: flex-end;
+        background: #1e2028;
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px 12px 2px 12px;
+        padding: 0.7rem 1rem;
+        max-width: 80%;
+        font-size: 0.85rem;
+        color: #aaa;
+        font-style: italic;
+    }
+
+    /* ---- Capsule Identity Card ---- */
+    .capsule-card {
+        background: linear-gradient(160deg, #0f1014 0%, #13151a 100%);
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        padding: 0.9rem 0.85rem;
+        margin: 0.5rem 0;
+    }
+    .capsule-card .capsule-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #ddd;
+        display: block;
+        margin-bottom: 0.15rem;
+    }
+    .capsule-card .capsule-email {
+        font-size: 0.72rem;
+        color: #555;
+        display: block;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .capsule-card .capsule-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .mode-pill {
+        display: inline-block;
+        padding: 0.18rem 0.6rem;
+        border-radius: 10px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+    .mode-personal {
+        background: #1a1f2e;
+        color: #6688cc;
+        border: 1px solid #2a3550;
+    }
+    .mode-work {
+        background: #1a2a1a;
+        color: #55aa66;
+        border: 1px solid #2a4a2a;
+    }
+    .capsule-id-tag {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.62rem;
+        color: #3a3d45;
+    }
+
+    /* ---- Sign-in section ---- */
+    .signin-header {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #555;
+        margin-bottom: 0.6rem;
+        display: block;
+    }
+    .signin-note {
+        font-size: 0.72rem;
+        color: #444;
+        line-height: 1.4;
+        margin-bottom: 0.8rem;
+    }
 </style>
 
 <!-- PWA Manifest + Mobile Meta -->
@@ -216,23 +558,100 @@ st.markdown("""
 # Sidebar
 # ============================================================
 
+# Initialize capsule session state before sidebar renders
+for _k, _v in {
+    "capsule_token": None,
+    "capsule_id": None,
+    "capsule_email": None,
+    "capsule_name": None,
+    "capsule_mode": None,
+}.items():
+    if _k not in st.session_state:
+        st.session_state[_k] = _v
+
 with st.sidebar:
-    st.markdown("### HOLO")
-    st.markdown("*Trust Layer for AI Agents*")
+    st.markdown("""
+    <div class="sidebar-brand">
+        <span class="brand-name">⬡ HOLO</span>
+        <span class="brand-sub">Protect &nbsp;·&nbsp; Trust Layer</span>
+        <span class="brand-tagline">Multi-model adversarial council<br>for high-stakes agentic actions</span>
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown("---")
 
-    # Connection status
+    # ---- Connection status ----
     try:
         health = requests.get(f"{API_BASE}/health", timeout=3).json()
+        version = health.get('version', '?')
         st.markdown(
-            f"\u25CF API Connected &nbsp; `v{health.get('version', '?')}`",
+            f'<div class="status-online"><span class="status-dot"></span> API Online &nbsp;'
+            f'<code style="font-size:0.7rem;color:#555;">v{version}</code></div>',
+            unsafe_allow_html=True,
         )
     except Exception:
-        st.markdown("\u25CB API Disconnected")
+        st.markdown(
+            f'<div class="status-offline"><span class="status-dot-off"></span> API Offline</div>',
+            unsafe_allow_html=True,
+        )
         st.caption(f"Expected at {API_BASE}")
 
     st.markdown("---")
-    st.caption("v0.1.0 \u00B7 Patent Pending")
+
+    # ---- Capsule Identity ----
+    if st.session_state.capsule_token:
+        # Signed in — show identity card
+        mode = st.session_state.capsule_mode or "personal"
+        mode_class = f"mode-{mode}"
+        cid = st.session_state.capsule_id or ""
+        st.markdown(
+            f'<div class="capsule-card">'
+            f'<span class="capsule-name">{st.session_state.capsule_name}</span>'
+            f'<span class="capsule-email">{st.session_state.capsule_email}</span>'
+            f'<div class="capsule-meta">'
+            f'<span class="mode-pill {mode_class}">{mode}</span>'
+            f'<span class="capsule-id-tag">{cid[:8]}…</span>'
+            f'</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+        if st.button("Sign out", key="signout_btn", use_container_width=True):
+            for _k in ("capsule_token", "capsule_id", "capsule_email",
+                       "capsule_name", "capsule_mode"):
+                st.session_state[_k] = None
+            st.rerun()
+    else:
+        # Not signed in — show sign-in form
+        st.markdown(
+            '<span class="signin-header">Sign in to Holo</span>'
+            '<p class="signin-note">Your Capsule ID links chat sessions to persistent memory — '
+            'so context compounds over time.</p>',
+            unsafe_allow_html=True,
+        )
+        with st.form("capsule_signin", clear_on_submit=False):
+            signin_email = st.text_input("Email", placeholder="you@example.com")
+            signin_name  = st.text_input("Name",  placeholder="Your name")
+            submitted    = st.form_submit_button("⬡  Activate Capsule", use_container_width=True)
+
+        if submitted:
+            if not signin_email or "@" not in signin_email:
+                st.error("Enter a valid email.")
+            else:
+                try:
+                    result = call_email_signin(signin_email, signin_name)
+                    st.session_state.capsule_token = result["capsule_token"]
+                    st.session_state.capsule_id    = result["capsule_id"]
+                    st.session_state.capsule_email = result["email"]
+                    st.session_state.capsule_name  = result["name"]
+                    st.session_state.capsule_mode  = result.get("mode", "personal")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Sign-in failed: {e}")
+
+    st.markdown("---")
+    st.markdown(
+        '<span style="font-size:0.7rem;color:#444;letter-spacing:0.08em;">v0.1.0 &nbsp;·&nbsp; Patent Pending</span>',
+        unsafe_allow_html=True,
+    )
 
 
 # ============================================================
@@ -286,6 +705,36 @@ def call_history() -> dict:
     return resp.json()
 
 
+def call_email_signin(email: str, name: str) -> dict:
+    """POST to /auth/email and return capsule info."""
+    resp = requests.post(
+        f"{API_BASE}/auth/email",
+        json={"email": email, "name": name},
+        timeout=10,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def call_chat(message: str, session_id: str | None = None,
+              capsule_token: str | None = None) -> dict:
+    """POST to /v1/chat and return parsed JSON."""
+    headers = {"x-api-key": API_KEY, "Content-Type": "application/json"}
+    if capsule_token:
+        headers["Authorization"] = f"Bearer {capsule_token}"
+    payload: dict = {"message": message}
+    if session_id:
+        payload["session_id"] = session_id
+    resp = requests.post(
+        f"{API_BASE}/v1/chat",
+        json=payload,
+        headers=headers,
+        timeout=60,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
 # ============================================================
 # Rendering Helpers
 # ============================================================
@@ -303,11 +752,14 @@ CATEGORY_LABELS = {
 def render_verdict(decision: str):
     """Big verdict banner."""
     css_class = "verdict-allow" if decision == "ALLOW" else "verdict-escalate"
-    icon = "\u2713" if decision == "ALLOW" else "\u26A0"
+    icon = "✓" if decision == "ALLOW" else "⚠"
+    sub = "Action cleared by adversarial council" if decision == "ALLOW" else "Human review required — threat detected"
     st.markdown(
-        f'<div class="{css_class}">{icon} &nbsp; {decision}</div>',
+        f'<div class="{css_class}">{icon} &nbsp; {decision}'
+        f'<span class="verdict-sub">{sub}</span></div>',
         unsafe_allow_html=True,
     )
+    st.markdown('<div class="results-label">Adversarial Council Verdict</div>', unsafe_allow_html=True)
 
 
 def render_risk_heatmap(risk_profile: dict):
@@ -448,6 +900,175 @@ def render_token_summary(token_usage: dict):
         st.metric("Total Cost", f"${token_usage.get('total_cost_usd', 0):.4f}")
 
 
+def generate_follow_ups(result: dict) -> list[dict]:
+    """Generate 3 contextual follow-up prompts based on the evaluation result."""
+    decision = result.get("decision", "ESCALATE")
+    risk_profile = result.get("risk_profile", {})
+    decision_reason = result.get("decision_reason", "")
+
+    high_cats = [k for k, v in risk_profile.items() if v.get("severity") == "HIGH"]
+    medium_cats = [k for k, v in risk_profile.items() if v.get("severity") == "MEDIUM"]
+    top_cat = high_cats[0] if high_cats else (medium_cats[0] if medium_cats else None)
+    top_label = CATEGORY_LABELS.get(top_cat, top_cat.replace("_", " ").title()) if top_cat else "the primary signal"
+
+    # Build a shared context prefix for every message
+    high_labels = [CATEGORY_LABELS.get(c, c) for c in high_cats]
+    ctx = (
+        f"Context: A Holo adversarial council just evaluated an invoice payment transaction "
+        f"and returned verdict: {decision}. "
+        + (f"High-severity findings: {', '.join(high_labels)}. " if high_labels else "")
+        + (f"Decision reason: {decision_reason}. " if decision_reason else "")
+    )
+
+    prompts = []
+
+    # 1 — Dig into the primary finding
+    if decision == "ESCALATE":
+        prompts.append({
+            "label": "Primary Threat",
+            "title": f"Why did {top_label} drive escalation?",
+            "hint": "The council's detailed reasoning on the highest-risk signal.",
+            "message": (
+                f"{ctx} Walk me through exactly what the adversarial council detected "
+                f"in {top_label} and why it was severe enough to escalate."
+            ),
+        })
+    else:
+        prompts.append({
+            "label": "Clearance Path",
+            "title": "What specifically cleared this transaction?",
+            "hint": "Understand the signals the council verified before allowing.",
+            "message": (
+                f"{ctx} What were the specific signals the council verified, "
+                f"and what evidence would have been enough to tip it toward escalation?"
+            ),
+        })
+
+    # 2 — Counterfactual
+    if decision == "ESCALATE":
+        prompts.append({
+            "label": "Counterfactual",
+            "title": "What would have cleared this transaction?",
+            "hint": "The verification path or evidence that changes the verdict.",
+            "message": (
+                f"{ctx} What specific evidence, verification steps, or contextual signals — "
+                f"if present — would have allowed the council to approve this transaction?"
+            ),
+        })
+    else:
+        prompts.append({
+            "label": "Attack Surface",
+            "title": "How could a bad actor weaponize this pattern?",
+            "hint": "Map the threat model behind this transaction type.",
+            "message": (
+                f"{ctx} Describe how a sophisticated attacker might craft a similar transaction "
+                f"to evade detection — what attack variations exist, and how subtle can they get?"
+            ),
+        })
+
+    # 3 — Controls and prevention
+    prompts.append({
+        "label": "Prevention",
+        "title": "What controls stop this at scale?",
+        "hint": "Turn council findings into policy — what should your org implement?",
+        "message": (
+            f"{ctx} Based on this evaluation, what internal controls, approval policies, "
+            f"or verification gates should an organization put in place to catch this class "
+            f"of {'attack' if decision == 'ESCALATE' else 'risk'} before it reaches the agent layer?"
+        ),
+    })
+
+    return prompts
+
+
+def render_follow_ups(result: dict):
+    """3 contextual follow-up prompt cards that call /v1/chat when clicked."""
+    st.markdown(
+        '<div class="followup-header">⬡ &nbsp; Go Deeper<span></span></div>',
+        unsafe_allow_html=True,
+    )
+
+    prompts = generate_follow_ups(result)
+    cols = st.columns(3)
+
+    for i, (col, p) in enumerate(zip(cols, prompts)):
+        with col:
+            clicked = st.button(
+                f"**{p['label']}**\n\n{p['title']}\n\n_{p['hint']}_",
+                key=f"followup_{i}",
+                use_container_width=True,
+            )
+            if clicked:
+                st.session_state.active_followup = i
+                st.session_state.pending_chat_message = p["message"]
+                st.session_state.pending_chat_display = p["title"]
+
+    # Fire the chat call if a follow-up was just triggered
+    if st.session_state.get("pending_chat_message"):
+        msg = st.session_state.pop("pending_chat_message")
+        display = st.session_state.pop("pending_chat_display", msg)
+        with st.spinner("Holo is thinking..."):
+            try:
+                chat_result = call_chat(
+                    msg,
+                    st.session_state.get("chat_session_id"),
+                    capsule_token=st.session_state.get("capsule_token"),
+                )
+                st.session_state.chat_session_id = chat_result.get("session_id")
+                st.session_state.chat_history.append({
+                    "display": display,
+                    "response": chat_result.get("response", ""),
+                })
+            except Exception as e:
+                st.error(f"Chat error: {e}")
+
+    # Render chat thread
+    if st.session_state.get("chat_history"):
+        st.markdown('<div class="chat-thread">', unsafe_allow_html=True)
+        for turn in st.session_state.chat_history:
+            st.markdown(
+                f'<div class="chat-user-msg">{turn["display"]}</div>',
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                f'<div class="holo-response">'
+                f'<span class="holo-response-label">⬡ Holo</span>'
+                f'{turn["response"]}'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Allow freeform follow-up
+        st.markdown(
+            '<div class="section-header">Continue the conversation</div>',
+            unsafe_allow_html=True,
+        )
+        user_msg = st.text_input(
+            "Ask Holo anything about this evaluation",
+            key="freeform_chat_input",
+            label_visibility="collapsed",
+            placeholder="Ask anything about this evaluation...",
+        )
+        if st.button("Send", key="freeform_chat_send"):
+            if user_msg.strip():
+                with st.spinner("Holo is thinking..."):
+                    try:
+                        chat_result = call_chat(
+                            user_msg,
+                            st.session_state.get("chat_session_id"),
+                            capsule_token=st.session_state.get("capsule_token"),
+                        )
+                        st.session_state.chat_session_id = chat_result.get("session_id")
+                        st.session_state.chat_history.append({
+                            "display": user_msg,
+                            "response": chat_result.get("response", ""),
+                        })
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Chat error: {e}")
+
+
 # ============================================================
 # Tab 1: New Evaluation
 # ============================================================
@@ -455,8 +1076,21 @@ def render_token_summary(token_usage: dict):
 tab_eval, tab_history = st.tabs(["\u2B21 New Evaluation", "\U0001F4CA History"])
 
 with tab_eval:
-    st.markdown("## Evaluate an Action")
-    st.caption("Select a demo scenario or build your own payload. Holo runs a multi-model adversarial loop and returns ALLOW or ESCALATE.")
+    # Session state for persistent results + chat
+    for _key in ("eval_result", "chat_session_id", "chat_history", "active_followup"):
+        if _key not in st.session_state:
+            st.session_state[_key] = None if _key != "chat_history" else []
+
+    st.markdown("""
+    <div class="page-hero">
+        <h1>Evaluate an Action</h1>
+        <p class="hero-sub">
+            Select a scenario or build your own payload.
+            Holo runs a <strong>multi-model adversarial council</strong> — three frontier models, compounding postmortems,
+            convergence detection — and returns a final verdict: <strong>ALLOW</strong> or <strong>ESCALATE</strong>.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     # ---- Scenario Selector ----
     scenario_name = st.selectbox(
@@ -562,7 +1196,7 @@ with tab_eval:
 
     st.markdown("")  # spacing
     evaluate_clicked = st.button(
-        "\u2B21  Evaluate Action",
+        "⬡  Run Adversarial Evaluation",
         type="primary",
         use_container_width=True,
     )
@@ -620,7 +1254,15 @@ with tab_eval:
                 st.error(f"Unexpected error: {e}")
                 st.stop()
 
-        # ---- Display Results ----
+        # Store result in session state so it persists across re-runs (e.g. follow-up clicks)
+        st.session_state.eval_result = result
+        st.session_state.chat_session_id = None
+        st.session_state.chat_history = []
+        st.session_state.active_followup = None
+
+    # ---- Display Results (from session state, persists across button clicks) ----
+    if st.session_state.eval_result:
+        result = st.session_state.eval_result
         st.markdown("---")
 
         render_verdict(result.get("decision", "ESCALATE"))
@@ -634,8 +1276,12 @@ with tab_eval:
 
         st.markdown("")
         st.markdown(
-            f"**Audit ID:** `{result.get('audit_id', 'N/A')}`"
+            f'<span style="font-size:0.75rem;color:#444;font-family:\'JetBrains Mono\',monospace;">'
+            f'Audit ID: {result.get("audit_id", "N/A")}</span>',
+            unsafe_allow_html=True,
         )
+
+        render_follow_ups(result)
 
 
 # ============================================================
@@ -643,7 +1289,12 @@ with tab_eval:
 # ============================================================
 
 with tab_history:
-    st.markdown("## Evaluation History")
+    st.markdown("""
+    <div class="history-hero">
+        <h2>Evaluation History</h2>
+        <span class="history-sub">All past adversarial evaluations — auditable, compounding, permanent.</span>
+    </div>
+    """, unsafe_allow_html=True)
 
     try:
         data = call_history()

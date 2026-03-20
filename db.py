@@ -57,6 +57,68 @@ class Database:
         )
         return result.data[0]
 
+    def issue_api_key(self, capsule_id: str, name: str = "default") -> str:
+        """
+        Generate a new holo_sk_... API key, store a hash of it, and return
+        the raw key. The raw key is returned exactly once — never stored.
+
+        Requires the api_keys table to have a capsule_id column:
+          ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS capsule_id text;
+          ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+        """
+        import secrets
+        raw_key = "holo_sk_" + secrets.token_urlsafe(32)
+        key_hash   = hashlib.sha256(raw_key.encode()).hexdigest()
+        key_prefix = raw_key[:14]  # "holo_sk_" + 6 chars — safe to display
+
+        self.client.table("api_keys").insert({
+            "key_hash":                key_hash,
+            "key_prefix":              key_prefix,
+            "name":                    name,
+            "capsule_id":              capsule_id,
+            "is_active":               True,
+            "max_requests_per_minute": 60,
+        }).execute()
+
+        return raw_key
+
+    def get_api_keys(self, capsule_id: str) -> list[dict]:
+        """Return all active API keys for a capsule (prefix + name only — never the hash)."""
+        result = (
+            self.client.table("api_keys")
+            .select("key_prefix, name, is_active, created_at, max_requests_per_minute")
+            .eq("capsule_id", capsule_id)
+            .eq("is_active", True)
+            .order("created_at", desc=True)
+            .execute()
+        )
+        return result.data or []
+
+    def revoke_api_key(self, capsule_id: str, key_prefix: str) -> bool:
+        """Soft-delete a key by prefix. Returns True if a row was updated."""
+        result = (
+            self.client.table("api_keys")
+            .update({"is_active": False})
+            .eq("capsule_id", capsule_id)
+            .eq("key_prefix", key_prefix)
+            .execute()
+        )
+        return bool(result.data)
+
+    def get_capsule_id_for_key(self, raw_key: str) -> Optional[str]:
+        """Return the capsule_id associated with a raw API key, or None."""
+        key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+        result = (
+            self.client.table("api_keys")
+            .select("capsule_id")
+            .eq("key_hash", key_hash)
+            .eq("is_active", True)
+            .execute()
+        )
+        if result.data:
+            return result.data[0].get("capsule_id")
+        return None
+
     # ----------------------------------------------------------------
     # Evaluation Log Operations
     # ----------------------------------------------------------------
@@ -128,6 +190,82 @@ class Database:
             }
             for row in result.data
         }
+
+    # ----------------------------------------------------------------
+    # Subscription / Quota Operations
+    # ----------------------------------------------------------------
+
+    def get_subscription(self, capsule_id: str) -> Optional[dict]:
+        """Get subscription record for a capsule. Returns None if not found."""
+        result = (
+            self.client.table("subscriptions")
+            .select("*")
+            .eq("capsule_id", capsule_id)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+
+    def get_or_create_subscription(self, capsule_id: str, email: str) -> dict:
+        """Get existing subscription or create a free tier one."""
+        sub = self.get_subscription(capsule_id)
+        if sub:
+            return sub
+        result = (
+            self.client.table("subscriptions")
+            .insert({"capsule_id": capsule_id, "email": email, "plan": "free", "calls_quota": 3})
+            .execute()
+        )
+        return result.data[0]
+
+    def increment_calls_used(self, capsule_id: str) -> int:
+        """Increment calls_used by 1. Returns new count."""
+        sub = self.get_subscription(capsule_id)
+        if not sub:
+            return 0
+        new_count = (sub.get("calls_used") or 0) + 1
+        self.client.table("subscriptions").update(
+            {"calls_used": new_count, "updated_at": "now()"}
+        ).eq("capsule_id", capsule_id).execute()
+        return new_count
+
+    def update_subscription_plan(self, capsule_id: str, plan: str, quota: int,
+                                  stripe_customer_id: str = None, stripe_sub_id: str = None) -> dict:
+        """Update a subscription after successful Stripe payment."""
+        updates = {"plan": plan, "calls_quota": quota, "updated_at": "now()"}
+        if stripe_customer_id:
+            updates["stripe_customer_id"] = stripe_customer_id
+        if stripe_sub_id:
+            updates["stripe_sub_id"] = stripe_sub_id
+        result = (
+            self.client.table("subscriptions")
+            .update(updates)
+            .eq("capsule_id", capsule_id)
+            .execute()
+        )
+        return result.data[0] if result.data else {}
+
+    # ----------------------------------------------------------------
+    # Usage Tracking
+    # ----------------------------------------------------------------
+
+    def log_api_usage(self, record: dict) -> None:
+        """Insert a usage log record. Silently ignores errors."""
+        try:
+            self.client.table("usage_logs").insert(record).execute()
+        except Exception as e:
+            logger.warning(f"Usage log write failed: {e}")
+
+    def get_usage_stats(self, api_key_hash: str | None = None) -> list[dict]:
+        """Fetch recent usage logs, optionally filtered by key."""
+        q = (
+            self.client.table("usage_logs")
+            .select("*")
+            .order("created_at", desc=True)
+            .limit(500)
+        )
+        if api_key_hash:
+            q = q.eq("api_key_hash", api_key_hash)
+        return q.execute().data
 
     # ----------------------------------------------------------------
     # Health Check

@@ -110,7 +110,7 @@ class MockAdapter(BaseAdapter):
         # Not used directly — run_turn is overridden
         raise NotImplementedError
 
-    def run_turn(self, state, turn_number, role):
+    def run_turn(self, state, turn_number, role, temperature=0.2):
         idx = min(self._call_count, len(self._results) - 1)
         self._call_count += 1
         r = self._results[idx]

@@ -112,8 +112,13 @@
     #attach:hover { background: var(--bg3); }
     #attach svg { stroke: var(--text2); }
     #file-input { display: none; }
-    .attachment-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--bg2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; font-size: 12px; color: var(--text2); margin: 4px 0; }
+    .attachment-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 4px 10px; font-size: 12px; color: var(--text2); margin: 4px 0; }
     .attachment-pill button { background: none; border: none; color: var(--text2); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; }
+    .attachment-pill.image-pill { padding: 4px 8px 4px 4px; border-radius: 10px; }
+    .attachment-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 7px; display: block; cursor: pointer; }
+    /* Images inside user bubble */
+    .msg-images { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; justify-content: flex-end; }
+    .msg-img { max-width: 220px; max-height: 180px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 1px solid var(--border); }
     #attachments-bar { padding: 0 20px 4px; display: flex; flex-wrap: wrap; gap: 6px; }
     #input-actions { display: flex; align-items: flex-end; gap: 6px; flex-shrink: 0; }
     #send { width: 32px; height: 32px; border-radius: 8px; background: var(--text); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.15s; }
@@ -254,7 +259,7 @@
     .thread-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
     #thread-empty { color: var(--text3); font-size: 13px; text-align: center; padding: 32px 16px; line-height: 1.6; }
     /* Thread toggle in header */
-    #thread-toggle { background: none; border: 1px solid var(--border); color: var(--text3); border-radius: 8px; padding: 5px 9px; font-size: 14px; cursor: pointer; display: none; transition: all 0.15s; flex-shrink: 0; line-height: 1; }
+    #thread-toggle { background: none; border: 1px solid var(--border); color: var(--text3); border-radius: 8px; padding: 5px 9px; font-size: 14px; cursor: pointer; display: block; transition: all 0.15s; flex-shrink: 0; line-height: 1; }
     #thread-toggle:hover { border-color: var(--text2); color: var(--text5); }
     #thread-toggle.open { border-color: var(--accent); color: var(--accent); }
 
@@ -406,9 +411,16 @@
   function renderAttachmentPill(file) {
     const bar  = document.getElementById("attachments-bar");
     const pill = document.createElement("div");
-    pill.className   = "attachment-pill";
     pill.dataset.name = file.name;
-    pill.innerHTML   = `📎 ${escHtml(file.name)} <button onclick="removeAttachment('${escHtml(file.name)}', this.parentElement)">×</button>`;
+
+    if (isImageFile(file)) {
+      pill.className = "attachment-pill image-pill";
+      const url = URL.createObjectURL(file);
+      pill.innerHTML = `<img class="attachment-thumb" src="${url}" alt="${escHtml(file.name)}" /><button onclick="removeAttachment('${escHtml(file.name)}', this.parentElement)" style="align-self:flex-start;margin-top:2px">×</button>`;
+    } else {
+      pill.className = "attachment-pill";
+      pill.innerHTML = `📎 ${escHtml(file.name)} <button onclick="removeAttachment('${escHtml(file.name)}', this.parentElement)">×</button>`;
+    }
     bar.appendChild(pill);
   }
 
@@ -692,7 +704,6 @@
     updateModeUI(capsuleMode);
     fetchCapsuleContext(name);
     restoreLastSession();
-    document.getElementById("thread-toggle").style.display = "block";
     loadSessionList();
   }
 
@@ -829,7 +840,7 @@
     msg.innerHTML = `
       <div class="holo-icon">✦</div>
       <div class="holo-body">
-        <div class="bubble">${escHtml(handoff.message)} <a href="${handoff.new_thread}" style="color:var(--accent);text-decoration:none;font-weight:600;">Start fresh thread →</a></div>
+        <div class="bubble">${escHtml(handoff.message)} <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;font-weight:600;">Start fresh thread →</a></div>
       </div>`;
     container.appendChild(msg);
     scrollToBottom();
@@ -907,6 +918,24 @@
     }
   }
 
+  // Paste screenshots directly into the input area
+  document.getElementById("input").addEventListener("paste", function(e) {
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith("image/")) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (!file) continue;
+        // Give pasted image a stable name
+        const ext = item.type.split("/")[1] || "png";
+        const named = new File([file], `screenshot-${Date.now()}.${ext}`, { type: item.type });
+        attachedFiles.push(named);
+        renderAttachmentPill(named);
+      }
+    }
+  });
+
   async function sendMessage() {
     if (isLoading) return;
     const input = document.getElementById("input");
@@ -927,7 +956,11 @@
     isLoading = true;
     document.getElementById("send").disabled = true;
 
-    appendMessage("user", text); // show only the typed text, not raw file contents
+    // Collect object URLs for image previews before clearing attachedFiles
+    const imagePreviewUrls = attachedFiles
+      .filter(isImageFile)
+      .map(f => URL.createObjectURL(f));
+    appendMessage("user", text, imagePreviewUrls); // show text + image previews
     const typingEl = appendTyping();
     scrollToBottom();
     startAmbientBubbles();
@@ -981,6 +1014,16 @@
       if (data.handoff && data.handoff.suggested) {
         setTimeout(() => showHandoff(data.handoff), 1200);
       }
+
+      // YELLOW nudge — warn early before context gets too heavy
+      if (data.thread_health_level === "YELLOW" && !document.getElementById("thread-nudge")) {
+        const nudge = document.createElement("div");
+        nudge.id = "thread-nudge";
+        nudge.style.cssText = "text-align:center;padding:8px 16px;font-size:12px;color:var(--text4);";
+        nudge.innerHTML = `This thread is getting long. <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;">Start a fresh one</a> to keep Holo sharp.`;
+        document.getElementById("messages").appendChild(nudge);
+        scrollToBottom();
+      }
     } catch (e) {
       stopAmbientBubbles();
       typingEl.remove();
@@ -988,15 +1031,17 @@
     } finally {
       isLoading = false;
       document.getElementById("send").disabled = false;
-      scrollToBottom();
     }
   }
 
-  function appendMessage(role, text) {
+  function appendMessage(role, text, imageUrls) {
     const container = document.getElementById("messages");
     const msg       = document.createElement("div");
     msg.className   = `msg ${role}`;
-    msg.innerHTML   = `<div class="bubble">${escHtml(text)}</div>`;
+    const imagesHtml = (imageUrls && imageUrls.length)
+      ? `<div class="msg-images">${imageUrls.map(u => `<img class="msg-img" src="${u}" onclick="window.open('${u}')" />`).join("")}</div>`
+      : "";
+    msg.innerHTML   = `<div class="bubble">${escHtml(text)}${imagesHtml}</div>`;
     container.appendChild(msg);
     return msg;
   }
@@ -1033,6 +1078,23 @@
       </div>`;
 
     container.appendChild(msg);
+
+    // Stagger each block element in so it doesn't land as one big blast
+    const bubble = msg.querySelector(".bubble");
+    if (bubble) {
+      Array.from(bubble.children).forEach((el, i) => {
+        el.style.opacity    = "0";
+        el.style.transform  = "translateY(5px)";
+        el.style.transition = `opacity 0.35s ease ${i * 75}ms, transform 0.35s ease ${i * 75}ms`;
+        requestAnimationFrame(() => {
+          el.style.opacity   = "1";
+          el.style.transform = "translateY(0)";
+        });
+      });
+    }
+
+    // Scroll the top of Holo's response into view — not the bottom
+    msg.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function copyMsg(id, btn) {
@@ -1101,7 +1163,12 @@
   }
 
   function newThread() {
-    window.open("/chat", "_blank");
+    sessionId = null;
+    turnCount = 0;
+    document.getElementById("messages").innerHTML =
+      `<div id="empty"><h2>What's on your mind?</h2><p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p></div>`;
+    document.getElementById("input").focus();
+    closeThreadPanel();
   }
 
   function scrollToBottom() {
@@ -1254,7 +1321,7 @@
     _threadPanelOpen = true;
     document.getElementById("thread-panel").classList.add("open");
     document.getElementById("thread-toggle").classList.add("open");
-    if (_sessionList.length === 0) loadSessionList();
+    if (!capsuleToken || _sessionList.length === 0) loadSessionList();
   }
 
   function closeThreadPanel() {
@@ -1264,7 +1331,10 @@
   }
 
   async function loadSessionList() {
-    if (!capsuleToken) return;
+    if (!capsuleToken) {
+      document.getElementById("thread-list").innerHTML = `<div id="thread-empty">Sign in to save and access your threads.</div>`;
+      return;
+    }
     try {
       const res = await fetch("/v1/capsule/sessions", {
         headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }

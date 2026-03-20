@@ -200,6 +200,7 @@ class HoloChatEngine:
         # Link session to capsule on first turn
         if capsule_id and session.turn_count == 1:
             self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id)
+            self._brain.append_session_history(capsule_id, session.session_id, user_message)
 
         # Pilot learns — extract any new facts about the user and persist them
         if capsule_id:
@@ -231,7 +232,7 @@ class HoloChatEngine:
                     logger.warning(f"Consolidation failed: {e}")
             threading.Thread(target=_consolidate, daemon=True).start()
 
-        # Persist to Supabase
+        # Persist to Supabase — capsule_id links session to user permanently
         self._brain.save_chat_turn(
             session_id    = session.session_id,
             turn_number   = session.turn_count,
@@ -239,6 +240,7 @@ class HoloChatEngine:
             holo_response = response_text,
             provider      = adapter.provider,
             temperature   = temperature,
+            capsule_id    = capsule_id,
         )
 
         # Signal a thread handoff when health is RED

@@ -772,6 +772,7 @@ class ProjectBrain:
         holo_response: str,
         provider: str,
         temperature: float,
+        capsule_id: str = None,
     ):
         """
         Persist one chat turn (user message + Holo response) to Supabase.
@@ -782,12 +783,17 @@ class ProjectBrain:
         try:
             now = datetime.now(timezone.utc).isoformat()
 
-            # Upsert session row
-            self._client.table("holo_chat_sessions").upsert({
+            # Upsert session row — include capsule_id so threads are user-owned
+            session_row = {
                 "session_id":  session_id,
                 "last_active": now,
                 "turn_count":  turn_number,
-            }, on_conflict="session_id").execute()
+            }
+            if capsule_id:
+                session_row["capsule_id"] = capsule_id
+            self._client.table("holo_chat_sessions").upsert(
+                session_row, on_conflict="session_id"
+            ).execute()
 
             # Insert user + assistant messages
             self._client.table("holo_chat_messages").insert([
@@ -836,6 +842,54 @@ class ProjectBrain:
         except Exception as e:
             logger.warning(f"ProjectBrain.load_chat_history failed: {e}")
             return None
+
+    def list_sessions(self, capsule_id: str, limit: int = 40) -> list:
+        """
+        Return all chat sessions for a capsule, newest first.
+        Each entry includes session_id, created_at, last_active, turn_count,
+        and the first user message as a preview title.
+        """
+        if not self._client or not capsule_id:
+            return []
+        try:
+            rows = (
+                self._client.table("holo_chat_sessions")
+                .select("session_id, created_at, last_active, turn_count")
+                .eq("capsule_id", capsule_id)
+                .order("last_active", desc=True)
+                .limit(limit)
+                .execute()
+            ).data or []
+
+            if not rows:
+                return []
+
+            # Fetch first user message for each session to use as title
+            session_ids = [r["session_id"] for r in rows]
+            previews = {}
+            for sid in session_ids:
+                try:
+                    first = (
+                        self._client.table("holo_chat_messages")
+                        .select("content")
+                        .eq("session_id", sid)
+                        .eq("role", "user")
+                        .order("created_at", desc=False)
+                        .limit(1)
+                        .execute()
+                    ).data
+                    if first:
+                        previews[sid] = first[0]["content"][:80]
+                except Exception:
+                    pass
+
+            for r in rows:
+                r["preview"] = previews.get(r["session_id"], "New conversation")
+
+            return rows
+        except Exception as e:
+            logger.warning(f"ProjectBrain.list_sessions failed: {e}")
+            return []
 
     def save_consolidation(self, capsule_id: str, session_id: str, session_note: dict) -> None:
         """Persist the Pilot's session-end note to holo_session_consolidations."""
@@ -931,6 +985,79 @@ class ProjectBrain:
         except Exception as e:
             logger.warning(f"ProjectBrain.load_last_consolidation failed: {e}")
             return None
+
+    def append_session_history(self, capsule_id: str, session_id: str, first_message: str) -> None:
+        """
+        Append this session to the capsule's session history list.
+        Stored as JSON in holo_capsule_context under key '_session_history'.
+        No schema changes required — uses the existing context table.
+        Keeps last 50 sessions; newest is at the end of the list.
+        """
+        import json
+        if not self._client:
+            return
+        try:
+            resp = (
+                self._client.table("holo_capsule_context")
+                .select("value")
+                .eq("capsule_id", capsule_id)
+                .eq("key", "_session_history")
+                .maybe_single()
+                .execute()
+            )
+            existing: list = []
+            if resp.data:
+                try:
+                    existing = json.loads(resp.data["value"]) or []
+                except Exception:
+                    existing = []
+
+            now = datetime.now(timezone.utc).isoformat()
+            entry = {
+                "id":      session_id,
+                "at":      now,
+                "preview": first_message[:80],
+            }
+            # Deduplicate by session_id (handles retries on first turn)
+            existing = [e for e in existing if e.get("id") != session_id]
+            existing.append(entry)
+            if len(existing) > 50:
+                existing = existing[-50:]
+
+            self._client.table("holo_capsule_context").upsert({
+                "capsule_id": capsule_id,
+                "key":        "_session_history",
+                "value":      json.dumps(existing),
+                "updated_at": now,
+            }, on_conflict="capsule_id,key").execute()
+
+        except Exception as e:
+            logger.warning(f"ProjectBrain.append_session_history failed: {e}")
+
+    def load_session_list(self, capsule_id: str) -> list:
+        """
+        Return list of sessions for this capsule, newest first.
+        Each entry: {id, at, preview}
+        """
+        import json
+        if not self._client:
+            return []
+        try:
+            resp = (
+                self._client.table("holo_capsule_context")
+                .select("value")
+                .eq("capsule_id", capsule_id)
+                .eq("key", "_session_history")
+                .maybe_single()
+                .execute()
+            )
+            if not resp.data:
+                return []
+            entries = json.loads(resp.data["value"]) or []
+            return list(reversed(entries))  # newest first
+        except Exception as e:
+            logger.warning(f"ProjectBrain.load_session_list failed: {e}")
+            return []
 
     def _extract_vendor_domain(self, context: dict) -> Optional[str]:
         """Extract vendor email domain from the context bundle."""

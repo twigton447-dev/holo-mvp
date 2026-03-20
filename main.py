@@ -597,6 +597,19 @@ async def get_last_session(request: Request):
     return JSONResponse(content={"session_id": session_id, "history": history})
 
 
+@app.get("/v1/capsule/sessions")
+async def list_sessions(request: Request):
+    """
+    Return all past chat sessions for the authenticated user, newest first.
+    Each entry: {id, at, preview}
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    sessions = _capsule_brain.load_session_list(capsule["sub"])
+    return JSONResponse(content={"sessions": sessions})
+
+
 @app.get("/v1/chat/{session_id}/history")
 async def chat_history(
     session_id: str,

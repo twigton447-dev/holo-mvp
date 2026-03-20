@@ -54,7 +54,7 @@ from fastapi.staticfiles import StaticFiles
 from auth import RateLimiter
 from context_governor import ContextGovernor
 from chat_engine import HoloChatEngine
-from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, _brain as _capsule_brain
+from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
 from db import Database
 from billing import create_checkout_session, create_customer_portal_session, construct_webhook_event, PLANS
 
@@ -352,19 +352,59 @@ async def email_signin(request: Request):
     except Exception:
         raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
 
-    email    = body.get("email", "").strip()
-    name     = body.get("name", "").strip()
-    password = body.get("password", "").strip()
+    email       = body.get("email", "").strip()
+    name        = body.get("name", "").strip()
+    password    = body.get("password", "").strip()
+    invite_code = body.get("invite_code", "").strip()
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="A valid email is required.")
     if not password:
         raise HTTPException(status_code=400, detail="A password is required.")
 
-    result = handle_email_signin(email, name, password)
+    try:
+        result = handle_email_signin(email, name, password, invite_code)
+    except ValueError:
+        raise HTTPException(status_code=403, detail="Invalid invite code.")
     if not result:
         raise HTTPException(status_code=401, detail="Incorrect password.")
 
     return JSONResponse(content=result)
+
+
+@app.post("/auth/forgot-password")
+async def forgot_password(request: Request):
+    """Send a password reset email. Body: { "email": "..." }"""
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+    email = body.get("email", "").strip()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="A valid email is required.")
+    base_url = str(request.base_url)
+    request_password_reset(email, base_url)
+    # Always return 200 — don't reveal whether the account exists
+    return JSONResponse(content={"ok": True})
+
+
+@app.post("/auth/reset-password")
+async def do_reset_password(request: Request):
+    """Reset password with token. Body: { "email": "...", "token": "...", "password": "..." }"""
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+    email    = body.get("email", "").strip()
+    token    = body.get("token", "").strip()
+    password = body.get("password", "").strip()
+    if not all([email, token, password]):
+        raise HTTPException(status_code=400, detail="email, token, and password are required.")
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters.")
+    ok = reset_password(email, token, password)
+    if not ok:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset link. Please request a new one.")
+    return JSONResponse(content={"ok": True})
 
 
 @app.get("/auth/me")

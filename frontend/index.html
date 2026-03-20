@@ -290,43 +290,68 @@
   <h2>Holo</h2>
   <p>Your second brain. Sign in to bring your capsule with you.</p>
 
-  <!-- Google sign-in button — rendered by JS once GSI library + client ID are both ready -->
   <div id="g_signin_btn"></div>
 
-  <!-- Divider -->
   <div style="display:flex;align-items:center;gap:12px;width:100%;max-width:280px;margin:4px 0;">
     <div style="flex:1;height:1px;background:#222;"></div>
     <span style="color:#333;font-size:12px;">or</span>
     <div style="flex:1;height:1px;background:#222;"></div>
   </div>
 
-  <!-- Email sign-in -->
-  <div id="email-signin-form" style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;">
-    <input id="signin-name"     type="text"     placeholder="Your name"  autocomplete="name"
-      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;" />
-    <input id="signin-email"    type="email"    placeholder="Your email" autocomplete="email"
-      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;" />
-    <input id="signin-password" type="password" placeholder="Password"   autocomplete="current-password"
-      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;" />
-    <button onclick="emailSignIn()"
+  <!-- Tab toggle -->
+  <div style="display:flex;background:#111;border:1px solid #2a2a2a;border-radius:10px;overflow:hidden;width:100%;max-width:280px;">
+    <button id="tab-create" onclick="switchAuthTab('create')"
+      style="flex:1;padding:9px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;background:#1a56e8;color:#fff;transition:all 0.15s;">
+      Create account
+    </button>
+    <button id="tab-signin" onclick="switchAuthTab('signin')"
+      style="flex:1;padding:9px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;background:transparent;color:#555;transition:all 0.15s;">
+      Sign in
+    </button>
+  </div>
+
+  <!-- Create account form -->
+  <div id="form-create" style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;">
+    <input id="create-name"     type="text"     placeholder="Your name"        autocomplete="name"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
+    <input id="create-email"    type="email"    placeholder="Email"            autocomplete="email"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
+    <input id="create-password" type="password" placeholder="Password (min 8 chars)" autocomplete="new-password"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
+    <input id="create-invite" type="text" placeholder="Invite code"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
+    <button onclick="doCreateAccount()"
       style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
-      Continue
+      Create account
+    </button>
+    <div id="create-error" style="color:#ef4444;font-size:12px;text-align:center;display:none;"></div>
+  </div>
+
+  <!-- Sign in form -->
+  <div id="form-signin" style="display:none;flex-direction:column;gap:10px;width:100%;max-width:280px;">
+    <input id="signin-email"    type="email"    placeholder="Email"    autocomplete="email"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
+    <input id="signin-password" type="password" placeholder="Password" autocomplete="current-password"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
+    <button onclick="doSignIn()"
+      style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
+      Sign in
     </button>
     <div id="signin-error" style="color:#ef4444;font-size:12px;text-align:center;display:none;"></div>
     <button onclick="showForgotPassword()" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;text-align:center;padding:0;">Forgot password?</button>
   </div>
 
-  <!-- Forgot password form (hidden by default) -->
+  <!-- Forgot password form -->
   <div id="forgot-form" style="display:none;flex-direction:column;gap:10px;width:100%;max-width:280px;">
-    <p style="color:#888;font-size:13px;margin:0;text-align:center;line-height:1.6;">Enter your email and we'll send a reset link.</p>
+    <p style="color:#888;font-size:13px;margin:0;text-align:center;line-height:1.6;">We'll send a reset link to your email.</p>
     <input id="forgot-email" type="email" placeholder="Your email" autocomplete="email"
-      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;" />
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <button onclick="sendResetEmail()"
       style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
       Send reset link
     </button>
     <div id="forgot-msg" style="font-size:12px;text-align:center;display:none;"></div>
-    <button onclick="showEmailSignIn()" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;">← Back to sign in</button>
+    <button onclick="showForgotBack()" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;">← Back</button>
   </div>
 
   <button onclick="skipSignIn()" style="background:none;border:none;color:#333;font-size:13px;cursor:pointer;margin-top:4px;">Continue without signing in</button>
@@ -336,7 +361,7 @@
 <div id="reset-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;align-items:center;justify-content:center;">
   <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px 28px;width:calc(100% - 48px);max-width:340px;display:flex;flex-direction:column;gap:14px;">
     <h3 style="margin:0;font-size:18px;font-weight:700;color:#e8e8e8;">Set a new password</h3>
-    <input id="reset-password"  type="password" placeholder="New password (min 6 chars)" autocomplete="new-password"
+    <input id="reset-password"  type="password" placeholder="New password (min 8 chars)" autocomplete="new-password"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <input id="reset-password2" type="password" placeholder="Confirm new password"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
@@ -686,42 +711,65 @@
     .catch(() => skipSignIn());
   }
 
-  async function emailSignIn() {
-    const name     = document.getElementById("signin-name").value.trim();
-    const email    = document.getElementById("signin-email").value.trim();
-    const password = document.getElementById("signin-password").value;
-    const errEl    = document.getElementById("signin-error");
+  // ---- Auth tab switching --------------------------------------------------
+
+  function switchAuthTab(tab) {
+    const isCreate = tab === "create";
+    document.getElementById("tab-create").style.background = isCreate ? "#1a56e8" : "transparent";
+    document.getElementById("tab-create").style.color      = isCreate ? "#fff"    : "#555";
+    document.getElementById("tab-signin").style.background = isCreate ? "transparent" : "#1a56e8";
+    document.getElementById("tab-signin").style.color      = isCreate ? "#555"    : "#fff";
+    document.getElementById("form-create").style.display   = isCreate ? "flex"    : "none";
+    document.getElementById("form-signin").style.display   = isCreate ? "none"    : "flex";
+    document.getElementById("forgot-form").style.display   = "none";
+    document.getElementById("create-error").style.display  = "none";
+    document.getElementById("signin-error").style.display  = "none";
+  }
+
+  async function _authCall(email, name, password, errElId, invite_code = "") {
+    const errEl = document.getElementById(errElId);
     errEl.style.display = "none";
-
-    if (!email || !email.includes("@")) {
-      errEl.textContent = "Please enter a valid email.";
-      errEl.style.display = "block";
-      return;
-    }
-    if (!password) {
-      errEl.textContent = "Please enter a password.";
-      errEl.style.display = "block";
-      return;
-    }
-
     try {
       const res  = await fetch("/auth/email", {
         method:  "POST",
         headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
-        body:    JSON.stringify({ email, name, password }),
+        body:    JSON.stringify({ email, name, password, invite_code }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Sign-in failed.");
+      if (!res.ok) throw new Error(data.detail || "Something went wrong.");
       capsuleToken = data.capsule_token;
       capsuleMode  = data.mode || "personal";
       localStorage.setItem("holo_capsule_token", capsuleToken);
       localStorage.setItem("holo_capsule_mode",  capsuleMode);
-      showCapsule(data);
       document.getElementById("signin-overlay").classList.add("hidden");
+      showCapsule(data);
     } catch (e) {
-      errEl.textContent = e.message;
+      errEl.textContent   = e.message;
       errEl.style.display = "block";
     }
+  }
+
+  async function doCreateAccount() {
+    const name        = (document.getElementById("create-name")?.value     || "").trim();
+    const email       = (document.getElementById("create-email")?.value    || "").trim();
+    const password    =  document.getElementById("create-password")?.value || "";
+    const invite_code = (document.getElementById("create-invite")?.value   || "").trim();
+    const errEl       =  document.getElementById("create-error");
+    errEl.style.display = "none";
+    if (!email || !email.includes("@")) { errEl.textContent = "Please enter a valid email."; errEl.style.display = "block"; return; }
+    if (password.length < 8)            { errEl.textContent = "Password must be at least 8 characters."; errEl.style.display = "block"; return; }
+    if (!invite_code)                   { errEl.textContent = "An invite code is required."; errEl.style.display = "block"; return; }
+    await _authCall(email, name || email.split("@")[0], password, "create-error", invite_code);
+  }
+
+  async function doSignIn() {
+    const email    = (document.getElementById("signin-email")?.value    || "").trim();
+    const password =  document.getElementById("signin-password")?.value || "";
+    const errEl    =  document.getElementById("signin-error");
+    errEl.style.display = "none";
+    if (!email || !email.includes("@")) { errEl.textContent = "Please enter a valid email."; errEl.style.display = "block"; return; }
+    if (!password)                       { errEl.textContent = "Please enter your password."; errEl.style.display = "block"; return; }
+    await _authCall(email, "", password, "signin-error");
   }
 
   function skipSignIn() {
@@ -729,15 +777,19 @@
   }
 
   function showForgotPassword() {
-    document.getElementById("email-signin-form").style.display = "none";
+    document.getElementById("form-signin").style.display = "none";
     document.getElementById("forgot-form").style.display = "flex";
-    document.getElementById("forgot-msg").style.display = "none";
+    const fm = document.getElementById("forgot-msg");
+    if (fm) fm.style.display = "none";
   }
 
-  function showEmailSignIn() {
+  function showForgotBack() {
     document.getElementById("forgot-form").style.display = "none";
-    document.getElementById("email-signin-form").style.display = "flex";
+    document.getElementById("form-signin").style.display = "flex";
   }
+
+  // Keep old name as alias in case anything calls it
+  function showEmailSignIn() { showForgotBack(); }
 
   async function sendResetEmail() {
     const email  = document.getElementById("forgot-email").value.trim();
@@ -789,8 +841,8 @@
     const msgEl   = document.getElementById("reset-msg");
     msgEl.style.display = "none";
 
-    if (pw1.length < 6) {
-      msgEl.style.color = "#ef4444"; msgEl.textContent = "Password must be at least 6 characters."; msgEl.style.display = "block"; return;
+    if (pw1.length < 8) {
+      msgEl.style.color = "#ef4444"; msgEl.textContent = "Password must be at least 8 characters."; msgEl.style.display = "block"; return;
     }
     if (pw1 !== pw2) {
       msgEl.style.color = "#ef4444"; msgEl.textContent = "Passwords don't match."; msgEl.style.display = "block"; return;
@@ -820,10 +872,8 @@
   function showCapsule(data) {
     const avatarEl = document.getElementById("user-avatar");
     const modeEl   = document.getElementById("mode-toggle");
-    avatarEl.style.display = "";
-    modeEl.style.display   = "";
-    document.getElementById("signin-btn").style.display  = "none";
-    document.getElementById("signout-btn").style.display = "";
+    if (avatarEl) avatarEl.style.display = "";
+    if (modeEl)   modeEl.style.display   = "";
 
     const name = data.name || data.email || "?";
     const avatarClick = `toggleAvatarMenu()`;
@@ -884,8 +934,9 @@
       updateMemoryBadge();
       renderMemoryList();
 
-      // Onboarding: if Holo knows nothing yet, inject a welcome message
-      const knownCount = Object.keys(_memoryContext).length;
+      // Onboarding: if Holo knows nothing real yet, inject a welcome message
+      // Filter internal keys (prefixed _) — they're system data, not user knowledge
+      const knownCount = Object.keys(_memoryContext).filter(k => !k.startsWith("_")).length;
       if (knownCount === 0) {
         const firstName = (userName || "").split(/[\s@]/)[0] || "hey";
         injectOnboarding(firstName);
@@ -1004,7 +1055,7 @@
     scrollToBottom();
   }
 
-  const _BIO_PROMPT = `Write me a short personal brief — 150–250 words — that I can share with a new AI so it understands me immediately. Cover: who I am and what I do, what I'm actively working on right now, how I like to think and communicate, what I care most about, and anything else that would help someone get up to speed on me fast. Write it in plain, direct language as if I wrote it myself.`;
+  const _BIO_PROMPT = `Write me a personal brief I can share with a new AI so it understands me from day one. Cover the following:\n\n1. Who I am and what I do\n2. What I'm actively working on right now\n3. How I think and communicate — my style, pace, what I value in a conversation\n4. What I care about most (personally and professionally)\n5. Based on our conversations, what you think my top 3–5 Clifton Strengths are and why — even if I haven't taken the assessment, give me your honest read\n6. Anything else that would help someone understand how I operate\n\nWrite it in plain, direct language — as if I wrote it myself. 200–300 words.`;
 
   function copyBioPrompt() {
     navigator.clipboard.writeText(_BIO_PROMPT).then(() => {

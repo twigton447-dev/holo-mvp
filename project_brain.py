@@ -705,6 +705,21 @@ class ProjectBrain:
             logger.warning(f"ProjectBrain.get_or_create_capsule failed: {e}")
             return None
 
+    def get_capsule_by_google_id(self, google_id: str) -> Optional[dict]:
+        if not self._client:
+            return None
+        try:
+            rows = (
+                self._client.table("holo_capsules")
+                .select("*")
+                .eq("google_id", google_id)
+                .limit(1)
+                .execute()
+            ).data or []
+            return rows[0] if rows else None
+        except Exception:
+            return None
+
     def get_capsule(self, capsule_id: str) -> Optional[dict]:
         if not self._client:
             return None

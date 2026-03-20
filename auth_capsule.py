@@ -164,29 +164,34 @@ def handle_email_signin(email: str, name: str, password: str,
 
     synthetic_id = "email:" + hashlib.sha256(email.encode()).hexdigest()[:32]
 
-    # Look up capsule by synthetic_id (stored as google_id) to get the real capsule_id
-    capsule = _brain.get_or_create_capsule(synthetic_id, email, name, "") if _brain._client else None
+    # Look up existing capsule first (without creating)
+    existing_capsule = _brain.get_capsule_by_google_id(synthetic_id) if _brain._client else None
 
-    if capsule:
-        real_id = capsule["capsule_id"]
-        existing_ctx = _brain.get_capsule_context(real_id)
-        stored_hash  = existing_ctx.get("_password_hash")
+    if existing_capsule:
+        real_id = existing_capsule["capsule_id"]
+        ctx = _brain.get_capsule_context(real_id)
+        stored_hash = ctx.get("_password_hash")
 
         if stored_hash:
             # Returning user — verify password
             if not bcrypt.checkpw(password.encode(), stored_hash.encode()):
                 logger.warning(f"Password mismatch for {email}")
                 return None
+            capsule = existing_capsule
         else:
-            # Capsule exists but no hash yet — new user, check invite code
-            if not _valid_invite_code(invite_code):
-                logger.warning(f"Invalid invite code '{invite_code}' for {email}")
-                raise ValueError("invalid_invite_code")
+            # Existing capsule but no hash (legacy account) — set password, no invite needed
             hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
             _brain.set_capsule_context(real_id, "_password_hash", hashed)
+            capsule = existing_capsule
     else:
-        # No DB — ephemeral fallback (no invite check possible)
-        pass
+        # Brand new user — require invite code
+        if not _valid_invite_code(invite_code):
+            logger.warning(f"Invalid invite code '{invite_code}' for {email}")
+            raise ValueError("invalid_invite_code")
+        capsule = _brain.get_or_create_capsule(synthetic_id, email, name, "")
+        if capsule:
+            hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+            _brain.set_capsule_context(capsule["capsule_id"], "_password_hash", hashed)
     if not capsule:
         import uuid
         capsule = {

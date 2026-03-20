@@ -26,7 +26,7 @@
       --text4:    #777;
       --text5:    #aaa;
       --input-bg: #2a2a2a;
-      --accent:   #3b5bdb;
+      --accent:   #5b7ae5;
     }
     body.light {
       --bg:       #fafaf8;
@@ -40,7 +40,7 @@
       --text4:    #666;
       --text5:    #444;
       --input-bg: #ffffff;
-      --accent:   #3b5bdb;
+      --accent:   #5b7ae5;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; transition: background 0.2s, color 0.2s; }
@@ -160,7 +160,7 @@
       font-weight: 300; letter-spacing: 0.03em;
       pointer-events: none;
     }
-    .thought-bubble.blue   { background: rgba(26,58,110,0.45); color: #dbeafe; border: 1px solid rgba(29,78,216,0.4); }
+    .thought-bubble.blue   { background: rgba(40,56,120,0.45); color: #dbeafe; border: 1px solid rgba(91,122,229,0.4); }
     .thought-bubble.yellow { background: rgba(58,46,0,0.45);  color: #fef9c3; border: 1px solid rgba(217,119,6,0.4); }
     .thought-bubble.red    { background: rgba(58,10,10,0.45); color: #fee2e2; border: 1px solid rgba(220,38,38,0.4); }
     .thought-bubble.green  { background: rgba(10,46,26,0.45); color: #dcfce7; border: 1px solid rgba(22,163,74,0.4); }
@@ -193,7 +193,7 @@
     #header { padding: 10px 20px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     #header-brand { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
     #header h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; margin: 0; display: flex; align-items: baseline; gap: 5px; }
-    #brand-sub { font-size: 12px; font-weight: 400; color: var(--text3); opacity: 0.35; transition: opacity 0.4s ease; letter-spacing: 0.02em; }
+    #brand-sub { font-size: 15px; font-weight: 300; color: var(--text2); opacity: 0.55; letter-spacing: -0.1px; }
     #brand-tagline { font-size: 10px; font-weight: 500; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.5; }
     #header-right { display: flex; align-items: center; gap: 8px; }
     #new-thread { background: none; border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.15s; }
@@ -303,7 +303,7 @@
   <!-- Tab toggle -->
   <div style="display:flex;background:#111;border:1px solid #2a2a2a;border-radius:10px;overflow:hidden;width:100%;max-width:280px;">
     <button id="tab-create" onclick="switchAuthTab('create')"
-      style="flex:1;padding:9px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;background:#1a56e8;color:#fff;transition:all 0.15s;">
+      style="flex:1;padding:9px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;background:#5b7ae5;color:#fff;transition:all 0.15s;">
       Create account
     </button>
     <button id="tab-signin" onclick="switchAuthTab('signin')"
@@ -315,13 +315,19 @@
   <!-- Create account form -->
   <div id="form-create" style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;">
     <input id="create-name"     type="text"     placeholder="Your name"              autocomplete="name"
+      onkeydown="if(event.key==='Enter')doCreateAccount()"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <input id="create-email"    type="email"    placeholder="Email"                  autocomplete="email"
+      onkeydown="if(event.key==='Enter')doCreateAccount()"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <input id="create-password" type="password" placeholder="Password (min 8 chars)" autocomplete="new-password"
+      onkeydown="if(event.key==='Enter')doCreateAccount()"
+      style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
+    <input id="create-invite" type="text" placeholder="Invite code"
+      onkeydown="if(event.key==='Enter')doCreateAccount()"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <button onclick="doCreateAccount()"
-      style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
+      style="background:#5b7ae5;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
       Create account
     </button>
     <div id="create-error" style="color:#ef4444;font-size:12px;text-align:center;display:none;"></div>
@@ -330,11 +336,13 @@
   <!-- Sign in form -->
   <div id="form-signin" style="display:none;flex-direction:column;gap:10px;width:100%;max-width:280px;">
     <input id="signin-email"    type="email"    placeholder="Email"    autocomplete="email"
+      onkeydown="if(event.key==='Enter')doSignIn()"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <input id="signin-password" type="password" placeholder="Password" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')doSignIn()"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <button onclick="doSignIn()"
-      style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
+      style="background:#5b7ae5;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
       Sign in
     </button>
     <div id="signin-error" style="color:#ef4444;font-size:12px;text-align:center;display:none;"></div>
@@ -345,9 +353,10 @@
   <div id="forgot-form" style="display:none;flex-direction:column;gap:10px;width:100%;max-width:280px;">
     <p style="color:#888;font-size:13px;margin:0;text-align:center;line-height:1.6;">We'll send a reset link to your email.</p>
     <input id="forgot-email" type="email" placeholder="Your email" autocomplete="email"
+      onkeydown="if(event.key==='Enter')sendResetEmail()"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <button onclick="sendResetEmail()"
-      style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
+      style="background:#5b7ae5;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
       Send reset link
     </button>
     <div id="forgot-msg" style="font-size:12px;text-align:center;display:none;"></div>
@@ -366,7 +375,7 @@
     <input id="reset-password2" type="password" placeholder="Confirm new password"
       style="background:#111;border:1px solid #2a2a2a;color:#e8e8e8;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;" />
     <button onclick="submitReset()"
-      style="background:#1a56e8;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
+      style="background:#5b7ae5;border:none;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">
       Save new password
     </button>
     <div id="reset-msg" style="font-size:12px;text-align:center;display:none;"></div>
@@ -576,8 +585,8 @@
     document.getElementById("theme-toggle").textContent = "☾";
   }
 
-  // ---- Brand sub-word (hidden — space label takes over once space is picked)
-  document.getElementById("brand-sub").textContent = "";
+  // ---- Brand sub-word — always shows "Chat" in lighter weight
+  // (space-label will show active space name when a space is picked)
 
   // ---- Rotating greeting ---------------------------------------------------
   const GREETINGS = [
@@ -718,9 +727,9 @@
 
   function switchAuthTab(tab) {
     const isCreate = tab === "create";
-    document.getElementById("tab-create").style.background = isCreate ? "#1a56e8" : "transparent";
+    document.getElementById("tab-create").style.background = isCreate ? "#5b7ae5" : "transparent";
     document.getElementById("tab-create").style.color      = isCreate ? "#fff"    : "#555";
-    document.getElementById("tab-signin").style.background = isCreate ? "transparent" : "#1a56e8";
+    document.getElementById("tab-signin").style.background = isCreate ? "transparent" : "#5b7ae5";
     document.getElementById("tab-signin").style.color      = isCreate ? "#555"    : "#fff";
     document.getElementById("form-create").style.display   = isCreate ? "flex"    : "none";
     document.getElementById("form-signin").style.display   = isCreate ? "none"    : "flex";
@@ -892,6 +901,7 @@
     fetchCapsuleContext(name);
     restoreLastSession();
     loadSessionList();
+    openThreadPanel();
   }
 
   async function restoreLastSession() {
@@ -997,7 +1007,6 @@
     const menu = document.createElement("div");
     menu.id = "avatar-menu";
     menu.innerHTML = `
-      <button onclick="closeAvatarMenu();openMemoryPanel()">What Holo knows</button>
       <button class="menu-danger" onclick="signOut()">Sign out</button>`;
     document.getElementById("user-avatar").appendChild(menu);
     // Close on outside click
@@ -1430,7 +1439,6 @@
     document.getElementById("messages").innerHTML =
       `<div id="empty"><h2>What's on your mind?</h2><p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p></div>`;
     document.getElementById("input").focus();
-    closeThreadPanel();
   }
 
   function scrollToBottom() {
@@ -1583,7 +1591,9 @@
     _threadPanelOpen = true;
     document.getElementById("thread-panel").classList.add("open");
     document.getElementById("thread-toggle").classList.add("open");
-    if (!capsuleToken || _sessionList.length === 0) loadSessionList();
+    if (!capsuleToken) { loadSessionList(); return; }
+    if (_sessionList.length === 0) loadSessionList();
+    else renderThreadList();
   }
 
   function closeThreadPanel() {
@@ -1622,7 +1632,7 @@
   }
 
   async function loadSession(sid) {
-    if (sid === sessionId) { closeThreadPanel(); return; }
+    if (sid === sessionId) return;
     try {
       const res = await fetch(`/v1/chat/${sid}/history`, {
         headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
@@ -1651,7 +1661,6 @@
       });
       scrollToBottom();
       renderThreadList(); // update active highlight
-      closeThreadPanel();
     } catch (e) {}
   }
 
@@ -1659,7 +1668,7 @@
   function prependSession(sid, preview) {
     _sessionList = _sessionList.filter(s => s.id !== sid);
     _sessionList.unshift({ id: sid, at: new Date().toISOString(), preview });
-    if (_threadPanelOpen) renderThreadList();
+    renderThreadList();
   }
 
   function timeAgo(iso) {

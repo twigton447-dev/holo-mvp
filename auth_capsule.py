@@ -173,16 +173,16 @@ def handle_email_signin(email: str, name: str, password: str,
         if not bcrypt.checkpw(password.encode(), stored_hash.encode()):
             logger.warning(f"Password mismatch for {email}")
             return None
+        capsule = _brain.get_or_create_capsule(synthetic_id, email, name, "")
     else:
         # New user — check invite code first
         if not _valid_invite_code(invite_code):
             logger.warning(f"Invalid invite code '{invite_code}' for {email}")
             raise ValueError("invalid_invite_code")
-        # Hash and store password
+        # Create capsule row FIRST so the FK exists, then store password hash
+        capsule = _brain.get_or_create_capsule(synthetic_id, email, name, "")
         hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
         _brain.set_capsule_context(synthetic_id, "_password_hash", hashed)
-
-    capsule = _brain.get_or_create_capsule(synthetic_id, email, name, "")
     if not capsule:
         import uuid
         capsule = {

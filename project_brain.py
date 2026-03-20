@@ -669,21 +669,21 @@ class ProjectBrain:
         if not self._client:
             return None
         try:
-            resp = (
+            rows = (
                 self._client.table("holo_capsules")
                 .select("*")
                 .eq("google_id", google_id)
-                .maybe_single()
+                .limit(1)
                 .execute()
-            )
-            if resp.data:
+            ).data or []
+            if rows:
                 # Update last_active + name/avatar in case they changed
                 self._client.table("holo_capsules").update({
                     "last_active": datetime.now(timezone.utc).isoformat(),
                     "name":        name,
                     "avatar_url":  avatar_url,
                 }).eq("google_id", google_id).execute()
-                return resp.data
+                return rows[0]
 
             # First sign-in — create capsule
             import uuid
@@ -709,14 +709,14 @@ class ProjectBrain:
         if not self._client:
             return None
         try:
-            resp = (
+            rows = (
                 self._client.table("holo_capsules")
                 .select("*")
                 .eq("capsule_id", capsule_id)
-                .maybe_single()
+                .limit(1)
                 .execute()
-            )
-            return resp.data
+            ).data or []
+            return rows[0] if rows else None
         except Exception:
             return None
 

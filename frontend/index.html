@@ -625,6 +625,38 @@
     }
     updateModeUI(capsuleMode);
     fetchCapsuleContext(name);
+    restoreLastSession();
+  }
+
+  async function restoreLastSession() {
+    if (!capsuleToken) return;
+    try {
+      const res = await fetch("/v1/capsule/last-session", {
+        headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.session_id || !data.history || data.history.length === 0) return;
+
+      // Restore session state
+      sessionId = data.session_id;
+      document.getElementById("empty")?.remove();
+      document.getElementById("holo-onboarding")?.remove();
+
+      const container = document.getElementById("messages");
+      data.history.forEach(msg => {
+        if (msg.role === "user") {
+          appendMessage("user", msg.content);
+        } else if (msg.role === "assistant") {
+          // Render as a Holo message (simplified — no chips/actions for history)
+          const el = document.createElement("div");
+          el.className = "msg holo";
+          el.innerHTML = `<div class="holo-icon">✦</div><div class="holo-body"><div class="bubble">${renderMarkdown(msg.content)}</div></div>`;
+          container.appendChild(el);
+        }
+      });
+      scrollToBottom();
+    } catch (e) {}
   }
 
   let _memoryContext = {};
@@ -719,6 +751,20 @@
     } catch (e) {}
   }
 
+  function showHandoff(handoff) {
+    // Renders as a Holo message, not a system banner — the Pilot's own voice
+    const container = document.getElementById("messages");
+    const msg = document.createElement("div");
+    msg.className = "msg holo";
+    msg.innerHTML = `
+      <div class="holo-icon">✦</div>
+      <div class="holo-body">
+        <div class="bubble">${escHtml(handoff.message)} <a href="${handoff.new_thread}" style="color:var(--accent);text-decoration:none;font-weight:600;">Start fresh thread →</a></div>
+      </div>`;
+    container.appendChild(msg);
+    scrollToBottom();
+  }
+
   function injectOnboarding(firstName) {
     // Only inject once per session
     if (document.getElementById("holo-onboarding")) return;
@@ -728,13 +774,10 @@
     const msg = document.createElement("div");
     msg.className = "msg holo";
     msg.id = "holo-onboarding";
-    const greeting = firstName && firstName.length > 1
-      ? `Hey ${firstName}.`
-      : "Hey.";
     msg.innerHTML = `
       <div class="holo-icon">✦</div>
       <div class="holo-body">
-        <div class="bubble">${greeting} I'm glad you're here. Before we start — tell me a bit about yourself. What you're working on, what's been weighing on you, what you want me to understand about who you are. No format required. Just talk.</div>
+        <div class="bubble">What's actually going on?</div>
       </div>`;
     container.appendChild(msg);
     scrollToBottom();
@@ -855,6 +898,11 @@
 
       // Silently refresh what Holo knows — Pilot may have extracted new facts
       setTimeout(() => refreshMemoryContext(), 2000);
+
+      // Thread handoff — Pilot tells the user it's time to move, in its own voice
+      if (data.handoff && data.handoff.suggested) {
+        setTimeout(() => showHandoff(data.handoff), 1200);
+      }
     } catch (e) {
       stopAmbientBubbles();
       typingEl.remove();

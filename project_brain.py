@@ -387,7 +387,7 @@ class ProjectBrain:
                 .table("holo_vendor_profiles")
                 .select("*")
                 .eq("vendor_domain", vendor_domain)
-                .single()
+                .maybe_single()
                 .execute()
             )
             profile = profile_resp.data
@@ -633,7 +633,7 @@ class ProjectBrain:
             .select("total_evaluations, allow_count, escalate_count, "
                     "highest_risk_seen, first_seen")
             .eq("vendor_domain", vendor_domain)
-            .single()
+            .maybe_single()
             .execute()
         )
         current = resp.data or {}
@@ -673,7 +673,7 @@ class ProjectBrain:
                 self._client.table("holo_capsules")
                 .select("*")
                 .eq("google_id", google_id)
-                .single()
+                .maybe_single()
                 .execute()
             )
             if resp.data:
@@ -713,7 +713,7 @@ class ProjectBrain:
                 self._client.table("holo_capsules")
                 .select("*")
                 .eq("capsule_id", capsule_id)
-                .single()
+                .maybe_single()
                 .execute()
             )
             return resp.data
@@ -835,6 +835,101 @@ class ProjectBrain:
             return [{"role": r["role"], "content": r["content"]} for r in rows]
         except Exception as e:
             logger.warning(f"ProjectBrain.load_chat_history failed: {e}")
+            return None
+
+    def save_consolidation(self, capsule_id: str, session_id: str, session_note: dict) -> None:
+        """Persist the Pilot's session-end note to holo_session_consolidations."""
+        if not self._client or not session_note:
+            return
+        try:
+            self._client.table("holo_session_consolidations").insert({
+                "capsule_id":   capsule_id,
+                "session_id":   session_id,
+                "what_changed": session_note.get("what_changed", ""),
+                "what_surfaced": session_note.get("what_surfaced", ""),
+                "open_threads": session_note.get("open_threads", []),
+                "pilot_note":   session_note.get("pilot_note", ""),
+                "created_at":   datetime.now(timezone.utc).isoformat(),
+            }).execute()
+            logger.info(f"ProjectBrain: session consolidation saved for {capsule_id[:8]}.")
+        except Exception as e:
+            logger.warning(f"ProjectBrain.save_consolidation failed: {e}")
+
+    def upsert_life_context(self, capsule_id: str, entries: list) -> None:
+        """
+        Write the Pilot's distilled life_context entries for a capsule.
+        If an entry supersedes an existing key, soft-prune the old one first.
+        """
+        if not self._client or not entries:
+            return
+        now = datetime.now(timezone.utc).isoformat()
+        for entry in entries:
+            key = entry.get("key", "").strip()
+            if not key:
+                continue
+            try:
+                # Soft-prune any entry this supersedes
+                supersedes = entry.get("supersedes")
+                if supersedes:
+                    self._client.table("holo_life_context").update({
+                        "pruned_at":    now,
+                        "prune_reason": f"Superseded by '{key}' after session consolidation.",
+                    }).eq("capsule_id", capsule_id).eq("key", supersedes).is_("pruned_at", "null").execute()
+
+                # Upsert the new insight
+                self._client.table("holo_life_context").upsert({
+                    "capsule_id":         capsule_id,
+                    "category":           entry.get("category", "patterns"),
+                    "key":                key,
+                    "value":              entry.get("value", "")[:500],
+                    "confidence":         1.0,
+                    "last_reinforced":    now,
+                    "reinforcement_count": 1,
+                    "updated_at":         now,
+                }, on_conflict="capsule_id,key").execute()
+
+            except Exception as e:
+                logger.warning(f"ProjectBrain.upsert_life_context failed for key '{key}': {e}")
+
+        logger.info(f"ProjectBrain: {len(entries)} life_context entries upserted for {capsule_id[:8]}.")
+
+    def load_life_context(self, capsule_id: str) -> list:
+        """
+        Load the active (non-pruned) life_context entries for a capsule.
+        Returns list of {category, key, value, confidence} dicts, ordered by confidence desc.
+        """
+        if not self._client:
+            return []
+        try:
+            resp = (
+                self._client.table("holo_life_context")
+                .select("category, key, value, confidence")
+                .eq("capsule_id", capsule_id)
+                .is_("pruned_at", "null")
+                .order("confidence", desc=True)
+                .execute()
+            )
+            return resp.data or []
+        except Exception as e:
+            logger.warning(f"ProjectBrain.load_life_context failed: {e}")
+            return []
+
+    def load_last_consolidation(self, capsule_id: str) -> Optional[dict]:
+        """Load the most recent session consolidation note for a capsule."""
+        if not self._client:
+            return None
+        try:
+            resp = (
+                self._client.table("holo_session_consolidations")
+                .select("what_changed, what_surfaced, open_threads, pilot_note, created_at")
+                .eq("capsule_id", capsule_id)
+                .order("created_at", desc=True)
+                .limit(1)
+                .execute()
+            )
+            return resp.data[0] if resp.data else None
+        except Exception as e:
+            logger.warning(f"ProjectBrain.load_last_consolidation failed: {e}")
             return None
 
     def _extract_vendor_domain(self, context: dict) -> Optional[str]:

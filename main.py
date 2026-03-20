@@ -55,8 +55,11 @@ from auth import RateLimiter
 from context_governor import ContextGovernor
 from chat_engine import HoloChatEngine
 from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, _brain as _capsule_brain
+from db import Database
+from billing import create_checkout_session, create_customer_portal_session, construct_webhook_event, PLANS
 
 _rate_limiter = RateLimiter()
+_db: Database | None = None
 
 # Governor is instantiated once at startup and reused for every request.
 # This means adapters are initialized once (SDK clients, auth, etc.).
@@ -70,6 +73,17 @@ async def lifespan(app: FastAPI):
     global _governor
 
     logger.info("Holo API starting up...")
+
+    # 0. Connect to Supabase for usage tracking (optional — won't block startup)
+    global _db
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_KEY")
+    if supabase_url and supabase_key:
+        try:
+            _db = Database(supabase_url, supabase_key)
+            logger.info("Usage tracking: Supabase connected.")
+        except Exception as e:
+            logger.warning(f"Usage tracking unavailable: {e}")
 
     # 1. Validate required environment variables
     required = [
@@ -126,36 +140,65 @@ if _frontend_dir.exists():
 # Auth dependency
 # ---------------------------------------------------------------------------
 
+def _track_usage(api_key: str, endpoint: str, status_code: int,
+                 input_tokens: int = 0, output_tokens: int = 0,
+                 cost_usd: float = 0.0, latency_ms: int = 0) -> None:
+    """Fire-and-forget usage log. Never raises."""
+    if _db is None:
+        return
+    key_hash = hashlib.sha256(api_key.encode()).hexdigest()[:16]
+    try:
+        _db.log_api_usage({
+            "api_key_hash": key_hash,
+            "endpoint":     endpoint,
+            "status_code":  status_code,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "cost_usd":     cost_usd,
+            "latency_ms":   latency_ms,
+        })
+    except Exception:
+        pass
+
+
 def _verify_key(request: Request) -> str:
     """
-    Simple API key validation against HOLO_API_KEY in the environment.
-    Compares using a constant-time hash comparison to prevent timing attacks.
+    API key validation. Checks per-user keys in Supabase first, then falls
+    back to the HOLO_API_KEY env var for internal/admin use.
     """
     provided = request.headers.get("x-api-key", "")
     if not provided:
         raise HTTPException(status_code=401, detail="Missing x-api-key header.")
 
-    expected = os.getenv("HOLO_API_KEY", "")
-    if not expected:
-        raise HTTPException(status_code=500, detail="Server misconfigured: HOLO_API_KEY not set.")
-
-    # Constant-time comparison — hmac.compare_digest prevents timing attacks
-    provided_hash = hashlib.sha256(provided.encode()).digest()
-    expected_hash = hashlib.sha256(expected.encode()).digest()
-    if not hmac.compare_digest(provided_hash, expected_hash):
-        raise HTTPException(status_code=401, detail="Invalid API key.")
-
-    # Rate limiting: 60 requests/minute per key (keyed by SHA256 prefix to avoid
-    # storing raw keys in memory)
     key_id = hashlib.sha256(provided.encode()).hexdigest()[:16]
-    max_rpm = int(os.getenv("HOLO_MAX_RPM", "60"))
-    if not _rate_limiter.check(key_id, max_rpm):
-        raise HTTPException(
-            status_code=429,
-            detail=f"Rate limit exceeded ({max_rpm} requests/minute).",
-        )
 
-    return provided
+    # 1. Check per-user keys in Supabase
+    if _db is not None:
+        row = _db.validate_api_key(provided)
+        if row:
+            max_rpm = row.get("max_requests_per_minute", 60)
+            if not _rate_limiter.check(key_id, max_rpm):
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"Rate limit exceeded ({max_rpm} requests/minute).",
+                )
+            return provided
+
+    # 2. Fall back to env var (admin / internal use)
+    expected = os.getenv("HOLO_API_KEY", "")
+    if expected:
+        provided_hash = hashlib.sha256(provided.encode()).digest()
+        expected_hash = hashlib.sha256(expected.encode()).digest()
+        if hmac.compare_digest(provided_hash, expected_hash):
+            max_rpm = int(os.getenv("HOLO_MAX_RPM", "60"))
+            if not _rate_limiter.check(key_id, max_rpm):
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"Rate limit exceeded ({max_rpm} requests/minute).",
+                )
+            return provided
+
+    raise HTTPException(status_code=401, detail="Invalid API key.")
 
 
 # ---------------------------------------------------------------------------
@@ -223,18 +266,48 @@ async def evaluate_action(
     action_type = body.get("action", {}).get("type", "unknown")
     logger.info(f"Evaluation request received | action_type={action_type}")
 
+    # Quota check — requires capsule token for tracking
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if _db and capsule:
+        sub = _db.get_or_create_subscription(capsule["sub"], capsule.get("email", ""))
+        if sub["calls_used"] >= sub["calls_quota"]:
+            raise HTTPException(
+                status_code=402,
+                detail={
+                    "error":   "quota_exceeded",
+                    "message": f"You've used all {sub['calls_quota']} calls on your {sub['plan']} plan.",
+                    "upgrade": "/billing/checkout",
+                }
+            )
+
     # Run the live loop
     if _governor is None:
         raise HTTPException(status_code=503, detail="Engine not initialized.")
 
+    t0 = time.time()
     try:
         result = _governor.evaluate(body)
     except Exception as e:
         logger.error(f"Governor error: {type(e).__name__}: {e}", exc_info=True)
+        _track_usage(_key, "/v1/evaluate_action", 500)
         raise HTTPException(
             status_code=500,
             detail="Evaluation engine error. See server logs for details.",
         )
+
+    elapsed = int((time.time() - t0) * 1000)
+    tokens  = result.get("total_tokens", {})
+    _track_usage(
+        _key, "/v1/evaluate_action", 200,
+        input_tokens  = tokens.get("total_input_tokens", 0),
+        output_tokens = tokens.get("total_output_tokens", 0),
+        cost_usd      = tokens.get("total_cost_usd", 0.0),
+        latency_ms    = elapsed,
+    )
+
+    # Increment quota counter
+    if _db and capsule:
+        _db.increment_calls_used(capsule["sub"])
 
     # Build API response
     response = _build_response(result)
@@ -293,11 +366,117 @@ async def email_signin(request: Request):
 
 @app.get("/auth/me")
 async def get_me(request: Request):
-    """Return current capsule info from the Authorization: Bearer <token> header."""
+    """
+    Return current capsule info. Also ensures the capsule row exists in Supabase
+    and re-issues a fresh token — heals ephemeral capsules from earlier sessions.
+    """
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     if not capsule:
         raise HTTPException(status_code=401, detail="Invalid or missing capsule token.")
+
+    # Ensure capsule row exists — creates it if the token was ephemeral
+    if _capsule_brain._client:
+        existing = _capsule_brain.get_capsule(capsule["sub"])
+        if not existing:
+            # Heal: create the capsule row using identity from the JWT
+            import uuid as _uuid
+            try:
+                from datetime import datetime, timezone
+                now = datetime.now(timezone.utc).isoformat()
+                email = capsule.get("email", "")
+                # Use a stable synthetic google_id derived from email
+                import hashlib
+                synthetic_id = "email:" + hashlib.sha256(email.encode()).hexdigest()[:32]
+                _capsule_brain._client.table("holo_capsules").upsert({
+                    "capsule_id":  capsule["sub"],
+                    "google_id":   synthetic_id or capsule["sub"],
+                    "email":       email,
+                    "name":        email.split("@")[0] if email else "User",
+                    "avatar_url":  "",
+                    "mode":        capsule.get("mode", "personal"),
+                    "created_at":  now,
+                    "last_active": now,
+                }, on_conflict="capsule_id").execute()
+                logger.info(f"Healed ephemeral capsule {capsule['sub'][:8]} → Supabase row created.")
+            except Exception as e:
+                logger.warning(f"Capsule heal failed: {e}")
+
     return JSONResponse(content=capsule)
+
+
+@app.post("/auth/keys")
+async def issue_key(request: Request):
+    """
+    Issue a new API key for the authenticated user.
+
+    Requires: Authorization: Bearer <capsule_token>
+    Body (optional): { "name": "my-agent" }
+    Returns: { "api_key": "holo_sk_...", "key_prefix": "holo_sk_XXXXXX" }
+
+    The raw api_key is returned exactly once. Store it — it cannot be retrieved again.
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+
+    if _db is None:
+        raise HTTPException(status_code=503, detail="Database unavailable.")
+
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    name = (body.get("name") or "default").strip()[:64]
+
+    raw_key = _db.issue_api_key(capsule_id=capsule["sub"], name=name)
+    key_prefix = raw_key[:14]
+
+    logger.info(f"API key issued: prefix={key_prefix} capsule={capsule['sub'][:8]}")
+
+    return JSONResponse(content={
+        "api_key":    raw_key,
+        "key_prefix": key_prefix,
+        "name":       name,
+        "note":       "Store this key — it will not be shown again.",
+    })
+
+
+@app.get("/auth/keys")
+async def list_keys(request: Request):
+    """
+    List all active API keys for the authenticated user.
+    Returns key prefixes only — never the raw key or its hash.
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+
+    if _db is None:
+        raise HTTPException(status_code=503, detail="Database unavailable.")
+
+    keys = _db.get_api_keys(capsule["sub"])
+    return JSONResponse(content={"keys": keys})
+
+
+@app.delete("/auth/keys/{key_prefix}")
+async def revoke_key(key_prefix: str, request: Request):
+    """
+    Revoke an API key by its prefix. Only the key's owner can revoke it.
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+
+    if _db is None:
+        raise HTTPException(status_code=503, detail="Database unavailable.")
+
+    revoked = _db.revoke_api_key(capsule_id=capsule["sub"], key_prefix=key_prefix)
+    if not revoked:
+        raise HTTPException(status_code=404, detail="Key not found or already revoked.")
+
+    logger.info(f"API key revoked: prefix={key_prefix} capsule={capsule['sub'][:8]}")
+    return JSONResponse(content={"revoked": True, "key_prefix": key_prefix})
 
 
 @app.post("/auth/mode")
@@ -318,12 +497,21 @@ async def set_mode(request: Request):
 
 
 @app.get("/")
+def serve_landing():
+    """Serve the Holo landing page."""
+    landing = _frontend_dir / "landing.html"
+    if landing.exists():
+        return FileResponse(str(landing))
+    return {"status": "ok", "message": "Holo API running. Frontend not found."}
+
+
+@app.get("/chat")
 def serve_chat_ui():
     """Serve the Holo chat UI."""
     index = _frontend_dir / "index.html"
     if index.exists():
         return FileResponse(str(index))
-    return {"status": "ok", "message": "Holo API running. Frontend not found."}
+    return {"status": "ok", "message": "Holo API running. Chat UI not found."}
 
 
 @app.post("/v1/chat")
@@ -357,12 +545,23 @@ async def chat(
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     capsule_id = capsule["sub"] if capsule else None
 
+    t0 = time.time()
     try:
         result = _chat_engine.send_message(session_id, message, capsule_id=capsule_id,
                                            images=images)
     except Exception as e:
         logger.error(f"Chat engine error: {type(e).__name__}: {e}", exc_info=True)
+        _track_usage(_key, "/v1/chat", 500)
         raise HTTPException(status_code=500, detail="Chat engine error. See server logs.")
+
+    elapsed = int((time.time() - t0) * 1000)
+    tokens  = result.get("tokens", {})
+    _track_usage(
+        _key, "/v1/chat", 200,
+        input_tokens  = tokens.get("input", 0),
+        output_tokens = tokens.get("output", 0),
+        latency_ms    = elapsed,
+    )
 
     return JSONResponse(content={
         "session_id":          result["session_id"],
@@ -376,6 +575,28 @@ async def chat(
     })
 
 
+@app.get("/v1/capsule/last-session")
+async def get_last_session(request: Request):
+    """
+    Return the last session ID and full history for the authenticated user.
+    Used to restore a thread after a page refresh or server restart.
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    ctx = _capsule_brain.get_capsule_context(capsule["sub"])
+    session_id = ctx.get("last_session_id")
+    if not session_id:
+        return JSONResponse(content={"session_id": None, "history": []})
+    # Restore into engine memory (loads from Supabase if not already in memory)
+    if _chat_engine:
+        session = _chat_engine.get_or_create_session(session_id)
+        history = session.history
+    else:
+        history = _capsule_brain.load_chat_history(session_id) or []
+    return JSONResponse(content={"session_id": session_id, "history": history})
+
+
 @app.get("/v1/chat/{session_id}/history")
 async def chat_history(
     session_id: str,
@@ -384,8 +605,10 @@ async def chat_history(
     """Return the full message history for a session."""
     if _chat_engine is None:
         raise HTTPException(status_code=503, detail="Chat engine not initialized.")
-    history = _chat_engine.get_history(session_id)
-    if history is None:
+    # Try in-memory first, then fall back to Supabase via session restore
+    session = _chat_engine.get_or_create_session(session_id)
+    history = session.history
+    if not history:
         raise HTTPException(status_code=404, detail="Session not found.")
     return JSONResponse(content={"session_id": session_id, "history": history})
 
@@ -400,6 +623,308 @@ async def clear_chat(
         raise HTTPException(status_code=503, detail="Chat engine not initialized.")
     cleared = _chat_engine.clear_session(session_id)
     return JSONResponse(content={"cleared": cleared, "session_id": session_id})
+
+
+# ---------------------------------------------------------------------------
+# Billing routes
+# ---------------------------------------------------------------------------
+
+@app.post("/billing/checkout")
+async def billing_checkout(request: Request):
+    """
+    Create a Stripe Checkout session.
+    Body: { "plan": "starter"|"pro", "capsule_token": "..." }
+    Returns: { "checkout_url": "..." }
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required to upgrade.")
+
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON.")
+
+    plan = body.get("plan", "")
+    if plan not in ("starter", "pro"):
+        raise HTTPException(status_code=400, detail="plan must be 'starter' or 'pro'")
+
+    base_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+    try:
+        url = create_checkout_session(
+            plan=plan,
+            customer_email=capsule.get("email", ""),
+            success_url=f"{base_url}/?upgrade=success",
+            cancel_url=f"{base_url}/?upgrade=cancelled",
+        )
+    except Exception as e:
+        logger.error(f"Stripe checkout error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create checkout session.")
+
+    return JSONResponse(content={"checkout_url": url})
+
+
+@app.post("/billing/portal")
+async def billing_portal(request: Request):
+    """
+    Create a Stripe Customer Portal session for managing/cancelling subscription.
+    Returns: { "portal_url": "..." }
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+
+    if _db is None:
+        raise HTTPException(status_code=503, detail="Database unavailable.")
+
+    sub = _db.get_subscription(capsule["sub"])
+    if not sub or not sub.get("stripe_customer_id"):
+        raise HTTPException(status_code=404, detail="No active subscription found.")
+
+    base_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+    try:
+        url = create_customer_portal_session(
+            stripe_customer_id=sub["stripe_customer_id"],
+            return_url=f"{base_url}/",
+        )
+    except Exception as e:
+        logger.error(f"Stripe portal error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create portal session.")
+
+    return JSONResponse(content={"portal_url": url})
+
+
+@app.post("/billing/webhook")
+async def billing_webhook(request: Request):
+    """
+    Stripe webhook — updates subscription status after payment.
+    Must be called by Stripe, not the frontend.
+    """
+    payload    = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+
+    try:
+        event = construct_webhook_event(payload, sig_header)
+    except Exception as e:
+        logger.warning(f"Webhook signature verification failed: {e}")
+        raise HTTPException(status_code=400, detail="Invalid webhook signature.")
+
+    if event["type"] == "checkout.session.completed":
+        session           = event["data"]["object"]
+        plan              = session.get("metadata", {}).get("plan", "starter")
+        stripe_customer   = session.get("customer")
+        stripe_sub        = session.get("subscription")
+        customer_email    = session.get("customer_email", "")
+        quota             = PLANS.get(plan, {}).get("calls_per_month", 500)
+
+        if _db and customer_email:
+            # Find the capsule by email and upgrade their plan
+            result = (
+                _db.client.table("subscriptions")
+                .select("capsule_id")
+                .eq("email", customer_email)
+                .execute()
+            )
+            if result.data:
+                capsule_id = result.data[0]["capsule_id"]
+                _db.update_subscription_plan(
+                    capsule_id=capsule_id,
+                    plan=plan,
+                    quota=quota,
+                    stripe_customer_id=stripe_customer,
+                    stripe_sub_id=stripe_sub,
+                )
+                logger.info(f"Upgraded {customer_email} to {plan} ({quota} calls/mo)")
+
+    elif event["type"] == "customer.subscription.deleted":
+        stripe_customer = event["data"]["object"].get("customer")
+        if _db and stripe_customer:
+            _db.client.table("subscriptions").update(
+                {"plan": "free", "calls_quota": 1, "calls_used": 0,
+                 "stripe_sub_id": None, "updated_at": "now()"}
+            ).eq("stripe_customer_id", stripe_customer).execute()
+            logger.info(f"Subscription cancelled for customer {stripe_customer}")
+
+    return JSONResponse(content={"received": True})
+
+
+@app.post("/evaluate")
+async def evaluate(
+    request: Request,
+    _key: str = Depends(_verify_key),
+):
+    """
+    Simplified evaluation endpoint.
+
+    Accepts invoice_data at the top level and maps it to the governor's
+    action/context shape. Runs the full multi-model adversarial loop.
+
+    Required fields:
+      invoice_data.action   — action descriptor (type, actor, parameters)
+      invoice_data.context  — context bundle (email_chain required)
+    """
+    if _governor is None:
+        raise HTTPException(status_code=503, detail="Engine not initialized.")
+
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+
+    invoice_data = body.get("invoice_data", body)  # accept either wrapped or flat
+
+    if "action" not in invoice_data:
+        raise HTTPException(status_code=400, detail="Missing required field: action")
+    context = invoice_data.get("context", {})
+    if not context or not context.get("email_chain"):
+        raise HTTPException(status_code=400, detail="Missing required field: context.email_chain")
+
+    t0 = time.time()
+    try:
+        result = _governor.evaluate(invoice_data)
+    except Exception as e:
+        logger.error(f"Governor error: {type(e).__name__}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Evaluation engine error. See server logs.")
+
+    elapsed = int((time.time() - t0) * 1000)
+    tokens  = result.get("total_tokens", {})
+    _track_usage(
+        _key, "/evaluate", 200,
+        input_tokens  = tokens.get("total_input_tokens", 0),
+        output_tokens = tokens.get("total_output_tokens", 0),
+        cost_usd      = tokens.get("total_cost_usd", 0.0),
+        latency_ms    = elapsed,
+    )
+
+    return JSONResponse(content=_build_response(result))
+
+
+@app.post("/project-brain/connect")
+async def project_brain_connect(request: Request):
+    """
+    Authenticate a workspace to the Project Brain and store the connection.
+
+    Body: { "workspace_id": str, "api_key": str }
+    Returns: { "status": "connected", "memory_size": int, "context_loaded": bool }
+
+    The connection is recorded in holo_integrations keyed by workspace_id.
+    Requires a valid capsule token (Authorization: Bearer <token>).
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+
+    workspace_id = body.get("workspace_id", "").strip()
+    api_key      = body.get("api_key", "").strip()
+    if not workspace_id or not api_key:
+        raise HTTPException(status_code=400, detail="workspace_id and api_key are required.")
+
+    if len(api_key) < 16:
+        raise HTTPException(status_code=400, detail="api_key appears invalid (too short).")
+
+    if _db is None:
+        raise HTTPException(status_code=503, detail="Database unavailable.")
+
+    try:
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc).isoformat()
+
+        _db.client.table("holo_integrations").upsert(
+            {
+                "capsule_id":     capsule["sub"],
+                "source":         "workspace",
+                "status":         "connected",
+                "connected_at":   now,
+                "last_synced_at": now,
+                "metadata": {
+                    "workspace_id": workspace_id,
+                    "api_key_hash": hashlib.sha256(api_key.encode()).hexdigest()[:16],
+                },
+            },
+            on_conflict="capsule_id,source",
+        ).execute()
+
+        ctx_resp = (
+            _db.client.table("holo_capsule_context")
+            .select("key", count="exact")
+            .eq("capsule_id", capsule["sub"])
+            .execute()
+        )
+        memory_size    = ctx_resp.count or 0
+        context_loaded = memory_size > 0
+
+        logger.info(
+            f"Project Brain: workspace '{workspace_id}' connected "
+            f"for capsule {capsule['sub'][:8]}. memory_size={memory_size}"
+        )
+
+    except Exception as e:
+        logger.error(f"project-brain/connect error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to store workspace connection.")
+
+    return JSONResponse(content={
+        "status":         "connected",
+        "memory_size":    memory_size,
+        "context_loaded": context_loaded,
+    })
+
+
+@app.get("/v1/capsule/context")
+async def get_capsule_context(request: Request):
+    """Return what Holo knows about the authenticated user."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    ctx = _capsule_brain.get_capsule_context(capsule["sub"])
+    public = {k: v for k, v in ctx.items() if not k.startswith("_") and k != "last_session_id"}
+    return JSONResponse(content={"context": public})
+
+
+@app.post("/v1/capsule/context")
+async def seed_capsule_context(request: Request):
+    """
+    Seed or update facts Holo knows about you.
+    Body: { "context": { "key": "value", ... } }
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON.")
+    context = body.get("context", {})
+    if not isinstance(context, dict):
+        raise HTTPException(status_code=400, detail="context must be a dict.")
+    for key, value in context.items():
+        if key and isinstance(value, str):
+            _capsule_brain.set_capsule_context(capsule["sub"], str(key)[:50], str(value)[:500])
+    logger.info(f"Capsule seeded for {capsule['sub'][:8]}: {list(context.keys())}")
+    return JSONResponse(content={"seeded": list(context.keys())})
+
+
+@app.get("/billing/status")
+async def billing_status(request: Request):
+    """Return the current user's plan and quota usage."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+
+    if _db is None:
+        return JSONResponse(content={"plan": "free", "calls_used": 0, "calls_quota": 1})
+
+    sub = _db.get_or_create_subscription(capsule["sub"], capsule.get("email", ""))
+    return JSONResponse(content={
+        "plan":        sub["plan"],
+        "calls_used":  sub["calls_used"],
+        "calls_quota": sub["calls_quota"],
+        "overage_rate": 0.15 if sub["plan"] == "starter" else (0.10 if sub["plan"] == "pro" else 0),
+    })
 
 
 # ---------------------------------------------------------------------------

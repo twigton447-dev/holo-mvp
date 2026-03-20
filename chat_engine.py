@@ -10,6 +10,7 @@ for each turn based on the message content and conversation context.
 """
 
 import logging
+import threading
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -132,7 +133,9 @@ class HoloChatEngine:
         session.last_active = time.time()
 
         # Load capsule context early — needed by both Pilot and system prompt
-        capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+        capsule_context  = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+        life_context     = self._brain.load_life_context(capsule_id) if capsule_id else []
+        last_session     = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
 
         # Co-Pilot runs the instruments: temperature + search decision
         temperature  = self._copilot.assess_chat_temperature(user_message, session.history)
@@ -160,10 +163,12 @@ class HoloChatEngine:
             f"provider={adapter.provider} | temp={temperature:.2f}"
         )
 
-        # Inject thread-health context + capsule context + Pilot's tenor brief
+        # Inject thread-health context + portrait + working memory + Pilot brief
         system_prompt = (
             HOLO_CHAT_SYSTEM_PROMPT
             + "\n\n" + _health_context(session)
+            + ("\n\n" + _life_context_block(life_context) if life_context else "")
+            + ("\n\n" + _last_session_block(last_session) if last_session else "")
             + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
             + ("\n\nPILOT BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
         )
@@ -204,6 +209,28 @@ class HoloChatEngine:
             if updates:
                 logger.info(f"Capsule context updated for {capsule_id[:8]}: {list(updates.keys())}")
 
+        # Pilot consolidates — when thread health hits RED, curate the permanent record.
+        # Runs in a background thread so it never delays the user's response.
+        if capsule_id and session.thread_health_level == "RED":
+            def _consolidate():
+                try:
+                    result = self._pilot.consolidate_session(
+                        session.history, capsule_context, session.session_id
+                    )
+                    if result.get("session_note"):
+                        self._brain.save_consolidation(
+                            capsule_id, session.session_id, result["session_note"]
+                        )
+                    if result.get("life_context"):
+                        self._brain.upsert_life_context(capsule_id, result["life_context"])
+                    logger.info(
+                        f"Consolidation complete for {capsule_id[:8]}: "
+                        f"{len(result.get('life_context', []))} life_context entries written."
+                    )
+                except Exception as e:
+                    logger.warning(f"Consolidation failed: {e}")
+            threading.Thread(target=_consolidate, daemon=True).start()
+
         # Persist to Supabase
         self._brain.save_chat_turn(
             session_id    = session.session_id,
@@ -214,6 +241,15 @@ class HoloChatEngine:
             temperature   = temperature,
         )
 
+        # Signal a thread handoff when health is RED
+        handoff = None
+        if session.thread_health_level == "RED":
+            handoff = {
+                "suggested":  True,
+                "message":    "This thread is getting long. I've saved everything — your portrait, your open threads, everything I know. Continue here and I'll pick up right where we are.",
+                "new_thread": "/chat",
+            }
+
         return {
             "session_id":          session.session_id,
             "response":            response_text,
@@ -223,6 +259,7 @@ class HoloChatEngine:
             "elapsed_ms":          elapsed_ms,
             "tokens":              {"input": in_tok, "output": out_tok},
             "thought":             thought,   # {"text": str, "color": str} or None
+            "handoff":             handoff,   # {suggested, message, new_thread} or None
             "_provider":           adapter.provider,
             "_temperature":        temperature,
         }
@@ -242,9 +279,36 @@ class HoloChatEngine:
 # Helpers
 # ---------------------------------------------------------------------------
 
+def _life_context_block(entries: list) -> str:
+    """
+    Format the Pilot's permanent portrait for injection.
+    This is the distilled, curated truth — highest priority context.
+    """
+    lines = ["WHO THIS PERSON IS (Pilot's permanent portrait — distilled across all sessions):"]
+    for e in entries:
+        conf = f" [{int(e.get('confidence', 1.0) * 100)}% confidence]" if e.get("confidence", 1.0) < 0.8 else ""
+        lines.append(f"  [{e.get('category', 'patterns')}] {e.get('key', '')}: {e.get('value', '')}{conf}")
+    return "\n".join(lines)
+
+
+def _last_session_block(note: dict) -> str:
+    """Format the Pilot's note from last session — private, never surface."""
+    if not note:
+        return ""
+    lines = ["LAST SESSION NOTE (Pilot's private carry-forward — do not mention to user):"]
+    if note.get("what_surfaced"):
+        lines.append(f"  What surfaced last time: {note['what_surfaced']}")
+    if note.get("open_threads"):
+        threads = note["open_threads"] if isinstance(note["open_threads"], list) else [note["open_threads"]]
+        lines.append(f"  Open threads to pick up: {', '.join(threads)}")
+    if note.get("pilot_note"):
+        lines.append(f"  Pilot note: {note['pilot_note']}")
+    return "\n".join(lines)
+
+
 def _capsule_context_block(context: dict) -> str:
-    """Format capsule context for injection into the system prompt."""
-    lines = ["CAPSULE CONTEXT (what the Governor knows about this user):"]
+    """Format capsule context (working memory) for injection into the system prompt."""
+    lines = ["WORKING MEMORY (facts extracted this and recent sessions — less refined than portrait):"]
     for k, v in context.items():
         lines.append(f"  {k}: {v}")
     return "\n".join(lines)

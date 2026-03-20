@@ -1082,6 +1082,111 @@ class PilotAdapter(_FlightDeckBase):
         except Exception:
             return {}
 
+    def consolidate_session(
+        self,
+        history: list,
+        capsule_context: dict,
+        session_id: str,
+    ) -> dict:
+        """
+        The Pilot's curatorial act. Called at thread end.
+
+        Reads the full thread and produces two outputs:
+
+        1. life_context_updates — the distilled permanent record.
+           Each entry is something genuinely true about this person that belongs
+           in the long-term portrait. Slop, filler, tangents, and transient
+           states are left out. Only signal. Each entry includes:
+             category: financial|relationships|health|work|goals|patterns|emotional|spiritual|avoidances
+             key: human-readable label (e.g. 'cash_flow_concern', 'avoids_conflict_at_work')
+             value: the insight in plain language — what the Pilot actually understands
+             supersedes: key of any prior entry this replaces (optional)
+
+        2. session_note — the Pilot's private note to itself for next time.
+           what_changed: what the Pilot's understanding of this person shifted
+           what_surfaced: what was brought to light this session
+           open_threads: things unresolved the next session should pick up
+           pilot_note: the Pilot's own read — what to watch, what to return to
+
+        Returns:
+          {
+            "life_context": [ {category, key, value, supersedes?}, ... ],
+            "session_note": { what_changed, what_surfaced, open_threads, pilot_note }
+          }
+        """
+        if len(history) < 4:
+            return {"life_context": [], "session_note": {}}
+
+        # Full thread — curator needs to see everything
+        full_history = "\n".join(
+            f"{m['role'].upper()}: {m['content'][:500]}" for m in history
+        )
+        existing = "\n".join(
+            f"  {k}: {v}" for k, v in capsule_context.items()
+            if not k.startswith("_") and k != "last_session_id"
+        ) or "none yet"
+
+        prompt = (
+            f"You are the Pilot — the curator of this person's long-term portrait.\n"
+            f"This thread is ending. Your job is to distill everything that happened\n"
+            f"into the permanent record. Be ruthless. Most of what was said was noise.\n"
+            f"Keep only what is genuinely true about who this person is.\n\n"
+
+            f"FULL THREAD:\n{full_history}\n\n"
+            f"EXISTING LONG-TERM CONTEXT:\n{existing}\n\n"
+
+            f"OUTPUT SECTION 1 — LIFE CONTEXT UPDATES\n"
+            f"For each genuine insight worth adding to the permanent portrait, write:\n"
+            f"INSIGHT | category | key | value | supersedes_key_or_none\n\n"
+            f"Categories: financial, relationships, health, work, goals, patterns, emotional, spiritual, avoidances\n"
+            f"Key: snake_case, stable label (e.g. 'funding_anxiety', 'avoids_direct_conflict')\n"
+            f"Value: 1-2 sentences, what the Pilot genuinely understands — not a transcript summary\n"
+            f"Supersedes: key of any existing entry this replaces, or 'none'\n"
+            f"Max 5 entries. If nothing genuinely new: write NONE\n\n"
+
+            f"OUTPUT SECTION 2 — SESSION NOTE\n"
+            f"Write exactly four lines:\n"
+            f"CHANGED: [what shifted in the Pilot's understanding this session]\n"
+            f"SURFACED: [what was brought to light — a realization, a pattern named, a truth landed]\n"
+            f"OPEN: [comma-separated threads unresolved — things to pick up next time]\n"
+            f"NOTE: [the Pilot's private read — what to watch, what to return to, what this person needs]\n\n"
+
+            f"Write SECTION 1 first, then SECTION 2. Nothing else."
+        )
+
+        result = {"life_context": [], "session_note": {}}
+        try:
+            raw = self._call(prompt, max_tokens=600)
+            lines = raw.strip().splitlines()
+
+            for line in lines:
+                line = line.strip()
+                if line.upper().startswith("INSIGHT"):
+                    parts = [p.strip() for p in line.split("|")]
+                    if len(parts) >= 4:
+                        entry = {
+                            "category":   parts[1] if len(parts) > 1 else "patterns",
+                            "key":        parts[2].lower().replace(" ", "_")[:50] if len(parts) > 2 else "",
+                            "value":      parts[3][:500] if len(parts) > 3 else "",
+                            "supersedes": parts[4] if len(parts) > 4 and parts[4].lower() != "none" else None,
+                        }
+                        if entry["key"] and entry["value"]:
+                            result["life_context"].append(entry)
+                elif line.upper().startswith("CHANGED:"):
+                    result["session_note"]["what_changed"] = line.split(":", 1)[1].strip()
+                elif line.upper().startswith("SURFACED:"):
+                    result["session_note"]["what_surfaced"] = line.split(":", 1)[1].strip()
+                elif line.upper().startswith("OPEN:"):
+                    val = line.split(":", 1)[1].strip()
+                    result["session_note"]["open_threads"] = [t.strip() for t in val.split(",") if t.strip()]
+                elif line.upper().startswith("NOTE:"):
+                    result["session_note"]["pilot_note"] = line.split(":", 1)[1].strip()
+
+        except Exception as e:
+            logger.warning(f"Pilot.consolidate_session failed: {e}")
+
+        return result
+
 
 # Keep GovernorAdapter as an alias so existing evaluation code doesn't break
 GovernorAdapter = CoPilotAdapter

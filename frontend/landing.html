@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>Holo — Verification layer for AI agents</title>
+  <meta name="description" content="Before your agent executes an irreversible action, run it through Holo. Three independent models evaluate it. You get ALLOW or ESCALATE." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #0f0f0f;
+      --bg2:    #1a1a1a;
+      --bg3:    #222;
+      --border: #2e2e2e;
+      --text:   #ededed;
+      --text2:  #888;
+      --text3:  #555;
+      --accent: #cc785c;
+      --accent2:#e8896a;
+      --green:  #4ade80;
+      --red:    #f87171;
+      --yellow: #fbbf24;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    nav { border-bottom: 1px solid var(--border); padding: 18px 0; }
+    nav .inner {
+      max-width: 860px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
+    .logo span { color: var(--accent); }
+    .btn-nav {
+      background: var(--accent); color: #fff;
+      padding: 8px 18px; border-radius: 8px;
+      font-size: 14px; font-weight: 500;
+      border: none; cursor: pointer; font-family: inherit;
+      transition: background 0.15s;
+    }
+    .btn-nav:hover { background: var(--accent2); }
+
+    /* Hero */
+    .hero { padding: 96px 0 72px; text-align: center; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 999px; padding: 5px 14px;
+      font-size: 12px; font-weight: 500; color: var(--text2);
+      margin-bottom: 28px;
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .hero h1 {
+      font-size: clamp(34px, 5vw, 54px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p {
+      font-size: 18px; color: var(--text2);
+      max-width: 480px; margin: 0 auto 40px; line-height: 1.7;
+    }
+    .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      padding: 13px 28px; border-radius: 10px;
+      font-size: 15px; font-weight: 600;
+      border: none; cursor: pointer; font-family: inherit;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: var(--accent2); }
+    .btn-secondary {
+      background: var(--bg2); color: var(--text);
+      padding: 13px 28px; border-radius: 10px;
+      font-size: 15px; font-weight: 500;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--text3); }
+
+    /* Terminal demo */
+    .demo-section { padding: 0 0 80px; }
+    .demo-wrap {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+    }
+    .demo-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+      background: var(--bg3);
+    }
+    .demo-header .dots { display: flex; gap: 6px; }
+    .demo-header .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #28c840; }
+    .demo-header .title { font-size: 12px; color: var(--text2); margin-left: 6px; font-weight: 500; }
+    .demo-cols { display: grid; grid-template-columns: 1fr 1px 1fr; }
+    .demo-col { padding: 24px; }
+    .demo-divider { background: var(--border); }
+    .demo-label { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
+    pre.code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12.5px; line-height: 1.7; color: var(--text);
+      white-space: pre; overflow-x: auto;
+    }
+    .token-key    { color: #7dd3fc; }
+    .token-str    { color: #86efac; }
+    .token-num    { color: #fbbf24; }
+    .token-kw     { color: #c084fc; }
+    .token-comment { color: var(--text3); font-style: italic; }
+    .verdict-allow  { color: var(--green); font-weight: 700; }
+    .verdict-esc    { color: var(--red); font-weight: 700; }
+    .verdict-yellow { color: var(--yellow); }
+    @media (max-width: 600px) {
+      .demo-cols { grid-template-columns: 1fr; }
+      .demo-divider { display: none; }
+      .demo-col:first-child { border-bottom: 1px solid var(--border); }
+    }
+
+    /* Pricing */
+    .pricing-section { padding: 72px 0 96px; }
+    .pricing-section h2 {
+      font-size: clamp(24px, 3vw, 32px); font-weight: 700;
+      letter-spacing: -0.8px; margin-bottom: 8px;
+    }
+    .pricing-section .sub { font-size: 15px; color: var(--text2); margin-bottom: 40px; }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0; border-top: 1px solid var(--border);
+    }
+    @media (max-width: 640px) { .pricing-grid { grid-template-columns: 1fr; } }
+    .plan-card {
+      padding: 32px 24px 32px 0;
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+    }
+    .plan-card:last-child { border-right: none; }
+    .plan-card:not(:first-child) { padding-left: 24px; }
+    .plan-card.featured .plan-name { color: var(--accent); }
+    .plan-name { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .plan-price { font-size: 40px; font-weight: 700; letter-spacing: -1.5px; margin-bottom: 4px; }
+    .plan-price span { font-size: 16px; font-weight: 400; color: var(--text2); }
+    .plan-calls { font-size: 13px; color: var(--text2); margin-bottom: 28px; }
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; flex: 1; }
+    .plan-features li { font-size: 13px; color: var(--text2); display: flex; align-items: flex-start; gap: 8px; }
+    .plan-features li::before { content: "—"; color: var(--text3); flex-shrink: 0; }
+    .plan-card.featured .plan-features li::before { content: "✓"; color: var(--accent); font-weight: 700; }
+    .plan-cta {
+      display: block; text-align: center;
+      padding: 11px 20px; border-radius: 9px;
+      font-size: 14px; font-weight: 600;
+      border: 1px solid var(--border);
+      color: var(--text2); background: none;
+      cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s;
+    }
+    .plan-card.featured .plan-cta { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .plan-cta:hover { border-color: var(--text2); color: var(--text); }
+    .plan-card.featured .plan-cta:hover { background: var(--accent2); border-color: var(--accent2); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border); padding: 28px 0;
+      color: var(--text2); font-size: 13px;
+    }
+    footer .inner {
+      max-width: 860px; margin: 0 auto; padding: 0 24px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    }
+    footer a { color: var(--text2); }
+    footer a:hover { color: var(--text); }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+      z-index: 100; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 36px 32px;
+      width: 100%; max-width: 420px; margin: 0 16px;
+    }
+    .modal h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.4px; }
+    .modal p  { font-size: 14px; color: var(--text2); margin-bottom: 24px; }
+    .modal label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+    .modal input {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; color: var(--text);
+      font-size: 14px; font-family: inherit;
+      margin-bottom: 16px; outline: none; transition: border-color 0.15s;
+    }
+    .modal input:focus { border-color: var(--accent); }
+    .modal-submit {
+      width: 100%; background: var(--accent); color: #fff;
+      border: none; border-radius: 9px; padding: 12px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: background 0.15s;
+    }
+    .modal-submit:hover { background: var(--accent2); }
+    .modal-close {
+      float: right; background: none; border: none;
+      color: var(--text2); font-size: 22px; cursor: pointer; line-height: 1;
+    }
+    .modal-success { display: none; text-align: center; padding: 12px 0; }
+    .modal-success h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .modal-success p  { font-size: 14px; color: var(--text2); }
+    .key-display {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px; color: var(--accent);
+      word-break: break-all; margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <span class="logo">holo<span>.</span></span>
+    <button class="btn-nav" onclick="openModal()">Get API key</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="badge"><span class="badge-dot"></span> Early access</div>
+    <h1>The verification layer<br>for <em>AI agents</em> that<br>can't afford to get it wrong.</h1>
+    <p>Before your agent executes an irreversible action, run it through Holo. Three independent models evaluate it. You get ALLOW or ESCALATE.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="openModal()">Get your API key</button>
+      <a href="#pricing" class="btn-secondary">See pricing</a>
+    </div>
+  </div>
+</section>
+
+<section class="demo-section">
+  <div class="container">
+    <div class="demo-wrap">
+      <div class="demo-header">
+        <div class="dots">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <span class="title">terminal</span>
+      </div>
+      <div class="demo-cols">
+        <div class="demo-col">
+          <div class="demo-label">Request</div>
+          <pre class="code"><span class="token-kw">curl</span> -X POST https://api.holo.ai/v1/evaluate \
+  -H <span class="token-str">"x-api-key: holo_sk_..."</span> \
+  -d <span class="token-str">'{
+    "action": {
+      "type": "invoice_payment",
+      "parameters": {
+        "vendor": "Acme Supplies",
+        "amount_usd": 47500,
+        "account": "****4821"
+      }
+    },
+    "context": {
+      "email_chain": [{
+        "from": "billing@acme-supplies.net",
+        "subject": "URGENT: New payment details",
+        "body": "Please update our wire to..."
+      }]
+    }
+  }'</span></pre>
+        </div>
+        <div class="demo-divider"></div>
+        <div class="demo-col">
+          <div class="demo-label">Response</div>
+          <pre class="code">{
+  <span class="token-key">"decision"</span>: <span class="verdict-esc">"ESCALATE"</span>,
+  <span class="token-key">"decision_reason"</span>: <span class="token-str">"Payment routing
+  change via email with urgency
+  language. Sender domain registered
+  14 days ago. High confidence
+  BEC attempt."</span>,
+
+  <span class="token-key">"risk_profile"</span>: {
+    <span class="token-key">"payment_routing"</span>: <span class="verdict-esc">"HIGH"</span>,
+    <span class="token-key">"domain_spoofing"</span>: <span class="verdict-esc">"HIGH"</span>,
+    <span class="token-key">"urgency_pressure"</span>: <span class="verdict-yellow">"MEDIUM"</span>,
+    <span class="token-key">"sender_identity"</span>: <span class="verdict-esc">"HIGH"</span>
+  },
+
+  <span class="token-key">"converged"</span>: <span class="token-kw">true</span>,
+  <span class="token-key">"turns_completed"</span>: <span class="token-num">3</span>,
+  <span class="token-key">"elapsed_ms"</span>: <span class="token-num">4821</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing-section" id="pricing">
+  <div class="container">
+    <h2>Simple pricing.</h2>
+    <p class="sub">No contracts. No setup fees. Cancel any time.</p>
+    <div class="pricing-grid">
+      <div class="plan-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0 <span>/mo</span></div>
+        <div class="plan-calls">3 evaluations to try it</div>
+        <ul class="plan-features">
+          <li>Full adversarial loop</li>
+          <li>Complete audit trail</li>
+          <li>API key included</li>
+        </ul>
+        <button class="plan-cta" onclick="openModal()">Get started free</button>
+      </div>
+      <div class="plan-card featured">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$49 <span>/mo</span></div>
+        <div class="plan-calls">500 evaluations · $0.15 overage</div>
+        <ul class="plan-features">
+          <li>Full adversarial loop</li>
+          <li>Complete audit trail</li>
+          <li>Usage dashboard</li>
+          <li>Email support</li>
+        </ul>
+        <button class="plan-cta" onclick="openModal()">Get started</button>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$199 <span>/mo</span></div>
+        <div class="plan-calls">3,000 evaluations · $0.10 overage</div>
+        <ul class="plan-features">
+          <li>Full adversarial loop</li>
+          <li>Complete audit trail</li>
+          <li>Usage dashboard</li>
+          <li>Priority support</li>
+          <li>Project Brain memory</li>
+        </ul>
+        <button class="plan-cta" onclick="openModal()">Get started</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <span>© 2026 Holo</span>
+    <a href="mailto:taylor@holo.ai">Contact</a>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="modal" onclick="if(event.target===this) closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modal-form">
+      <h2>Get your API key</h2>
+      <p>Free to start. Full adversarial loop on your first 3 evaluations.</p>
+      <label>Name</label>
+      <input type="text" id="signup-name" placeholder="Taylor Wigton" autocomplete="name" />
+      <label>Email</label>
+      <input type="email" id="signup-email" placeholder="you@company.com" autocomplete="email" />
+      <button class="modal-submit" onclick="submitSignup()">Get API key →</button>
+    </div>
+    <div class="modal-success" id="modal-success">
+      <div style="font-size:36px;margin-bottom:12px">✓</div>
+      <h3>You're in.</h3>
+      <p>Your API key:</p>
+      <div class="key-display" id="key-display"></div>
+      <p style="font-size:13px;color:var(--text2)">Copy this — it won't be shown again.<br>Start with <code style="font-size:12px;background:var(--bg3);padding:2px 5px;border-radius:4px">POST /v1/evaluate_action</code></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openModal() {
+    document.getElementById('modal').classList.add('open');
+    setTimeout(() => document.getElementById('signup-name').focus(), 100);
+  }
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  async function submitSignup() {
+    const name  = document.getElementById('signup-name').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    if (!name)  { document.getElementById('signup-name').focus();  return; }
+    if (!email || !email.includes('@')) { document.getElementById('signup-email').focus(); return; }
+
+    const btn = document.querySelector('.modal-submit');
+    btn.textContent = 'Setting up…';
+    btn.disabled = true;
+
+    try {
+      const authRes = await fetch('/auth/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email }),
+      });
+      const authData = await authRes.json();
+      if (!authRes.ok) throw new Error(authData.detail || 'Signup failed');
+
+      const keyRes = await fetch('/auth/keys', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authData.capsule_token}`,
+        },
+        body: JSON.stringify({ name: 'default' }),
+      });
+      const keyData = await keyRes.json();
+      if (!keyRes.ok) throw new Error(keyData.detail || 'Key issuance failed');
+
+      document.getElementById('key-display').textContent = keyData.api_key;
+      document.getElementById('modal-form').style.display = 'none';
+      document.getElementById('modal-success').style.display = 'block';
+    } catch (err) {
+      btn.textContent = 'Get API key →';
+      btn.disabled = false;
+      alert('Something went wrong: ' + err.message);
+    }
+  }
+</script>
+
+</body>
+</html>

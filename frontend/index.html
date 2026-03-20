@@ -211,6 +211,10 @@
     .avatar-placeholder { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; cursor: pointer; flex-shrink: 0; }
     #user-avatar { position: relative; display: flex; align-items: center; }
     #memory-badge { position: absolute; top: -4px; right: -4px; background: var(--accent); color: #fff; font-size: 9px; font-weight: 700; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+    #avatar-menu { position: absolute; top: calc(100% + 8px); right: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 4px; min-width: 160px; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+    #avatar-menu button { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--text); padding: 8px 12px; font-size: 13px; font-family: inherit; cursor: pointer; border-radius: 7px; }
+    #avatar-menu button:hover { background: var(--bg3); }
+    #avatar-menu .menu-danger { color: #ef4444; }
 
     /* Memory panel */
     #memory-panel { position: fixed; top: 0; right: 0; height: 100vh; width: 300px; background: var(--bg); border-left: 1px solid var(--border); z-index: 90; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.22s ease; }
@@ -352,9 +356,9 @@
         <button class="mode-btn" id="btn-work" onclick="switchMode('work')">Work</button>
       </div>
       <div id="incognito-badge">◉ Incognito</div>
-      <button id="thread-toggle" onclick="toggleThreadPanel()" title="Your threads">Your threads</button>
-      <button id="incognito-btn" onclick="toggleIncognito()" title="Incognito threads">Incognito threads</button>
-      <button id="new-thread" onclick="newThread()">New thread</button>
+      <button id="thread-toggle" onclick="toggleThreadPanel()" title="See my threads">See my threads</button>
+      <button id="incognito-btn" onclick="toggleIncognito()" title="Start incognito thread">Start incognito thread</button>
+      <button id="new-thread" onclick="newThread()">Start new thread</button>
       <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀</button>
       <div id="user-avatar" style="display:none"></div>
     </div>
@@ -703,11 +707,12 @@
     modeEl.style.display   = "";
 
     const name = data.name || data.email || "?";
+    const avatarClick = `toggleAvatarMenu()`;
     if (data.avatar_url) {
-      avatarEl.innerHTML = `<img class="avatar" src="${data.avatar_url}" title="${name}" onclick="openMemoryPanel()" /><div id="memory-badge" style="display:none"></div>`;
+      avatarEl.innerHTML = `<img class="avatar" src="${data.avatar_url}" title="${name}" onclick="${avatarClick}" /><div id="memory-badge" style="display:none"></div>`;
     } else {
       const initial = name[0].toUpperCase();
-      avatarEl.innerHTML = `<div class="avatar-placeholder" title="${name}" onclick="openMemoryPanel()">${initial}</div><div id="memory-badge" style="display:none"></div>`;
+      avatarEl.innerHTML = `<div class="avatar-placeholder" title="${name}" onclick="${avatarClick}">${initial}</div><div id="memory-badge" style="display:none"></div>`;
     }
     updateModeUI(capsuleMode);
     fetchCapsuleContext(name);
@@ -807,6 +812,32 @@
         <div class="memory-key">${escHtml(k.replace(/_/g, " "))}</div>
         <div class="memory-val">${escHtml(v)}</div>
       </div>`).join("");
+  }
+
+  // ── Avatar menu ───────────────────────────────────────────────────────────────
+
+  function toggleAvatarMenu() {
+    const existing = document.getElementById("avatar-menu");
+    if (existing) { existing.remove(); return; }
+    const menu = document.createElement("div");
+    menu.id = "avatar-menu";
+    menu.innerHTML = `
+      <button onclick="closeAvatarMenu();openMemoryPanel()">What Holo knows</button>
+      <button class="menu-danger" onclick="signOut()">Sign out</button>`;
+    document.getElementById("user-avatar").appendChild(menu);
+    // Close on outside click
+    setTimeout(() => document.addEventListener("click", closeAvatarMenu, { once: true }), 0);
+  }
+
+  function closeAvatarMenu() {
+    document.getElementById("avatar-menu")?.remove();
+  }
+
+  function signOut() {
+    localStorage.removeItem("holo_capsule_token");
+    localStorage.removeItem("holo_capsule_mode");
+    capsuleToken = null;
+    location.reload();
   }
 
   // ── Memory panel ─────────────────────────────────────────────────────────────

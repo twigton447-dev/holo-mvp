@@ -277,6 +277,21 @@
     #incognito-btn { background: none; border: 1px solid var(--border); color: var(--text3); border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em; }
     #incognito-btn:hover { border-color: #a78bfa; color: #a78bfa; }
     #incognito-btn.active { border-color: #a78bfa; color: #a78bfa; background: #a78bfa11; }
+
+    /* Mobile */
+    @media (max-width: 480px) {
+      #messages { padding: 20px 16px 12px; }
+      #input-bar { padding: 8px 12px 16px; }
+      #attachments-bar { padding: 0 12px 4px; }
+      #empty h2 { font-size: 28px; letter-spacing: -0.8px; }
+      #empty p { font-size: 15px; }
+      .holo-body .bubble { font-size: 15px; line-height: 1.85; }
+      .holo-body h1 { font-size: 24px; }
+      .holo-body h2 { font-size: 20px; }
+      .msg.user .bubble { max-width: 90%; }
+      #memory-panel { width: 100%; }
+      #thread-panel { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -1096,12 +1111,12 @@
         headers: { "Content-Type": "application/json", "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` },
         body:    JSON.stringify({ about_me: text }),
       });
-      // Remove the onboarding card and drop into chat with the bio pre-filled
       document.getElementById("holo-onboarding")?.remove();
       document.getElementById("empty")?.remove();
       refreshMemoryContext();
-      // Send it as the first message so Holo acknowledges and responds
-      document.getElementById("input").value = text;
+      // Send a special onboarding prompt — Holo sees the bio in context and gives a proper intro
+      const onboardingPrompt = `I just shared my personal brief with you. Here it is for reference:\n\n${text}\n\nNow please introduce yourself to me — explain why you asked for this brief, how you actually work (the fact that you run across three AI models simultaneously and synthesize the best from each), what makes you genuinely different from using ChatGPT, Claude, or Gemini on their own, and what we can accomplish together. Be warm, direct, and specific — mention real capabilities and what this new relationship can look like. Keep it conversational, not a sales pitch.`;
+      document.getElementById("input").value = onboardingPrompt;
       sendMessage();
     } catch { btn.disabled = false; btn.textContent = "Seed to Holo"; }
   }

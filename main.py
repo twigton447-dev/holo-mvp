@@ -555,6 +555,19 @@ def serve_landing():
     return {"status": "ok", "message": "Holo API running. Frontend not found."}
 
 
+@app.get("/sw.js")
+def serve_service_worker():
+    """Serve the PWA service worker from root scope so it can control all pages."""
+    sw = _frontend_dir / "sw.js"
+    if not sw.exists():
+        raise HTTPException(status_code=404, detail="Service worker not found.")
+    return FileResponse(
+        str(sw),
+        media_type="application/javascript",
+        headers={"Service-Worker-Allowed": "/"},
+    )
+
+
 @app.get("/chat")
 def serve_chat_ui():
     """Serve the Holo chat UI."""
@@ -671,6 +684,62 @@ async def list_sessions(request: Request):
         for s in sessions
     ]
     return JSONResponse(content={"sessions": mapped})
+
+
+_summary_cache: dict = {}
+_surface_cache: dict = {}
+
+@app.get("/v1/capsule/surface")
+async def capsule_surface(
+    request: Request,
+    _key: str = Depends(_verify_key),
+):
+    """
+    Pilot-generated surface briefing: top 5 topics + priority to-dos.
+    Cached per capsule for 30 minutes to avoid redundant LLM calls.
+    """
+    import time
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    capsule_id = capsule["sub"]
+
+    # Return cached result if fresh (< 30 min)
+    cached = _surface_cache.get(capsule_id)
+    if cached and (time.time() - cached["ts"]) < 1800:
+        return JSONResponse(content=cached["data"])
+
+    if _chat_engine is None:
+        raise HTTPException(status_code=503, detail="Chat engine not initialized.")
+
+    context = _capsule_brain.get_capsule_context(capsule_id) or {}
+    sessions = _capsule_brain.list_sessions(capsule_id)
+    result = _chat_engine._pilot.generate_surface(context, sessions)
+    if not result:
+        return JSONResponse(content={"topics": [], "todos": []})
+
+    _surface_cache[capsule_id] = {"data": result, "ts": time.time()}
+    return JSONResponse(content=result)
+
+
+@app.get("/v1/chat/{session_id}/summary")
+async def thread_summary(
+    session_id: str,
+    _key: str = Depends(_verify_key),
+):
+    """Return a Pilot-written summary of the thread for sidebar hover preview."""
+    if session_id in _summary_cache:
+        return JSONResponse(content={"summary": _summary_cache[session_id]})
+    if _chat_engine is None:
+        raise HTTPException(status_code=503, detail="Chat engine not initialized.")
+    session = _chat_engine.get_or_create_session(session_id)
+    history = session.history
+    if not history:
+        raise HTTPException(status_code=404, detail="Session not found.")
+    summary = _chat_engine._pilot.summarize_thread(history)
+    if summary:
+        _summary_cache[session_id] = summary
+    return JSONResponse(content={"summary": summary})
 
 
 @app.get("/v1/chat/{session_id}/history")

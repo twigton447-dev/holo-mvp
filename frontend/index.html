@@ -2,10 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1a1a" />
   <title>Holo</title>
   <link rel="manifest" href="/static/manifest.json" />
+
+  <!-- PWA: Apple / iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Holo" />
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+
+  <!-- PWA: Android / general -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Holo" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
@@ -43,7 +53,7 @@
       --accent:   #5b7ae5;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; transition: background 0.2s, color 0.2s; }
+    html, body { height: 100%; margin: 0; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; transition: background 0.2s, color 0.2s; }
     #app { display: flex; flex-direction: column; height: 100dvh; max-width: 800px; margin: 0 auto; }
 
     /* Messages */
@@ -291,7 +301,62 @@
     .thread-preview { font-size: 13px; color: var(--text); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .thread-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
     #thread-empty { color: var(--text3); font-size: 13px; text-align: center; padding: 32px 16px; line-height: 1.6; }
+    #thread-summary-tooltip { position: fixed; left: 268px; z-index: 200; width: 220px; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 13px; box-shadow: 0 4px 18px rgba(0,0,0,0.18); pointer-events: none; opacity: 0; transition: opacity 0.15s; font-size: 12.5px; line-height: 1.55; color: var(--text5); }
+    #thread-summary-tooltip.visible { opacity: 1; }
+    #thread-summary-tooltip .tstt-loading { color: var(--text3); font-style: italic; }
     .thread-section-header { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; padding: 12px 10px 4px; }
+
+    /* ---- Artifact card (inline in chat) ---------------------------------- */
+    .artifact-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 12px 0; background: var(--bg2); }
+    .artifact-preview { width: 100%; height: 220px; border: none; pointer-events: none; display: block; background: #fff; }
+    .artifact-bar { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-top: 1px solid var(--border); background: var(--bg2); }
+    .artifact-bar span { font-size: 12px; color: var(--text2); flex: 1; font-weight: 500; }
+    .artifact-btn { background: none; border: 1px solid var(--border); border-radius: 7px; color: var(--text2); font-size: 12px; font-family: inherit; cursor: pointer; padding: 4px 10px; transition: all 0.12s; white-space: nowrap; }
+    .artifact-btn:hover { background: var(--bg3); color: var(--text); }
+    .artifact-btn.primary { background: var(--text); color: var(--bg); border-color: transparent; }
+    .artifact-btn.primary:hover { opacity: 0.85; }
+
+    /* ---- Artifact panel (right side) ------------------------------------- */
+    #artifact-panel { position: fixed; top: 0; right: 0; height: 100vh; width: 52vw; min-width: 480px; background: var(--bg); border-left: 1px solid var(--border); z-index: 95; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.24s ease; }
+    #artifact-panel.open { transform: translateX(0); }
+    #artifact-panel-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    #artifact-panel-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #artifact-panel-header .artifact-btn { font-size: 11.5px; }
+    #artifact-iframe { flex: 1; border: none; background: #fff; }
+    @media (max-width: 900px) { #artifact-panel { width: 100%; min-width: unset; } }
+    /* Surface panel — Pilot's priority briefing */
+    #surface-panel { position: fixed; top: 0; right: 0; height: 100vh; width: 300px; background: var(--bg); border-left: 1px solid var(--border); z-index: 85; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.26s ease; }
+    #surface-panel.open { transform: translateX(0); }
+    #surface-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    #surface-panel-header .surface-title { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; }
+    #surface-panel-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; }
+    #surface-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
+    #surface-body::-webkit-scrollbar { width: 3px; }
+    #surface-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .surface-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 8px; }
+    #surface-topics { display: flex; flex-direction: column; gap: 8px; }
+    .topic-box { border-radius: 12px; padding: 14px 16px; cursor: default; }
+    .topic-box .topic-label { font-size: 15px; font-weight: 700; line-height: 1.25; }
+    .topic-box.blue   { background: rgba(91,122,229,0.12); border: 1px solid rgba(91,122,229,0.25); }
+    .topic-box.blue   .topic-label { color: #7b9cf0; }
+    .topic-box.yellow { background: rgba(245,158,11,0.1);  border: 1px solid rgba(245,158,11,0.2); }
+    .topic-box.yellow .topic-label { color: #f59e0b; }
+    .topic-box.green  { background: rgba(34,197,94,0.1);   border: 1px solid rgba(34,197,94,0.2); }
+    .topic-box.green  .topic-label { color: #4ade80; }
+    .topic-box.red    { background: rgba(239,68,68,0.1);   border: 1px solid rgba(239,68,68,0.2); }
+    .topic-box.red    .topic-label { color: #f87171; }
+    .topic-box.purple { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2); }
+    .topic-box.purple .topic-label { color: #c4b5fd; }
+    .topic-box.orange { background: rgba(249,115,22,0.1);  border: 1px solid rgba(249,115,22,0.2); }
+    .topic-box.orange .topic-label { color: #fb923c; }
+    #surface-todos { display: flex; flex-direction: column; gap: 8px; }
+    .todo-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; }
+    .todo-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .todo-dot.high { background: #f87171; }
+    .todo-dot.medium { background: #f59e0b; }
+    .todo-text { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.45; }
+    #surface-loading { display: flex; align-items: center; justify-content: center; flex: 1; color: var(--text3); font-size: 13px; }
+    @media (max-width: 700px) { #surface-panel { width: 100%; } }
     /* Thread toggle in header */
     #thread-toggle { background: none; border: 1px solid var(--border); color: var(--text3); border-radius: 8px; padding: 5px 12px; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; display: block; transition: all 0.15s; flex-shrink: 0; letter-spacing: 0.04em; }
     #thread-toggle:hover { border-color: var(--text2); color: var(--text5); }
@@ -425,6 +490,21 @@
   </div>
 </div>
 
+<!-- Artifact panel — right side, renders HTML artifacts full-size -->
+<div id="artifact-panel">
+  <div id="artifact-panel-header">
+    <span id="artifact-panel-title">Artifact</span>
+    <button class="artifact-btn" onclick="artifactNewTab()" title="Open in new tab">↗ New tab</button>
+    <button class="artifact-btn" onclick="artifactDownload()" title="Download HTML">↓ Download</button>
+    <button class="artifact-btn" onclick="artifactPrint()" title="Export as PDF">⎙ PDF</button>
+    <button class="artifact-btn" onclick="closeArtifactPanel()" title="Close">×</button>
+  </div>
+  <iframe id="artifact-iframe" sandbox="allow-scripts allow-same-origin" title="Artifact preview"></iframe>
+</div>
+
+<!-- Thread summary tooltip (Pilot-written, shown on thread hover) -->
+<div id="thread-summary-tooltip"></div>
+
 <!-- Thread panel — left sidebar showing all past threads -->
 <div id="thread-panel">
   <div id="thread-panel-header">
@@ -451,6 +531,16 @@
   <div id="memory-panel-footer">
     <textarea id="seed-input" rows="3" placeholder="Tell Holo something about yourself…&#10;e.g. I'm building a startup in health tech"></textarea>
     <button id="seed-btn" onclick="seedMemory()">Save to Holo's memory</button>
+  </div>
+</div>
+
+<div id="surface-panel">
+  <div id="surface-panel-header">
+    <span class="surface-title">On my mind</span>
+    <button id="surface-panel-close" onclick="closeSurfacePanel()">×</button>
+  </div>
+  <div id="surface-body">
+    <div id="surface-loading">Thinking about you...</div>
   </div>
 </div>
 
@@ -579,6 +669,10 @@
     return await file.text();
   }
 
+  function isPdfFile(file) {
+    return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+  }
+
   async function readAttachmentsAsText() {
     const parts  = [];
     const images = [];
@@ -588,10 +682,17 @@
           const data = await readFileAsBase64(file);
           images.push({ name: file.name, data, mimeType: file.type || "image/jpeg" });
         } catch { parts.push(`\n\n[Attached image: ${file.name} — could not read]`); }
+      } else if (isPdfFile(file)) {
+        // Send as native PDF — Anthropic and Google read it natively (including scanned pages).
+        // OpenAI gets a graceful fallback note injected by the backend.
+        try {
+          const data = await readFileAsBase64(file);
+          images.push({ name: file.name, data, mimeType: "application/pdf" });
+        } catch { parts.push(`\n\n[Attached PDF: ${file.name} — could not read]`); }
       } else {
         try {
-          const text = await readFileAsText(file);
-          parts.push(`\n\n[Attached: ${file.name}]\n${text.slice(0, 6000)}`);
+          const text = await file.text();
+          parts.push(`\n\n[Attached: ${file.name}]\n${text.slice(0, 8000)}`);
         } catch { parts.push(`\n\n[Attached: ${file.name} — could not read]`); }
       }
     }
@@ -963,6 +1064,12 @@
     restoreLastSession();
     loadSessionList();
     openThreadPanel();
+    // Surface panel: show on login after a short delay (lets context load first)
+    setTimeout(() => {
+      const knownCount = Object.keys(_memoryContext || {}).filter(k => !k.startsWith("_")).length;
+      if (knownCount > 0) openSurfacePanel();
+    }, 1200);
+    resetInactivityTimer();
   }
 
   async function restoreLastSession() {
@@ -1090,6 +1197,75 @@
   }
 
   // ── Memory panel ─────────────────────────────────────────────────────────────
+
+  // ---- Surface Panel -------------------------------------------------------
+
+  let _surfaceLoaded = false;
+  let _inactivityTimer = null;
+  const INACTIVITY_MS = 60 * 60 * 1000; // 1 hour
+
+  function resetInactivityTimer() {
+    clearTimeout(_inactivityTimer);
+    _inactivityTimer = setTimeout(() => {
+      if (capsuleToken) openSurfacePanel();
+    }, INACTIVITY_MS);
+  }
+
+  async function openSurfacePanel() {
+    const panel = document.getElementById("surface-panel");
+    panel.classList.add("open");
+    if (_surfaceLoaded) return;
+    try {
+      const res = await fetch("/v1/capsule/surface", {
+        headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` },
+      });
+      if (!res.ok) throw new Error("Surface fetch failed.");
+      const data = await res.json();
+      renderSurfacePanel(data);
+      _surfaceLoaded = true;
+    } catch (e) {
+      document.getElementById("surface-body").innerHTML =
+        `<div style="color:var(--text3);font-size:13px;padding:8px;">Nothing to surface yet. Keep talking.</div>`;
+    }
+  }
+
+  function closeSurfacePanel() {
+    document.getElementById("surface-panel").classList.remove("open");
+  }
+
+  function renderSurfacePanel(data) {
+    const topics = data.topics || [];
+    const todos  = data.todos  || [];
+    const body   = document.getElementById("surface-body");
+
+    const topicsHtml = topics.length ? `
+      <div>
+        <div class="surface-section-label">What's on your plate</div>
+        <div id="surface-topics">
+          ${topics.map(t => `
+            <div class="topic-box ${t.color || 'blue'}">
+              <div class="topic-label">${escHtml(t.label)}</div>
+            </div>`).join("")}
+        </div>
+      </div>` : "";
+
+    const todosHtml = todos.length ? `
+      <div>
+        <div class="surface-section-label">Priority to-dos</div>
+        <div id="surface-todos">
+          ${todos.map(td => `
+            <div class="todo-item">
+              <div class="todo-dot ${td.priority || 'medium'}"></div>
+              <div class="todo-text">${escHtml(td.text)}</div>
+            </div>`).join("")}
+        </div>
+      </div>` : "";
+
+    body.innerHTML = topicsHtml + todosHtml ||
+      `<div style="color:var(--text3);font-size:13px;">Nothing to surface yet.</div>`;
+  }
+
+  // ---- Memory Panel --------------------------------------------------------
 
   function openMemoryPanel() {
     renderMemoryList();
@@ -1328,6 +1504,10 @@
     const input = document.getElementById("input");
     const text  = input.value.trim();
     if (!text) return;
+
+    // Reset inactivity timer and invalidate surface cache on new message
+    resetInactivityTimer();
+    _surfaceLoaded = false;
 
     // Clear empty state
     document.getElementById("empty")?.remove();
@@ -1577,11 +1757,32 @@
   }
 
   // Minimal markdown: bold, italic, code, bullets, headers
+  // ---- Artifact store -------------------------------------------------------
+  const _artifacts = {}; // id → html string
+  let _artifactCurrent = null; // id of artifact loaded in panel
+
   function renderMarkdown(text) {
-    // Protect code blocks first
+    // Protect code blocks first — detect HTML artifacts before escaping
     const codeBlocks = [];
     let s = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
-      codeBlocks.push(`<div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><code>${escHtml(code.trim())}</code></pre></div>`);
+      const trimmed = code.trim();
+      // Detect a full HTML artifact: lang is html and content looks like a document
+      if (lang.toLowerCase() === "html" && /<!doctype|<html/i.test(trimmed)) {
+        const aid = "art_" + Date.now() + "_" + codeBlocks.length;
+        _artifacts[aid] = trimmed;
+        const title = (trimmed.match(/<title>([^<]*)<\/title>/i) || [])[1] || "Artifact";
+        codeBlocks.push(`
+          <div class="artifact-card">
+            <iframe class="artifact-preview" srcdoc="${escHtml(trimmed)}" sandbox="allow-scripts" title="preview"></iframe>
+            <div class="artifact-bar">
+              <span>✦ ${escHtml(title)}</span>
+              <button class="artifact-btn" onclick="artifactDownloadById('${aid}')">↓ Download</button>
+              <button class="artifact-btn primary" onclick="openArtifactPanel('${aid}', '${escHtml(title)}')">Open ↗</button>
+            </div>
+          </div>`);
+      } else {
+        codeBlocks.push(`<div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre><code>${escHtml(trimmed)}</code></pre></div>`);
+      }
       return `\x00CODE${codeBlocks.length - 1}\x00`;
     });
 
@@ -1785,7 +1986,7 @@
       const label = s.title || s.preview || "Thread";
       const topic = threadTopic(label);
       const active = s.id === sessionId ? " active" : "";
-      return `<div class="thread-item${active}${topic ? " " + topic : ""}" onclick="loadSession('${escHtml(s.id)}')">
+      return `<div class="thread-item${active}${topic ? " " + topic : ""}" onclick="loadSession('${escHtml(s.id)}')" onmouseenter="threadTooltipShow(this,'${escHtml(s.id)}')" onmouseleave="threadTooltipHide()">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
           <div class="thread-preview" style="flex:1;min-width:0;">${escHtml(label)}</div>
           <button onclick="event.stopPropagation();deleteThread('${escHtml(s.id)}')" title="Delete thread" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 4px;border-radius:4px;font-size:13px;opacity:0;transition:opacity 0.15s;flex-shrink:0;" class="thread-delete-btn">✕</button>
@@ -1798,6 +1999,105 @@
       .filter(sec => sec.items.length > 0)
       .map(sec => `<div class="thread-section-header">${sec.label}</div>${sec.items.map(renderItem).join("")}`)
       .join("");
+  }
+
+  // ---- Artifact panel -------------------------------------------------------
+
+  function openArtifactPanel(aid, title) {
+    const html = _artifacts[aid];
+    if (!html) return;
+    _artifactCurrent = aid;
+    document.getElementById("artifact-panel-title").textContent = title || "Artifact";
+    document.getElementById("artifact-iframe").srcdoc = html;
+    document.getElementById("artifact-panel").classList.add("open");
+  }
+
+  function closeArtifactPanel() {
+    document.getElementById("artifact-panel").classList.remove("open");
+    _artifactCurrent = null;
+  }
+
+  function artifactNewTab() {
+    const aid  = _artifactCurrent;
+    const html = aid ? _artifacts[aid] : null;
+    if (!html) return;
+    const w = window.open("", "_blank");
+    w.document.write(html);
+    w.document.close();
+  }
+
+  function artifactDownload() {
+    if (_artifactCurrent) artifactDownloadById(_artifactCurrent);
+  }
+
+  function artifactDownloadById(aid) {
+    const html = _artifacts[aid];
+    if (!html) return;
+    const title = (html.match(/<title>([^<]*)<\/title>/i) || [])[1] || "holo-artifact";
+    const blob = new Blob([html], { type: "text/html" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = title.replace(/[^a-z0-9]/gi, "-").toLowerCase() + ".html";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function artifactPrint() {
+    const iframe = document.getElementById("artifact-iframe");
+    if (!iframe) return;
+    iframe.contentWindow.print();
+  }
+
+  // ---- Thread summary tooltip -----------------------------------------------
+
+  const _ttSummaryCache = {};
+  let _ttHoverTimer = null;
+  let _ttCurrentSid = null;
+
+  function threadTooltipShow(el, sid) {
+    _ttCurrentSid = sid;
+    clearTimeout(_ttHoverTimer);
+    _ttHoverTimer = setTimeout(() => {
+      const tip = document.getElementById("thread-summary-tooltip");
+      // Position vertically centred on the hovered item
+      const rect = el.getBoundingClientRect();
+      const tipH = 80; // estimated height
+      let top = rect.top + (rect.height / 2) - (tipH / 2);
+      top = Math.max(8, Math.min(top, window.innerHeight - tipH - 8));
+      tip.style.top = top + "px";
+
+      if (_ttSummaryCache[sid]) {
+        tip.innerHTML = _ttSummaryCache[sid];
+        tip.classList.add("visible");
+        return;
+      }
+
+      tip.innerHTML = `<span class="tstt-loading">Reading thread…</span>`;
+      tip.classList.add("visible");
+
+      fetch(`/v1/chat/${sid}/summary`, {
+        headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          const text = data?.summary || "";
+          _ttSummaryCache[sid] = text || "<em>No summary available.</em>";
+          // Only update if still hovering this item
+          if (_ttCurrentSid === sid) {
+            tip.innerHTML = _ttSummaryCache[sid];
+          }
+        })
+        .catch(() => {
+          if (_ttCurrentSid === sid) tip.classList.remove("visible");
+        });
+    }, 350);
+  }
+
+  function threadTooltipHide() {
+    _ttCurrentSid = null;
+    clearTimeout(_ttHoverTimer);
+    const tip = document.getElementById("thread-summary-tooltip");
+    tip.classList.remove("visible");
   }
 
   async function deleteThread(sid) {
@@ -1871,6 +2171,14 @@
     const d = Math.floor(h / 24);
     if (d < 7)   return `${d}d ago`;
     return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
+
+  // ---- Service worker registration -----------------------------------------
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js")
+        .catch(e => console.warn("SW registration failed:", e));
+    });
   }
 </script>
 </body>

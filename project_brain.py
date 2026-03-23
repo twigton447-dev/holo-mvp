@@ -91,7 +91,7 @@ Ambient signal layer (run these when building the full life-context system):
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- 7. Integrations — OAuth tokens and connection state per capsule per source
---    One row per (capsule_id, source). The Pilot reads this to know what
+--    One row per (capsule_id, source). The Captain reads this to know what
 --    signal feeds are live for a given person.
 CREATE TABLE IF NOT EXISTS holo_integrations (
     id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -117,7 +117,7 @@ CREATE INDEX IF NOT EXISTS idx_integrations_capsule
 
 -- 8. Ambient signals — the raw event log of the person's life
 --    Append-only. High volume. Every signal from every connected source
---    lands here as a normalized event. The Pilot reads recent windows
+--    lands here as a normalized event. The Captain reads recent windows
 --    to understand where the person is right now.
 CREATE TABLE IF NOT EXISTS holo_signals (
     id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -140,11 +140,11 @@ CREATE TABLE IF NOT EXISTS holo_signals (
     amount_usd      float,                    -- for purchases
     domain          text,                     -- for page visits
     duration_min    int,                      -- for meetings, calls
-    -- Derived flags the Pilot sets after processing
-    flagged         boolean DEFAULT false,    -- something the Pilot wants to surface
+    -- Derived flags the Captain sets after processing
+    flagged         boolean DEFAULT false,    -- something the Captain wants to surface
     flag_reason     text,
-    -- Pilot-extracted nutrient (persists). Raw content does not.
-    summary         text                      -- what the Pilot decided mattered from this event
+    -- Captain-extracted nutrient (persists). Raw content does not.
+    summary         text                      -- what the Captain decided mattered from this event
 );
 
 CREATE INDEX IF NOT EXISTS idx_signals_capsule_time
@@ -158,18 +158,18 @@ CREATE INDEX IF NOT EXISTS idx_signals_source
 
 -- 9. Life context — synthesized understanding of who this person is right now.
 --    Not raw events. Not history. The current true state of the person as the
---    Pilot understands it. Written and pruned by the Pilot, not by cron jobs.
+--    Captain understands it. Written and pruned by the Captain, not by cron jobs.
 --
---    Pruning rules (Pilot judgment, not automation):
+--    Pruning rules (Captain judgment, not automation):
 --      - confidence decays 0.1 per week if no reinforcing signals arrive
---      - when confidence drops below 0.3, Pilot reviews: prune or reaffirm
+--      - when confidence drops below 0.3, Captain reviews: prune or reaffirm
 --      - when something evolves (goal achieved, pattern broken, concern resolved),
---        Pilot explicitly marks the old insight pruned and writes the new state
+--        Captain explicitly marks the old insight pruned and writes the new state
 --      - pruned rows are soft-deleted (pruned_at set), never hard-deleted immediately
---        so the Pilot can reference what changed and why
+--        so the Captain can reference what changed and why
 --      - hard delete after 30 days of soft deletion — no hoarding, no archaeology
 --
---    The Pilot holds who you are now. Not who you were.
+--    The Captain holds who you are now. Not who you were.
 CREATE TABLE IF NOT EXISTS holo_life_context (
     id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     capsule_id      text REFERENCES holo_capsules(capsule_id) ON DELETE CASCADE,
@@ -179,14 +179,14 @@ CREATE TABLE IF NOT EXISTS holo_life_context (
                                       -- | 'work' | 'goals' | 'patterns' | 'emotional'
                                       -- | 'spiritual' | 'avoidances'
     key             text NOT NULL,    -- human-readable label e.g. 'cash_flow_concern'
-    value           text NOT NULL,    -- the insight, written in plain language by Pilot
+    value           text NOT NULL,    -- the insight, written in plain language by Captain
     confidence      float DEFAULT 1.0, -- 0.0–1.0, decays weekly without reinforcement
     last_reinforced timestamptz DEFAULT now(), -- last time a signal confirmed this
     reinforcement_count int DEFAULT 1,         -- how many times this has been confirmed
     source_signals  uuid[],           -- signal IDs that contributed to this insight
     -- Pruning fields
-    pruned_at       timestamptz,      -- set when Pilot decides this is no longer true
-    prune_reason    text,             -- what changed — written by Pilot, not a code flag
+    pruned_at       timestamptz,      -- set when Captain decides this is no longer true
+    prune_reason    text,             -- what changed — written by Captain, not a code flag
     superseded_by   uuid,             -- if replaced by a new insight, points to it
     embedding       vector(1536),     -- for semantic retrieval
     UNIQUE (capsule_id, key)
@@ -217,10 +217,10 @@ CREATE INDEX IF NOT EXISTS idx_life_context_embedding
 --   AND pruned_at < now() - interval '30 days';
 
 -- 10. Transcripts — TRANSIENT processing queue, not permanent storage.
---     The Pilot reads full_text once, extracts nutrients into holo_life_context
+--     The Captain reads full_text once, extracts nutrients into holo_life_context
 --     and holo_signals, then full_text is deleted (set to null).
 --     Only the derived insights persist. Raw content does not accumulate.
---     status: 'pending' → Pilot hasn't processed yet
+--     status: 'pending' → Captain hasn't processed yet
 --             'processed' → nutrients extracted, full_text deleted
 CREATE TABLE IF NOT EXISTS holo_transcripts (
     id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -234,9 +234,9 @@ CREATE TABLE IF NOT EXISTS holo_transcripts (
     participants    text[],
     duration_min    int,
     status          text DEFAULT 'pending',  -- 'pending' | 'processed'
-    full_text       text,                 -- TRANSIENT — nulled after Pilot processes
-    -- Nutrients extracted by Pilot (these persist after full_text is dropped)
-    pilot_summary   text,
+    full_text       text,                 -- TRANSIENT — nulled after Captain processes
+    -- Nutrients extracted by Captain (these persist after full_text is dropped)
+    captain_summary text,
     decisions_made  text[],
     commitments     text[],
     stress_signals  text[],
@@ -248,18 +248,18 @@ CREATE INDEX IF NOT EXISTS idx_transcripts_pending
 CREATE INDEX IF NOT EXISTS idx_transcripts_capsule_time
     ON holo_transcripts (capsule_id, occurred_at DESC);
 
--- 11. Session consolidations — what the Pilot wrote to memory after each session
+-- 11. Session consolidations — what the Captain wrote to memory after each session
 --     The explicit record of what was learned, what changed, what was surfaced.
---     Feeds the session-open load so the Pilot always walks in knowing what happened.
+--     Feeds the session-open load so the Captain always walks in knowing what happened.
 CREATE TABLE IF NOT EXISTS holo_session_consolidations (
     id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     capsule_id      text REFERENCES holo_capsules(capsule_id) ON DELETE CASCADE,
     session_id      text,
     created_at      timestamptz DEFAULT now(),
-    what_changed    text,    -- what the Pilot updated in life_context this session
+    what_changed    text,    -- what the Captain updated in life_context this session
     what_surfaced   text,    -- what thought bubbles were shown and whether they landed
     open_threads    text[],  -- things unresolved that the next session should pick up
-    pilot_note      text     -- the Pilot's own note to herself for next time
+    captain_note    text     -- the Captain's own note to herself for next time
 );
 
 CREATE INDEX IF NOT EXISTS idx_consolidations_capsule
@@ -305,6 +305,24 @@ CREATE TABLE IF NOT EXISTS holo_chat_sessions (
 -- If the table already exists, run these migrations:
 -- ALTER TABLE holo_chat_sessions ADD COLUMN IF NOT EXISTS capsule_id text REFERENCES holo_capsules(capsule_id);
 -- ALTER TABLE holo_chat_sessions ADD COLUMN IF NOT EXISTS title text;
+
+-- 12. Artifacts — HTML outputs generated by Holo, saved for retrieval
+CREATE TABLE IF NOT EXISTS holo_artifacts (
+    artifact_id    uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    capsule_id     text REFERENCES holo_capsules(capsule_id) ON DELETE CASCADE,
+    session_id     text REFERENCES holo_chat_sessions(session_id),
+    turn_number    int,
+    title          text,
+    artifact_type  text DEFAULT 'html',
+    content        text,
+    created_at     timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_artifacts_capsule
+    ON holo_artifacts (capsule_id, created_at DESC);
+
+ALTER TABLE holo_artifacts ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON holo_artifacts FROM anon, authenticated;
 
 -- 5. Chat messages
 CREATE TABLE IF NOT EXISTS holo_chat_messages (
@@ -361,6 +379,20 @@ class ProjectBrain:
                 f"ProjectBrain: connection failed ({e}). "
                 "Run the schema SQL in the Supabase dashboard."
             )
+            self._client = None
+
+    def _reconnect(self):
+        """Re-establish the Supabase client after a stale-connection failure."""
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_KEY")
+        if not url or not key:
+            return
+        try:
+            from supabase import create_client
+            self._client = create_client(url, key)
+            logger.info("ProjectBrain: reconnected to Supabase.")
+        except Exception as e:
+            logger.warning(f"ProjectBrain: reconnect failed: {e}")
             self._client = None
 
     # -------------------------------------------------------------------------
@@ -852,22 +884,25 @@ class ProjectBrain:
         """
         if not self._client:
             return None
-        try:
-            resp = (
-                self._client
-                .table("holo_chat_messages")
-                .select("role, content")
-                .eq("session_id", session_id)
-                .order("created_at", desc=False)
-                .execute()
-            )
-            rows = resp.data or []
-            if not rows:
-                return None
-            return [{"role": r["role"], "content": r["content"]} for r in rows]
-        except Exception as e:
-            logger.warning(f"ProjectBrain.load_chat_history failed: {e}")
-            return None
+        for attempt in range(2):
+            try:
+                resp = (
+                    self._client
+                    .table("holo_chat_messages")
+                    .select("role, content")
+                    .eq("session_id", session_id)
+                    .order("created_at", desc=False)
+                    .execute()
+                )
+                rows = resp.data or []
+                if not rows:
+                    return None
+                return [{"role": r["role"], "content": r["content"]} for r in rows]
+            except Exception as e:
+                logger.warning(f"ProjectBrain.load_chat_history attempt {attempt+1} failed: {e}")
+                if attempt == 0:
+                    self._reconnect()
+        return None
 
     def delete_session(self, capsule_id: str, session_id: str) -> bool:
         """
@@ -878,12 +913,12 @@ class ProjectBrain:
         if not self._client or not capsule_id or not session_id:
             return False
         try:
-            # Verify ownership
+            # Verify ownership: session must belong to this capsule OR have no capsule_id (legacy session)
             check = (
                 self._client.table("holo_chat_sessions")
                 .select("session_id")
                 .eq("session_id", session_id)
-                .eq("capsule_id", capsule_id)
+                .or_(f"capsule_id.eq.{capsule_id},capsule_id.is.null")
                 .limit(1)
                 .execute()
             ).data or []
@@ -948,7 +983,7 @@ class ProjectBrain:
             return []
 
     def save_consolidation(self, capsule_id: str, session_id: str, session_note: dict) -> None:
-        """Persist the Pilot's session-end note to holo_session_consolidations."""
+        """Persist the Captain's session-end note to holo_session_consolidations."""
         if not self._client or not session_note:
             return
         try:
@@ -958,7 +993,7 @@ class ProjectBrain:
                 "what_changed": session_note.get("what_changed", ""),
                 "what_surfaced": session_note.get("what_surfaced", ""),
                 "open_threads": session_note.get("open_threads", []),
-                "pilot_note":   session_note.get("pilot_note", ""),
+                "captain_note": session_note.get("captain_note", ""),
                 "created_at":   datetime.now(timezone.utc).isoformat(),
             }).execute()
             logger.info(f"ProjectBrain: session consolidation saved for {capsule_id[:8]}.")
@@ -967,7 +1002,7 @@ class ProjectBrain:
 
     def upsert_life_context(self, capsule_id: str, entries: list) -> None:
         """
-        Write the Pilot's distilled life_context entries for a capsule.
+        Write the Captain's distilled life_context entries for a capsule.
         If an entry supersedes an existing key, soft-prune the old one first.
         """
         if not self._client or not entries:
@@ -1031,7 +1066,7 @@ class ProjectBrain:
         try:
             resp = (
                 self._client.table("holo_session_consolidations")
-                .select("what_changed, what_surfaced, open_threads, pilot_note, created_at")
+                .select("what_changed, what_surfaced, open_threads, captain_note, created_at")
                 .eq("capsule_id", capsule_id)
                 .order("created_at", desc=True)
                 .limit(1)
@@ -1091,7 +1126,7 @@ class ProjectBrain:
             logger.warning(f"ProjectBrain.append_session_history failed: {e}")
 
     def update_session_name(self, capsule_id: str, session_id: str, name: str) -> None:
-        """Write the Pilot-generated title directly to holo_chat_sessions."""
+        """Write the Captain-generated title directly to holo_chat_sessions."""
         if not self._client or not name:
             return
         try:
@@ -1101,6 +1136,74 @@ class ProjectBrain:
             logger.info(f"ProjectBrain: session {session_id[:8]} named '{name}'.")
         except Exception as e:
             logger.warning(f"ProjectBrain.update_session_name failed: {e}")
+
+    # ------------------------------------------------------------------
+    # Artifact registry
+    # ------------------------------------------------------------------
+
+    def save_artifact(
+        self,
+        capsule_id: str,
+        session_id: str,
+        turn_number: int,
+        title: str,
+        content: str,
+        artifact_type: str = "html",
+    ) -> Optional[str]:
+        """Save a generated artifact to holo_artifacts. Returns artifact_id or None."""
+        if not self._client or not content:
+            return None
+        try:
+            resp = self._client.table("holo_artifacts").insert({
+                "capsule_id":    capsule_id,
+                "session_id":    session_id,
+                "turn_number":   turn_number,
+                "title":         title,
+                "artifact_type": artifact_type,
+                "content":       content,
+            }).execute()
+            aid = resp.data[0]["artifact_id"] if resp.data else None
+            logger.info(f"ProjectBrain: artifact saved '{title}' ({aid}).")
+            return aid
+        except Exception as e:
+            logger.warning(f"ProjectBrain.save_artifact failed: {e}")
+            return None
+
+    def list_artifacts(self, capsule_id: str, limit: int = 50) -> list:
+        """Return all artifacts for a capsule, newest first. No content — metadata only."""
+        if not self._client or not capsule_id:
+            return []
+        try:
+            rows = (
+                self._client.table("holo_artifacts")
+                .select("artifact_id, title, artifact_type, session_id, turn_number, created_at")
+                .eq("capsule_id", capsule_id)
+                .order("created_at", desc=True)
+                .limit(limit)
+                .execute()
+            ).data or []
+            return rows
+        except Exception as e:
+            logger.warning(f"ProjectBrain.list_artifacts failed: {e}")
+            return []
+
+    def get_artifact(self, capsule_id: str, artifact_id: str) -> Optional[dict]:
+        """Retrieve a single artifact by ID, verifying capsule ownership."""
+        if not self._client:
+            return None
+        try:
+            resp = (
+                self._client.table("holo_artifacts")
+                .select("*")
+                .eq("artifact_id", artifact_id)
+                .eq("capsule_id", capsule_id)
+                .maybe_single()
+                .execute()
+            )
+            return resp.data if resp else None
+        except Exception as e:
+            logger.warning(f"ProjectBrain.get_artifact failed: {e}")
+            return None
 
     def load_session_list(self, capsule_id: str) -> list:
         """

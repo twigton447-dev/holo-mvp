@@ -617,7 +617,7 @@ async def chat(
     except Exception as e:
         logger.error(f"Chat engine error: {type(e).__name__}: {e}", exc_info=True)
         _track_usage(_key, "/v1/chat", 500)
-        raise HTTPException(status_code=500, detail="Chat engine error. See server logs.")
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
 
     elapsed = int((time.time() - t0) * 1000)
     tokens  = result.get("tokens", {})
@@ -637,6 +637,7 @@ async def chat(
         "elapsed_ms":          result["elapsed_ms"],
         "tokens":              result["tokens"],
         "thought":             result.get("thought"),
+        "artifacts":           result.get("artifacts", []),
     })
 
 
@@ -686,6 +687,28 @@ async def list_sessions(request: Request):
     return JSONResponse(content={"sessions": mapped})
 
 
+@app.get("/v1/artifacts")
+async def list_artifacts(request: Request):
+    """Return all saved artifacts for the authenticated user, newest first."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    artifacts = _capsule_brain.list_artifacts(capsule["sub"])
+    return JSONResponse(content={"artifacts": artifacts})
+
+
+@app.get("/v1/artifacts/{artifact_id}")
+async def get_artifact(artifact_id: str, request: Request):
+    """Return a single artifact by ID. User must own it."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    artifact = _capsule_brain.get_artifact(capsule["sub"], artifact_id)
+    if not artifact:
+        raise HTTPException(status_code=404, detail="Artifact not found.")
+    return JSONResponse(content=artifact)
+
+
 _summary_cache: dict = {}
 _surface_cache: dict = {}
 
@@ -695,7 +718,7 @@ async def capsule_surface(
     _key: str = Depends(_verify_key),
 ):
     """
-    Pilot-generated surface briefing: top 5 topics + priority to-dos.
+    Captain-generated surface briefing: top 5 topics + priority to-dos.
     Cached per capsule for 30 minutes to avoid redundant LLM calls.
     """
     import time
@@ -714,7 +737,7 @@ async def capsule_surface(
 
     context = _capsule_brain.get_capsule_context(capsule_id) or {}
     sessions = _capsule_brain.list_sessions(capsule_id)
-    result = _chat_engine._pilot.generate_surface(context, sessions)
+    result = _chat_engine._captain.generate_surface(context, sessions)
     if not result:
         return JSONResponse(content={"topics": [], "todos": []})
 
@@ -727,16 +750,19 @@ async def thread_summary(
     session_id: str,
     _key: str = Depends(_verify_key),
 ):
-    """Return a Pilot-written summary of the thread for sidebar hover preview."""
+    """Return a Captain-written summary of the thread for sidebar hover preview."""
     if session_id in _summary_cache:
         return JSONResponse(content={"summary": _summary_cache[session_id]})
     if _chat_engine is None:
         raise HTTPException(status_code=503, detail="Chat engine not initialized.")
+    # Try in-memory session first, fall back to DB
     session = _chat_engine.get_or_create_session(session_id)
     history = session.history
     if not history:
+        history = _capsule_brain.load_chat_history(session_id) or []
+    if not history:
         raise HTTPException(status_code=404, detail="Session not found.")
-    summary = _chat_engine._pilot.summarize_thread(history)
+    summary = _chat_engine._captain.summarize_thread(history)
     if summary:
         _summary_cache[session_id] = summary
     return JSONResponse(content={"summary": summary})
@@ -783,7 +809,7 @@ async def delete_session(
     capsule_id = capsule["sub"]
     if _chat_engine:
         _chat_engine.clear_session(session_id)
-    deleted = _brain.delete_session(capsule_id, session_id)
+    deleted = _capsule_brain.delete_session(capsule_id, session_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Session not found or access denied.")
     return JSONResponse(content={"deleted": True, "session_id": session_id})

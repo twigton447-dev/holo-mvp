@@ -10,6 +10,7 @@ for each turn based on the message content and conversation context.
 """
 
 import logging
+import re as _re
 import threading
 import time
 import uuid
@@ -18,8 +19,7 @@ from typing import Optional, List, Dict, Any
 
 from llm_adapters import (
     HOLO_CHAT_SYSTEM_PROMPT,
-    CoPilotAdapter,
-    PilotAdapter,
+    CaptainAdapter,
     load_adapters,
 )
 from project_brain import ProjectBrain
@@ -94,12 +94,12 @@ class HoloChatEngine:
 
     def __init__(self):
         self._adapters  = load_adapters()    # [OpenAI, Anthropic, Google]
-        self._copilot   = CoPilotAdapter()   # runs the instruments every turn
-        self._pilot     = PilotAdapter()     # in command — thinks about the human
+        self._captain   = CaptainAdapter()   # in command — runs instruments and thinks about the human
         self._brain     = ProjectBrain()
         logger.info(
             "HoloChatEngine initialized. Adapters: "
             + ", ".join(a.provider for a in self._adapters)
+            + f" | CaptainAdapter ready"
         )
 
     def get_or_create_session(self, session_id: Optional[str] = None) -> ChatSession:
@@ -130,7 +130,7 @@ class HoloChatEngine:
         Process one user message. Returns Holo's response + metadata.
         The caller should use session_id from the returned dict for follow-up turns.
 
-        incognito=True: blind mode — no capsule context, no Pilot memory, no life portrait
+        incognito=True: blind mode — no capsule context, no Captain memory, no life portrait
         injected. Base system prompt only. Used for unbiased evaluation runs.
         """
         session             = self.get_or_create_session(session_id)
@@ -146,13 +146,18 @@ class HoloChatEngine:
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
 
-        # Co-Pilot runs the instruments: temperature + search decision
-        temperature  = self._copilot.assess_chat_temperature(user_message, session.history)
-        search_query = self._copilot.should_search(user_message, session.history)
+        # Captain locks in provider for this turn — must happen first so every
+        # Captain call (instruments + portrait) uses the same rotating DNA,
+        # never the same provider as the driver
+        self._captain.prepare_for_turn(session.rotation_index)
 
-        # Pilot thinks about the human — skipped in incognito (would introduce bias)
-        thought = None if incognito else self._pilot.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        tenor   = None if incognito else self._pilot.assess_tenor(session.history, capsule_context, turn_count=session.turn_count)
+        # Captain runs the instruments: temperature + search decision
+        temperature  = self._captain.assess_chat_temperature(user_message, session.history)
+        search_query = self._captain.should_search(user_message, session.history)
+
+        # Captain thinks about the human — skipped in incognito (would introduce bias)
+        thought = None if incognito else self._captain.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        tenor   = None if incognito else self._captain.assess_tenor(session.history, capsule_context, turn_count=session.turn_count)
         search_results = web_search.search(search_query) if search_query else None
 
         # Build enriched message — search results injected for the model only,
@@ -169,11 +174,11 @@ class HoloChatEngine:
 
         logger.info(
             f"Chat turn {session.turn_count} | session={session.session_id[:8]} | "
-            f"provider={adapter.provider} | temp={temperature:.2f}"
+            f"driver={adapter.provider} | captain={self._captain.provider} | temp={temperature:.2f}"
             + (" | INCOGNITO" if incognito else "")
         )
 
-        # Inject thread-health context + portrait + working memory + Pilot brief
+        # Inject thread-health context + portrait + working memory + Captain brief
         # Incognito: only base system prompt — zero context leakage
         system_prompt = HOLO_CHAT_SYSTEM_PROMPT
         if not incognito:
@@ -182,7 +187,7 @@ class HoloChatEngine:
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
-                + ("\n\nPILOT BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
+                + ("\n\nCAPTAIN BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
             )
 
         # Call the adapter — enriched_message includes search results if any
@@ -193,9 +198,9 @@ class HoloChatEngine:
         )
         elapsed_ms = int((time.time() - start) * 1000)
 
-        # Hallucination check — Co-Pilot scans for specific low-confidence claims
+        # Hallucination check — Captain scans for specific low-confidence claims
         # and verifies them against live search. Silent on clean responses.
-        response_text, flagged_claims = self._copilot.verify_claims(
+        response_text, flagged_claims = self._captain.verify_claims(
             response_text, web_search.search
         )
         if flagged_claims:
@@ -204,6 +209,13 @@ class HoloChatEngine:
                 # Quietly inline the correction so the user gets accurate information
                 note = " · ".join(corrections)
                 response_text += f"\n\n*One thing worth correcting: {note}*"
+
+        # Extract and save any HTML artifacts — after claims check, before history commit
+        artifacts_saved = []
+        if capsule_id and not incognito:
+            artifacts_saved = _extract_and_save_artifacts(
+                self._brain, response_text, capsule_id, session.session_id, session.turn_count
+            )
 
         # Commit both turns to history
         session.history.append({"role": "user",      "content": user_message})
@@ -214,20 +226,20 @@ class HoloChatEngine:
             self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id)
             self._brain.append_session_history(capsule_id, session.session_id, user_message)
 
-        # Pilot learns — extract any new facts about the user and persist them
+        # Captain learns — extract any new facts about the user and persist them
         # Skipped in incognito: blind sessions must not pollute the capsule portrait
         if capsule_id and not incognito:
-            updates = self._pilot.extract_context_updates(session.history, capsule_context)
+            updates = self._captain.extract_context_updates(session.history, capsule_context)
             for key, value in updates.items():
                 self._brain.set_capsule_context(capsule_id, key, value)
             if updates:
                 logger.info(f"Capsule context updated for {capsule_id[:8]}: {list(updates.keys())}")
 
-        # Pilot consolidates — skipped in incognito
+        # Captain consolidates — skipped in incognito
         if capsule_id and not incognito and session.thread_health_level == "RED":
             def _consolidate():
                 try:
-                    result = self._pilot.consolidate_session(
+                    result = self._captain.consolidate_session(
                         session.history, capsule_context, session.session_id
                     )
                     if result.get("session_note"):
@@ -244,14 +256,14 @@ class HoloChatEngine:
                     logger.warning(f"Consolidation failed: {e}")
             threading.Thread(target=_consolidate, daemon=True).start()
 
-        # Pilot names the thread after turn 2 — enough context to know the topic
+        # Captain names the thread after turn 2 — enough context to know the topic
         if capsule_id and session.turn_count == 2 and not incognito:
             _hist = list(session.history)
             _sid  = session.session_id
             _cid  = capsule_id
             def _name_thread():
                 try:
-                    name = self._pilot.name_session(_hist)
+                    name = self._captain.name_session(_hist)
                     if name:
                         self._brain.update_session_name(_cid, _sid, name)
                 except Exception as e:
@@ -274,7 +286,7 @@ class HoloChatEngine:
         if session.thread_health_level == "RED":
             handoff = {
                 "suggested":  True,
-                "message":    "This thread is getting long. I've saved everything — your portrait, your open threads, everything I know. Continue here and I'll pick up right where we are.",
+                "message":    "This thread is getting long. Everything important has been saved: your portrait, open threads, what shifted this session. Before you continue, tell me: how much context do you want carried into the next thread? (Full detail, key points only, or just pick up where we left off and I'll calibrate.)",
                 "new_thread": "/chat",
             }
 
@@ -291,6 +303,7 @@ class HoloChatEngine:
             "incognito":           incognito,
             "_provider":           adapter.provider,
             "_temperature":        temperature,
+            "artifacts":           artifacts_saved,
         }
 
     def get_history(self, session_id: str) -> Optional[List[Dict[str, str]]]:
@@ -310,10 +323,10 @@ class HoloChatEngine:
 
 def _life_context_block(entries: list) -> str:
     """
-    Format the Pilot's permanent portrait for injection.
+    Format the Captain's permanent portrait for injection.
     This is the distilled, curated truth — highest priority context.
     """
-    lines = ["WHO THIS PERSON IS (Pilot's permanent portrait — distilled across all sessions):"]
+    lines = ["WHO THIS PERSON IS (Captain's permanent portrait — distilled across all sessions):"]
     for e in entries:
         conf = f" [{int(e.get('confidence', 1.0) * 100)}% confidence]" if e.get("confidence", 1.0) < 0.8 else ""
         lines.append(f"  [{e.get('category', 'patterns')}] {e.get('key', '')}: {e.get('value', '')}{conf}")
@@ -321,17 +334,17 @@ def _life_context_block(entries: list) -> str:
 
 
 def _last_session_block(note: dict) -> str:
-    """Format the Pilot's note from last session — private, never surface."""
+    """Format the Captain's note from last session — private, never surface."""
     if not note:
         return ""
-    lines = ["LAST SESSION NOTE (Pilot's private carry-forward — do not mention to user):"]
+    lines = ["LAST SESSION NOTE (Captain's private carry-forward — do not mention to user):"]
     if note.get("what_surfaced"):
         lines.append(f"  What surfaced last time: {note['what_surfaced']}")
     if note.get("open_threads"):
         threads = note["open_threads"] if isinstance(note["open_threads"], list) else [note["open_threads"]]
         lines.append(f"  Open threads to pick up: {', '.join(threads)}")
-    if note.get("pilot_note"):
-        lines.append(f"  Pilot note: {note['pilot_note']}")
+    if note.get("captain_note"):
+        lines.append(f"  Captain note: {note['captain_note']}")
     return "\n".join(lines)
 
 
@@ -341,6 +354,26 @@ def _capsule_context_block(context: dict) -> str:
     for k, v in context.items():
         lines.append(f"  {k}: {v}")
     return "\n".join(lines)
+
+
+def _extract_and_save_artifacts(
+    brain, response_text: str, capsule_id: str, session_id: str, turn_number: int
+) -> list:
+    """
+    Scan response_text for ```html artifacts, save each to holo_artifacts.
+    Returns list of {artifact_id, title, type} dicts for the API response.
+    """
+    saved = []
+    for match in _re.finditer(r'```html\n?([\s\S]*?)```', response_text, _re.IGNORECASE):
+        content = match.group(1).strip()
+        if not _re.search(r'<!doctype|<html', content, _re.IGNORECASE):
+            continue
+        title_match = _re.search(r'<title>([^<]*)</title>', content, _re.IGNORECASE)
+        title = title_match.group(1).strip() if title_match else "Artifact"
+        aid = brain.save_artifact(capsule_id, session_id, turn_number, title, content)
+        if aid:
+            saved.append({"artifact_id": aid, "title": title, "type": "html"})
+    return saved
 
 
 def _health_context(session: ChatSession) -> str:

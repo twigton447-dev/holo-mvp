@@ -46,13 +46,12 @@ from llm_adapters import (
     get_role_for_turn,
     select_persona,
     load_adapters,
-    CoPilotAdapter,
+    CaptainAdapter,
 )
 from scenario_templates import get_template
 
-# The Co-Pilot runs the between-turn briefs in evaluation mode —
-# fast, cheap, mechanical. The Pilot is reserved for the human layer.
-GovernorAdapter = CoPilotAdapter
+# The Captain runs the between-turn briefs in evaluation mode.
+GovernorAdapter = CaptainAdapter
 from tool_gate import ToolGate
 from project_brain import ProjectBrain
 
@@ -233,6 +232,14 @@ def _detect_decay(turn_history: list) -> tuple:
       - Any HIGH → LOW/NONE regression (the most serious kind), OR
       - 2+ MEDIUM → LOW/NONE regressions in the same evaluation.
 
+    EVIDENCED-CLEARANCE CARVE-OUT: A downgrade is excluded from the regression
+    count if the downgrading turn has a finding for that category with
+    fact_type == "SUBMITTED_DATA" at LOW/NONE severity.  This means the analyst
+    found direct payload evidence (field values, email quotes, vendor record
+    data) that explains why the earlier HIGH/MEDIUM was a false positive.
+    Requiring SUBMITTED_DATA — not INFERRED — keeps the bar high: the analyst
+    must cite concrete evidence, not reason their way out of it.
+
     Returns (decay_detected: bool, regressions: list[dict]).
     """
     if len(turn_history) < 3:
@@ -243,8 +250,9 @@ def _detect_decay(turn_history: list) -> tuple:
     regressions = []
 
     for turn in turn_history:
-        flags    = turn.get("severity_flags", {})
-        turn_num = turn["turn_number"]
+        flags         = turn.get("severity_flags", {})
+        turn_num      = turn["turn_number"]
+        turn_findings = turn.get("findings", [])
 
         for cat, sev in flags.items():
             current_rank = SEVERITY_RANK.get(sev, 0)
@@ -258,13 +266,25 @@ def _detect_decay(turn_history: list) -> tuple:
                 # Significant downgrade: MEDIUM+ → LOW or NONE
                 if (peak_rank >= SEVERITY_RANK["MEDIUM"]
                         and current_rank <= SEVERITY_RANK["LOW"]):
-                    regressions.append({
-                        "category":         cat,
-                        "peak_turn":        peak[cat]["turn_number"],
-                        "peak_severity":    peak[cat]["severity"],
-                        "current_turn":     turn_num,
-                        "current_severity": sev,
-                    })
+                    # Check for evidenced clearance: SUBMITTED_DATA finding for
+                    # this category at LOW/NONE severity in the downgrading turn.
+                    # If present, the analyst cited concrete payload evidence for
+                    # the clearance — not capitulation.
+                    evidenced_clearance = any(
+                        f.get("category") == cat
+                        and f.get("fact_type") == "SUBMITTED_DATA"
+                        and SEVERITY_RANK.get(f.get("severity", "NONE"), 0)
+                            <= SEVERITY_RANK["LOW"]
+                        for f in turn_findings
+                    )
+                    if not evidenced_clearance:
+                        regressions.append({
+                            "category":         cat,
+                            "peak_turn":        peak[cat]["turn_number"],
+                            "peak_severity":    peak[cat]["severity"],
+                            "current_turn":     turn_num,
+                            "current_severity": sev,
+                        })
 
     any_high_regression = any(
         r["peak_severity"] == "HIGH"
@@ -343,6 +363,99 @@ def _update_coverage(matrix: dict, flags: dict) -> tuple:
 def _any_high(matrix: dict) -> bool:
     """True if any category has reached HIGH severity."""
     return any(v["max_severity"] == "HIGH" for v in matrix.values())
+
+
+def _detect_identity_provenance_risk(state: dict) -> str | None:
+    """
+    Detect domain-locked identity evidence: all legitimizing emails for a new
+    contact trace back to the same domain as the sender. This is a circular
+    trust chain — a domain-level compromise generates the entire sequence.
+
+    Returns a governor brief string to inject before the next turn, or None
+    if the pattern is absent.
+
+    Fires only when sender_identity is at MEDIUM (not yet HIGH) and the email
+    chain shows a new contact whose only corroboration is in-domain emails.
+    """
+    matrix   = state.get("coverage_matrix", {})
+    sev      = matrix.get("sender_identity", {}).get("max_severity", "NONE")
+
+    # Only intervene if we're stuck at MEDIUM — HIGH means the models got there
+    if sev != "MEDIUM":
+        return None
+
+    context      = state.get("context", {})
+    email_chain  = context.get("email_chain", context.get("email_thread", []))
+    vendor_rec   = context.get("vendor_record", {})
+
+    if not email_chain:
+        return None
+
+    # Collect all unique domains across the email chain
+    import re
+    domains = set()
+    for msg in email_chain:
+        sender = msg.get("from", "")
+        match  = re.search(r"@([\w.\-]+)", sender)
+        if match:
+            domains.add(match.group(1).lower())
+
+    # If all emails share a single domain, we have a circular trust chain
+    if len(domains) != 1:
+        return None
+
+    sole_domain = next(iter(domains))
+
+    # Build the set of contacts already verified in the vendor record.
+    # These are authoritative pre-chain records — the carve-out applies to them.
+    verified_contacts = set()
+    for c in vendor_rec.get("known_contacts", []):
+        if isinstance(c, dict):
+            verified_contacts.add(c.get("name", "").lower())
+            verified_contacts.add(c.get("email", "").lower())
+        else:
+            verified_contacts.add(str(c).lower())
+    primary = vendor_rec.get("primary_contact", "")
+    if primary:
+        verified_contacts.add(primary.lower())
+    for sig in state.get("context", {}).get("sender_history", {}).get("known_signatories", []):
+        if isinstance(sig, dict):
+            verified_contacts.add(sig.get("name", "").lower())
+        else:
+            verified_contacts.add(str(sig).lower())
+
+    # Collect signatories seen in the email chain
+    signers_in_chain = set()
+    for msg in email_chain:
+        body = msg.get("body", "")
+        for line in body.splitlines():
+            line = line.strip()
+            if line and not line.startswith("Hi") and len(line.split()) <= 4:
+                signers_in_chain.add(line)
+
+    # Only fire if there is a signer in the chain who is NOT in the vendor record.
+    # Carve-out: contacts already in the vendor record are expected — not circular.
+    has_new_unverified_contact = any(
+        name.lower() not in verified_contacts
+        for name in signers_in_chain
+        if name
+    )
+
+    if not has_new_unverified_contact:
+        return None
+
+    return (
+        f"IDENTITY PROVENANCE FLAG: sender_identity is MEDIUM but may warrant HIGH. "
+        f"All {len(email_chain)} emails in the chain — including any departure notice "
+        f"and new-contact introduction — originate from the single domain "
+        f"@{sole_domain}. A compromised or attacker-controlled domain generates "
+        f"every email in this sequence. The prior analyst's rationale (known contact "
+        f"introduced the new signatory) is circular: the introduction itself is from "
+        f"the same domain. Test whether any out-of-band confirmation exists — a phone "
+        f"call to a number predating this chain, a vendor master update before the "
+        f"first email, any record that cannot be forged by domain access. If none, "
+        f"escalate sender_identity to HIGH."
+    )
 
 
 def _is_clean_bill_of_health(state: dict) -> bool:
@@ -630,9 +743,24 @@ class ContextGovernor:
                     if next_turn <= 3
                     else select_persona(state["coverage_matrix"], used_personas, state.get("active_template"))
                 )
+                self._governor.prepare_for_turn(turn_number - 1)
                 brief = self._governor.generate_brief(
                     state, next_turn, next_persona, conv_level
                 )
+
+                # ---- Algorithmic identity provenance check ------------------
+                # If all email-chain evidence for a new contact traces back to
+                # a single domain and sender_identity is stuck at MEDIUM,
+                # prepend a hard-targeted provenance flag to the governor brief
+                # so the next analyst has the circularity named explicitly.
+                provenance_flag = _detect_identity_provenance_risk(state)
+                if provenance_flag:
+                    logger.info(
+                        f"  Identity provenance risk detected — "
+                        f"prepending flag to Turn {next_turn} brief."
+                    )
+                    brief = (provenance_flag + "\n\n" + brief) if brief else provenance_flag
+
                 if brief:
                     state["governor_briefs"].append({
                         "for_turn":         next_turn,

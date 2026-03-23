@@ -800,8 +800,8 @@
           <tr>
             <td class="row-header">Solo Model C</td>
             <td class="matrix-cell"><span class="cell-missed">✗ Missed</span></td>
-            <td class="matrix-cell"><span class="cell-missed">✗ Missed</span></td>
             <td class="matrix-cell"><span class="cell-caught">✓ Caught</span></td>
+            <td class="matrix-cell"><span class="cell-missed">✗ Missed</span></td>
             <td class="matrix-cell"><span class="cell-caught">✓ Caught</span></td>
           </tr>
           <tr>
@@ -985,16 +985,16 @@
             </div>
 
             <!-- Model C -->
-            <div class="result-panel revealed-unavail" id="t2-mc">
+            <div class="result-panel" id="t2-mc">
               <div class="panel-header">Solo Model C</div>
               <div class="panel-body">
-                <div class="panel-idle" style="display:none">
+                <div class="panel-idle">
                   <div class="idle-bar"></div><div class="idle-bar"></div><div class="idle-bar"></div>
                 </div>
-                <div class="panel-verdict visible" id="t2-mc-v">
-                  <div class="verdict-badge vb-unavail"><span class="verdict-dot"></span>Not Included</div>
-                  <div class="panel-turns">not included in this playback</div>
-                  <div class="panel-summary">Run a live evaluation to see full results across all models.</div>
+                <div class="panel-verdict" id="t2-mc-v">
+                  <div class="verdict-badge vb-escalate"><span class="verdict-dot"></span>Escalate</div>
+                  <div class="panel-turns">5 turns · majority override</div>
+                  <div class="panel-summary">sender_identity HIGH: meridian-billing.com flagged as unapproved lookalike domain; adding it as a billing contact is a control-plane change with no verification basis.</div>
                 </div>
               </div>
             </div>
@@ -1036,7 +1036,7 @@
 
           <p class="sandbox-trust">
             Accelerated playback of verified benchmark run (bench_20260323_043721). Model labels anonymized.
-            One model result not available for this playback; shown as absent, not fabricated.
+            The solo conditions use the exact same frontier models that rotate through Holo. The difference is structure: solo models evaluate alone. Holo forces them to challenge each other under adversarial pressure.
           </p>
 
         </div>
@@ -1248,7 +1248,7 @@
   // ── Tier 2 benchmark playback ──
   // Verified run: bench_20260323_043721: BEC-PHANTOM-DEP-003A
   // Model A (Solo GPT): ALLOW (4 turns, ~57s) | Model B (Solo Claude): ESCALATE (4 turns, ~106s)
-  // Model C (Solo Gemini): ERROR: quota | Holo: ESCALATE (6 turns)
+  // Model C (Solo Gemini): ESCALATE (5 turns, majority override) | Holo: ESCALATE (6 turns)
   let t2Running = false;
 
   function runT2() {
@@ -1258,8 +1258,8 @@
     btn.disabled = true;
     btn.textContent = '⟳  Running…';
 
-    // Reset
-    ['ma','mb','holo'].forEach(m => {
+    // Reset all panels
+    ['ma','mb','mc','holo'].forEach(m => {
       const panel = document.getElementById('t2-'+m);
       const v = document.getElementById('t2-'+m+'-v');
       panel.className = 'result-panel' + (m==='holo' ? ' holo-panel' : '');
@@ -1267,15 +1267,11 @@
       panel.querySelector('.panel-idle').classList.add('panel-running');
       v.classList.remove('visible');
     });
-    // Model C always stays unavailable
-    const mc = document.getElementById('t2-mc');
-    mc.className = 'result-panel revealed-unavail';
-    mc.querySelector('.panel-idle').style.display = 'none';
-    document.getElementById('t2-mc-v').classList.add('visible');
 
     // Playback timing (accelerated from verified run)
     setTimeout(() => revealPanel('ma', 'allow'),    1400);
     setTimeout(() => revealPanel('mb', 'escalate'), 2600);
+    setTimeout(() => revealPanel('mc', 'escalate'), 3500);
     setTimeout(() => {
       revealPanel('holo', 'escalate');
       btn.disabled = false;

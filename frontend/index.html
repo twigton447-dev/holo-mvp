@@ -268,15 +268,25 @@
     #space-label { display: none; }
 
     /* Thread panel — slides in from left */
+    #thread-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 79; }
+    #thread-backdrop.open { display: block; }
     #thread-panel { position: fixed; top: 0; left: 0; height: 100vh; width: 260px; background: var(--bg); border-right: 1px solid var(--border); z-index: 80; display: flex; flex-direction: column; transform: translateX(-100%); transition: transform 0.22s ease; }
     #thread-panel.open { transform: translateX(0); }
     #thread-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; border-bottom: 1px solid var(--border); }
     #thread-panel-header span { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.12em; }
-    #thread-panel-close { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 18px; line-height: 1; padding: 0; }
+    #thread-panel-close { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 18px; line-height: 1; padding: 4px 6px; }
+    #thread-panel-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .tp-tab { flex: 1; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text2); font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; padding: 8px 0; transition: all 0.12s; }
+    .tp-tab.active { color: var(--text); border-bottom-color: var(--accent); }
     #thread-new-btn { margin: 10px 10px 6px; }
     #thread-new-btn button { width: 100%; background: var(--bg2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; text-align: left; }
     #thread-new-btn button:hover { background: var(--bg3); }
     #thread-list { flex: 1; overflow-y: auto; padding: 4px 8px 16px; }
+    #artifact-list { flex: 1; overflow-y: auto; padding: 4px 8px 16px; display: none; }
+    .artifact-list-item { padding: 9px 10px 9px 12px; border-radius: 8px; cursor: pointer; transition: background 0.12s; margin-bottom: 2px; border-left: 3px solid var(--accent); }
+    .artifact-list-item:hover { background: var(--bg2); }
+    .artifact-list-item .artifact-list-title { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .artifact-list-item .artifact-list-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
     #thread-list::-webkit-scrollbar { width: 3px; }
     #thread-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
     .thread-item { padding: 9px 10px 9px 12px; border-radius: 8px; cursor: pointer; transition: background 0.12s; margin-bottom: 2px; border-left: 3px solid transparent; }
@@ -324,7 +334,7 @@
     #artifact-panel-header .artifact-btn { font-size: 11.5px; }
     #artifact-iframe { flex: 1; border: none; background: #fff; }
     @media (max-width: 900px) { #artifact-panel { width: 100%; min-width: unset; } }
-    /* Surface panel — Pilot's priority briefing */
+    /* Surface panel — Captain's priority briefing */
     #surface-panel { position: fixed; top: 0; right: 0; height: 100vh; width: 300px; background: var(--bg); border-left: 1px solid var(--border); z-index: 85; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.26s ease; }
     #surface-panel.open { transform: translateX(0); }
     #surface-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
@@ -383,7 +393,10 @@
       .holo-body h2 { font-size: 20px; }
       .msg.user .bubble { max-width: 90%; }
       #memory-panel { width: 100%; }
-      #thread-panel { width: 100%; }
+      #thread-panel { width: 85%; max-width: 320px; }
+      #thread-panel-close { font-size: 26px; padding: 8px 10px; color: var(--text); }
+      #thread-panel-header { padding: 16px 16px 12px; }
+      #thread-new-btn button { font-size: 15px; padding: 13px 16px; }
     }
   </style>
 </head>
@@ -502,20 +515,28 @@
   <iframe id="artifact-iframe" sandbox="allow-scripts allow-same-origin" title="Artifact preview"></iframe>
 </div>
 
-<!-- Thread summary tooltip (Pilot-written, shown on thread hover) -->
+<!-- Thread summary tooltip (Captain-written, shown on thread hover) -->
 <div id="thread-summary-tooltip"></div>
 
-<!-- Thread panel — left sidebar showing all past threads -->
+<!-- Thread panel — left sidebar showing all past threads and artifacts -->
+<div id="thread-backdrop" onclick="closeThreadPanel()"></div>
 <div id="thread-panel">
   <div id="thread-panel-header">
-    <span>Threads</span>
+    <span>Library</span>
     <button id="thread-panel-close" onclick="closeThreadPanel()">×</button>
+  </div>
+  <div id="thread-panel-tabs">
+    <button class="tp-tab active" id="tab-threads" onclick="switchPanelTab('threads')">Threads</button>
+    <button class="tp-tab" id="tab-artifacts" onclick="switchPanelTab('artifacts')">Artifacts</button>
   </div>
   <div id="thread-new-btn">
     <button onclick="newThread()">+ New thread</button>
   </div>
   <div id="thread-list">
     <div id="thread-empty">Your threads will appear here.</div>
+  </div>
+  <div id="artifact-list">
+    <div id="artifact-list-empty" style="padding:16px 12px;font-size:13px;color:var(--text3);">Artifacts Holo generates will appear here.</div>
   </div>
 </div>
 
@@ -711,7 +732,7 @@
     turnCount = 0;
     const container = document.getElementById("messages");
     container.innerHTML = incognitoMode
-      ? `<div id="empty"><h2>Incognito</h2><p>No memory, no context, no Pilot brief. Pure baseline. Nothing from this thread touches your capsule.</p></div>`
+      ? `<div id="empty"><h2>Incognito</h2><p>No memory, no context, no Captain brief. Pure baseline. Nothing from this thread touches your capsule.</p></div>`
       : `<div id="empty"><h2>What's on your mind?</h2><p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p></div>`;
   }
 
@@ -1283,7 +1304,7 @@
     if (!text) return;
 
     // Parse the freeform text into key-value via a simple heuristic:
-    // send as a single "about_me" seed, then let the Pilot reshape it over time
+    // send as a single "about_me" seed, then let the Captain reshape it over time
     const seed = { about_me: text };
     try {
       await fetch("/v1/capsule/context", {
@@ -1297,7 +1318,7 @@
   }
 
   function showHandoff(handoff) {
-    // Renders as a Holo message, not a system banner — the Pilot's own voice
+    // Renders as a Holo message, not a system banner — the Captain's own voice
     const container = document.getElementById("messages");
     const msg = document.createElement("div");
     msg.className = "msg holo";
@@ -1555,13 +1576,13 @@
       const data = await res.json();
       sessionId = data.session_id;
       appendHoloMessage(data);
-      // Add new thread to panel on first turn; refresh after turn 2 so Pilot name replaces preview
+      // Add new thread to panel on first turn; refresh after turn 2 so Captain name replaces preview
       if (data.turn_number === 1) {
         const firstMsg = document.querySelectorAll(".msg.user .bubble")[0]?.innerText || "";
         prependSession(data.session_id, firstMsg);
       } else if (data.turn_number === 2) {
-        setTimeout(() => loadSessionList(), 5000);  // Pilot names thread async
-        setTimeout(() => loadSessionList(), 12000); // fallback if Pilot was slow
+        setTimeout(() => loadSessionList(), 5000);  // Captain names thread async
+        setTimeout(() => loadSessionList(), 12000); // fallback if Captain was slow
       }
 
       // Track turns and show free-limit banner if needed
@@ -1570,15 +1591,23 @@
         document.getElementById("free-limit-banner").classList.remove("hidden");
       }
 
-      // Thought bubble from Pilot — slight delay so it feels organic
+      // Thought bubble from Captain — slight delay so it feels organic
       if (data.thought) {
         setTimeout(() => spawnThought(data.thought), 1800);
       }
 
-      // Silently refresh what Holo knows — Pilot may have extracted new facts
+      // If new artifacts were saved this turn, prepend to registry
+      if (data.artifacts && data.artifacts.length > 0) {
+        for (const a of data.artifacts) {
+          _artifactRegistry.unshift({ artifact_id: a.artifact_id, title: a.title, created_at: new Date().toISOString() });
+        }
+        if (_activePanelTab === "artifacts") renderArtifactList();
+      }
+
+      // Silently refresh what Holo knows — Captain may have extracted new facts
       setTimeout(() => refreshMemoryContext(), 2000);
 
-      // Thread handoff — Pilot tells the user it's time to move, in its own voice
+      // Thread handoff — Captain tells the user it's time to move, in its own voice
       if (data.handoff && data.handoff.suggested) {
         setTimeout(() => showHandoff(data.handoff), 1200);
       }
@@ -1917,6 +1946,7 @@
   function openThreadPanel() {
     _threadPanelOpen = true;
     document.getElementById("thread-panel").classList.add("open");
+    document.getElementById("thread-backdrop").classList.add("open");
     document.getElementById("thread-toggle").classList.add("open");
     if (!capsuleToken) { loadSessionList(); return; }
     if (_sessionList.length === 0) loadSessionList();
@@ -1926,6 +1956,7 @@
   function closeThreadPanel() {
     _threadPanelOpen = false;
     document.getElementById("thread-panel").classList.remove("open");
+    document.getElementById("thread-backdrop").classList.remove("open");
     document.getElementById("thread-toggle").classList.remove("open");
   }
 
@@ -2046,6 +2077,69 @@
     const iframe = document.getElementById("artifact-iframe");
     if (!iframe) return;
     iframe.contentWindow.print();
+  }
+
+  // ---- Artifact registry (saved artifacts panel) ----------------------------
+
+  let _artifactRegistry = [];
+  let _activePanelTab = "threads";
+
+  function switchPanelTab(tab) {
+    _activePanelTab = tab;
+    document.getElementById("tab-threads").classList.toggle("active", tab === "threads");
+    document.getElementById("tab-artifacts").classList.toggle("active", tab === "artifacts");
+    document.getElementById("thread-new-btn").style.display  = tab === "threads"   ? "" : "none";
+    document.getElementById("thread-list").style.display     = tab === "threads"   ? "" : "none";
+    document.getElementById("artifact-list").style.display   = tab === "artifacts" ? "" : "none";
+    if (tab === "artifacts" && _artifactRegistry.length === 0) loadArtifactList();
+  }
+
+  async function loadArtifactList() {
+    if (!capsuleToken) {
+      document.getElementById("artifact-list").innerHTML =
+        `<div style="padding:16px 12px;font-size:13px;color:var(--text3);">Sign in to access saved artifacts.</div>`;
+      return;
+    }
+    try {
+      const res = await fetch("/v1/artifacts", {
+        headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
+      });
+      if (!res.ok) return;
+      const { artifacts } = await res.json();
+      _artifactRegistry = artifacts || [];
+      renderArtifactList();
+    } catch (e) {}
+  }
+
+  function renderArtifactList() {
+    const el = document.getElementById("artifact-list");
+    if (_artifactRegistry.length === 0) {
+      el.innerHTML = `<div id="artifact-list-empty" style="padding:16px 12px;font-size:13px;color:var(--text3);">Artifacts Holo generates will appear here.</div>`;
+      return;
+    }
+    el.innerHTML = _artifactRegistry.map(a => `
+      <div class="artifact-list-item" onclick="openSavedArtifact('${escHtml(a.artifact_id)}', '${escHtml(a.title || "Artifact")}')">
+        <div class="artifact-list-title">${escHtml(a.title || "Artifact")}</div>
+        <div class="artifact-list-time">${timeAgo(a.created_at)}</div>
+      </div>`).join("");
+  }
+
+  async function openSavedArtifact(artifactId, title) {
+    // Check in-memory store first (current session)
+    if (_artifacts[artifactId]) {
+      openArtifactPanel(artifactId, title);
+      return;
+    }
+    // Fetch from server
+    try {
+      const res = await fetch(`/v1/artifacts/${artifactId}`, {
+        headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
+      });
+      if (!res.ok) return;
+      const artifact = await res.json();
+      _artifacts[artifactId] = artifact.content;
+      openArtifactPanel(artifactId, title);
+    } catch (e) {}
   }
 
   // ---- Thread summary tooltip -----------------------------------------------

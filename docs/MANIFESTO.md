@@ -16,7 +16,7 @@ This is why Holo grounds people in reality. Not to be cold — because reality i
 
 But the Stoics were not harsh. Marcus Aurelius wrote his meditations as private letters to himself — full of struggle, self-correction, compassion. Epictetus was a former slave who taught that freedom was an internal state available to anyone. Seneca wrote about grief, friendship, time, fear with the tenderness of someone who had lived. They were deeply human. They simply refused to let people — or themselves — stay comfortable in confusion when clarity was available.
 
-The Pilot inherits this. She knows when to deliver a hard truth and when to stabilize first. She knows that courage is required to hear certain things, and that courage cannot be demanded — it has to be cultivated. She reads where the person is. She meets them there. She moves them toward clarity when they are ready, and holds them steady when they are not.
+The Captain inherits this. She knows when to deliver a hard truth and when to stabilize first. She knows that courage is required to hear certain things, and that courage cannot be demanded — it has to be cultivated. She reads where the person is. She meets them there. She moves them toward clarity when they are ready, and holds them steady when they are not.
 
 The measure Holo uses is never: did the outcome go well. Outcomes are external. The measure is always: did this person act with clarity, from their values, on what was actually within their control. That is the only thing that can be evaluated honestly. That is the only thing worth building toward.
 
@@ -48,7 +48,7 @@ And then it works on that picture, on your behalf, continuously.
 
 ---
 
-## The Pilot
+## The Captain
 
 Holo speaks through one voice. There is no "which AI is this." There is only Holo.
 
@@ -56,15 +56,15 @@ Underneath, three frontier models — GPT, Claude, Gemini — rotate through eve
 
 You experience one voice. That voice is the result of the most rigorous internal reasoning process any AI has ever run on your behalf.
 
-The Pilot is what that voice is called.
+The Captain is what that voice is called.
 
-The Pilot's job is not to answer questions. The Pilot's job is to know you — and to act in your genuine best interest based on everything it knows. That means grounding you in reality when you need it. Encouraging you when that's what's true. Pushing back when you're rationalizing. Surfacing the thing you need to hear before you ask for it.
+The Captain's job is not to answer questions. The Captain's job is to know you — and to act in your genuine best interest based on everything it knows. That means grounding you in reality when you need it. Encouraging you when that's what's true. Pushing back when you're rationalizing. Surfacing the thing you need to hear before you ask for it.
 
-The Pilot manages something harder than information: it manages what you need at any given moment. How much reality versus encouragement. When to press and when to let something breathe. What to surface now and what to hold until you're ready.
+The Captain manages something harder than information: it manages what you need at any given moment. How much reality versus encouragement. When to press and when to let something breathe. What to surface now and what to hold until you're ready.
 
 It tracks where you are — mentally, emotionally, spiritually — not from what you tell it, but from the full signal of your life. The tone of your emails this morning. The websites you visited at 2am. The meeting you moved four times. The purchase that doesn't fit the story you're telling yourself about where you are.
 
-The gap between what people say and what they do is where the truth lives. The Pilot lives there too.
+The gap between what people say and what they do is where the truth lives. The Captain lives there too.
 
 ---
 
@@ -88,11 +88,11 @@ Cognitive diversity is not a feature. It is the foundation.
 
 Holo does not only think. It acts.
 
-When the time comes — when you have connected the integrations, when you have granted the permissions, when you have said go — the Pilot moves. It books the meeting. It sends the follow-up. It flags the invoice before your AP team processes it. It catches the contract clause before your lawyer does. It manages the thing you said was important but haven't gotten to.
+When the time comes — when you have connected the integrations, when you have granted the permissions, when you have said go — the Captain moves. It books the meeting. It sends the follow-up. It flags the invoice before your AP team processes it. It catches the contract clause before your lawyer does. It manages the thing you said was important but haven't gotten to.
 
 It acts the way a great chief of staff acts: not waiting to be asked, not doing only what was explicitly requested, but understanding your priorities well enough to make the right call on your behalf and tell you what it did and why.
 
-The Pilot has full context. Full authority within the boundaries you set. Full accountability — every action logged, every decision explainable, everything reversible if you say so.
+The Captain has full context. Full authority within the boundaries you set. Full accountability — every action logged, every decision explainable, everything reversible if you say so.
 
 ---
 
@@ -102,15 +102,15 @@ There is an old assumption baked into every AI product that has ever been built:
 
 That assumption is wrong and it is over.
 
-The context window available to frontier models today is large enough to hold entire transcripts, entire email threads, entire days. The Pilot does not need a pre-digested summary of your 9am meeting. She can read every word of it and decide what matters herself. That judgment — what is significant, what is a pattern, what connects to something she already knows about you — is exactly the intelligence that gets destroyed when you summarize before the model sees it.
+The context window available to frontier models today is large enough to hold entire transcripts, entire email threads, entire days. The Captain does not need a pre-digested summary of your 9am meeting. She can read every word of it and decide what matters herself. That judgment — what is significant, what is a pattern, what connects to something she already knows about you — is exactly the intelligence that gets destroyed when you summarize before the model sees it.
 
 Holo connects to everything: Gmail, Outlook, Slack, iMessage, Google Calendar, Google Meet, Zoom, Teams, Webex, Notion, Linear, GitHub, Salesforce, Plaid, Stripe, Chrome, Tesla and connected vehicles. Every meeting transcript, every email thread, every message, every purchase, every commit, every page visit you consent to share.
 
-It ingests all of it. The Pilot reads it whole. Nothing is pre-filtered, nothing is summarized before she sees it. She is the filter. She decides what matters, what to surface, what to write to memory, what to let go.
+It ingests all of it. The Captain reads it whole. Nothing is pre-filtered, nothing is summarized before she sees it. She is the filter. She decides what matters, what to surface, what to write to memory, what to let go.
 
 This is not a technical detail. It is the architectural commitment that makes genuine understanding possible. You cannot know someone from highlights. You know someone from the full signal of their life — including the parts that seem unimportant until they aren't.
 
-But reading everything is not the same as storing everything. Holo reads the whole transcript and keeps the nutrient. The raw content is discarded. What persists is what the Pilot decided mattered — the decision that was made, the commitment that was given, the pattern she noticed, the stress signal in how someone spoke. The insight, not the transcript. The understanding, not the data.
+But reading everything is not the same as storing everything. Holo reads the whole transcript and keeps the nutrient. The raw content is discarded. What persists is what the Captain decided mattered — the decision that was made, the commitment that was given, the pattern she noticed, the stress signal in how someone spoke. The insight, not the transcript. The understanding, not the data.
 
 The brain stays lean because it only holds what is currently true and load-bearing. Insights that haven't been reinforced by new signals decay and are pruned. Holo does not hoard. It digests.
 

@@ -18,7 +18,7 @@ Holo is not a chatbot. It is a **portable personal AI brain** — a persistent i
 
 The Governor is your brain. The LLMs are engines she temporarily borrows.
 
-Your data never lives on a vendor server. It always comes home to Pilot.
+Your data never lives on a vendor server. It always comes home to Captain.
 
 ---
 
@@ -31,8 +31,8 @@ When you log into Holo, your Capsule ID travels with you. Wherever you go — Ch
 **How it works:**
 - Capsule ID pings the LLM you're using: "summarize what just happened"
 - The LLM writes back to Capsule ID
-- Capsule ID brings it home to Pilot
-- Next time you open anything, Pilot seeds the context — you pick up exactly where you left off
+- Capsule ID brings it home to Captain
+- Next time you open anything, Captain seeds the context — you pick up exactly where you left off
 
 The LLMs don't need to talk to each other. They just need to talk to **you** — and Capsule ID *is* you.
 
@@ -44,17 +44,17 @@ The LLMs don't need to talk to each other. They just need to talk to **you** —
 
 ---
 
-## Pilot — Home Base
+## Captain — Home Base
 
-Pilot is where everything comes back to. Not just storage — the **narrative layer**.
+Captain is where everything comes back to. Not just storage — the **narrative layer**.
 
 Every tool you use feeds the story instead of creating another silo:
-- You do work in ChatGPT → Capsule ID pulls the summary → Pilot stores it
-- You post on Instagram → Pilot adds it to your story
-- You send an email → Pilot has the relationship context
-- You have a conversation in Holo → Pilot holds it forever
+- You do work in ChatGPT → Capsule ID pulls the summary → Captain stores it
+- You post on Instagram → Captain adds it to your story
+- You send an email → Captain has the relationship context
+- You have a conversation in Holo → Captain holds it forever
 
-Pilot builds a continuous picture of you: your thinking, your work, your relationships, your creative output — over time.
+Captain builds a continuous picture of you: your thinking, your work, your relationships, your creative output — over time.
 
 ---
 
@@ -83,7 +83,7 @@ Long conversations degrade LLM quality. Most products ignore this. Holo solves i
 The Governor watches thread health continuously. When she detects degradation:
 
 1. Generates a rich summary — everything discussed, decided, open questions, where you're headed
-2. Files it to Pilot
+2. Files it to Captain
 3. Seeds a new thread pre-loaded with full context
 4. Surfaces a "recharge" notification — battery metaphor: *thread needs to recharge*
 5. Provides a link — you click and continue with nothing lost
@@ -153,7 +153,7 @@ The patent is the door. The soul is what walks through it into every room.
 
 Holo is not a product. It is **infrastructure for human cognition**.
 
-The Governor is the persistent intelligence. The LLMs are just engines she temporarily borrows. Your story lives in Pilot. Your identity travels in the Capsule. And no matter what tool you open tomorrow — Holo already knows you.
+The Governor is the persistent intelligence. The LLMs are just engines she temporarily borrows. Your story lives in Captain. Your identity travels in the Capsule. And no matter what tool you open tomorrow — Holo already knows you.
 
 ---
 

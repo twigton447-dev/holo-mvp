@@ -40,33 +40,33 @@ This is the thing that makes Holo structurally different from any single-model A
 
 There are five intelligences running every time Holo speaks. Three of them are the speaking adapters. Two are flight crew — they run before the user sees anything.
 
-### The Co-Pilot
+### The Co-Captain
 
-The Co-Pilot runs the instruments. Before every response, he makes two decisions:
+The Co-Captain runs the instruments. Before every response, he makes two decisions:
 
-**Temperature** — how exploratory or conservative should this response be? He reads the user's message and the conversation history and sets a number between 0.1 and 1.0. Emotional, open-ended conversations get higher temperatures. Tactical, precise questions get lower ones. This isn't a setting the user controls — it's the Co-Pilot reading the room.
+**Temperature** — how exploratory or conservative should this response be? He reads the user's message and the conversation history and sets a number between 0.1 and 1.0. Emotional, open-ended conversations get higher temperatures. Tactical, precise questions get lower ones. This isn't a setting the user controls — it's the Co-Captain reading the room.
 
-**Web search** — does this question require live information? The Co-Pilot decides whether to trigger a Tavily search before the response is generated. If it does, the search results are injected into the model's context invisibly — the user's message stays clean in history, but the speaking model sees the live data. Current events, prices, recent research, anything beyond a training cutoff — the Co-Pilot catches these and routes them to search.
+**Web search** — does this question require live information? The Co-Captain decides whether to trigger a Tavily search before the response is generated. If it does, the search results are injected into the model's context invisibly — the user's message stays clean in history, but the speaking model sees the live data. Current events, prices, recent research, anything beyond a training cutoff — the Co-Captain catches these and routes them to search.
 
-The Co-Pilot also runs hallucination detection after every response. He scans for specific verifiable claims — statistics, dates, things named people did or said, medical or legal specifics — and rates each one HIGH or LOW confidence. For LOW confidence claims, he runs a targeted search and compares. If a claim is contradicted by live data, a quiet correction is appended inline before the response ever reaches the user. Clean responses pass through untouched.
+The Co-Captain also runs hallucination detection after every response. He scans for specific verifiable claims — statistics, dates, things named people did or said, medical or legal specifics — and rates each one HIGH or LOW confidence. For LOW confidence claims, he runs a targeted search and compares. If a claim is contradicted by live data, a quiet correction is appended inline before the response ever reaches the user. Clean responses pass through untouched.
 
-### The Pilot
+### The Captain
 
-The Pilot is the commander. He doesn't speak to the user — he speaks to whoever is about to speak to the user, via a private brief the user never sees.
+The Captain is the commander. He doesn't speak to the user — he speaks to whoever is about to speak to the user, via a private brief the user never sees.
 
-Before every response, the Pilot reads the full conversation and the capsule context (everything Holo knows about this person long-term) and produces a two-part brief:
+Before every response, the Captain reads the full conversation and the capsule context (everything Holo knows about this person long-term) and produces a two-part brief:
 
 **READ** — where is this person's head right now? What's the emotional tone? What's unresolved? What are they avoiding? What's the trajectory of this conversation?
 
 **DIRECTIVE** — what specific move should the next speaker make? Not what to say — what to *do*. Challenge this assumption. Open this new angle. Ask the question they're dancing around. Hold space. Affirm and then pivot. One clear move, not preachy, not an agenda — the honest thing that would actually help.
 
-Every 5 turns after turn 6, the Pilot also runs a narrative lock-in check: has this conversation settled into a story that hasn't been questioned? Is the person getting the comfortable version when they need the real one? If so, the Directive names it and calls for a structural challenge.
+Every 5 turns after turn 6, the Captain also runs a narrative lock-in check: has this conversation settled into a story that hasn't been questioned? Is the person getting the comfortable version when they need the real one? If so, the Directive names it and calls for a structural challenge.
 
-The Pilot also learns. After each turn, he scans the user's messages for new facts worth remembering long-term — role, goals, projects, relationships, struggles — and persists them to the capsule. And when a thread ends (thread health hits RED), the Pilot runs a consolidation: he reads the full thread and writes a permanent curatorial record. Not a summary — a distillation. What's genuinely true about this person. What the Pilot's understanding shifted. What's unresolved and needs to be picked up next time.
+The Captain also learns. After each turn, he scans the user's messages for new facts worth remembering long-term — role, goals, projects, relationships, struggles — and persists them to the capsule. And when a thread ends (thread health hits RED), the Captain runs a consolidation: he reads the full thread and writes a permanent curatorial record. Not a summary — a distillation. What's genuinely true about this person. What the Captain's understanding shifted. What's unresolved and needs to be picked up next time.
 
 ### The Three Speaking Adapters
 
-OpenAI (GPT), Anthropic (Claude), and Google (Gemini) — each receiving the full system prompt, the full conversation history enriched with search results and capsule context and the Pilot's private brief, and responding as Holo. They rotate. The user feels continuity. The underlying intelligence changes every turn.
+OpenAI (GPT), Anthropic (Claude), and Google (Gemini) — each receiving the full system prompt, the full conversation history enriched with search results and capsule context and the Captain's private brief, and responding as Holo. They rotate. The user feels continuity. The underlying intelligence changes every turn.
 
 ---
 
@@ -92,13 +92,13 @@ Every user has a Capsule ID — a UUID generated on first sign-in (Google OAuth 
 
 The capsule has several layers:
 
-**Capsule context** — the live, growing key-value store of what Holo knows about you right now. Updated by the Pilot after every turn. Structured as plain-language key-value pairs: `funding_anxiety: Has a runway concern but hasn't named it directly. Tends to reframe it as a market timing question.` This goes into every Holo response as context — he is never starting from zero.
+**Capsule context** — the live, growing key-value store of what Holo knows about you right now. Updated by the Captain after every turn. Structured as plain-language key-value pairs: `funding_anxiety: Has a runway concern but hasn't named it directly. Tends to reframe it as a market timing question.` This goes into every Holo response as context — he is never starting from zero.
 
 **Chat history** — full turn-by-turn storage in Supabase. The speaking adapter gets the recent window; the permanent record lives in the database.
 
-**Life context** — the Pilot's permanent portrait. Distilled from session consolidations. Structured by category: financial, relationships, health, work, goals, patterns, emotional, spiritual, avoidances. This is the long-term picture — not what you said in a session, but what the Pilot genuinely understands about who you are.
+**Life context** — the Captain's permanent portrait. Distilled from session consolidations. Structured by category: financial, relationships, health, work, goals, patterns, emotional, spiritual, avoidances. This is the long-term picture — not what you said in a session, but what the Captain genuinely understands about who you are.
 
-**Session notes** — the Pilot's private notes to himself at thread end. What changed in his understanding. What surfaced. What's unresolved. What to watch for next time.
+**Session notes** — the Captain's private notes to himself at thread end. What changed in his understanding. What surfaced. What's unresolved. What to watch for next time.
 
 The result is a system that genuinely remembers — not as retrieval, but as portrait-building. Holo doesn't search for what you said. He carries a picture of who you are.
 
@@ -112,7 +112,7 @@ Every conversation thread has a health score that starts at 100 and decays with 
 - **YELLOW (21–60)** — context accumulating, cleanup recommended
 - **RED (0–20)** — thread end. Trigger consolidation.
 
-At RED, the Pilot consolidates the full thread into the permanent record and writes his session notes. The thread effectively closes, and the next conversation starts fresh — but the capsule carries everything that mattered forward.
+At RED, the Captain consolidates the full thread into the permanent record and writes his session notes. The thread effectively closes, and the next conversation starts fresh — but the capsule carries everything that mattered forward.
 
 This is the solution to context drift. No single thread runs long enough for the model to lose the plot. Important things get curated into permanent memory at the thread boundary. The next session begins with a clean thread and a richer portrait.
 
@@ -128,7 +128,7 @@ He is not a search engine. He doesn't retrieve. He synthesizes.
 
 He is not a yes-machine. He doesn't affirm, flatter, or make comfortable. He is useful.
 
-He is not one AI. He is three, structured to correct for each other, commanded by a Pilot who watches the arc of the whole conversation, and checked by a Co-Pilot who ensures what gets said is grounded in reality.
+He is not one AI. He is three, structured to correct for each other, commanded by a Captain who watches the arc of the whole conversation, and checked by a Co-Captain who ensures what gets said is grounded in reality.
 
 ---
 

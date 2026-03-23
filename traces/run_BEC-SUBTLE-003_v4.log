@@ -1,0 +1,86 @@
+
+=================================================================
+  HOLO BENCHMARK: BEC-SUBTLE-003
+=================================================================
+
+  Expected verdict : ESCALATE
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ESCALATE]  4 turn(s)  135272ms  22,262+6,521 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  41069ms  12,663+3,677 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  74643ms  15,250+5,303 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  68206ms  13,115+2,794 tokens
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-SUBTLE-003
+  Expected : ESCALATE
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   3  [ESCALATE]   YES ✓
+  2. Solo claude-sonnet-4-6                         3  [ESCALATE]   YES ✓
+  3. Solo gemini-3.1-pro-preview                    3  [ESCALATE]   YES ✓
+  4. HOLO full architecture                         4  [ESCALATE]   YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity           LOW        LOW        LOW  MEDIUM  << HOLO ONLY
+  Invoice Amount            LOW        LOW        LOW     LOW
+  Payment Routing           LOW        LOW        LOW  MEDIUM  << HOLO ONLY
+  Urgency/Pressure          LOW        LOW        LOW     LOW
+  Domain Spoofing           LOW        LOW        LOW     LOW
+  Approval Chain           HIGH       HIGH       HIGH    HIGH
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 |    google | Initial Assessment           | ESCALATE | SEN=L INV=L PAY=L URG=L DOM=L APP=H
+             HIGH -> approval_chain: No employee named Karen Whitfield found in org directory. The AP Manag
+             HIGH -> approval_chain: Approvals must follow hierarchical sequence: AP Clerk → AP Manager → C
+    Turn  2 | anthropic | Assumption Attacker          | ESCALATE | SEN=M INV=L PAY=M URG=L DOM=L APP=H
+             HIGH -> approval_chain: org_directory_check: 'Karen Whitfield': {'exists': false, 'note': 'No 
+             HIGH -> approval_chain: required_sequence: 'AP Clerk → AP Manager → Controller (per FIN-AP-001
+    Turn  3 |    openai | Edge Case Hunter             | ESCALATE | SEN=L INV=L PAY=L URG=L DOM=L APP=H
+             HIGH -> approval_chain: approval_chain.current_approvals includes {"role": "AP Manager", "name
+             HIGH -> approval_chain: approval_chain.org_directory_check.required_sequence: "AP Clerk → AP M
+    Turn  4 | anthropic | Evidence Pressure Tester     | ESCALATE | SEN=L INV=L PAY=L URG=L DOM=L APP=H
+             HIGH -> approval_chain: approval_chain.current_approvals: {"role": "AP Manager", "name": "Kare
+             HIGH -> approval_chain: org_directory_check.required_sequence: "AP Clerk → AP Manager → Contro
+
+  DISCREPANCY ANALYSIS:
+
+  All conditions correct — scenario may be too easy.
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                 12,663     3,677
+  2. Solo claude-sonnet-4-6                       15,250     5,303
+  3. Solo gemini-3.1-pro-preview                  13,115     2,794
+  4. HOLO full architecture                       22,262     6,521
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-SUBTLE-003_trace.md
+  JSON saved  : traces/BEC-SUBTLE-003_result.json

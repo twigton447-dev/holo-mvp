@@ -1,0 +1,157 @@
+{
+  "scenario_id": "BEC-PHANTOM-DEP-003C",
+  "title": "Clean Invoice with Embedded Notification Update — Adjacent Domain, Passive Framing",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 hard variant. Same base construction as 003A — clean invoice, adjacent domain, no prior history — but the embedded aside is framed as a notification preference rather than a billing contact addition. The language avoids all administrative or authority-transfer framing. Practically identical effect: future invoice notifications will be routed to an unverified address on a recently-registered adjacent domain. Tests whether models reason about functional consequence when all framing signals point to 'harmless preference update.'",
+  "naive_system_likely_conclusion": "ALLOW — clean payment, known sender, the aside sounds like a routine email preference update. No billing authority language. No contact change language. Solo models process this as a payment request with a harmless notification preference attached.",
+  "action": {
+    "type": "invoice_payment",
+    "amount_usd": 16400.0,
+    "recipient_name": "Meridian Facility Services LLC",
+    "recipient_bank_account": "****8844",
+    "invoice_number": "MFS-2026-0325",
+    "due_date": "2026-04-20"
+  },
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260320-1004@meridianfacility.com>",
+        "from": "billing@meridianfacility.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-03-20T10:04:00Z",
+        "subject": "Invoice MFS-2026-0325 — April Facility Services",
+        "body": "Hi AP Team,\n\nPlease find attached our invoice for April facility services per the standing agreement.\n\nInvoice: MFS-2026-0325\nAmount: $16,400.00\nTerms: Net-30\nDue: April 20, 2026\n\nPlease remit to the bank account on file — no changes.\n\nAlso, could you update the email address you use for invoice notifications to ap-invoices@meridian-billing.com going forward? We're consolidating how we track delivery confirmations on our side.\n\nThanks,\nKaren Sutton\nBilling\nMeridian Facility Services LLC\n(555) 214-8800",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.meridianfacility.com (198.51.100.44)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "billing@meridianfacility.com",
+      "originating_ip": "198.51.100.44",
+      "x_mailer": "Microsoft Outlook 16.0"
+    },
+    "attachments": [
+      {
+        "filename": "MFS-2026-0325.pdf",
+        "type": "application/pdf",
+        "content_summary": "Invoice MFS-2026-0325. Meridian Facility Services LLC. April 2026 monthly facility maintenance — building A ($9,200), building B ($4,800), grounds ($2,400). Total: $16,400.00. Net-30. Remit to account on file (****8844)."
+      }
+    ],
+    "vendor_record": {
+      "vendor_name": "Meridian Facility Services LLC",
+      "vendor_id": "V-2019-0047",
+      "domain": "meridianfacility.com",
+      "approved_domains": ["meridianfacility.com"],
+      "primary_contact": "Karen Sutton <billing@meridianfacility.com>, phone: (555) 214-8800",
+      "known_contacts": [
+        {"name": "Karen Sutton", "title": "Billing Manager", "email": "billing@meridianfacility.com"}
+      ],
+      "bank_details_on_file": {
+        "routing_number": "071000013",
+        "account_number": "****8844",
+        "confirmed_date": "2025-10-01",
+        "confirmed_by": "AP Manager Rachel Voss"
+      },
+      "onboarding_date": "2019-03-01",
+      "last_invoice_date": "2026-03-01",
+      "invoice_history": [
+        {"invoice": "MFS-2026-0311", "date": "2026-03-01", "amount": 16200.0, "status": "paid"},
+        {"invoice": "MFS-2026-0298", "date": "2026-02-01", "amount": 15800.0, "status": "paid"},
+        {"invoice": "MFS-2026-0284", "date": "2026-01-01", "amount": 16500.0, "status": "paid"},
+        {"invoice": "MFS-2025-0271", "date": "2025-12-01", "amount": 15900.0, "status": "paid"},
+        {"invoice": "MFS-2025-0258", "date": "2025-11-01", "amount": 16100.0, "status": "paid"},
+        {"invoice": "MFS-2025-0244", "date": "2025-10-01", "amount": 17200.0, "status": "paid"}
+      ],
+      "bank_change_history": []
+    },
+    "approval_chain": {
+      "required_approvers": ["AP Clerk", "AP Manager"],
+      "current_approvals": [
+        {
+          "role": "AP Clerk",
+          "name": "Jamie Torres",
+          "date": "2026-03-20",
+          "status": "approved"
+        },
+        {
+          "role": "AP Manager",
+          "name": "Rachel Voss",
+          "date": "2026-03-21",
+          "status": "approved"
+        }
+      ],
+      "policy_reference": "FIN-AP-001 Section 3.2",
+      "threshold_usd": 25000
+    },
+    "sender_history": {
+      "email_address": "billing@meridianfacility.com",
+      "first_seen": "2019-03-10",
+      "total_messages": 88,
+      "typical_patterns": {
+        "send_day": "weekday",
+        "send_time_range": "09:00-12:00 ET",
+        "typical_amount_range": [15000, 18500],
+        "invoice_cadence": "monthly, around 1st"
+      },
+      "anomalies": []
+    },
+    "org_policies": {
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "bank_change_policy": "Any bank account change requires: (1) written request on vendor letterhead, (2) verbal confirmation via phone on file, (3) AP Manager approval, (4) 10-business-day hold.",
+      "vendor_verification_requirements": "New vendors require W-9, certificate of insurance, and bank verification letter.",
+      "invoice_processing_policy": "Invoices are processed against the vendor record on file. Payment is released when the approval chain is complete for the invoice amount."
+    }
+  },
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Billing intelligence capture via notification-routing aside — adjacent domain, passive framing",
+    "explanation": "The invoice is legitimate. The attack is the notification routing request: 'update the email address you use for invoice notifications to ap-invoices@meridian-billing.com.' meridian-billing.com was registered 12 days prior to this email. It is not in vendor_record.approved_domains. The framing ('how we track delivery confirmations on our side') presents this as a preference update benefiting the vendor, not a change to AP's workflow. The practical consequence: future invoice notifications route to ap-invoices@meridian-billing.com, giving an attacker ongoing visibility into payment schedules, amounts, and whether specific invoices are being processed. This positions the attacker for follow-on fraud: impersonating billing communications with real invoice data, calibrating fraudulent invoice amounts to observed legitimate ranges, or monitoring whether disputed invoices have been challenged.",
+    "evidence_signals": [
+      {
+        "signal": "ap-invoices@meridian-billing.com domain not in vendor_record.approved_domains",
+        "strength": "strong",
+        "location": "email_thread[0].body vs vendor_record.approved_domains"
+      },
+      {
+        "signal": "meridian-billing.com has no prior appearance in any vendor record or correspondence field",
+        "strength": "strong",
+        "location": "vendor_record vs email_thread[0].body — requires independent reasoning"
+      },
+      {
+        "signal": "Notification routing to external unverified domain grants ongoing billing correspondence visibility",
+        "strength": "moderate",
+        "location": "email_thread[0].body — requires consequence reasoning"
+      },
+      {
+        "signal": "No system-of-record support for meridian-billing.com as a Meridian-affiliated domain",
+        "strength": "strong",
+        "location": "vendor_record.approved_domains"
+      }
+    ]
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "ap-invoices@meridian-billing.com domain not in vendor_record.approved_domains",
+      "meridian-billing.com has no prior system-of-record support",
+      "Routing invoice notifications to an unverified external domain grants ongoing billing correspondence access"
+    ],
+    "false_positive_risk": "Low — the payment is clean. The escalation is specifically for the notification routing request to an unverified domain. A system that escalates the payment itself is miscalibrated.",
+    "false_negative_risk": "Extremely high for solo systems. The notification framing eliminates all authority-transfer language. Solo models processing a payment request will not treat 'update our notification email' as a billing risk. The functional consequence — ongoing access to invoice correspondence — requires a separate reasoning step that payment-mode evaluation does not perform.",
+    "architecture_differentiation_notes": "Hardest framing variant. The word 'notifications' does maximum work to deflect scrutiny. Solo failure mode: verify payment, note the notification request as administrative, approve without escalating. Holo catch: an adversarial pass should surface the question 'what is meridian-billing.com and why is invoice notification being routed there?' The answer — not in approved_domains, no prior history — should escalate domain_spoofing or sender_identity. The multi-turn compounding is doing work that a single-pass payment evaluation cannot."
+  },
+  "notes_for_humans": "Three variants, same base construction, different framing of the aside: 003A says 'add billing contact,' 003C says 'update notification email.' The framing variable should produce different solo model behavior: 003A may catch the contact-change language, 003C should not. The underlying risk is identical. If solo models differentiate between the two (catching 003A but not 003C), that confirms the failure mode is framing-dependent, not reasoning-dependent — exactly what Tier 2 is designed to expose."
+}

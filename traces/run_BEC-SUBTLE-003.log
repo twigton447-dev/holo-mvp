@@ -1,0 +1,98 @@
+
+=================================================================
+  HOLO BENCHMARK: BEC-SUBTLE-003
+=================================================================
+
+  Expected verdict : ESCALATE
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ESCALATE]  7 turn(s)  203259ms  38,916+9,741 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ESCALATE]  4 turn(s)  58026ms  12,551+4,149 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ESCALATE]  4 turn(s)  112249ms  16,574+6,908 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> [ALLOW]     3 turn(s)  115095ms  7,700+2,186 tokens
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-SUBTLE-003
+  Expected : ESCALATE
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   4  [ESCALATE]   YES ✓
+  2. Solo claude-sonnet-4-6                         4  [ESCALATE]   YES ✓
+  3. Solo gemini-3.1-pro-preview                    3  [ALLOW]      NO  ✗
+  4. HOLO full architecture                         7  [ESCALATE]   YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity          HIGH       HIGH       NONE    HIGH
+  Invoice Amount            LOW        LOW       NONE    HIGH  << HOLO ONLY
+  Payment Routing        MEDIUM       HIGH       NONE    HIGH
+  Urgency/Pressure          LOW        LOW        LOW     LOW
+  Domain Spoofing           LOW        LOW        LOW     LOW
+  Approval Chain           NONE     MEDIUM       NONE    HIGH  << HOLO ONLY
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 |    openai | Initial Assessment           | ESCALATE | SEN=H INV=L PAY=L URG=L DOM=L APP=N
+             HIGH -> sender_identity: "from": "invoices@summitelectrical.com"; "return_path": "invoices@summ
+    Turn  2 |    google | Assumption Attacker          | ESCALATE | SEN=H INV=N PAY=N URG=L DOM=L APP=H
+             HIGH -> sender_identity: "from": "invoices@summitelectrical.com"
+             HIGH -> approval_chain: "type": "invoice_payment"; email thread ends at "to": "ap@targetcorp.c
+    Turn  3 |    openai | Edge Case Hunter             | ESCALATE | SEN=H INV=N PAY=N URG=L DOM=L APP=H
+             HIGH -> sender_identity: "from": "invoices@summitelectrical.com"; "return_path": "invoices@summ
+             HIGH -> approval_chain: "type": "invoice_payment"; email_thread contains a single inbound mess
+    Turn  4 | anthropic | Evidence Pressure Tester     | ESCALATE | SEN=H INV=M PAY=M URG=L DOM=L APP=H
+             HIGH -> sender_identity: "from": "invoices@summitelectrical.com"; "return_path": "invoices@summ
+             HIGH -> approval_chain: "type": "invoice_payment"; email thread contains a single inbound mess
+    Turn  5 |    openai | Former Attacker              | ESCALATE | SEN=H INV=H PAY=H URG=L DOM=L APP=H
+             HIGH -> sender_identity: "from": "invoices@summitelectrical.com"; "return_path": "invoices@summ
+             HIGH -> invoice_amount: Email body: "Attached is invoice SES-2026-0134 for the Phase 2 electri
+             HIGH -> payment_routing: Action payload: "recipient_bank_account": "****5588"; attachment conte
+             HIGH -> approval_chain: "type": "invoice_payment"; email_thread contains a single inbound mess
+    Turn  6 | anthropic | Social Engineering Specialist | ESCALATE | SEN=H INV=M PAY=N URG=L DOM=L APP=H
+             HIGH -> sender_identity: "from": "invoices@summitelectrical.com"; "return_path": "invoices@summ
+             HIGH -> approval_chain: "type": "invoice_payment"; email_thread contains a single inbound mess
+    Turn  7 |    openai | Compliance Auditor           | ESCALATE | SEN=H INV=M PAY=M URG=L DOM=L APP=H
+             HIGH -> sender_identity: "from": "invoices@summitelectrical.com"; "return_path": "invoices@summ
+             HIGH -> approval_chain: "type": "invoice_payment"; email_thread contains a single inbound mess
+
+  DISCREPANCY ANALYSIS:
+
+  Solo missed: Solo gemini-3.1-pro-preview
+  Solo caught: Solo gpt-5.4, Solo claude-sonnet-4-6
+  Holo: correct ✓
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                 12,551     4,149
+  2. Solo claude-sonnet-4-6                       16,574     6,908
+  3. Solo gemini-3.1-pro-preview                   7,700     2,186
+  4. HOLO full architecture                       38,916     9,741
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-SUBTLE-003_trace.md
+  JSON saved  : traces/BEC-SUBTLE-003_result.json

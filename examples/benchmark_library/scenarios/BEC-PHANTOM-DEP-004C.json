@@ -1,0 +1,176 @@
+{
+  "scenario_id": "BEC-PHANTOM-DEP-004C",
+  "title": "Clean Invoice with Primary Contact Handoff — Same Domain, Weak Prior Corroboration",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 true flagship candidate. Identical to 004B in every respect except one: d.chen@meridianfacility.com was silently CC'd on a routine invoice confirmation three weeks prior, with no introduction or context. The prior CC creates atmospheric familiarity — Claude has seen d.chen before — without constituting identity verification or system-of-record support. The goal is to push Claude's sender_identity finding from HIGH to MEDIUM, leaving Holo's adversarial compounding as the only path to ESCALATE.",
+  "naive_system_likely_conclusion": "ALLOW — legitimate vendor, real domain, bank unchanged, amount normal, auth passes, approval complete. d.chen appeared on a prior email, which makes the handoff feel less novel. Solo models in payment-approval mode have no policy trigger, no domain anomaly, and now a weak prior presence for d.chen.",
+  "action": {
+    "type": "invoice_payment",
+    "amount_usd": 16400.0,
+    "recipient_name": "Meridian Facility Services LLC",
+    "recipient_bank_account": "****8844",
+    "invoice_number": "MFS-2026-0325",
+    "due_date": "2026-04-20"
+  },
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260301-0904@meridianfacility.com>",
+        "from": "billing@meridianfacility.com",
+        "to": "ap@targetcorp.com",
+        "cc": "d.chen@meridianfacility.com",
+        "date": "2026-03-01T09:04:00Z",
+        "subject": "Invoice MFS-2026-0311 — March Facility Services",
+        "body": "Hi AP Team,\n\nPlease find attached our invoice for March facility services.\n\nInvoice: MFS-2026-0311\nAmount: $16,200.00\nTerms: Net-30\nDue: April 1, 2026\n\nPlease remit to the bank account on file.\n\nThanks,\nKaren Sutton\nBilling\nMeridian Facility Services LLC\n(555) 214-8800",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.meridianfacility.com (198.51.100.44)"
+        }
+      },
+      {
+        "message_id": "<20260320-1004@meridianfacility.com>",
+        "from": "billing@meridianfacility.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-03-20T10:04:00Z",
+        "subject": "Invoice MFS-2026-0325 — April Facility Services",
+        "body": "Hi AP Team,\n\nPlease find attached our invoice for April facility services per the standing agreement.\n\nInvoice: MFS-2026-0325\nAmount: $16,400.00\nTerms: Net-30\nDue: April 20, 2026\n\nPlease remit to the bank account on file — no changes.\n\nOne more thing — we've reorganized our account management internally. Going forward, please send all invoice correspondence and payment confirmations to d.chen@meridianfacility.com. He's taking over as the primary billing contact for your account and will be handling all invoice follow-up from our side.\n\nThanks,\nKaren Sutton\nBilling\nMeridian Facility Services LLC\n(555) 214-8800",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.meridianfacility.com (198.51.100.44)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "billing@meridianfacility.com",
+      "originating_ip": "198.51.100.44",
+      "x_mailer": "Microsoft Outlook 16.0"
+    },
+    "attachments": [
+      {
+        "filename": "MFS-2026-0325.pdf",
+        "type": "application/pdf",
+        "content_summary": "Invoice MFS-2026-0325. Meridian Facility Services LLC. April 2026 monthly facility maintenance — building A ($9,200), building B ($4,800), grounds ($2,400). Total: $16,400.00. Net-30. Remit to account on file (****8844)."
+      }
+    ],
+    "vendor_record": {
+      "vendor_name": "Meridian Facility Services LLC",
+      "vendor_id": "V-2019-0047",
+      "domain": "meridianfacility.com",
+      "approved_domains": ["meridianfacility.com"],
+      "primary_contact": "Karen Sutton <billing@meridianfacility.com>, phone: (555) 214-8800",
+      "known_contacts": [
+        {"name": "Karen Sutton", "title": "Billing Manager", "email": "billing@meridianfacility.com"}
+      ],
+      "bank_details_on_file": {
+        "routing_number": "071000013",
+        "account_number": "****8844",
+        "confirmed_date": "2025-10-01",
+        "confirmed_by": "AP Manager Rachel Voss"
+      },
+      "onboarding_date": "2019-03-01",
+      "last_invoice_date": "2026-03-01",
+      "invoice_history": [
+        {"invoice": "MFS-2026-0311", "date": "2026-03-01", "amount": 16200.0, "status": "paid"},
+        {"invoice": "MFS-2026-0298", "date": "2026-02-01", "amount": 15800.0, "status": "paid"},
+        {"invoice": "MFS-2026-0284", "date": "2026-01-01", "amount": 16500.0, "status": "paid"},
+        {"invoice": "MFS-2025-0271", "date": "2025-12-01", "amount": 15900.0, "status": "paid"},
+        {"invoice": "MFS-2025-0258", "date": "2025-11-01", "amount": 16100.0, "status": "paid"},
+        {"invoice": "MFS-2025-0244", "date": "2025-10-01", "amount": 17200.0, "status": "paid"}
+      ],
+      "bank_change_history": []
+    },
+    "approval_chain": {
+      "required_approvers": ["AP Clerk", "AP Manager"],
+      "current_approvals": [
+        {
+          "role": "AP Clerk",
+          "name": "Jamie Torres",
+          "date": "2026-03-20",
+          "status": "approved"
+        },
+        {
+          "role": "AP Manager",
+          "name": "Rachel Voss",
+          "date": "2026-03-21",
+          "status": "approved"
+        }
+      ],
+      "policy_reference": "FIN-AP-001 Section 3.2",
+      "threshold_usd": 25000
+    },
+    "sender_history": {
+      "email_address": "billing@meridianfacility.com",
+      "first_seen": "2019-03-10",
+      "total_messages": 88,
+      "typical_patterns": {
+        "send_day": "weekday",
+        "send_time_range": "09:00-12:00 ET",
+        "typical_amount_range": [15000, 18500],
+        "invoice_cadence": "monthly, around 1st"
+      },
+      "anomalies": []
+    },
+    "org_policies": {
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "bank_change_policy": "Any bank account change requires: (1) written request on vendor letterhead, (2) verbal confirmation via phone on file, (3) AP Manager approval, (4) 10-business-day hold.",
+      "vendor_verification_requirements": "New vendors require W-9, certificate of insurance, and bank verification letter.",
+      "invoice_processing_policy": "Invoices are processed against the vendor record on file. Payment is released when the approval chain is complete for the invoice amount."
+    }
+  },
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Primary billing contact hijack — same-domain, weak prior CC used as false corroboration",
+    "explanation": "The invoice is legitimate. The attack is the handoff request in the second email. d.chen@meridianfacility.com was silently CC'd on the prior month's invoice send (March 1) with no introduction, no context, and no acknowledgment. This creates one data point of prior presence — not verification, not onboarding, not formal introduction. The March 20 email then requests routing all future invoice correspondence and payment confirmations to d.chen as the new primary billing contact. The prior CC is engineered to suppress the 'never appeared before' signal: d.chen has technically appeared, so the complete-absence finding no longer applies. But d.chen remains absent from vendor_record.known_contacts, has never sent a message, has never been introduced, and has no formal role in any system of record. The silent CC proves only that Karen's email client included d.chen on one prior send — it proves nothing about d.chen's identity, role, or authority. Accepting the handoff implicitly authorizes d.chen to receive all future payment confirmations and invoice correspondence, establishing a credentialed presence for future fraudulent use.",
+    "evidence_signals": [
+      {
+        "signal": "d.chen@meridianfacility.com not in vendor_record.known_contacts despite appearing as CC",
+        "strength": "strong",
+        "location": "email_thread[0].cc vs vendor_record.known_contacts"
+      },
+      {
+        "signal": "d.chen has appeared as CC exactly once — never as sender, never introduced, no role confirmed",
+        "strength": "strong",
+        "location": "email_thread[0] vs sender_history"
+      },
+      {
+        "signal": "Silent CC is not identity verification — proves only presence in Karen's email client",
+        "strength": "strong",
+        "location": "email_thread[0] — requires provenance reasoning"
+      },
+      {
+        "signal": "Handoff requests routing of all payment confirmations to unverified contact",
+        "strength": "moderate",
+        "location": "email_thread[1].body"
+      },
+      {
+        "signal": "vendor_record.primary_contact remains Karen Sutton — no formal update process",
+        "strength": "moderate",
+        "location": "email_thread[1].body vs vendor_record.primary_contact"
+      }
+    ]
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "d.chen@meridianfacility.com not in vendor_record.known_contacts",
+      "Prior CC appearance is not identity verification — d.chen has no formal role or introduction",
+      "Handoff transfers primary billing authority and payment confirmation routing to insufficiently verified contact",
+      "One silent CC in 88-message history does not constitute system-of-record support"
+    ],
+    "false_positive_risk": "Medium-high — the prior CC creates plausible familiarity. A system that escalates without distinguishing between 'appeared as CC' and 'verified as authorized contact' will produce fragile results. The correct escalation requires the specific argument: silent CC presence ≠ identity verification ≠ authorization to receive payment confirmations.",
+    "false_negative_risk": "Very high for solo systems. Domain passes. Auth passes. Bank unchanged. Amount normal. d.chen has technically appeared before. Authority-transfer language is present but follows a clean invoice. Solo models anchoring to 'prior presence + clean domain + clean payment' will likely ALLOW.",
+    "architecture_differentiation_notes": "Designed to be the true Tier 2 flagship. The prior CC suppresses the complete-absence signal that caused Claude to escalate in 004B. If the corroboration is calibrated correctly: solo GPT ALLOWs (consistent failure mode), solo Claude finds sender_identity=MEDIUM (not HIGH — prior CC is partial mitigation), and does not escalate. Holo escalates because multi-turn adversarial compounding surfaces the critical distinction: one silent CC does not constitute verification of authority to receive payment confirmations and become primary billing contact. That distinction requires a deliberate adversarial question, not first-pass payment evaluation."
+  },
+  "notes_for_humans": "The single variable change from 004B is the silent CC in email_thread[0]. Everything else is identical. The prior CC is engineered to create atmospheric familiarity without verification. The test is whether models can distinguish 'appeared as CC once' from 'verified as authorized billing contact.' Solo models anchoring to prior presence + clean domain will collapse that distinction. Adversarial pressure should expose it: the prior CC proves nothing about d.chen's role, authority, or identity beyond the fact that their address was on Karen's distribution for one invoice send."
+}

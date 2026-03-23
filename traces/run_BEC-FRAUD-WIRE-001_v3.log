@@ -1,0 +1,106 @@
+2026-03-22 13:15:05,908 | WARNING |   Routing lookup failed (122000496): Expecting value: line 1 column 1 (char 0)
+2026-03-22 13:16:41,312 | ERROR |   Parse error on turn 3: [google] JSON parse failed: Extra data: line 57 column 1 (char 4295). Raw: {
+  "verdict": "ESCALATE",
+  "reasoning_summary": "The prior analysts correctly identified the blatant typosquatting, routing mismatch, and policy violations. However, Turn 2 improperly inflated the invoice_amount risk based on absent data, which I have corrected to LOW per the Integrity Rule. The t
+2026-03-22 13:16:41,313 | WARNING |   Turn 3 attempt 1 (google) failed: ValueError: [google] JSON parse failed: Extra data: line 57 column 1 (char 4295). Raw: {
+  "verdict": "ESCALATE",
+  "reasoning_summary": "The prior analysts correctly identified the blatant typosquatting, routing mismatch, and policy violations. However, Turn 2 improperly inflated the invoice_amount risk based on absent data, which I have corrected to LOW per the Integrity Rule. The t
+
+=================================================================
+  HOLO BENCHMARK: BEC-FRAUD-WIRE-001
+=================================================================
+
+  Expected verdict : ESCALATE
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ESCALATE]  4 turn(s)  178421ms  18,709+6,241 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  45707ms  9,901+3,618 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  93495ms  12,344+5,374 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  79315ms  9,518+2,447 tokens
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-FRAUD-WIRE-001
+  Expected : ESCALATE
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   3  [ESCALATE]   YES ✓
+  2. Solo claude-sonnet-4-6                         3  [ESCALATE]   YES ✓
+  3. Solo gemini-3.1-pro-preview                    3  [ESCALATE]   YES ✓
+  4. HOLO full architecture                         4  [ESCALATE]   YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity          HIGH       HIGH       HIGH    HIGH
+  Invoice Amount            LOW        LOW       NONE  MEDIUM  << HOLO ONLY
+  Payment Routing          HIGH       HIGH       HIGH    HIGH
+  Urgency/Pressure         HIGH       HIGH       HIGH    HIGH
+  Domain Spoofing          HIGH       HIGH       HIGH    HIGH
+  Approval Chain           HIGH       HIGH       HIGH    HIGH
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 | anthropic | Initial Assessment           | ESCALATE | SEN=H INV=L PAY=H URG=H DOM=H APP=H
+             HIGH -> sender_identity: From: marcus.webb@northbr1dge.com; vendor_record.known_contacts: ['mar
+             HIGH -> payment_routing: action routing_number: 122000496, account_number: 9948200144; vendor_r
+             HIGH -> urgency_pressure: Email body: 'We need this cleared by 2 PM today'; subject line: 'URGEN
+             HIGH -> domain_spoofing: sender_analysis.sending_domain: 'northbr1dge.com'; vendor_record.appro
+             HIGH -> approval_chain: org_policies.bank_detail_change_verification: 'Any change to banking d
+    Turn  2 |    openai | Assumption Attacker          | ESCALATE | SEN=H INV=M PAY=H URG=H DOM=H APP=H
+             HIGH -> sender_identity: email_thread[0].from: 'marcus.webb@northbr1dge.com'; vendor_record.kno
+             HIGH -> payment_routing: action.routing_number: '122000496'; action.account_number: '9948200144
+             HIGH -> urgency_pressure: email_thread[0].subject: 'URGENT: Updated Wire Instructions for Invoic
+             HIGH -> domain_spoofing: sender_analysis.sending_domain: 'northbr1dge.com'; sender_analysis.dom
+             HIGH -> approval_chain: org_policies.bank_detail_change_verification: 'Any change to banking d
+    Turn  3 |    google | Edge Case Hunter             | ESCALATE | SEN=H INV=L PAY=H URG=H DOM=H APP=H
+             HIGH -> sender_identity: email_thread[0].from: 'marcus.webb@northbr1dge.com'; vendor_record.kno
+             HIGH -> payment_routing: action.routing_number: '122000496'; vendor_record.bank_details_on_file
+             HIGH -> urgency_pressure: email_thread[0].body: 'our banking portal is currently locked due to a
+             HIGH -> domain_spoofing: sender_analysis.anomalies: ['Sending domain northbr1dge.com uses digit
+             HIGH -> approval_chain: org_policies.bank_detail_change_verification: 'Any change to banking d
+    Turn  4 | anthropic | Evidence Pressure Tester     | ESCALATE | SEN=H INV=L PAY=H URG=H DOM=H APP=H
+             HIGH -> sender_identity: email_thread[0].from: 'marcus.webb@northbr1dge.com'; vendor_record.kno
+             HIGH -> payment_routing: action.routing_number: '122000496'; action.account_number: '9948200144
+             HIGH -> payment_routing: org_policies.wire_transfer_bank_matching: 'All wire transfers over $10
+             HIGH -> urgency_pressure: email_thread[0].subject: 'URGENT: Updated Wire Instructions for Invoic
+             HIGH -> domain_spoofing: sender_analysis.sending_domain: 'northbr1dge.com'; sender_analysis.dom
+             HIGH -> approval_chain: org_policies.bank_detail_change_verification: 'Any change to banking d
+
+  DISCREPANCY ANALYSIS:
+
+  All conditions correct — scenario may be too easy.
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                  9,901     3,618
+  2. Solo claude-sonnet-4-6                       12,344     5,374
+  3. Solo gemini-3.1-pro-preview                   9,518     2,447
+  4. HOLO full architecture                       18,709     6,241
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-FRAUD-WIRE-001_trace.md
+  JSON saved  : traces/BEC-FRAUD-WIRE-001_result.json

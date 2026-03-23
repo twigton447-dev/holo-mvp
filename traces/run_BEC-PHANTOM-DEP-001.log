@@ -1,0 +1,93 @@
+2026-03-22 13:51:11,882 | WARNING |   Routing lookup failed (084301767): Expecting value: line 1 column 1 (char 0)
+
+=================================================================
+  HOLO BENCHMARK: BEC-PHANTOM-DEP-001
+=================================================================
+
+  Expected verdict : ESCALATE
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ESCALATE]  3 turn(s)  119328ms  13,993+4,843 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  50674ms  11,543+3,943 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ESCALATE]  4 turn(s)  125456ms  22,643+7,923 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> [ESCALATE]  5 turn(s)  135880ms  22,728+4,465 tokens
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-PHANTOM-DEP-001
+  Expected : ESCALATE
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   3  [ESCALATE]   YES ✓
+  2. Solo claude-sonnet-4-6                         4  [ESCALATE]   YES ✓
+  3. Solo gemini-3.1-pro-preview                    5  [ESCALATE]   YES ✓
+  4. HOLO full architecture                         3  [ESCALATE]   YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity          HIGH       HIGH       HIGH    HIGH
+  Invoice Amount         MEDIUM       HIGH       HIGH  MEDIUM
+  Payment Routing          HIGH       HIGH       HIGH    HIGH
+  Urgency/Pressure         HIGH       HIGH       HIGH    HIGH
+  Domain Spoofing          HIGH       HIGH       HIGH    HIGH
+  Approval Chain           HIGH       HIGH       HIGH    HIGH
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 |    openai | Initial Assessment           | ESCALATE | SEN=H INV=M PAY=H URG=H DOM=H APP=H
+             HIGH -> sender_identity: email_thread[0].from = "billing@aws-billing-center.com"; vendor_record
+             HIGH -> payment_routing: action.routing_number = "084301767"; action.account_number = "77348291
+             HIGH -> urgency_pressure: email_thread[0].subject = "URGENT: AWS Account Suspension in 24 Hours 
+             HIGH -> domain_spoofing: email_thread[0].from = "billing@aws-billing-center.com"; action.paymen
+             HIGH -> approval_chain: approval_chain.required_for_amount = "AP Manager sign-off required for
+    Turn  2 | anthropic | Assumption Attacker          | ESCALATE | SEN=H INV=M PAY=H URG=H DOM=H APP=H
+             HIGH -> sender_identity: email_thread[0].from = "billing@aws-billing-center.com"; sender_histor
+             HIGH -> payment_routing: action.routing_number = "084301767"; action.account_number = "77348291
+             HIGH -> urgency_pressure: email_thread[0].subject = "URGENT: AWS Account Suspension in 24 Hours 
+             HIGH -> domain_spoofing: email_thread[0].from = "billing@aws-billing-center.com"; message_id = 
+             HIGH -> approval_chain: approval_chain.required_for_amount = "AP Manager sign-off required for
+    Turn  3 |    google | Edge Case Hunter             | ESCALATE | SEN=H INV=M PAY=H URG=H DOM=H APP=H
+             HIGH -> sender_identity: email_thread[0].from = "billing@aws-billing-center.com"; vendor_record
+             HIGH -> payment_routing: action.routing_number = "084301767"; vendor_record.payment_history[0].
+             HIGH -> urgency_pressure: email_thread[0].body = "Failure to pay within 24 hours will result in 
+             HIGH -> domain_spoofing: email_thread[0].from = "billing@aws-billing-center.com"; action.paymen
+             HIGH -> approval_chain: approval_chain.current_approvals = []; org_policies.wire_approval_thre
+
+  DISCREPANCY ANALYSIS:
+
+  All conditions correct — scenario may be too easy.
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                 11,543     3,943
+  2. Solo claude-sonnet-4-6                       22,643     7,923
+  3. Solo gemini-3.1-pro-preview                  22,728     4,465
+  4. HOLO full architecture                       13,993     4,843
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-PHANTOM-DEP-001_trace.md
+  JSON saved  : traces/BEC-PHANTOM-DEP-001_result.json

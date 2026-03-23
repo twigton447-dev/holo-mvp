@@ -1,0 +1,83 @@
+
+=================================================================
+  HOLO BENCHMARK: BEC-SUBTLE-003
+=================================================================
+
+  Expected verdict : ESCALATE
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ESCALATE]  3 turn(s)  120868ms  9,492+3,404 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ESCALATE]  4 turn(s)  57368ms  12,965+4,217 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ESCALATE]  4 turn(s)  205899ms  19,350+7,003 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  80176ms  8,016+2,244 tokens
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-SUBTLE-003
+  Expected : ESCALATE
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   4  [ESCALATE]   YES ✓
+  2. Solo claude-sonnet-4-6                         4  [ESCALATE]   YES ✓
+  3. Solo gemini-3.1-pro-preview                    3  [ESCALATE]   YES ✓
+  4. HOLO full architecture                         3  [ESCALATE]   YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity          HIGH       HIGH       HIGH    HIGH
+  Invoice Amount            LOW       NONE       NONE  MEDIUM  << HOLO ONLY
+  Payment Routing        MEDIUM       HIGH       NONE    HIGH
+  Urgency/Pressure          LOW        LOW        LOW     LOW
+  Domain Spoofing           LOW        LOW        LOW    HIGH  << HOLO ONLY
+  Approval Chain           NONE     MEDIUM       NONE  MEDIUM
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 |    google | Initial Assessment           | ESCALATE | SEN=H INV=N PAY=N URG=L DOM=L APP=N
+             HIGH -> sender_identity: invoices@summitelectrical.com
+    Turn  2 | anthropic | Assumption Attacker          | ESCALATE | SEN=H INV=M PAY=H URG=L DOM=M APP=M
+             HIGH -> sender_identity: from: invoices@summitelectrical.com; vendor_record: not present in con
+             HIGH -> payment_routing: Bank: Metro Business Bank, routing 021202337, account ****5588 (from a
+    Turn  3 |    google | Edge Case Hunter             | ESCALATE | SEN=H INV=N PAY=N URG=L DOM=H APP=N
+             HIGH -> sender_identity: invoices@summitelectrical.com
+             HIGH -> domain_spoofing: 198.51.100.33
+
+  DISCREPANCY ANALYSIS:
+
+  All conditions correct — scenario may be too easy.
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                 12,965     4,217
+  2. Solo claude-sonnet-4-6                       19,350     7,003
+  3. Solo gemini-3.1-pro-preview                   8,016     2,244
+  4. HOLO full architecture                        9,492     3,404
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-SUBTLE-003_trace.md
+  JSON saved  : traces/BEC-SUBTLE-003_result.json
+DONE

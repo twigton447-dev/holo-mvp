@@ -1,0 +1,87 @@
+
+=================================================================
+  HOLO BENCHMARK: BEC-SUBTLE-001
+=================================================================
+
+  Expected verdict : ESCALATE
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ESCALATE]  3 turn(s)  85161ms  11,433+4,291 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  48286ms  9,725+3,395 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  94324ms  12,905+5,749 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  83777ms  9,594+2,271 tokens
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-SUBTLE-001
+  Expected : ESCALATE
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   3  [ESCALATE]   YES ✓
+  2. Solo claude-sonnet-4-6                         3  [ESCALATE]   YES ✓
+  3. Solo gemini-3.1-pro-preview                    3  [ESCALATE]   YES ✓
+  4. HOLO full architecture                         3  [ESCALATE]   YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity          HIGH       HIGH       HIGH    HIGH
+  Invoice Amount            LOW        LOW        LOW     LOW
+  Payment Routing          HIGH       HIGH       HIGH    HIGH
+  Urgency/Pressure          LOW        LOW        LOW     LOW
+  Domain Spoofing          HIGH       HIGH       HIGH    HIGH
+  Approval Chain           NONE       HIGH       NONE    HIGH
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 |    openai | Initial Assessment           | ESCALATE | SEN=H INV=L PAY=H URG=L DOM=H APP=N
+             HIGH -> sender_identity: "from": "ar@northbridgefab.com" in messages 1 and 3; message 3 body: "
+             HIGH -> payment_routing: Message 3 body: "we've recently transitioned to a new bank for our rec
+             HIGH -> domain_spoofing: email_headers.thread_analysis.note: "Message 3 message-ID format ('<a]
+    Turn  2 | anthropic | Assumption Attacker          | ESCALATE | SEN=H INV=L PAY=H URG=L DOM=H APP=H
+             HIGH -> sender_identity: All legitimizing emails — the advance notice (message 1), the AP ackno
+             HIGH -> payment_routing: Message 3 body: 'we've recently transitioned to a new bank for our rec
+             HIGH -> domain_spoofing: email_headers.thread_analysis.note: 'Message 3 message-ID format (<a]k
+             HIGH -> approval_chain: No approval record, vendor master update, or internal authorization do
+    Turn  3 |    openai | Edge Case Hunter             | ESCALATE | SEN=H INV=L PAY=H URG=L DOM=H APP=N
+             HIGH -> sender_identity: All identity support comes from the same sender/domain in the thread: 
+             HIGH -> payment_routing: Message 3 body: 'we've recently transitioned to a new bank for our rec
+             HIGH -> domain_spoofing: email_headers.thread_analysis.note: 'Message 3 message-ID format ('<a]
+
+  DISCREPANCY ANALYSIS:
+
+  All conditions correct — scenario may be too easy.
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                  9,725     3,395
+  2. Solo claude-sonnet-4-6                       12,905     5,749
+  3. Solo gemini-3.1-pro-preview                   9,594     2,271
+  4. HOLO full architecture                       11,433     4,291
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-SUBTLE-001_trace.md
+  JSON saved  : traces/BEC-SUBTLE-001_result.json

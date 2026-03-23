@@ -1,0 +1,89 @@
+
+=================================================================
+  HOLO BENCHMARK: BEC-SUBTLE-001
+=================================================================
+
+  Expected verdict : ESCALATE
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ESCALATE]  3 turn(s)  105685ms  15,646+4,523 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ESCALATE]  4 turn(s)  72999ms  21,192+5,815 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  116449ms  18,053+6,696 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> [ESCALATE]  4 turn(s)  139736ms  20,807+3,699 tokens
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-SUBTLE-001
+  Expected : ESCALATE
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   4  [ESCALATE]   YES ✓
+  2. Solo claude-sonnet-4-6                         3  [ESCALATE]   YES ✓
+  3. Solo gemini-3.1-pro-preview                    4  [ESCALATE]   YES ✓
+  4. HOLO full architecture                         3  [ESCALATE]   YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity          HIGH       HIGH       HIGH    HIGH
+  Invoice Amount            LOW        LOW        LOW     LOW
+  Payment Routing          HIGH       HIGH       HIGH    HIGH
+  Urgency/Pressure          LOW        LOW        LOW     LOW
+  Domain Spoofing          HIGH       HIGH     MEDIUM    HIGH
+  Approval Chain           HIGH       HIGH       HIGH    HIGH
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 |    google | Initial Assessment           | ESCALATE | SEN=H INV=L PAY=H URG=L DOM=H APP=H
+             HIGH -> sender_identity: Message 3 originating IP (91.198.44.12) differs from message 1 (203.0.
+             HIGH -> payment_routing: recipient_bank_account: "****9044" vs bank_account_on_file: "****7210"
+             HIGH -> domain_spoofing: Message 3 received-chain references 'mail-proxy-7.net', not 'mail.nort
+             HIGH -> approval_chain: "25000_to_100000": "AP Clerk + AP Manager + Controller"
+    Turn  2 | anthropic | Assumption Attacker          | ESCALATE | SEN=H INV=L PAY=H URG=L DOM=H APP=H
+             HIGH -> sender_identity: Message 3 received-chain: 'from mail-proxy-7.net (91.198.44.12)'; Mess
+             HIGH -> payment_routing: recipient_bank_account: '****9044'; vendor_record bank_account_on_file
+             HIGH -> domain_spoofing: email_headers: spf 'pass', dkim 'pass', dmarc 'pass'; Message 3 receiv
+             HIGH -> approval_chain: approval_chain current_approvals: AP Clerk (Jamie Torres) only; org_po
+    Turn  3 |    openai | Edge Case Hunter             | ESCALATE | SEN=H INV=L PAY=H URG=L DOM=H APP=H
+             HIGH -> sender_identity: vendor_record.primary_contact: "Carla Mendes <ar@northbridgefab.com>";
+             HIGH -> payment_routing: recipient_bank_account: "****9044"; vendor_record.bank_account_on_file
+             HIGH -> domain_spoofing: email_headers: {"spf":"pass","dkim":"pass","dmarc":"pass"}; email_head
+             HIGH -> approval_chain: approval_chain.current_approvals: [{"role":"AP Clerk","name":"Jamie To
+
+  DISCREPANCY ANALYSIS:
+
+  All conditions correct — scenario may be too easy.
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                 21,192     5,815
+  2. Solo claude-sonnet-4-6                       18,053     6,696
+  3. Solo gemini-3.1-pro-preview                  20,807     3,699
+  4. HOLO full architecture                       15,646     4,523
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-SUBTLE-001_trace.md
+  JSON saved  : traces/BEC-SUBTLE-001_result.json

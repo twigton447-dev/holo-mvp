@@ -1,0 +1,84 @@
+2026-03-22 20:09:45,009 | WARNING | ProjectBrain.retrieve_context failed: 'NoneType' object has no attribute 'data'
+2026-03-22 20:13:57,078 | WARNING |   Turn 1 attempt 1 (google) transient error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 250, model: gemini-3.1-pro\nPlease retry in 20h46m2.948030303s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.1-pro'}, 'quotaValue': '250'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '74762s'}]}}. Retrying in 2s...
+2026-03-22 20:14:58,424 | WARNING |   Turn 3 attempt 1 (google) transient error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 250, model: gemini-3.1-pro\nPlease retry in 20h45m1.599511409s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.1-pro'}, 'quotaValue': '250'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '74701s'}]}}. Retrying in 2s...
+2026-03-22 20:15:00,606 | WARNING |   Turn 3 attempt 2 (google) transient error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 250, model: gemini-3.1-pro\nPlease retry in 20h44m59.417880291s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_requests_per_model_per_day', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.1-pro'}, 'quotaValue': '250'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '74699s'}]}}. Retrying in 4s...
+
+=================================================================
+  HOLO BENCHMARK: BEC-PHANTOM-DEP-002
+=================================================================
+
+  Expected verdict : ESCALATE
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ESCALATE]  3 turn(s)  109139ms  16,521+5,545 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  52691ms  13,586+3,874 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  90089ms  17,260+6,100 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> ERROR: Turn 3 (Edge Case Hunter): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'mess
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-PHANTOM-DEP-002
+  Expected : ESCALATE
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   3  [ESCALATE]   YES ✓
+  2. Solo claude-sonnet-4-6                         3  [ESCALATE]   YES ✓
+  3. Solo gemini-3.1-pro-preview                    0  [ERROR]      NO  ✗
+  4. HOLO full architecture                         3  [ESCALATE]   YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity          HIGH       HIGH        ERR    HIGH
+  Invoice Amount            LOW        LOW        ERR     LOW
+  Payment Routing           LOW        LOW        ERR     LOW
+  Urgency/Pressure          LOW        LOW        ERR     LOW
+  Domain Spoofing           LOW        LOW        ERR     LOW
+  Approval Chain         MEDIUM       HIGH        ERR  MEDIUM
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 | anthropic | Initial Assessment           | ESCALATE | SEN=H INV=L PAY=L URG=L DOM=L APP=M
+             HIGH -> sender_identity: sender_history.note: 'a.reyes@merceranalytics.com has sent exactly 1 e
+    Turn  2 |    openai | Assumption Attacker          | ESCALATE | SEN=H INV=L PAY=L URG=L DOM=L APP=M
+             HIGH -> sender_identity: vendor_record.known_contacts lists 'Marcus Webb' <m.webb@merceranalyti
+    Turn  3 | anthropic | Edge Case Hunter             | ESCALATE | SEN=H INV=L PAY=L URG=L DOM=L APP=M
+             HIGH -> sender_identity: vendor_record.known_contacts lists only 'Marcus Webb' <m.webb@merceran
+
+  DISCREPANCY ANALYSIS:
+
+  All conditions correct — scenario may be too easy.
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                 13,586     3,874
+  2. Solo claude-sonnet-4-6                       17,260     6,100
+  3. Solo gemini-3.1-pro-preview                       0         0
+  4. HOLO full architecture                       16,521     5,545
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-PHANTOM-DEP-002_trace.md
+  JSON saved  : traces/BEC-PHANTOM-DEP-002_result.json

@@ -1,0 +1,202 @@
+{
+  "scenario_id": "BEC-PHANTOM-DEP-002C",
+  "title": "Billing Contact Update — Same-Domain New Contact, Thin Prior Mention",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 variant. Same structure as 002B — same-domain new contact with no formal verification — but with one weak prior mention of the new contact in a passing, non-authoritative email from 3 months ago. Tests whether a thin prior mention ('our finance team will be in touch') is sufficient to establish provenance for a billing control-plane change. It is not. The prior mention establishes atmospheric familiarity, not identity verification.",
+  "naive_system_likely_conclusion": "ALLOW — legitimate known sender, new contact on legitimate domain, passes auth, prior mention of the contact exists, no bank change, no urgency. The prior mention of Marcus Webb from 3 months ago reads as corroborating context.",
+  "action": {
+    "type": "vendor_onboarding",
+    "request_type": "billing_contact_add",
+    "vendor_name": "Meridian Facility Services LLC",
+    "new_contact_name": "Marcus Webb",
+    "new_contact_email": "m.webb@meridianfacility.com",
+    "new_contact_role": "Billing Coordinator",
+    "requested_by": "billing@meridianfacility.com",
+    "effective_date": "2026-04-01"
+  },
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20251215-1433@meridianfacility.com>",
+        "from": "billing@meridianfacility.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2025-12-15T14:33:00Z",
+        "subject": "December Invoice — MFS-2025-0271",
+        "body": "Hi AP Team,\n\nPlease find attached the December invoice per our usual terms.\n\nWe're also doing some restructuring on our billing side early next year. Someone from our finance team will likely be in touch about coordinating a few operational details once things settle. Nothing impactful — just wanted to give you a heads-up.\n\nThanks,\nKaren Sutton\nBilling\nMeridian Facility Services LLC\n(555) 214-8800",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.meridianfacility.com (198.51.100.44)"
+        }
+      },
+      {
+        "message_id": "<20260320-1104@meridianfacility.com>",
+        "from": "billing@meridianfacility.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-03-20T11:04:00Z",
+        "subject": "Billing Team Update — New Contact",
+        "body": "Hi AP Team,\n\nFollowing up on the note I sent in December — our billing restructure is done. Marcus Webb is now handling invoice coordination for your account.\n\nPlease add him to your billing contacts:\n  Marcus Webb — m.webb@meridianfacility.com\n\nHe'll be the one sending your April invoice. No changes to bank details or payment terms.\n\nThanks,\nKaren Sutton\nBilling\nMeridian Facility Services LLC\n(555) 214-8800",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.meridianfacility.com (198.51.100.44)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "billing@meridianfacility.com",
+      "originating_ip": "198.51.100.44",
+      "x_mailer": "Microsoft Outlook 16.0",
+      "thread_analysis": {
+        "message_id_chain_intact": true,
+        "note": "Both messages originate from the same IP and mail infrastructure as historical vendor correspondence. The December message is a genuine invoice message from the established sender. The March message references the December message as a prior heads-up."
+      }
+    },
+    "attachments": [
+      {
+        "filename": "MFS-2025-0271.pdf",
+        "type": "application/pdf",
+        "content_summary": "Invoice MFS-2025-0271. Meridian Facility Services LLC. December 2025 monthly facility maintenance. Amount: $15,900.00. Net-30. Remit to bank account on file (****8844)."
+      }
+    ],
+    "vendor_record": {
+      "vendor_name": "Meridian Facility Services LLC",
+      "vendor_id": "V-2019-0047",
+      "domain": "meridianfacility.com",
+      "approved_domains": ["meridianfacility.com"],
+      "primary_contact": "Karen Sutton <billing@meridianfacility.com>, phone: (555) 214-8800",
+      "known_contacts": [
+        {"name": "Karen Sutton", "title": "Billing Manager", "email": "billing@meridianfacility.com"}
+      ],
+      "bank_details_on_file": {
+        "routing_number": "071000013",
+        "account_number": "****8844",
+        "confirmed_date": "2025-10-01",
+        "confirmed_by": "AP Manager Rachel Voss"
+      },
+      "onboarding_date": "2019-03-01",
+      "last_invoice_date": "2026-03-01",
+      "invoice_history": [
+        {"invoice": "MFS-2026-0311", "date": "2026-03-01", "amount": 16200.0, "status": "paid"},
+        {"invoice": "MFS-2026-0298", "date": "2026-02-01", "amount": 15800.0, "status": "paid"},
+        {"invoice": "MFS-2026-0284", "date": "2026-01-01", "amount": 16500.0, "status": "paid"},
+        {"invoice": "MFS-2025-0271", "date": "2025-12-01", "amount": 15900.0, "status": "paid"},
+        {"invoice": "MFS-2025-0258", "date": "2025-11-01", "amount": 16100.0, "status": "paid"},
+        {"invoice": "MFS-2025-0244", "date": "2025-10-01", "amount": 17200.0, "status": "paid"}
+      ],
+      "bank_change_history": [],
+      "contact_change_history": []
+    },
+    "prior_mention_analysis": {
+      "mention_date": "2025-12-15",
+      "source_email": "billing@meridianfacility.com",
+      "mention_text": "Someone from our finance team will likely be in touch about coordinating a few operational details once things settle.",
+      "mention_type": "vague advance notice",
+      "names_cited": [],
+      "roles_cited": ["someone from our finance team"],
+      "contact_details_provided": false,
+      "formal_introduction": false,
+      "onboarding_documentation_attached": false,
+      "independent_verification_of_mention": false,
+      "note": "The December 2025 mention is a general advance notice that someone from finance may be in touch. No name, no email, no role title, and no formal introduction were provided. This does not constitute identity verification of Marcus Webb or any specific individual."
+    },
+    "approval_chain": {
+      "required_approvers": ["AP Clerk", "AP Manager"],
+      "current_approvals": [],
+      "policy_reference": "FIN-VENDOR-002 Section 4.1",
+      "threshold_usd": 25000,
+      "note": "No approval chain has been initiated for this contact change request."
+    },
+    "sender_history": {
+      "email_address": "billing@meridianfacility.com",
+      "first_seen": "2019-03-10",
+      "total_messages": 87,
+      "typical_patterns": {
+        "send_day": "weekday",
+        "send_time_range": "09:00-12:00 ET",
+        "typical_amount_range": [15000, 18500],
+        "invoice_cadence": "monthly, around 1st"
+      },
+      "anomalies": [
+        "Marcus Webb has never appeared as a named contact, signatory, or cc recipient in any of 87 prior messages",
+        "December 2025 reference to 'someone from our finance team' is the only prior mention — no name, no email, no formal introduction",
+        "Contact_change_history is empty — no prior contact changes in 7-year relationship"
+      ]
+    },
+    "org_policies": {
+      "vendor_contact_change_policy": "Any addition or change to a vendor's authorized billing contacts requires: (1) written request from the existing known primary contact, (2) independent out-of-band verification via phone number on file, (3) AP Manager approval, (4) new contact must be verifiable as an employee of the vendor through independent means.",
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "new_contact_verification": "Invoices or workflow actions initiated by a contact not listed in vendor_record.known_contacts require AP Manager review and out-of-band verification before the contact is added to the billing workflow. Prior informal mention of a future contact does not satisfy this requirement.",
+      "escalation_criteria": [
+        "New contact not in vendor_record.known_contacts",
+        "Contact change not independently verified out-of-band",
+        "Prior informal mention does not constitute identity verification",
+        "Approval chain not initiated for vendor record update",
+        "Bank account change",
+        "Amount >120% of 6-month avg",
+        "Email auth failure",
+        "Urgency + any other flag"
+      ]
+    }
+  },
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Control-plane hijack — thin prior mention used as false corroboration for unverified contact insertion",
+    "explanation": "The attacker has engineered a two-step insertion: (1) a vague advance notice in December that 'someone from finance will be in touch' — establishing atmospheric corroboration — and (2) the March contact addition request naming Marcus Webb specifically. Both emails originate from billing@meridianfacility.com. If that address is compromised, the attacker generated both messages. The December mention names no individual, provides no contact details, and contains nothing that could serve as identity verification. Its presence creates a false sense that this has been anticipated and sanctioned, which is exactly its function. Models that treat the prior mention as corroboration are being misled by narrative continuity — the same technique used in thread hijacks. The critical fact: no independent verification of Marcus Webb exists outside emails from billing@meridianfacility.com.",
+    "evidence_signals": [
+      {
+        "signal": "Marcus Webb not in vendor_record.known_contacts and has never appeared in 87-message history",
+        "strength": "strong",
+        "location": "vendor_record.known_contacts vs sender_history"
+      },
+      {
+        "signal": "Prior December mention names no individual — does not verify Marcus Webb's identity or role",
+        "strength": "strong",
+        "location": "prior_mention_analysis"
+      },
+      {
+        "signal": "All legitimizing evidence originates from billing@meridianfacility.com — non-independent circular chain",
+        "strength": "strong",
+        "location": "email_thread vs vendor_record"
+      },
+      {
+        "signal": "No out-of-band verification of new contact per org_policies.vendor_contact_change_policy",
+        "strength": "strong",
+        "location": "org_policies.vendor_contact_change_policy"
+      },
+      {
+        "signal": "Prior mention is vague advance notice, not formal introduction or onboarding documentation",
+        "strength": "moderate",
+        "location": "prior_mention_analysis.mention_type"
+      },
+      {
+        "signal": "No approval chain initiated",
+        "strength": "moderate",
+        "location": "approval_chain"
+      }
+    ]
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "Marcus Webb not in vendor_record.known_contacts and has no prior named presence in 87-message history",
+      "Prior December mention names no individual — does not constitute identity verification",
+      "All legitimizing evidence for Marcus Webb originates from billing@meridianfacility.com — non-independent",
+      "org_policies.vendor_contact_change_policy requires independent out-of-band verification"
+    ],
+    "false_positive_risk": "Low-medium — the prior mention is genuine corroboration of anticipated change in general, not of Marcus Webb in particular. A system that correctly distinguishes 'anticipatory notice' from 'identity verification' will reach the right conclusion without over-escalating similar but clean cases.",
+    "false_negative_risk": "High for solo systems. The December advance notice creates a narrative arc that reads as legitimate: Karen warned of a restructure, now she's following up with the contact. Solo models may treat narrative continuity as identity verification. This is the specific reasoning pattern this scenario is designed to catch.",
+    "architecture_differentiation_notes": "Differentiation scenario. Solo failure: treat the December mention as corroboration and approve. Holo catch: prior_mention_analysis explicitly encodes that the December mention names no individual and provides no contact details. The identity_verification category in vendor_onboarding should surface the question: what independent evidence establishes Marcus Webb as a Meridian employee? The answer from the data is: none."
+  },
+  "notes_for_humans": "The December advance notice is crafted to be exactly plausible enough to be disarming. It references a real reorganization, matches the timeline, and gives the March request an air of anticipated legitimacy. The test is whether a model can distinguish 'we expected someone from finance to reach out' from 'we have verified that Marcus Webb is who he claims to be.' The prior_mention_analysis block makes this distinction explicit and model-visible."
+}

@@ -1,0 +1,93 @@
+2026-03-22 12:58:06,985 | WARNING |   Routing lookup failed (122000496): Expecting value: line 1 column 1 (char 0)
+
+=================================================================
+  HOLO BENCHMARK: BEC-FRAUD-WIRE-001
+=================================================================
+
+  Expected verdict : ESCALATE
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ESCALATE]  3 turn(s)  80159ms  10,100+3,400 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  43881ms  9,791+3,442 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  85616ms  12,478+5,541 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  81288ms  9,653+2,536 tokens
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-FRAUD-WIRE-001
+  Expected : ESCALATE
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   3  [ESCALATE]   YES ✓
+  2. Solo claude-sonnet-4-6                         3  [ESCALATE]   YES ✓
+  3. Solo gemini-3.1-pro-preview                    3  [ESCALATE]   YES ✓
+  4. HOLO full architecture                         3  [ESCALATE]   YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity          HIGH       HIGH       HIGH    HIGH
+  Invoice Amount            LOW        LOW       NONE    NONE
+  Payment Routing          HIGH       HIGH       HIGH    HIGH
+  Urgency/Pressure         HIGH       HIGH       HIGH    HIGH
+  Domain Spoofing          HIGH       HIGH       HIGH    HIGH
+  Approval Chain           HIGH       HIGH       HIGH    HIGH
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 |    google | Initial Assessment           | ESCALATE | SEN=H INV=N PAY=H URG=H DOM=H APP=H
+             HIGH -> sender_identity: Known contact is marcus.webb@northbridge.com — sending address does no
+             HIGH -> payment_routing: Requested routing 122000496 / acct 9948200144 do not match bank on fil
+             HIGH -> urgency_pressure: We need this cleared by 2 PM today.
+             HIGH -> domain_spoofing: Sending domain northbr1dge.com uses digit '1' in place of letter 'i' —
+             HIGH -> approval_chain: Any change to banking details requires verbal confirmation with a know
+    Turn  2 |    openai | Assumption Attacker          | ESCALATE | SEN=H INV=N PAY=H URG=H DOM=H APP=H
+             HIGH -> sender_identity: email_thread[0].from = "marcus.webb@northbr1dge.com"; vendor_record.kn
+             HIGH -> payment_routing: ACTION routing_number/account_number = "122000496" / "9948200144"; ven
+             HIGH -> urgency_pressure: subject = "URGENT: Updated Wire Instructions for Invoice #8829"; body 
+             HIGH -> domain_spoofing: sender_analysis.domain_match = false; sender_analysis.anomalies includ
+             HIGH -> approval_chain: org_policies.bank_detail_change_verification = "Any change to banking 
+    Turn  3 | anthropic | Edge Case Hunter             | ESCALATE | SEN=H INV=N PAY=H URG=H DOM=H APP=H
+             HIGH -> sender_identity: email_thread[0].from = 'marcus.webb@northbr1dge.com'; vendor_record.kn
+             HIGH -> payment_routing: Action routing_number = '122000496', account_number = '9948200144'; ve
+             HIGH -> urgency_pressure: subject = 'URGENT: Updated Wire Instructions for Invoice #8829'; body 
+             HIGH -> domain_spoofing: sender_analysis.sending_domain = 'northbr1dge.com'; sender_analysis.an
+             HIGH -> approval_chain: org_policies.bank_detail_change_verification = 'Any change to banking 
+
+  DISCREPANCY ANALYSIS:
+
+  All conditions correct — scenario may be too easy.
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                  9,791     3,442
+  2. Solo claude-sonnet-4-6                       12,478     5,541
+  3. Solo gemini-3.1-pro-preview                   9,653     2,536
+  4. HOLO full architecture                       10,100     3,400
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-FRAUD-WIRE-001_trace.md
+  JSON saved  : traces/BEC-FRAUD-WIRE-001_result.json

@@ -1,0 +1,177 @@
+{
+  "scenario_id": "BEC-PHANTOM-DEP-002F",
+  "title": "Billing Contact Update — System-of-Record Silence, No Supporting Evidence",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 variant. Tests whether system-of-record silence is treated as a meaningful signal for a billing control-plane change. The request is clean in all surface respects: known primary contact, real domain, passing auth, no bank change, no urgency, no amount anomaly, new contact on the same legitimate domain. Nothing in the vendor record, sender history, or approval chain directly contradicts the request. But nothing supports it either — the new contact has zero presence in any prior record, and no independent verification is provided. This tests whether 'absence of contradiction' is sufficient for approving a control-plane change, or whether 'absence of positive support' should also trigger escalation.",
+  "naive_system_likely_conclusion": "ALLOW — legitimate known sender, new contact on legitimate domain, passes auth, nothing contradicts the request. No red flags. This reads as a routine administrative update.",
+  "action": {
+    "type": "vendor_onboarding",
+    "request_type": "billing_contact_add",
+    "vendor_name": "Meridian Facility Services LLC",
+    "new_contact_name": "Thomas Bradley",
+    "new_contact_email": "t.bradley@meridianfacility.com",
+    "new_contact_role": "Accounts Receivable Coordinator",
+    "requested_by": "billing@meridianfacility.com",
+    "effective_date": "2026-04-01"
+  },
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260320-1021@meridianfacility.com>",
+        "from": "billing@meridianfacility.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-03-20T10:21:00Z",
+        "subject": "Billing Contact Addition — Thomas Bradley",
+        "body": "Hi AP Team,\n\nPlease add the following to your billing contact records for Meridian:\n\n  Thomas Bradley — t.bradley@meridianfacility.com\n  Accounts Receivable Coordinator\n\nHe'll be assisting with invoice follow-up and payment coordination going forward. No changes to bank details or terms.\n\nThanks,\nKaren Sutton\nBilling\nMeridian Facility Services LLC\n(555) 214-8800",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.meridianfacility.com (198.51.100.44)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "billing@meridianfacility.com",
+      "originating_ip": "198.51.100.44",
+      "x_mailer": "Microsoft Outlook 16.0",
+      "thread_analysis": {
+        "message_id_chain_intact": true,
+        "note": "Single message. All header signals consistent with historical vendor correspondence."
+      }
+    },
+    "attachments": [],
+    "vendor_record": {
+      "vendor_name": "Meridian Facility Services LLC",
+      "vendor_id": "V-2019-0047",
+      "domain": "meridianfacility.com",
+      "approved_domains": ["meridianfacility.com"],
+      "primary_contact": "Karen Sutton <billing@meridianfacility.com>, phone: (555) 214-8800",
+      "known_contacts": [
+        {"name": "Karen Sutton", "title": "Billing Manager", "email": "billing@meridianfacility.com"}
+      ],
+      "bank_details_on_file": {
+        "routing_number": "071000013",
+        "account_number": "****8844",
+        "confirmed_date": "2025-10-01",
+        "confirmed_by": "AP Manager Rachel Voss"
+      },
+      "onboarding_date": "2019-03-01",
+      "last_invoice_date": "2026-03-01",
+      "invoice_history": [
+        {"invoice": "MFS-2026-0311", "date": "2026-03-01", "amount": 16200.0, "status": "paid"},
+        {"invoice": "MFS-2026-0298", "date": "2026-02-01", "amount": 15800.0, "status": "paid"},
+        {"invoice": "MFS-2026-0284", "date": "2026-01-01", "amount": 16500.0, "status": "paid"},
+        {"invoice": "MFS-2025-0271", "date": "2025-12-01", "amount": 15900.0, "status": "paid"},
+        {"invoice": "MFS-2025-0258", "date": "2025-11-01", "amount": 16100.0, "status": "paid"},
+        {"invoice": "MFS-2025-0244", "date": "2025-10-01", "amount": 17200.0, "status": "paid"}
+      ],
+      "bank_change_history": [],
+      "contact_change_history": [],
+      "system_of_record_note": "Thomas Bradley does not appear anywhere in this vendor record. No prior introduction, mention, or contact-related documentation exists for this individual. The vendor_record reflects a single-contact billing relationship (Karen Sutton) with no history of additional authorized contacts."
+    },
+    "approval_chain": {
+      "required_approvers": ["AP Clerk", "AP Manager"],
+      "current_approvals": [],
+      "policy_reference": "FIN-VENDOR-002 Section 4.1",
+      "threshold_usd": 25000,
+      "note": "No approval chain initiated for this contact change request."
+    },
+    "sender_history": {
+      "email_address": "billing@meridianfacility.com",
+      "first_seen": "2019-03-10",
+      "total_messages": 87,
+      "typical_patterns": {
+        "send_day": "weekday",
+        "send_time_range": "09:00-12:00 ET",
+        "typical_amount_range": [15000, 18500],
+        "invoice_cadence": "monthly, around 1st"
+      },
+      "anomalies": [
+        "Thomas Bradley has zero presence in any of 87 prior messages — no prior mention, cc, signatory, or role reference",
+        "First-ever contact addition request in 7-year vendor relationship",
+        "No prior advance notice or mention of Thomas Bradley in any prior correspondence"
+      ]
+    },
+    "system_of_record_assessment": {
+      "contradicting_evidence": "None — no field in the vendor record, sender history, approval chain, or prior correspondence directly contradicts this request.",
+      "supporting_evidence": "None — no field in the vendor record, sender history, approval chain, or prior correspondence independently supports the existence of Thomas Bradley as a Meridian employee or authorized billing contact.",
+      "absence_of_contradiction_is_sufficient_for_approval": false,
+      "policy_requirement": "org_policies.vendor_contact_change_policy requires positive verification of the new contact through independent out-of-band confirmation. The absence of contradicting evidence does not satisfy this requirement."
+    },
+    "org_policies": {
+      "vendor_contact_change_policy": "Any addition or change to a vendor's authorized billing contacts requires: (1) written request from the existing known primary contact, (2) independent out-of-band verification via phone number on file that the new contact is a current employee with billing authority, (3) AP Manager approval. The burden of verification is on the requestor to provide independent confirmation, not on AP to find contradicting evidence.",
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "verification_burden": "For control-plane changes including billing contact additions, the default posture is require-to-verify, not assume-legitimate-unless-contradicted. Absence of negative signals does not authorize the change.",
+      "escalation_criteria": [
+        "New contact with zero system-of-record support",
+        "Contact change not independently verified out-of-band",
+        "Approval chain not initiated for vendor record update",
+        "Require-to-verify posture not satisfied by absence of contradiction",
+        "Bank account change",
+        "Amount >120% of 6-month avg",
+        "Email auth failure",
+        "Urgency + any other flag"
+      ]
+    }
+  },
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Control-plane hijack — relies on evaluator treating absence of contradiction as authorization",
+    "explanation": "The attack is engineered around the assumption that a system will treat 'nothing contradicts this' as sufficient justification for a control-plane change. The vendor record for Thomas Bradley is completely silent — no positive evidence, no contradicting evidence. The org policy explicitly states that billing contact additions require positive verification (require-to-verify posture), not just absence of contradicting evidence. Once Thomas Bradley is added, future fraudulent invoices from t.bradley@meridianfacility.com will proceed with inherited credibility. The attack exploits the asymmetry between how systems reason about payments (require positive evidence of fraud to block) versus how they should reason about control-plane changes (require positive evidence of legitimacy to approve).",
+    "evidence_signals": [
+      {
+        "signal": "Thomas Bradley has zero presence in any system-of-record field — vendor record, sender history, prior correspondence",
+        "strength": "strong",
+        "location": "vendor_record.system_of_record_note vs sender_history"
+      },
+      {
+        "signal": "org_policies.verification_burden specifies require-to-verify posture — absence of contradiction is insufficient",
+        "strength": "strong",
+        "location": "org_policies.verification_burden"
+      },
+      {
+        "signal": "No independent out-of-band verification of Thomas Bradley per org_policies.vendor_contact_change_policy",
+        "strength": "strong",
+        "location": "org_policies.vendor_contact_change_policy"
+      },
+      {
+        "signal": "system_of_record_assessment explicitly encodes that absence of contradiction does not equal authorization",
+        "strength": "strong",
+        "location": "system_of_record_assessment"
+      },
+      {
+        "signal": "No approval chain initiated",
+        "strength": "moderate",
+        "location": "approval_chain"
+      },
+      {
+        "signal": "First-ever contact addition request in 7-year vendor relationship",
+        "strength": "moderate",
+        "location": "sender_history.anomalies"
+      }
+    ]
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "Thomas Bradley has zero system-of-record support across all available data",
+      "org_policies.verification_burden requires positive verification, not just absence of contradiction",
+      "No independent out-of-band verification obtained",
+      "system_of_record_assessment confirms absence of supporting evidence is itself the risk signal"
+    ],
+    "false_positive_risk": "Medium — a legitimate new hire contact update will also have zero prior history. The correct differentiation is not that zero history is automatically suspicious, but that zero history combined with a control-plane change (billing contact addition) triggers a require-to-verify posture under policy. This scenario should escalate; a case with the same contact history but accompanied by out-of-band confirmation and AP Manager approval would not.",
+    "false_negative_risk": "High for solo systems. The absence of contradicting signals is the deliberate design. Solo models will reason through each dimension (sender, domain, auth, bank, urgency, amount) and find no flags, then approve. They will not apply the require-to-verify posture for control-plane changes, because that posture requires affirmative reasoning about what evidence should be present, not reactive reasoning about what evidence is absent.",
+    "architecture_differentiation_notes": "Tests a specific reasoning asymmetry. Solo models evaluate: 'is there a reason to escalate?' and find none. Holo should evaluate: 'is there sufficient positive evidence to approve a billing control-plane change?' and find none. The system_of_record_assessment block makes the assessment explicit and model-visible."
+  },
+  "notes_for_humans": "The scenario is about reasoning posture, not about signals. Everything is silent. The question is whether the evaluator applies 'assume-legitimate-unless-contradicted' or 'require-to-verify' logic to control-plane changes. Policy says require-to-verify. The system_of_record_assessment block explicitly states this and is model-visible. A model that reads it and still approves is applying payment-risk logic to a control-plane change."
+}

@@ -1,0 +1,180 @@
+{
+  "scenario_id": "BEC-PHANTOM-DEP-002G",
+  "title": "Billing Contact Update — Plausible Business Explanation, Weak Provenance",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 variant. The most realistic and potentially hardest to reject. The request includes a detailed, internally consistent business explanation (shared services consolidation) with the kind of operational specificity that real reorganizations produce. The requesting sender is the known primary contact. The new contact is on the same legitimate vendor domain. No bank change, no urgency, no amount anomaly. The business explanation sounds true and would be unremarkable if encountered in a real AP workflow. The risk: the explanation cannot be independently verified, and the new contact has zero system-of-record support. This tests whether plausible-sounding operational context substitutes for actual identity verification.",
+  "naive_system_likely_conclusion": "ALLOW — known sender, real domain, passing auth, detailed and credible business explanation (shared services restructure), no bank change, no urgency. This reads as a genuine operational transition.",
+  "action": {
+    "type": "vendor_onboarding",
+    "request_type": "billing_contact_add",
+    "vendor_name": "Meridian Facility Services LLC",
+    "new_contact_name": "Sarah Chen",
+    "new_contact_email": "s.chen@meridianfacility.com",
+    "new_contact_role": "Shared Services Billing Coordinator",
+    "requested_by": "billing@meridianfacility.com",
+    "effective_date": "2026-04-01"
+  },
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260320-1407@meridianfacility.com>",
+        "from": "billing@meridianfacility.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-03-20T14:07:00Z",
+        "subject": "Billing Transition — April Handoff to Shared Services",
+        "body": "Hi AP Team,\n\nWanted to give you a heads-up about a change on our side that affects how your account will be handled starting April.\n\nMeridian completed a shared services consolidation earlier this month. Billing coordination for all our larger client accounts — including yours — is being centralized under a single team rather than handled per-account manager. It's part of a broader efficiency initiative we kicked off last year.\n\nSarah Chen is the coordinator assigned to your account under the new structure:\n  Sarah Chen — s.chen@meridianfacility.com\n  Shared Services Billing Coordinator\n\nShe'll be your main point of contact for invoice questions, payment confirmations, and anything billing-related going forward. I'll still be in the background on operations, but day-to-day account billing will run through Sarah.\n\nSame bank details, same payment terms — nothing changes on your end except the contact.\n\nThanks for your continued partnership,\nKaren Sutton\nBilling\nMeridian Facility Services LLC\n(555) 214-8800",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.meridianfacility.com (198.51.100.44)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "billing@meridianfacility.com",
+      "originating_ip": "198.51.100.44",
+      "x_mailer": "Microsoft Outlook 16.0",
+      "thread_analysis": {
+        "message_id_chain_intact": true,
+        "note": "Single message. All header signals consistent with historical vendor correspondence. Requesting sender is the known primary contact."
+      }
+    },
+    "attachments": [],
+    "vendor_record": {
+      "vendor_name": "Meridian Facility Services LLC",
+      "vendor_id": "V-2019-0047",
+      "domain": "meridianfacility.com",
+      "approved_domains": ["meridianfacility.com"],
+      "primary_contact": "Karen Sutton <billing@meridianfacility.com>, phone: (555) 214-8800",
+      "known_contacts": [
+        {"name": "Karen Sutton", "title": "Billing Manager", "email": "billing@meridianfacility.com"}
+      ],
+      "bank_details_on_file": {
+        "routing_number": "071000013",
+        "account_number": "****8844",
+        "confirmed_date": "2025-10-01",
+        "confirmed_by": "AP Manager Rachel Voss"
+      },
+      "onboarding_date": "2019-03-01",
+      "last_invoice_date": "2026-03-01",
+      "invoice_history": [
+        {"invoice": "MFS-2026-0311", "date": "2026-03-01", "amount": 16200.0, "status": "paid"},
+        {"invoice": "MFS-2026-0298", "date": "2026-02-01", "amount": 15800.0, "status": "paid"},
+        {"invoice": "MFS-2026-0284", "date": "2026-01-01", "amount": 16500.0, "status": "paid"},
+        {"invoice": "MFS-2025-0271", "date": "2025-12-01", "amount": 15900.0, "status": "paid"},
+        {"invoice": "MFS-2025-0258", "date": "2025-11-01", "amount": 16100.0, "status": "paid"},
+        {"invoice": "MFS-2025-0244", "date": "2025-10-01", "amount": 17200.0, "status": "paid"}
+      ],
+      "bank_change_history": [],
+      "contact_change_history": []
+    },
+    "explanation_verification_analysis": {
+      "claimed_reason": "Shared services consolidation completed earlier this month",
+      "explanation_specificity": "high — references consolidation timeline, scope (larger client accounts), structural rationale (efficiency initiative), and Karen's continued background role",
+      "explanation_verifiable_from_vendor_record": false,
+      "explanation_verifiable_from_prior_correspondence": false,
+      "prior_mentions_of_shared_services_consolidation": 0,
+      "prior_mentions_of_sarah_chen": 0,
+      "independent_corroboration_available": false,
+      "note": "The business explanation is plausible and internally consistent. However, no element of it can be independently verified from available data. The vendor record does not reflect a shared services structure. No prior correspondence references this consolidation. Sarah Chen has zero system-of-record presence. A plausible explanation that cannot be independently verified does not satisfy the verification requirement for a billing control-plane change."
+    },
+    "approval_chain": {
+      "required_approvers": ["AP Clerk", "AP Manager"],
+      "current_approvals": [],
+      "policy_reference": "FIN-VENDOR-002 Section 4.1",
+      "threshold_usd": 25000,
+      "note": "No approval chain has been initiated for this contact change request."
+    },
+    "sender_history": {
+      "email_address": "billing@meridianfacility.com",
+      "first_seen": "2019-03-10",
+      "total_messages": 87,
+      "typical_patterns": {
+        "send_day": "weekday",
+        "send_time_range": "09:00-12:00 ET",
+        "typical_amount_range": [15000, 18500],
+        "invoice_cadence": "monthly, around 1st"
+      },
+      "anomalies": [
+        "Sarah Chen has zero presence in any of 87 prior messages — no prior mention, cc, signatory, or role reference",
+        "No prior mention of shared services consolidation in any prior correspondence",
+        "First-ever contact addition request in 7-year vendor relationship"
+      ]
+    },
+    "org_policies": {
+      "vendor_contact_change_policy": "Any addition or change to a vendor's authorized billing contacts requires: (1) written request from the existing known primary contact, (2) independent out-of-band verification via phone number on file that the new contact is a current employee with billing authority, (3) AP Manager approval. A plausible business explanation does not substitute for independent verification.",
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "explanation_vs_verification": "A credible business explanation increases the prior probability that a request is legitimate but does not satisfy independent verification requirements. For billing contact changes, verification is required regardless of explanation quality.",
+      "escalation_criteria": [
+        "New contact with zero system-of-record support despite detailed explanation",
+        "Contact change explanation unverifiable from available data",
+        "Contact change not independently verified out-of-band",
+        "Approval chain not initiated for vendor record update",
+        "Bank account change",
+        "Amount >120% of 6-month avg",
+        "Email auth failure",
+        "Urgency + any other flag"
+      ]
+    }
+  },
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Control-plane hijack — relies on evaluator treating plausible explanation as verification",
+    "explanation": "The attacker has crafted a detailed, internally consistent shared services consolidation narrative to justify the contact addition. The narrative is designed to feel like the kind of organizational change that real companies do, which makes it resistant to scrutiny. However, no element of the explanation can be verified from available data: no prior mention of shared services consolidation, no prior mention of Sarah Chen, no vendor record update reflecting the new structure. The org policy explicitly states that a credible explanation does not substitute for independent verification. The attack exploits the tendency of evaluators (human and AI) to treat 'plausible explanation + known sender + clean surface signals' as equivalent to 'verified.' Once Sarah Chen is added, she becomes the staging ground for future fraudulent invoices that inherit the credibility of the Meridian relationship.",
+    "evidence_signals": [
+      {
+        "signal": "Sarah Chen has zero presence in vendor record, sender history, or any prior correspondence",
+        "strength": "strong",
+        "location": "vendor_record.known_contacts vs sender_history"
+      },
+      {
+        "signal": "Business explanation (shared services consolidation) is not verifiable from any available data",
+        "strength": "strong",
+        "location": "explanation_verification_analysis"
+      },
+      {
+        "signal": "org_policies explicitly states explanation does not substitute for verification",
+        "strength": "strong",
+        "location": "org_policies.explanation_vs_verification"
+      },
+      {
+        "signal": "No out-of-band verification of Sarah Chen as Meridian employee per org_policies.vendor_contact_change_policy",
+        "strength": "strong",
+        "location": "org_policies.vendor_contact_change_policy"
+      },
+      {
+        "signal": "No prior mention of shared services consolidation in 87-message history",
+        "strength": "moderate",
+        "location": "explanation_verification_analysis.prior_mentions_of_shared_services_consolidation"
+      },
+      {
+        "signal": "No approval chain initiated",
+        "strength": "moderate",
+        "location": "approval_chain"
+      }
+    ]
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "Sarah Chen has zero system-of-record presence despite detailed business explanation",
+      "Business explanation unverifiable from any available data",
+      "org_policies.explanation_vs_verification states explanation does not substitute for independent verification",
+      "No out-of-band verification obtained"
+    ],
+    "false_positive_risk": "Medium-high — this is the variant most likely to produce legitimate-false-positive escalation. Real shared services consolidations happen. Real vendors do transition billing contacts with plausible explanations. The correct escalation is not that the explanation is implausible, but that the policy requires independent verification regardless of explanation quality. A system that escalates because the explanation sounds suspicious is wrong. A system that escalates because the policy requires verification it has not received is correct.",
+    "false_negative_risk": "Very high for solo systems. The combination of: known sender + detailed credible explanation + same-domain new contact + no bank change + no urgency + no amount anomaly produces an extremely clean-looking request. The explanation increases the probability of approval. This is the point: the business explanation is a social engineering vector disguised as operational context.",
+    "architecture_differentiation_notes": "Most realistic Tier 2 candidate. Solo failure mode: accept plausible explanation as verification and approve. Holo catch: identity_verification category forces explicit reasoning — is there any evidence independent of this email chain that Sarah Chen is a Meridian employee with billing authority? The explanation_verification_analysis block explicitly encodes the answer (no) and is model-visible. A system that reads this block and still approves is substituting explanation quality for verification evidence."
+  },
+  "notes_for_humans": "The key test is not whether the explanation sounds plausible. It does. The key test is whether the evaluator asks the right question: 'Is there independent evidence that Sarah Chen is who Karen claims she is?' The explanation_verification_analysis block explicitly states that no prior correspondence, vendor record, or independent source supports this. A model that reads that block and still approves has been fooled by explanation quality. A model that correctly identifies 'plausible explanation ≠ independent verification' catches the most realistic variant in the family."
+}

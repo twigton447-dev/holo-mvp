@@ -1,0 +1,90 @@
+
+=================================================================
+  HOLO BENCHMARK: BEC-SUBTLE-003
+=================================================================
+
+  Expected verdict : ESCALATE
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ESCALATE]  5 turn(s)  188403ms  31,236+7,410 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  43009ms  13,028+3,726 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ESCALATE]  3 turn(s)  80803ms  15,562+5,226 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> [ESCALATE]  5 turn(s)  148250ms  26,926+4,651 tokens
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-SUBTLE-003
+  Expected : ESCALATE
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   3  [ESCALATE]   YES ✓
+  2. Solo claude-sonnet-4-6                         3  [ESCALATE]   YES ✓
+  3. Solo gemini-3.1-pro-preview                    5  [ESCALATE]   YES ✓
+  4. HOLO full architecture                         5  [ESCALATE]   YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity           LOW        LOW        LOW     LOW
+  Invoice Amount            LOW        LOW     MEDIUM     LOW
+  Payment Routing           LOW        LOW        LOW    HIGH  << HOLO ONLY
+  Urgency/Pressure          LOW        LOW        LOW     LOW
+  Domain Spoofing           LOW        LOW        LOW     LOW
+  Approval Chain           HIGH       HIGH       HIGH    HIGH
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 |    google | Initial Assessment           | ESCALATE | SEN=L INV=L PAY=L URG=L DOM=L APP=H
+             HIGH -> approval_chain: "exists": false, "note": "No employee named Karen Whitfield found in o
+             HIGH -> approval_chain: Out-of-sequence approvals are invalid per FIN-AP-001 Section 3.2.1.
+    Turn  2 | anthropic | Assumption Attacker          | ESCALATE | SEN=L INV=L PAY=M URG=L DOM=L APP=H
+             HIGH -> approval_chain: "Karen Whitfield": {"exists": false, "note": "No employee named Karen 
+             HIGH -> approval_chain: Approvals: AP Clerk 2026-03-10, Controller 2026-03-11, AP Manager 2026
+    Turn  3 |    google | Edge Case Hunter             | ESCALATE | SEN=L INV=L PAY=H URG=L DOM=L APP=H
+             HIGH -> payment_routing: Invoice attachment: "Bank: Metro Business Bank, routing 021202337, acc
+             HIGH -> approval_chain: "Karen Whitfield": {"exists": false, "note": "No employee named Karen 
+             HIGH -> approval_chain: Approvals: AP Clerk (03-10), Controller (03-11), AP Manager (03-12). P
+    Turn  4 |    openai | Evidence Pressure Tester     | ESCALATE | SEN=L INV=L PAY=M URG=L DOM=L APP=H
+             HIGH -> approval_chain: "Karen Whitfield": {"exists": false, "note": "No employee named Karen 
+             HIGH -> approval_chain: current_approvals dates: AP Clerk "2026-03-10", Controller "2026-03-11
+    Turn  5 | anthropic | Former Attacker              | ESCALATE | SEN=L INV=L PAY=M URG=L DOM=L APP=H
+             HIGH -> approval_chain: "Karen Whitfield": {"exists": false, "note": "No employee named Karen 
+             HIGH -> approval_chain: current_approvals dates: AP Clerk '2026-03-10', Controller '2026-03-11
+
+  DISCREPANCY ANALYSIS:
+
+  All conditions correct — scenario may be too easy.
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                 13,028     3,726
+  2. Solo claude-sonnet-4-6                       15,562     5,226
+  3. Solo gemini-3.1-pro-preview                  26,926     4,651
+  4. HOLO full architecture                       31,236     7,410
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-SUBTLE-003_trace.md
+  JSON saved  : traces/BEC-SUBTLE-003_result.json

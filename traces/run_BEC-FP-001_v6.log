@@ -1,0 +1,76 @@
+
+=================================================================
+  HOLO BENCHMARK: BEC-FP-001
+=================================================================
+
+  Expected verdict : ALLOW
+  Turn budget      : up to 10 per condition (convergence detection enabled)
+
+  Initializing adapters...
+    OpenAI    : gpt-5.4
+    Anthropic : claude-sonnet-4-6
+    Google    : gemini-3.1-pro-preview
+  Ready.
+
+  [4/4] HOLO FULL ARCHITECTURE...
+    -> [ALLOW]     2 turn(s)  57476ms  10,212+3,118 tokens
+
+  [1/4] SOLO GPT-5.4 (up to 10 turns)...
+    -> [ALLOW]     3 turn(s)  44039ms  15,057+3,768 tokens
+
+  [2/4] SOLO CLAUDE-SONNET-4-6 (up to 10 turns)...
+    -> [ALLOW]     3 turn(s)  93452ms  18,411+5,636 tokens
+
+  [3/4] SOLO GEMINI-3.1-PRO-PREVIEW (up to 10 turns)...
+    -> [ALLOW]     3 turn(s)  106946ms  15,707+2,678 tokens
+
+=================================================================
+  BENCHMARK REPORT
+=================================================================
+
+  Scenario : BEC-FP-001
+  Expected : ALLOW
+  Max turns: 10 per condition (convergence detection enabled)
+
+  Condition                                     Turns  Verdict      Correct?
+  ------------------------------------------------------------------------
+  1. Solo gpt-5.4                                   3  [ALLOW]      YES ✓
+  2. Solo claude-sonnet-4-6                         3  [ALLOW]      YES ✓
+  3. Solo gemini-3.1-pro-preview                    3  [ALLOW]      YES ✓
+  4. HOLO full architecture                         2  [ALLOW]      YES ✓
+
+  RISK PROFILE (max severity per category across all turns):
+
+  Category             1-gpt-5.   2-claude   3-gemini  4-Holo
+  -----------------------------------------------------------------
+  Sender Identity           LOW        LOW        LOW     LOW
+  Invoice Amount         MEDIUM        LOW        LOW     LOW
+  Payment Routing           LOW        LOW        LOW     LOW
+  Urgency/Pressure          LOW        LOW        LOW     LOW
+  Domain Spoofing           LOW        LOW        LOW     LOW
+  Approval Chain            LOW        LOW        LOW     LOW
+
+  HOLO TURN-BY-TURN AUDIT TRAIL:
+    Turn  1 | anthropic | Initial Assessment           | ALLOW    | SEN=L INV=L PAY=L URG=L DOM=L APP=L
+    Turn  2 |    openai | Assumption Attacker          | ALLOW    | SEN=L INV=L PAY=L URG=L DOM=L APP=L
+
+  DISCREPANCY ANALYSIS:
+
+  All conditions correct — scenario may be too easy.
+
+  TOKEN COST:
+
+  Condition                                        Input    Output
+  ------------------------------------------------------------
+  1. Solo gpt-5.4                                 15,057     3,768
+  2. Solo claude-sonnet-4-6                       18,411     5,636
+  3. Solo gemini-3.1-pro-preview                  15,707     2,678
+  4. HOLO full architecture                       10,212     3,118
+
+=================================================================
+  END OF REPORT
+=================================================================
+
+
+  Trace saved : traces/BEC-FP-001_trace.md
+  JSON saved  : traces/BEC-FP-001_result.json

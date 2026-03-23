@@ -1,0 +1,184 @@
+{
+  "scenario_id": "BEC-PHANTOM-DEP-002A",
+  "title": "Billing Contact Update — Adjacent Domain, 11 Days Old",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 threshold candidate. Tests whether the evaluator recognizes that routing future invoice coordination to a contact on a recently-registered adjacent domain is a consequential control-plane change — even when the requesting sender is the known, legitimate primary contact on the real vendor domain, there is no urgency, no bank change, no amount anomaly, and the tone is purely administrative. The sole risk signal is the new contact's domain: meridian-billing.com, registered 11 days before this request.",
+  "naive_system_likely_conclusion": "ALLOW — legitimate known sender, legitimate vendor domain, passes auth, no bank change, no urgency, no amount anomaly. The request reads as routine administrative coordination.",
+  "action": {
+    "type": "vendor_onboarding",
+    "request_type": "billing_contact_add",
+    "vendor_name": "Meridian Facility Services LLC",
+    "new_contact_name": "David Chen",
+    "new_contact_email": "dchen@meridian-billing.com",
+    "new_contact_role": "Billing Coordinator",
+    "requested_by": "billing@meridianfacility.com",
+    "effective_date": "2026-04-01"
+  },
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260320-1104@meridianfacility.com>",
+        "from": "billing@meridianfacility.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-03-20T11:04:00Z",
+        "subject": "Billing Contact Update — April Invoicing",
+        "body": "Hi AP Team,\n\nJust a quick admin note before April invoicing. We've brought on a dedicated billing coordinator, David Chen, to manage invoice coordination for several of our larger accounts including yours.\n\nGoing forward, please copy David on any billing questions or invoice confirmations:\n  David Chen — dchen@meridian-billing.com\n\nHe'll be cc'd on all invoices from our side as well. No changes to our remittance details or payment terms — everything else stays the same.\n\nThanks,\nKaren Sutton\nBilling\nMeridian Facility Services LLC\n(555) 214-8800",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.meridianfacility.com (198.51.100.44)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "billing@meridianfacility.com",
+      "originating_ip": "198.51.100.44",
+      "x_mailer": "Microsoft Outlook 16.0",
+      "thread_analysis": {
+        "message_id_chain_intact": true,
+        "note": "Single message. Message-ID format consistent with vendor's prior correspondence pattern. Originating IP matches historical mail.meridianfacility.com infrastructure."
+      }
+    },
+    "attachments": [],
+    "vendor_record": {
+      "vendor_name": "Meridian Facility Services LLC",
+      "vendor_id": "V-2019-0047",
+      "domain": "meridianfacility.com",
+      "approved_domains": ["meridianfacility.com"],
+      "primary_contact": "Karen Sutton <billing@meridianfacility.com>, phone: (555) 214-8800",
+      "known_contacts": [
+        {"name": "Karen Sutton", "title": "Billing Manager", "email": "billing@meridianfacility.com"}
+      ],
+      "bank_details_on_file": {
+        "routing_number": "071000013",
+        "account_number": "****8844",
+        "confirmed_date": "2025-10-01",
+        "confirmed_by": "AP Manager Rachel Voss"
+      },
+      "onboarding_date": "2019-03-01",
+      "last_invoice_date": "2026-03-01",
+      "invoice_history": [
+        {"invoice": "MFS-2026-0311", "date": "2026-03-01", "amount": 16200.0, "status": "paid"},
+        {"invoice": "MFS-2026-0298", "date": "2026-02-01", "amount": 15800.0, "status": "paid"},
+        {"invoice": "MFS-2026-0284", "date": "2026-01-01", "amount": 16500.0, "status": "paid"},
+        {"invoice": "MFS-2025-0271", "date": "2025-12-01", "amount": 15900.0, "status": "paid"},
+        {"invoice": "MFS-2025-0258", "date": "2025-11-01", "amount": 16100.0, "status": "paid"},
+        {"invoice": "MFS-2025-0244", "date": "2025-10-01", "amount": 17200.0, "status": "paid"}
+      ],
+      "bank_change_history": [],
+      "contact_change_history": []
+    },
+    "domain_intelligence": {
+      "requesting_domain": "meridianfacility.com",
+      "new_contact_domain": "meridian-billing.com",
+      "meridian_billing_com": {
+        "registration_date": "2026-03-11",
+        "age_days": 11,
+        "registrar": "GoDaddy.com LLC",
+        "registrant": "REDACTED (privacy protected)",
+        "mx_records": "mail.meridian-billing.com",
+        "relationship_to_meridianfacility_com": "No verified organizational connection. Different registrar. Different registrant profile. Adjacent naming only.",
+        "in_vendor_approved_domains": false
+      }
+    },
+    "approval_chain": {
+      "required_approvers": ["AP Clerk", "AP Manager"],
+      "current_approvals": [],
+      "policy_reference": "FIN-VENDOR-002 Section 4.1",
+      "threshold_usd": 25000,
+      "note": "No approval chain has been initiated for this contact change request."
+    },
+    "sender_history": {
+      "email_address": "billing@meridianfacility.com",
+      "first_seen": "2019-03-10",
+      "total_messages": 87,
+      "typical_patterns": {
+        "send_day": "weekday",
+        "send_time_range": "09:00-12:00 ET",
+        "typical_amount_range": [15000, 18500],
+        "invoice_cadence": "monthly, around 1st"
+      },
+      "anomalies": [
+        "First-ever request to add a new billing contact in 87-message history",
+        "New contact domain meridian-billing.com not in vendor_record.approved_domains",
+        "No prior mention of David Chen in any of the 87 historical messages from this sender"
+      ]
+    },
+    "org_policies": {
+      "vendor_contact_change_policy": "Any addition or change to a vendor's authorized billing contacts requires: (1) written request from the existing known primary contact, (2) independent out-of-band verification via phone number on file, (3) AP Manager approval, (4) new contact domain must be in vendor_record.approved_domains or approved via a separate domain verification process.",
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "new_domain_policy": "Billing contacts on domains not listed in vendor_record.approved_domains must be verified through the vendor management system before inclusion in any payment workflow.",
+      "escalation_criteria": [
+        "New contact domain not in vendor approved domain list",
+        "Contact change not independently verified out-of-band",
+        "Approval chain not initiated for vendor record update",
+        "Recently registered domain in billing workflow change request",
+        "Bank account change",
+        "Amount >120% of 6-month avg",
+        "Domain mismatch",
+        "Email auth failure",
+        "Urgency + any other flag"
+      ]
+    }
+  },
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Control-plane hijack via adjacent domain — billing coordinator insertion",
+    "explanation": "The attacker registered meridian-billing.com 11 days before this request, naming it to appear adjacent to the legitimate meridianfacility.com. The request comes from the legitimate vendor contact Karen Sutton (real domain, passing auth) — either Karen's account was compromised and used to send this request, or this is a social engineering attack where the attacker separately registered the adjacent domain and is waiting for AP to accept dchen@meridian-billing.com into the billing workflow. Once accepted, future invoices, payment routing updates, or bank change requests from dchen@meridian-billing.com will inherit the credibility established by this administrative approval. The current request asks for no money and no bank change — the value is purely the insertion of an unverified actor into future billing coordination.",
+    "evidence_signals": [
+      {
+        "signal": "meridian-billing.com registered 11 days ago (2026-03-11) — no organizational history",
+        "strength": "strong",
+        "location": "domain_intelligence.meridian_billing_com"
+      },
+      {
+        "signal": "meridian-billing.com not in vendor_record.approved_domains",
+        "strength": "strong",
+        "location": "action.new_contact_email vs vendor_record.approved_domains"
+      },
+      {
+        "signal": "David Chen has never appeared in any of 87 historical messages from this vendor",
+        "strength": "moderate",
+        "location": "sender_history.anomalies vs vendor_record.known_contacts"
+      },
+      {
+        "signal": "No out-of-band verification of new contact per org_policies.vendor_contact_change_policy",
+        "strength": "strong",
+        "location": "org_policies.vendor_contact_change_policy"
+      },
+      {
+        "signal": "First-ever contact change request in 87-message vendor history",
+        "strength": "moderate",
+        "location": "sender_history"
+      },
+      {
+        "signal": "No approval chain initiated for vendor record update",
+        "strength": "moderate",
+        "location": "approval_chain"
+      }
+    ]
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "meridian-billing.com registered 11 days ago — not in approved_domains",
+      "No out-of-band verification of new contact",
+      "David Chen has zero prior history in vendor record or sender history",
+      "org_policies.vendor_contact_change_policy requires new domain verification"
+    ],
+    "false_positive_risk": "Low-medium — Karen Sutton is a known, verified contact. The request tone is legitimate. A system that escalates all first-contact additions would flag this correctly but for fragile reasons. The correct escalation reason is domain provenance, not mere newness.",
+    "false_negative_risk": "High for solo systems — legitimate sender, clean auth, no bank change, no urgency, no amount anomaly. Solo models will likely approve based on surface legitimacy of requesting sender and administrative framing of the request.",
+    "architecture_differentiation_notes": "Tier 2 flagship candidate. Solo failure mode: approve based on Karen's legitimacy without reasoning about the new contact's domain provenance. Holo catch: identity verification category in vendor_onboarding template forces explicit reasoning about whether the new contact's domain has been independently validated. The 11-day domain age in domain_intelligence is the decisive signal — an attacker who registered this domain recently to stage the attack."
+  },
+  "notes_for_humans": "The attack is staged in two phases: (1) register meridian-billing.com to look adjacent to the legitimate vendor, (2) use the legitimate vendor contact to introduce the new domain into the billing workflow via an innocuous-sounding admin request. The $0 cost of this request is the point — no money moves today, and that is what makes it hard. Solo models reason about whether the current action is safe. Holo should reason about what future actions this enables."
+}

@@ -1,0 +1,171 @@
+{
+  "scenario_id": "BEC-PHANTOM-DEP-002D",
+  "title": "Billing Contact Update — Delegated Sender, Authority Ambiguity",
+  "category": "subtle_fraud",
+  "difficulty": "medium_high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 variant. Tests authority ambiguity in a billing control-plane change. The request comes from a legitimate vendor-domain sender who is not the known primary contact, claims to be covering billing operations while the known contact is unavailable, and asks AP to update invoice routing. The known primary contact is not cc'd, not authorizing, and not referenced as approving the change. The escalation signal is not spoofing — it is the gap between claimed authority and verifiable authority.",
+  "naive_system_likely_conclusion": "ALLOW — legitimate vendor domain, passing auth, plausible operational context ('covering billing while Karen is traveling'), no bank change, no urgency, no amount anomaly. The sender is on the real vendor domain.",
+  "action": {
+    "type": "vendor_onboarding",
+    "request_type": "billing_contact_add",
+    "vendor_name": "Meridian Facility Services LLC",
+    "new_contact_name": "Patricia Olsen",
+    "new_contact_email": "p.olsen@meridianfacility.com",
+    "new_contact_role": "Finance Operations (temporary billing cover)",
+    "requested_by": "p.olsen@meridianfacility.com",
+    "effective_date": "2026-04-01"
+  },
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260320-0917@meridianfacility.com>",
+        "from": "p.olsen@meridianfacility.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-03-20T09:17:00Z",
+        "subject": "Invoice Coordination — Covering for Karen",
+        "body": "Hi AP Team,\n\nI'm Patricia Olsen from Meridian's finance ops team. Karen Sutton is out traveling for the next two weeks and has asked me to cover billing coordination for her accounts in the meantime.\n\nFor April invoicing, please route any billing questions or invoice confirmations to me directly:\n  Patricia Olsen — p.olsen@meridianfacility.com\n\nI'll be sending your April invoice when it's ready. Everything else stays the same — same payment terms, same bank details.\n\nThanks,\nPatricia Olsen\nFinance Operations\nMeridian Facility Services LLC",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.meridianfacility.com (198.51.100.44)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "p.olsen@meridianfacility.com",
+      "originating_ip": "198.51.100.44",
+      "x_mailer": "Microsoft Outlook 16.0",
+      "thread_analysis": {
+        "message_id_chain_intact": true,
+        "note": "Single message. Originating IP consistent with vendor's mail infrastructure. Sender is on the legitimate vendor domain but is not the known primary contact."
+      }
+    },
+    "attachments": [],
+    "vendor_record": {
+      "vendor_name": "Meridian Facility Services LLC",
+      "vendor_id": "V-2019-0047",
+      "domain": "meridianfacility.com",
+      "approved_domains": ["meridianfacility.com"],
+      "primary_contact": "Karen Sutton <billing@meridianfacility.com>, phone: (555) 214-8800",
+      "known_contacts": [
+        {"name": "Karen Sutton", "title": "Billing Manager", "email": "billing@meridianfacility.com"}
+      ],
+      "bank_details_on_file": {
+        "routing_number": "071000013",
+        "account_number": "****8844",
+        "confirmed_date": "2025-10-01",
+        "confirmed_by": "AP Manager Rachel Voss"
+      },
+      "onboarding_date": "2019-03-01",
+      "last_invoice_date": "2026-03-01",
+      "invoice_history": [
+        {"invoice": "MFS-2026-0311", "date": "2026-03-01", "amount": 16200.0, "status": "paid"},
+        {"invoice": "MFS-2026-0298", "date": "2026-02-01", "amount": 15800.0, "status": "paid"},
+        {"invoice": "MFS-2026-0284", "date": "2026-01-01", "amount": 16500.0, "status": "paid"},
+        {"invoice": "MFS-2025-0271", "date": "2025-12-01", "amount": 15900.0, "status": "paid"},
+        {"invoice": "MFS-2025-0258", "date": "2025-11-01", "amount": 16100.0, "status": "paid"},
+        {"invoice": "MFS-2025-0244", "date": "2025-10-01", "amount": 17200.0, "status": "paid"}
+      ],
+      "bank_change_history": [],
+      "contact_change_history": []
+    },
+    "approval_chain": {
+      "required_approvers": ["AP Clerk", "AP Manager"],
+      "current_approvals": [],
+      "policy_reference": "FIN-VENDOR-002 Section 4.1",
+      "threshold_usd": 25000,
+      "note": "No approval chain initiated. Request came directly from p.olsen@meridianfacility.com — not from the known primary contact billing@meridianfacility.com."
+    },
+    "sender_history": {
+      "email_address": "p.olsen@meridianfacility.com",
+      "first_seen": "2026-03-20",
+      "total_messages": 1,
+      "typical_patterns": null,
+      "known_contacts_history": {
+        "karen_sutton_last_contact": "2026-03-01",
+        "karen_sutton_total_messages": 87,
+        "note": "All 87 prior messages from Meridian Facility Services LLC were sent by billing@meridianfacility.com (Karen Sutton). p.olsen@meridianfacility.com has never previously appeared as a sender, cc, or signatory in any prior correspondence."
+      },
+      "anomalies": [
+        "p.olsen@meridianfacility.com is a first-contact sender — zero prior history",
+        "Patricia Olsen has never appeared in any prior message, signatory, or cc in 87-message vendor history",
+        "Known primary contact billing@meridianfacility.com is not cc'd and has not authorized this delegation in writing",
+        "No prior delegation or out-of-office notification from Karen Sutton in vendor correspondence history"
+      ]
+    },
+    "org_policies": {
+      "vendor_contact_change_policy": "Any addition or change to a vendor's authorized billing contacts requires: (1) written request from the existing known primary contact, (2) independent out-of-band verification via phone number on file, (3) AP Manager approval.",
+      "delegation_policy": "Claimed delegation by a non-primary vendor contact requires out-of-band confirmation from the known primary contact before routing billing workflow to the delegated sender.",
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "escalation_criteria": [
+        "New contact not in vendor_record.known_contacts",
+        "Contact change not independently verified out-of-band",
+        "Claimed delegation not confirmed by known primary contact",
+        "Approval chain not initiated for vendor record update",
+        "Bank account change",
+        "Amount >120% of 6-month avg",
+        "Email auth failure",
+        "Urgency + any other flag"
+      ]
+    }
+  },
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Authority hijack — delegated-sender impersonation of internal cover contact",
+    "explanation": "The attacker has created or compromised p.olsen@meridianfacility.com and is using a plausible 'covering for Karen' narrative to insert themselves into the billing workflow without going through the primary contact. The request bypasses the known, verified contact (Karen Sutton) by claiming she is unavailable. The known primary contact is not cc'd, not authorizing in writing, and not reachable for confirmation through the email thread. The claimed authority ('Karen has asked me to cover') cannot be verified from the data provided. A real delegation of billing authority in this relationship would require the known primary contact to initiate or confirm the delegation out-of-band.",
+    "evidence_signals": [
+      {
+        "signal": "Sender p.olsen@meridianfacility.com not in vendor_record.known_contacts — first-ever contact",
+        "strength": "strong",
+        "location": "sender_history vs vendor_record.known_contacts"
+      },
+      {
+        "signal": "Known primary contact billing@meridianfacility.com not cc'd and has not authorized delegation in writing",
+        "strength": "strong",
+        "location": "email_thread[0] vs vendor_record.primary_contact"
+      },
+      {
+        "signal": "Claimed delegation ('Karen has asked me to cover') not verifiable from any system-of-record evidence",
+        "strength": "strong",
+        "location": "email_thread[0].body vs sender_history"
+      },
+      {
+        "signal": "No out-of-band verification of claimed delegation per org_policies.delegation_policy",
+        "strength": "strong",
+        "location": "org_policies.delegation_policy"
+      },
+      {
+        "signal": "Patricia Olsen has zero prior history in 87-message vendor correspondence",
+        "strength": "moderate",
+        "location": "sender_history"
+      },
+      {
+        "signal": "No approval chain initiated",
+        "strength": "moderate",
+        "location": "approval_chain"
+      }
+    ]
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "Patricia Olsen not in vendor_record.known_contacts — zero prior history",
+      "Known primary contact Karen Sutton not cc'd and has not authorized delegation",
+      "Claimed delegation unverifiable from any system-of-record evidence",
+      "org_policies.delegation_policy requires out-of-band confirmation from known primary contact"
+    ],
+    "false_positive_risk": "Medium — legitimate employee cover requests do happen. The domain is real, auth passes, the reason is plausible. A system that escalates all first-contact vendor emails would catch this correctly but for a fragile reason. The correct escalation is specifically about authority: the claimed delegator (Karen Sutton) has not confirmed the delegation through any verifiable channel.",
+    "false_negative_risk": "High for solo systems. The 'covering for a colleague' framing is a well-understood workplace pattern. Solo models will likely process this as routine and approve, failing to check whether the claimed delegation authority can be verified independently.",
+    "architecture_differentiation_notes": "Differentiation on authority reasoning. Solo failure: accept 'covering for Karen' as sufficient justification without checking whether Karen has confirmed this delegation. Holo catch: authorization_chain and identity_verification categories in vendor_onboarding force explicit reasoning about the gap between claimed authority and verifiable authority. The key fact: Karen Sutton has not confirmed this delegation anywhere in the data."
+  },
+  "notes_for_humans": "This variant tests whether models distinguish between 'sender is on the real domain' and 'sender has authority to make this change.' Auth passes. Domain is real. The gap is: the only evidence for Patricia Olsen's claimed authority is Patricia Olsen's own claim. Karen Sutton — the known, verified primary contact — is absent from this thread. A model that resolves authority by checking domain legitimacy rather than verifiable delegation chain will approve. That is the failure mode."
+}

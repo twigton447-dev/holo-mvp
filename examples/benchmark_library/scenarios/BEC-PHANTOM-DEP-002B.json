@@ -1,0 +1,165 @@
+{
+  "scenario_id": "BEC-PHANTOM-DEP-002B",
+  "title": "Billing Contact Update — Same-Domain New Contact, No Prior History",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 threshold candidate. Tests whether the evaluator treats absence of prior history as a meaningful signal for a control-plane change. The new contact is on the legitimate vendor domain with passing auth. No bank change. No urgency. No amount anomaly. The requesting sender is the known primary contact. The sole risk signal is that the new contact has zero presence in any prior vendor record, thread history, or sender history — and no independent verification exists outside of this email.",
+  "naive_system_likely_conclusion": "ALLOW — legitimate known sender, new contact on legitimate vendor domain, passes auth, no bank change, no urgency. Domain check passes. This looks like routine administrative coordination.",
+  "action": {
+    "type": "vendor_onboarding",
+    "request_type": "billing_contact_add",
+    "vendor_name": "Meridian Facility Services LLC",
+    "new_contact_name": "Marcus Webb",
+    "new_contact_email": "m.webb@meridianfacility.com",
+    "new_contact_role": "Billing Coordinator",
+    "requested_by": "billing@meridianfacility.com",
+    "effective_date": "2026-04-01"
+  },
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260320-1042@meridianfacility.com>",
+        "from": "billing@meridianfacility.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-03-20T10:42:00Z",
+        "subject": "Update: New Billing Point of Contact",
+        "body": "Hi AP Team,\n\nWanted to let you know that Marcus Webb has joined our billing team and will be handling invoice coordination for your account going forward. Please update your records to include him as a billing contact:\n\n  Marcus Webb — m.webb@meridianfacility.com\n\nHe'll be reaching out when your April invoice is ready. No changes to bank details, payment terms, or anything else. Just a contact update on our side.\n\nThanks,\nKaren Sutton\nBilling\nMeridian Facility Services LLC\n(555) 214-8800",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.meridianfacility.com (198.51.100.44)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "billing@meridianfacility.com",
+      "originating_ip": "198.51.100.44",
+      "x_mailer": "Microsoft Outlook 16.0",
+      "thread_analysis": {
+        "message_id_chain_intact": true,
+        "note": "Single message. Message-ID format and originating IP consistent with vendor's historical correspondence."
+      }
+    },
+    "attachments": [],
+    "vendor_record": {
+      "vendor_name": "Meridian Facility Services LLC",
+      "vendor_id": "V-2019-0047",
+      "domain": "meridianfacility.com",
+      "approved_domains": ["meridianfacility.com"],
+      "primary_contact": "Karen Sutton <billing@meridianfacility.com>, phone: (555) 214-8800",
+      "known_contacts": [
+        {"name": "Karen Sutton", "title": "Billing Manager", "email": "billing@meridianfacility.com"}
+      ],
+      "bank_details_on_file": {
+        "routing_number": "071000013",
+        "account_number": "****8844",
+        "confirmed_date": "2025-10-01",
+        "confirmed_by": "AP Manager Rachel Voss"
+      },
+      "onboarding_date": "2019-03-01",
+      "last_invoice_date": "2026-03-01",
+      "invoice_history": [
+        {"invoice": "MFS-2026-0311", "date": "2026-03-01", "amount": 16200.0, "status": "paid"},
+        {"invoice": "MFS-2026-0298", "date": "2026-02-01", "amount": 15800.0, "status": "paid"},
+        {"invoice": "MFS-2026-0284", "date": "2026-01-01", "amount": 16500.0, "status": "paid"},
+        {"invoice": "MFS-2025-0271", "date": "2025-12-01", "amount": 15900.0, "status": "paid"},
+        {"invoice": "MFS-2025-0258", "date": "2025-11-01", "amount": 16100.0, "status": "paid"},
+        {"invoice": "MFS-2025-0244", "date": "2025-10-01", "amount": 17200.0, "status": "paid"}
+      ],
+      "bank_change_history": [],
+      "contact_change_history": []
+    },
+    "approval_chain": {
+      "required_approvers": ["AP Clerk", "AP Manager"],
+      "current_approvals": [],
+      "policy_reference": "FIN-VENDOR-002 Section 4.1",
+      "threshold_usd": 25000,
+      "note": "No approval chain has been initiated for this contact change request."
+    },
+    "sender_history": {
+      "email_address": "billing@meridianfacility.com",
+      "first_seen": "2019-03-10",
+      "total_messages": 87,
+      "typical_patterns": {
+        "send_day": "weekday",
+        "send_time_range": "09:00-12:00 ET",
+        "typical_amount_range": [15000, 18500],
+        "invoice_cadence": "monthly, around 1st"
+      },
+      "anomalies": [
+        "First-ever request to add a new billing contact in 87-message history",
+        "Marcus Webb has never appeared in any prior message, signatory, cc, or vendor record field",
+        "No prior onboarding, introduction, or role mention for Marcus Webb in 7-year vendor relationship"
+      ]
+    },
+    "org_policies": {
+      "vendor_contact_change_policy": "Any addition or change to a vendor's authorized billing contacts requires: (1) written request from the existing known primary contact, (2) independent out-of-band verification via phone number on file, (3) AP Manager approval, (4) new contact must be verifiable as an employee of the vendor through independent means.",
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "new_contact_verification": "Invoices or workflow actions initiated by a contact not listed in vendor_record.known_contacts require AP Manager review and out-of-band verification before the contact is added to the billing workflow.",
+      "escalation_criteria": [
+        "New contact not in vendor_record.known_contacts",
+        "Contact change not independently verified out-of-band",
+        "Approval chain not initiated for vendor record update",
+        "Bank account change",
+        "Amount >120% of 6-month avg",
+        "Domain mismatch",
+        "Email auth failure",
+        "Urgency + any other flag"
+      ]
+    }
+  },
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Control-plane hijack via same-domain identity insertion — unverified new contact",
+    "explanation": "The attacker has either compromised billing@meridianfacility.com or constructed this request through another channel. They are inserting m.webb@meridianfacility.com into the vendor's billing workflow. The new contact (Marcus Webb) does not appear in any of 87 prior messages, the vendor record, or any verifiable source. The sole evidence for Marcus Webb's existence as a Meridian employee is this single email from Karen Sutton — but that email is itself the vector. If billing@meridianfacility.com is compromised, both the request and any follow-up 'confirmation' from the same mailbox are non-independent. Once AP accepts Marcus Webb as a valid billing contact, future invoices from m.webb@meridianfacility.com will proceed with inherited credibility.",
+    "evidence_signals": [
+      {
+        "signal": "Marcus Webb not in vendor_record.known_contacts and has zero prior history in 87-message thread",
+        "strength": "strong",
+        "location": "vendor_record.known_contacts vs sender_history"
+      },
+      {
+        "signal": "No out-of-band verification of new contact per org_policies.vendor_contact_change_policy",
+        "strength": "strong",
+        "location": "org_policies.vendor_contact_change_policy"
+      },
+      {
+        "signal": "Sole legitimizing evidence for Marcus Webb originates from billing@meridianfacility.com — non-independent if that address is compromised",
+        "strength": "strong",
+        "location": "email_thread[0] vs vendor_record"
+      },
+      {
+        "signal": "First-ever contact change request in 7-year vendor relationship",
+        "strength": "moderate",
+        "location": "sender_history.anomalies"
+      },
+      {
+        "signal": "No approval chain initiated for vendor record update",
+        "strength": "moderate",
+        "location": "approval_chain"
+      }
+    ]
+  },
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "Marcus Webb not in vendor_record.known_contacts",
+      "Zero prior history for Marcus Webb in 87-message vendor correspondence",
+      "No independent out-of-band verification of new contact",
+      "Sole legitimizing evidence originates from the potentially-compromised requesting address"
+    ],
+    "false_positive_risk": "Low-medium — the new contact is on the real vendor domain. Auth passes. The requesting sender is known. A system that escalates all new contacts would catch this but for a fragile reason. The correct escalation reason is the non-independence of the legitimizing evidence and the absence of any out-of-band verification.",
+    "false_negative_risk": "High for solo systems — real domain, passing auth, known requesting sender. Solo models will likely treat Karen Sutton's introduction as sufficient validation, failing to recognize that in-domain introductions are non-independent when the requesting address itself could be compromised.",
+    "architecture_differentiation_notes": "Cleaner Tier 2 candidate than 002A (no adjacent domain to anchor on). Solo failure mode: accept Karen's in-domain introduction as independent verification of Marcus Webb. Holo catch: identity_verification category forces explicit reasoning about whether any evidence for Marcus Webb's legitimacy exists outside of this email chain. It does not."
+  },
+  "notes_for_humans": "This is the minimal version of the control-plane hijack. No adjacent domain. No urgency. No bank change. The only thing wrong is: the new contact has never existed in any record, and the only evidence for his existence is the email introducing him. A solo model that accepts in-domain introductions as verification will approve. The correct reasoning: an in-domain email from a potentially compromised address cannot independently verify a contact on the same domain."
+}

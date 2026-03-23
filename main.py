@@ -549,7 +549,7 @@ async def set_mode(request: Request):
 @app.get("/")
 def serve_landing():
     """Serve the Holo landing page."""
-    landing = _frontend_dir / "landing.html"
+    landing = _frontend_dir / "index.html"
     if landing.exists():
         return FileResponse(str(landing))
     return {"status": "ok", "message": "Holo API running. Frontend not found."}
@@ -571,7 +571,7 @@ def serve_service_worker():
 @app.get("/chat")
 def serve_chat_ui():
     """Serve the Holo chat UI."""
-    index = _frontend_dir / "index.html"
+    index = _frontend_dir / "chat.html"
     if index.exists():
         return FileResponse(str(index))
     return {"status": "ok", "message": "Holo API running. Chat UI not found."}

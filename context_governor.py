@@ -64,7 +64,7 @@ logger = logging.getLogger("holo.governor")
 MIN_TURNS           = 3   # minimum before convergence can fire
 MAX_TURNS           = 10  # ceiling for both Holo and solo — same cap, same test
 CONVERGENCE_WINDOW  = 2   # consecutive zero-delta turns required to converge
-MAX_RETRIES         = 1   # one retry per turn before declaring failure
+# Retries are handled by provider_health.call_with_retry (max 3, exponential backoff)
 
 # Temperature schedule: high early (wide adversarial exploration),
 # low late (precision verification as convergence approaches).
@@ -594,6 +594,8 @@ class ContextGovernor:
           4. Governor decides algorithmically — no LLM in the final call.
           5. HIGH-severity override is a hard lock. No model can clear it.
         """
+        from provider_health import registry, HealthMonitor, SystemUnavailableError
+
         evaluation_id = f"holo_{uuid.uuid4().hex[:8]}"
         start_time    = time.time()
 
@@ -614,6 +616,17 @@ class ContextGovernor:
         clean_exit    = False
         oscillation   = False
         decay         = False
+
+        # Restore any expired quarantines and initialise health tracking
+        for a in self._adapters:
+            registry.restore_if_expired(a.provider, evaluation_id)
+        health = HealthMonitor(total_providers=len(self._adapters))
+        active_count = len([a for a in self._adapters
+                            if not registry.is_quarantined(a.provider)])
+        try:
+            health.check_and_classify(active_count, evaluation_id, turn_number=0)
+        except SystemUnavailableError:
+            raise
         decay_detail  = []
         used_personas = set()
 
@@ -703,7 +716,8 @@ class ContextGovernor:
             )
 
             turn_result = self._run_turn_with_retry(
-                adapter, state, turn_number, role, temperature
+                adapter, state, turn_number, role, temperature,
+                health=health, evaluation_id=evaluation_id,
             )
 
             if turn_result is None:
@@ -715,6 +729,8 @@ class ContextGovernor:
                 break
 
             turn_dict = turn_result.to_dict()
+            if health.degraded_turns and health.degraded_turns[-1] == turn_number:
+                turn_dict["degraded"] = True
             turn_dict["temperature"] = temperature  # inspectability: what temp drove this turn
 
             new_coverage, delta = _update_coverage(
@@ -976,6 +992,7 @@ class ContextGovernor:
 
             "coverage_matrix": state["coverage_matrix"],
             "elapsed_ms":      elapsed_ms,
+            "run_health":      health.run_health,
             "total_tokens": {
                 "input":  sum(t.get("input_tokens",  0) for t in state["turn_history"]),
                 "output": sum(t.get("output_tokens", 0) for t in state["turn_history"]),
@@ -993,54 +1010,60 @@ class ContextGovernor:
 
     def _get_fallback_adapter(self, failed_adapter):
         """
-        Return a different-vendor adapter to use when the primary fails.
+        Return a different-vendor, non-quarantined adapter to use when the primary fails.
 
-        Patent §4.4.1: the fallback must not be the same provider as the
-        instance that produced the immediately preceding turn, preserving
-        the cross-vendor adversarial diversity benefit.
-
-        Returns None only if every other adapter also shares the same
-        provider (shouldn't happen with a 3-vendor setup).
+        Cross-vendor constraint preserved: fallback must not be the same provider
+        as the failed adapter. Quarantined providers are skipped.
+        Returns None only if no eligible adapter exists.
         """
+        from provider_health import registry
         for adapter in self._adapters:
-            if adapter.provider != failed_adapter.provider:
+            if (adapter.provider != failed_adapter.provider
+                    and not registry.is_quarantined(adapter.provider)):
                 return adapter
         return None
 
-    def _run_turn_with_retry(self, adapter, state, turn_number, role, temperature=0.2):
+    def _run_turn_with_retry(self, adapter, state, turn_number, role,
+                             temperature=0.2, health=None, evaluation_id="unknown"):
         """
-        Run one turn with up to MAX_RETRIES retries, then cross-vendor fallback.
+        Run one turn. Retry logic lives inside call_with_retry (called from run_turn).
 
         Failure sequence:
-          1. Try primary adapter up to MAX_RETRIES + 1 times.
-          2. If still failing, try a different-vendor fallback adapter once.
-          3. If fallback also fails, return None → partial evaluation.
+          1. Try primary adapter (call_with_retry handles up to 3 attempts internally).
+          2. On ProviderUnavailableError: quarantine provider, try cross-vendor fallback.
+          3. On fallback ProviderUnavailableError: quarantine fallback, return None.
 
-        The cross-vendor constraint is enforced at step 2: we never fall
-        back to the same provider that just failed.
+        health (HealthMonitor) is updated on quarantine events so the caller can
+        annotate the turn and track run_health.
         """
-        for attempt in range(MAX_RETRIES + 1):
-            try:
-                return adapter.run_turn(state, turn_number, role, temperature)
-            except Exception as e:
-                logger.warning(
-                    f"  Turn {turn_number} attempt {attempt + 1} "
-                    f"({adapter.provider}) failed: {type(e).__name__}: {e}"
-                )
+        from provider_health import registry, ProviderUnavailableError
 
-        # Primary exhausted — try cross-vendor fallback
+        try:
+            return adapter.run_turn(state, turn_number, role, temperature)
+        except ProviderUnavailableError as e:
+            registry.quarantine(e.provider, evaluation_id)
+            if health:
+                healthy = [a for a in self._adapters
+                           if not registry.is_quarantined(a.provider)]
+                health.check_and_classify(len(healthy), evaluation_id, turn_number)
+
+        # Primary quarantined — try cross-vendor fallback
         fallback = self._get_fallback_adapter(adapter)
         if fallback:
             logger.warning(
-                f"  Turn {turn_number}: primary {adapter.provider} exhausted. "
+                f"  Turn {turn_number}: primary {adapter.provider} quarantined. "
                 f"Falling back to {fallback.provider} ({fallback.model_id})."
             )
             try:
                 return fallback.run_turn(state, turn_number, role, temperature)
-            except Exception as e:
+            except ProviderUnavailableError as e:
+                registry.quarantine(e.provider, evaluation_id)
+                if health:
+                    healthy = [a for a in self._adapters
+                               if not registry.is_quarantined(a.provider)]
+                    health.check_and_classify(len(healthy), evaluation_id, turn_number)
                 logger.error(
-                    f"  Turn {turn_number} fallback {fallback.provider} also "
-                    f"failed: {type(e).__name__}: {e}"
+                    f"  Turn {turn_number} fallback {fallback.provider} also quarantined."
                 )
 
         return None

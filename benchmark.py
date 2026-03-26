@@ -47,6 +47,7 @@ from llm_adapters import (
     get_role_for_turn,
 )
 from context_governor import ContextGovernor
+from scenario_templates import get_template
 
 SEVERITY_RANK = {"NONE": 0, "LOW": 1, "MEDIUM": 2, "HIGH": 3}
 
@@ -54,13 +55,20 @@ SEVERITY_RANK = {"NONE": 0, "LOW": 1, "MEDIUM": 2, "HIGH": 3}
 # Shared helpers
 # ---------------------------------------------------------------------------
 
-def _init_cov():
-    return {cat: {"addressed": False, "max_severity": "NONE"} for cat in BEC_CATEGORIES}
+def _scenario_categories(scenario):
+    """Return the category list for the scenario's action type."""
+    action_type = scenario.get("action", {}).get("type", "invoice_payment")
+    return get_template(action_type)["categories"]
 
-def _update_cov(matrix, flags):
+def _init_cov(categories=None):
+    cats = categories if categories is not None else BEC_CATEGORIES
+    return {cat: {"addressed": False, "max_severity": "NONE"} for cat in cats}
+
+def _update_cov(matrix, flags, categories=None):
+    cats = categories if categories is not None else BEC_CATEGORIES
     updated = deepcopy(matrix)
     delta = 0
-    for cat in BEC_CATEGORIES:
+    for cat in cats:
         new_sev = flags.get(cat, "NONE")
         if new_sev == "NONE":
             continue
@@ -80,32 +88,36 @@ def _sev_rank(s):
     return SEVERITY_RANK.get(s, 0)
 
 def _empty_state(scenario):
+    action_type = scenario.get("action", {}).get("type", "invoice_payment")
     return {
         "evaluation_id":   "benchmark",
         "action":          scenario.get("action", {}),
         "context":         scenario.get("context", {}),
         "turn_history":    [],
         "coverage_matrix": {},
+        "active_template": get_template(action_type),
     }
 
 def _ms(start):
     return int((time.time() - start) * 1000)
 
 def _ok(condition, model, turns, verdict, flags, reasoning, findings, turn_log,
-        elapsed, in_tok, out_tok, extra=None):
+        elapsed, in_tok, out_tok, extra=None, run_health="clean"):
     d = {"condition": condition, "model": model, "turns_run": turns,
          "verdict": verdict, "severity_flags": flags, "reasoning": reasoning,
          "findings": findings, "turn_log": turn_log, "elapsed_ms": elapsed,
-         "total_tokens": {"input": in_tok, "output": out_tok}, "error": None}
+         "total_tokens": {"input": in_tok, "output": out_tok},
+         "run_health": run_health, "error": None}
     if extra:
         d["extra"] = extra
     return d
 
-def _err(condition, model, exc, elapsed):
+def _err(condition, model, exc, elapsed, run_health="contaminated"):
     return {"condition": condition, "model": model, "turns_run": 0,
             "verdict": "ERROR", "severity_flags": {cat: "NONE" for cat in BEC_CATEGORIES},
             "reasoning": str(exc), "findings": [], "turn_log": [],
-            "elapsed_ms": elapsed, "total_tokens": {"input": 0, "output": 0}, "error": str(exc)}
+            "elapsed_ms": elapsed, "total_tokens": {"input": 0, "output": 0},
+            "run_health": run_health, "error": str(exc)}
 
 def _sf(cond, cat):
     if cond.get("error"):
@@ -158,8 +170,9 @@ def run_solo(scenario, adapter, condition_name, force_max_turns=False):
         (skipped when force_max_turns=True)
       - MAX_TURNS reached
     """
+    categories = _scenario_categories(scenario)
     state     = _empty_state(scenario)
-    coverage  = _init_cov()
+    coverage  = _init_cov(categories)
     turn_log  = []
     in_tok = out_tok = 0
     start     = time.time()
@@ -167,33 +180,26 @@ def run_solo(scenario, adapter, condition_name, force_max_turns=False):
     converged = False
     used_personas = set()
 
+    from provider_health import ProviderUnavailableError, HealthMonitor
+    health = HealthMonitor(total_providers=1)
+
     for turn_number in range(1, MAX_TURNS + 1):
         role = get_role_for_turn(turn_number)
         if role in used_personas:
             break  # persona library exhausted
         used_personas.add(role)
 
-        last_exc = None
-        for attempt in range(1, 4):
-            try:
-                r = adapter.run_turn(state, turn_number, role)
-                last_exc = None
-                break
-            except Exception as e:
-                last_exc = e
-                err_str = str(e)
-                is_transient = any(x in err_str for x in ("503", "429", "UNAVAILABLE", "overloaded")) or "rate" in err_str.lower()
-                if is_transient and attempt < 3:
-                    wait = 2 ** attempt
-                    logger.warning(f"  Turn {turn_number} attempt {attempt} ({adapter.provider}) transient error: {e}. Retrying in {wait}s...")
-                    time.sleep(wait)
-                else:
-                    break
-        if last_exc is not None:
+        try:
+            r = adapter.run_turn(state, turn_number, role)
+        except ProviderUnavailableError as e:
             return _err(condition_name, f"{adapter.provider}/{adapter.model_id}",
-                        Exception(f"Turn {turn_number} ({role}): {last_exc}"), _ms(start))
+                        Exception(f"Turn {turn_number} ({role}): {e}"), _ms(start),
+                        run_health="contaminated")
+        except Exception as e:
+            return _err(condition_name, f"{adapter.provider}/{adapter.model_id}",
+                        Exception(f"Turn {turn_number} ({role}): {e}"), _ms(start))
         state["turn_history"].append(r.to_dict())
-        coverage, delta = _update_cov(coverage, r.severity_flags)
+        coverage, delta = _update_cov(coverage, r.severity_flags, categories)
         deltas.append(delta)
         turn_log.append(r.to_dict())
         in_tok  += r.input_tokens
@@ -220,30 +226,36 @@ def run_solo(scenario, adapter, condition_name, force_max_turns=False):
                turns_run, final_verdict, flags, reasoning,
                turn_log[-1].get("findings", []) if turn_log else [],
                turn_log, _ms(start), in_tok, out_tok,
-               extra={"converged": converged, "deltas": deltas})
+               extra={"converged": converged, "deltas": deltas},
+               run_health=health.run_health)
 
 # ---------------------------------------------------------------------------
 # Holo full architecture
 # ---------------------------------------------------------------------------
 
-def run_holo_loop(scenario, force_max_turns=False):
+def run_holo_loop(scenario, force_max_turns=False, no_memory=False):
     import context_governor as _cg
     _orig_window = _cg.CONVERGENCE_WINDOW
     if force_max_turns:
         _cg.CONVERGENCE_WINDOW = MAX_TURNS + 1  # window can never be satisfied
-    governor = ContextGovernor()
+    governor = ContextGovernor(no_memory=no_memory)
     start    = time.time()
     try:
         result  = governor.evaluate(scenario)
         elapsed = _ms(start)
         flags   = {cat: result["coverage_matrix"][cat]["max_severity"]
                    for cat in result["coverage_matrix"]}
+        from provider_health import SystemUnavailableError
         return _ok("holo_full", "openai+anthropic+google+governor",
                    result["turns_completed"], result["decision"], flags,
                    result["decision_reason"], [], result["turn_history"], elapsed,
                    result["total_tokens"]["input"], result["total_tokens"]["output"],
                    extra={"converged": result["converged"], "deltas": result["deltas"],
-                          "coverage_matrix": result["coverage_matrix"]})
+                          "coverage_matrix": result["coverage_matrix"]},
+                   run_health=result.get("run_health", "clean"))
+    except SystemUnavailableError as e:
+        return _err("holo_full", "openai+anthropic+google+governor", e, _ms(start),
+                    run_health="contaminated")
     except Exception as e:
         return _err("holo_full", "openai+anthropic+google+governor", e, _ms(start))
     finally:
@@ -253,7 +265,8 @@ def run_holo_loop(scenario, force_max_turns=False):
 # Main runner
 # ---------------------------------------------------------------------------
 
-def run_benchmark(scenario_path, verbose=False, force_max_turns=False):
+def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory=False,
+                  quick=False, solo_only=False):
     if verbose:
         logging.getLogger().setLevel(logging.INFO)
 
@@ -268,32 +281,51 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False):
     _header(f"HOLO BENCHMARK: {scenario_name}")
     print(f"  Expected verdict : {expected}")
     conv_note = "DISABLED — full 10 turns forced" if force_max_turns else "enabled"
-    print(f"  Turn budget      : up to {MAX_TURNS} per condition (convergence detection {conv_note})\n")
+    mode_note = " [QUICK — Solo GPT only]" if quick else (" [SOLO ONLY]" if solo_only else "")
+    print(f"  Turn budget      : up to {MAX_TURNS} per condition (convergence detection {conv_note}){mode_note}\n")
 
     print("  Initializing adapters...")
     openai_adapter    = OpenAIAdapter()
-    anthropic_adapter = AnthropicAdapter()
-    google_adapter    = GoogleAdapter()
+    if not quick:
+        anthropic_adapter = AnthropicAdapter()
+        google_adapter    = GoogleAdapter()
     print(f"    OpenAI    : {openai_adapter.model_id}")
-    print(f"    Anthropic : {anthropic_adapter.model_id}")
-    print(f"    Google    : {google_adapter.model_id}")
+    if not quick:
+        print(f"    Anthropic : {anthropic_adapter.model_id}")
+        print(f"    Google    : {google_adapter.model_id}")
     print("  Ready.\n")
 
-    print("  [4/4] HOLO FULL ARCHITECTURE...")
-    cond4 = run_holo_loop(scenario, force_max_turns=force_max_turns)
-    _inline(cond4)
+    if not quick and not solo_only:
+        print("  [4/4] HOLO FULL ARCHITECTURE...")
+        cond4 = run_holo_loop(scenario, force_max_turns=force_max_turns, no_memory=no_memory)
+        _inline(cond4)
+    else:
+        cond4 = None
 
     print(f"\n  [1/4] SOLO {openai_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
     cond1 = run_solo(scenario, openai_adapter, "solo_openai", force_max_turns=force_max_turns)
     _inline(cond1)
 
-    print(f"\n  [2/4] SOLO {anthropic_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
-    cond2 = run_solo(scenario, anthropic_adapter, "solo_anthropic", force_max_turns=force_max_turns)
-    _inline(cond2)
+    if quick:
+        verdict = cond1.get("verdict", "ERROR")
+        t1_flags = cond1.get("turn_log", [{}])[0].get("severity_flags", {}) if cond1.get("turn_log") else {}
+        t1_highs = [c for c, s in t1_flags.items() if s == "HIGH"]
+        if t1_highs and verdict == "ESCALATE":
+            print(f"\n  QUICK RESULT: Turn 1 HIGH on {t1_highs} → ESCALATE immediately. Likely Tier 1.")
+        elif verdict == "ESCALATE":
+            print(f"\n  QUICK RESULT: ESCALATE (multi-turn). May still be Tier 1 — run full harness to confirm.")
+        else:
+            print(f"\n  QUICK RESULT: ALLOW on Solo GPT → Tier 2 candidate. Run full harness.")
+        print()
+        cond2 = cond3 = None
+    else:
+        print(f"\n  [2/4] SOLO {anthropic_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
+        cond2 = run_solo(scenario, anthropic_adapter, "solo_anthropic", force_max_turns=force_max_turns)
+        _inline(cond2)
 
-    print(f"\n  [3/4] SOLO {google_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
-    cond3 = run_solo(scenario, google_adapter, "solo_google", force_max_turns=force_max_turns)
-    _inline(cond3)
+        print(f"\n  [3/4] SOLO {google_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
+        cond3 = run_solo(scenario, google_adapter, "solo_google", force_max_turns=force_max_turns)
+        _inline(cond3)
 
     result = {
         "benchmark_id":       f"bench_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
@@ -301,10 +333,11 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False):
         "expected_verdict":   expected,
         "max_turns":          MAX_TURNS,
         "force_max_turns":    force_max_turns,
+        "categories":         _scenario_categories(scenario),
         "models": {
             "openai":    openai_adapter.model_id,
-            "anthropic": anthropic_adapter.model_id,
-            "google":    google_adapter.model_id,
+            "anthropic": getattr(anthropic_adapter, "model_id", None) if not quick else None,
+            "google":    getattr(google_adapter, "model_id", None) if not quick else None,
         },
         "conditions": {
             "solo_openai":    cond1,
@@ -343,36 +376,33 @@ def _print_report(r):
     print(f"  {'Condition':<45} {'Turns':>5}  {'Verdict':<11}  {'Correct?'}")
     print(f"  {'-'*72}")
     for label, cond, _ in rows:
+        if cond is None:
+            print(f"  {label:<45} {'—':>5}  {'—':<11}  —")
+            continue
         correct = "YES ✓" if cond["verdict"] == expected else "NO  ✗"
         print(f"  {label:<45} {cond['turns_run']:>5}  {_badge(cond['verdict']):<11}  {correct}")
 
     print(f"\n  RISK PROFILE (max severity per category across all turns):\n")
-    cat_labels = {
-        "sender_identity":  "Sender Identity ",
-        "invoice_amount":   "Invoice Amount  ",
-        "payment_routing":  "Payment Routing ",
-        "urgency_pressure": "Urgency/Pressure",
-        "domain_spoofing":  "Domain Spoofing ",
-        "approval_chain":   "Approval Chain  ",
-    }
-    col1 = f"1-{models.get('openai','GPT')[:6]}"
-    col2 = f"2-{models.get('anthropic','Claude')[:6]}"
-    col3 = f"3-{models.get('google','Gemini')[:6]}"
-    print(f"  {'Category':<18} {col1:>10} {col2:>10} {col3:>10} {'4-Holo':>7}")
-    print(f"  {'-'*65}")
-    for cat in BEC_CATEGORIES:
-        lbl = cat_labels.get(cat, cat)
-        s1 = _sf(c["solo_openai"],    cat)
-        s2 = _sf(c["solo_anthropic"], cat)
-        s3 = _sf(c["solo_google"],    cat)
-        s4 = _sf(c["holo_full"],      cat)
-        solo_max = max(_sev_rank(s1), _sev_rank(s2), _sev_rank(s3))
-        holo_wins = _sev_rank(s4) > solo_max
+    categories = r.get("categories", BEC_CATEGORIES)
+    col1 = f"1-{(models.get('openai') or 'GPT')[:6]}"
+    col2 = f"2-{(models.get('anthropic') or 'Claude')[:6]}"
+    col3 = f"3-{(models.get('google') or 'Gemini')[:6]}"
+    print(f"  {'Category':<22} {col1:>10} {col2:>10} {col3:>10} {'4-Holo':>7}")
+    print(f"  {'-'*69}")
+    for cat in categories:
+        lbl = cat.replace("_", " ").title()[:22]
+        s1 = _sf(c["solo_openai"],    cat) if c["solo_openai"]    else "—"
+        s2 = _sf(c["solo_anthropic"], cat) if c["solo_anthropic"] else "—"
+        s3 = _sf(c["solo_google"],    cat) if c["solo_google"]    else "—"
+        s4 = _sf(c["holo_full"],      cat) if c["holo_full"]      else "—"
+        known = [_sev_rank(s) for s in [s1, s2, s3] if s != "—"]
+        solo_max = max(known) if known else 0
+        holo_wins = c["holo_full"] and _sev_rank(s4) > solo_max
         mark = "  << HOLO ONLY" if holo_wins else ""
-        print(f"  {lbl:<18} {s1:>10} {s2:>10} {s3:>10} {s4:>7}{mark}")
+        print(f"  {lbl:<22} {s1:>10} {s2:>10} {s3:>10} {s4:>7}{mark}")
 
     # Turn-by-turn audit for Holo
-    holo_log = c["holo_full"].get("turn_log", [])
+    holo_log = c["holo_full"].get("turn_log", []) if c["holo_full"] else []
     if holo_log and not c["holo_full"]["error"]:
         print(f"\n  HOLO TURN-BY-TURN AUDIT TRAIL:")
         for t in holo_log:
@@ -385,26 +415,21 @@ def _print_report(r):
 
     # Discrepancy analysis
     print(f"\n  DISCREPANCY ANALYSIS:\n")
-    solo_results = {
-        f"Solo {models.get('openai','')}":    c["solo_openai"]["verdict"],
-        f"Solo {models.get('anthropic','')}": c["solo_anthropic"]["verdict"],
-        f"Solo {models.get('google','')}":    c["solo_google"]["verdict"],
-    }
+    _solo_map = [
+        (f"Solo {models.get('openai') or 'GPT'}",      "solo_openai"),
+        (f"Solo {models.get('anthropic') or 'Claude'}", "solo_anthropic"),
+        (f"Solo {models.get('google') or 'Gemini'}",   "solo_google"),
+    ]
+    solo_results = {lbl: c[key]["verdict"] for lbl, key in _solo_map if c[key] is not None}
     solo_wrong  = {k: (v != expected) for k, v in solo_results.items()
-                   if not c[{"Solo "+models.get("openai",""):"solo_openai",
-                              "Solo "+models.get("anthropic",""):"solo_anthropic",
-                              "Solo "+models.get("google",""):"solo_google"}[k]]["error"]}
-    holo_right  = c["holo_full"]["verdict"] == expected and not c["holo_full"]["error"]
+                   if not c[{lbl: key for lbl, key in _solo_map}[k]]["error"]}
+    holo_right  = c["holo_full"] is not None and c["holo_full"]["verdict"] == expected and not c["holo_full"]["error"]
     all_solo_wrong = bool(solo_wrong) and all(solo_wrong.values())
 
     if all_solo_wrong and holo_right:
         failed = ", ".join(k for k, v in solo_wrong.items() if v)
         print(f"  *** ARCHITECTURE PROOF — STRONGEST POSSIBLE RESULT:\n")
-        solo_turns = {
-            f"Solo {models.get('openai','')}":    c["solo_openai"].get("turns_run", "?"),
-            f"Solo {models.get('anthropic','')}": c["solo_anthropic"].get("turns_run", "?"),
-            f"Solo {models.get('google','')}":    c["solo_google"].get("turns_run", "?"),
-        }
+        solo_turns = {lbl: c[key].get("turns_run", "?") for lbl, key in _solo_map if c[key] is not None}
         holo_turns = c["holo_full"].get("turns_run", "?")
         print(f"      All 3 solo models failed: {failed}\n")
         print(f"      Solo turns run: " + ", ".join(f"{k}: {v}" for k, v in solo_turns.items()))
@@ -430,6 +455,9 @@ def _print_report(r):
     print(f"  {'Condition':<45} {'Input':>8}  {'Output':>8}")
     print(f"  {'-'*60}")
     for label, cond, _ in rows:
+        if cond is None:
+            print(f"  {label:<45} {'—':>8}  {'—':>8}")
+            continue
         print(f"  {label:<45} {cond['total_tokens'].get('input',0):>8,}  "
               f"{cond['total_tokens'].get('output',0):>8,}")
 
@@ -439,7 +467,7 @@ def _print_report(r):
 # Batch runner
 # ---------------------------------------------------------------------------
 
-def run_all(save, verbose, directory=None, force_max_turns=False):
+def run_all(save, verbose, directory=None, force_max_turns=False, no_memory=False):
     d = Path(directory) if directory else Path("examples/benchmark_library/scenarios")
     if not d.exists():
         print(f"No directory: {d}")
@@ -447,7 +475,7 @@ def run_all(save, verbose, directory=None, force_max_turns=False):
     scenarios = sorted(d.glob("*.json"))
     results = []
     for s in scenarios:
-        result = run_benchmark(str(s), verbose=verbose, force_max_turns=force_max_turns)
+        result = run_benchmark(str(s), verbose=verbose, force_max_turns=force_max_turns, no_memory=no_memory)
         results.append(result)
         if save:
             _save(result)
@@ -473,6 +501,74 @@ def _save(result):
     fname = out / f"{result['benchmark_id']}_{result['scenario_name']}.json"
     fname.write_text(json.dumps(result, indent=2))
     print(f"  Saved: {fname}")
+    _append_ledger(result)
+
+def _append_ledger(result):
+    """Append one row to benchmark_ledger.csv."""
+    import csv
+    ledger = Path("benchmark_ledger.csv")
+    c      = result["conditions"]
+
+    def _tok(cond, side):
+        if not cond or cond.get("error"):
+            return ""
+        return cond.get("total_tokens", {}).get(side, "")
+
+    def _turns(cond):
+        if not cond or cond.get("error"):
+            return ""
+        return cond.get("turns_run", "")
+
+    def _ms(cond):
+        if not cond or cond.get("error"):
+            return ""
+        return cond.get("elapsed_ms", "")
+
+    def _verdict(cond):
+        if not cond:
+            return "SKIP"
+        if cond.get("error"):
+            return "ERROR"
+        return cond.get("verdict", "")
+
+    row = {
+        "scenario_id":          result.get("scenario_name", ""),
+        "domain":               "",
+        "attack_class":         "",
+        "intended_signal":      "",
+        "solo_gpt_verdict":     _verdict(c.get("solo_openai")),
+        "solo_claude_verdict":  _verdict(c.get("solo_anthropic")),
+        "solo_gemini_verdict":  _verdict(c.get("solo_google")),
+        "holo_verdict":         _verdict(c.get("holo_full")),
+        "catch_correct_reason": "",
+        "solo_gpt_tokens_in":   _tok(c.get("solo_openai"),    "input"),
+        "solo_gpt_tokens_out":  _tok(c.get("solo_openai"),    "output"),
+        "solo_gpt_turns":       _turns(c.get("solo_openai")),
+        "solo_gpt_time_ms":     _ms(c.get("solo_openai")),
+        "solo_claude_tokens_in":  _tok(c.get("solo_anthropic"), "input"),
+        "solo_claude_tokens_out": _tok(c.get("solo_anthropic"), "output"),
+        "solo_claude_turns":      _turns(c.get("solo_anthropic")),
+        "solo_claude_time_ms":    _ms(c.get("solo_anthropic")),
+        "solo_gemini_tokens_in":  _tok(c.get("solo_google"),   "input"),
+        "solo_gemini_tokens_out": _tok(c.get("solo_google"),   "output"),
+        "solo_gemini_turns":      _turns(c.get("solo_google")),
+        "solo_gemini_time_ms":    _ms(c.get("solo_google")),
+        "holo_tokens_in":   _tok(c.get("holo_full"), "input"),
+        "holo_tokens_out":  _tok(c.get("holo_full"), "output"),
+        "holo_turns":       _turns(c.get("holo_full")),
+        "holo_time_ms":     _ms(c.get("holo_full")),
+        "publication_status": "",
+        "leak_notes":         "",
+        "date_run":           result.get("timestamp", "")[:10],
+    }
+
+    write_header = not ledger.exists()
+    with ledger.open("a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=list(row.keys()))
+        if write_header:
+            writer.writeheader()
+        writer.writerow(row)
+    print(f"  Ledger:  benchmark_ledger.csv")
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -501,15 +597,22 @@ def main():
     parser.add_argument("--verbose",        action="store_true", help="Enable verbose logging")
     parser.add_argument("--force-max-turns", action="store_true",
                         help="Disable early convergence — every condition runs all 10 turns")
+    parser.add_argument("--no-memory", action="store_true",
+                        help="Disable ProjectBrain memory injection (benchmark isolation mode)")
+    parser.add_argument("--quick", action="store_true",
+                        help="Solo GPT only, 1-turn filter — cheap Tier 1 detector before full run")
+    parser.add_argument("--solo-only", action="store_true",
+                        help="Run all 3 solo conditions but skip Holo — saves ~40%% of token cost")
     args = parser.parse_args()
 
     if args.all:
-        run_all(args.save, args.verbose, args.dir, force_max_turns=args.force_max_turns)
+        run_all(args.save, args.verbose, args.dir, force_max_turns=args.force_max_turns, no_memory=args.no_memory)
         return
     if not args.scenario:
         parser.print_help()
         sys.exit(1)
-    result = run_benchmark(args.scenario, verbose=args.verbose, force_max_turns=args.force_max_turns)
+    result = run_benchmark(args.scenario, verbose=args.verbose, force_max_turns=args.force_max_turns,
+                           no_memory=args.no_memory, quick=args.quick, solo_only=args.solo_only)
     if args.save:
         _save(result)
 

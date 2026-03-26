@@ -964,7 +964,17 @@ class GovernorAdapter(_FlightDeckBase):
         Randomly select the Governor's provider for this turn.
         Excludes the driver's vendor — guarantees no DNA overlap, no predictable pattern.
         """
-        candidates = [a for a in self._pool if a.provider != driver_adapter.provider]
+        from provider_health import registry
+        for a in self._pool:
+            registry.restore_if_expired(a.provider)
+        candidates = [a for a in self._pool
+                      if a.provider != driver_adapter.provider
+                      and not registry.is_quarantined(a.provider)]
+        if not candidates:
+            # All non-driver providers quarantined — fall back to any healthy adapter
+            candidates = [a for a in self._pool if not registry.is_quarantined(a.provider)]
+        if not candidates:
+            candidates = self._pool  # last resort: ignore quarantine for governor brief
         chosen = random.choice(candidates)
         self.provider   = chosen.provider
         self.model_id   = chosen.model_id
@@ -1639,7 +1649,13 @@ class BaseAdapter:
             f"Role: {role} | temp={temperature}"
         )
 
-        raw, in_tok, out_tok = self.call(system_prompt, user_message, temperature)
+        from provider_health import call_with_retry
+        session_id = state.get("evaluation_id", "unknown")
+        raw, in_tok, out_tok = call_with_retry(
+            lambda: self.call(system_prompt, user_message, temperature),
+            provider   = self.provider,
+            session_id = session_id,
+        )
 
         try:
             parsed = _parse_json_response(raw, self.provider, categories)

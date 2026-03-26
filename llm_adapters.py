@@ -923,7 +923,7 @@ class _FlightDeckBase:
                     max_output_tokens = max_tokens,
                 ),
             )
-            return response.text.strip()
+            return (response.text or "").strip()
 
 
 # ---------------------------------------------------------------------------

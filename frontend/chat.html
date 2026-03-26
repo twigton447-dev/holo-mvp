@@ -1622,6 +1622,7 @@
         scrollToBottom();
       }
     } catch (e) {
+      console.error("Chat fetch error:", e);
       stopAmbientBubbles();
       typingEl.remove();
       appendError("Network error — check that the Holo server is running.");
@@ -2147,6 +2148,7 @@
   const _ttSummaryCache = {};
   let _ttHoverTimer = null;
   let _ttCurrentSid = null;
+  let _loadingSessionId = null;
 
   function threadTooltipShow(el, sid) {
     _ttCurrentSid = sid;
@@ -2215,7 +2217,8 @@
   }
 
   async function loadSession(sid) {
-    if (sid === sessionId) return;
+    if (sid === sessionId || sid === _loadingSessionId) return;
+    _loadingSessionId = sid;
     try {
       const res = await fetch(`/v1/chat/${sid}/history`, {
         headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
@@ -2245,6 +2248,7 @@
       scrollToBottom();
       renderThreadList(); // update active highlight
     } catch (e) {}
+    finally { _loadingSessionId = null; }
   }
 
   // Called after first turn so new session appears at top of list immediately

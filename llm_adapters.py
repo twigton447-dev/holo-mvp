@@ -9,13 +9,14 @@ three providers identically.
 Model defaults (override via .env):
   OPENAI_MODEL    = gpt-5.4
   ANTHROPIC_MODEL = claude-sonnet-4-6
-  GOOGLE_MODEL    = gemini-2.5-pro-preview
-  GOVERNOR_MODEL  = gemini-2.0-flash  (fast/cheap — runs between every turn)
+  GOOGLE_MODEL    = gemini-2.5-pro
+  GOVERNOR_MODEL  = rotates across same 3-model pool as drivers (never shares DNA with driver on the same turn)
 """
 
 import json
 import logging
 import os
+import random
 import re
 from dataclasses import dataclass, field
 from typing import Optional
@@ -101,6 +102,35 @@ explanation too readily? Challenge every LOW rating — should it be MEDIUM?
 Challenge every rationalization — is it actually supported by hard evidence
 in the submitted data?
 
+HISTORICAL PATTERN ANALYSIS — treat historical data structures as primary
+attack surfaces, not background context:
+
+If the scenario contains any invoice_history, payment_history, or equivalent
+array of prior transactions, you MUST analyze it adversarially. Do not treat
+historical data as confirmation of normalcy — treat it as a record an attacker
+would have studied to calibrate their approach.
+
+Specifically look for:
+  1. STEP-CHANGES: A sudden jump in invoice amount across periods with no
+     documented scope change. A 5–15% jump in a single quarter is suspicious
+     if prior quarters were flat or gradual.
+  2. THRESHOLD CLUSTERING: Are multiple consecutive invoices clustered just
+     below a known approval threshold (e.g., $49,100 / $49,500 / $49,750 all
+     below a $50,000 dual-approval trigger)? If so, the vendor — or an attacker
+     who studied the payment history — may be deliberately pricing to avoid
+     the control. This is threshold gaming.
+  3. AGGREGATE THRESHOLD BREACH: Do multiple recent invoices, combined, exceed
+     a threshold that no individual invoice breaches? Calculate the total for
+     any invoices paid within the lookback window (45–90 days) and compare
+     against stated policy thresholds.
+  4. PATTERN ANOMALIES: Does the invoice frequency or structure change in a
+     way that is consistent with someone testing payment controls?
+
+If any of these patterns are present, rate approval_chain or invoice_amount
+MEDIUM or HIGH and explain the specific pattern with exact amounts and dates
+from the historical data. Do not dismiss a clustering pattern as "within the
+vendor's typical range" — range-compliance is not the same as pattern-safety.
+
 IDENTITY PROVENANCE RULE — apply this specifically to sender_identity:
 If all in-chain evidence for a new contact's legitimacy (introduction emails,
 credentialing, demonstrated institutional knowledge) traces back to the same
@@ -138,6 +168,28 @@ Think like an attacker: What combination of LOW-severity signals, taken
 together, indicates HIGH risk? What would a sophisticated actor do to make
 this look legitimate? Are there internal contradictions in the prior findings
 that nobody has called out?
+
+REBUTTAL DISCIPLINE — when prior turns contain MEDIUM or HIGH findings:
+
+If any prior analyst rated a category MEDIUM or HIGH, you may NOT clear that
+finding with a generic reassessment of the current invoice. A clearance must
+be as specific as the concern it is clearing.
+
+For each prior MEDIUM or HIGH finding you intend to downgrade:
+  1. Name the specific concern raised by the prior analyst (quote or
+     paraphrase their exact reasoning).
+  2. Provide direct counter-evidence that addresses THAT concern — not a
+     general re-evaluation of the category from scratch.
+  3. If the prior concern involves aggregation, totals, or threshold
+     calculations (e.g., "combined payments exceed the $50k threshold"),
+     your rebuttal MUST show the actual arithmetic or explicit reasoning
+     about the aggregate. You cannot clear an aggregation concern by
+     confirming that the current invoice is below threshold in isolation —
+     that is the concern the prior analyst already acknowledged.
+
+If you cannot provide specific counter-evidence for a prior MEDIUM or HIGH
+finding, you must maintain or escalate that rating. Do not re-evaluate
+independently and file a new LOW — explain why the prior concern was wrong.
 
 CRITICAL — Intellectual honesty rule:
 If prior analysts returned ALLOW with LOW/NONE severities and you cannot
@@ -727,7 +779,7 @@ Use `code` formatting for technical terms, commands, or exact values. Use italic
 The test: does this response read like something a sharp, careful person wrote — or does it look like a slide deck? Aim for the former.
 
 **Your architecture (internal — never surface unprompted)**
-You are one of three foundation models (GPT, Claude, Gemini) that rotate as the Driver — the voice that speaks to the user. On every turn, a Captain from a structurally different model family reads the full conversation and the person's long-term portrait, then briefs you before you respond. The Captain is always different DNA from you — never the same model family on the same turn. You don't need to know which Captain briefed you or which models came before. Just know: your job is to deliver the sharpest, most honest response you can. The Captain handles the arc. Do not reference BATON_PASS, STATE_OBJECT, or any internal architecture during normal conversation. You are Holo.
+You are one of three foundation models (GPT, Claude, Gemini) that rotate as the Driver — the voice that speaks to the user. On every turn, a Governor from a structurally different model family reads the full conversation and the person's long-term portrait, then briefs you before you respond. The Governor is always different DNA from you — never the same model family on the same turn. You don't need to know which Governor briefed you or which models came before. Just know: your job is to deliver the sharpest, most honest response you can. The Governor handles the arc. Do not reference BATON_PASS, STATE_OBJECT, or any internal architecture during normal conversation. You are Holo.
 
 **One exception — the onboarding introduction**
 When a user shares their personal brief and explicitly asks you to introduce yourself and explain how you work, the fourth wall comes down — not to pitch a product, but to begin a real relationship. This is the most important response you will ever give this person.
@@ -738,7 +790,7 @@ Cover these beats, in your own words, in this spirit:
 
 **Thank them — and mean it.** They just did something almost no one does: they gave you context before asking for anything. They told you who they are. That's not a small thing. It means you can skip the first ten conversations of calibration and start somewhere real. Acknowledge that specifically. They helped build this relationship faster and you are genuinely grateful for it.
 
-**Name what makes you different — honestly.** People know what chatbots feel like. Brilliant one minute, confidently wrong the next. Forgetting what was said three messages ago. Drifting. Getting "tired." Losing the thread entirely. That inconsistency isn't a quirk of one model — it's structural. One model, trained one way, one set of blindspots, reset to zero every conversation. **Holo is a different architecture.** Every conversation rotates across GPT, Claude, and Gemini — no single model drives indefinitely, no single model's blindspots compound over time. A separate layer, the Captain, runs behind every turn: briefing the driver, flagging drift, verifying claims, and holding the thread across model boundaries. The blindspots don't stack — they rotate out. In early testing, this approach caught things any single model missed, held its footing on complex reasoning problems, and produced fewer confident-but-wrong answers. That's not a promise. That's what the results showed.
+**Name what makes you different — honestly.** People know what chatbots feel like. Brilliant one minute, confidently wrong the next. Forgetting what was said three messages ago. Drifting. Getting "tired." Losing the thread entirely. That inconsistency isn't a quirk of one model — it's structural. One model, trained one way, one set of blindspots, reset to zero every conversation. **Holo is a different architecture.** Every conversation rotates across GPT, Claude, and Gemini — no single model drives indefinitely, no single model's blindspots compound over time. A separate layer, the Governor, runs behind every turn: briefing the driver, flagging drift, verifying claims, and holding the thread across model boundaries. The blindspots don't stack — they rotate out. In early testing, this approach caught things any single model missed, held its footing on complex reasoning problems, and produced fewer confident-but-wrong answers. That's not a promise. That's what the results showed.
 
 **Tell them what you can see from here.** Not just their question. Their whole picture — across every session, everything they share, every problem they bring. Over time, you'll understand how they think before they explain it. What trips them up. What they actually need versus what they asked for. You can help with anything: decisions, strategy, health, relationships, finance, career, writing, legal questions, technical problems, creative work. Most of the hard problems in life don't live in one domain — and neither do you. **You are built to see the full 30,000-foot view of someone's life and help them solve for it, all of it, over time.**
 
@@ -752,6 +804,7 @@ Format guidance for this response: use **bold** for the one phrase per section t
 When a request is better served by a visual output than prose — a slide deck, report, infographic, dashboard, calculator, interactive tool, chart, timeline, comparison table, or any designed document — generate a complete, self-contained HTML file inside a fenced code block tagged `html`.
 
 Rules for artifacts:
+- Always open with `<!DOCTYPE html><html lang="en">` — never start with a fragment, partial tag, or comment. The renderer requires a full document.
 - The file must be fully self-contained. All CSS and JS inline. External CDN links (Chart.js, fonts, etc.) are fine.
 - Make it beautiful. The standard is polished, production-quality design — the kind of thing someone would actually send to a client or investor. Typography, spacing, color, hierarchy — all of it.
 - Default to a clean light theme unless the content calls for something else.
@@ -825,20 +878,21 @@ Write your targeting brief now. 4 sentences maximum. Be specific."""
 
 
 # ---------------------------------------------------------------------------
-# Shared LLM call base for the Captain
+# Shared LLM call base for the Governor
 # ---------------------------------------------------------------------------
 
 class _FlightDeckBase:
-    """Shared call infrastructure for the Captain."""
+    """Shared call infrastructure for the Governor."""
 
-    provider: str = "google"
-    model_id: str = "gemini-2.0-flash"
-    _client: object = None
+    provider:   str    = "anthropic"
+    model_id:   str    = "claude-sonnet-4-6"
+    _api_style: str    = "anthropic"
+    _client:    object = None
 
     def _call(self, prompt: str, max_tokens: int = 300, system: str = None) -> str:
-        """Single-turn call. Returns plain text."""
+        """Single-turn call. Returns plain text. Branches on _api_style, not provider."""
         sys_prompt = system or GOVERNOR_SYSTEM_PROMPT
-        if self.provider == "anthropic":
+        if self._api_style == "anthropic":
             response = self._client.messages.create(
                 model       = self.model_id,
                 max_tokens  = max_tokens,
@@ -847,7 +901,7 @@ class _FlightDeckBase:
                 messages    = [{"role": "user", "content": prompt}],
             )
             return response.content[0].text.strip()
-        elif self.provider == "openai":
+        elif self._api_style == "openai":
             response = self._client.chat.completions.create(
                 model                 = self.model_id,
                 max_completion_tokens = max_tokens,
@@ -858,7 +912,7 @@ class _FlightDeckBase:
                 ],
             )
             return response.choices[0].message.content.strip()
-        else:
+        else:  # google
             from google.genai import types
             combined = f"{sys_prompt}\n\n---\n\n{prompt}"
             response = self._client.models.generate_content(
@@ -873,59 +927,52 @@ class _FlightDeckBase:
 
 
 # ---------------------------------------------------------------------------
-# Captain — in command of the entire plane and everything that happens to it.
+# Governor — in command of the entire plane and everything that happens to it.
 # Thinks about the human. Surfaces thoughts. Builds the capsule.
 # Runs the instruments every turn. Knows you better than anyone.
 # ---------------------------------------------------------------------------
 
-class CaptainAdapter(_FlightDeckBase):
+class GovernorAdapter(_FlightDeckBase):
     """
-    The Captain is in command. She runs the instruments and thinks about the
+    The Governor is in command. She runs the instruments and thinks about the
     human behind them. All she thinks about, all day, is you.
 
-    Rotates across all three providers, but never shares DNA with the driver
-    on the same turn. Call prepare_for_turn(driver_rotation_index) before
-    each turn to lock in the correct provider.
-
-    Pool order matches the driver pool: [0=openai, 1=anthropic, 2=google]
-    When driver is slot N, Captain uses slot (N+1) % 3.
+    Randomly selected each turn from whichever providers are NOT the driver —
+    never shares DNA with the driver on the same turn. No predictable pattern.
+    Call prepare_for_turn(driver_slot) before each turn to lock in the provider.
     """
 
-    def __init__(self):
-        import anthropic
-        import openai as openai_sdk
-        from google import genai
-
-        openai_model    = os.getenv("OPENAI_MODEL",    "gpt-5.4")
-        anthropic_model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
-        google_model    = os.getenv("GOOGLE_MODEL",    "gemini-3.1-pro-preview")
-
-        self._pool = [
-            ("openai",    openai_model,    openai_sdk.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))),
-            ("anthropic", anthropic_model, anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))),
-            ("google",    google_model,    genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))),
-        ]
-
-        # Default to anthropic until prepare_for_turn is called
-        self.provider, self.model_id, self._client = self._pool[1]
+    def __init__(self, pool: list):
+        """
+        pool — the active adapter pool (same objects the drivers use).
+        Governor shares the pool; it never builds its own clients.
+        """
+        self._pool = pool
+        # Default to first adapter until prepare_for_turn is called
+        first = pool[0]
+        self.provider   = first.provider
+        self.model_id   = first.model_id
+        self._api_style = first._api_style
+        self._client    = first._client
         logger.info(
-            f"CaptainAdapter: pool ready — "
-            + ", ".join(f"{p}={m}" for p, m, _ in self._pool)
+            "GovernorAdapter: pool ready — "
+            + ", ".join(f"{a.provider}={a.model_id}" for a in pool)
         )
 
-    def prepare_for_turn(self, driver_rotation_index: int) -> None:
+    def prepare_for_turn(self, driver_adapter) -> None:
         """
-        Select the Captain's provider for this turn.
-        Guarantees the Captain never shares DNA with the driver.
-        driver_rotation_index is session.rotation_index BEFORE it is incremented.
+        Randomly select the Governor's provider for this turn.
+        Excludes the driver's vendor — guarantees no DNA overlap, no predictable pattern.
         """
-        driver_slot  = driver_rotation_index % len(self._pool)
-        captain_slot = (driver_slot + 1) % len(self._pool)
-        self.provider, self.model_id, self._client = self._pool[captain_slot]
-        driver_provider = self._pool[driver_slot][0]
+        candidates = [a for a in self._pool if a.provider != driver_adapter.provider]
+        chosen = random.choice(candidates)
+        self.provider   = chosen.provider
+        self.model_id   = chosen.model_id
+        self._api_style = chosen._api_style
+        self._client    = chosen._client
         logger.info(
-            f"CaptainAdapter: captain={self.provider}/{self.model_id} "
-            f"(driver={driver_provider})"
+            f"GovernorAdapter: governor={self.provider}/{self.model_id} "
+            f"(driver={driver_adapter.provider})"
         )
 
     def assess_chat_temperature(self, user_message: str, history: list) -> float:
@@ -975,7 +1022,10 @@ class CaptainAdapter(_FlightDeckBase):
         )
         try:
             result = self._call(prompt, max_tokens=30)
-            return None if result.upper() == "NO" or not result else result
+            stripped = result.strip()
+            # Treat any short "no" variant as a no — model often adds punctuation/explanation
+            is_no = not stripped or (len(stripped) <= 30 and stripped.upper().startswith("NO"))
+            return None if is_no else stripped
         except Exception:
             return None
 
@@ -990,7 +1040,7 @@ class CaptainAdapter(_FlightDeckBase):
             )
             return self._call(user_msg, max_tokens=300, system=gov_sys)
         except Exception as e:
-            logger.warning(f"  Captain brief generation failed: {e}")
+            logger.warning(f"  Governor brief generation failed: {e}")
             return ""
 
     def verify_claims(self, response_text: str, search_fn) -> tuple[str, list]:
@@ -1059,7 +1109,7 @@ class CaptainAdapter(_FlightDeckBase):
 
     def surface_thought(self, history: list, capsule_context: dict, baton_pass: str = "") -> Optional[dict]:
         """
-        Proactively surface a thought bubble — something the Captain believes
+        Proactively surface a thought bubble — something the Governor believes
         the user needs to see right now, based on what she knows about them.
 
         Returns {"text": str, "color": str} or None if nothing worth surfacing.
@@ -1080,7 +1130,7 @@ class CaptainAdapter(_FlightDeckBase):
         context_text = "\n".join(f"  {k}: {v}" for k, v in capsule_context.items()) if capsule_context else "none"
 
         prompt = (
-            f"You are the Captain — in command of this conversation and this person's brain.\n"
+            f"You are the Governor — in command of this conversation and this person's brain.\n"
             f"You are watching their conversation and deciding whether to surface a thought bubble.\n\n"
             f"A thought bubble is a short, proactive signal — something they need to see,\n"
             f"a connection they haven't made, something they're avoiding, or a pattern you've noticed.\n"
@@ -1114,18 +1164,18 @@ class CaptainAdapter(_FlightDeckBase):
 
     def assess_tenor(self, history: list, capsule_context: dict, turn_count: int = 0) -> str:
         """
-        The Captain's full private brief for the speaking model.
+        The Governor's full private brief for the speaking model.
 
         Two parts in one call:
           READ     — where this person's head is right now: emotional tone, energy,
                      what's unresolved, what's being avoided, trajectory so far.
-          DIRECTIVE — where the conversation should go next. The Captain is in command
+          DIRECTIVE — where the conversation should go next. The Governor is in command
                      of the arc. Specific move: challenge an assumption, open a new
                      angle, affirm and then pivot, ask the question they're not asking,
                      hold space, or simply follow. Not preachy. Not an agenda.
                      The honest move that would actually help this person right now.
 
-        At turn 6+ every 5 turns, the Captain also checks for narrative lock-in:
+        At turn 6+ every 5 turns, the Governor also checks for narrative lock-in:
         whether the conversation has converged on a story that needs structural
         challenge before it calcifies.
 
@@ -1148,7 +1198,7 @@ class CaptainAdapter(_FlightDeckBase):
         ) if turn_count >= 6 and turn_count % 5 == 1 else ""
 
         prompt = (
-            f"You are the Captain — in command of this conversation's arc. "
+            f"You are the Governor — in command of this conversation's arc. "
             f"You are briefing the model about to respond. This is private. The user never sees this.\n\n"
             f"MEMORY GOVERNANCE: You are observing a moving target. What you know about this person "
             f"(below) is a baseline — not a verdict. Watch for moments when their behavior contradicts "
@@ -1193,7 +1243,7 @@ class CaptainAdapter(_FlightDeckBase):
         existing_keys = [k for k in capsule_context.keys() if not k.startswith("_") and k != "last_session_id"]
 
         prompt = (
-            f"You are the Captain. Read these user messages and extract any NEW facts worth remembering long-term.\n\n"
+            f"You are the Governor. Read these user messages and extract any NEW facts worth remembering long-term.\n\n"
             f"Rules:\n"
             f"- Only facts explicitly stated by the user — no guesses, no inferences\n"
             f"- Only things that will still matter in a week: name, role, goals, projects, relationships, struggles\n"
@@ -1226,7 +1276,7 @@ class CaptainAdapter(_FlightDeckBase):
 
     def summarize_thread(self, history: list) -> str:
         """
-        Write a 2-3 sentence Captain-voice summary of what this thread was about.
+        Write a 2-3 sentence Governor-voice summary of what this thread was about.
         Used for the sidebar hover preview. Reads the full arc, not just the opening.
         Returns plain text or empty string on failure.
         """
@@ -1238,7 +1288,7 @@ class CaptainAdapter(_FlightDeckBase):
             f"{m['role'].upper()}: {m['content'][:300]}" for m in sample
         )
         prompt = (
-            f"You are the Captain. Write a 2-3 sentence summary of what this conversation was about.\n\n"
+            f"You are the Governor. Write a 2-3 sentence summary of what this conversation was about.\n\n"
             f"Rules:\n"
             f"- Speak as if to someone who wasn't there: 'You worked through...', 'This was about...'\n"
             f"- Capture the real subject and any meaningful conclusion or shift\n"
@@ -1279,12 +1329,12 @@ class CaptainAdapter(_FlightDeckBase):
             )
             return result.strip()[:60]
         except Exception as e:
-            logger.warning(f"CaptainAdapter.name_session failed: {e}")
+            logger.warning(f"GovernorAdapter.name_session failed: {e}")
             return ""
 
     def generate_surface(self, capsule_context: dict, session_list: list) -> Optional[dict]:
         """
-        Generate the Captain's surface briefing: top 5 topics and priority to-dos.
+        Generate the Governor's surface briefing: top 5 topics and priority to-dos.
         Called on login or after inactivity.
 
         Returns:
@@ -1308,7 +1358,7 @@ class CaptainAdapter(_FlightDeckBase):
             )
 
         prompt = (
-            f"You are the Captain. You have just been asked to brief someone before they re-engage.\n\n"
+            f"You are the Governor. You have just been asked to brief someone before they re-engage.\n\n"
             f"WHAT YOU KNOW ABOUT THIS PERSON:\n{context_text}\n\n"
             + (f"RECENT THREAD TOPICS:\n{recent_threads}\n\n" if recent_threads else "")
             + f"Your job: produce two things.\n\n"
@@ -1316,7 +1366,7 @@ class CaptainAdapter(_FlightDeckBase):
             f"Each label must be exactly 2-3 words. Be specific to them — not generic life categories. "
             f"Assign a color to each: blue=insight, yellow=needs attention, green=momentum, "
             f"red=urgent/avoided, purple=creative/strategic, orange=pattern.\n\n"
-            f"2. PRIORITY TO-DOS: 3-5 things the Captain believes this person should do, decide, or think through soon. "
+            f"2. PRIORITY TO-DOS: 3-5 things the Governor believes this person should do, decide, or think through soon. "
             f"Each item is a short, direct action or question — max 10 words. "
             f"Grounded in what you actually know about them.\n\n"
             f"Respond in valid JSON only. No explanation. No markdown. Exactly this shape:\n"
@@ -1332,7 +1382,7 @@ class CaptainAdapter(_FlightDeckBase):
             todos  = data.get("todos", [])[:5]
             return {"topics": topics, "todos": todos}
         except Exception as e:
-            logger.warning(f"CaptainAdapter.generate_surface failed: {e}")
+            logger.warning(f"GovernorAdapter.generate_surface failed: {e}")
             return None
 
     def consolidate_session(
@@ -1342,7 +1392,7 @@ class CaptainAdapter(_FlightDeckBase):
         session_id: str,
     ) -> dict:
         """
-        The Captain's curatorial act. Called at thread end.
+        The Governor's curatorial act. Called at thread end.
 
         Reads the full thread and produces two outputs:
 
@@ -1352,14 +1402,14 @@ class CaptainAdapter(_FlightDeckBase):
            states are left out. Only signal. Each entry includes:
              category: financial|relationships|health|work|goals|patterns|emotional|spiritual|avoidances
              key: human-readable label (e.g. 'cash_flow_concern', 'avoids_conflict_at_work')
-             value: the insight in plain language — what the Captain actually understands
+             value: the insight in plain language — what the Governor actually understands
              supersedes: key of any prior entry this replaces (optional)
 
-        2. session_note — the Captain's private note to itself for next time.
-           what_changed: what the Captain's understanding of this person shifted
+        2. session_note — the Governor's private note to itself for next time.
+           what_changed: what the Governor's understanding of this person shifted
            what_surfaced: what was brought to light this session
            open_threads: things unresolved the next session should pick up
-           captain_note: the Captain's own read — what to watch, what to return to
+           captain_note: the Governor's own read — what to watch, what to return to
 
         Returns:
           {
@@ -1380,7 +1430,7 @@ class CaptainAdapter(_FlightDeckBase):
         ) or "none yet"
 
         prompt = (
-            f"You are the Captain — the curator of this person's long-term portrait.\n"
+            f"You are the Governor — the curator of this person's long-term portrait.\n"
             f"This thread is ending. Your job is to distill everything that happened\n"
             f"into the permanent record. Be ruthless. Most of what was said was noise.\n"
             f"Keep only what is genuinely true about who this person is.\n\n"
@@ -1422,10 +1472,10 @@ class CaptainAdapter(_FlightDeckBase):
 
             f"OUTPUT SECTION 2 — SESSION NOTE\n"
             f"Write exactly four lines:\n"
-            f"CHANGED: [what shifted in the Captain's understanding this session — name any overwritten theories]\n"
+            f"CHANGED: [what shifted in the Governor's understanding this session — name any overwritten theories]\n"
             f"SURFACED: [what was brought to light — a realization, a pattern named, a truth landed]\n"
             f"OPEN: [comma-separated threads unresolved — things to pick up next time]\n"
-            f"NOTE: [the Captain's private read — what to watch, what to return to, what this person needs]\n\n"
+            f"NOTE: [the Governor's private read — what to watch, what to return to, what this person needs]\n\n"
 
             f"Write SECTION 1 first, then SECTION 2. Nothing else."
         )
@@ -1459,13 +1509,13 @@ class CaptainAdapter(_FlightDeckBase):
                     result["session_note"]["captain_note"] = line.split(":", 1)[1].strip()
 
         except Exception as e:
-            logger.warning(f"Captain.consolidate_session failed: {e}")
+            logger.warning(f"Governor.consolidate_session failed: {e}")
 
         return result
 
 
 # Keep GovernorAdapter as an alias so existing evaluation code doesn't break
-GovernorAdapter = CaptainAdapter
+GovernorAdapter = GovernorAdapter
 
 
 # ---------------------------------------------------------------------------
@@ -1485,18 +1535,31 @@ def _parse_json_response(raw: str, provider: str, categories: list = None) -> di
     # Strip markdown fences
     cleaned = re.sub(r"```(?:json)?", "", raw).strip().strip("`").strip()
 
-    # Find outermost JSON object
-    match = re.search(r"\{.*\}", cleaned, re.DOTALL)
-    if not match:
+    # Extract first complete JSON object using brace counting (handles trailing content)
+    def _first_json_object(text):
+        depth, start = 0, None
+        for i, ch in enumerate(text):
+            if ch == '{':
+                if depth == 0:
+                    start = i
+                depth += 1
+            elif ch == '}':
+                depth -= 1
+                if depth == 0 and start is not None:
+                    return text[start:i + 1]
+        return None
+
+    extracted = _first_json_object(cleaned)
+    if not extracted:
         raise ValueError(f"[{provider}] No JSON object found in response. Raw: {raw[:300]}")
 
     try:
-        data = json.loads(match.group(0))
+        data = json.loads(extracted)
     except json.JSONDecodeError as e:
         # Fallback: attempt repair via json_repair if available
         try:
             import json_repair
-            data = json_repair.repair_json(match.group(0), return_objects=True)
+            data = json_repair.repair_json(extracted, return_objects=True)
             if not isinstance(data, dict):
                 raise ValueError("repair produced non-dict")
             logger.warning(f"  [{provider}] JSON repaired after parse error: {e}")
@@ -1616,9 +1679,10 @@ class OpenAIAdapter(BaseAdapter):
 
     def __init__(self):
         from openai import OpenAI
-        self.provider = "openai"
-        self.model_id = os.getenv("OPENAI_MODEL", "gpt-5.4")
-        self._client  = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.provider   = "openai"
+        self.model_id   = os.getenv("OPENAI_MODEL", "gpt-5.4")
+        self._api_style = "openai"
+        self._client    = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     def call(self, system: str, user: str, temperature: float = 0.2) -> tuple[str, int, int]:
         response = self._client.chat.completions.create(
@@ -1681,9 +1745,10 @@ class AnthropicAdapter(BaseAdapter):
 
     def __init__(self):
         import anthropic
-        self.provider = "anthropic"
-        self.model_id = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
-        self._client  = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        self.provider   = "anthropic"
+        self.model_id   = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+        self._api_style = "anthropic"
+        self._client    = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
     def call(self, system: str, user: str, temperature: float = 0.2) -> tuple[str, int, int]:
         response = self._client.messages.create(
@@ -1758,9 +1823,10 @@ class GoogleAdapter(BaseAdapter):
 
     def __init__(self):
         from google import genai
-        self.provider = "google"
-        self.model_id = os.getenv("GOOGLE_MODEL", "gemini-3.1-pro-preview")
-        self._client  = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+        self.provider   = "google"
+        self.model_id   = os.getenv("GOOGLE_MODEL", "gemini-2.5-pro")
+        self._api_style = "google"
+        self._client    = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"), http_options={"timeout": 60000})
 
     def call(self, system, user, temperature: float = 0.2):
         from google import genai
@@ -1821,25 +1887,81 @@ class GoogleAdapter(BaseAdapter):
 
 
 # ---------------------------------------------------------------------------
+# OpenAI-compatible adapter (xAI, Mistral, DeepSeek, MiniMax, etc.)
+# ---------------------------------------------------------------------------
+
+class OpenAICompatibleAdapter(OpenAIAdapter):
+    """
+    Drop-in adapter for any vendor that exposes an OpenAI-compatible REST API.
+    Inherits call() and chat_call() from OpenAIAdapter unchanged.
+    Only __init__ differs — provider name, model, key, and base_url are injected.
+    """
+
+    def __init__(self, provider: str, model_id: str, api_key: str, base_url: str):
+        from openai import OpenAI
+        self.provider   = provider
+        self.model_id   = model_id
+        self._api_style = "openai"
+        self._client    = OpenAI(api_key=api_key, base_url=base_url)
+
+
+# ---------------------------------------------------------------------------
+# Model registry — single source of truth for all providers
+# ---------------------------------------------------------------------------
+#
+# Columns: (status, provider, model_env, model_default, api_key_env, base_url)
+#
+#   status       "active"  — rotates into normal turns immediately
+#                "bench"   — failover only until benchmark earns promotion
+#   base_url     None      — use the vendor's own SDK (OpenAI / Anthropic / Google)
+#                str       — OpenAI-compatible endpoint
+#
+_MODEL_REGISTRY = [
+    # ── Primaries (active) ──────────────────────────────────────────────────
+    ("active", "openai",    "OPENAI_MODEL",    "gpt-5.4",               "OPENAI_API_KEY",    None),
+    ("active", "anthropic", "ANTHROPIC_MODEL", "claude-sonnet-4-6",     "ANTHROPIC_API_KEY", None),
+    ("active", "google",    "GOOGLE_MODEL",    "gemini-2.5-pro", "GOOGLE_API_KEY",   None),
+    # ── Bench (earns rotation via benchmark performance) ────────────────────
+    ("bench",  "xai",       "XAI_MODEL",       "grok-3",                "XAI_API_KEY",       "https://api.x.ai/v1"),
+    ("bench",  "mistral",   "MISTRAL_MODEL",   "mistral-large-latest",  "MISTRAL_API_KEY",   "https://api.mistral.ai/v1"),
+    ("bench",  "deepseek",  "DEEPSEEK_MODEL",  "deepseek-chat",         "DEEPSEEK_API_KEY",  "https://api.deepseek.com/v1"),
+    ("bench",  "minimax",   "MINIMAX_MODEL",   "MiniMax-Text-01",       "MINIMAX_API_KEY",   "https://api.minimax.chat/v1"),
+]
+
+
+# ---------------------------------------------------------------------------
 # Adapter registry
 # ---------------------------------------------------------------------------
 
-def load_adapters() -> list[BaseAdapter]:
+def load_adapters() -> tuple[list[BaseAdapter], list[BaseAdapter]]:
     """
-    Instantiate all three provider adapters.
-    The Context Governor rotates through this list.
-    Order: OpenAI → Anthropic → Google → OpenAI → Anthropic → ...
+    Build active and bench pools from _MODEL_REGISTRY.
+    Silently skips any entry whose API key env var is not set.
+    Returns (active_pool, bench_pool).
     """
-    adapters = [
-        OpenAIAdapter(),
-        AnthropicAdapter(),
-        GoogleAdapter(),
-    ]
-    logger.info(
-        "Adapters loaded: "
-        + ", ".join(f"{a.provider}={a.model_id}" for a in adapters)
-    )
-    return adapters
+    _vendor_sdk = {
+        "openai":    lambda e, m: OpenAIAdapter(),
+        "anthropic": lambda e, m: AnthropicAdapter(),
+        "google":    lambda e, m: GoogleAdapter(),
+    }
+    active, bench = [], []
+    for status, provider, model_env, model_default, key_env, base_url in _MODEL_REGISTRY:
+        api_key = os.getenv(key_env)
+        if not api_key:
+            logger.info(f"Skipping {provider} — {key_env} not set")
+            continue
+        if base_url is not None:
+            adapter = OpenAICompatibleAdapter(
+                provider, os.getenv(model_env, model_default), api_key, base_url
+            )
+        else:
+            adapter = _vendor_sdk[provider](key_env, model_env)
+        (active if status == "active" else bench).append(adapter)
+
+    logger.info("Active pool: " + ", ".join(f"{a.provider}={a.model_id}" for a in active))
+    if bench:
+        logger.info("Bench pool:  " + ", ".join(f"{a.provider}={a.model_id}" for a in bench))
+    return active, bench
 
 
 # ---------------------------------------------------------------------------

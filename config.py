@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # --- Model IDs ---
     openai_model: str = "gpt-4o"
     anthropic_model: str = "claude-sonnet-4-20250514"
-    google_model: str = "gemini-1.5-pro"
+    google_model: str = "gemini-2.5-pro"
 
     # --- Supabase ---
     supabase_url: str = ""

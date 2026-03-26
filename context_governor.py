@@ -46,12 +46,12 @@ from llm_adapters import (
     get_role_for_turn,
     select_persona,
     load_adapters,
-    CaptainAdapter,
+    GovernorAdapter,
 )
 from scenario_templates import get_template
 
-# The Captain runs the between-turn briefs in evaluation mode.
-GovernorAdapter = CaptainAdapter
+# The Governor runs the between-turn briefs in evaluation mode.
+GovernorAdapter = GovernorAdapter
 from tool_gate import ToolGate
 from project_brain import ProjectBrain
 
@@ -571,11 +571,12 @@ def _build_initial_state(request: dict, evaluation_id: str) -> dict:
 
 class ContextGovernor:
 
-    def __init__(self):
-        self._adapters  = load_adapters()
-        self._governor  = GovernorAdapter()
-        self._tool_gate = ToolGate()
-        self._brain     = ProjectBrain()
+    def __init__(self, no_memory: bool = False):
+        self._adapters, self._bench = load_adapters()
+        self._governor   = GovernorAdapter(self._adapters)
+        self._tool_gate  = ToolGate()
+        self._brain      = ProjectBrain()
+        self._no_memory  = no_memory
 
     def evaluate(self, request: dict) -> dict:
         """
@@ -620,8 +621,10 @@ class ContextGovernor:
         # Query persistent memory for prior evaluations of this vendor.
         # Holo is never on its first day on the job — if this vendor has
         # appeared before, analysts will know before they write a single word.
-        prior_experience = self._brain.retrieve_context(
-            state["action"], state["context"]
+        # Suppressed when no_memory=True (benchmark isolation mode).
+        prior_experience = (
+            None if self._no_memory
+            else self._brain.retrieve_context(state["action"], state["context"])
         )
         if prior_experience:
             state["artifacts"]["project_brain_v1"] = {
@@ -743,7 +746,7 @@ class ContextGovernor:
                     if next_turn <= 3
                     else select_persona(state["coverage_matrix"], used_personas, state.get("active_template"))
                 )
-                self._governor.prepare_for_turn(turn_number - 1)
+                self._governor.prepare_for_turn(adapter)
                 brief = self._governor.generate_brief(
                     state, next_turn, next_persona, conv_level
                 )

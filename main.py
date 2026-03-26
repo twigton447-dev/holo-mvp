@@ -48,6 +48,7 @@ logger = logging.getLogger("holo.main")
 
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -127,6 +128,13 @@ app = FastAPI(
     ),
     version  = "0.1.0",
     lifespan = lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Serve the chat UI from /frontend — must be mounted before routes
@@ -718,7 +726,7 @@ async def capsule_surface(
     _key: str = Depends(_verify_key),
 ):
     """
-    Captain-generated surface briefing: top 5 topics + priority to-dos.
+    Governor-generated surface briefing: top 5 topics + priority to-dos.
     Cached per capsule for 30 minutes to avoid redundant LLM calls.
     """
     import time
@@ -750,7 +758,7 @@ async def thread_summary(
     session_id: str,
     _key: str = Depends(_verify_key),
 ):
-    """Return a Captain-written summary of the thread for sidebar hover preview."""
+    """Return a Governor-written summary of the thread for sidebar hover preview."""
     if session_id in _summary_cache:
         return JSONResponse(content={"summary": _summary_cache[session_id]})
     if _chat_engine is None:

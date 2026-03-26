@@ -1,15 +1,16 @@
 """
 chat_engine.py
 
-Holo chat mode — round-robin multi-model conversation engine.
+Holo chat mode — randomized multi-model conversation engine.
 
-Every response comes from a different LLM provider
-(OpenAI → Anthropic → Google → repeat), but all speak as Holo
-using the unified persona prompt. The Governor sets temperature
-for each turn based on the message content and conversation context.
+Every response comes from a randomly selected LLM provider.
+The Governor is also randomly selected, but never shares DNA
+with the driver on the same turn. No predictable pattern exists.
+All providers speak as Holo using the unified persona prompt.
 """
 
 import logging
+import random
 import re as _re
 import threading
 import time
@@ -19,7 +20,7 @@ from typing import Optional, List, Dict, Any
 
 from llm_adapters import (
     HOLO_CHAT_SYSTEM_PROMPT,
-    CaptainAdapter,
+    GovernorAdapter,
     load_adapters,
 )
 from project_brain import ProjectBrain
@@ -40,7 +41,7 @@ _sessions: Dict[str, "ChatSession"] = {}
 class ChatSession:
     session_id: str
     history: List[Dict[str, str]] = field(default_factory=list)
-    rotation_index: int = 0      # 0=OpenAI, 1=Anthropic, 2=Google, cycles
+    rotation_index: int = 0      # kept for turn counting only; adapter selection is randomized
     turn_count: int = 0
     created_at: float = field(default_factory=time.time)
     last_active: float = field(default_factory=time.time)
@@ -93,13 +94,14 @@ class HoloChatEngine:
     """
 
     def __init__(self):
-        self._adapters  = load_adapters()    # [OpenAI, Anthropic, Google]
-        self._captain   = CaptainAdapter()   # in command — runs instruments and thinks about the human
-        self._brain     = ProjectBrain()
+        self._adapters, self._bench = load_adapters()   # active pool + bench pool
+        self._governor = GovernorAdapter(self._adapters) # shares active pool, never same DNA as driver
+        self._brain    = ProjectBrain()
         logger.info(
-            "HoloChatEngine initialized. Adapters: "
+            "HoloChatEngine initialized. Active: "
             + ", ".join(a.provider for a in self._adapters)
-            + f" | CaptainAdapter ready"
+            + (" | Bench: " + ", ".join(a.provider for a in self._bench) if self._bench else "")
+            + " | GovernorAdapter ready"
         )
 
     def get_or_create_session(self, session_id: Optional[str] = None) -> ChatSession:
@@ -130,7 +132,7 @@ class HoloChatEngine:
         Process one user message. Returns Holo's response + metadata.
         The caller should use session_id from the returned dict for follow-up turns.
 
-        incognito=True: blind mode — no capsule context, no Captain memory, no life portrait
+        incognito=True: blind mode — no capsule context, no Governor memory, no life portrait
         injected. Base system prompt only. Used for unbiased evaluation runs.
         """
         session             = self.get_or_create_session(session_id)
@@ -146,39 +148,44 @@ class HoloChatEngine:
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
 
-        # Captain locks in provider for this turn — must happen first so every
-        # Captain call (instruments + portrait) uses the same rotating DNA,
-        # never the same provider as the driver
-        self._captain.prepare_for_turn(session.rotation_index)
+        # Randomly select driver for this turn — no predictable pattern
+        adapter = self._adapters[random.randrange(len(self._adapters))]
+        session.rotation_index += 1
+        session.turn_count     += 1
 
-        # Captain runs the instruments: temperature + search decision
-        temperature  = self._captain.assess_chat_temperature(user_message, session.history)
-        search_query = self._captain.should_search(user_message, session.history)
+        # Governor locks in provider for this turn — excludes driver's vendor,
+        # randomly selects from remaining pool, no predictable pattern
+        self._governor.prepare_for_turn(adapter)
 
-        # Captain thinks about the human — skipped in incognito (would introduce bias)
-        thought = None if incognito else self._captain.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        tenor   = None if incognito else self._captain.assess_tenor(session.history, capsule_context, turn_count=session.turn_count)
+        # Governor runs the instruments: temperature + search decision
+        temperature  = self._governor.assess_chat_temperature(user_message, session.history)
+        search_query = self._governor.should_search(user_message, session.history)
+
+        # Governor thinks about the human — skipped in incognito (would introduce bias)
+        thought = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        tenor   = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count)
         search_results = web_search.search(search_query) if search_query else None
 
         # Build enriched message — search results injected for the model only,
         # not stored in history (history stays clean with the original message)
         enriched_message = user_message
         if search_results:
-            enriched_message = f"{user_message}\n\n{search_results}"
+            enriched_message = (
+                f"{user_message}\n\n"
+                f"[BACKGROUND CONTEXT: The following search results were retrieved to help you answer. "
+                f"Use them silently — do not mention, quote, or reference that a search was performed. "
+                f"If the results are irrelevant to the question, ignore them entirely.]\n\n"
+                f"{search_results}"
+            )
             logger.info(f"  Search query: '{search_query}'")
-
-        # Round-robin adapter selection
-        adapter              = self._adapters[session.rotation_index % len(self._adapters)]
-        session.rotation_index += 1
-        session.turn_count     += 1
 
         logger.info(
             f"Chat turn {session.turn_count} | session={session.session_id[:8]} | "
-            f"driver={adapter.provider} | captain={self._captain.provider} | temp={temperature:.2f}"
+            f"driver={adapter.provider} | governor={self._governor.provider} | temp={temperature:.2f}"
             + (" | INCOGNITO" if incognito else "")
         )
 
-        # Inject thread-health context + portrait + working memory + Captain brief
+        # Inject thread-health context + portrait + working memory + Governor brief
         # Incognito: only base system prompt — zero context leakage
         system_prompt = HOLO_CHAT_SYSTEM_PROMPT
         if not incognito:
@@ -191,16 +198,30 @@ class HoloChatEngine:
             )
 
         # Call the adapter — enriched_message includes search results if any
+        # On failure, transparently fail over to a bench model from a different vendor
         start = time.time()
-        response_text, in_tok, out_tok = adapter.chat_call(
-            system_prompt, session.history, enriched_message, temperature,
-            images=images or None,
-        )
+        try:
+            response_text, in_tok, out_tok = adapter.chat_call(
+                system_prompt, session.history, enriched_message, temperature,
+                images=images or None,
+            )
+        except Exception as primary_err:
+            logger.warning(f"Driver {adapter.provider} failed: {primary_err} — attempting bench failover")
+            bench_candidates = [b for b in self._bench if b.provider != adapter.provider]
+            if not bench_candidates:
+                raise
+            fallback = random.choice(bench_candidates)
+            logger.info(f"Bench failover: {fallback.provider}/{fallback.model_id}")
+            response_text, in_tok, out_tok = fallback.chat_call(
+                system_prompt, session.history, enriched_message, temperature,
+                images=images or None,
+            )
+            adapter = fallback  # reflect actual driver in metadata
         elapsed_ms = int((time.time() - start) * 1000)
 
-        # Hallucination check — Captain scans for specific low-confidence claims
+        # Hallucination check — Governor scans for specific low-confidence claims
         # and verifies them against live search. Silent on clean responses.
-        response_text, flagged_claims = self._captain.verify_claims(
+        response_text, flagged_claims = self._governor.verify_claims(
             response_text, web_search.search
         )
         if flagged_claims:
@@ -226,20 +247,20 @@ class HoloChatEngine:
             self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id)
             self._brain.append_session_history(capsule_id, session.session_id, user_message)
 
-        # Captain learns — extract any new facts about the user and persist them
+        # Governor learns — extract any new facts about the user and persist them
         # Skipped in incognito: blind sessions must not pollute the capsule portrait
         if capsule_id and not incognito:
-            updates = self._captain.extract_context_updates(session.history, capsule_context)
+            updates = self._governor.extract_context_updates(session.history, capsule_context)
             for key, value in updates.items():
                 self._brain.set_capsule_context(capsule_id, key, value)
             if updates:
                 logger.info(f"Capsule context updated for {capsule_id[:8]}: {list(updates.keys())}")
 
-        # Captain consolidates — skipped in incognito
+        # Governor consolidates — skipped in incognito
         if capsule_id and not incognito and session.thread_health_level == "RED":
             def _consolidate():
                 try:
-                    result = self._captain.consolidate_session(
+                    result = self._governor.consolidate_session(
                         session.history, capsule_context, session.session_id
                     )
                     if result.get("session_note"):
@@ -256,14 +277,14 @@ class HoloChatEngine:
                     logger.warning(f"Consolidation failed: {e}")
             threading.Thread(target=_consolidate, daemon=True).start()
 
-        # Captain names the thread after turn 2 — enough context to know the topic
+        # Governor names the thread after turn 2 — enough context to know the topic
         if capsule_id and session.turn_count == 2 and not incognito:
             _hist = list(session.history)
             _sid  = session.session_id
             _cid  = capsule_id
             def _name_thread():
                 try:
-                    name = self._captain.name_session(_hist)
+                    name = self._governor.name_session(_hist)
                     if name:
                         self._brain.update_session_name(_cid, _sid, name)
                 except Exception as e:
@@ -323,10 +344,10 @@ class HoloChatEngine:
 
 def _life_context_block(entries: list) -> str:
     """
-    Format the Captain's permanent portrait for injection.
+    Format the Governor's permanent portrait for injection.
     This is the distilled, curated truth — highest priority context.
     """
-    lines = ["WHO THIS PERSON IS (Captain's permanent portrait — distilled across all sessions):"]
+    lines = ["WHO THIS PERSON IS (Governor's permanent portrait — distilled across all sessions):"]
     for e in entries:
         conf = f" [{int(e.get('confidence', 1.0) * 100)}% confidence]" if e.get("confidence", 1.0) < 0.8 else ""
         lines.append(f"  [{e.get('category', 'patterns')}] {e.get('key', '')}: {e.get('value', '')}{conf}")
@@ -334,10 +355,10 @@ def _life_context_block(entries: list) -> str:
 
 
 def _last_session_block(note: dict) -> str:
-    """Format the Captain's note from last session — private, never surface."""
+    """Format the Governor's note from last session — private, never surface."""
     if not note:
         return ""
-    lines = ["LAST SESSION NOTE (Captain's private carry-forward — do not mention to user):"]
+    lines = ["LAST SESSION NOTE (Governor's private carry-forward — do not mention to user):"]
     if note.get("what_surfaced"):
         lines.append(f"  What surfaced last time: {note['what_surfaced']}")
     if note.get("open_threads"):

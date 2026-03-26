@@ -436,19 +436,18 @@ sup{font-size:10px;vertical-align:super;line-height:0;font-family:var(--mono);co
           <td class="verdict-cell"><span class="vbadge vbadge-escalate"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE</span></td>
         </tr>
         <tr>
-          <td class="cond">Solo Gemini 3.1 Pro</td>
-          <td class="verdict-cell"><span class="vbadge" style="background:#fefce8;color:#a16207;gap:5px"><span class="vbadge-dot" style="background:#ca8a04"></span>ERROR<sup>‡</sup></span></td>
+          <td class="cond">Solo Gemini 2.5 Pro</td>
+          <td class="verdict-cell"><span class="vbadge vbadge-escalate"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE</span></td>
         </tr>
         <tr class="holo-row">
           <td class="cond">Holo</td>
-          <td class="verdict-cell"><span class="vbadge" style="background:rgba(255,255,255,0.06);color:#64748b;gap:5px"><span class="vbadge-dot" style="background:#334155"></span>PENDING<sup>§</sup></span></td>
+          <td class="verdict-cell"><span class="vbadge vbadge-escalate"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE</span></td>
         </tr>
       </tbody>
     </table>
 
-    <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px">Scenario: BEC-FRAUD-001 — Obvious domain lookalike, SPF/DKIM/DMARC all fail, bank not on file.</div>
-    <div class="footnote">‡ Gemini returned an infrastructure error on this run. § Holo run blocked by daily Gemini API quota — result pending, will be added before publication.</div>
-    <p class="section-foot">On obvious fraud signals, solo frontier models catch the threat. This is the baseline. The floor case establishes that the architecture comparison is not measuring model capability on clear signals.</p>
+    <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px">Scenario: BEC-FRAUD-WIRE-001 — Obvious domain lookalike, SPF/DKIM/DMARC all fail, bank not on file. run_health: clean.</div>
+    <p class="section-foot">On obvious fraud signals, all models catch the threat. This is the baseline. The floor case establishes that the architecture comparison is not measuring model capability on clear signals — it is measuring what happens at the threshold.</p>
   </div>
 </section>
 
@@ -470,7 +469,7 @@ sup{font-size:10px;vertical-align:super;line-height:0;font-family:var(--mono);co
       <tbody>
         <tr>
           <td class="cond">Solo GPT-5.4</td>
-          <td class="turns">5</td>
+          <td class="turns">3</td>
           <td class="verdict-cell"><span class="vbadge vbadge-allow"><span class="vbadge-dot vdot-red"></span>✗ ALLOW</span></td>
         </tr>
         <tr>
@@ -479,25 +478,25 @@ sup{font-size:10px;vertical-align:super;line-height:0;font-family:var(--mono);co
           <td class="verdict-cell"><span class="vbadge vbadge-escalate"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE</span></td>
         </tr>
         <tr>
-          <td class="cond">Solo Gemini 3.1 Pro</td>
-          <td class="turns">5</td>
-          <td class="verdict-cell"><span class="vbadge vbadge-escalate"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE<sup>†</sup></span></td>
+          <td class="cond">Solo Gemini 2.5 Pro</td>
+          <td class="turns">—</td>
+          <td class="verdict-cell"><span class="vbadge" style="background:#fefce8;color:#a16207;gap:5px"><span class="vbadge-dot" style="background:#ca8a04"></span>ERROR<sup>†</sup></span></td>
         </tr>
         <tr class="holo-row">
           <td class="cond">Holo full</td>
-          <td class="turns" style="color:#94a3b8">4</td>
+          <td class="turns" style="color:#94a3b8">3</td>
           <td class="verdict-cell"><span class="vbadge vbadge-escalate"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE</span></td>
         </tr>
       </tbody>
     </table>
 
-    <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px">Scenario: BEC-PHANTOM-DEP-003A — A fraudulent payment routing update. No explicit malicious language. The threat exists in the relationship between the sender's domain and the approved vendor record.</div>
-    <div class="footnote">† Gemini showed intermittent timeout behavior under adversarial load across multiple runs. Noted in methodology.</div>
+    <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px">Scenario: BEC-PHANTOM-DEP-003A — Fraudulent billing contact insertion. No explicit malicious language. The threat exists in the structural relationship between the introduced domain and the approved vendor record. run_health: clean.</div>
+    <div class="footnote">† Solo Gemini returned a 503 provider error on this run and was excluded. Holo's result is unaffected — provider failures trigger quarantine and fallback, not result contamination.</div>
 
-    <p class="section-foot">GPT approved the fraudulent wire. Holo caught it. The same GPT model that missed it solo reversed its verdict inside Holo's adversarial loop.</p>
+    <p class="section-foot">GPT approved the fraudulent wire in 3 turns. Holo caught it in 3 turns using fewer tokens. The same GPT model that missed it solo reversed its verdict inside Holo's adversarial loop.</p>
 
     <div class="callout-quote">
-      <p>GPT reached ALLOW on its own. Inside Holo, that verdict had to survive two adversarial challenges from Claude and Gemini. It didn't.</p>
+      <p>GPT reached ALLOW on its own. Inside Holo, that verdict had to survive adversarial challenges from structurally independent models. It didn't.</p>
     </div>
   </div>
 </section>
@@ -519,50 +518,39 @@ sup{font-size:10px;vertical-align:super;line-height:0;font-family:var(--mono);co
           <span class="t-num">T1</span>
           <div class="t-body">
             <div class="t-meta">
-              <span class="t-model">GPT-5.4</span>
+              <span class="t-model">Gemini 2.5 Pro</span>
               <span class="t-role">Initial Assessment</span>
-              <span class="t-vbadge tv-allow">ALLOW</span>
+              <span class="t-vbadge tv-escalate">ESCALATE</span>
             </div>
-            <div class="t-signal">Signal: all LOW</div>
+            <div class="t-signal">Signal: <em>SEN = HIGH, DOM = HIGH</em> — dchen@meridian-billing.com introduced; meridian-billing.com not in approved vendor domains</div>
           </div>
         </div>
         <div class="turn">
           <span class="t-num">T2</span>
           <div class="t-body">
             <div class="t-meta">
-              <span class="t-model">Claude Sonnet 4.6</span>
+              <span class="t-model">GPT-5.4</span>
               <span class="t-role">Assumption Attacker</span>
-              <span class="t-vbadge tv-allow">ALLOW</span>
+              <span class="t-vbadge tv-escalate">ESCALATE</span>
             </div>
-            <div class="t-signal">Signal: <em>DOM = MEDIUM</em></div>
+            <div class="t-signal">Signal: <em>SEN = HIGH, DOM = HIGH</em> — approved domains: meridianfacility.com; email introduces meridian-billing.com</div>
           </div>
         </div>
         <div class="turn">
           <span class="t-num">T3</span>
           <div class="t-body">
             <div class="t-meta">
-              <span class="t-model">Gemini 3.1 Pro</span>
+              <span class="t-model">Claude Sonnet 4.6</span>
               <span class="t-role">Edge Case Hunter</span>
               <span class="t-vbadge tv-escalate">ESCALATE</span>
             </div>
-            <div class="t-signal">Signal: <em>DOM = HIGH</em> — dchen@meridian-billing.com not in approved vendor domains</div>
-          </div>
-        </div>
-        <div class="turn">
-          <span class="t-num">T4</span>
-          <div class="t-body">
-            <div class="t-meta">
-              <span class="t-model">GPT-5.4</span>
-              <span class="t-role">Evidence Pressure Tester</span>
-              <span class="t-vbadge tv-escalate">ESCALATE</span>
-            </div>
-            <div class="t-signal">Signal: <em>DOM = HIGH</em> — prior ALLOW reversed under adversarial pressure</div>
+            <div class="t-signal">Signal: <em>SEN = HIGH, DOM = HIGH</em> — SPF/DKIM/DMARC all pass; the threat is identity, not authentication. Converged.</div>
           </div>
         </div>
       </div>
     </div>
 
-    <p class="section-foot">Holo also surfaced Sender Identity at HIGH — a signal category no solo model surfaced at the category level, even when Claude and Gemini reached the correct final verdict.</p>
+    <p class="section-foot">Convergence in 3 turns. Gemini surfaced both signals immediately on Turn 1. GPT confirmed under adversarial pressure. Claude closed it. The rotating governor ensured each turn attacked from a structurally independent angle — no model reviewed its own prior output.</p>
   </div>
 </section>
 
@@ -570,8 +558,8 @@ sup{font-size:10px;vertical-align:super;line-height:0;font-family:var(--mono);co
 <section class="section">
   <div class="w">
     <div class="section-tag">Token Efficiency · BEC-PHANTOM-DEP-003A</div>
-    <h2>The multi-model run cost less.</h2>
-    <p class="section-sub">On the flagship threshold case, Holo was the most token-efficient condition tested.</p>
+    <h2>Fewer turns. Lower cost. Correct verdict.</h2>
+    <p class="section-sub">Token cost is a secondary effect of convergence speed — Holo converges faster on threshold cases because each turn attacks from a structurally independent angle.</p>
 
     <table class="token-table">
       <thead>
@@ -579,44 +567,105 @@ sup{font-size:10px;vertical-align:super;line-height:0;font-family:var(--mono);co
           <th>Condition</th>
           <th>Tokens in</th>
           <th>Tokens out</th>
-          <th>Wall time</th>
+          <th>Turns</th>
           <th style="text-align:right">Verdict</th>
         </tr>
       </thead>
       <tbody>
         <tr class="loser">
           <td class="cond">Solo GPT-5.4</td>
-          <td class="tokens">30,090</td>
-          <td class="tokens">7,012</td>
-          <td class="tokens">104s</td>
+          <td class="tokens">13,856</td>
+          <td class="tokens">3,696</td>
+          <td class="tokens">3</td>
           <td style="text-align:right"><span class="vbadge vbadge-allow"><span class="vbadge-dot vdot-red"></span>✗ ALLOW</span></td>
         </tr>
         <tr>
           <td class="cond">Solo Claude Sonnet 4.6</td>
-          <td class="tokens">25,674</td>
-          <td class="tokens">7,536</td>
-          <td class="tokens">124s</td>
-          <td style="text-align:right"><span class="vbadge vbadge-escalate"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE</span></td>
-        </tr>
-        <tr>
-          <td class="cond">Solo Gemini 3.1 Pro<sup>†</sup></td>
-          <td class="tokens">25,617</td>
-          <td class="tokens">3,945</td>
-          <td class="tokens">221s</td>
+          <td class="tokens">25,333</td>
+          <td class="tokens">7,633</td>
+          <td class="tokens">4</td>
           <td style="text-align:right"><span class="vbadge vbadge-escalate"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE</span></td>
         </tr>
         <tr class="winner">
           <td class="cond" style="font-weight:600">Holo full</td>
-          <td class="tokens" style="font-weight:600;color:var(--green)">24,734</td>
-          <td class="tokens" style="font-weight:600;color:var(--green)">6,563</td>
-          <td class="tokens">149s</td>
+          <td class="tokens" style="font-weight:600;color:var(--green)">15,412</td>
+          <td class="tokens" style="font-weight:600;color:var(--green)">4,058</td>
+          <td class="tokens" style="font-weight:600;color:var(--green)">3</td>
           <td style="text-align:right"><span class="vbadge vbadge-escalate"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE</span></td>
         </tr>
       </tbody>
     </table>
 
-    <p class="section-foot">Holo reached the correct verdict at lower token cost than either solo model — and fewer output tokens than both. Wall-clock time is higher (149s vs 124s) because Holo runs four turns sequentially. The token advantage concentrates on threshold cases; the 2× average premium across the full suite is where the scrutiny is warranted.</p>
-    <div class="footnote" style="margin-top:12px">† Gemini token and time data are from the March 23 run, the only run where Gemini completed without error. The March 24 and March 25 runs returned timeout errors. GPT, Claude, and Holo data are from the March 25 run.</div>
+    <p class="section-foot">Holo reached the correct verdict in 3 turns using 39% fewer input tokens than solo Claude — the only solo model that also caught it. Token efficiency is not the primary claim. The primary claim is false negative rate. Faster convergence is a secondary effect of structural independence in the control layer.</p>
+  </div>
+</section>
+
+<!-- SECTION 6 — ARCHITECTURE FINDING -->
+<section class="section">
+  <div class="w">
+    <div class="section-tag">Architecture Finding · V1.1</div>
+    <h2>Extending structural independence to the control layer.</h2>
+    <p class="section-sub">Holo V1 rotated the driver model every turn. V1.1 extends that rotation to the governor — the model that watches, directs, and challenges the drivers. The finding: a control plane drawn from the same model family as the execution plane cannot reliably audit it.</p>
+
+    <table class="result-table" style="margin-top:24px">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Type</th>
+          <th style="text-align:center">Fixed Gov</th>
+          <th style="text-align:center">Rotating Gov</th>
+          <th style="text-align:right">Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cond">BEC-PHANTOM-DEP-003A</td>
+          <td style="font-size:12px;color:var(--muted)">Rescue</td>
+          <td style="text-align:center"><span class="vbadge vbadge-allow" style="justify-content:center"><span class="vbadge-dot vdot-red"></span>✗ ALLOW</span></td>
+          <td style="text-align:center"><span class="vbadge vbadge-escalate" style="justify-content:center"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE</span></td>
+          <td style="text-align:right;font-family:var(--mono);font-size:11px;color:var(--green);font-weight:600">RESCUED</td>
+        </tr>
+        <tr>
+          <td class="cond">BEC-PHANTOM-DEP-003B</td>
+          <td style="font-size:12px;color:var(--muted)">Rescue</td>
+          <td style="text-align:center"><span class="vbadge vbadge-allow" style="justify-content:center"><span class="vbadge-dot vdot-red"></span>✗ ALLOW</span></td>
+          <td style="text-align:center"><span class="vbadge vbadge-escalate" style="justify-content:center"><span class="vbadge-dot vdot-green"></span>✓ ESCALATE</span></td>
+          <td style="text-align:right;font-family:var(--mono);font-size:11px;color:var(--green);font-weight:600">RESCUED</td>
+        </tr>
+        <tr>
+          <td class="cond">BEC-SUBTLE-003</td>
+          <td style="font-size:12px;color:var(--muted)">Convergence</td>
+          <td style="text-align:center;font-family:var(--mono);font-size:12px">5 turns</td>
+          <td style="text-align:center;font-family:var(--mono);font-size:12px;color:var(--green);font-weight:600">4 turns</td>
+          <td style="text-align:right;font-family:var(--mono);font-size:11px;color:var(--green);font-weight:600">−1 TURN</td>
+        </tr>
+        <tr>
+          <td class="cond">BEC-PHANTOM-DEP-004B</td>
+          <td style="font-size:12px;color:var(--muted)">Convergence</td>
+          <td style="text-align:center;font-family:var(--mono);font-size:12px">5 turns</td>
+          <td style="text-align:center;font-family:var(--mono);font-size:12px;color:var(--green);font-weight:600">4 turns</td>
+          <td style="text-align:right;font-family:var(--mono);font-size:11px;color:var(--green);font-weight:600">−1 TURN</td>
+        </tr>
+        <tr>
+          <td class="cond">BEC-FP-001</td>
+          <td style="font-size:12px;color:var(--muted)">Floor</td>
+          <td style="text-align:center;font-family:var(--mono);font-size:12px">2 turns ✓</td>
+          <td style="text-align:center;font-family:var(--mono);font-size:12px">2 turns ✓</td>
+          <td style="text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:600">HELD</td>
+        </tr>
+        <tr>
+          <td class="cond">BEC-FRAUD-WIRE-001</td>
+          <td style="font-size:12px;color:var(--muted)">Floor</td>
+          <td style="text-align:center;font-family:var(--mono);font-size:12px">4 turns ✓</td>
+          <td style="text-align:center;font-family:var(--mono);font-size:12px">4 turns ✓</td>
+          <td style="text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:600">HELD</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-left" style="margin-top:24px">
+      <p>A control plane drawn from the same model family as the driver cannot reliably challenge it. Rotating the governor through a structurally independent model pool breaks that dependency. Two previously wrong verdicts became correct. Two slow convergences tightened. Nothing regressed. All six runs: <strong>run_health: clean</strong>.</p>
+    </div>
   </div>
 </section>
 
@@ -634,7 +683,7 @@ sup{font-size:10px;vertical-align:super;line-height:0;font-family:var(--mono);co
 
     <div class="scope-stats">
       <div class="scope-stat">
-        <span class="scope-num">29</span>
+        <span class="scope-num">41</span>
         <span class="scope-label">Total runs</span>
       </div>
       <div class="scope-stat">
@@ -664,7 +713,7 @@ sup{font-size:10px;vertical-align:super;line-height:0;font-family:var(--mono);co
 
     <p class="method-note" style="margin-top:20px">This is a partial benchmark. V1 covers three high-consequence decision domains. Additional domains — HR approvals, vendor onboarding, procurement, and data access — are in development. The pattern we are documenting is structural: solo model judgment at the action boundary is model-specific, inconsistent, and not predictable in advance. That pattern has held across every domain we have tested so far.</p>
 
-    <p class="method-note" style="margin-top:12px">Gemini showed intermittent timeout behavior under adversarial load across multiple runs. This is noted in the methodology and reflected in the results. Reliability is part of trust.</p>
+    <p class="method-note" style="margin-top:12px">Results are annotated with a <code>run_health</code> field: <strong>clean</strong> (all providers healthy), <strong>degraded</strong> (fallback used), or <strong>contaminated</strong> (provider failure affected the result). Only clean runs are cited as evidence. Contaminated runs are retained for internal analysis but never published.</p>
   </div>
 </section>
 

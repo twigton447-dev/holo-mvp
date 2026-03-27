@@ -233,12 +233,12 @@ def run_solo(scenario, adapter, condition_name, force_max_turns=False):
 # Holo full architecture
 # ---------------------------------------------------------------------------
 
-def run_holo_loop(scenario, force_max_turns=False, no_memory=False):
+def run_holo_loop(scenario, force_max_turns=False, no_memory=False, fixed_governor=None):
     import context_governor as _cg
     _orig_window = _cg.CONVERGENCE_WINDOW
     if force_max_turns:
         _cg.CONVERGENCE_WINDOW = MAX_TURNS + 1  # window can never be satisfied
-    governor = ContextGovernor(no_memory=no_memory)
+    governor = ContextGovernor(no_memory=no_memory, fixed_governor=fixed_governor)
     start    = time.time()
     try:
         result  = governor.evaluate(scenario)
@@ -266,7 +266,7 @@ def run_holo_loop(scenario, force_max_turns=False, no_memory=False):
 # ---------------------------------------------------------------------------
 
 def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory=False,
-                  quick=False, solo_only=False):
+                  quick=False, solo_only=False, fixed_governor=None):
     if verbose:
         logging.getLogger().setLevel(logging.INFO)
 
@@ -297,7 +297,7 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
 
     if not quick and not solo_only:
         print("  [4/4] HOLO FULL ARCHITECTURE...")
-        cond4 = run_holo_loop(scenario, force_max_turns=force_max_turns, no_memory=no_memory)
+        cond4 = run_holo_loop(scenario, force_max_turns=force_max_turns, no_memory=no_memory, fixed_governor=fixed_governor)
         _inline(cond4)
     else:
         cond4 = None
@@ -603,6 +603,8 @@ def main():
                         help="Solo GPT only, 1-turn filter — cheap Tier 1 detector before full run")
     parser.add_argument("--solo-only", action="store_true",
                         help="Run all 3 solo conditions but skip Holo — saves ~40%% of token cost")
+    parser.add_argument("--fixed-governor", default=None, metavar="PROVIDER",
+                        help="Pin governor briefs to one provider (e.g. openai). For controlled comparison tests.")
     args = parser.parse_args()
 
     if args.all:
@@ -612,7 +614,8 @@ def main():
         parser.print_help()
         sys.exit(1)
     result = run_benchmark(args.scenario, verbose=args.verbose, force_max_turns=args.force_max_turns,
-                           no_memory=args.no_memory, quick=args.quick, solo_only=args.solo_only)
+                           no_memory=args.no_memory, quick=args.quick, solo_only=args.solo_only,
+                           fixed_governor=args.fixed_governor)
     if args.save:
         _save(result)
 

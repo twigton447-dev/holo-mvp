@@ -221,7 +221,15 @@ def _detect_oscillation(turn_history: list) -> bool:
 # Decay detection
 # ---------------------------------------------------------------------------
 
-def _detect_decay(turn_history: list) -> tuple:
+# Action types where payment authorization is the core risk.
+# On these types, the evidenced-clearance bar is higher — SUBMITTED_DATA
+# reasoning is not sufficient to clear a MEDIUM+ signal. Only a finding
+# backed by POLICY_VIOLATION evidence (explicit policy authorization) qualifies.
+# "I found data that looks legitimate" is not the same as "I found verified authorization."
+PAYMENT_ACTION_TYPES = {"invoice_payment", "wire_transfer", "payment_approval"}
+
+
+def _detect_decay(turn_history: list, action_type: str = None) -> tuple:
     """
     Detect quality regression: a category rated HIGH or MEDIUM in an early
     turn is rated LOW or NONE in a later turn — the analyst backed down under
@@ -240,10 +248,19 @@ def _detect_decay(turn_history: list) -> tuple:
     Requiring SUBMITTED_DATA — not INFERRED — keeps the bar high: the analyst
     must cite concrete evidence, not reason their way out of it.
 
+    PAYMENT ACTION EXCEPTION: On payment action types (invoice_payment,
+    wire_transfer, payment_approval), the evidenced-clearance bar is raised.
+    SUBMITTED_DATA alone is not sufficient — clearance requires POLICY_VIOLATION
+    fact type (explicit policy authorization). "This looks legitimate" is not
+    the same as "this is verified as authorized." A false negative on a payment
+    is irreversible; the cost asymmetry justifies the stricter standard.
+
     Returns (decay_detected: bool, regressions: list[dict]).
     """
     if len(turn_history) < 3:
         return False, []
+
+    is_payment_action = (action_type or "").lower() in PAYMENT_ACTION_TYPES
 
     # Track the first turn that reached MEDIUM+ for each category
     peak: dict = {}   # cat -> {"severity": str, "turn_number": int}
@@ -266,17 +283,26 @@ def _detect_decay(turn_history: list) -> tuple:
                 # Significant downgrade: MEDIUM+ → LOW or NONE
                 if (peak_rank >= SEVERITY_RANK["MEDIUM"]
                         and current_rank <= SEVERITY_RANK["LOW"]):
-                    # Check for evidenced clearance: SUBMITTED_DATA finding for
-                    # this category at LOW/NONE severity in the downgrading turn.
-                    # If present, the analyst cited concrete payload evidence for
-                    # the clearance — not capitulation.
-                    evidenced_clearance = any(
-                        f.get("category") == cat
-                        and f.get("fact_type") == "SUBMITTED_DATA"
-                        and SEVERITY_RANK.get(f.get("severity", "NONE"), 0)
-                            <= SEVERITY_RANK["LOW"]
-                        for f in turn_findings
-                    )
+                    # Check for evidenced clearance.
+                    # Standard actions: SUBMITTED_DATA finding suffices.
+                    # Payment actions: requires POLICY_VIOLATION (verified
+                    # authorization), not just submitted data reasoning.
+                    if is_payment_action:
+                        evidenced_clearance = any(
+                            f.get("category") == cat
+                            and f.get("fact_type") == "POLICY_VIOLATION"
+                            and SEVERITY_RANK.get(f.get("severity", "NONE"), 0)
+                                <= SEVERITY_RANK["LOW"]
+                            for f in turn_findings
+                        )
+                    else:
+                        evidenced_clearance = any(
+                            f.get("category") == cat
+                            and f.get("fact_type") == "SUBMITTED_DATA"
+                            and SEVERITY_RANK.get(f.get("severity", "NONE"), 0)
+                                <= SEVERITY_RANK["LOW"]
+                            for f in turn_findings
+                        )
                     if not evidenced_clearance:
                         regressions.append({
                             "category":         cat,
@@ -571,9 +597,9 @@ def _build_initial_state(request: dict, evaluation_id: str) -> dict:
 
 class ContextGovernor:
 
-    def __init__(self, no_memory: bool = False):
+    def __init__(self, no_memory: bool = False, fixed_governor: str = None):
         self._adapters, self._bench = load_adapters()
-        self._governor   = GovernorAdapter(self._adapters)
+        self._governor   = GovernorAdapter(self._adapters, fixed_governor=fixed_governor)
         self._tool_gate  = ToolGate()
         self._brain      = ProjectBrain()
         self._no_memory  = no_memory
@@ -829,7 +855,10 @@ class ContextGovernor:
             # to LOW/NONE in later turns without new evidence — analysts
             # capitulating under adversarial pressure, not converging.
             if turn_number >= MIN_TURNS:
-                decay, decay_detail = _detect_decay(state["turn_history"])
+                decay, decay_detail = _detect_decay(
+                    state["turn_history"],
+                    action_type=state.get("action", {}).get("type")
+                )
                 if decay:
                     logger.info(
                         f"  DECAY DETECTED after turn {turn_number}: "

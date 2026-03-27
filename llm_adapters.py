@@ -942,12 +942,15 @@ class GovernorAdapter(_FlightDeckBase):
     Call prepare_for_turn(driver_slot) before each turn to lock in the provider.
     """
 
-    def __init__(self, pool: list):
+    def __init__(self, pool: list, fixed_governor: str = None):
         """
         pool — the active adapter pool (same objects the drivers use).
+        fixed_governor — if set, always use this provider for governor briefs
+                         (e.g. "openai"). Used for controlled comparison tests.
         Governor shares the pool; it never builds its own clients.
         """
         self._pool = pool
+        self._fixed_governor = fixed_governor
         # Default to first adapter until prepare_for_turn is called
         first = pool[0]
         self.provider   = first.provider
@@ -957,6 +960,7 @@ class GovernorAdapter(_FlightDeckBase):
         logger.info(
             "GovernorAdapter: pool ready — "
             + ", ".join(f"{a.provider}={a.model_id}" for a in pool)
+            + (f" [FIXED: {fixed_governor}]" if fixed_governor else " [ROTATING]")
         )
 
     def prepare_for_turn(self, driver_adapter) -> None:
@@ -967,14 +971,18 @@ class GovernorAdapter(_FlightDeckBase):
         from provider_health import registry
         for a in self._pool:
             registry.restore_if_expired(a.provider)
-        candidates = [a for a in self._pool
-                      if a.provider != driver_adapter.provider
-                      and not registry.is_quarantined(a.provider)]
-        if not candidates:
-            # All non-driver providers quarantined — fall back to any healthy adapter
-            candidates = [a for a in self._pool if not registry.is_quarantined(a.provider)]
-        if not candidates:
-            candidates = self._pool  # last resort: ignore quarantine for governor brief
+        if self._fixed_governor:
+            # Fixed governor mode: always use the specified provider
+            fixed = [a for a in self._pool if a.provider == self._fixed_governor]
+            candidates = fixed if fixed else self._pool
+        else:
+            candidates = [a for a in self._pool
+                          if a.provider != driver_adapter.provider
+                          and not registry.is_quarantined(a.provider)]
+            if not candidates:
+                candidates = [a for a in self._pool if not registry.is_quarantined(a.provider)]
+            if not candidates:
+                candidates = self._pool  # last resort: ignore quarantine for governor brief
         chosen = random.choice(candidates)
         self.provider   = chosen.provider
         self.model_id   = chosen.model_id

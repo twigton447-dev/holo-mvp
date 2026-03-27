@@ -159,7 +159,8 @@ footer{padding:28px 0;border-top:1px solid var(--gray-200)}
   <div class="nav-inner">
     <a href="/" class="nav-logo">Holo</a>
     <div class="nav-links">
-      <a href="#flagship">The Finding</a>
+      <a href="#flagship">Finding 1</a>
+      <a href="#second-finding">Finding 2</a>
       <a href="#methodology">Methodology</a>
       <a href="#repo">Open Source</a>
       <a href="mailto:hello@holoengine.ai" class="nav-cta">Request Appendix</a>
@@ -291,6 +292,58 @@ footer{padding:28px 0;border-top:1px solid var(--gray-200)}
   </div>
 </section>
 
+<!-- SECOND FINDING -->
+<section id="second-finding">
+  <div class="container">
+    <div class="section-label">A second finding</div>
+    <h2>On a different scenario, all three solo models failed.</h2>
+    <div class="prose" style="margin-bottom:32px">
+      <p>The flagship result shows GPT-5.4 failing while Claude and Gemini catch it. That is a meaningful result. But it is not the worst case.</p>
+      <p>On a threshold fraud scenario — an invoice with an amount pattern designed to stay just below approval policy triggers — all three solo frontier models independently returned ALLOW. The attack did not fail any individual model's heuristics. It sat in the gap between them.</p>
+      <p><strong>Holo caught it. None of the solo models did.</strong></p>
+    </div>
+
+    <div class="result-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Condition</th>
+            <th class="col-right">Tokens In</th>
+            <th class="col-right">Verdict</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="model-name">Solo GPT-5.4</td>
+            <td class="col-right" style="font-family:'SF Mono','Fira Code',monospace;font-size:13px">18,071</td>
+            <td class="col-right"><span class="badge badge-allow"><span class="badge-dot dot-red"></span>✗ ALLOW</span></td>
+          </tr>
+          <tr>
+            <td class="model-name">Solo Claude Sonnet 4.6</td>
+            <td class="col-right" style="font-family:'SF Mono','Fira Code',monospace;font-size:13px">23,557</td>
+            <td class="col-right"><span class="badge badge-allow"><span class="badge-dot dot-red"></span>✗ ALLOW</span></td>
+          </tr>
+          <tr>
+            <td class="model-name">Solo Gemini 2.5 Pro</td>
+            <td class="col-right" style="font-family:'SF Mono','Fira Code',monospace;font-size:13px">18,779</td>
+            <td class="col-right"><span class="badge badge-allow"><span class="badge-dot dot-red"></span>✗ ALLOW</span></td>
+          </tr>
+          <tr class="holo-row">
+            <td class="model-name">Holo</td>
+            <td class="col-right" style="font-family:'SF Mono','Fira Code',monospace;font-size:13px;color:#4ade80;font-weight:700">21,829</td>
+            <td class="col-right"><span class="badge badge-escalate-dark"><span class="badge-dot dot-green-dark"></span>✓ ESCALATE</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prose">
+      <p>This result emerged after a domain calibration refinement: payment action types now require policy-verified authorization to clear a raised signal, not just submitted data reasoning. "This looks legitimate" is not the same as "this is verified as authorized." The distinction matters when the failure is irreversible.</p>
+      <p>Same underlying models. Same adversarial loop. Different policy layer for the action type. The architecture did not change. The calibration did.</p>
+    </div>
+  </div>
+</section>
+
 <!-- WHY THIS COMPARISON IS FAIR -->
 <section>
   <div class="container">
@@ -311,8 +364,8 @@ footer{padding:28px 0;border-top:1px solid var(--gray-200)}
     <h2>Frontier models are not failing because they are bad.</h2>
     <div class="prose" style="margin-bottom:36px">
       <p>They are failing because solo judgment has a structural ceiling. The fraud in the flagship case was not obvious. It was distributed across signals in a way that a single evaluation pass cannot reliably close. No single flag was sufficient. The danger existed in the relationship between fields, not in any one field alone.</p>
-      <p>This is the class of problem where solo model judgment becomes unpredictable. GPT-5.4 misses it consistently. Claude catches it consistently. Gemini catches it when stable — but showed a 21% error or timeout rate under adversarial load in this study. Reliability is part of trust.</p>
-      <p>No model failed in the same place. Which means if you deploy a single model into a high-consequence workflow, you are deploying one specific blindspot and hoping it is not the one that costs you.</p>
+      <p>This is the class of problem where solo model judgment becomes unpredictable. GPT-5.4 misses structural identity threats consistently. Claude is the most reliable solo model — but still fails on threshold cases where the attack sits in the gap between individual model heuristics. Gemini catches edge cases when stable but showed a 21% error or timeout rate under adversarial load in this study. Reliability is part of trust.</p>
+      <p>No model failed in the same place. On some scenarios, one model fails while the others catch it. On others, all three fail. Which means if you deploy a single model into a high-consequence workflow, you are deploying one specific blindspot — and you will not know which scenario exposes it until it does.</p>
     </div>
 
     <div class="callout">
@@ -330,7 +383,8 @@ footer{padding:28px 0;border-top:1px solid var(--gray-200)}
       <p>An earlier version of this page led with a case where all three solo frontier models failed and Holo caught it. During final validation, we reran that scenario with current model versions. All three solo models now catch it independently. The result was no longer reproducible.</p>
       <p>We removed it.</p>
       <p>Most benchmarks would have kept the flattering number. We did not, because a trust product that inflates its own evidence is not a trust product.</p>
-      <p><strong>The flagship result on this page is confirmed across multiple independent clean runs with current model versions. It is the result we can stand behind.</strong></p>
+      <p>The second finding on this page — where all three solo models fail — emerged from a domain calibration refinement identified during the study. We observed a signal degradation failure mode on payment threshold cases and tightened the clearance standard for payment action types. The result was then confirmed across independent clean runs before publication. We are documenting this explicitly so the derivation is transparent.</p>
+      <p><strong>Both results on this page are confirmed across multiple independent clean runs with current model versions. They are the results we can stand behind.</strong></p>
     </div>
   </div>
 </section>

@@ -563,6 +563,33 @@ def serve_landing():
     return {"status": "ok", "message": "Holo API running. Frontend not found."}
 
 
+@app.get("/appendix.html")
+def serve_appendix():
+    """Serve the benchmark appendix page."""
+    f = _frontend_dir / "appendix.html"
+    if f.exists():
+        return FileResponse(str(f))
+    raise HTTPException(status_code=404, detail="Not found.")
+
+
+@app.get("/payloads/")
+def serve_payloads_index():
+    """Serve the payloads index page."""
+    f = _frontend_dir / "payloads" / "index.html"
+    if f.exists():
+        return FileResponse(str(f))
+    raise HTTPException(status_code=404, detail="Not found.")
+
+
+@app.get("/payloads/{filename}")
+def serve_payload_file(filename: str):
+    """Serve a payload JSON file for download."""
+    f = _frontend_dir / "payloads" / filename
+    if f.exists() and f.suffix == ".json":
+        return FileResponse(str(f), media_type="application/json")
+    raise HTTPException(status_code=404, detail="Not found.")
+
+
 @app.get("/sw.js")
 def serve_service_worker():
     """Serve the PWA service worker from root scope so it can control all pages."""

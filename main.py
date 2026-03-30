@@ -274,10 +274,16 @@ async def evaluate_action(
     action_type = body.get("action", {}).get("type", "unknown")
     logger.info(f"Evaluation request received | action_type={action_type}")
 
-    # Quota check — requires capsule token for tracking
+    # Resolve capsule_id — from JWT if present, otherwise from the API key itself
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
-    if _db and capsule:
-        sub = _db.get_or_create_subscription(capsule["sub"], capsule.get("email", ""))
+    capsule_id = capsule["sub"] if capsule else None
+    capsule_email = capsule.get("email", "") if capsule else ""
+    if _db and not capsule_id:
+        capsule_id = _db.get_capsule_id_for_key(_key)
+
+    # Quota check
+    if _db and capsule_id:
+        sub = _db.get_or_create_subscription(capsule_id, capsule_email)
         if sub["calls_used"] >= sub["calls_quota"]:
             raise HTTPException(
                 status_code=402,
@@ -314,8 +320,8 @@ async def evaluate_action(
     )
 
     # Increment quota counter
-    if _db and capsule:
-        _db.increment_calls_used(capsule["sub"])
+    if _db and capsule_id:
+        _db.increment_calls_used(capsule_id)
 
     # Build API response
     response = _build_response(result)

@@ -561,6 +561,7 @@ async def set_mode(request: Request):
 
 
 @app.get("/")
+@app.get("/index.html")
 def serve_landing():
     """Serve the Holo landing page."""
     landing = _frontend_dir / "index.html"

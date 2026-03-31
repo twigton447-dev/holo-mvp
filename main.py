@@ -659,7 +659,7 @@ async def chat(
     except Exception as e:
         logger.error(f"Chat engine error: {type(e).__name__}: {e}", exc_info=True)
         _track_usage(_key, "/v1/chat", 500)
-        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail="Something went wrong on our end. Please try again in a moment.")
 
     elapsed = int((time.time() - t0) * 1000)
     tokens  = result.get("tokens", {})

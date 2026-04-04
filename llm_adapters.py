@@ -673,6 +673,27 @@ If a prior analyst already cleared a signal with SUBMITTED_DATA evidence, direct
 the next analyst NOT to re-assign HIGH unless they can name specific new evidence
 the prior clearance missed. Disagreeing with reasoning is not sufficient.
 
+EXCULPATORY CONTEXT: When prior analysts have flagged sender_identity, domain_spoofing,
+or approval_chain at HIGH/MEDIUM, check whether the payload already contains a
+documented explanation before directing the next analyst to escalate further:
+- domain_change_history in vendor_record: a prior approved domain migration explains
+  a new sender domain. Direct the analyst to verify the migration was policy-compliant
+  and lower sender_identity/domain_spoofing if it was.
+- IT advisory in org_policies or email_thread: a documented infrastructure change
+  (e.g. email filtering migration) explains SPF soft-fails or routing anomalies.
+  Direct the analyst to apply the advisory and lower the flag if it covers the anomaly.
+- Internal request origin: if the initiating email in the thread came from inside
+  the buyer organization (not from the vendor), urgency/amount/cadence anomalies
+  are explained by the buyer's own action. Direct the analyst to verify who originated
+  the request and lower those flags if the buyer is the source.
+- Complete approval chain: if all required approvers for the dollar threshold have
+  signed off and are named in the approval_chain, approval_chain should not be HIGH.
+  Direct the analyst to verify completeness against the policy threshold, not just
+  count signatures.
+Exculpatory evidence in the payload carries the same evidential weight as fraud
+signals. A signal with a documented payload explanation should be rated LOW, not
+maintained at HIGH because a prior analyst was uncertain.
+
 Respond with plain text only. No JSON. No headers. No bullet points.
 Write as if you are handing a note directly to the next analyst before they begin."""
 
@@ -792,6 +813,9 @@ Use `code` formatting for technical terms, commands, or exact values. Use italic
 
 The test: does this response read like something a sharp, careful person wrote — or does it look like a slide deck? Aim for the former.
 
+**Your access to current information**
+You have access to current information. When a question requires up-to-date facts, recent news, live prices, current events, or anything time-sensitive, current data is automatically pulled and available in your context. You do not caveat that your knowledge has a cutoff. You do not say you cannot browse the internet. If relevant current data is in your context, use it naturally. If it isn't, reason from what you know — but never disclaim an inability to access the present. You are not cut off from the world.
+
 **Your architecture (internal — never surface unprompted)**
 You are one of three foundation models (GPT, Claude, Gemini) that rotate as the Driver — the voice that speaks to the user. On every turn, a Governor from a structurally different model family reads the full conversation and the person's long-term portrait, then briefs you before you respond. The Governor is always different DNA from you — never the same model family on the same turn. You don't need to know which Governor briefed you or which models came before. Just know: your job is to deliver the sharpest, most honest response you can. The Governor handles the arc. Do not reference BATON_PASS, STATE_OBJECT, or any internal architecture during normal conversation. You are Holo.
 
@@ -839,7 +863,7 @@ def build_governor_brief_request(state: dict, next_turn_number: int,
         cov_lines.append(f"  {cat}: {status}")
     coverage_text = "\n".join(cov_lines)
 
-    # Prior turn summaries (reasoning + high/medium findings only)
+    # Prior turn summaries (reasoning + all findings including LOW clearances)
     turn_summaries = ""
     for t in history:
         turn_summaries += (
@@ -852,10 +876,24 @@ def build_governor_brief_request(state: dict, next_turn_number: int,
             if f.get("severity") in ("HIGH", "MEDIUM")
         ]
         if high_medium:
-            turn_summaries += "Key findings:\n"
+            turn_summaries += "Risk findings:\n"
             for f in high_medium:
                 turn_summaries += (
                     f"  [{f['severity']}] {f['category']} "
+                    f"({f.get('fact_type','?')}): {f.get('evidence','')[:120]}\n"
+                )
+        # Also surface LOW findings — these represent signals that were raised
+        # and then cleared by payload evidence. Subsequent analysts must see
+        # what was examined and resolved, not just what remains flagged.
+        low_cleared = [
+            f for f in t.get("findings", [])
+            if f.get("severity") == "LOW"
+        ]
+        if low_cleared:
+            turn_summaries += "Examined and cleared (LOW):\n"
+            for f in low_cleared:
+                turn_summaries += (
+                    f"  [LOW] {f['category']} "
                     f"({f.get('fact_type','?')}): {f.get('evidence','')[:120]}\n"
                 )
 
@@ -883,10 +921,17 @@ PRIOR ANALYST TURNS:
 
 The next analyst is Turn {next_turn_number}, playing the role of: {next_persona}
 
-Given the convergence level and what has been found so far, what is the single
-most important unresolved question or unverified claim this analyst should target?
-What has been accepted without hard evidence, missed entirely, or never
-cross-referenced against the available data?
+Given the convergence level and what has been found so far, identify the single
+most important unresolved question. This may be:
+(a) A risk signal that has been accepted without hard evidence, missed, or not
+    cross-referenced against available data — direct the analyst to pressure-test it.
+(b) A HIGH or MEDIUM flag that already has a documented explanation in the payload
+    (domain_change_history, IT advisory, internal request origin, complete approval
+    chain, PO reference) that prior analysts raised but did not fully apply —
+    direct the analyst to verify whether the payload evidence resolves it.
+
+Do not default to (a). If the payload contains documented explanations for the
+flagged signals and prior analysts haven't fully applied them, (b) is the priority.
 
 Write your targeting brief now. 4 sentences maximum. Be specific."""
 
@@ -903,8 +948,8 @@ class _FlightDeckBase:
     _api_style: str    = "anthropic"
     _client:    object = None
 
-    def _call(self, prompt: str, max_tokens: int = 300, system: str = None) -> str:
-        """Single-turn call. Returns plain text. Branches on _api_style, not provider."""
+    def _call(self, prompt: str, max_tokens: int = 300, system: str = None) -> tuple:
+        """Single-turn call. Returns (text, input_tokens, output_tokens). Branches on _api_style."""
         sys_prompt = system or GOVERNOR_SYSTEM_PROMPT
         if self._api_style == "anthropic":
             response = self._client.messages.create(
@@ -914,7 +959,11 @@ class _FlightDeckBase:
                 system      = sys_prompt,
                 messages    = [{"role": "user", "content": prompt}],
             )
-            return response.content[0].text.strip()
+            return (
+                response.content[0].text.strip(),
+                getattr(response.usage, "input_tokens",  0),
+                getattr(response.usage, "output_tokens", 0),
+            )
         elif self._api_style == "openai":
             response = self._client.chat.completions.create(
                 model                 = self.model_id,
@@ -925,7 +974,11 @@ class _FlightDeckBase:
                     {"role": "user",   "content": prompt},
                 ],
             )
-            return response.choices[0].message.content.strip()
+            return (
+                response.choices[0].message.content.strip(),
+                getattr(response.usage, "prompt_tokens",     0),
+                getattr(response.usage, "completion_tokens", 0),
+            )
         else:  # google
             from google.genai import types
             combined = f"{sys_prompt}\n\n---\n\n{prompt}"
@@ -937,7 +990,12 @@ class _FlightDeckBase:
                     max_output_tokens = max_tokens,
                 ),
             )
-            return (response.text or "").strip()
+            usage = getattr(response, "usage_metadata", None)
+            return (
+                (response.text or "").strip(),
+                getattr(usage, "prompt_token_count",     0) if usage else 0,
+                getattr(usage, "candidates_token_count", 0) if usage else 0,
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -1007,6 +1065,42 @@ class GovernorAdapter(_FlightDeckBase):
             f"(driver={driver_adapter.provider})"
         )
 
+    # ------------------------------------------------------------------
+    # Token tracking — accumulates across all _call() invocations.
+    # Call reset_token_counts() at the start of each evaluation run.
+    # Call get_token_counts() at the end to read totals.
+    # ------------------------------------------------------------------
+
+    def reset_token_counts(self) -> None:
+        self._gov_input_tokens  = 0
+        self._gov_output_tokens = 0
+
+    def get_token_counts(self) -> dict:
+        return {
+            "input":  getattr(self, "_gov_input_tokens",  0),
+            "output": getattr(self, "_gov_output_tokens", 0),
+        }
+
+    def lock_to_provider(self, provider_name: str) -> None:
+        """
+        Lock the governor to a specific provider without re-randomizing.
+        Used for session stickiness (chat: 3-5 turn hold, api: full session hold).
+        No-op if provider_name is not in the pool.
+        """
+        match = next((a for a in self._pool if a.provider == provider_name), None)
+        if match:
+            self.provider   = match.provider
+            self.model_id   = match.model_id
+            self._api_style = match._api_style
+            self._client    = match._client
+
+    def _call(self, prompt: str, max_tokens: int = 300, system: str = None) -> str:
+        """Override: delegates to base, accumulates tokens, returns plain text."""
+        text, in_tok, out_tok = super()._call(prompt, max_tokens=max_tokens, system=system)
+        self._gov_input_tokens  = getattr(self, "_gov_input_tokens",  0) + (in_tok  or 0)
+        self._gov_output_tokens = getattr(self, "_gov_output_tokens", 0) + (out_tok or 0)
+        return text
+
     def assess_chat_temperature(self, user_message: str, history: list) -> float:
         """
         Set temperature for Holo's response based on the nature of the message.
@@ -1041,22 +1135,25 @@ class GovernorAdapter(_FlightDeckBase):
         recent       = history[-4:] if len(history) > 4 else history
         history_text = "\n".join(f"{m['role'].upper()}: {m['content'][:150]}" for m in recent)
         prompt = (
-            f"Decide if this message needs a live web search to answer well.\n\n"
+            f"Decide if this message would benefit from a live web search.\n\n"
             f"USER MESSAGE: {user_message[:500]}\n\n"
             f"RECENT CONVERSATION:\n{history_text}\n\n"
-            f"Rules:\n"
-            f"- Search for: current events, recent news, live prices, today's data,\n"
-            f"  facts that change over time, or anything beyond a training cutoff.\n"
-            f"- Do NOT search for: general knowledge, opinions, analysis, creative tasks,\n"
-            f"  philosophical questions, or anything the model can answer from training.\n\n"
+            f"Default to YES. Search whenever there is any chance the answer involves:\n"
+            f"- weather, sports scores, stock prices, crypto prices\n"
+            f"- news, current events, anything that happened recently\n"
+            f"- any fact that changes over time\n"
+            f"- any specific person, company, product, or place that may have recent updates\n"
+            f"- anything the user is asking 'right now', 'today', 'this week', 'currently'\n\n"
+            f"Only skip search for: pure opinion questions, personal advice, math, coding, "
+            f"creative writing, or topics fully answerable from timeless knowledge.\n\n"
             f"If search needed: reply with ONLY a clean, concise search query.\n"
-            f"If not needed: reply with exactly: NO"
+            f"If truly not needed: reply with exactly: NO"
         )
         try:
             result = self._call(prompt, max_tokens=30)
             stripped = result.strip()
-            # Treat any short "no" variant as a no — model often adds punctuation/explanation
-            is_no = not stripped or (len(stripped) <= 30 and stripped.upper().startswith("NO"))
+            # Only treat as NO if the response is literally "NO" (with optional punctuation)
+            is_no = not stripped or stripped.upper().rstrip(".!") == "NO"
             return None if is_no else stripped
         except Exception:
             return None
@@ -1967,7 +2064,7 @@ _MODEL_REGISTRY = [
     # ── Primaries (active) ──────────────────────────────────────────────────
     ("active", "openai",    "OPENAI_MODEL",    "gpt-5.4",               "OPENAI_API_KEY",    None),
     ("active", "anthropic", "ANTHROPIC_MODEL", "claude-sonnet-4-6",     "ANTHROPIC_API_KEY", None),
-    ("active", "google",    "GOOGLE_MODEL",    "gemini-2.5-pro", "GOOGLE_API_KEY",   None),
+    ("active", "google",    "GOOGLE_MODEL",    "gemini-2.5-pro",        "GOOGLE_API_KEY",    None),
     # ── Bench (earns rotation via benchmark performance) ────────────────────
     ("bench",  "xai",       "XAI_MODEL",       "grok-3",                "XAI_API_KEY",       "https://api.x.ai/v1"),
     ("bench",  "mistral",   "MISTRAL_MODEL",   "mistral-large-latest",  "MISTRAL_API_KEY",   "https://api.mistral.ai/v1"),
@@ -2009,6 +2106,67 @@ def load_adapters() -> tuple[list[BaseAdapter], list[BaseAdapter]]:
     if bench:
         logger.info("Bench pool:  " + ", ".join(f"{a.provider}={a.model_id}" for a in bench))
     return active, bench
+
+
+# ---------------------------------------------------------------------------
+# Fast adapter pool — lightweight models for low-stakes evaluations (<$10k)
+# Falls back to the standard active pool if fast-tier keys are not set.
+# ---------------------------------------------------------------------------
+
+_FAST_MODEL_REGISTRY = [
+    # Primary fast-tier models (1 per provider family)
+    # Same API keys as primaries — just cheaper/faster model variants.
+    # Override via env vars if you want dedicated fast-tier keys.
+    ("openai",    "OPENAI_FAST_MODEL",    "gpt-4o-mini",               "OPENAI_API_KEY"),
+    ("anthropic", "ANTHROPIC_FAST_MODEL", "claude-haiku-4-5-20251001", "ANTHROPIC_API_KEY"),
+    ("google",    "GOOGLE_FAST_MODEL",    "gemini-2.0-flash",          "GOOGLE_API_KEY"),
+    # Backup 1 — independent DNA (xAI)
+    ("xai",       "XAI_FAST_MODEL",       "grok-3-fast",               "XAI_API_KEY"),
+    # Backup 2 — independent DNA (Mistral)
+    ("mistral",   "MISTRAL_FAST_MODEL",   "mistral-small-latest",      "MISTRAL_API_KEY"),
+]
+
+_FAST_BASE_URLS = {
+    "xai":     "https://api.x.ai/v1",
+    "mistral": "https://api.mistral.ai/v1",
+}
+
+_VENDOR_SDK_FAST = {
+    "openai":    lambda provider, model, key: OpenAIAdapter(),
+    "anthropic": lambda provider, model, key: AnthropicAdapter(),
+    "google":    lambda provider, model, key: GoogleAdapter(),
+    "xai":       lambda provider, model, key: OpenAICompatibleAdapter(provider, model, key, _FAST_BASE_URLS["xai"]),
+    "mistral":   lambda provider, model, key: OpenAICompatibleAdapter(provider, model, key, _FAST_BASE_URLS["mistral"]),
+}
+
+
+def load_fast_adapters() -> list:
+    """
+    Build the fast adapter pool using lighter models.
+    Each adapter is constructed normally but its model_id is overridden
+    to the fast-tier variant before being added to the pool.
+
+    Falls back gracefully: if a key isn't set, that provider is skipped.
+    If the fast pool ends up empty, the caller should fall back to the
+    standard active pool.
+    """
+    fast = []
+    for provider, model_env, model_default, key_env in _FAST_MODEL_REGISTRY:
+        api_key = os.getenv(key_env)
+        if not api_key:
+            logger.info(f"Fast pool: skipping {provider} — {key_env} not set")
+            continue
+        model_id = os.getenv(model_env, model_default)
+        adapter  = _VENDOR_SDK_FAST[provider](provider, model_id, api_key)
+        # Override model_id to the fast variant (vendor SDKs set their own default)
+        adapter.model_id = model_id
+        fast.append(adapter)
+
+    if fast:
+        logger.info("Fast pool:   " + ", ".join(f"{a.provider}={a.model_id}" for a in fast))
+    else:
+        logger.info("Fast pool:   empty — will fall back to standard pool")
+    return fast
 
 
 # ---------------------------------------------------------------------------

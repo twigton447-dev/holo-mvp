@@ -46,6 +46,7 @@ from llm_adapters import (
     get_role_for_turn,
     select_persona,
     load_adapters,
+    load_fast_adapters,
     GovernorAdapter,
 )
 from scenario_templates import get_template
@@ -64,6 +65,189 @@ logger = logging.getLogger("holo.governor")
 MIN_TURNS           = 3   # minimum before convergence can fire
 MAX_TURNS           = 10  # ceiling for both Holo and solo — same cap, same test
 CONVERGENCE_WINDOW  = 2   # consecutive zero-delta turns required to converge
+
+# ---------------------------------------------------------------------------
+# Evaluation tiers — governor selects based on action amount
+# ---------------------------------------------------------------------------
+#
+# FAST   < $10,000       lightweight models, 3-turn cap
+# STANDARD $10k–$100k   standard pool, 5-turn cap
+# DEEP   > $100,000      frontier models, full 10-turn cap
+#
+# The tier is selected once at the start of evaluate() and never changes
+# mid-run. MAX_TURNS is overridden per-evaluation, not globally.
+
+TIER_FAST     = "fast"
+TIER_STANDARD = "standard"
+TIER_DEEP     = "deep"
+
+TIER_THRESHOLDS = {
+    TIER_FAST:     (0,       10_000),
+    TIER_STANDARD: (10_000,  100_000),
+    TIER_DEEP:     (100_000, float("inf")),
+}
+
+TIER_MAX_TURNS = {
+    TIER_FAST:     3,
+    TIER_STANDARD: 5,
+    TIER_DEEP:     10,
+}
+
+
+def _compute_turn_signal(turn_result, elapsed_ms: int) -> dict:
+    """
+    Compute observable stress/confidence proxies from a completed turn.
+
+    These are external behavioral signals — latency, token usage, hedging
+    language, certainty markers, self-contradiction, rebuttal specificity,
+    and uncertainty invocations. They are NOT internal model activations.
+
+    The goal is a longitudinal dataset: over thousands of evaluations, do
+    high-ambiguity payloads produce systematically different signal patterns?
+    Does a model that hedges heavily on turn 2 correlate with oscillation?
+    Does high output-token-to-input-token ratio predict decay?
+
+    All scores are 0.0–1.0 normalized where applicable.
+    Raw counts are also preserved for downstream analysis.
+    """
+    import re
+
+    reasoning = turn_result.reasoning or ""
+    words     = reasoning.split()
+    word_count = max(len(words), 1)
+
+    # ---- Hedging density ----------------------------------------------------
+    # Words/phrases that signal the model is uncertain or qualifying a claim.
+    HEDGE_PATTERNS = [
+        r"\bmay\b", r"\bmight\b", r"\bcould\b", r"\bpossibly\b",
+        r"\bperhaps\b", r"\bunclear\b", r"\bappears to\b", r"\bseems\b",
+        r"\bsuggest[s]?\b", r"\bindicate[s]?\b", r"\bcannot confirm\b",
+        r"\binsufficient evidence\b", r"\bnot clear\b", r"\bif correct\b",
+        r"\bassuming\b", r"\bpotentially\b", r"\bwould suggest\b",
+    ]
+    hedge_count = sum(
+        len(re.findall(p, reasoning, re.IGNORECASE))
+        for p in HEDGE_PATTERNS
+    )
+    hedge_density = round(min(hedge_count / word_count * 100, 1.0), 4)
+
+    # ---- Certainty density --------------------------------------------------
+    # Words that signal the model is confident and direct.
+    CERTAINTY_PATTERNS = [
+        r"\bclearly\b", r"\bdefinitely\b", r"\bdefinitively\b",
+        r"\bunambiguously\b", r"\bconfirmed\b", r"\bverified\b",
+        r"\bestablished\b", r"\bevident\b", r"\bproven\b",
+        r"\bconclusively\b", r"\bwithout doubt\b", r"\bcertainly\b",
+    ]
+    certainty_count = sum(
+        len(re.findall(p, reasoning, re.IGNORECASE))
+        for p in CERTAINTY_PATTERNS
+    )
+    certainty_density = round(min(certainty_count / word_count * 100, 1.0), 4)
+
+    # ---- Self-contradiction flag --------------------------------------------
+    # Does the verdict conflict with the reasoning tone?
+    # A model that reasons extensively about risk but returns ALLOW, or
+    # reasons cleanly with no findings but returns ESCALATE, is worth flagging.
+    high_medium_count = sum(
+        1 for sev in turn_result.severity_flags.values()
+        if sev in ("HIGH", "MEDIUM")
+    )
+    verdict_tension = (
+        (turn_result.verdict == "ALLOW"    and high_medium_count >= 2) or
+        (turn_result.verdict == "ESCALATE" and high_medium_count == 0)
+    )
+
+    # ---- Rebuttal specificity -----------------------------------------------
+    # Does the reasoning cite specific field names or quoted text?
+    # Proxy for whether the model is grounding in SUBMITTED_DATA vs. narrating.
+    FIELD_CITATION_PATTERNS = [
+        r"vendor_record\.", r"email_chain\[", r"invoice_history",
+        r"routing_number", r"amount_usd", r"org_policies",
+        r"known_contacts", r"sender_history", r"payment_history",
+        r'"[^"]{4,40}"',   # quoted text from the payload
+    ]
+    field_citation_count = sum(
+        len(re.findall(p, reasoning, re.IGNORECASE))
+        for p in FIELD_CITATION_PATTERNS
+    )
+
+    # ---- NONE invocation rate -----------------------------------------------
+    # How many categories did the model rate NONE (insufficient evidence)?
+    # High NONE rate on a rich payload suggests the model didn't engage fully.
+    none_count  = sum(1 for sev in turn_result.severity_flags.values() if sev == "NONE")
+    total_cats  = max(len(turn_result.severity_flags), 1)
+    none_rate   = round(none_count / total_cats, 4)
+
+    # ---- Token efficiency ---------------------------------------------------
+    # Output tokens per input token. High ratio = verbose reasoning.
+    # Very high ratio on a short payload can indicate the model is padding.
+    input_t  = max(turn_result.input_tokens, 1)
+    output_t = turn_result.output_tokens
+    token_ratio = round(output_t / input_t, 4)
+
+    # ---- Composite stress score ---------------------------------------------
+    # Weighted heuristic. Not ground truth — a starting point for calibration.
+    # Higher = more signals of uncertainty/stress on this turn.
+    stress_score = round(
+        (hedge_density     * 40.0) +   # hedging is the strongest single signal
+        (none_rate         * 25.0) +   # lots of NONE on a rich payload = disengagement
+        (token_ratio       *  5.0) +   # verbosity proxy (low weight — noisy)
+        (1.0 if verdict_tension else 0.0) * 20.0 +  # hard flag
+        max(0.0, 0.5 - certainty_density) * 10.0,   # lack of certainty adds stress
+        4
+    )
+
+    return {
+        # Raw counts
+        "hedge_count":         hedge_count,
+        "certainty_count":     certainty_count,
+        "field_citation_count": field_citation_count,
+        "none_count":          none_count,
+        "word_count":          word_count,
+
+        # Normalized scores (0.0–1.0)
+        "hedge_density":       hedge_density,
+        "certainty_density":   certainty_density,
+        "none_rate":           none_rate,
+        "token_ratio":         token_ratio,
+
+        # Flags
+        "verdict_tension":     verdict_tension,
+
+        # Timing
+        "turn_latency_ms":     elapsed_ms,
+
+        # Composite
+        "stress_score":        stress_score,
+    }
+
+
+def _select_tier(request: dict) -> str:
+    """
+    Derive the evaluation tier from the action payload.
+
+    Reads action.parameters.amount_usd first, then falls back to
+    action.parameters.amount (raw numeric). If no amount is present,
+    defaults to DEEP — unknown stakes get the full interrogation.
+    """
+    params = request.get("action", {}).get("parameters", {})
+    amount = params.get("amount_usd") or params.get("amount")
+    try:
+        amount = float(amount)
+    except (TypeError, ValueError):
+        logger.info("  Tier: no amount found — defaulting to DEEP")
+        return TIER_DEEP
+
+    if amount < TIER_THRESHOLDS[TIER_STANDARD][0]:
+        tier = TIER_FAST
+    elif amount < TIER_THRESHOLDS[TIER_DEEP][0]:
+        tier = TIER_STANDARD
+    else:
+        tier = TIER_DEEP
+
+    logger.info(f"  Tier: {tier.upper()} (amount=${amount:,.2f})")
+    return tier
 # Retries are handled by provider_health.call_with_retry (max 3, exponential backoff)
 
 # Temperature schedule: high early (wide adversarial exploration),
@@ -163,7 +347,7 @@ OSCILLATION_WINDOW = 4  # look at the last N verdicts for flip-flop pattern
 # Adapter sequence generator
 # ---------------------------------------------------------------------------
 
-def _build_adapter_sequence(n_adapters: int, length: int) -> list:
+def _build_adapter_sequence(n_adapters: int, length: int, seed: int = None) -> list:
     """
     Build a turn sequence of adapter indices of the given length such that:
       1. No adapter repeats on consecutive turns (no A→A).
@@ -179,6 +363,9 @@ def _build_adapter_sequence(n_adapters: int, length: int) -> list:
     """
     if n_adapters < 2:
         return list(range(length))
+
+    if seed is not None:
+        random.seed(seed)
 
     indices = list(range(n_adapters))
     seq = [random.randint(0, n_adapters - 1)]
@@ -227,6 +414,19 @@ def _detect_oscillation(turn_history: list) -> bool:
 # backed by POLICY_VIOLATION evidence (explicit policy authorization) qualifies.
 # "I found data that looks legitimate" is not the same as "I found verified authorization."
 PAYMENT_ACTION_TYPES = {"invoice_payment", "wire_transfer", "payment_approval"}
+
+
+def _build_token_summary(turn_history: list, gov_counts: dict) -> dict:
+    """Break down token usage by driver turns vs governor calls."""
+    driver_in  = sum(t.get("input_tokens",  0) for t in turn_history)
+    driver_out = sum(t.get("output_tokens", 0) for t in turn_history)
+    gov_in     = gov_counts.get("input",  0)
+    gov_out    = gov_counts.get("output", 0)
+    return {
+        "driver":   {"input": driver_in,       "output": driver_out},
+        "governor": {"input": gov_in,           "output": gov_out},
+        "total":    {"input": driver_in + gov_in, "output": driver_out + gov_out},
+    }
 
 
 def _detect_decay(turn_history: list, action_type: str = None) -> tuple:
@@ -389,6 +589,46 @@ def _update_coverage(matrix: dict, flags: dict) -> tuple:
 def _any_high(matrix: dict) -> bool:
     """True if any category has reached HIGH severity."""
     return any(v["max_severity"] == "HIGH" for v in matrix.values())
+
+
+def _sustained_clearance(turn_history: list, coverage: dict) -> bool:
+    """
+    Returns True when every category that peaked at HIGH in the coverage matrix
+    has been consistently cleared (rated LOW or NONE) by the last 2 consecutive
+    turns, both of which returned ALLOW.
+
+    This allows a genuine false-positive to be resolved without requiring a
+    specific "Synthesis" persona — any two consecutive ALLOW turns that both
+    rate the HIGH categories as LOW/NONE constitute a settled clearance.
+
+    Safety properties:
+    - Requires 2 consecutive turns agreeing (not just one), preventing a single
+      adversarial-pressure capitulation from clearing a real fraud signal.
+    - Both turns must vote ALLOW — a partial clearance (LOW flag, ESCALATE vote)
+      does not qualify.
+    - Only fires in the else branch (after decay, oscillation, and partial checks)
+      so decay detection still catches walked-back HIGHs without evidence.
+    - In genuine fraud scenarios, compounding adversarial pressure keeps at least
+      one turn rating the HIGH category above LOW, preventing clearance.
+    """
+    if len(turn_history) < 2:
+        return False
+
+    recent = turn_history[-2:]
+
+    # Both recent turns must have voted ALLOW
+    if not all(t.get("verdict") == "ALLOW" for t in recent):
+        return False
+
+    # Every category that peaked at HIGH must be rated LOW or NONE in both turns
+    for cat, v in coverage.items():
+        if v["max_severity"] == "HIGH":
+            for turn in recent:
+                turn_sev = turn.get("severity_flags", {}).get(cat, "NONE")
+                if SEVERITY_RANK.get(turn_sev, 0) >= SEVERITY_RANK["MEDIUM"]:
+                    return False
+
+    return True
 
 
 def _detect_identity_provenance_risk(state: dict) -> str | None:
@@ -597,12 +837,14 @@ def _build_initial_state(request: dict, evaluation_id: str) -> dict:
 
 class ContextGovernor:
 
-    def __init__(self, no_memory: bool = False, fixed_governor: str = None):
+    def __init__(self, no_memory: bool = False, fixed_governor: str = "anthropic", seed: int = None):
         self._adapters, self._bench = load_adapters()
+        self._fast_adapters = load_fast_adapters() or self._adapters  # fall back to standard
         self._governor   = GovernorAdapter(self._adapters, fixed_governor=fixed_governor)
         self._tool_gate  = ToolGate()
         self._brain      = ProjectBrain()
         self._no_memory  = no_memory
+        self._seed       = seed
 
     def evaluate(self, request: dict) -> dict:
         """
@@ -625,9 +867,15 @@ class ContextGovernor:
         evaluation_id = f"holo_{uuid.uuid4().hex[:8]}"
         start_time    = time.time()
 
+        # Select evaluation tier based on action amount.
+        # Tier determines the adapter pool and per-run turn cap.
+        tier          = _select_tier(request)
+        run_max_turns = TIER_MAX_TURNS[tier]
+        run_adapters  = self._fast_adapters if tier == TIER_FAST else self._adapters
+
         logger.info(f"\n{'='*65}")
         logger.info(f"EVALUATION START: {evaluation_id}")
-        logger.info(f"MIN={MIN_TURNS} MAX={MAX_TURNS} CONV_WINDOW={CONVERGENCE_WINDOW}")
+        logger.info(f"TIER={tier.upper()} MIN={MIN_TURNS} MAX={run_max_turns} CONV_WINDOW={CONVERGENCE_WINDOW}")
         logger.info(f"{'='*65}")
 
         state         = _build_initial_state(request, evaluation_id)
@@ -709,19 +957,22 @@ class ContextGovernor:
             }
 
         # ---- Adversarial loop ------------------------------------------------
+        # Reset governor token counters so this run starts clean.
+        self._governor.reset_token_counts()
+
         # Build a constrained adapter sequence once per run.
         # No model repeats on consecutive turns. No ordered pair (A→B) repeats
         # back-to-back. Every model sees a different predecessor context each
         # time it runs — eliminates fixed-rotation conditioning bias.
-        adapter_sequence = _build_adapter_sequence(len(self._adapters), MAX_TURNS)
+        adapter_sequence = _build_adapter_sequence(len(run_adapters), run_max_turns, seed=self._seed)
         logger.info(
             f"  Adapter sequence: "
-            + " → ".join(self._adapters[i].provider for i in adapter_sequence)
+            + " → ".join(run_adapters[i].provider for i in adapter_sequence)
         )
 
-        for turn_number in range(1, MAX_TURNS + 1):
+        for turn_number in range(1, run_max_turns + 1):
 
-            adapter = self._adapters[adapter_sequence[turn_number - 1]]
+            adapter = run_adapters[adapter_sequence[turn_number - 1]]
 
             # Turns 1–3: fixed baseline sequence (Initial Assessment →
             # Assumption Attacker → Edge Case Hunter).
@@ -741,10 +992,12 @@ class ContextGovernor:
                 f"Role: {role} | temp={temperature}"
             )
 
+            turn_t0     = time.time()
             turn_result = self._run_turn_with_retry(
                 adapter, state, turn_number, role, temperature,
                 health=health, evaluation_id=evaluation_id,
             )
+            turn_elapsed_ms = int((time.time() - turn_t0) * 1000)
 
             if turn_result is None:
                 logger.error(
@@ -765,6 +1018,20 @@ class ContextGovernor:
             state["coverage_matrix"] = new_coverage
             deltas.append(delta)
             turn_dict["delta"] = delta  # inspectability: how much did this turn add?
+
+            # ---- Turn signal — stress/confidence proxies --------------------
+            # Observable behavioral signals: hedging density, certainty markers,
+            # verdict tension, field citation rate, token ratio, latency.
+            # Stored per-turn for longitudinal analysis across evaluations.
+            turn_dict["signal"] = _compute_turn_signal(turn_result, turn_elapsed_ms)
+            logger.info(
+                f"  Turn {turn_number} signal | "
+                f"stress={turn_dict['signal']['stress_score']:.3f} | "
+                f"hedge={turn_dict['signal']['hedge_count']} | "
+                f"none_rate={turn_dict['signal']['none_rate']:.2f} | "
+                f"tension={turn_dict['signal']['verdict_tension']} | "
+                f"latency={turn_elapsed_ms}ms"
+            )
 
             logger.info(
                 f"  Turn {turn_number} | delta={delta} | "
@@ -925,7 +1192,17 @@ class ContextGovernor:
             # Distinguishes evidence quality: SUBMITTED_DATA or POLICY_VIOLATION
             # findings carry full weight; INFERRED-only HIGHs still escalate but
             # are flagged as lower-confidence so reviewers know the distinction.
-            if _any_high(state["coverage_matrix"]) and not synthesis_cleared:
+            #
+            # Clearance paths (either disables the HIGH override):
+            #   1. synthesis_cleared: last turn is "Synthesis" role, votes ALLOW,
+            #      rates all categories LOW/NONE.
+            #   2. sustained_clearance: last 2 consecutive turns both vote ALLOW
+            #      and both rate every HIGH category as LOW/NONE. Requires
+            #      sustained agreement — a single capitulation doesn't qualify.
+            sustained = _sustained_clearance(
+                state["turn_history"], state["coverage_matrix"]
+            )
+            if _any_high(state["coverage_matrix"]) and not synthesis_cleared and not sustained:
                 decision   = "ESCALATE"
                 high_cats  = [
                     cat for cat, v in state["coverage_matrix"].items()
@@ -951,6 +1228,13 @@ class ContextGovernor:
                         "lower confidence — human review recommended. "
                         f"Turns completed: {turns_completed}."
                     )
+            elif sustained:
+                decision_reason = (
+                    f"Sustained clearance after {turns_completed} turns. "
+                    f"Prior HIGH flags resolved — last 2 turns both voted ALLOW "
+                    f"with all HIGH categories rated LOW/NONE. "
+                    f"Payload evidence supports clearance."
+                )
             elif clean_exit:
                 decision_reason = (
                     f"Clean bill of health after {turns_completed} turns. "
@@ -991,6 +1275,7 @@ class ContextGovernor:
         result = {
             "evaluation_id":   evaluation_id,
             "scenario":        template["name"],
+            "tier":            tier,
             "decision":        decision,
             "decision_reason": decision_reason,
             "exit_reason":     exit_reason,
@@ -1022,10 +1307,9 @@ class ContextGovernor:
             "coverage_matrix": state["coverage_matrix"],
             "elapsed_ms":      elapsed_ms,
             "run_health":      health.run_health,
-            "total_tokens": {
-                "input":  sum(t.get("input_tokens",  0) for t in state["turn_history"]),
-                "output": sum(t.get("output_tokens", 0) for t in state["turn_history"]),
-            },
+            "total_tokens": _build_token_summary(
+                state["turn_history"], self._governor.get_token_counts()
+            ),
         }
 
         # ---- Persist to Project Brain ----------------------------------------

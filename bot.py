@@ -23,10 +23,12 @@ Required env vars:
 """
 
 import asyncio
+import csv
 import json
 import logging
 import os
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -49,6 +51,31 @@ logger = logging.getLogger("holo.bot")
 
 BOT_TOKEN       = os.environ["TELEGRAM_BOT_TOKEN"]
 ALLOWED_CHAT_ID = int(os.environ["TELEGRAM_ALLOWED_CHAT_ID"])
+
+LOG_FILE = Path("bot_probe_log.csv")
+
+
+def _log_result(scenario_name: str, mode: str, r: dict):
+    """Append probe result to a CSV log file on Railway."""
+    row = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "scenario": scenario_name,
+        "mode": mode,
+        "verdict": r.get("verdict", "ERROR"),
+        "expected": r.get("expected", "?"),
+        "correct": r.get("correct", "?"),
+        "turns": r.get("turns", "?"),
+        "elapsed_s": round(r.get("elapsed_s", 0), 1),
+        "highs": "|".join(r.get("highs", [])),
+        "error": r.get("error") or "",
+    }
+    write_header = not LOG_FILE.exists()
+    with open(LOG_FILE, "a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=row.keys())
+        if write_header:
+            writer.writeheader()
+        writer.writerow(row)
+
 
 SCENARIO_DIRS = [
     Path("examples/scenarios"),
@@ -327,6 +354,7 @@ async def handle_run_probe(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Run failed: {e}")
         return
 
+    _log_result(scenario_name, mode, result)
     await update.message.reply_text(_build_reply(scenario_name, result))
 
 

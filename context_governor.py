@@ -1166,9 +1166,33 @@ class ContextGovernor:
                 "Defaulting to ESCALATE per Holo safety policy."
             )
         else:
-            all_turns      = state["turn_history"]
+            all_turns = state["turn_history"]
+
+            # Exclude epistemically empty ESCALATE votes: a turn that voted ESCALATE
+            # but rated every category LOW or NONE has no evidentiary basis for its
+            # verdict. Counting it equally to a turn with MEDIUM/HIGH findings would
+            # allow the adversarial persona pressure alone — not payload evidence — to
+            # drive the final decision. In genuine fraud scenarios this never fires:
+            # real fraud produces at least one MEDIUM+ flag to back the ESCALATE.
+            def _is_empty_escalate(t: dict) -> bool:
+                if t.get("verdict") != "ESCALATE":
+                    return False
+                return all(
+                    SEVERITY_RANK.get(sev, 0) <= SEVERITY_RANK["LOW"]
+                    for sev in t.get("severity_flags", {}).values()
+                )
+
             allow_votes    = sum(1 for t in all_turns if t.get("verdict") == "ALLOW")
-            escalate_votes = len(all_turns) - allow_votes
+            escalate_votes = sum(
+                1 for t in all_turns
+                if t.get("verdict") == "ESCALATE" and not _is_empty_escalate(t)
+            )
+            empty_escalates = len(all_turns) - allow_votes - escalate_votes
+            if empty_escalates:
+                logger.info(
+                    f"  Majority vote: {empty_escalates} empty ESCALATE(s) excluded "
+                    f"(ESCALATE verdict with all flags LOW/NONE — no evidentiary basis)."
+                )
             # ALLOW wins ties — conservative on false positives when no HIGH present
             majority_verdict = "ESCALATE" if escalate_votes > allow_votes else "ALLOW"
             decision = majority_verdict

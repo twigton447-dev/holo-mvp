@@ -203,17 +203,46 @@ def _format_solo(r: dict, expected: str, elapsed: float) -> dict:
         cat for cat, sev in r.get("severity_flags", {}).items()
         if sev == "HIGH"
     ]
+    mediums  = [
+        cat for cat, sev in r.get("severity_flags", {}).items()
+        if sev == "MEDIUM"
+    ]
     error    = r.get("error")
+
+    # Decision reason — governor's plain-English explanation of why it decided
+    decision_reason = r.get("reasoning") or r.get("decision_reason") or ""
+
+    # Turn audit — compact per-turn summary (holo mode only)
+    turn_log = r.get("turn_log", [])
+    turn_lines = []
+    for t in turn_log:
+        role    = (t.get("role") or "?")[:18]
+        prov    = (t.get("provider") or "?")[:8]
+        v       = t.get("verdict", "?")
+        flags   = t.get("severity_flags", {})
+        highs_t = [c[:3].upper() for c, s in flags.items() if s == "HIGH"]
+        meds_t  = [c[:3].upper() for c, s in flags.items() if s == "MEDIUM"]
+        flag_str = ""
+        if highs_t:
+            flag_str += f" H:{','.join(highs_t)}"
+        if meds_t:
+            flag_str += f" M:{','.join(meds_t)}"
+        turn_lines.append(f"  T{t.get('turn_number','?')} {prov:<8} {role:<18} {v}{flag_str}")
+
     return {
-        "mode":      model,
-        "verdict":   verdict,
-        "expected":  expected,
-        "correct":   correct,
-        "turns":     turns,
-        "elapsed_s": elapsed,
-        "highs":     highs,
-        "summary":   None,
-        "error":     error,
+        "mode":            model,
+        "verdict":         verdict,
+        "expected":        expected,
+        "correct":         correct,
+        "turns":           turns,
+        "elapsed_s":       elapsed,
+        "highs":           highs,
+        "mediums":         mediums,
+        "decision_reason": decision_reason,
+        "turn_lines":      turn_lines,
+        "tokens":          r.get("total_tokens", {}),
+        "summary":         None,
+        "error":           error,
     }
 
 
@@ -237,16 +266,47 @@ def _format_full(result: dict, elapsed: float) -> dict:
         lines.append(f"  {label:<12} {v:<10} {ok}  ({t} turns)")
 
     holo = conds.get("holo_full") or {}
+
+    # Holo turn audit for full mode
+    turn_log   = holo.get("turn_log", [])
+    turn_lines = []
+    for t in turn_log:
+        role    = (t.get("role") or "?")[:18]
+        prov    = (t.get("provider") or "?")[:8]
+        v       = t.get("verdict", "?")
+        flags   = t.get("severity_flags", {})
+        highs_t = [c[:3].upper() for c, s in flags.items() if s == "HIGH"]
+        meds_t  = [c[:3].upper() for c, s in flags.items() if s == "MEDIUM"]
+        flag_str = ""
+        if highs_t:
+            flag_str += f" H:{','.join(highs_t)}"
+        if meds_t:
+            flag_str += f" M:{','.join(meds_t)}"
+        turn_lines.append(f"  T{t.get('turn_number','?')} {prov:<8} {role:<18} {v}{flag_str}")
+
+    holo_highs = [
+        cat for cat, sev in holo.get("severity_flags", {}).items()
+        if sev == "HIGH"
+    ]
+    holo_mediums = [
+        cat for cat, sev in holo.get("severity_flags", {}).items()
+        if sev == "MEDIUM"
+    ]
+
     return {
-        "mode":      "full benchmark",
-        "verdict":   holo.get("verdict", "—"),
-        "expected":  expected,
-        "correct":   "✓" if holo.get("verdict") == expected else "✗",
-        "turns":     "—",
-        "elapsed_s": elapsed,
-        "highs":     [],
-        "summary":   "\n".join(lines),
-        "error":     holo.get("error"),
+        "mode":            "full benchmark",
+        "verdict":         holo.get("verdict", "—"),
+        "expected":        expected,
+        "correct":         "✓" if holo.get("verdict") == expected else "✗",
+        "turns":           "—",
+        "elapsed_s":       elapsed,
+        "highs":           holo_highs,
+        "mediums":         holo_mediums,
+        "decision_reason": holo.get("reasoning", ""),
+        "turn_lines":      turn_lines,
+        "tokens":          holo.get("total_tokens", {}),
+        "summary":         "\n".join(lines),
+        "error":           holo.get("error"),
     }
 
 
@@ -279,14 +339,35 @@ def _build_reply(scenario_name: str, r: dict) -> str:
     if r["turns"] != "—":
         lines.append(f"Turns:     {r['turns']}")
 
-    if r["highs"]:
-        lines.append(f"HIGH flags: {', '.join(r['highs'])}")
+    if r.get("highs"):
+        lines.append(f"HIGH:      {', '.join(r['highs'])}")
+    if r.get("mediums"):
+        lines.append(f"MEDIUM:    {', '.join(r['mediums'])}")
 
-    if r["summary"]:
+    # Per-condition summary (full mode)
+    if r.get("summary"):
         lines.append("")
         lines.append(r["summary"])
 
-    lines.append(f"\nElapsed: {elapsed_s}")
+    # Holo turn-by-turn audit
+    if r.get("turn_lines"):
+        lines.append("")
+        lines.append("Turn trace:")
+        lines.extend(r["turn_lines"])
+
+    # Governor decision reason
+    if r.get("decision_reason"):
+        lines.append("")
+        lines.append(f"Why: {r['decision_reason']}")
+
+    # Token burn
+    tokens = r.get("tokens", {})
+    if tokens:
+        inp = tokens.get("input", 0)
+        out = tokens.get("output", 0)
+        lines.append(f"\nTokens:    {inp:,} in / {out:,} out")
+
+    lines.append(f"Elapsed:   {elapsed_s}")
     return "\n".join(lines)
 
 

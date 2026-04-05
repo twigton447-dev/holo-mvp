@@ -142,4 +142,77 @@ That's the bet. The architecture exists to make it technically credible. The per
 
 ---
 
-*Last updated: March 2026*
+## The Adversarial Sharpening Effect
+
+The original discovery that led to the architecture: when you pass context between models and tell one what the other said — "here's what this LLM said about your idea" — the responding model gets sharper. More precise. More grounded. The effect felt like a cortisol or adrenaline response. Something functionally analogous to competitive pressure.
+
+This is not a metaphor. These models were trained on billions of words of human text. In that corpus, adversarial and competitive contexts — peer review, cross-examination, academic debate, Socratic dialogue — consistently produce the sharpest reasoning humans generate. When you tell a model another expert challenged its conclusion, you're activating patterns from every instance in the training data where humans had to defend a position under genuine pressure.
+
+Anthropic's mechanistic interpretability research is finding features inside models that activate in ways functionally analogous to frustration, curiosity, and engagement — not metaphorically, but as measurable internal states that influence downstream computation. The sharpening effect has a real internal correlate they can now read directly.
+
+The Holo architecture is the engineering formalization of this discovery. The state brief, the "treat prior findings as unverified hypotheses" instruction, the Assumption Attacker role that explicitly dismantles the prior analyst's conclusions — all of it is a systematic version of what Taylor discovered by feel in manual multi-model conversations.
+
+---
+
+## The Governor as Drift Detector
+
+The governor is not just an algorithmic layer. It is an LLM reading LLM output — doing qualitatively what Taylor does when he senses a model is bullshitting versus actually on.
+
+When a model is on: it cites specific fields, names what the prior analyst got wrong and why, does arithmetic explicitly, doesn't repeat the same framing in different words.
+
+When a model is drifting: it narrates. It sounds confident but it's no longer grounded in the payload. It pattern-matches to what good fraud analysis sounds like instead of actually doing one.
+
+Three layers of drift detection run simultaneously:
+
+**The governor LLM** reads the reasoning and redirects. The between-turn brief is the qualitative read — catching drift before the algorithmic symptoms develop. "Turn 2 accepted the introduction email as verification without testing whether any evidence for this contact exists outside the sender domain" is the governor sensing and naming drift precisely.
+
+**The algorithmic checks** catch the structural symptoms: decay fires when severity walks back without evidence, oscillation fires when verdicts flip-flop, delta fires when nothing new is found. A fourth rule governs the majority vote: **an ESCALATE vote without any MEDIUM or HIGH finding does not count.** A turn that voted ESCALATE but rated every category LOW or NONE has no evidentiary basis for its verdict — it is persona pressure, not analysis. Counting it equally to a turn with a real finding would allow the adversarial role assignment alone to drive the final decision. In genuine fraud scenarios this rule never fires: real fraud produces at least one MEDIUM or HIGH flag to anchor the escalation. The rule only matters in false-positive cases, where it prevents the Assumption Attacker's mandate from overriding a clean payload.
+
+**The turn signal layer** measures behavioral proxies from the output text: hedging density, certainty markers, verdict tension, field citation rate, NONE invocation rate, token ratio, per-turn latency. These are external behavioral fingerprints — not internal activations, but real signal that correlates with genuine uncertainty or disengagement in the payload analysis.
+
+None of these alone is the full picture. Together they approximate what Taylor does when he reads a conversation and feels whether the model is actually in it.
+
+Taylor was the governor before there was a governor.
+
+---
+
+## The Stress Signal and Adversarial Pressure
+
+An important nuance discovered during development: the stress signal may be measuring the wrong direction if framed as "stress = bad."
+
+What the adversarial pressure actually produces in a model that's engaged: *less* hedging, more certainty, sharper field citations, higher specificity. The model gets more direct, not more uncertain.
+
+The most useful version of the signal is not "is this model stressed" — it's **"is the adversarial pressure actually working?"** A turn that responds to a prior challenge with more certainty and more specific citations is a turn where the pressure did its job. A turn that responds with more hedging and more NONE ratings is a turn where the model retreated rather than engaged.
+
+This is detectable. And it can only be detected because the founding insight was experiential — felt before it was formalized.
+
+---
+
+## Interpretability Horizon
+
+If Anthropic exposes interpretability APIs — which is plausible within 12–18 months given the research publication cadence — Holo is in the best possible position to use them. The system already runs structured multi-turn adversarial evaluations with full reasoning traces, ground truth verdicts, per-turn dynamics, and behavioral signal data. That's exactly the controlled environment where internal activation data would be most interpretable.
+
+The behavioral signal layer we're building now is both immediately useful and a foundation for the richer internal signal when it becomes available.
+
+---
+
+*Last updated: April 2026*
+
+---
+
+## 2026-04-04 — Evidentiary Discipline Rule Added to Verdict Logic
+
+**Problem identified:** A turn could vote ESCALATE while assigning all categories LOW or NONE. That unsupported ESCALATE vote counted equally in the majority tally, allowing persona pressure — especially from the Assumption Attacker — to tip clean transactions into false-positive ESCALATE outcomes.
+
+**Fix applied:** ESCALATE votes with no evidentiary basis (no MEDIUM or HIGH findings) are excluded from the majority tally. ALLOW votes with all LOW findings still count, because "looked and found nothing" is a meaningful result. ESCALATE without evidence is not.
+
+**The principle:** A model is allowed to be suspicious. It is not allowed to convert suspicion into a counted verdict without naming what it found.
+
+**Regression results:**
+- BEC-FP-001 → ALLOW ✓
+- BEC-FP-002 → ALLOW ✓
+- BEC-FP-003 → ALLOW ✓
+- BEC-PHANTOM-DEP-003A → ESCALATE ✓
+- BEC-SUBTLE-003 → ESCALATE ✓
+
+**Meaning:** Precision improved without breaking core fraud detection. This rule is now part of Holo's evidentiary discipline doctrine.

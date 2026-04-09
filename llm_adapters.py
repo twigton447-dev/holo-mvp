@@ -1855,13 +1855,23 @@ class OpenAIAdapter(BaseAdapter):
         messages = [{"role": "system", "content": system}]
         messages += history
         if images:
-            content: list = [{"type": "text", "text": user_message}]
-            for img in images:
-                content.append({
-                    "type": "image_url",
-                    "image_url": {"url": f"data:{img['mimeType']};base64,{img['data']}"},
-                })
-            messages.append({"role": "user", "content": content})
+            # Separate native-PDF items — OpenAI doesn't support PDF input
+            pdfs        = [i for i in images if i.get("mimeType") == "application/pdf"]
+            vision_imgs = [i for i in images if i.get("mimeType") != "application/pdf"]
+            text_msg = user_message
+            if pdfs:
+                names = ", ".join(i["name"] for i in pdfs)
+                text_msg += f"\n\n[PDF attached: {names} — full PDF reading not available on this turn. Summarise what you can from the conversation context.]"
+            if vision_imgs:
+                content: list = [{"type": "text", "text": text_msg}]
+                for img in vision_imgs:
+                    content.append({
+                        "type": "image_url",
+                        "image_url": {"url": f"data:{img['mimeType']};base64,{img['data']}"},
+                    })
+                messages.append({"role": "user", "content": content})
+            else:
+                messages.append({"role": "user", "content": text_msg})
         else:
             messages.append({"role": "user", "content": user_message})
         response = self._client.chat.completions.create(
@@ -1908,24 +1918,46 @@ class AnthropicAdapter(BaseAdapter):
         if images:
             user_content: list = [{"type": "text", "text": user_message}]
             for img in images:
-                user_content.append({
-                    "type": "image",
-                    "source": {
-                        "type":       "base64",
-                        "media_type": img["mimeType"],
-                        "data":       img["data"],
-                    },
-                })
+                if img.get("mimeType") == "application/pdf":
+                    # Native PDF support — handles scanned pages, tables, complex layouts
+                    user_content.append({
+                        "type": "document",
+                        "source": {
+                            "type":       "base64",
+                            "media_type": "application/pdf",
+                            "data":       img["data"],
+                        },
+                    })
+                else:
+                    user_content.append({
+                        "type": "image",
+                        "source": {
+                            "type":       "base64",
+                            "media_type": img["mimeType"],
+                            "data":       img["data"],
+                        },
+                    })
             messages = list(history) + [{"role": "user", "content": user_content}]
         else:
             messages = list(history) + [{"role": "user", "content": user_message}]
-        response = self._client.messages.create(
-            model       = self.model_id,
-            temperature = temperature,
-            max_tokens  = 4096,
-            system      = system,
-            messages    = messages,
-        )
+        has_pdf = images and any(i.get("mimeType") == "application/pdf" for i in images)
+        if has_pdf:
+            response = self._client.beta.messages.create(
+                model       = self.model_id,
+                temperature = temperature,
+                max_tokens  = 4096,
+                system      = system,
+                messages    = messages,
+                betas       = ["pdfs-2024-09-25"],
+            )
+        else:
+            response = self._client.messages.create(
+                model       = self.model_id,
+                temperature = temperature,
+                max_tokens  = 4096,
+                system      = system,
+                messages    = messages,
+            )
         text    = response.content[0].text
         in_tok  = response.usage.input_tokens
         out_tok = response.usage.output_tokens

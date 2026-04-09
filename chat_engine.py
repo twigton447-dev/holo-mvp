@@ -46,13 +46,6 @@ class ChatSession:
     created_at: float = field(default_factory=time.time)
     last_active: float = field(default_factory=time.time)
 
-    # Governor stickiness
-    # "chat": hold for random 3-5 turns, then re-randomize
-    # "api":  lock to one provider for the entire session, re-randomize on next session
-    gov_mode: str = "chat"
-    gov_provider: Optional[str] = None   # currently locked governor provider
-    gov_turns_remaining: int = 0         # turns left before next switch (chat mode only)
-
     @property
     def thread_health_score(self) -> int:
         """
@@ -111,12 +104,11 @@ class HoloChatEngine:
             + " | GovernorAdapter ready"
         )
 
-    def get_or_create_session(self, session_id: Optional[str] = None,
-                              gov_mode: str = "chat") -> ChatSession:
+    def get_or_create_session(self, session_id: Optional[str] = None) -> ChatSession:
         if session_id and session_id in _sessions:
             return _sessions[session_id]
         new_id  = session_id or str(uuid.uuid4())
-        session = ChatSession(session_id=new_id, gov_mode=gov_mode)
+        session = ChatSession(session_id=new_id)
 
         # Restore history from Supabase if the session_id is known but not in memory
         # (e.g. after a server restart)
@@ -135,55 +127,16 @@ class HoloChatEngine:
     def send_message(self, session_id: str, user_message: str,
                      capsule_id: Optional[str] = None,
                      images: Optional[List[Dict[str, Any]]] = None,
-                     incognito: bool = False,
-                     gov_mode: str = "chat") -> Dict[str, Any]:
+                     incognito: bool = False) -> Dict[str, Any]:
         """
         Process one user message. Returns Holo's response + metadata.
         The caller should use session_id from the returned dict for follow-up turns.
 
         incognito=True: blind mode — no capsule context, no Governor memory, no life portrait
         injected. Base system prompt only. Used for unbiased evaluation runs.
-
-        gov_mode="chat": governor holds for random 3-5 turns, then re-randomizes.
-        gov_mode="api":  governor locked for the entire session, re-randomizes on next session.
         """
-        session             = self.get_or_create_session(session_id, gov_mode=gov_mode)
+        session             = self.get_or_create_session(session_id)
         session.last_active = time.time()
-
-        # Consolidate-on-resume — runs once on the first turn of a new session.
-        # If the prior session was abandoned before hitting RED (the common case),
-        # it was never consolidated. Consolidate it now before loading context
-        # so the current session starts with a complete portrait.
-        if capsule_id and not incognito and session.turn_count == 0:
-            stale_session_id = self._brain.get_prior_unconsolidated_session(
-                capsule_id, session.session_id
-            )
-            if stale_session_id:
-                logger.info(
-                    f"  Consolidate-on-resume: prior session {stale_session_id[:8]} "
-                    f"was never consolidated — running now."
-                )
-                def _consolidate_stale():
-                    try:
-                        stale_history = self._brain.load_chat_history(stale_session_id)
-                        if stale_history and len(stale_history) >= 4:
-                            stale_ctx = self._brain.get_capsule_context(capsule_id)
-                            result = self._governor.consolidate_session(
-                                stale_history, stale_ctx, stale_session_id
-                            )
-                            if result.get("session_note"):
-                                self._brain.save_consolidation(
-                                    capsule_id, stale_session_id, result["session_note"]
-                                )
-                            if result.get("life_context"):
-                                self._brain.upsert_life_context(capsule_id, result["life_context"])
-                            logger.info(
-                                f"  Stale consolidation complete for {stale_session_id[:8]}: "
-                                f"{len(result.get('life_context', []))} life_context entries written."
-                            )
-                    except Exception as e:
-                        logger.warning(f"Stale consolidation failed for {stale_session_id[:8]}: {e}")
-                threading.Thread(target=_consolidate_stale, daemon=True).start()
 
         # Incognito: strip all memory — only base system prompt reaches the model
         if incognito:
@@ -200,23 +153,9 @@ class HoloChatEngine:
         session.rotation_index += 1
         session.turn_count     += 1
 
-        # Governor stickiness — hold court for a spell before rotating.
-        # chat mode: hold for a random 3-5 turns, then re-randomize (unpredictable cadence)
-        # api mode:  lock to one provider for the entire session; re-randomize on next session
-        if session.gov_mode == "api":
-            if session.gov_provider is None:
-                self._governor.prepare_for_turn(adapter)
-                session.gov_provider = self._governor.provider
-            else:
-                self._governor.lock_to_provider(session.gov_provider)
-        else:
-            if session.gov_turns_remaining <= 0:
-                self._governor.prepare_for_turn(adapter)
-                session.gov_provider       = self._governor.provider
-                session.gov_turns_remaining = random.randint(3, 5)
-            else:
-                self._governor.lock_to_provider(session.gov_provider)
-                session.gov_turns_remaining -= 1
+        # Governor locks in provider for this turn — excludes driver's vendor,
+        # randomly selects from remaining pool, no predictable pattern
+        self._governor.prepare_for_turn(adapter)
 
         # Governor runs the instruments: temperature + search decision
         temperature  = self._governor.assess_chat_temperature(user_message, session.history)
@@ -269,9 +208,6 @@ class HoloChatEngine:
         except Exception as primary_err:
             logger.warning(f"Driver {adapter.provider} failed: {primary_err} — attempting bench failover")
             bench_candidates = [b for b in self._bench if b.provider != adapter.provider]
-            if not bench_candidates:
-                # No bench pool — fall back to another active adapter from a different vendor
-                bench_candidates = [b for b in self._adapters if b.provider != adapter.provider]
             if not bench_candidates:
                 raise
             fallback = random.choice(bench_candidates)
@@ -459,7 +395,6 @@ def _extract_and_save_artifacts(
         if aid:
             saved.append({"artifact_id": aid, "title": title, "type": "html"})
     return saved
-
 
 
 def _health_context(session: ChatSession) -> str:

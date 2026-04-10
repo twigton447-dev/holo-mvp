@@ -48,7 +48,6 @@
   /* ── COVER ── */
   .cover {
     padding: 5rem 0 4rem;
-    border-bottom: 1.5px solid var(--ink);
     margin-bottom: 4rem;
   }
 
@@ -121,19 +120,24 @@
   /* ── EXECUTIVE SUMMARY ── */
   .exec-summary {
     background: var(--cream-warm);
-    border-left: 3px solid var(--gold);
-    padding: 2rem 2.5rem;
+    border-left: 4px solid var(--gold);
+    border-top: 1.5px solid var(--gold-light);
+    padding: 2.25rem 2.75rem;
     margin-bottom: 4rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.055);
   }
 
   .exec-summary .section-label {
-    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    margin-bottom: 1.25rem;
   }
 
   .exec-summary p {
-    font-size: 0.975rem;
+    font-size: 1rem;
     color: var(--ink-muted);
-    margin-bottom: 0.875rem;
+    margin-bottom: 1rem;
   }
 
   .exec-summary p:last-child { margin-bottom: 0; }
@@ -523,8 +527,8 @@
 <body>
 
 <div style="max-width:820px;margin:0 auto;padding:1.2rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #d4d0c8;">
-  <a href="research.html" style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:#8a7a52 !important;text-decoration:none;">← Research</a>
-  <a href="https://github.com/twigton447-dev/holo-benchmark/releases/download/v1.0/Blindspots.at.the.Action.Boundary.Holo.Engine.pdf" style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:#8a7a52 !important;text-decoration:none;">Download PDF ↓</a>
+  <a href="research.html" style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:#8a7a52 !important;text-decoration:none !important;">← Research</a>
+  <a href="https://github.com/twigton447-dev/holo-benchmark" target="_blank" style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:#8a7a52 !important;text-decoration:none !important;">GitHub ↗</a>
 </div>
 
 <!-- COVER -->
@@ -550,12 +554,12 @@
 <!-- EXECUTIVE SUMMARY -->
 <div class="exec-summary">
   <div class="section-label">Executive Summary</div>
-  <p style="margin-top:0.75rem">AI agents are now being deployed into the most critical workflows in the global economy: approving payments, executing contracts, granting access, and initiating operational changes on behalf of real organizations. These systems are increasingly being built on a small number of frontier models. The practical question is no longer whether these models are impressive. It is where they fail when the cost of failure becomes irreversible.</p>
-  <p>This paper documents a targeted search for that breaking point at the action boundary: the moment just before an AI system's output becomes a real-world commitment.</p>
-  <p>To test that boundary fairly, we evaluated the strongest publicly available frontier models from multiple labs at the time of testing — GPT-5.4, Claude-Sonnet-4-6, and Gemini-2.5-Pro — as solo baselines. We then tested Holo Engine against those same baselines. Holo is model-agnostic, but the purpose of this benchmark was to measure what was possible against the most capable solo systems available at the time, not against weaker controls.</p>
-  <p>In the benchmark's primary finding, all three frontier baseline models independently approved a fraudulent transaction. Holo Engine, a runtime trust layer and adversarial checkpoint architecture designed for the action boundary, escalated it correctly. The failure was not a quirk of one model. It was a structural pattern: solo judgment has a ceiling when faced with a plausible but unverifiable narrative.</p>
-  <p>This is not an argument against any one model or lab. It is evidence that strong solo frontier models can still fail in materially important ways at the moment before execution, and that a properly structured adversarial architecture can remain strong where solo judgment breaks.</p>
-  <p>The benchmark presented here covers an eight-domain research program focused on high-consequence AI actions. Two domains are complete and published in this paper. Six are in development. Together they form the beginning of the Blindspot Atlas: a growing corpus of domain-specific failure patterns at the action boundary, designed to improve Holo's own coverage and, over time, help the frontier labs themselves better understand and reduce these blindspots.</p>
+  <p style="margin-top:0.75rem">AI agents are now being deployed into the most critical workflows in the global economy: approving payments, executing contracts, granting access, and initiating operational changes on behalf of real organizations. These systems are increasingly being built on a small number of frontier models. The practical question is no longer whether these models are impressive. <strong>It is where they fail when the cost of failure becomes irreversible.</strong></p>
+  <p>This paper documents a targeted search for that breaking point at the <strong>action boundary</strong>: the moment just before an AI system's output becomes a real-world commitment.</p>
+  <p>To test that boundary fairly, we evaluated some of the strongest publicly available frontier models from multiple labs at the time of testing — GPT-5.4, Claude-Sonnet-4-6, and Gemini-2.5-Pro — as solo baselines. We then tested Holo Engine against those same baselines. Holo is model-agnostic, but the purpose of this benchmark was to measure what was possible against the most capable solo systems available at the time, not against weaker controls.</p>
+  <p>In the benchmark's primary finding, <strong>all three frontier baseline models independently approved a fraudulent transaction.</strong> Holo Engine, a runtime trust layer and adversarial checkpoint architecture designed for the action boundary, escalated it correctly. The failure was not a quirk of one model. It was a structural pattern: <strong>solo judgment has a ceiling when faced with a plausible but unverifiable narrative.</strong></p>
+  <p>This is not an argument against any one model or lab. It is evidence that <strong>strong solo frontier models can still fail in materially important ways at the moment before execution</strong>, and that a properly structured adversarial architecture can remain strong where solo judgment breaks.</p>
+  <p>The benchmark presented here covers an eight-domain research program focused on high-consequence AI actions. Two domains are complete and published in this paper. Six are in development. Together they form the beginning of the <strong>Blindspot Atlas</strong>: a growing corpus of domain-specific failure patterns at the action boundary, designed to improve Holo's own coverage and, over time, help the frontier labs themselves better understand and reduce these blindspots.</p>
   <p style="font-size:0.875rem;color:var(--ink-faint)">Models tested: GPT-5.4 &nbsp;·&nbsp; Claude-Sonnet-4-6 &nbsp;·&nbsp; Gemini-2.5-Pro &nbsp;·&nbsp; Holo Full Architecture</p>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid var(--rule);border-radius:6px;overflow:hidden;margin-top:16px;margin-bottom:20px">
@@ -629,12 +633,13 @@
   <p>The agent is not the principal. It is the proxy. And proxies can be exploited.</p>
   <p>An adversary who understands this system does not need to fool the human. They only need to fool the agent. And because the adversary has access to the same frontier models the agent is built on, they can test their attack against the agent's own reasoning until they find the version that passes.</p>
   <div class="callout-key">Overconfidence in a solo model is not a minor calibration problem. At the action boundary, it is a structural vulnerability.</div>
-  <p>This is consistent with emerging research showing that agentic systems can create insider-threat-style risk surfaces and that model-level reliability remains probabilistic even in high-stakes settings.</p>
+  <p>This pattern is consistent with emerging research on agentic misalignment, which shows that even capable models can create insider-threat-style risk surfaces in high-stakes settings.</p>
   <p>The answer is not simply a smarter agent. A smarter agent may still carry smarter blindspots. The answer is a checkpoint: a system that does not trust the agent's confidence, does not accept its verdict at face value, and forces the proposed action to survive adversarial scrutiny before it is allowed to become real.</p>
   <p style="font-size:0.825rem;color:var(--ink-faint)">Lynch, A. et al. "Agentic Misalignment: How LLMs Could Be Insider Threats." arXiv:2510.05179. Anthropic Research. October 2025.</p>
 
   <h3>1.5 &nbsp; What Holo Is, in Plain Terms</h3>
   <p>The closest real-world analogy to Holo is airport security. Every item receives the same structured treatment. A coordinated team examines it from multiple angles using different instruments. Most items clear immediately. Some require a second look. A small number are flagged for intervention.</p>
+  <p>In enterprise security terms, Holo functions as a semantic policy decision point: a runtime checkpoint that evaluates the business meaning of a proposed action, not just its surface compliance with fixed rules.</p>
   <p>The true power of the system is not only what it catches. It is also what is never attempted because the checkpoint exists. Deterrence is a documented and legitimate security outcome. Holo operates on the same principle at the action boundary.</p>
 
   <h3>1.6 &nbsp; The Symmetric Arms Race</h3>
@@ -844,6 +849,7 @@
   </div>
 
   <h3>6.1 &nbsp; Evidentiary Discipline</h3>
+  <p>The architecture is designed to function as an adversarial approval firewall: a system that does not ask whether the action looks permitted, but whether the reasoning behind it survives structured adversarial pressure.</p>
   <div class="callout-key">An escalation must be backed by evidence.</div>
   <div class="table-wrap">
     <table>
@@ -885,7 +891,7 @@
   <div class="objection">
     <h3>"This is vendor bias."</h3>
     <p>Yes. This is a vendor-built benchmark. The same team designed the scenarios, built the architecture, and reported the results. That is a real limitation, not a disclosure formality.</p>
-    <p>The strongest fairness control applied here was structural: the solo comparison conditions use the same frontier models that appear inside Holo's adversarial reactor. Holo is not being compared against weaker baselines or obsolete systems. It is being tested against the strongest publicly available frontier models from multiple labs at the time of evaluation: GPT-5.4, Claude-Sonnet-4-6, and Gemini-2.5-Pro.</p>
+    <p>The strongest fairness control applied here was structural: the solo comparison conditions use the same frontier models that appear inside Holo's adversarial reactor. Holo is not being compared against weaker baselines or obsolete systems. It is being tested against some of the strongest publicly available frontier models from multiple labs at the time of evaluation: GPT-5.4, Claude-Sonnet-4-6, and Gemini-2.5-Pro.</p>
     <p>The results should therefore be read as disclosed internal evidence, not independent validation. The correct next step is held-out scenario authorship, third-party replication, and eventually external benchmark governance.</p>
   </div>
 
@@ -927,6 +933,7 @@
     <p>No. The architecture is model-agnostic, but it is not simply a bundle of models voting.</p>
     <p>Holo uses frontier models as adversarial analysts inside a structured checkpoint architecture. The important property is not plurality by itself. It is role separation, evidentiary discipline, randomized assignment, and a deterministic governor that computes the verdict from the evidence rather than from the confidence of the last model to speak.</p>
     <p>That distinction matters because the benchmark is not claiming that more models automatically solves the problem. The claim is narrower: a properly structured adversarial checkpoint can remain strong in cases where solo frontier judgment fails.</p>
+    <p>The more precise category is an adversarial approval firewall: a checkpoint where the verdict is computed from evidence under adversarial pressure, not from model confidence or rule pattern-matching.</p>
   </div>
 
   <div class="objection">
@@ -1082,6 +1089,8 @@
   <p>This paper does not claim to have solved that problem. It claims to have identified a specific, testable gap at the action boundary, built a methodology for evaluating it, and produced results across two completed domains, including a confirmed symmetric collapse, that justify further scrutiny.</p>
 
   <div class="pullquote">The benchmark is how we learned where the ambushes are. Holo is how we make sure your agents never walk into one.</div>
+
+  <p>What that means in practice is a semantic policy decision point at the action boundary: a layer that makes autonomous approvals safe enough to turn on.</p>
 
   <p>Behind every agentic workflow in this benchmark is a person who might not know an AI made the decision. The small business owner whose vendor payment was rerouted. The employee whose system access was quietly expanded. The company whose contract now contains terms no one approved. They did not interact with the model. They did not see the payload. The action boundary is invisible to them. That is exactly why it cannot be unguarded.</p>
   <p><strong>We are building it.</strong></p>

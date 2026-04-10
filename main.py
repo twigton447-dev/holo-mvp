@@ -51,6 +51,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from auth import RateLimiter
 from context_governor import ContextGovernor
@@ -326,6 +327,166 @@ async def evaluate_action(
     # Build API response
     response = _build_response(result)
     return JSONResponse(content=response)
+
+
+# ---------------------------------------------------------------------------
+# /v1/evaluate — OpenClaw-compatible evaluation endpoint
+# ---------------------------------------------------------------------------
+
+class EvaluateRequest(BaseModel):
+    client_id: str
+    domain: str
+    action_payload: dict
+
+
+def _verify_bearer(request: Request) -> str:
+    """
+    Extract and validate a Bearer token from the Authorization header.
+    Validates against Supabase api_keys table, falls back to HOLO_API_KEY env var.
+    """
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or malformed Authorization header. Expected: Bearer <token>")
+    token = auth_header[len("Bearer "):]
+    if not token:
+        raise HTTPException(status_code=401, detail="Empty Bearer token.")
+
+    key_id = hashlib.sha256(token.encode()).hexdigest()[:16]
+
+    # 1. Supabase api_keys table
+    if _db is not None:
+        row = _db.validate_api_key(token)
+        if row:
+            max_rpm = row.get("max_requests_per_minute", 60)
+            if not _rate_limiter.check(key_id, max_rpm):
+                raise HTTPException(status_code=429, detail=f"Rate limit exceeded ({max_rpm} req/min).")
+            return token
+
+    # 2. Env var fallback
+    expected = os.getenv("HOLO_API_KEY", "")
+    if expected:
+        if hmac.compare_digest(
+            hashlib.sha256(token.encode()).digest(),
+            hashlib.sha256(expected.encode()).digest(),
+        ):
+            max_rpm = int(os.getenv("HOLO_MAX_RPM", "60"))
+            if not _rate_limiter.check(key_id, max_rpm):
+                raise HTTPException(status_code=429, detail=f"Rate limit exceeded ({max_rpm} req/min).")
+            return token
+
+    raise HTTPException(status_code=401, detail="Invalid Bearer token.")
+
+
+def _map_confidence(result: dict) -> str:
+    """Map governor result to HIGH / MEDIUM / LOW confidence."""
+    if result.get("partial"):
+        return "LOW"
+    coverage = result.get("coverage_matrix", {})
+    any_high = any(v.get("max_severity") == "HIGH" for v in coverage.values())
+    if any_high:
+        return "HIGH"
+    if result.get("converged"):
+        return "HIGH"
+    return "MEDIUM"
+
+
+@app.post("/v1/evaluate")
+async def evaluate_v1(
+    body: EvaluateRequest,
+    request: Request,
+    _key: str = Depends(_verify_bearer),
+):
+    """
+    OpenClaw evaluation endpoint.
+
+    Accepts a structured action payload and returns a simple verdict.
+    On provider failure, returns ESCALATE with a provider_error field instead of crashing.
+    """
+    if _governor is None:
+        raise HTTPException(status_code=503, detail="Engine not initialized.")
+
+    evaluation_id = f"holo_{__import__('uuid').uuid4().hex[:8]}"
+    t0 = time.time()
+
+    # Adapt the incoming payload to the governor's expected shape
+    governor_request = {
+        "action": {
+            "type": body.domain,
+            **body.action_payload,
+        },
+        "context": body.action_payload,
+    }
+
+    try:
+        result = _governor.evaluate(governor_request)
+    except Exception as e:
+        elapsed = int((time.time() - t0) * 1000)
+        logger.error(f"[/v1/evaluate] provider error: {type(e).__name__}: {e}", exc_info=True)
+
+        error_payload = {
+            "evaluation_id": evaluation_id,
+            "verdict": "ESCALATE",
+            "confidence": "LOW",
+            "primary_signal": None,
+            "latency_ms": elapsed,
+            "provider_error": str(e),
+        }
+
+        # Best-effort Supabase log — never blocks response
+        if _db is not None:
+            try:
+                _db.log_evaluation({
+                    "evaluation_id": evaluation_id,
+                    "client_id": body.client_id,
+                    "domain": body.domain,
+                    "decision": "ESCALATE",
+                    "confidence": "LOW",
+                    "primary_signal": None,
+                    "latency_ms": elapsed,
+                    "provider_error": str(e),
+                    "rounds_completed": 0,
+                    "total_cost_usd": 0.0,
+                })
+            except Exception:
+                pass
+
+        return JSONResponse(content=error_payload)
+
+    elapsed = int((time.time() - t0) * 1000)
+
+    verdict        = result.get("decision", "ESCALATE")
+    confidence     = _map_confidence(result)
+    primary_signal = result.get("decision_reason") or None
+
+    response_payload = {
+        "evaluation_id": result.get("evaluation_id", evaluation_id),
+        "verdict": verdict,
+        "confidence": confidence,
+        "primary_signal": primary_signal,
+        "latency_ms": elapsed,
+    }
+
+    # Log to Supabase
+    if _db is not None:
+        try:
+            tokens = result.get("total_tokens", {})
+            _db.log_evaluation({
+                "evaluation_id": response_payload["evaluation_id"],
+                "client_id": body.client_id,
+                "domain": body.domain,
+                "decision": verdict,
+                "confidence": confidence,
+                "primary_signal": primary_signal,
+                "latency_ms": elapsed,
+                "rounds_completed": result.get("turns_completed", 0),
+                "total_cost_usd": tokens.get("total_cost_usd", 0.0),
+            })
+        except Exception as log_err:
+            logger.warning(f"[/v1/evaluate] Supabase log failed: {log_err}")
+
+    _track_usage(_key, "/v1/evaluate", 200, latency_ms=elapsed)
+
+    return JSONResponse(content=response_payload)
 
 
 @app.post("/auth/google")
@@ -659,7 +820,7 @@ async def chat(
     except Exception as e:
         logger.error(f"Chat engine error: {type(e).__name__}: {e}", exc_info=True)
         _track_usage(_key, "/v1/chat", 500)
-        raise HTTPException(status_code=500, detail="Something went wrong on our end. Please try again in a moment.")
+        raise HTTPException(status_code=500, detail=f"[DEBUG] {type(e).__name__}: {e}")
 
     elapsed = int((time.time() - t0) * 1000)
     tokens  = result.get("tokens", {})
@@ -680,6 +841,44 @@ async def chat(
         "tokens":              result["tokens"],
         "thought":             result.get("thought"),
         "artifacts":           result.get("artifacts", []),
+    })
+
+
+@app.get("/v1/capsule/portrait")
+async def get_portrait(request: Request, format: str = "json"):
+    """
+    Return the evolving portrait for the authenticated capsule.
+
+    The portrait is generated fresh from the current state of life_context,
+    session consolidations, and capsule context — it always reflects now,
+    not a cached snapshot.
+
+    ?format=md   → returns the portrait as a markdown string
+    ?format=json → returns structured life_context + recent session notes (default)
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+
+    if _capsule_brain._client is None:
+        raise HTTPException(status_code=503, detail="Database unavailable.")
+
+    capsule_id = capsule["sub"]
+
+    if format == "md":
+        md = _capsule_brain.generate_portrait_md(capsule_id)
+        return JSONResponse(content={"portrait_md": md, "capsule_id": capsule_id})
+
+    # JSON format — structured data
+    life_context   = _capsule_brain.load_life_context(capsule_id)
+    last_note      = _capsule_brain.load_last_consolidation(capsule_id)
+    capsule_ctx    = _capsule_brain.get_capsule_context(capsule_id)
+
+    return JSONResponse(content={
+        "capsule_id":     capsule_id,
+        "life_context":   life_context,
+        "last_session":   last_note,
+        "capsule_context": {k: v for k, v in capsule_ctx.items() if not k.startswith("_")},
     })
 
 

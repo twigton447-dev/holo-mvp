@@ -731,6 +731,16 @@ def serve_landing():
     return {"status": "ok", "message": "Holo API running. Frontend not found."}
 
 
+@app.get("/openclaw")
+@app.get("/openclaw.html")
+def serve_openclaw():
+    """Serve the OpenClaw security brief."""
+    f = _frontend_dir / "openclaw.html"
+    if f.exists():
+        return FileResponse(str(f))
+    raise HTTPException(status_code=404, detail="Not found.")
+
+
 @app.get("/appendix.html")
 def serve_appendix():
     """Serve the benchmark appendix page."""

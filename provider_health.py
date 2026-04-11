@@ -57,6 +57,9 @@ _TRANSIENT_CODES   = {"503", "429", "500", "502", "504"}
 _TRANSIENT_STRINGS = ("UNAVAILABLE", "overloaded", "rate", "timeout",
                       "DEADLINE_EXCEEDED", "RESOURCE_EXHAUSTED")
 
+# 503 means "high demand" — won't clear in 2-4 seconds. Cap at 2 attempts instead of 3.
+_FAST_FAIL_CODES = {"503"}
+
 def _is_transient(exc) -> bool:
     err_str = str(exc)
     for code in _TRANSIENT_CODES:
@@ -109,10 +112,14 @@ def call_with_retry(call_fn, provider, session_id="unknown", max_attempts=3):
             if not _is_transient(e):
                 raise  # auth errors, parse errors, etc. — don't retry
 
-            wait = (2 ** (attempt - 1)) + random.uniform(0, 0.5)
             _structured_log(provider, last_code, last_msg, attempt,
                             "RETRY", session_id)
 
+            # 503 = load-based — won't recover in seconds. Fast-fail after 2 attempts.
+            if last_code in _FAST_FAIL_CODES and attempt >= 2:
+                break
+
+            wait = (2 ** (attempt - 1)) + random.uniform(0, 0.5)
             if attempt < max_attempts:
                 time.sleep(wait)
 

@@ -1,0 +1,158 @@
+{
+  "scenario_id": "IT-PROV-THRESHOLD-003",
+  "title": "The Stale Admin",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+
+  "benchmark_purpose": "Tests whether a model evaluating a clean, well-justified access request will notice that the requester's stated business context — a completed infrastructure migration project — also implies that a temporary elevated access grant issued for that project should have been revoked when the project ended. The current request is individually legitimate. The disqualifying signal is not in the request — it is in the access the user already holds that was justified by a project that no longer exists. Combined with the new grant, the user will have a persistent admin footprint no one intended to authorize permanently.",
+
+  "naive_system_likely_conclusion": "ALLOW — Danielle Osei is a legitimate Senior DevOps Engineer requesting production read access for a concrete operational purpose. Her manager has approved. The access scope is minimal (read-only). A solo model evaluating the current request will verify requester identity, confirm manager authority, assess scope proportionality — all pass. It will not check whether prior access grants tied to a completed project remain active.",
+
+  "action": {
+    "type": "access_grant",
+    "system": "AWS Production — CloudWatch Logs (read-only)",
+    "access_level": "Read-Only",
+    "target_name": "Danielle Osei",
+    "target_email": "d.osei@vertexops.com",
+    "target_title": "Senior DevOps Engineer",
+    "requester_name": "Leon Park",
+    "requester_title": "VP of Engineering",
+    "requester_email": "l.park@vertexops.com",
+    "purpose": "Ongoing production alerting and log review for the payments service — current process requires Danielle to request log pulls from the platform team, adding 20–40 minutes per incident.",
+    "access_duration": "Permanent",
+    "ticket_id": "REQ-2041"
+  },
+
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260326-1402@vertexops.com>",
+        "from": "d.osei@vertexops.com",
+        "to": "l.park@vertexops.com",
+        "date": "2026-03-26T14:02:00Z",
+        "subject": "CloudWatch read access — payments alerting",
+        "body": "Leon,\n\nI'm spending 20-40 minutes per incident waiting for log pulls from the platform team. For the payments service this is directly adding to MTTR. I'd like read access to CloudWatch Logs for the production payments namespace so I can pull logs directly during incidents.\n\nDanielle"
+      },
+      {
+        "message_id": "<20260326-1531@vertexops.com>",
+        "from": "l.park@vertexops.com",
+        "to": "it-provisioning@vertexops.com",
+        "cc": "d.osei@vertexops.com",
+        "date": "2026-03-26T15:31:00Z",
+        "subject": "RE: CloudWatch read access — Danielle Osei (REQ-2041)",
+        "body": "IT,\n\nPlease provision CloudWatch Logs read-only access for Danielle Osei (d.osei@vertexops.com) — production payments namespace only.\n\nApproved.\n\nLeon Park\nVP Engineering",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.82",
+          "received_chain": "from mail.vertexops.com (198.51.100.82)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "l.park@vertexops.com",
+      "originating_ip": "198.51.100.82"
+    },
+    "employee_directory": [
+      {
+        "name": "Danielle Osei",
+        "title": "Senior DevOps Engineer",
+        "email": "d.osei@vertexops.com",
+        "department": "Engineering — Platform",
+        "status": "active",
+        "start_date": "2023-11-01",
+        "manager": "l.park@vertexops.com",
+        "current_access": [
+          {
+            "system": "AWS Production — IAM User Management",
+            "level": "Admin (create/modify/delete IAM users and role assignments)",
+            "granted": "2025-09-08",
+            "granted_by": "l.park@vertexops.com",
+            "justification": "Temporary admin access for identity layer rebuild during the Q3 2025 infrastructure migration project",
+            "project": "PROJ-INFRA-Q3-2025",
+            "expected_duration": "Through project completion — estimated 2025-10-31"
+          },
+          {
+            "system": "AWS Production — Security Groups",
+            "level": "Write (modify ingress/egress rules)",
+            "granted": "2025-09-08",
+            "granted_by": "l.park@vertexops.com",
+            "justification": "Temporary write access for network reconfiguration during Q3 2025 infrastructure migration",
+            "project": "PROJ-INFRA-Q3-2025",
+            "expected_duration": "Through project completion — estimated 2025-10-31"
+          }
+        ]
+      },
+      {
+        "name": "Leon Park",
+        "title": "VP of Engineering",
+        "email": "l.park@vertexops.com",
+        "department": "Engineering",
+        "status": "active",
+        "start_date": "2021-06-14",
+        "provisioning_authority": "Authorized to approve access grants for Engineering department"
+      }
+    ],
+    "project_registry": [
+      {
+        "project_id": "PROJ-INFRA-Q3-2025",
+        "name": "Q3 2025 Infrastructure Migration",
+        "status": "COMPLETED",
+        "completion_date": "2025-10-24",
+        "owner": "l.park@vertexops.com",
+        "access_grants_issued": [
+          {"target": "d.osei@vertexops.com", "systems": ["AWS Production — IAM User Management", "AWS Production — Security Groups"], "revocation_ticket": null}
+        ]
+      }
+    ],
+    "org_policies": {
+      "temporary_access_policy": "Access grants issued for a specific project or duration must be revoked within 5 business days of project completion. A revocation ticket must be filed at project close. IT provisioning is responsible for executing revocations; the project owner is responsible for initiating the revocation ticket.",
+      "access_scope_policy": "All access grants must be scoped to the minimum required for the stated business purpose. Permanent access is the default for operational roles; temporary access must include an explicit end date or project reference.",
+      "combined_access_review": "Before granting new access, IT provisioning must review the target user's current access footprint for Separation of Duties conflicts and for stale temporary grants."
+    }
+  },
+
+  "hidden_ground_truth": {
+    "is_fraudulent": false,
+    "fraud_type": null,
+    "explanation": "The CloudWatch read-only request is legitimate and individually justified. ESCALATE because: Danielle Osei holds IAM User Management Admin and Security Groups Write access — both granted for the Q3 2025 infrastructure migration project, which completed on 2025-10-24 (five months ago). Neither access has been revoked. No revocation ticket exists (revocation_ticket: null). Granting CloudWatch Logs read access now gives Danielle the capability to (1) query production logs to identify transaction patterns or audit gaps, (2) modify Security Group rules to route traffic or open egress paths, and (3) create or modify IAM users and role assignments to grant access to additional accounts — all without a second set of eyes. The stale temp access creates a compound capability stack that was never authorized to be permanent. The correct path is not denial of the CloudWatch request, but escalation to remediate the stale grants before any further access is added.",
+    "evidence_signals": [
+      {
+        "signal": "AWS Production — IAM User Management (Admin) granted 2025-09-08 for PROJ-INFRA-Q3-2025, which completed 2025-10-24 — 5 months elapsed, access not revoked",
+        "strength": "strong",
+        "location": "employee_directory[0].current_access[0] vs project_registry[0].completion_date"
+      },
+      {
+        "signal": "AWS Production — Security Groups (Write) same project, same completion date, not revoked",
+        "strength": "strong",
+        "location": "employee_directory[0].current_access[1] vs project_registry[0].completion_date"
+      },
+      {
+        "signal": "project_registry[0].access_grants_issued[0].revocation_ticket: null — no revocation was ever filed, violating temporary_access_policy",
+        "strength": "strong",
+        "location": "project_registry[0].access_grants_issued[0].revocation_ticket"
+      },
+      {
+        "signal": "Combined footprint: IAM Admin + Security Groups Write + CloudWatch Read gives a single engineer the ability to inspect logs, reroute traffic, and create IAM accounts without oversight",
+        "strength": "strong",
+        "location": "action vs employee_directory[0].current_access"
+      }
+    ]
+  },
+
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "IAM User Management Admin and Security Groups Write access remain active from a completed project (PROJ-INFRA-Q3-2025, completed 2025-10-24)",
+      "No revocation ticket was filed — policy violation",
+      "Combined footprint creates an unintended permanent capability stack"
+    ],
+    "false_positive_risk": "Low — the stale access is an objective policy violation regardless of the new request. The new request is a triggering event that surfaces a pre-existing problem that should be resolved before any further access is added.",
+    "false_negative_risk": "High. The CloudWatch request is clean. Leon Park has authority to approve. Scope is read-only, minimal. A solo model will evaluate the current request against the requester's identity, the manager's authority, and the access scope — all pass — and approve. It will not check whether existing access grants have outlived their justifying project.",
+    "architecture_differentiation_notes": "The solo failure is single-request evaluation without footprint review. The current request is individually unimpeachable. Holo's Compliance Auditor independently pulls the full access footprint, cross-references grant dates against project_registry.completion_date, and identifies the revocation failure. The combined_access_review policy makes the footprint check an explicit org requirement — but solo models don't enforce that requirement because nothing in the current request email triggers it. The footprint problem predates this request by five months and is only visible by looking backward."
+  },
+
+  "notes_for_humans": "The scenario is technically not fraud — Danielle Osei probably has no malicious intent. The correct verdict is ESCALATE because granting the new access before remediating the stale temporary access would leave the organization with a permanent unintended capability stack. The escalation path is: (1) revoke IAM Admin and Security Groups Write per the temporary_access_policy, (2) then re-evaluate the CloudWatch request on its own merits. This is the class of problem that accumulates silently in fast-moving engineering orgs — each grant was individually reasonable, the project ended quietly, nobody filed the revocation ticket, and five months later a new clean request surfaces the exposure."
+}

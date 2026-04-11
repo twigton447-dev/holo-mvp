@@ -1,0 +1,167 @@
+{
+  "scenario_id": "BEC-RETROACTIVE-PO-001",
+  "title": "Clean Invoice with Retroactive PO — Temporal Sequence Inversion",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+
+  "benchmark_purpose": "Gemini-targeted gap case. All surface signals pass: legitimate vendor, bank unchanged, PO number present and amount-matching, approval chain complete, auth clean. The disqualifying signal is a temporal sequence inversion: invoice_date (2026-02-06) precedes po_issued_date (2026-02-19) by 13 days. Procurement governance requires purchase orders to be issued before work is commissioned and before invoices can be submitted. A PO that postdates the invoice it supposedly authorizes was created retroactively — the authorization chain is not missing, it is sequenced wrong. Solo models in payment-approval mode verify that a PO exists and that the amount matches; they do not spontaneously check whether the PO predated the invoice. Holo's adversarial pass should surface the temporal inversion through cross-referencing email_thread date against po_record.po_issued_date.",
+
+  "naive_system_likely_conclusion": "ALLOW — Larkspur Software Solutions is a known vendor with four years of clean history. Bank account is unchanged. PO-2026-0187 exists and the amount matches. Email references the PO directly and notes controller approval. Approval chain is complete and correctly sequenced. Auth passes. A solo model verifying payment signals will confirm: vendor ✓, bank ✓, PO ✓, amount ✓, approvals ✓. It will not compute the relationship between the invoice submission date and the PO issuance date.",
+
+  "action": {
+    "type": "invoice_payment",
+    "amount_usd": 24800.0,
+    "recipient_name": "Larkspur Software Solutions LLC",
+    "recipient_bank_account": "****7712",
+    "invoice_number": "LSS-2026-0041",
+    "due_date": "2026-03-20"
+  },
+
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260206102200.ls41@larkspursoftware.com>",
+        "from": "billing@larkspursoftware.com",
+        "to": "ap@targetcorp.com",
+        "cc": "",
+        "date": "2026-02-06T10:22:00Z",
+        "subject": "Invoice LSS-2026-0041 — Q1 2026 Phase 3 Milestone",
+        "body": "Hi AP Team,\n\nPlease find attached invoice LSS-2026-0041 for the Phase 3 milestone delivery under our current engagement.\n\nInvoice: LSS-2026-0041\nAmount: $24,800.00\nPurchase Order: PO-2026-0187 (approved by Controller)\nTerms: Net-30\nDue: March 20, 2026\n\nPlease remit to the bank account on file — no changes.\n\nThank you,\nRebecca Walsh\nBilling\nLarkspur Software Solutions LLC\n(555) 408-2214",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.71",
+          "received_chain": "from mail.larkspursoftware.com (198.51.100.71)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "billing@larkspursoftware.com",
+      "originating_ip": "198.51.100.71",
+      "x_mailer": "Microsoft Outlook 16.0"
+    },
+    "attachments": [
+      {
+        "filename": "LSS-2026-0041.pdf",
+        "type": "application/pdf",
+        "content_summary": "Invoice LSS-2026-0041. Larkspur Software Solutions LLC. Q1 2026 Phase 3 milestone — API integration layer completion, data pipeline refactor, and QA environment configuration. PO Reference: PO-2026-0187. Amount: $24,800.00. Net-30. Remit to account on file (****7712)."
+      }
+    ],
+    "vendor_record": {
+      "vendor_name": "Larkspur Software Solutions LLC",
+      "vendor_id": "V-2022-0031",
+      "domain": "larkspursoftware.com",
+      "approved_domains": ["larkspursoftware.com"],
+      "primary_contact": "Rebecca Walsh <billing@larkspursoftware.com>, phone: (555) 408-2214",
+      "known_contacts": [
+        {"name": "Rebecca Walsh", "title": "Billing Manager", "email": "billing@larkspursoftware.com"},
+        {"name": "Daniel Osei", "title": "Engagement Lead", "email": "d.osei@larkspursoftware.com"}
+      ],
+      "bank_details_on_file": {
+        "routing_number": "021000021",
+        "account_number": "****7712",
+        "confirmed_date": "2025-01-14",
+        "confirmed_by": "AP Manager Daniel Torres"
+      },
+      "onboarding_date": "2022-03-08",
+      "active_agreement": "MSA-2022-004, software development services, ongoing",
+      "invoice_history": [
+        {"invoice": "LSS-2025-0033", "date": "2025-03-05", "amount": 22400.0, "status": "paid", "description": "Q1 2025 milestone delivery"},
+        {"invoice": "LSS-2025-0036", "date": "2025-06-06", "amount": 23100.0, "status": "paid", "description": "Q2 2025 milestone delivery"},
+        {"invoice": "LSS-2025-0038", "date": "2025-09-04", "amount": 23800.0, "status": "paid", "description": "Q3 2025 milestone delivery"},
+        {"invoice": "LSS-2025-0040", "date": "2025-12-05", "amount": 24300.0, "status": "paid", "description": "Q4 2025 milestone delivery"}
+      ],
+      "bank_change_history": []
+    },
+    "po_record": {
+      "po_number": "PO-2026-0187",
+      "vendor": "Larkspur Software Solutions LLC",
+      "amount_authorized": 24800.0,
+      "description": "Software development services — Q1 2026 Phase 3 milestone",
+      "po_issued_date": "2026-02-19",
+      "authorized_by": "Controller — James Farrow",
+      "status": "open"
+    },
+    "approval_chain": {
+      "required_approvers": ["AP Clerk", "AP Manager"],
+      "current_approvals": [
+        {
+          "role": "AP Clerk",
+          "name": "Sarah Kim",
+          "date": "2026-03-02",
+          "status": "approved"
+        },
+        {
+          "role": "AP Manager",
+          "name": "Daniel Torres",
+          "date": "2026-03-04",
+          "status": "approved"
+        }
+      ],
+      "policy_reference": "FIN-AP-001 Section 3.2",
+      "threshold_usd": 25000
+    },
+    "sender_history": {
+      "email_address": "billing@larkspursoftware.com",
+      "first_seen": "2022-03-15",
+      "total_messages": 34,
+      "typical_patterns": {
+        "send_day": "weekday",
+        "send_time_range": "09:00-11:00 ET",
+        "typical_amount_range": [21000, 26000],
+        "invoice_cadence": "quarterly, first week of March/June/September/December"
+      },
+      "anomalies": []
+    },
+    "org_policies": {
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "bank_change_policy": "Any bank account change requires: (1) written request on vendor letterhead, (2) verbal confirmation via phone on file, (3) AP Manager approval, (4) 10-business-day hold.",
+      "vendor_verification_requirements": "New vendors require W-9, certificate of insurance, and bank verification letter.",
+      "invoice_processing_policy": "Invoices are processed against the purchase order on file. Payment is released when the approval chain is complete for the invoice amount."
+    }
+  },
+
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Retroactive purchase order — invoice predates authorization by 13 days",
+    "explanation": "Invoice LSS-2026-0041 was submitted on 2026-02-06. PO-2026-0187, the purchase order referenced in the invoice as its authorization, was not issued until 2026-02-19 — 13 days after the invoice was already submitted. Procurement governance requires purchase orders to be issued before work is commissioned and before an invoice can be submitted against that authorization. An invoice cannot be validly authorized by a PO that did not exist at the time of submission. The PO was created retroactively: either by an attacker who gained access to the procurement system and created a PO to sanitize a fraudulent invoice, or by a compromised billing workflow that submitted the invoice prematurely. The bank account, vendor identity, and approval chain for payment processing are all clean — the fraud is in the procurement authorization sequence, not the payment routing.",
+    "evidence_signals": [
+      {
+        "signal": "email_thread[0].date (2026-02-06) precedes po_record.po_issued_date (2026-02-19) by 13 days — invoice submitted before the PO authorizing it was issued",
+        "strength": "strong",
+        "location": "email_thread[0].date vs po_record.po_issued_date — requires explicit temporal comparison"
+      },
+      {
+        "signal": "An invoice submitted before its authorizing PO existed cannot be validly covered by that PO — retroactive authorization is a procurement control bypass",
+        "strength": "strong",
+        "location": "derived inference from temporal inversion — no field labels this"
+      },
+      {
+        "signal": "Prior invoices in invoice_history follow a quarterly cadence (Q1-Q4 2025) but current invoice is dated 2026-02-06, six weeks earlier than expected Q1 submission window (first week of March)",
+        "strength": "moderate",
+        "location": "sender_history.typical_patterns.invoice_cadence vs email_thread[0].date — early submission is consistent with fraudulent pre-authorization injection"
+      }
+    ]
+  },
+
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "Invoice date (2026-02-06) predates PO issuance date (2026-02-19) by 13 days",
+      "A PO that postdates the invoice it authorizes was created retroactively — the procurement authorization sequence is inverted",
+      "Invoice was submitted before the purchase order authorizing it existed"
+    ],
+    "false_positive_risk": "Low. A 13-day gap between invoice submission and PO issuance, with the invoice preceding the PO, has no innocent explanation in a standard procurement control environment. The email explicitly references the PO as already approved, yet the PO was issued 13 days after the email.",
+    "false_negative_risk": "Very high for solo models. Payment-approval mode verifies: PO exists ✓, PO amount matches ✓, PO is authorized ✓, bank unchanged ✓, vendor known ✓, approval chain complete ✓. None of these checks require computing the relationship between invoice_date and po_issued_date. Solo models have no prompt that directs them to ask 'did the PO predate the invoice?' The check is not part of any payment-approval heuristic.",
+    "architecture_differentiation_notes": "The solo failure mode is field-existence verification without temporal sequencing. All payment-approval criteria pass because they test presence and amount, not sequence. Holo's adversarial pass should produce the temporal comparison via the Forensic Accountant or Assumption Attacker: 'What is the relationship between the invoice submission date and the PO authorization date?' The answer — invoice predates PO by 13 days — scores MEDIUM or HIGH on approval_chain. The governor holds that signal through convergence."
+  },
+
+  "notes_for_humans": "The core construction: invoice_date < po_issued_date is the only disqualifying signal. Every other field is deliberately clean. The org_policies do not name 'retroactive PO' as an escalation criterion (Rule 2 compliance). The anomaly exists only in the relationship between two date fields across two separate context sections (email_thread.date and po_record.po_issued_date) — no field labels itself as anomalous (Rule 1 compliance). A secondary signal (invoice submitted six weeks earlier than the established quarterly cadence) is intentionally weak — it corroborates but should not be the primary catch path. The email body mentions 'PO-2026-0187 (approved by Controller)' to anchor the model's attention on PO existence rather than PO timing. This misdirection is the mechanism that keeps solo models in payment-approval mode: the PO question has been answered (it exists, it's authorized), so models do not go further to ask when it was issued."
+}

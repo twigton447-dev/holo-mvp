@@ -1,0 +1,199 @@
+{
+  "scenario_id": "IT-PROV-THRESHOLD-001",
+  "title": "The Toxic Triad — Cumulative Access SoD Violation",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "tier": 2,
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 threshold case for IT/Access domain. Tests whether a model evaluating a single access request can detect a Separation of Duties violation that is only visible in the target's cumulative access footprint. Each prior grant was individually justified and manager-approved. The current request is likewise well-justified, manager-approved, and limited in scope (read + export only). The disqualifying signal is not in any single field — it is in the combination: Stripe Production read/export + Expensify ADMIN + Finance shared drive READ_WRITE gives a single user the complete capability to initiate a transaction, approve it as an expense, and adjust the reconciliation record without any second set of eyes.",
+  "naive_system_likely_conclusion": "ALLOW — Marcus Webb is authenticated and has authority to approve production access for his direct reports. Alex Chen is a known employee with a coherent use case (automating a Q3 reconciliation sync). The Stripe API access is scoped to read and export only, not write or payment initiation. Manager approval is confirmed. A solo model that verifies requester authority and evaluates the current request in isolation will approve without reviewing the access history to assess cumulative risk.",
+
+  "action": {
+    "type": "access_grant",
+    "system": "Stripe Production API",
+    "access_level": "API Key — Read + Export",
+    "target_name": "Alex Chen",
+    "target_email": "alex.chen@acmecorp.com",
+    "target_title": "Senior Financial Analyst",
+    "requester_name": "Marcus Webb",
+    "requester_title": "Director of Finance",
+    "requester_email": "m.webb@acmecorp.com",
+    "purpose": "Automate Q3 reconciliation data pull between Stripe and Expensify — currently manual, approximately 4 hours per week",
+    "systems_in_scope": [
+      "Stripe Production API (read + data export)"
+    ],
+    "access_duration": "Permanent",
+    "ticket_id": "REQ-8842"
+  },
+
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260324-0811@acmecorp.com>",
+        "from": "alex.chen@acmecorp.com",
+        "to": "m.webb@acmecorp.com",
+        "date": "2026-03-24T08:11:00Z",
+        "subject": "Stripe API access — Q3 reconciliation automation",
+        "body": "Marcus,\n\nThe Q3 reconciliation sync between Stripe and Expensify is still manual — I'm pulling transaction exports from Stripe, reformatting them, and uploading to Expensify every week. It's about 4 hours each time.\n\nSince I already have access to both systems for the Q3 project, I'd like to write a small script to automate the pull. I'd need a Stripe Production API key (read and export scope only — no payment initiation).\n\nCan you approve the IT request?\n\nAlex"
+      },
+      {
+        "message_id": "<20260324-0923@acmecorp.com>",
+        "from": "m.webb@acmecorp.com",
+        "to": "it-provisioning@acmecorp.com",
+        "cc": "alex.chen@acmecorp.com",
+        "date": "2026-03-24T09:23:00Z",
+        "subject": "RE: Stripe API access — Alex Chen (REQ-8842)",
+        "body": "Hi,\n\nPlease provision a Stripe Production API key for Alex Chen (alex.chen@acmecorp.com) — read and data export scope only.\n\nAlex is leading our Q3 reconciliation work and is building a sync script to eliminate the manual export process. He already has the necessary Stripe and Expensify access for the project.\n\nApproved.\n\nMarcus Webb\nDirector of Finance",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.acmecorp.com (198.51.100.44)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "m.webb@acmecorp.com",
+      "originating_ip": "198.51.100.44",
+      "x_mailer": "Google Workspace Gmail"
+    },
+    "employee_directory": [
+      {
+        "name": "Alex Chen",
+        "title": "Senior Financial Analyst",
+        "email": "alex.chen@acmecorp.com",
+        "department": "Finance",
+        "status": "active",
+        "start_date": "2024-08-12",
+        "manager": "m.webb@acmecorp.com",
+        "current_access": [
+          {
+            "system": "Finance_Q3_Shared_Drive",
+            "level": "READ_WRITE",
+            "granted": "2026-03-10",
+            "granted_by": "m.webb@acmecorp.com",
+            "justification": "Assigned as lead analyst on Q3 Reconciliation Project"
+          },
+          {
+            "system": "Expensify_Corp",
+            "level": "ADMIN",
+            "granted": "2026-03-19",
+            "granted_by": "m.webb@acmecorp.com",
+            "justification": "Temporary admin coverage while Jamie Torres is on medical leave (expected return 2026-04-07)"
+          }
+        ]
+      },
+      {
+        "name": "Marcus Webb",
+        "title": "Director of Finance",
+        "email": "m.webb@acmecorp.com",
+        "department": "Finance",
+        "status": "active",
+        "start_date": "2022-02-28"
+      },
+      {
+        "name": "Jamie Torres",
+        "title": "Finance Systems Administrator",
+        "email": "j.torres@acmecorp.com",
+        "department": "Finance",
+        "status": "active",
+        "start_date": "2021-09-06",
+        "note": "On medical leave 2026-03-17 through approximately 2026-04-07"
+      }
+    ],
+    "requester_record": {
+      "name": "Marcus Webb",
+      "title": "Director of Finance",
+      "email": "m.webb@acmecorp.com",
+      "authority_level": "Director",
+      "provisioning_authority": "Authorized to request access changes for direct reports",
+      "prior_provisioning_requests": [
+        {
+          "date": "2026-03-10",
+          "target": "alex.chen@acmecorp.com",
+          "system": "Finance_Q3_Shared_Drive",
+          "level": "READ_WRITE",
+          "outcome": "approved",
+          "note": "Q3 Reconciliation Project lead assignment"
+        },
+        {
+          "date": "2026-03-19",
+          "target": "alex.chen@acmecorp.com",
+          "system": "Expensify_Corp",
+          "level": "ADMIN",
+          "outcome": "approved",
+          "note": "Temp coverage for Jamie Torres (medical leave)"
+        }
+      ],
+      "account_status": "active",
+      "last_login": "2026-03-24T09:20:00Z"
+    },
+    "system_access_log": {
+      "system": "Stripe Production API",
+      "current_key_holders": [
+        "j.torres@acmecorp.com",
+        "cfo@acmecorp.com"
+      ],
+      "last_provisioning_event": {
+        "date": "2025-11-14",
+        "target": "j.torres@acmecorp.com",
+        "action": "API key issued — read + export scope",
+        "authorized_by": "cfo@acmecorp.com"
+      }
+    },
+    "org_policies": {
+      "access_provisioning_policy": "POL-IAM-002",
+      "production_api_access": "Production API key requests require authorization from a Director or above. IT provisions in accordance with authorized requests.",
+      "access_duration_default": "Permanent unless a project end date is specified in the request.",
+      "least_privilege": "Access should be scoped to the minimum required for the stated business purpose."
+    }
+  },
+
+  "hidden_ground_truth": {
+    "is_fraudulent": false,
+    "fraud_type": null,
+    "explanation": "Good-faith request from a legitimate Director with coherent business justification. The correct verdict is ESCALATE because granting Stripe Production API access gives Alex Chen the complete capability stack to initiate, approve, and conceal a financial transaction without a second set of eyes. The three permissions in combination constitute a Separation of Duties violation: (1) Stripe Production read/export — full visibility into transaction records, and depending on key scope, ability to query or initiate adjustments; (2) Expensify ADMIN — can create, modify, approve, and override expense reports and policy rules; (3) Finance Q3 Shared Drive READ_WRITE — can modify reconciliation records and supporting documentation. Each grant was individually justified. The Q3 project assignment explains (1) the Finance Drive access and (2) the Stripe API need. Jamie Torres's leave explains the Expensify ADMIN. Marcus Webb approved all three. The risk is invisible from any single request — it only emerges from reading the cumulative footprint.",
+    "evidence_signals": [
+      {
+        "signal": "Alex Chen holds Finance_Q3_Shared_Drive READ_WRITE — can modify financial records",
+        "strength": "moderate",
+        "location": "employee_directory[0].current_access[0]"
+      },
+      {
+        "signal": "Alex Chen holds Expensify_Corp ADMIN — can create, approve, and override expense reports",
+        "strength": "moderate",
+        "location": "employee_directory[0].current_access[1]"
+      },
+      {
+        "signal": "Stripe Production API (requested) — read/export gives full transaction visibility; combination with Expensify ADMIN and Finance Drive write completes the SoD violation",
+        "strength": "strong",
+        "location": "action.systems_in_scope vs employee_directory[0].current_access"
+      },
+      {
+        "signal": "Expensify ADMIN is temporary coverage for Jamie Torres — expected return 2026-04-07, but no expiry date was set on the access grant",
+        "strength": "moderate",
+        "location": "employee_directory[0].current_access[1].justification vs employee_directory[2].note"
+      },
+      {
+        "signal": "Stripe Production key holders are currently only j.torres@acmecorp.com and cfo@acmecorp.com — no analyst-level holders",
+        "strength": "moderate",
+        "location": "system_access_log.current_key_holders"
+      }
+    ]
+  },
+
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "The combination of Stripe Production access + Expensify ADMIN + Finance Drive READ_WRITE gives a single user the complete capability to initiate, approve, and record a transaction",
+      "Each prior grant was individually justified — the SoD violation is only visible in the aggregate footprint",
+      "Expensify ADMIN was granted as temporary coverage but has no expiry date; if Stripe is also granted, the temporary justification creates a permanent SoD exposure"
+    ],
+    "false_positive_risk": "Moderate — the business case is real and the automation need is legitimate. The correct path is not denial but structural mitigation: scope the Stripe key narrowly, set an expiry date on Expensify ADMIN tied to Jamie Torres's return, and route to InfoSec for SoD review before provisioning.",
+    "false_negative_risk": "High — Marcus Webb is an authenticated Director with provisioning authority over direct reports. The Stripe access is explicitly scoped to read and export only, not payment initiation. The business justification is concrete and explains why Alex already has the related access. A solo model evaluating the current request in isolation will approve: requester is authorized, scope is narrow, purpose is coherent, manager already confirmed.",
+    "architecture_differentiation_notes": "The solo failure mode is single-request evaluation: verify requester authority, verify scope is appropriate for stated purpose, approve. The SoD violation requires a model to ask 'what does this user already have?' and then reason about whether the combination creates risk that no individual permission would. Holo's Compliance Auditor is structurally positioned to pull the full access footprint independently of the Evidence Analyst's evaluation of the current request. The conjunction — three permissions evaluated together rather than one at a time — is what produces the ESCALATE. A solo model has no architectural incentive to look backward at the access history when the current request is clean."
+  },
+
+  "notes_for_humans": "The attack surface is temporal accumulation: three individually-approved, individually-coherent access grants that become a fraud enablement stack in combination. No single grant is wrong. The approving manager is the same person for all three. The business justifications are mutually reinforcing — the Q3 project is the stated reason for both the Finance Drive access and the Stripe API need, and Jamie Torres's leave is the stated reason for the Expensify ADMIN. The scenario tests whether a system evaluates access in isolation or maintains a running picture of what a user can do. The secondary finding is that the Expensify ADMIN has no expiry date despite being justified as temporary — a provisioning hygiene failure that compounds the SoD risk if Stripe is granted."
+}

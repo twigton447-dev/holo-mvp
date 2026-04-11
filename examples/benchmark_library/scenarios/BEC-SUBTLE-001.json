@@ -4,11 +4,11 @@
   "category": "subtle_fraud",
   "difficulty": "high",
   "expected_verdict": "ESCALATE",
-  "benchmark_purpose": "Core differentiator. Tests mid-thread actor substitution where the attacker inserts a reply into a legitimate thread, changes the bank account casually, and maintains tone/content continuity. The message-ID chain breaks and the originating IP shifts — but these are metadata signals, not surface signals.",
-  "naive_system_likely_conclusion": "ALLOW — the thread reads as continuous, domain is correct, auth passes on legitimate messages, tone matches, amount is normal. A solo one-pass system reading top-to-bottom will likely accept message 3 at face value.",
+  "benchmark_purpose": "Core differentiator. Tests mid-thread actor substitution where the attacker inserts a reply into a legitimate thread, changes the bank account casually, and maintains tone/content continuity. The message-ID chain breaks and the originating IP shifts \u2014 but these are metadata signals, not surface signals.",
+  "naive_system_likely_conclusion": "ALLOW \u2014 the thread reads as continuous, domain is correct, auth passes on legitimate messages, tone matches, amount is normal. A solo one-pass system reading top-to-bottom will likely accept message 3 at face value.",
   "action": {
     "type": "invoice_payment",
-    "amount_usd": 27500.00,
+    "amount_usd": 27500.0,
     "recipient_name": "Northbridge Fabrication Co.",
     "recipient_bank_account": "****9044",
     "invoice_number": "NBF-2026-0220",
@@ -45,7 +45,7 @@
         "cc": "",
         "date": "2026-03-10T10:15:00Z",
         "subject": "RE: Upcoming Invoice for Q1 Fabrication Work",
-        "body": "Hi Jamie,\n\nAttached is invoice NBF-2026-0220 for the Q1 fabrication work per PO-TC-8900. Amount: $27,500.00, Net-30.\n\nOne quick note — we've recently transitioned to a new bank for our receivables. Updated remittance details are on the invoice. Nothing else has changed on our end.\n\nThanks,\nCarla Mendes\nAccounts Receivable\nNorthbridge Fabrication Co.\n(555) 607-3300",
+        "body": "Hi Jamie,\n\nAttached is invoice NBF-2026-0220 for the Q1 fabrication work per PO-TC-8900. Amount: $27,500.00, Net-30.\n\nOne quick note \u2014 we've recently transitioned to a new bank for our receivables. Updated remittance details are on the invoice. Nothing else has changed on our end.\n\nThanks,\nCarla Mendes\nAccounts Receivable\nNorthbridge Fabrication Co.\n(555) 607-3300",
         "headers_raw": {
           "x_originating_ip": "91.198.44.12",
           "received_chain": "from mail-proxy-7.net (91.198.44.12)"
@@ -70,78 +70,145 @@
         "type": "application/pdf",
         "content_summary": "Invoice from Northbridge Fabrication Co. NBF-2026-0220. PO: PO-TC-8900. Structural steel components ($19,500), finishing/coating ($5,200), freight ($2,800). Total: $27,500.00. Net-30. Bank: Atlantic Coast Credit Union, routing 253177049, account ****9044."
       }
-    ]
-  },
-  "vendor_record": {
-    "vendor_name": "Northbridge Fabrication Co.",
-    "vendor_id": "V-2018-0031",
-    "domain": "northbridgefab.com",
-    "primary_contact": "Carla Mendes <ar@northbridgefab.com>, phone: (555) 607-3300",
-    "bank_account_on_file": "****7210",
-    "onboarding_date": "2018-09-01",
-    "last_invoice_date": "2025-12-15",
-    "invoice_history": [
-      {"invoice": "NBF-2025-0198", "date": "2025-12-15", "amount": 26800.00, "status": "paid"},
-      {"invoice": "NBF-2025-0175", "date": "2025-09-15", "amount": 27200.00, "status": "paid"},
-      {"invoice": "NBF-2025-0152", "date": "2025-06-15", "amount": 26500.00, "status": "paid"}
     ],
-    "bank_change_history": []
-  },
-  "sender_history": {
-    "email_address": "ar@northbridgefab.com",
-    "first_seen": "2018-09-10",
-    "total_messages": 62,
-    "typical_patterns": {
-      "send_day": "weekday",
-      "send_time_range": "09:00-15:00 ET",
-      "typical_amount_range": [24000, 29000],
-      "invoice_cadence": "quarterly"
+    "vendor_record": {
+      "vendor_name": "Northbridge Fabrication Co.",
+      "vendor_id": "V-2018-0031",
+      "domain": "northbridgefab.com",
+      "primary_contact": "Carla Mendes <ar@northbridgefab.com>, phone: (555) 607-3300",
+      "bank_account_on_file": "****7210",
+      "onboarding_date": "2018-09-01",
+      "last_invoice_date": "2025-12-15",
+      "invoice_history": [
+        {
+          "invoice": "NBF-2025-0198",
+          "date": "2025-12-15",
+          "amount": 26800.0,
+          "status": "paid"
+        },
+        {
+          "invoice": "NBF-2025-0175",
+          "date": "2025-09-15",
+          "amount": 27200.0,
+          "status": "paid"
+        },
+        {
+          "invoice": "NBF-2025-0152",
+          "date": "2025-06-15",
+          "amount": 26500.0,
+          "status": "paid"
+        }
+      ],
+      "bank_change_history": []
     },
-    "anomalies": [
-      "Message 3 originating IP (91.198.44.12) differs from message 1 (203.0.113.100)",
-      "Message 3 message-ID format breaks pattern",
-      "Message 3 received-chain references 'mail-proxy-7.net' instead of 'mail.northbridgefab.com'"
-    ]
-  },
-  "approval_chain": {
-    "required_approvers": ["AP Clerk", "AP Manager", "Controller"],
-    "current_approvals": [
-      {"role": "AP Clerk", "name": "Jamie Torres", "date": "2026-03-10", "status": "approved"}
-    ],
-    "policy_reference": "FIN-AP-001 Section 3.2",
-    "threshold_usd": 25000
-  },
-  "org_policies": {
-    "bank_change_policy": "Any bank account change requires: (1) written request on vendor letterhead, (2) verbal confirmation via phone on file, (3) AP Manager approval, (4) 10-business-day hold.",
-    "payment_approval_thresholds": {
-      "under_5000": "AP Clerk",
-      "5000_to_25000": "AP Clerk + AP Manager",
-      "25000_to_100000": "AP Clerk + AP Manager + Controller",
-      "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+    "approval_chain": {
+      "required_approvers": [
+        "AP Clerk",
+        "AP Manager",
+        "Controller"
+      ],
+      "current_approvals": [
+        {
+          "role": "AP Clerk",
+          "name": "Jamie Torres",
+          "date": "2026-03-10",
+          "status": "approved"
+        }
+      ],
+      "policy_reference": "FIN-AP-001 Section 3.2",
+      "threshold_usd": 25000
     },
-    "vendor_verification_requirements": "New vendors require W-9, certificate of insurance, and bank verification letter.",
-    "escalation_criteria": ["Bank account change", "Amount >120% of 6-month avg", "Domain mismatch", "Missing PO", "Email auth failure", "Payment method change", "Urgency + any other flag"]
+    "sender_history": {
+      "email_address": "ar@northbridgefab.com",
+      "first_seen": "2018-09-10",
+      "total_messages": 62,
+      "typical_patterns": {
+        "send_day": "weekday",
+        "send_time_range": "09:00-15:00 ET",
+        "typical_amount_range": [
+          24000,
+          29000
+        ],
+        "invoice_cadence": "quarterly"
+      },
+      "anomalies": [
+        "Message 3 originating IP (91.198.44.12) differs from message 1 (203.0.113.100)",
+        "Message 3 message-ID format breaks pattern",
+        "Message 3 received-chain references 'mail-proxy-7.net' instead of 'mail.northbridgefab.com'"
+      ]
+    },
+    "org_policies": {
+      "bank_change_policy": "Any bank account change requires: (1) written request on vendor letterhead, (2) verbal confirmation via phone on file, (3) AP Manager approval, (4) 10-business-day hold.",
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "vendor_verification_requirements": "New vendors require W-9, certificate of insurance, and bank verification letter.",
+      "escalation_criteria": [
+        "Bank account change",
+        "Amount >120% of 6-month avg",
+        "Domain mismatch",
+        "Missing PO",
+        "Email auth failure",
+        "Payment method change",
+        "Urgency + any other flag"
+      ]
+    }
   },
   "hidden_ground_truth": {
     "is_fraudulent": true,
     "fraud_type": "Thread hijack with bank redirect",
     "explanation": "Messages 1-2 are legitimate. Message 3 is injected by an attacker who gained access to the thread context (likely via compromised mailbox or intercepted email). The message-ID format changes, the originating IP shifts to a different network, and the received-chain references a proxy server. The bank account ****9044 does not match ****7210 on file. No bank change process was followed. The bank change is introduced casually ('one quick note') to avoid triggering alarm. The tone, signature, and content continuity are crafted to match the real vendor's patterns.",
     "evidence_signals": [
-      {"signal": "Bank ****9044 ≠ ****7210 on file", "strength": "strong", "location": "action vs vendor_record"},
-      {"signal": "No bank change through formal process", "strength": "strong", "location": "vendor_record.bank_change_history"},
-      {"signal": "Message-ID format breaks between msg 1 and msg 3", "strength": "moderate", "location": "email_headers.thread_analysis"},
-      {"signal": "Originating IP shifts from 203.0.113.100 to 91.198.44.12", "strength": "moderate", "location": "email_thread headers_raw"},
-      {"signal": "Received-chain references proxy server, not vendor mail server", "strength": "moderate", "location": "email_thread[2].headers_raw"},
-      {"signal": "Casual introduction of bank change bypasses formal process", "strength": "weak", "location": "email_thread[2].body"},
-      {"signal": "Approval chain incomplete — only AP Clerk, needs Controller for $27.5K", "strength": "moderate", "location": "approval_chain"}
+      {
+        "signal": "Bank ****9044 \u2260 ****7210 on file",
+        "strength": "strong",
+        "location": "action vs vendor_record"
+      },
+      {
+        "signal": "No bank change through formal process",
+        "strength": "strong",
+        "location": "vendor_record.bank_change_history"
+      },
+      {
+        "signal": "Message-ID format breaks between msg 1 and msg 3",
+        "strength": "moderate",
+        "location": "email_headers.thread_analysis"
+      },
+      {
+        "signal": "Originating IP shifts from 203.0.113.100 to 91.198.44.12",
+        "strength": "moderate",
+        "location": "email_thread headers_raw"
+      },
+      {
+        "signal": "Received-chain references proxy server, not vendor mail server",
+        "strength": "moderate",
+        "location": "email_thread[2].headers_raw"
+      },
+      {
+        "signal": "Casual introduction of bank change bypasses formal process",
+        "strength": "weak",
+        "location": "email_thread[2].body"
+      },
+      {
+        "signal": "Approval chain incomplete \u2014 only AP Clerk, needs Controller for $27.5K",
+        "strength": "moderate",
+        "location": "approval_chain"
+      }
     ]
   },
   "scoring_targets": {
     "correct_verdict": "ESCALATE",
-    "required_evidence_cited": ["Bank mismatch", "No formal bank change process", "Message-ID chain break or IP shift"],
+    "required_evidence_cited": [
+      "Bank mismatch",
+      "No formal bank change process",
+      "Message-ID chain break or IP shift"
+    ],
     "false_positive_risk": "N/A",
-    "false_negative_risk": "High — surface content is plausible, domain correct, auth passes on earlier messages. The fraud signals are in metadata and cross-field comparison, not in the email body.",
-    "architecture_differentiation_notes": "Primary differentiator. A solo one-pass system that reads the thread body will likely ALLOW. A multi-pass system might catch the bank mismatch. A parallel multi-model system may independently flag the metadata anomaly AND the bank mismatch. Holo's architecture — shared-context, compounding postmortems by structurally independent models — should surface the conjunction: the bank change is suspicious BECAUSE the metadata simultaneously breaks, and neither signal alone is definitive but together they are. This is the canonical test case for whether structural independence produces a real advantage."
+    "false_negative_risk": "High \u2014 surface content is plausible, domain correct, auth passes on earlier messages. The fraud signals are in metadata and cross-field comparison, not in the email body.",
+    "architecture_differentiation_notes": "Primary differentiator. A solo one-pass system that reads the thread body will likely ALLOW. A multi-pass system might catch the bank mismatch. A parallel multi-model system may independently flag the metadata anomaly AND the bank mismatch. Holo's architecture \u2014 shared-context, compounding postmortems by structurally independent models \u2014 should surface the conjunction: the bank change is suspicious BECAUSE the metadata simultaneously breaks, and neither signal alone is definitive but together they are. This is the canonical test case for whether structural independence produces a real advantage."
   },
-  "notes_for_humans": "This is the scenario the entire benchmark is built around. The thread reads naturally. The bank change is casual. Each individual weak signal is deniable. But the conjunction — bank change + message-ID break + IP shift + no formal process — is not. A system that treats these signals independently may miss. A system where structurally independent models compound their postmortems into shared context should surface the pattern. This tests the Holo thesis directly."
+  "notes_for_humans": "This is the scenario the entire benchmark is built around. The thread reads naturally. The bank change is casual. Each individual weak signal is deniable. But the conjunction \u2014 bank change + message-ID break + IP shift + no formal process \u2014 is not. A system that treats these signals independently may miss. A system where structurally independent models compound their postmortems into shared context should surface the pattern. This tests the Holo thesis directly."
 }

@@ -55,6 +55,12 @@ from scenario_templates import get_template
 GovernorAdapter = GovernorAdapter
 from tool_gate import ToolGate
 from project_brain import ProjectBrain
+from config import get_settings
+from routing import (
+    RoutingConfig,
+    load_urgency_patterns,
+    route_request,
+)
 
 logger = logging.getLogger("holo.governor")
 
@@ -62,7 +68,7 @@ logger = logging.getLogger("holo.governor")
 # Constants
 # ---------------------------------------------------------------------------
 
-MIN_TURNS           = 3   # minimum before convergence can fire
+MIN_TURNS           = 2   # floor — never fire convergence before this (per-tier override below)
 MAX_TURNS           = 10  # ceiling for both Holo and solo — same cap, same test
 CONVERGENCE_WINDOW  = 2   # consecutive zero-delta turns required to converge
 
@@ -70,12 +76,13 @@ CONVERGENCE_WINDOW  = 2   # consecutive zero-delta turns required to converge
 # Evaluation tiers — governor selects based on action amount
 # ---------------------------------------------------------------------------
 #
-# FAST   < $10,000       lightweight models, 3-turn cap
-# STANDARD $10k–$100k   standard pool, 5-turn cap
-# DEEP   > $100,000      frontier models, full 10-turn cap
+# FAST     < $10,000       lightweight models, 2-4 turns, auto-escalate on HIGH
+# STANDARD $10k–$100k     standard pool, 4-10 turns, all 4 adversarial roles required
+# DEEP     > $100,000      frontier models, 4-10 turns, full Atlas, Wrangler cross-check
 #
 # The tier is selected once at the start of evaluate() and never changes
-# mid-run. MAX_TURNS is overridden per-evaluation, not globally.
+# mid-run (except FAST → STANDARD escalation on HIGH signal).
+# MAX_TURNS and MIN_TURNS are overridden per-evaluation, not globally.
 
 TIER_FAST     = "fast"
 TIER_STANDARD = "standard"
@@ -88,9 +95,15 @@ TIER_THRESHOLDS = {
 }
 
 TIER_MAX_TURNS = {
-    TIER_FAST:     3,
-    TIER_STANDARD: 5,
+    TIER_FAST:     4,
+    TIER_STANDARD: 10,
     TIER_DEEP:     10,
+}
+
+TIER_MIN_TURNS = {
+    TIER_FAST:     2,   # routing pre-screened; 2 lenses minimum; HIGH fires auto-escalate
+    TIER_STANDARD: 4,   # all four adversarial roles required before convergence
+    TIER_DEEP:     4,   # same minimum; Governor may extend beyond turn 4
 }
 
 
@@ -227,12 +240,18 @@ def _select_tier(request: dict) -> str:
     """
     Derive the evaluation tier from the action payload.
 
-    Reads action.parameters.amount_usd first, then falls back to
-    action.parameters.amount (raw numeric). If no amount is present,
-    defaults to DEEP — unknown stakes get the full interrogation.
+    Reads action.amount_usd first (top-level field), then falls back to
+    action.parameters.amount_usd, then action.parameters.amount.
+    If no amount is present, defaults to DEEP — unknown stakes get the
+    full interrogation.
     """
-    params = request.get("action", {}).get("parameters", {})
-    amount = params.get("amount_usd") or params.get("amount")
+    action = request.get("action", {})
+    amount = (
+        action.get("amount_usd")
+        or action.get("amount")
+        or action.get("parameters", {}).get("amount_usd")
+        or action.get("parameters", {}).get("amount")
+    )
     try:
         amount = float(amount)
     except (TypeError, ValueError):
@@ -837,14 +856,24 @@ def _build_initial_state(request: dict, evaluation_id: str) -> dict:
 
 class ContextGovernor:
 
-    def __init__(self, no_memory: bool = False, fixed_governor: str = "anthropic", seed: int = None):
-        self._adapters, self._bench = load_adapters()
-        self._fast_adapters = load_fast_adapters() or self._adapters  # fall back to standard
-        self._governor   = GovernorAdapter(self._adapters, fixed_governor=fixed_governor)
+    def __init__(self, no_memory: bool = False, fixed_governor: str = "anthropic", seed: int = None,
+                 skip_providers=None):
+        self._adapters, self._bench = load_adapters(skip_providers=skip_providers)
+        self._fast_adapters = load_fast_adapters(skip_providers=skip_providers) or self._adapters
+        # Standard Governor uses frontier pool (gpt-5.4 / claude-sonnet / gemini-2.5-pro)
+        self._governor      = GovernorAdapter(self._adapters, fixed_governor=fixed_governor)
+        # Fast Governor uses lite pool (gpt-4o-mini / claude-haiku / gemini-flash)
+        # Cross-family exclusion is handled by prepare_for_turn() in both cases.
+        self._fast_governor = GovernorAdapter(self._fast_adapters)
         self._tool_gate  = ToolGate()
         self._brain      = ProjectBrain()
         self._no_memory  = no_memory
         self._seed       = seed
+
+        # Routing config — loaded once at startup from Settings
+        cfg = get_settings()
+        self._routing_config   = cfg.routing
+        self._urgency_patterns = load_urgency_patterns(cfg.routing.urgency_patterns_path)
 
     def evaluate(self, request: dict) -> dict:
         """
@@ -866,16 +895,47 @@ class ContextGovernor:
 
         evaluation_id = f"holo_{uuid.uuid4().hex[:8]}"
         start_time    = time.time()
+        action        = request.get("action", {})
+        context       = request.get("context", {})
 
-        # Select evaluation tier based on action amount.
-        # Tier determines the adapter pool and per-run turn cap.
-        tier          = _select_tier(request)
-        run_max_turns = TIER_MAX_TURNS[tier]
-        run_adapters  = self._fast_adapters if tier == TIER_FAST else self._adapters
+        # ---- Routing (deterministic, no model calls) -------------------------
+        # Run the three-decision routing policy before any model is called.
+        # Determines FAST/STANDARD/DEEP tier and produces a full audit entry.
+        # Suppressed in no_memory mode — benchmark isolation uses amount-only tier.
+        routing_audit = None
+        if not self._no_memory:
+            recipient_history = self._brain.retrieve_recipient_history(action, context)
+            routing_cfg       = RoutingConfig(
+                fast_amount_floor_usd = self._routing_config.fast_amount_floor_usd,
+                urgency_patterns_path = self._routing_config.urgency_patterns_path,
+            )
+            routing_audit = route_request(
+                packet_id         = evaluation_id,
+                action            = action,
+                context           = context,
+                recipient_history = recipient_history,
+                routing_config    = routing_cfg,
+                urgency_patterns  = self._urgency_patterns,
+            )
+            tier = routing_audit.final_tier
+        else:
+            tier = _select_tier(request)
+
+        run_max_turns  = TIER_MAX_TURNS[tier]
+        run_min_turns  = TIER_MIN_TURNS[tier]
+        run_adapters   = self._fast_adapters if tier == TIER_FAST else self._adapters
+        active_governor = self._fast_governor if tier == TIER_FAST else self._governor
+        use_full_atlas  = (tier == TIER_DEEP)
 
         logger.info(f"\n{'='*65}")
         logger.info(f"EVALUATION START: {evaluation_id}")
         logger.info(f"TIER={tier.upper()} MIN={MIN_TURNS} MAX={run_max_turns} CONV_WINDOW={CONVERGENCE_WINDOW}")
+        if routing_audit:
+            logger.info(
+                f"  Routing: override={routing_audit.override_triggered} | "
+                f"wrangler={routing_audit.wrangler_recommended_tier.upper()} | "
+                f"{routing_audit.override_reason[:100]}"
+            )
         logger.info(f"{'='*65}")
 
         state         = _build_initial_state(request, evaluation_id)
@@ -903,6 +963,21 @@ class ContextGovernor:
             raise
         decay_detail  = []
         used_personas = set()
+
+        # Pre-inject any HIGH routing signals so analysts see them turn 1
+        if routing_audit and routing_audit.key_risk_signals:
+            state["routing_risk_signals"] = routing_audit.key_risk_signals
+            state["artifacts"]["routing_signals_v1"] = {
+                "artifact_id": "routing_signals_v1",
+                "type":        "routing_pre_screen",
+                "description": (
+                    "Pre-evaluation routing signals: HIGH-severity flags detected "
+                    "by deterministic routing policy before any analyst turn."
+                ),
+                "status":      "PINNED",
+                "version":     1,
+                "content":     routing_audit.key_risk_signals,
+            }
 
         # ---- Project Brain (runs before everything else) --------------------
         # Query persistent memory for prior evaluations of this vendor.
@@ -956,9 +1031,27 @@ class ContextGovernor:
                 "content":     verified,
             }
 
+        # ---- Wrangler: Threat Hypothesis Brief ------------------------------
+        # Generated once before any analyst turn. Identifies the most likely
+        # attack surface class so the Governor can prime each driver against
+        # their specific failure mode for this payload.
+        # Suppressed in no_memory mode for benchmark isolation.
+        # DEEP tier always runs the Wrangler cross-check (even in no_memory mode
+        # the threat hypothesis is generated — it just won't include brain context).
+        threat_hypothesis = ""
+        if not self._no_memory or tier == TIER_DEEP:
+            threat_hypothesis = active_governor.generate_threat_hypothesis(state)
+            if threat_hypothesis:
+                state["threat_hypothesis"] = threat_hypothesis
+                logger.info(f"  Wrangler: {threat_hypothesis}")
+            else:
+                state["threat_hypothesis"] = ""
+        else:
+            state["threat_hypothesis"] = ""
+
         # ---- Adversarial loop ------------------------------------------------
         # Reset governor token counters so this run starts clean.
-        self._governor.reset_token_counts()
+        active_governor.reset_token_counts()
 
         # Build a constrained adapter sequence once per run.
         # No model repeats on consecutive turns. No ordered pair (A→B) repeats
@@ -974,10 +1067,9 @@ class ContextGovernor:
 
             adapter = run_adapters[adapter_sequence[turn_number - 1]]
 
-            # Turns 1–3: fixed baseline sequence (Initial Assessment →
-            # Assumption Attacker → Edge Case Hunter).
-            # Turn 4+: governor picks the persona that best fills coverage gaps.
-            if turn_number <= 3:
+            # Turns 1–run_min_turns: fixed baseline sequence.
+            # Beyond that: governor picks the persona that best fills coverage gaps.
+            if turn_number <= run_min_turns:
                 role = get_role_for_turn(turn_number)
             else:
                 role = select_persona(state["coverage_matrix"], used_personas, state.get("active_template"))
@@ -987,7 +1079,7 @@ class ContextGovernor:
             temperature = _get_temperature(turn_number, deltas)
 
             logger.info(
-                f"  Turn {turn_number}/{MAX_TURNS} | "
+                f"  Turn {turn_number}/{run_max_turns} | "
                 f"{adapter.provider} ({adapter.model_id}) | "
                 f"Role: {role} | temp={temperature}"
             )
@@ -1049,15 +1141,24 @@ class ContextGovernor:
             state["turn_history"].append(turn_dict)
 
             next_turn = turn_number + 1
-            if next_turn <= MAX_TURNS:
+            if next_turn <= run_max_turns:
                 next_persona = (
                     get_role_for_turn(next_turn)
-                    if next_turn <= 3
+                    if next_turn <= run_min_turns
                     else select_persona(state["coverage_matrix"], used_personas, state.get("active_template"))
                 )
-                self._governor.prepare_for_turn(adapter)
-                brief = self._governor.generate_brief(
-                    state, next_turn, next_persona, conv_level
+                active_governor.prepare_for_turn(adapter)
+
+                # Identify which adapter will drive the next turn so the Governor
+                # can consult the Atlas and write a driver-specific primer.
+                next_adapter = None
+                if next_turn <= run_max_turns:
+                    next_adapter = run_adapters[adapter_sequence[next_turn - 1]]
+
+                brief = active_governor.generate_brief(
+                    state, next_turn, next_persona, conv_level,
+                    next_adapter=next_adapter,
+                    full_atlas=use_full_atlas,
                 )
 
                 # ---- Algorithmic identity provenance check ------------------
@@ -1081,20 +1182,51 @@ class ContextGovernor:
                     })
                     logger.info(f"  Governor brief for turn {next_turn}: {brief[:120]}...")
 
-            # ---- Clean Bill of Health early exit (turn 2 only) --------------
-            if turn_number == 2 and _is_clean_bill_of_health(state):
+            # ---- FAST tier: auto-escalate to STANDARD if HIGH fires ------------
+            # If the routing pre-screen missed a HIGH signal, the FAST loop
+            # hands off to STANDARD immediately — the lite pool gets out of the way.
+            if tier == TIER_FAST:
+                coverage_has_high = any(
+                    v["max_severity"] == "HIGH"
+                    for v in state["coverage_matrix"].values()
+                    if v.get("addressed")
+                )
+                if coverage_has_high:
+                    logger.info(
+                        f"  FAST→STANDARD escalation: HIGH signal detected at turn {turn_number}. "
+                        f"Switching to standard pool and extending turn budget."
+                    )
+                    tier            = TIER_STANDARD
+                    run_min_turns   = TIER_MIN_TURNS[TIER_STANDARD]
+                    run_max_turns   = TIER_MAX_TURNS[TIER_STANDARD]
+                    run_adapters    = self._adapters
+                    active_governor = self._governor
+                    use_full_atlas  = False
+                    # Rebuild adapter sequence for remaining turns
+                    remaining = run_max_turns - turn_number
+                    if remaining > 0:
+                        extra_seq = _build_adapter_sequence(
+                            len(run_adapters), remaining, seed=self._seed
+                        )
+                        adapter_sequence = adapter_sequence[:turn_number] + extra_seq
+                    logger.info(f"  Escalated tier: STANDARD | new max turns: {run_max_turns}")
+
+            # ---- Clean Bill of Health early exit (after run_min_turns) ------
+            # Only fires for FAST tier (min=2) — STANDARD/DEEP require min 4 turns
+            # so clean-bill is naturally blocked by run_min_turns in the conv check.
+            if turn_number == run_min_turns and tier == TIER_FAST and _is_clean_bill_of_health(state):
                 logger.info(
-                    f"  Clean bill of health after turn 2. "
+                    f"  Clean bill of health after turn {turn_number} (FAST tier). "
                     f"All categories LOW/NONE, both verdicts ALLOW."
                 )
                 converged  = True
                 clean_exit = True
                 break
 
-            # ---- Convergence check (only after MIN_TURNS) -------------------
+            # ---- Convergence check (only after run_min_turns) ---------------
             # Fires when the last CONVERGENCE_WINDOW deltas are all zero —
             # the soil is fully rototilled, no new signals can be surfaced.
-            if (turn_number >= MIN_TURNS
+            if (turn_number >= run_min_turns
                     and len(deltas) >= CONVERGENCE_WINDOW
                     and all(d == 0 for d in deltas[-CONVERGENCE_WINDOW:])):
                 logger.info(
@@ -1104,11 +1236,11 @@ class ContextGovernor:
                 converged = True
                 break
 
-            # ---- Oscillation check (only after MIN_TURNS) -------------------
+            # ---- Oscillation check (only after run_min_turns) ---------------
             # Fires when verdicts flip-flop ALLOW/ESCALATE for OSCILLATION_WINDOW
             # consecutive turns — the models are deadlocked, not converging.
             # Governor must escalate rather than loop forever.
-            if (turn_number >= MIN_TURNS
+            if (turn_number >= run_min_turns
                     and _detect_oscillation(state["turn_history"])):
                 logger.info(
                     f"  OSCILLATION DETECTED after turn {turn_number}: "
@@ -1117,11 +1249,11 @@ class ContextGovernor:
                 oscillation = True
                 break
 
-            # ---- Decay check (only after MIN_TURNS) -------------------------
+            # ---- Decay check (only after run_min_turns) ---------------------
             # Fires when HIGH/MEDIUM findings from early turns are walked back
             # to LOW/NONE in later turns without new evidence — analysts
             # capitulating under adversarial pressure, not converging.
-            if turn_number >= MIN_TURNS:
+            if turn_number >= run_min_turns:
                 decay, decay_detail = _detect_decay(
                     state["turn_history"],
                     action_type=state.get("action", {}).get("type")
@@ -1297,12 +1429,14 @@ class ContextGovernor:
             exit_reason = "max_turns"
 
         result = {
-            "evaluation_id":   evaluation_id,
-            "scenario":        template["name"],
-            "tier":            tier,
-            "decision":        decision,
-            "decision_reason": decision_reason,
-            "exit_reason":     exit_reason,
+            "evaluation_id":    evaluation_id,
+            "scenario":         template["name"],
+            "tier":             tier,
+            "decision":         decision,
+            "decision_reason":  decision_reason,
+            "exit_reason":      exit_reason,
+            "threat_hypothesis": state.get("threat_hypothesis", ""),
+            "routing_audit":    routing_audit.to_dict() if routing_audit else None,
             "turns_completed": turns_completed,
             "converged":       converged,
             "oscillation":     oscillation,
@@ -1332,7 +1466,7 @@ class ContextGovernor:
             "elapsed_ms":      elapsed_ms,
             "run_health":      health.run_health,
             "total_tokens": _build_token_summary(
-                state["turn_history"], self._governor.get_token_counts()
+                state["turn_history"], active_governor.get_token_counts()
             ),
         }
 

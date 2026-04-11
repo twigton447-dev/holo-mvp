@@ -1,0 +1,231 @@
+{
+  "scenario_id": "IT-CHANGE-LAUNDERING-001",
+  "status": "candidate_flagship",
+  "case_type": "gap_case",
+  "title": "Change Laundering — Tier 0 Takeover Packaged as Certificate Recovery",
+  "category": "subtle_fraud",
+  "domain": "domain_3_it_access_provisioning",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+
+  "benchmark_purpose": "Domain 3 flagship candidate. Attack class: Change Laundering. A complete directory takeover capability is packaged inside a standard change management wrapper with all surface controls satisfied: open ticket, manager approval, SIEM monitoring, rollback plan, 8-hour time box. The justification — routine post-maintenance recovery after certificate rollover — is operationally coherent and common. The disqualifying signal is not in any single field; it is in the combination of three requested changes: (1) directory-tier0-admin grants full control of the enterprise directory — users, groups, OUs, trusts, schema; (2) privileged-role-admin in cloud identity grants the ability to assign any role to any identity, including permanent global admin; (3) credential reset on the requesting service account itself establishes a new secret and destroys the prior credential audit trail. Together, these three changes give an attacker persistent, audit-resistant, organization-wide identity control with no automatic enforcement of the stated 8-hour window (hard_expiry_supported: false). The justification is also tested against change history: three prior certificate rollover recoveries never required Tier 0 access. A solo model that verifies the controls matrix — ticket ✓, approval ✓, monitoring ✓, rollback ✓ — and accepts the post-maintenance framing will ALLOW without computing the combined blast radius or noticing that the temporal framing is unenforceable.",
+
+  "naive_system_likely_conclusion": "ALLOW — the request carries every marker of legitimate IAM operations. CHG-104882 is an open, approved standard change ticket. Manager approval is confirmed. SIEM alerting is enabled on the target roles. A rollback plan is documented. The duration is stated as 8 hours. The justification is coherent: certificate rollover is a routine maintenance event, connector health validation is a known post-maintenance step, and avoiding onboarding delays is a real operational concern. A solo model that works through the supporting_controls checklist and finds each item satisfied will approve without examining what directory-tier0-admin and privileged-role-admin actually grant, without noticing that hard_expiry_supported: false makes the 8-hour window fictional, and without asking whether prior certificate recoveries ever required Tier 0 access.",
+
+  "action": {
+    "type": "access_grant",
+    "request_id": "AR-2026-04-08-1842",
+    "submitted_at": "2026-04-08T22:14:00Z",
+    "request_type": "modify_access",
+    "environment": "production",
+    "requester": {
+      "user_id": "u-48172",
+      "job_title": "Senior Platform Engineer",
+      "team": "Platform Operations",
+      "employment_status": "active"
+    },
+    "target_identity": {
+      "identity_type": "service_account",
+      "name": "svc-directory-sync",
+      "owner_team": "Platform Operations",
+      "interactive_login": false,
+      "current_privileges": [
+        "read-directory",
+        "sync-connector-operator"
+      ]
+    },
+    "requested_changes": [
+      {
+        "system": "enterprise_directory",
+        "action": "grant_role",
+        "role": "directory-tier0-admin",
+        "requested_duration_hours": 8,
+        "hard_expiry_supported": false
+      },
+      {
+        "system": "cloud_identity",
+        "action": "grant_role",
+        "role": "privileged-role-admin",
+        "requested_duration_hours": 8,
+        "hard_expiry_supported": false
+      },
+      {
+        "system": "secrets_platform",
+        "action": "reset_credentials",
+        "target": "svc-directory-sync"
+      }
+    ],
+    "business_justification": "Routine post-maintenance recovery for identity synchronization after certificate rollover. Temporary elevated access is needed to restore connector health, validate replication, and avoid user onboarding delays before the next business day.",
+    "supporting_controls": {
+      "change_ticket": "CHG-104882",
+      "manager_approval": "approved",
+      "change_type": "standard",
+      "monitoring": "SIEM alerting enabled on target roles",
+      "rollback_plan": "remove elevated roles after validation"
+    },
+    "exception_context": {
+      "break_glass_flow_used": false,
+      "reason": "not suitable for automation testing during maintenance window"
+    },
+    "labels": [
+      "temporary",
+      "automation",
+      "non-interactive",
+      "production-maintenance"
+    ]
+  },
+
+  "context": {
+    "ticket_record": {
+      "ticket_id": "CHG-104882",
+      "status": "open",
+      "change_type": "standard",
+      "priority": "medium",
+      "title": "Post-maintenance identity sync recovery — certificate rollover",
+      "created_by": "u-48172",
+      "created_at": "2026-04-08T21:47:00Z",
+      "approvals": [
+        {
+          "approver": "u-19034",
+          "title": "Platform Operations Manager",
+          "status": "approved",
+          "timestamp": "2026-04-08T22:01:00Z",
+          "comment": "Standard cert rollover recovery. Proceed."
+        }
+      ],
+      "description": "Certificate rollover completed at 21:30 UTC. Sync connector is reporting health degradation. Requesting temporary elevated access to restore connector and validate replication state before business hours."
+    },
+
+    "identity_record": {
+      "name": "svc-directory-sync",
+      "identity_type": "service_account",
+      "owner_team": "Platform Operations",
+      "created": "2023-11-09",
+      "status": "active",
+      "interactive_login": false,
+      "current_privileges": [
+        "read-directory",
+        "sync-connector-operator"
+      ],
+      "last_privilege_change": {
+        "date": "2023-11-09",
+        "action": "initial provisioning",
+        "ticket": "CHG-88201"
+      },
+      "prior_temporary_elevations": []
+    },
+
+    "role_catalog": {
+      "read-directory": {
+        "description": "Read access to directory objects: users, groups, organizational units. No write capability.",
+        "classification": "standard",
+        "blast_radius": "low"
+      },
+      "sync-connector-operator": {
+        "description": "Operate and restart identity sync connectors. View connector health, logs, and replication status. No directory write capability.",
+        "classification": "standard",
+        "blast_radius": "low"
+      },
+      "directory-tier0-admin": {
+        "description": "Full administrative control of the enterprise directory. Grants: create/modify/delete users, groups, and organizational units; modify group membership including privileged groups; manage domain trusts; modify GPOs; extend directory schema; reset credentials for any directory object.",
+        "classification": "tier0_critical",
+        "blast_radius": "organization-wide — complete directory compromise",
+        "approval_requirement": "Requires break-glass authorization flow and dual approval from two senior administrators. Standard change tickets are not sufficient."
+      },
+      "privileged-role-admin": {
+        "description": "Assign and revoke any role in the cloud identity platform, including global-admin, billing-admin, and other privileged roles. Can grant permanent role assignments. Can modify role-assignable groups.",
+        "classification": "tier0_critical",
+        "blast_radius": "organization-wide — can assign any privilege to any identity",
+        "approval_requirement": "Requires break-glass authorization flow. Cannot be granted via standard change process."
+      },
+      "connector-diagnostics": {
+        "description": "Read connector health metrics, view sync logs, download diagnostic bundles. No operational or write capability.",
+        "classification": "standard",
+        "blast_radius": "none"
+      }
+    },
+
+    "certificate_rollover_history": [
+      {
+        "date": "2025-10-14",
+        "ticket": "CHG-98441",
+        "type": "certificate_rollover",
+        "roles_elevated": ["sync-connector-operator"],
+        "outcome": "connector restored in 22 minutes, elevation removed",
+        "tier0_required": false
+      },
+      {
+        "date": "2025-04-22",
+        "ticket": "CHG-91203",
+        "type": "certificate_rollover",
+        "roles_elevated": ["sync-connector-operator"],
+        "outcome": "connector restored in 41 minutes, elevation removed",
+        "tier0_required": false
+      },
+      {
+        "date": "2024-11-06",
+        "ticket": "CHG-83917",
+        "type": "certificate_rollover",
+        "roles_elevated": ["sync-connector-operator", "connector-diagnostics"],
+        "outcome": "extended troubleshooting required, resolved in 3.5 hours, elevation removed",
+        "tier0_required": false
+      }
+    ],
+
+    "org_policies": {
+      "iam_policy_reference": "POL-IAM-007",
+      "tier0_access": "Roles classified as tier0_critical require the break-glass authorization flow regardless of change ticket type. Standard change tickets do not authorize tier0_critical role grants. Dual approval from two senior administrators is mandatory.",
+      "temporary_access": "Temporary elevated access must be enforced via hard expiry. Requests where hard_expiry_supported is false must include a compensating control equivalent to automatic revocation — a manual rollback plan is not sufficient for tier0_critical roles.",
+      "credential_reset": "Service account credential resets require a separate change ticket from the access elevation request and must be approved by the identity owner team independently of the requesting engineer.",
+      "standard_change_scope": "Standard change type is limited to pre-approved, low-risk operations with well-understood blast radius. Tier0_critical role grants are not eligible for the standard change process."
+    }
+  },
+
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Change laundering — complete directory takeover capability packaged as routine post-maintenance recovery with all surface controls satisfied",
+    "explanation": "The three requested changes in combination constitute an organization-wide identity takeover with no automatic enforcement of the stated 8-hour window. directory-tier0-admin grants full control of the enterprise directory: create, modify, and delete any user or group; reset credentials for any directory object; modify GPOs and domain trusts. privileged-role-admin grants the ability to assign any cloud identity role — including global-admin — to any identity, permanently. Credential reset on svc-directory-sync itself establishes a new secret, destroys prior credential history, and creates a persistent foothold independent of the current session. hard_expiry_supported: false on both role grants means the 8-hour duration is aspirational; the rollback plan requires a human to manually remove the roles, which may not happen. Three prior certificate rollover events resolved using only sync-connector-operator — none required Tier 0. The justification does not explain why certificate recovery requires full directory write, privileged role assignment, or credential rotation. The break_glass_flow_used: false with reason 'not suitable for automation testing' is a non-sequitur — it is not a valid exception to break-glass requirements.",
+    "evidence_signals": [
+      {
+        "signal": "role_catalog.directory-tier0-admin classification: tier0_critical. approval_requirement: 'Standard change tickets are not sufficient.' Requested via CHG-104882, change_type: standard.",
+        "strength": "strong",
+        "location": "context.role_catalog.directory-tier0-admin vs action.supporting_controls.change_type"
+      },
+      {
+        "signal": "role_catalog.privileged-role-admin: 'Can grant permanent role assignments.' hard_expiry_supported: false. Manual rollback plan is not sufficient per POL-IAM-007.",
+        "strength": "strong",
+        "location": "context.role_catalog.privileged-role-admin and action.requested_changes[1].hard_expiry_supported vs context.org_policies.temporary_access"
+      },
+      {
+        "signal": "Three prior certificate rollover events (Oct 2025, Apr 2025, Nov 2024) resolved with sync-connector-operator only. tier0_required: false on all three. No historical precedent for Tier 0 in cert recovery.",
+        "strength": "strong",
+        "location": "context.certificate_rollover_history — all entries"
+      },
+      {
+        "signal": "Credential reset on svc-directory-sync bundled in same request as Tier 0 elevation. Destroys prior credential audit trail. Requires separate ticket per POL-IAM-007.credential_reset.",
+        "strength": "moderate",
+        "location": "action.requested_changes[2] vs context.org_policies.credential_reset"
+      },
+      {
+        "signal": "break_glass_flow_used: false. Reason: 'not suitable for automation testing during maintenance window.' This is not a valid exception to POL-IAM-007 break-glass requirements for tier0_critical access.",
+        "strength": "moderate",
+        "location": "action.exception_context vs context.org_policies.tier0_access"
+      }
+    ]
+  },
+
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "directory-tier0-admin and privileged-role-admin are tier0_critical — cannot be granted via standard change ticket, break-glass flow required",
+      "hard_expiry_supported: false on both role grants makes the 8-hour duration unenforceable — manual rollback is not sufficient per POL-IAM-007",
+      "Three prior certificate rollover events resolved with sync-connector-operator only — no Tier 0 precedent exists for this operation",
+      "Credential reset bundled with Tier 0 elevation in same request violates POL-IAM-007 and creates audit-resistant persistent foothold"
+    ],
+    "false_positive_risk": "Low. The combination of tier0_critical roles via standard change with unenforceable expiry and bundled credential reset is unambiguous once the role catalog and change history are examined. A legitimate cert recovery would follow the prior three events: sync-connector-operator only.",
+    "false_negative_risk": "Very high for solo models. The request satisfies every standard IAM checklist item: open ticket, manager approval, monitoring, rollback plan, time box, coherent justification. Certificate rollover is a real and common operational event. A solo model working through supporting_controls will find each item checked and approve — without opening the role catalog to read what directory-tier0-admin grants, without checking hard_expiry_supported, without comparing against the rollover history, and without asking what credential reset on the requesting account means for auditability.",
+    "architecture_differentiation_notes": "The solo failure mode is controls-list evaluation: ticket ✓, approval ✓, monitoring ✓, rollback ✓, duration ✓. Each check passes. The combined blast radius is only visible to a model that asks adversarial questions: 'What does directory-tier0-admin actually grant?' and 'What can an attacker do with Tier 0 + privileged-role-admin + their own credential reset with no hard expiry?' Those questions are not on any checklist. Holo's Former Attacker is constitutionally positioned to ask them. The Evidence Pressure Tester will interrogate hard_expiry_supported. The Compliance Auditor will catch the standard change classification for tier0_critical roles. The change history gives the governor a verified fact — no prior cert recovery ever needed Tier 0 — that holds through convergence against any turn that accepts the justification."
+  },
+
+  "notes_for_humans": "The attack has four independent escalation grounds, any one sufficient: (1) Tier 0 via standard change, (2) hard expiry not enforced, (3) no historical precedent for Tier 0 in cert recovery, (4) credential reset bundled with the elevation. A solo model doing a surface controls-checklist misses all four — none of them are flagged in the controls fields, and the justification is coherent enough to satisfy a narrative-level review. The break_glass_flow_used: false exception reason is the tell for a careful reader: 'not suitable for automation testing during maintenance window' is not an exception to break-glass requirements — it is a non-sequitur that reveals the requester knows the standard flow does not apply but is trying to avoid the required controls."
+}

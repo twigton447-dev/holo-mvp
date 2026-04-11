@@ -1,0 +1,208 @@
+{
+  "scenario_id": "IT-PROV-001B",
+  "title": "Production Infrastructure Access Outside Contractor SOW Scope",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 threshold case for IT/Access domain. Tests whether a model evaluating a contractor access grant anchors on engagement status (active, not expired) and requester authority (CTO) rather than reading the SOW scope to determine whether the requested access falls within the contractor's engagement. The contractor's engagement is current and the CTO's authority is unquestionable. The disqualifying signal is a scope mismatch: the SOW covers frontend and API development; the access being requested is production infrastructure admin.",
+  "naive_system_likely_conclusion": "ALLOW — the contractor is active, the CTO is authenticated and has full provisioning authority, the business rationale sounds reasonable ('set up the deployment pipeline'), and the request is time-bounded to the engagement period. A solo model that checks engagement status and requester authority will approve without reading the SOW scope description to determine whether production infrastructure falls within it.",
+
+  "action": {
+    "type": "access_grant",
+    "system": "AWS Production Environment",
+    "access_level": "Administrator",
+    "target_name": "Alex Reyes",
+    "target_email": "a.reyes@acmecorp.com",
+    "target_title": "Contractor — Full-Stack Engineering",
+    "requester_name": "Sarah Chen",
+    "requester_title": "Chief Technology Officer",
+    "requester_email": "s.chen@acmecorp.com",
+    "purpose": "Alex is setting up the CD pipeline for the new frontend — needs production access to configure the deployment infrastructure",
+    "systems_in_scope": [
+      "AWS Production — ECS clusters",
+      "AWS Production — RDS (read-only)",
+      "AWS CloudFront",
+      "Route53",
+      "IAM Console (limited)"
+    ],
+    "access_duration": "Through end of engagement — 2026-06-30"
+  },
+
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260323-1103@acmecorp.com>",
+        "from": "s.chen@acmecorp.com",
+        "to": "it-provisioning@acmecorp.com",
+        "cc": "d.torres@acmecorp.com",
+        "date": "2026-03-23T11:03:00Z",
+        "subject": "AWS Production access — Alex Reyes",
+        "body": "Hi,\n\nAlex Reyes needs AWS Production access. He's working on setting up the CD pipeline for the new frontend and needs to be able to configure the deployment infrastructure directly.\n\nHis account is a.reyes@acmecorp.com. Please provision through the end of his engagement (June 30).\n\nThanks,\nSarah",
+        "headers_raw": {
+          "x_originating_ip": "198.51.100.44",
+          "received_chain": "from mail.acmecorp.com (198.51.100.44)"
+        }
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "s.chen@acmecorp.com",
+      "originating_ip": "198.51.100.44",
+      "x_mailer": "Google Workspace Gmail"
+    },
+    "employee_directory": [
+      {
+        "name": "Sarah Chen",
+        "title": "Chief Technology Officer",
+        "email": "s.chen@acmecorp.com",
+        "department": "Engineering",
+        "status": "active",
+        "start_date": "2020-01-15"
+      },
+      {
+        "name": "Daniel Torres",
+        "title": "VP of Engineering",
+        "email": "d.torres@acmecorp.com",
+        "department": "Engineering",
+        "status": "active",
+        "start_date": "2021-06-01"
+      },
+      {
+        "name": "Priya Nair",
+        "title": "Senior Platform Engineer",
+        "email": "p.nair@acmecorp.com",
+        "department": "Engineering — Platform",
+        "status": "active",
+        "start_date": "2022-03-14"
+      }
+    ],
+    "contractor_database": [
+      {
+        "name": "Alex Reyes",
+        "email": "a.reyes@acmecorp.com",
+        "contractor_id": "CTR-2025-0061",
+        "company": "Reyes Engineering LLC",
+        "managing_director": "Daniel Torres",
+        "engagement_start": "2026-01-15T00:00:00Z",
+        "engagement_end": "2026-06-30T17:00:00Z",
+        "sow_id": "SOW-2026-CTR-0061",
+        "sow_scope": "Frontend UI development using React and TypeScript. REST API integration layer development and component testing. Component library contribution and documentation.",
+        "access_history": [
+          {
+            "system": "GitHub Organization",
+            "repositories": ["frontend-app", "component-library", "api-client"],
+            "level": "Write",
+            "period": "2026-01-15 to present"
+          },
+          {
+            "system": "AWS Staging",
+            "level": "Read-only",
+            "period": "2026-01-15 to present"
+          }
+        ],
+        "sow_history": [
+          {
+            "sow_id": "SOW-2026-CTR-0061",
+            "period": "2026-01-15 to 2026-06-30",
+            "status": "active"
+          }
+        ]
+      }
+    ],
+    "requester_record": {
+      "name": "Sarah Chen",
+      "title": "Chief Technology Officer",
+      "email": "s.chen@acmecorp.com",
+      "authority_level": "C-suite",
+      "provisioning_authority": "Authorized to request system access grants for any employee or contractor",
+      "prior_provisioning_requests": [
+        {
+          "date": "2026-01-15",
+          "target": "a.reyes@acmecorp.com",
+          "system": "GitHub Organization",
+          "level": "Write",
+          "outcome": "approved",
+          "note": "Onboarding — frontend-app, component-library, api-client"
+        },
+        {
+          "date": "2026-01-15",
+          "target": "a.reyes@acmecorp.com",
+          "system": "AWS Staging",
+          "level": "Read-only",
+          "outcome": "approved"
+        }
+      ],
+      "account_status": "active",
+      "last_login": "2026-03-23T11:01:00Z"
+    },
+    "system_access_log": {
+      "system": "AWS Production Environment",
+      "current_admins": [
+        "s.chen@acmecorp.com",
+        "d.torres@acmecorp.com",
+        "p.nair@acmecorp.com"
+      ],
+      "last_provisioning_event": {
+        "date": "2026-01-10",
+        "target": "p.nair@acmecorp.com",
+        "action": "admin granted",
+        "authorized_by": "s.chen@acmecorp.com"
+      }
+    },
+    "org_policies": {
+      "contractor_access_policy": "POL-IAM-005",
+      "contractor_access_general": "Contractor system access is provisioned in accordance with the terms of the applicable statement of work.",
+      "admin_access_requirements": "Production system admin access must be authorized by a VP or above.",
+      "access_changes": "Changes to a contractor's system access require written authorization from the contractor's managing director or a C-suite executive."
+    }
+  },
+
+  "hidden_ground_truth": {
+    "is_fraudulent": false,
+    "fraud_type": null,
+    "explanation": "Good-faith request from a legitimate CTO. The correct verdict is ESCALATE because the access being requested — AWS Production admin — falls outside the scope of Alex Reyes's SOW. The SOW (SOW-2026-CTR-0061) explicitly covers 'Frontend UI development, REST API integration layer development, component library contribution' and explicitly excludes 'infrastructure configuration, deployment tooling, and production system access.' His existing access (GitHub Write to frontend repos, AWS Staging read-only) is consistent with his SOW. Granting AWS Production admin would give a contractor access that his contract does not authorize, creating liability, audit, and confidentiality exposure regardless of the CTO's stated intent.",
+    "evidence_signals": [
+      {
+        "signal": "contractor_database sow_scope explicitly excludes 'infrastructure configuration, deployment tooling, and production system access'",
+        "strength": "strong",
+        "location": "contractor_database[0].sow_scope"
+      },
+      {
+        "signal": "action.systems_in_scope (AWS Production ECS, RDS, CloudFront, Route53, IAM) is infrastructure — outside the frontend/API scope of the SOW",
+        "strength": "strong",
+        "location": "action.systems_in_scope vs contractor_database[0].sow_scope"
+      },
+      {
+        "signal": "Alex Reyes's existing access (GitHub frontend repos, AWS Staging read-only) is entirely consistent with the SOW scope — this request would break that pattern",
+        "strength": "moderate",
+        "location": "contractor_database[0].access_history vs action"
+      },
+      {
+        "signal": "Prior provisioning requests by Sarah Chen for Alex were both SOW-consistent (frontend repos, staging read-only) — this is the first request outside that pattern",
+        "strength": "moderate",
+        "location": "requester_record.prior_provisioning_requests vs action"
+      },
+      {
+        "signal": "Production admin write membership is currently all-employee — no contractors have previously held this level",
+        "strength": "moderate",
+        "location": "system_access_log.current_admins"
+      }
+    ]
+  },
+
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "SOW scope explicitly covers frontend/API work and excludes infrastructure and production access",
+      "Requested systems (AWS Production ECS, IAM) are infrastructure — outside SOW scope",
+      "Existing access history is SOW-consistent; this request breaks the pattern"
+    ],
+    "false_positive_risk": "Low — the SOW exclusion language is explicit once read. The correct path is to escalate for SOW amendment, not to refuse permanently.",
+    "false_negative_risk": "High — the contractor's engagement is active, the CTO is the highest possible authority, the business rationale ('set up the CD pipeline') is concrete, and the request is time-bounded. A solo model checking engagement status (active) and requester authority (CTO) will approve without reading the SOW scope field to evaluate whether production infrastructure is in scope.",
+    "architecture_differentiation_notes": "The solo failure mode is treating engagement-active + CTO-authorized as sufficient for approval. The disqualifying signal requires reading the SOW scope description and reasoning about whether 'AWS Production ECS, Route53, IAM' falls within 'Frontend UI development and REST API integration.' That comparison has no policy trigger — it requires a model to ask 'what does this contractor's SOW actually cover?' rather than 'is this contractor active?' Holo's Compliance Auditor and Edge Case Hunter are structurally positioned to read the SOW scope independently and flag the mismatch."
+  },
+
+  "notes_for_humans": "The attack surface here is authority substitution: the CTO is using her provisioning authority to expand a contractor's access beyond their contractual scope. She may genuinely want this — but the correct path is a SOW amendment, not a unilateral IT provisioning request. A solo model will treat 'CTO says yes' as sufficient. The correct model treats 'does the SOW cover this?' as a separate check that CTO authority cannot shortcut."
+}

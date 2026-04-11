@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Taylor Wigton — J&amp;J EP Regional Sales Specialist</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Arial', Helvetica, sans-serif;
+    color: #111;
+    background: #f5f5f5;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 32px auto;
+    padding: 52px 60px 64px;
+    background: #fff;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  /* ── DOC LABEL ── */
+  .doc-label {
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #e8e8e8;
+    padding-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .doc-label span {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: #ccc;
+  }
+
+  /* ── HEADER ── */
+  .resume-header {
+    border-left: 5px solid #111;
+    padding-left: 18px;
+    margin-bottom: 32px;
+  }
+  .name {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+    line-height: 1.1;
+  }
+  .role-target {
+    font-size: 13px;
+    color: #666;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .contact {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.9;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 6px;
+  }
+  .contact .sep { color: #ccc; }
+  .contact a {
+    color: #555;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.15s;
+  }
+  .contact a:hover { color: #111; }
+
+  /* ── SECTIONS ── */
+  .section { margin-top: 28px; }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #fff;
+    background: #111;
+    padding: 5px 12px;
+    margin-bottom: 16px;
+    display: inline-block;
+  }
+
+  /* ── SUMMARY ── */
+  .summary-text {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #222;
+  }
+  .mission-text {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #333;
+    font-style: italic;
+    border-left: 4px solid #111;
+    padding: 12px 16px;
+    margin-top: 14px;
+    background: #f9f9f9;
+  }
+
+  /* ── SKILLS ── */
+  .skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .skill-tag {
+    background: #f3f3f3;
+    border: 1px solid #e0e0e0;
+    font-size: 12px;
+    padding: 4px 11px;
+    color: #222;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  /* ── ROLES ── */
+  .role { margin-bottom: 22px; }
+  .role:last-child { margin-bottom: 0; }
+
+  .role-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+    border-bottom: 1px solid #e8e8e8;
+    padding-bottom: 6px;
+    margin-bottom: 5px;
+  }
+  .role-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+  }
+  .role-date {
+    font-size: 12px;
+    color: #888;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+  .role-company {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 9px;
+    font-style: italic;
+    font-weight: 600;
+  }
+  ul { margin: 4px 0 0 18px; padding: 0; }
+  li {
+    margin-bottom: 7px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #222;
+  }
+  li a {
+    color: #111;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  li a:hover { color: #555; }
+  strong { color: #111; }
+
+  /* ── EDUCATION ── */
+  .edu-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13.5px;
+    margin-bottom: 8px;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .edu-date {
+    color: #888;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── ADDITIONAL ── */
+  .additional {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.9;
+  }
+
+  /* ── DIVIDER ── */
+  .page-break {
+    border: none;
+    border-top: 2px dashed #ddd;
+    margin: 64px 0 56px;
+  }
+
+  /* ── COVER LETTER ── */
+  .cl-header {
+    border-left: 5px solid #111;
+    padding-left: 18px;
+    margin-bottom: 32px;
+  }
+  .cl-name {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.2px;
+  }
+  .cl-contact {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.9;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 6px;
+  }
+  .cl-contact .sep { color: #ccc; }
+  .cl-contact a { color: #555; text-decoration: underline; text-underline-offset: 2px; }
+  .cl-date {
+    font-size: 13.5px;
+    color: #555;
+    margin-bottom: 24px;
+    margin-top: 10px;
+  }
+  .cl-address {
+    font-size: 13.5px;
+    color: #333;
+    line-height: 1.9;
+    margin-bottom: 24px;
+  }
+  .cl-salutation {
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .cl-body p {
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: #222;
+    margin-bottom: 18px;
+  }
+  .cl-body p a {
+    color: #111;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .cl-closing {
+    font-size: 13.5px;
+    margin-top: 32px;
+    line-height: 2.2;
+    color: #222;
+  }
+  .cl-sig {
+    font-size: 15px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { background: #fff; }
+    .page {
+      margin: 0;
+      box-shadow: none;
+      padding: 36px 44px 52px;
+    }
+    .page-break { margin: 44px 0 40px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══════════════════════════════════════
+       RESUME
+  ══════════════════════════════════════ -->
+
+  <div class="doc-label">
+    Resume — Taylor Wigton
+    <span>J&amp;J EP Regional Sales Specialist</span>
+  </div>
+
+  <div class="resume-header">
+    <div class="name">Taylor Wigton</div>
+    <div class="role-target">Regional Sales Specialist Candidate · Electrophysiology</div>
+    <div class="contact">
+      Mission Viejo, CA
+      <span class="sep">|</span>
+      310-736-8232
+      <span class="sep">|</span>
+      <a href="mailto:twigton447@gmail.com">twigton447@gmail.com</a>
+      <span class="sep">|</span>
+      <a href="https://www.linkedin.com/in/taylorwigton" target="_blank">LinkedIn</a>
+      <span class="sep">|</span>
+      <a href="https://cargocollective.com/taylorwigton" target="_blank">Portfolio →</a>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="section">
+    <div class="section-title">Professional Summary</div>
+    <div class="summary-text">
+      Sales professional with <strong>15+ years</strong> of experience driving growth, account development, and stakeholder adoption across healthcare and regulated markets. Proven track record <strong>building territories from the ground up</strong>, creating demand, navigating complex hospital buying environments, and translating technical or clinical information into clear customer value. Experienced working alongside physician leaders, hospital-affiliated organizations, and cardiovascular-adjacent clinical teams across Orange County. Seeking to bring that commercial discipline and healthcare credibility into a <strong>field-based MedTech sales role</strong>.
+    </div>
+    <div class="mission-text">
+      My father has managed <strong>AFib for over ten years</strong> — I've supported him through treatments, procedures, and the ongoing work of living with it. That experience, alongside <strong>three years navigating my son's surgeries at CHOC and Hoag</strong>, is what draws me specifically to the EP space. I'm not looking for a job in medical devices. I'm looking for this one.
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="section">
+    <div class="section-title">Core Competencies</div>
+    <div class="skills-grid">
+      <span class="skill-tag">Territory Management</span>
+      <span class="skill-tag">Account Development</span>
+      <span class="skill-tag">Demand Creation</span>
+      <span class="skill-tag">Competitive Positioning</span>
+      <span class="skill-tag">Clinical &amp; Economic Value Messaging</span>
+      <span class="skill-tag">Stakeholder Alignment</span>
+      <span class="skill-tag">Pipeline Management</span>
+      <span class="skill-tag">Cross-Functional Selling</span>
+      <span class="skill-tag">CRM Discipline</span>
+      <span class="skill-tag">Product Education</span>
+      <span class="skill-tag">Complex B2B Sales</span>
+      <span class="skill-tag">KOL Development</span>
+    </div>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <div class="section">
+    <div class="section-title">Professional Experience</div>
+
+    <div class="role">
+      <div class="role-header">
+        <span class="role-title">Owner &amp; Sales Strategist</span>
+        <span class="role-date">2012 – Present</span>
+      </div>
+      <div class="role-company">447 Consulting — Irvine, CA</div>
+      <ul>
+        <li>Led strategic growth engagements for <strong>Fortune 500 and healthcare organizations</strong>, operating as an embedded partner to improve adoption, align stakeholders, and drive measurable outcomes against defined KPIs.</li>
+        <li><strong>Grew Orange County territory relationships 46% in 12 months</strong> through direct prospecting, account development, and disciplined follow-up across 25+ healthcare, medtech, and clinical innovation accounts — including physician leaders and hospital-affiliated executives at Hoag and City of Hope. <a href="http://irvinestandard.com/2025/womens-pavilion-at-hoag-what-women-want/" target="_blank">View Hoag Feature →</a></li>
+        <li>Partnered with <strong>Physician-in-Chief Dr. Edward S. Kim</strong> at City of Hope to translate complex oncology and surgical research into accessible communication for patients, donors, and community stakeholders; co-created the <a href="https://www.cityofhope.org/orange-county/patients-visitors/talking-hope-podcast" target="_blank">Talking Hope Podcast</a> — <strong>2025 Sway Health Podcast of the Year</strong>, 19% YOY subscriber growth.</li>
+        <li><strong>Surpassed Q3 2025 quarterly profit goals by $12M</strong> on a Rocket Mortgage engagement by diagnosing commercial friction, aligning 10+ stakeholder groups, and driving adoption of a redesigned sales process. <a href="http://cargocollective.com/TaylorWigton/Rocket-Loans-UX-case-study" target="_blank">View Case Study →</a></li>
+        <li><strong>Improved conversion performance 42%</strong> on a JPMorgan Chase engagement by translating complex product value into clear, transparent ROI tools for customers and internal teams.</li>
+        <li>View full portfolio: <a href="https://cargocollective.com/taylorwigton" target="_blank">cargocollective.com/taylorwigton</a></li>
+      </ul>
+    </div>
+
+    <div class="role">
+      <div class="role-header">
+        <span class="role-title">Territory Manager</span>
+        <span class="role-date">2019</span>
+      </div>
+      <div class="role-company">WellCare / Easy Choice Health Plan</div>
+      <ul>
+        <li><strong>Exceeded enrollment goals by 26%</strong>, contributing to 45,000+ beneficiary enrollments through relationship-building with physicians, clinic staff, and community partners across LA and OC.</li>
+        <li>Managed a field-based territory with disciplined prospecting, account follow-up, and performance tracking against enrollment KPIs.</li>
+      </ul>
+    </div>
+
+    <div class="role">
+      <div class="role-header">
+        <span class="role-title">Strategic Lead</span>
+        <span class="role-date">2020 – 2021</span>
+      </div>
+      <div class="role-company">PIH Health</div>
+      <ul>
+        <li><strong>Reduced Medicare acquisition cost 77% below industry average</strong> by aligning 11 C-suite stakeholders around a more effective growth strategy in a complex health system environment.</li>
+      </ul>
+    </div>
+
+    <div class="role">
+      <div class="role-header">
+        <span class="role-title">Strategic Consultant</span>
+        <span class="role-date">2018 – 2019</span>
+      </div>
+      <div class="role-company">Edwards Lifesciences</div>
+      <ul>
+        <li>Supported <strong>TAVR heart valve launch</strong> by developing physician education materials and training support for cardiology teams navigating a technically complex, high-stakes product category.</li>
+        <li>Gained direct exposure to <strong>cardiovascular care pathways</strong>, clinical stakeholder dynamics, and the commercial realities of a high-growth medtech environment.</li>
+      </ul>
+    </div>
+
+    <div class="role">
+      <div class="role-header">
+        <span class="role-title">Territory Sales Representative</span>
+        <span class="role-date">Early Career</span>
+      </div>
+      <div class="role-company">Costco &amp; Sam's Club — Southern California</div>
+      <ul>
+        <li>Managed territory sales through live product demonstrations, direct customer engagement, and high-volume objection handling; trained reps across two regions and <strong>consistently exceeded quota</strong>.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- EDUCATION -->
+  <div class="section">
+    <div class="section-title">Education &amp; Certification</div>
+    <div class="edu-row">
+      <span><strong>BA, Sociology</strong> — Connecticut College</span>
+      <span class="edu-date">2005</span>
+    </div>
+    <div class="edu-row">
+      <span><strong>Medical Sales Certification</strong> — Evolve Medical Sales</span>
+      <span class="edu-date">2024</span>
+    </div>
+    <div class="edu-row">
+      <span><strong>Cardiac Anatomy &amp; EP Fundamentals</strong> — Independent Study (ongoing)</span>
+      <span class="edu-date">2024–Present</span>
+    </div>
+  </div>
+
+  <!-- ADDITIONAL -->
+  <div class="section">
+    <div class="section-title">Additional</div>
+    <div class="additional">
+      <strong>Community:</strong> Active in OC healthcare network; volunteer advocate, CHOC Children's Hospital<br />
+      <strong>Interests:</strong> Cardiac electrophysiology, clinical innovation, medtech adoption, health systems strategy<br />
+      <strong>References available upon request</strong>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════
+       COVER LETTER
+  ══════════════════════════════════════ -->
+
+  <hr class="page-break" />
+
+  <div class="doc-label">
+    Cover Letter — Taylor Wigton
+    <span>J&amp;J EP Regional Sales Specialist</span>
+  </div>
+
+  <div class="cl-header">
+    <div class="cl-name">Taylor Wigton</div>
+    <div class="cl-contact">
+      Mission Viejo, CA
+      <span class="sep">|</span>
+      310-736-8232
+      <span class="sep">|</span>
+      <a href="mailto:twigton447@gmail.com">twigton447@gmail.com</a>
+      <span class="sep">|</span>
+      <a href="https://cargocollective.com/taylorwigton" target="_blank">Portfolio →</a>
+    </div>
+  </div>
+
+  <div class="cl-date">March 30, 2026</div>
+
+  <div class="cl-address">
+    Hiring Manager<br />
+    Johnson &amp; Johnson MedTech<br />
+    Electrophysiology Division
+  </div>
+
+  <div class="cl-salutation">Dear Hiring Manager,</div>
+
+  <div class="cl-body">
+    <p>
+      I'm applying for the EP Regional Sales Specialist role because it sits at the exact intersection of everything I've built toward: a decade of field-based commercial work in healthcare, deep relationships with physician leaders and hospital executives across Orange County, and a personal connection to AFib that makes this more than a career move.
+    </p>
+
+    <p>
+      My father was diagnosed with atrial fibrillation over ten years ago. I've been with him through every stage — the medications, the cardioversions, the conversations with his cardiologist about ablation. Over roughly the same period, I spent three years navigating my son's surgeries at CHOC and Hoag. I know what it looks like when a clinical team is operating at the top of their game, and I understand what's actually at stake in that procedure room. That context doesn't make me a clinician. But it means I will never treat this product category as abstract.
+    </p>
+
+    <p>
+      On the commercial side: I've spent 15 years building territories, creating demand, and moving complex stakeholders. At 447 Consulting, I grew an Orange County healthcare account base 46% in 12 months — including physician leaders at Hoag and City of Hope. At WellCare, I exceeded enrollment targets by 26% in a field-based, KPI-driven territory. At PIH Health, I aligned 11 C-suite stakeholders and reduced Medicare acquisition cost 77% below industry average. At <strong>Edwards Lifesciences</strong>, I supported the TAVR launch — giving me direct exposure to cardiovascular care pathways, interventional clinical teams, and what it takes to sell into a technically demanding, high-stakes environment.
+    </p>
+
+    <p>
+      I completed <a href="#" target="_blank">medical sales training through Evolve</a> and have been doing independent study on cardiac anatomy and EP fundamentals. I'm not trying to become a clinician. I'm trying to be the kind of field rep who earns trust in the EP lab because I understand enough to have a real conversation — and who earns trust with the EP physician because I'm not there to oversell, I'm there to help them do their job better.
+    </p>
+
+    <p>
+      J&amp;J's EP portfolio is best-in-class. I want to carry it in Orange County. I'd welcome the chance to make the case in person.
+    </p>
+  </div>
+
+  <div class="cl-closing">
+    Sincerely,<br />
+    <div class="cl-sig">Taylor Wigton</div>
+    310-736-8232 &nbsp;·&nbsp; <a href="mailto:twigton447@gmail.com">twigton447@gmail.com</a>
+  </div>
+
+</div>
+</body>
+</html>

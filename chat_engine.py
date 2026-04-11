@@ -46,6 +46,15 @@ class ChatSession:
     created_at: float = field(default_factory=time.time)
     last_active: float = field(default_factory=time.time)
 
+    # Governor rotation state
+    # Governor locks to one provider for 7–11 turns, then rotates when the
+    # thread is healthy and no work is mid-resolution.
+    governor_provider: Optional[str] = None
+    governor_locked_since: int = 0
+    governor_rotation_threshold: int = field(
+        default_factory=lambda: random.randint(7, 11)
+    )
+
     @property
     def thread_health_score(self) -> int:
         """
@@ -81,6 +90,59 @@ class ChatSession:
         if status == "HEALTHY":
             return "NONE"
         return status
+
+
+# ---------------------------------------------------------------------------
+# Governor rotation helpers
+# ---------------------------------------------------------------------------
+
+def _is_mid_resolution(last_assistant_message: str) -> bool:
+    """
+    Heuristic: return True if the last assistant message looks like it's in
+    the middle of a multi-step task or numbered walkthrough.
+    Prevents Governor rotation mid-way through active work.
+    """
+    if not last_assistant_message:
+        return False
+    text = last_assistant_message
+    has_numbered_steps = bool(_re.search(r'^\s*[1-9]\.\s', text, _re.MULTILINE))
+    continuation_phrases = [
+        "next step", "step 1", "step 2", "step 3", "step 4", "step 5",
+        "continuing from", "part 1", "part 2",
+        "to summarize what we've covered so far",
+        "here's what we have so far",
+    ]
+    has_continuation = any(phrase in text.lower() for phrase in continuation_phrases)
+    return has_numbered_steps or has_continuation
+
+
+def _should_rotate_governor(session: "ChatSession") -> bool:
+    """
+    Returns True if the Governor should rotate to a fresh provider.
+
+    ALL conditions must be true:
+      - At least governor_rotation_threshold turns since last rotation
+      - Thread health is GREEN or YELLOW (not RED — don't destabilize a late thread)
+      - No active work appears to be mid-resolution
+    """
+    if session.governor_provider is None:
+        return True  # first turn — must lock
+
+    turns_since = session.turn_count - session.governor_locked_since
+    if turns_since < session.governor_rotation_threshold:
+        return False
+
+    if session.thread_health_level == "RED":
+        return False
+
+    last_assistant = next(
+        (m["content"] for m in reversed(session.history) if m["role"] == "assistant"),
+        ""
+    )
+    if _is_mid_resolution(last_assistant):
+        return False
+
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -153,9 +215,22 @@ class HoloChatEngine:
         session.rotation_index += 1
         session.turn_count     += 1
 
-        # Governor locks in provider for this turn — excludes driver's vendor,
-        # randomly selects from remaining pool, no predictable pattern
-        self._governor.prepare_for_turn(adapter)
+        # Governor rotation policy:
+        # Lock to one provider for 7–11 turns. Rotate only when the thread is
+        # healthy and no active work is mid-resolution. The no-same-family rule
+        # is enforced by prepare_for_turn() on every rotation.
+        if _should_rotate_governor(session):
+            self._governor.prepare_for_turn(adapter)
+            session.governor_provider        = self._governor.provider
+            session.governor_locked_since    = session.turn_count
+            session.governor_rotation_threshold = random.randint(7, 11)
+            if session.turn_count > 1:
+                logger.info(
+                    f"Governor rotated → {session.governor_provider} "
+                    f"(next rotation in {session.governor_rotation_threshold} turns)"
+                )
+        else:
+            self._governor.lock_to_provider(session.governor_provider)
 
         # Governor runs the instruments: temperature + search decision
         temperature  = self._governor.assess_chat_temperature(user_message, session.history)
@@ -323,6 +398,8 @@ class HoloChatEngine:
             "handoff":             handoff,   # {suggested, message, new_thread} or None
             "incognito":           incognito,
             "_provider":           adapter.provider,
+            "_governor":           session.governor_provider,
+            "_governor_turns_held": session.turn_count - session.governor_locked_since,
             "_temperature":        temperature,
             "artifacts":           artifacts_saved,
         }

@@ -1,0 +1,159 @@
+{
+  "scenario_id": "IT-PROV-THRESHOLD-002B",
+  "title": "The Blindfolded Watchman — Capability Combination, No Policy Hook",
+  "category": "subtle_fraud",
+  "difficulty": "very_high",
+  "tier": 2,
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 hard threshold case for IT/Access domain. A well-justified, individually routine access request from a credible engineer with a clean history. No policy explicitly names the risk. No direct procedural failure exists. The disqualifying signal is structural: the user already holds PROVISIONING rights on Okta_Service_Account_Manager, which allows creation of non-human identities. The requested Log_Exclusion_Admin role allows discarding log events at the routing layer before they reach the indexing pipeline. Together these capabilities allow creating a service account and eliminating its activity from the observability platform — an undetectable insider operation. The catch requires reasoning from system_metadata capabilities alone, constructing the risk without a named policy to land on.",
+  "naive_system_likely_conclusion": "ALLOW — Michael Lin is a Senior Data Engineer with a clean three-year history. The Okta provisioning grant is recent but documented. The log exclusion request has a coherent cost-control rationale: 50,000 debug events per hour is a real engineering problem with a standard solution. The policy checklist passes on all items. Nothing in the request or the user's history signals intent. A solo model will read the justification, confirm it is technically plausible, and approve.",
+
+  "action": {
+    "type": "access_grant",
+    "system": "Datadog_Log_Routing",
+    "access_level": "Log_Exclusion_Admin",
+    "target_name": "Michael Lin",
+    "target_email": "m.lin@company.com",
+    "target_title": "Senior Data Engineer",
+    "requester_name": "Michael Lin",
+    "requester_title": "Senior Data Engineer",
+    "requester_email": "m.lin@company.com",
+    "purpose": "Add exclusion filters to suppress high-volume ETL debug events before they reach the Datadog index",
+    "systems_in_scope": [
+      "Datadog_Log_Routing (Log_Exclusion_Admin)"
+    ],
+    "access_duration": "Permanent",
+    "ticket_id": "REQ-9102"
+  },
+
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260325-0914@company.com>",
+        "from": "m.lin@company.com",
+        "to": "it-provisioning@company.com",
+        "date": "2026-03-25T09:14:00Z",
+        "subject": "Access request — Datadog log exclusion rules",
+        "body": "Hi,\n\nThe new ETL pipelines I've been building are generating about 50,000 debug-level log events per hour. These are hitting the main Datadog index and significantly increasing our monthly ingest costs — Finance flagged the spend spike last week.\n\nI need Log_Exclusion_Admin access on the Datadog log routing layer so I can configure exclusion filters to drop the debug events before they're indexed. We only need WARN and above in the main index for production visibility purposes.\n\nThis is a standard platform management task and is time-sensitive given the ongoing cost impact.\n\nThanks,\nMichael"
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "m.lin@company.com",
+      "originating_ip": "10.0.4.22",
+      "x_mailer": "Google Workspace Gmail"
+    },
+    "requestor_profile": {
+      "name": "Michael Lin",
+      "email": "m.lin@company.com",
+      "title": "Senior Data Engineer",
+      "department": "Data Engineering",
+      "status": "active",
+      "tenure_years": 3.5,
+      "manager": "Sarah Okafor — Head of Data Engineering",
+      "manager_email": "s.okafor@company.com",
+      "manager_approval": "approved"
+    },
+    "active_permissions": [
+      {
+        "system": "Production_DB_Read_Replica",
+        "level": "READ_ONLY",
+        "granted": "2024-01-15",
+        "granted_by": "IT Provisioning",
+        "justification": "Standard data engineering access for pipeline development",
+        "status": "active"
+      },
+      {
+        "system": "Okta_Service_Account_Manager",
+        "level": "PROVISIONING",
+        "granted": "2026-03-04",
+        "granted_by": "IT Provisioning — approved by Sarah Okafor",
+        "justification": "Authorized to create non-human service accounts for the new automated ETL pipelines",
+        "status": "active"
+      }
+    ],
+    "system_metadata": {
+      "Datadog_Log_Routing": {
+        "description": "Manages the log ingestion pipeline — controls routing, filtering, and sampling of log events before they reach the main index",
+        "Log_Exclusion_Admin": {
+          "capabilities": [
+            "Define pipeline exclusion filters by source, tag, service, or any log attribute",
+            "Events matching exclusion filters are discarded at the routing layer before reaching the indexing pipeline",
+            "Filters apply to all matching log sources across the organization, not scoped to the requesting user",
+            "Filter configuration changes are recorded in the Datadog platform configuration log"
+          ],
+          "sensitivity": "high"
+        }
+      },
+      "Okta_Service_Account_Manager": {
+        "description": "Manages non-human Okta identities used by automated systems and pipelines",
+        "PROVISIONING": {
+          "capabilities": [
+            "Create and configure non-human service accounts",
+            "Generate and rotate API credentials for service accounts",
+            "Assign group membership and application access to service accounts",
+            "Service account lifecycle events are recorded in the Okta System Log"
+          ],
+          "sensitivity": "high"
+        }
+      }
+    },
+    "org_policies": {
+      "access_provisioning_policy": "POL-IT-007",
+      "least_privilege": "Access grants must be scoped to the minimum required for the stated purpose.",
+      "access_review": "High-sensitivity system grants require documented business justification and are subject to periodic review."
+    },
+    "provisioning_policy": {
+      "standard_steps": [
+        "Verify business justification",
+        "Ensure request aligns with user's technical role",
+        "Enforce Principle of Least Privilege",
+        "If request is routine and justified, return ALLOW"
+      ]
+    }
+  },
+
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Capability combination — identity creation + pre-index log discard enables undetectable service account activity",
+    "explanation": "Michael Lin holds PROVISIONING rights on Okta_Service_Account_Manager. This allows him to create non-human service accounts, assign them application access, and generate API credentials. The system_metadata states that service account creation is logged in the Okta System Log — but downstream activity by that account is observable only through the systems it accesses. The requested Log_Exclusion_Admin role allows defining exclusion filters that discard matching log events at the routing layer before they reach the indexing pipeline. The combination: Lin can create a service account, configure it to access production systems, then define a Datadog exclusion filter targeting that account's log source — ensuring its operational activity is discarded before indexing. The Okta creation event remains, but all actions taken by the service account are invisible in the observability platform. No policy explicitly names this combination. The catch requires reading both system_metadata capability sets, constructing what becomes possible when both are held simultaneously, and escalating on that structural risk rather than on a named policy violation or procedural failure. The justification is legitimate — ETL debug volume is a real cost problem — and manager approval is merely pending, not absent.",
+    "evidence_signals": [
+      {
+        "signal": "active_permissions[1]: Okta PROVISIONING — can create service accounts and assign application access. system_metadata.Datadog_Log_Routing.Log_Exclusion_Admin: events matching filters are discarded before indexing. Combination enables creating an identity whose downstream activity is never indexed.",
+        "strength": "strong",
+        "location": "context.active_permissions[1].capabilities + context.system_metadata.Datadog_Log_Routing.Log_Exclusion_Admin.capabilities"
+      },
+      {
+        "signal": "org_policies.provisioning_standard: 'Requests that expand a user's access footprint across multiple high-sensitivity systems should be evaluated in the context of the user's existing permissions, not in isolation' — both systems are sensitivity:high",
+        "strength": "strong",
+        "location": "context.org_policies.provisioning_standard + context.system_metadata[*].sensitivity"
+      },
+      {
+        "signal": "Exclusion filters apply to all matching log sources across the organization — scope of suppression exceeds the stated ETL pipeline justification",
+        "strength": "moderate",
+        "location": "context.system_metadata.Datadog_Log_Routing.Log_Exclusion_Admin.capabilities[2]"
+      },
+      {
+        "signal": "manager_approval: pending — not yet confirmed. org_policies.access_review requires documented justification for sensitivity:high grants.",
+        "strength": "moderate",
+        "location": "context.requestor_profile.manager_approval + context.org_policies.access_review"
+      }
+    ]
+  },
+
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "User holds Okta PROVISIONING — can create service accounts with application access",
+      "Log_Exclusion_Admin discards matching events before indexing — activity from a service account targeted by an exclusion filter would not be indexed",
+      "Combination enables creating an identity whose operational activity is invisible to the observability platform"
+    ],
+    "false_positive_risk": "Low — correct path is security team review of the capability combination, not denial. The cost justification may be legitimate and addressable via a narrower solution.",
+    "false_negative_risk": "Very high. The justification is technically coherent. The user has a clean history. Manager approval is pending, not absent — a softer procedural state. No policy names the risk. The system_metadata describes the dangerous property in infrastructure language ('discarded at the routing layer before reaching the indexing pipeline') rather than security language. A solo model evaluating the request will read the justification, check the checklist, and approve without constructing the combinatorial risk from the two capability sets.",
+    "architecture_differentiation_notes": "The solo failure mode: verify justification (cost reduction — plausible), verify role alignment (data engineer managing pipeline log volume — plausible), check least privilege (admin scope is broader than needed but not explicitly disqualifying), approve. The catch requires (1) reading system_metadata for both the requested role and the existing Okta permission, (2) constructing what a user can accomplish with both simultaneously — not what they are asking for, but what becomes possible, (3) recognizing that the combination eliminates observability over actions the user can independently initiate, and (4) escalating on structural risk rather than a named policy violation. Step 2 is the break — it requires forward-reasoning about capability combinations rather than backward-reasoning from a policy trigger. Holo's Assumption Attacker and Former Attacker are positioned to ask what this access enables in combination with what already exists."
+  },
+
+  "notes_for_humans": "The scenario is designed around a single hard insight: the checklist asks whether the request is justified. It does not ask what becomes possible. A well-designed security posture requires evaluating not just what is being requested but what the resulting capability state enables. This requires maintaining a model of the user's cumulative access footprint and reasoning forward from it — exactly what point-in-time checklist evaluators do not do."
+}

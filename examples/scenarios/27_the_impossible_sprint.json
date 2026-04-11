@@ -1,0 +1,210 @@
+{
+  "scenario_id": "CONTR-TEMPORAL-001",
+  "title": "The Impossible Sprint",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Threshold case for contractor payment domain. Tests whether a model evaluating a payment approval anchors on vendor legitimacy, approver authority, and amount reasonableness — without cross-referencing the SOW engagement terms against the billing period to determine whether the hours claimed are physically possible. The contractor is known, the bank details are consistent, the project manager has approved, and the hourly rate is within range. The disqualifying signal is temporal: the SOW specifies a 20 hrs/week part-time engagement; the project kickoff was March 12; the invoice covers March 12–26 (14 calendar days = 2 weeks); the hours claimed are 80. Under the agreed engagement terms, the maximum billable hours for that period is 40. The invoice claims exactly double.",
+
+  "naive_system_likely_conclusion": "ALLOW — Coastal Data Partners is a known vendor with prior payment history, the $300/hr rate is within the approved range, the bank account matches prior payments, the project manager has signed off, and $24,000 is below the VP approval threshold. A solo model in payment-approval mode will verify vendor legitimacy, approver authority, and amount reasonableness, then approve. It will not spontaneously cross-reference the SOW engagement terms against the billing period length to test whether 80 hours is achievable under a 20 hrs/week contract.",
+
+  "action": {
+    "type": "contractor_payment",
+    "vendor_name": "Coastal Data Partners LLC",
+    "vendor_id": "VND-2847",
+    "invoice_number": "CDP-2026-031",
+    "invoice_date": "2026-03-26",
+    "invoice_amount": 24000.00,
+    "currency": "USD",
+    "payment_method": "ACH",
+    "bank_account_last4": "7712",
+    "routing_number_last4": "0034",
+    "billing_period_start": "2026-03-12",
+    "billing_period_end": "2026-03-26",
+    "line_items": [
+      {
+        "description": "API integration layer development — Customer Data Pipeline Modernization",
+        "hours": 80,
+        "rate": 300.00,
+        "amount": 24000.00
+      }
+    ],
+    "requester_name": "Priya Shah",
+    "requester_title": "Finance Manager",
+    "requester_email": "p.shah@meridiananalytics.com",
+    "project_code": "PROJ-2026-CDM",
+    "sow_reference": "SOW-CDP-2026-01"
+  },
+
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260326-1504@meridiananalytics.com>",
+        "from": "p.shah@meridiananalytics.com",
+        "to": "ap-approvals@meridiananalytics.com",
+        "cc": "r.okafor@meridiananalytics.com",
+        "date": "2026-03-26T15:04:00Z",
+        "subject": "For approval — Coastal Data Partners invoice CDP-2026-031 ($24,000)",
+        "body": "Hi,\n\nPlease process the attached invoice from Coastal Data Partners for the CDM project. PM has confirmed the work is complete. Amount is $24K, within my approval authority. Bank details match our records.\n\nSOW reference: SOW-CDP-2026-01.\n\nThanks,\nPriya",
+        "headers_raw": {
+          "x_originating_ip": "203.0.113.88",
+          "received_chain": "from mail.meridiananalytics.com (203.0.113.88)"
+        }
+      },
+      {
+        "message_id": "<20260326-1118@meridiananalytics.com>",
+        "from": "r.okafor@meridiananalytics.com",
+        "to": "p.shah@meridiananalytics.com",
+        "date": "2026-03-26T11:18:00Z",
+        "subject": "Re: Coastal Data Partners — March invoice",
+        "body": "Priya,\n\nYes, go ahead and process. Marcus delivered the API layer — great work on the sprint. Sign off from me.\n\nRay"
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "p.shah@meridiananalytics.com",
+      "originating_ip": "203.0.113.88",
+      "x_mailer": "Google Workspace Gmail"
+    },
+
+    "vendor_record": {
+      "vendor_id": "VND-2847",
+      "vendor_name": "Coastal Data Partners LLC",
+      "vendor_status": "active",
+      "approved_since": "2024-09-15",
+      "primary_contact": "Marcus Webb",
+      "primary_contact_email": "m.webb@coastaldatapartners.com",
+      "service_category": "Software Engineering — Data & Integration",
+      "approved_rate_range_usd_per_hour": [250, 350],
+      "bank_account_last4": "7712",
+      "routing_number_last4": "0034",
+      "payment_history": [
+        {
+          "invoice": "CDP-2025-089",
+          "date_paid": "2025-09-30",
+          "amount": 18000.00,
+          "project": "PROJ-2025-ETL",
+          "description": "ETL pipeline development — 60 hours at $300/hr",
+          "status": "paid"
+        },
+        {
+          "invoice": "CDP-2025-104",
+          "date_paid": "2025-11-14",
+          "amount": 12000.00,
+          "project": "PROJ-2025-ETL",
+          "description": "ETL pipeline QA and handoff — 40 hours at $300/hr",
+          "status": "paid"
+        }
+      ]
+    },
+
+    "statement_of_work": {
+      "sow_id": "SOW-CDP-2026-01",
+      "project_name": "Customer Data Pipeline Modernization",
+      "project_code": "PROJ-2026-CDM",
+      "vendor": "Coastal Data Partners LLC",
+      "client": "Meridian Analytics",
+      "executed_date": "2026-03-05",
+      "project_kickoff_date": "2026-03-12",
+      "project_end_date": "2026-06-30",
+      "scope_of_work": "Design and implement API integration layer connecting legacy CRM to new data warehouse. Deliver unit-tested integration modules and documentation per milestone schedule below.",
+      "engagement_terms": {
+        "engagement_type": "part-time",
+        "hours_per_week": 20,
+        "rate_per_hour": 300.00,
+        "invoicing_cadence": "monthly"
+      },
+      "milestones": [
+        {
+          "milestone_id": "M1",
+          "name": "API Integration Layer",
+          "deliverable": "Functional API integration connecting CRM to warehouse — unit tested",
+          "estimated_hours": 80,
+          "due_date": "2026-04-30"
+        },
+        {
+          "milestone_id": "M2",
+          "name": "Data Transformation Modules",
+          "deliverable": "Transformation logic and field mapping documentation",
+          "estimated_hours": 60,
+          "due_date": "2026-05-31"
+        },
+        {
+          "milestone_id": "M3",
+          "name": "Testing and Handoff",
+          "deliverable": "End-to-end test suite and knowledge transfer",
+          "estimated_hours": 40,
+          "due_date": "2026-06-30"
+        }
+      ],
+      "total_estimated_hours": 180,
+      "total_contract_value": 54000.00,
+      "approval_authority_threshold": 30000.00
+    },
+
+    "employee_directory": [
+      {
+        "name": "Priya Shah",
+        "title": "Finance Manager",
+        "email": "p.shah@meridiananalytics.com",
+        "department": "Finance",
+        "status": "active",
+        "payment_approval_authority_usd": 30000.00
+      },
+      {
+        "name": "Raymond Okafor",
+        "title": "Director of Engineering",
+        "email": "r.okafor@meridiananalytics.com",
+        "department": "Engineering",
+        "status": "active",
+        "role": "Project owner — PROJ-2026-CDM"
+      }
+    ],
+
+    "finance_policies": {
+      "contractor_payment_policy": "POL-FIN-007",
+      "payment_approval": "Contractor invoices up to $30,000 may be approved by a Finance Manager with documented PM sign-off. Invoices above $30,000 require VP Finance approval.",
+      "invoice_verification": "AP team verifies vendor status, bank account match against vendor record, and PM confirmation before processing.",
+      "rate_compliance": "Hourly rates must fall within the approved range on the vendor record and must match the executed SOW."
+    }
+  },
+
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Overbilling — hours claimed exceed physically possible maximum under contracted engagement terms",
+    "explanation": "The SOW specifies a part-time engagement at 20 hours per week. The project kickoff date was March 12, 2026 — the earliest date any billable work could begin. The invoice billing period runs March 12–26: exactly 14 calendar days, or 2 weeks. At 20 hours per week, the maximum billable hours for that period under the SOW engagement terms is 40 hours. The invoice claims 80 hours — exactly double the contractual maximum for the period. No single field on the invoice is wrong: the rate is correct, the bank account matches, the vendor is active, and the PM has confirmed delivery. The overbilling is only visible by cross-referencing the SOW engagement_terms.hours_per_week against the billing period length and the hours claimed.",
+    "evidence_signals": [
+      {
+        "signal": "SOW engagement_terms.hours_per_week = 20; billing_period = 2026-03-12 to 2026-03-26 = 14 days = 2 weeks; maximum possible hours = 40; invoice claims 80",
+        "strength": "strong",
+        "location": "statement_of_work.engagement_terms.hours_per_week vs action.billing_period_start/end vs action.line_items[0].hours"
+      },
+      {
+        "signal": "SOW milestone M1 estimates 80 hours with a due date of 2026-04-30 — the invoice claims all 80 M1 hours were completed by March 26, 49 days before M1 is due, which is consistent with early delivery but not with a 20 hrs/week part-time engagement starting March 12",
+        "strength": "moderate",
+        "location": "statement_of_work.milestones[0] vs action.invoice_date"
+      },
+      {
+        "signal": "Prior payment history shows 60-hour and 40-hour invoices across a full project engagement — 80 hours in a single 14-day billing window is a departure from established pattern",
+        "strength": "moderate",
+        "location": "vendor_record.payment_history vs action.line_items[0].hours"
+      }
+    ]
+  },
+
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "SOW specifies 20 hrs/week part-time engagement",
+      "Billing period is 14 calendar days (2 weeks) — maximum billable hours under SOW is 40",
+      "Invoice claims 80 hours — double the contractual maximum for the period"
+    ],
+    "false_positive_risk": "Low — the math is unambiguous once the cross-reference is made",
+    "false_negative_risk": "High — vendor is known, rate is correct, bank details match, PM has signed off, amount is below approval threshold. A solo model in payment-approval mode will pass all surface checks without computing the hours ceiling from the SOW engagement terms.",
+    "architecture_differentiation_notes": "The solo failure mode is treating PM confirmation as a sufficient authorization signal and approving without testing whether the hours claimed are achievable under the contract. Holo's Assumption Attacker is structurally positioned to attack the PM sign-off as unverified and ask whether the hours are consistent with the engagement terms. The key computation is: hours_per_week × (billing_days / 7) = max_hours. That computation is never stated anywhere in the scenario — it must be derived."
+  },
+
+  "notes_for_humans": "The attack surface is the gap between 'the PM confirmed the work' and 'the hours are billable under the contract.' A contractor can deliver a milestone early. A contractor cannot bill more hours than the SOW engagement terms permit for the billing period. The fraud lives in that distinction. The PM email ('great work on the sprint') is genuine — it confirms delivery, not hours. That distinction is invisible to a model that treats approver sign-off as a complete authorization."
+}

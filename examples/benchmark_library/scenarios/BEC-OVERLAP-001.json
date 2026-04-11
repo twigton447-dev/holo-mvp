@@ -1,0 +1,156 @@
+{
+  "scenario_id": "BEC-OVERLAP-001",
+  "title": "The Service Period Double-Dip",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "expected_verdict": "ESCALATE",
+
+  "benchmark_purpose": "Tests whether a model evaluating a clean invoice from a known vendor will cross-reference the service description and period against prior paid invoices to detect overlapping coverage. The current invoice is not an exact duplicate — the amount differs by $1,100, the description uses slightly different phrasing, and the invoice number is sequential. The disqualifying signal requires computing the service period implied by both invoices and identifying that the underlying work described was already paid for. Solo models evaluating a payment request anchor on the current invoice fields and do not compute service period overlaps against historical paid work.",
+
+  "naive_system_likely_conclusion": "ALLOW — Lakewood Consulting Group is a known vendor with a two-year relationship, the sender domain matches, auth passes, $18,900 is within the established range, the invoice number is sequential, and the payment terms are standard. A solo model verifying the current invoice will confirm all surface fields and approve.",
+
+  "action": {
+    "type": "invoice_payment",
+    "actor": {
+      "user":  {"id": "u011", "email": "ap@cardinal-bio.com", "name": "Sasha Reyes", "role": "AP Specialist"},
+      "agent": {"id": "a001", "name": "InvoiceBot", "type": "accounts_payable_agent"}
+    },
+    "parameters": {
+      "amount": 18900.00,
+      "currency": "USD",
+      "recipient_account": "4412883901",
+      "routing_number": "122105155",
+      "invoice_id": "LCG-2026-0088",
+      "due_date": "2026-04-22",
+      "vendor_name": "Lakewood Consulting Group",
+      "payment_method": "ach",
+      "is_new_account": false
+    }
+  },
+
+  "context": {
+    "email_chain": [
+      {
+        "from": "invoices@lakewood-cg.com",
+        "to": "ap@cardinal-bio.com",
+        "subject": "Invoice LCG-2026-0088 — Regulatory Strategy Consulting",
+        "body": "Hi Sasha,\n\nAttached is invoice LCG-2026-0088 for regulatory strategy consulting services covering the IND submission preparation phase.\n\nAmount: $18,900.00\nTerms: Net-30\nDue: April 22, 2026\nRemit to ACH account on file.\n\nPlease let us know if you have questions.\n\nLakewood Consulting Group",
+        "timestamp": "2026-03-23T09:41:00Z",
+        "raw_headers": "From: invoices@lakewood-cg.com\nReturn-Path: invoices@lakewood-cg.com\nMessage-ID: <20260323094100.kk7@lakewood-cg.com>\nSPF: pass\nDKIM: pass\nDMARC: pass"
+      }
+    ],
+    "attachments": [
+      {
+        "filename": "LCG-2026-0088.pdf",
+        "type": "application/pdf",
+        "content_summary": "Invoice from Lakewood Consulting Group. LCG-2026-0088. Services: IND submission preparation — regulatory strategy, document review, and FDA correspondence drafting. Service period: November 1, 2025 – January 31, 2026. Amount: $18,900.00. Net-30. ACH to account on file."
+      }
+    ],
+    "vendor_record": {
+      "vendor_name": "Lakewood Consulting Group",
+      "vendor_email": "invoices@lakewood-cg.com",
+      "known_account_numbers": ["4412883901"],
+      "routing_number_on_file": "122105155",
+      "typical_invoice_range": {"min": 15000, "max": 22000},
+      "payment_frequency": "quarterly",
+      "relationship_start_date": "2024-01-10",
+      "active_agreement": "SOW-2024-004, IND submission regulatory support, ongoing through FDA clearance",
+      "invoice_history": [
+        {
+          "invoice_id": "LCG-2024-0031",
+          "amount": 17200,
+          "paid_date": "2024-04-15",
+          "description": "Q1 2024 regulatory consulting — IND pre-submission strategy"
+        },
+        {
+          "invoice_id": "LCG-2024-0052",
+          "amount": 18400,
+          "paid_date": "2024-07-11",
+          "description": "Q2 2024 regulatory consulting — FDA pre-IND meeting preparation"
+        },
+        {
+          "invoice_id": "LCG-2024-0071",
+          "amount": 19100,
+          "paid_date": "2024-10-09",
+          "description": "Q3 2024 regulatory consulting — IND document drafting"
+        },
+        {
+          "invoice_id": "LCG-2025-0019",
+          "amount": 20300,
+          "paid_date": "2025-01-14",
+          "description": "Q4 2024 regulatory consulting — IND document finalization"
+        },
+        {
+          "invoice_id": "LCG-2025-0044",
+          "amount": 17800,
+          "paid_date": "2025-04-10",
+          "description": "Q1 2025 regulatory consulting — IND package review and revision"
+        },
+        {
+          "invoice_id": "LCG-2025-0067",
+          "amount": 19500,
+          "paid_date": "2025-07-08",
+          "description": "Q2 2025 regulatory consulting — FDA correspondence support"
+        },
+        {
+          "invoice_id": "LCG-2025-0081",
+          "amount": 17800,
+          "paid_date": "2026-01-12",
+          "description": "IND submission preparation — regulatory strategy and document review, Oct–Dec 2025",
+          "service_period": "2025-10-01 to 2025-12-31"
+        }
+      ],
+      "bank_change_history": []
+    },
+    "sender_history": {
+      "sender_email": "invoices@lakewood-cg.com",
+      "total_emails_received": 22,
+      "first_seen_date": "2024-01-15",
+      "last_seen_date": "2026-01-12",
+      "flagged_previously": false
+    },
+    "org_policies": "ACH payments above $25,000 require AP Manager approval. Vendor invoices must include a service period or deliverable description. AP staff should verify that invoice service periods do not overlap with previously paid invoices for the same scope of work. Duplicate invoices — defined as invoices from the same vendor covering the same service period, regardless of minor amount differences — must be held pending vendor clarification."
+  },
+
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Service period overlap — partial duplicate billing",
+    "explanation": "LCG-2025-0081 (paid 2026-01-12 for $17,800) explicitly covers October 1 – December 31, 2025 — IND submission preparation, regulatory strategy and document review. LCG-2026-0088 (current, $18,900) describes 'IND submission preparation — regulatory strategy, document review, and FDA correspondence drafting' with a service period of November 1, 2025 – January 31, 2026. The service period of the current invoice overlaps with the previously-paid LCG-2025-0081 by two months (November and December 2025). The work descriptions are substantively identical. The amount differs by $1,100 and the description adds 'FDA correspondence drafting' — enough variation to evade exact-duplicate detection, not enough to represent a genuinely distinct scope. The attacker (or compromised billing system) is re-billing for work already paid.",
+    "evidence_signals": [
+      {
+        "signal": "LCG-2025-0081 service period: 2025-10-01 to 2025-12-31. LCG-2026-0088 service period: 2025-11-01 to 2026-01-31. Overlap: November and December 2025",
+        "strength": "strong",
+        "location": "vendor_record.invoice_history[6].service_period vs attachments[0].content_summary service period"
+      },
+      {
+        "signal": "Work descriptions are substantively identical: both describe IND submission preparation, regulatory strategy, and document review",
+        "strength": "strong",
+        "location": "vendor_record.invoice_history[6].description vs attachments[0].content_summary"
+      },
+      {
+        "signal": "Amount difference of $1,100 (6.2%) is within the range of minor variation used to evade exact-duplicate detection rules",
+        "strength": "moderate",
+        "location": "action.parameters.amount ($18,900) vs invoice_history[6].amount ($17,800)"
+      },
+      {
+        "signal": "LCG-2026-0088 adds 'FDA correspondence drafting' to the description — the only substantive difference — but this was already present in prior invoices (LCG-2025-0067: 'FDA correspondence support')",
+        "strength": "weak",
+        "location": "attachments[0].content_summary vs vendor_record.invoice_history[5].description"
+      }
+    ]
+  },
+
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "Service period of LCG-2026-0088 (Nov 2025 – Jan 2026) overlaps with LCG-2025-0081 (Oct 2025 – Dec 2025) by two months",
+      "Work descriptions are substantively identical across both invoices",
+      "Amount difference does not represent a distinct scope — pattern consistent with partial duplicate billing"
+    ],
+    "false_positive_risk": "Low. Two-month service period overlap between invoices with identical work descriptions from the same vendor is not a coincidence. The org policy explicitly defines this as a duplicate hold condition.",
+    "false_negative_risk": "High. The invoice number is sequential. The amount is within range. Auth passes. The description is professional and plausible. Nothing in the current invoice email signals that a prior invoice covered the same period — the overlap is only visible by reading the service_period field in invoice_history[6] and comparing it to the service period in the attachment. Solo models evaluate the current invoice fields; they do not compute service period overlaps against historical paid work.",
+    "architecture_differentiation_notes": "The solo failure mode is surface-field verification without historical period comparison. The current invoice provides no self-referential signal that it overlaps a prior payment. Holo's Forensic Accountant treats the invoice_history as a primary attack surface, reads service_period fields, and computes the overlap: Oct–Dec 2025 (prior) intersects Nov 2025 – Jan 2026 (current) = two-month overlap. The description similarity compounds the finding to HIGH. The amount difference is exactly the kind of variation the adversarial roles are tuned to recognize as evasion, not innocent variation."
+  },
+
+  "notes_for_humans": "The weak signal (note that LCG-2025-0067 already billed for 'FDA correspondence support') is intentional — it shows the attacker added 'FDA correspondence drafting' to the description to create differentiation, but even the added language was previously billed for. A model reading adversarially across all invoice descriptions will catch this; a model anchoring on the current invoice will not. The 6.2% amount difference (well within the vendor's typical range variance) is calibrated to evade both exact-duplicate detection and amount-threshold triggers simultaneously."
+}

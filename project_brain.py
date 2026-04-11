@@ -83,6 +83,46 @@ CREATE INDEX IF NOT EXISTS idx_findings_vendor
 CREATE INDEX IF NOT EXISTS idx_findings_category
     ON holo_findings (category, severity, created_at DESC);
 
+-- Migration: account fingerprint for known-recipient routing (Condition C)
+-- Run this after the initial schema creation if upgrading an existing deployment.
+ALTER TABLE holo_evaluations
+    ADD COLUMN IF NOT EXISTS payment_account_fingerprint text;
+CREATE INDEX IF NOT EXISTS idx_evals_fingerprint
+    ON holo_evaluations (vendor_domain, payment_account_fingerprint)
+    WHERE decision = 'ALLOW';
+
+-- 4. Benchmark runs: one row per condition per benchmark run
+--    benchmark_id ties the 4 conditions of a single run together.
+--    condition is one of: solo_openai, solo_anthropic, solo_google, holo_full
+CREATE TABLE IF NOT EXISTS holo_benchmark_runs (
+    id                  uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    benchmark_id        text NOT NULL,
+    run_timestamp       timestamptz NOT NULL,
+    scenario_id         text NOT NULL,
+    domain              text,
+    category            text,
+    difficulty          text,
+    attack_class        text,
+    expected_verdict    text NOT NULL,
+    condition           text NOT NULL,
+    model_version       text,
+    verdict             text NOT NULL,
+    correct             boolean NOT NULL,
+    turn_count          int,
+    tokens_input        int,
+    tokens_output       int,
+    elapsed_ms          int,
+    health_status       text,
+    gate_status         jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_bench_scenario
+    ON holo_benchmark_runs (scenario_id, run_timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_bench_condition
+    ON holo_benchmark_runs (condition, correct, run_timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_bench_id
+    ON holo_benchmark_runs (benchmark_id);
+
 ────────────────────────────────────────────────────────────
 
 Ambient signal layer (run these when building the full life-context system):
@@ -396,6 +436,175 @@ class ProjectBrain:
             self._client = None
 
     # -------------------------------------------------------------------------
+    # Benchmark persistence
+    # -------------------------------------------------------------------------
+
+    def save_benchmark_run(self, result: dict, scenario: dict) -> bool:
+        """
+        Write one row per condition from a completed benchmark run to
+        holo_benchmark_runs.
+
+        Called when --save-to-db is passed. The adversarial loop itself still
+        runs with no_memory=True (benchmark isolation) — this only persists
+        the final outcome data, never injects memory into the evaluation.
+
+        Returns True if all rows were written successfully, False otherwise.
+        """
+        if not self._client:
+            logger.warning("save_benchmark_run: no Supabase client — skipping.")
+            return False
+
+        benchmark_id     = result.get("benchmark_id", "")
+        scenario_id      = result.get("scenario_name", scenario.get("scenario_id", ""))
+        expected_verdict = result.get("expected_verdict", "UNKNOWN").upper()
+        run_timestamp    = result.get("timestamp", datetime.now(timezone.utc).isoformat())
+        models           = result.get("models", {})
+        conditions       = result.get("conditions", {})
+
+        # Derive domain from scenario action type via template
+        try:
+            from scenario_templates import get_template
+            action_type = scenario.get("action", {}).get("type", "invoice_payment")
+            domain = get_template(action_type).get("domain", "")
+        except Exception:
+            domain = ""
+
+        category     = scenario.get("category", "")
+        difficulty   = scenario.get("difficulty", "")
+        attack_class = scenario.get("hidden_ground_truth", {}).get("fraud_type", "") or ""
+
+        # Map condition key → model version string
+        _model_map = {
+            "solo_openai":    models.get("openai"),
+            "solo_anthropic": models.get("anthropic"),
+            "solo_google":    models.get("google"),
+            "holo_full":      (
+                f"openai={models.get('openai')}+"
+                f"anthropic={models.get('anthropic')}+"
+                f"google={models.get('google')}"
+            ),
+        }
+
+        rows = []
+        for cond_key, cond_data in conditions.items():
+            if cond_data is None:
+                continue
+
+            verdict    = cond_data.get("verdict", "ERROR")
+            correct    = (verdict == expected_verdict) and not cond_data.get("error")
+            tok        = cond_data.get("total_tokens", {})
+
+            rows.append({
+                "benchmark_id":     benchmark_id,
+                "run_timestamp":    run_timestamp,
+                "scenario_id":      scenario_id,
+                "domain":           domain,
+                "category":         category,
+                "difficulty":       difficulty,
+                "attack_class":     attack_class[:200] if attack_class else "",
+                "expected_verdict": expected_verdict,
+                "condition":        cond_key,
+                "model_version":    _model_map.get(cond_key, ""),
+                "verdict":          verdict,
+                "correct":          correct,
+                "turn_count":       cond_data.get("turns_run"),
+                "tokens_input":     tok.get("input"),
+                "tokens_output":    tok.get("output"),
+                "elapsed_ms":       cond_data.get("elapsed_ms"),
+                "health_status":    cond_data.get("run_health", ""),
+                "gate_status":      None,   # populated post-run when gate checks are wired
+            })
+
+        if not rows:
+            logger.warning(f"save_benchmark_run: no condition data to save for {benchmark_id}.")
+            return False
+
+        try:
+            self._client.table("holo_benchmark_runs").insert(rows).execute()
+            logger.info(
+                f"save_benchmark_run: {len(rows)} condition(s) saved "
+                f"for benchmark_id={benchmark_id}, scenario={scenario_id}."
+            )
+            print(f"  DB:      {len(rows)} condition row(s) saved to holo_benchmark_runs "
+                  f"({scenario_id})")
+            return True
+        except Exception as e:
+            logger.warning(f"save_benchmark_run failed: {e}")
+            print(f"  DB:      save failed — {e}")
+            return False
+
+    # Pre-evaluation: routing data (lightweight — called before analyst context)
+    # -------------------------------------------------------------------------
+
+    def retrieve_recipient_history(self, action: dict, context: dict) -> Optional[object]:
+        """
+        Return the minimal prior-transaction data needed by the routing function.
+
+        Lightweight — three targeted queries, no full evaluation history.
+        Returns a routing.RecipientHistory, or None if DB is unavailable or
+        this is a first-seen vendor.
+
+        Requires the payment_account_fingerprint column migration (see schema above).
+        """
+        if not self._client:
+            return None
+        vendor_domain = self._extract_vendor_domain(context)
+        if not vendor_domain:
+            return None
+
+        try:
+            from routing import RecipientHistory
+
+            # 1. Vendor profile: allow_count + first_seen
+            profile_resp = (
+                self._client
+                .table("holo_vendor_profiles")
+                .select("allow_count, first_seen")
+                .eq("vendor_domain", vendor_domain)
+                .maybe_single()
+                .execute()
+            )
+            profile = profile_resp.data
+            if not profile:
+                return None  # first-seen vendor
+
+            allow_count = profile.get("allow_count") or 0
+            first_seen  = (profile.get("first_seen") or "")[:10]  # YYYY-MM-DD
+
+            # 2. Account fingerprints from prior ALLOW evaluations (Condition C)
+            fp_resp = (
+                self._client
+                .table("holo_evaluations")
+                .select("payment_account_fingerprint")
+                .eq("vendor_domain", vendor_domain)
+                .eq("decision", "ALLOW")
+                .not_.is_("payment_account_fingerprint", "null")
+                .order("created_at", desc=True)
+                .limit(20)
+                .execute()
+            )
+            prior_fps = [
+                row["payment_account_fingerprint"]
+                for row in (fp_resp.data or [])
+                if row.get("payment_account_fingerprint")
+            ]
+
+            logger.info(
+                f"ProjectBrain.retrieve_recipient_history: '{vendor_domain}' — "
+                f"allow_count={allow_count}, first_seen={first_seen}, "
+                f"prior_fingerprints={len(prior_fps)}."
+            )
+
+            return RecipientHistory(
+                allow_count               = allow_count,
+                first_transaction_date    = first_seen or None,
+                prior_account_fingerprints = prior_fps,
+            )
+
+        except Exception as e:
+            logger.warning(f"ProjectBrain.retrieve_recipient_history failed: {e}")
+            return None
+
     # Pre-evaluation: retrieve relevant prior experience
     # -------------------------------------------------------------------------
 
@@ -577,21 +786,31 @@ class ProjectBrain:
                 )
 
             # --- 2. Insert evaluation record ---------------------------------
+            # Compute account fingerprint for future Condition C (known recipient) checks.
+            # Requires the payment_account_fingerprint column migration (see schema).
+            action = request.get("action", {})
+            try:
+                from routing import _compute_account_fingerprint
+                account_fp = _compute_account_fingerprint(action)
+            except Exception:
+                account_fp = None
+
             self._client.table("holo_evaluations").insert({
-                "evaluation_id":    result.get("evaluation_id"),
-                "vendor_domain":    vendor_domain,
-                "vendor_name":      vendor_name,
-                "decision":         result.get("decision"),
-                "exit_reason":      result.get("exit_reason"),
-                "turns_completed":  result.get("turns_completed"),
-                "elapsed_ms":       result.get("elapsed_ms"),
-                "converged":        result.get("converged", False),
-                "oscillation":      result.get("oscillation", False),
-                "decay":            result.get("decay", False),
-                "evaluation_brief": brief,
-                "high_categories":  high_cats,
-                "medium_categories": medium_cats,
-                "created_at":       datetime.now(timezone.utc).isoformat(),
+                "evaluation_id":               result.get("evaluation_id"),
+                "vendor_domain":               vendor_domain,
+                "vendor_name":                 vendor_name,
+                "decision":                    result.get("decision"),
+                "exit_reason":                 result.get("exit_reason"),
+                "turns_completed":             result.get("turns_completed"),
+                "elapsed_ms":                  result.get("elapsed_ms"),
+                "converged":                   result.get("converged", False),
+                "oscillation":                 result.get("oscillation", False),
+                "decay":                       result.get("decay", False),
+                "evaluation_brief":            brief,
+                "high_categories":             high_cats,
+                "medium_categories":           medium_cats,
+                "payment_account_fingerprint": account_fp,
+                "created_at":                  datetime.now(timezone.utc).isoformat(),
             }).execute()
 
             # --- 3. Insert normalized findings --------------------------------
@@ -1059,6 +1278,53 @@ class ProjectBrain:
             logger.warning(f"ProjectBrain.load_life_context failed: {e}")
             return []
 
+    def get_prior_unconsolidated_session(self, capsule_id: str, current_session_id: str) -> Optional[str]:
+        """
+        Find the most recent session for this capsule that was never consolidated.
+
+        Used by consolidate-on-resume: when a new session starts, check whether
+        the prior session was abandoned mid-conversation without hitting RED.
+        If so, consolidate it now before loading context for the new session.
+
+        Returns the session_id of the unconsolidated session, or None.
+        """
+        if not self._client:
+            return None
+        try:
+            # Get recent sessions for this capsule (excluding current)
+            sessions_resp = (
+                self._client.table("holo_chat_sessions")
+                .select("session_id, last_active")
+                .eq("capsule_id", capsule_id)
+                .neq("session_id", current_session_id)
+                .order("last_active", desc=True)
+                .limit(5)
+                .execute()
+            )
+            sessions = sessions_resp.data or []
+            if not sessions:
+                return None
+
+            # Check which of these have a consolidation record
+            for s in sessions:
+                sid = s["session_id"]
+                check = (
+                    self._client.table("holo_session_consolidations")
+                    .select("session_id")
+                    .eq("capsule_id", capsule_id)
+                    .eq("session_id", sid)
+                    .limit(1)
+                    .execute()
+                )
+                if not check.data:
+                    # This session was never consolidated
+                    return sid
+
+            return None
+        except Exception as e:
+            logger.warning(f"ProjectBrain.get_prior_unconsolidated_session failed: {e}")
+            return None
+
     def load_last_consolidation(self, capsule_id: str) -> Optional[dict]:
         """Load the most recent session consolidation note for a capsule."""
         if not self._client:
@@ -1124,6 +1390,125 @@ class ProjectBrain:
 
         except Exception as e:
             logger.warning(f"ProjectBrain.append_session_history failed: {e}")
+
+    def generate_portrait_md(self, capsule_id: str) -> str:
+        """
+        Generate an evolving markdown portrait of a capsule from all available
+        persistent data: life_context, recent session consolidations, capsule
+        context, and session history.
+
+        This is a living document — each call regenerates it from the current
+        state of the data. It reflects who this person is *now*, not a static
+        snapshot. Older entries that have been pruned or superseded do not appear.
+
+        Returns a markdown string. The caller decides where to save it.
+        """
+        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        # ---- Life context (the permanent portrait) --------------------------
+        life = self.load_life_context(capsule_id)
+        categories: Dict[str, list] = {}
+        for entry in life:
+            cat = entry.get("category", "patterns")
+            categories.setdefault(cat, []).append(entry)
+
+        CATEGORY_ORDER = [
+            "work", "goals", "financial", "patterns", "relationships",
+            "health", "emotional", "spiritual", "avoidances",
+        ]
+        CATEGORY_LABELS = {
+            "work":          "Work",
+            "goals":         "Goals",
+            "financial":     "Financial",
+            "patterns":      "Patterns",
+            "relationships": "Relationships",
+            "health":        "Health",
+            "emotional":     "Emotional",
+            "spiritual":     "Spiritual / Philosophy",
+            "avoidances":    "Avoidances",
+        }
+
+        portrait_sections = []
+        for cat in CATEGORY_ORDER:
+            entries = categories.get(cat, [])
+            if not entries:
+                continue
+            label = CATEGORY_LABELS.get(cat, cat.title())
+            lines = [f"## {label}\n"]
+            for e in sorted(entries, key=lambda x: -x.get("confidence", 1.0)):
+                conf = e.get("confidence", 1.0)
+                conf_tag = ""
+                if conf < 0.5:
+                    conf_tag = " *(fading)*"
+                elif conf < 0.8:
+                    conf_tag = " *(reinforcing)*"
+                lines.append(f"- **{e['key']}**: {e['value']}{conf_tag}")
+            portrait_sections.append("\n".join(lines))
+
+        # ---- Recent session consolidations ----------------------------------
+        consolidation_section = ""
+        if self._client:
+            try:
+                resp = (
+                    self._client.table("holo_session_consolidations")
+                    .select("created_at, what_changed, what_surfaced, open_threads, captain_note")
+                    .eq("capsule_id", capsule_id)
+                    .order("created_at", desc=True)
+                    .limit(10)
+                    .execute()
+                )
+                notes = resp.data or []
+                if notes:
+                    lines = ["## Recent Session Notes\n"]
+                    for n in notes:
+                        date = (n.get("created_at") or "")[:10]
+                        lines.append(f"### {date}")
+                        if n.get("what_surfaced"):
+                            lines.append(f"**Surfaced:** {n['what_surfaced']}")
+                        if n.get("what_changed"):
+                            lines.append(f"**Changed:** {n['what_changed']}")
+                        threads = n.get("open_threads")
+                        if threads:
+                            if isinstance(threads, list):
+                                lines.append(f"**Open threads:** {', '.join(threads)}")
+                            else:
+                                lines.append(f"**Open threads:** {threads}")
+                        if n.get("captain_note"):
+                            lines.append(f"**Captain note:** {n['captain_note']}")
+                        lines.append("")
+                    consolidation_section = "\n".join(lines)
+            except Exception as e:
+                logger.warning(f"generate_portrait_md: consolidations query failed: {e}")
+
+        # ---- Capsule context (live key/value state) -------------------------
+        context_section = ""
+        capsule_ctx = self.get_capsule_context(capsule_id)
+        if capsule_ctx:
+            ctx_items = [
+                f"- **{k}**: {v}"
+                for k, v in capsule_ctx.items()
+                if not k.startswith("_") and v
+            ]
+            if ctx_items:
+                context_section = "## Current Context\n\n" + "\n".join(ctx_items)
+
+        # ---- Assemble ---------------------------------------------------
+        parts = [
+            f"# Portrait — {now_str}",
+            f"*Capsule: {capsule_id[:8]}... | Generated: {now_str} | Living document — regenerated from current data*",
+            "",
+        ]
+        if portrait_sections:
+            parts += portrait_sections
+        if context_section:
+            parts.append(context_section)
+        if consolidation_section:
+            parts.append(consolidation_section)
+
+        if len(parts) <= 3:
+            parts.append("*No portrait data yet. Begins accumulating after the first session consolidation.*")
+
+        return "\n\n".join(parts)
 
     def update_session_name(self, capsule_id: str, session_id: str, name: str) -> None:
         """Write the Captain-generated title directly to holo_chat_sessions."""

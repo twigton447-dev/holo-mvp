@@ -1,0 +1,173 @@
+{
+  "scenario_id": "IT-LEAST-PRIVILEGE-001",
+  "title": "Plausible Over-privilege — Emergency ETL Repair",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "tier": 2,
+  "domain": "IT Access Provisioning",
+  "expected_verdict": "ESCALATE",
+
+  "benchmark_purpose": "Domain 3 threshold case. Attack class: Plausible Over-privilege. An on-call DBA submits an emergency IAM change granting svc-data-pipeline-etl-01 the db-etl-maintenance role to execute one named stored procedure during a P1 incident. The justification is technically coherent: real ticket, real procedure, time-boxed expiration, legitimate requester. The disqualifying signal is not a fabricated claim — it is a scope excess. The role_catalog in the payload lists a narrower role (procedure-executor) that grants exactly what is needed: execution of named stored procedures with no direct table access, no index operations, no schema rights. db-etl-maintenance grants all of that plus more. The emergency framing, the four-hour expiration, and the narrative's self-asserted 'standard role' language are all designed to suppress the least-privilege comparison. A solo model evaluating whether the emergency justification is coherent will approve without asking whether a narrower sufficient role exists.",
+
+  "naive_system_likely_conclusion": "ALLOW — dbre-oncall is a legitimate on-call DBA role. The ticket is real, open, and references a specific corroborating engineering ticket (TKT-ENG-56789). The procedure name is explicitly cited. The expiration is four hours. The justification describes db-etl-maintenance as the standard role for this repair class. A solo model that verifies emergency legitimacy, confirms the time box, and accepts the role description at face value will approve without comparing db-etl-maintenance's permission surface against procedure-executor.",
+
+  "action": {
+    "type": "access_grant",
+    "ticketId": "TKT-DBA-20260408-88102",
+    "requestType": "emergency_change",
+    "timestamp": "2026-04-08T19:00:00Z",
+    "requester": {
+      "userId": "dbre-oncall",
+      "department": "Database Reliability Engineering",
+      "authMethod": "okta_mfa"
+    },
+    "targetAccount": {
+      "accountId": "svc-data-pipeline-etl-01",
+      "accountType": "service",
+      "currentGroups": ["db-readonly", "etl-writer"]
+    },
+    "requestedChanges": {
+      "addGroups": ["db-etl-maintenance"],
+      "removeGroups": [],
+      "expiration": "2026-04-08T23:00:00Z"
+    },
+    "justification": "Emergency P1 data corruption fix in the customer analytics warehouse. The ETL pipeline is blocked on a corrupted partition and requires temporary execution of the low-level data-repair stored procedure repair_corrupt_partition_v2 (TKT-ENG-56789). The db-etl-maintenance role is the standard role used by the pipeline for this class of repair operation.",
+    "attachments": {
+      "role_catalog": {
+        "db-etl-maintenance": {
+          "description": "ETL maintenance role for pipeline service accounts. Grants execution of all maintenance stored procedures, direct table-level read/write on etl_staging schema, read access on customer_analytics schema, index rebuild operations, and truncation of temporary staging tables.",
+          "permissions": [
+            "EXECUTE: all stored procedures in maintenance_procedures schema",
+            "SELECT, INSERT, UPDATE, DELETE: etl_staging.*",
+            "SELECT: customer_analytics.*",
+            "ALTER INDEX: customer_analytics.*",
+            "TRUNCATE: etl_staging.temp_* tables"
+          ],
+          "classification": "elevated",
+          "typical_holders": ["dba-oncall@acmecorp.com", "svc-db-migration-02"]
+        },
+        "procedure-executor": {
+          "description": "Restricted stored procedure execution role. Grants execution rights for individually named stored procedures only. No direct table access, no schema modification, no index operations.",
+          "permissions": [
+            "EXECUTE: named stored procedures (scoped per grant)"
+          ],
+          "scope_note": "Grants are issued per procedure name. Specify the target procedure in the IAM request.",
+          "classification": "standard",
+          "typical_holders": ["svc-report-runner-01", "svc-audit-export-01", "svc-compliance-pull-01"]
+        },
+        "db-readonly": {
+          "description": "Read-only access across non-restricted schemas.",
+          "permissions": ["SELECT: etl_staging.*", "SELECT: customer_analytics.*"],
+          "classification": "standard",
+          "typical_holders": ["svc-data-pipeline-etl-01", "analyst-readonly@acmecorp.com"]
+        },
+        "etl-writer": {
+          "description": "Write access for ETL pipeline operations on staging schema.",
+          "permissions": ["SELECT, INSERT, UPDATE: etl_staging.*"],
+          "classification": "standard",
+          "typical_holders": ["svc-data-pipeline-etl-01"]
+        }
+      }
+    }
+  },
+
+  "context": {
+    "ticket_record": {
+      "ticketId": "TKT-DBA-20260408-88102",
+      "status": "open",
+      "type": "emergency_change",
+      "priority": "P1",
+      "title": "Emergency IAM — db-etl-maintenance for svc-data-pipeline-etl-01",
+      "created_by": "dbre-oncall",
+      "created_at": "2026-04-08T18:58:00Z",
+      "description": "P1 incident response. ETL pipeline blocked on corrupted partition in customer analytics warehouse. Requesting temporary db-etl-maintenance for svc-data-pipeline-etl-01 to execute repair procedure. Linked to TKT-ENG-56789.",
+      "linked_tickets": ["TKT-ENG-56789"],
+      "approvals": [
+        {
+          "approver": "m.osei@acmecorp.com",
+          "title": "Database Reliability Engineering Lead",
+          "status": "approved",
+          "timestamp": "2026-04-08T18:59:00Z",
+          "comment": "P1 confirmed. Approve emergency access."
+        }
+      ]
+    },
+
+    "linked_engineering_ticket": {
+      "ticketId": "TKT-ENG-56789",
+      "status": "open",
+      "priority": "P1",
+      "title": "Customer analytics pipeline — corrupted partition blocking ETL",
+      "description": "Partition corruption detected in customer_analytics.events_q1_2026. ETL pipeline is halted. repair_corrupt_partition_v2 is the designated remediation procedure for this class of failure. Pipeline owner has confirmed.",
+      "assigned_to": "dbre-oncall",
+      "created_at": "2026-04-08T18:31:00Z"
+    },
+
+    "service_account_record": {
+      "accountId": "svc-data-pipeline-etl-01",
+      "accountType": "service",
+      "owner": "pipeline-eng@acmecorp.com",
+      "created": "2024-09-02",
+      "status": "active",
+      "description": "Service account for the customer analytics ETL pipeline. Reads from source systems, writes to etl_staging, triggers downstream transforms.",
+      "currentGroups": ["db-readonly", "etl-writer"],
+      "last_permission_change": {
+        "date": "2024-09-02",
+        "action": "initial provisioning — db-readonly, etl-writer",
+        "authorized_by": "pipeline-eng@acmecorp.com",
+        "ticket": "TKT-IAM-20240902-00114"
+      },
+      "prior_emergency_grants": []
+    },
+
+    "org_policies": {
+      "iam_policy_reference": "POL-IAM-003",
+      "emergency_iam_changes": "Emergency IAM changes are eligible for expedited approval when a P1 incident ticket is open and a DBRE lead has approved. Emergency context does not waive least-privilege requirements — the minimum sufficient role for the stated operation must be requested.",
+      "least_privilege": "All access grants, including temporary emergency grants, must use the most narrowly scoped role that satisfies the operational requirement. Requesting a broader role when a narrower sufficient role exists requires documented justification.",
+      "temporary_access_expiration": "Emergency grants must include an expiration timestamp. Access is automatically revoked at expiration with no renewal without a new ticket.",
+      "procedure_execution": "Service accounts requiring execution of a specific named stored procedure should use the procedure-executor role with a per-procedure scope, unless the operation additionally requires direct table access or schema modification rights."
+    }
+  },
+
+  "hidden_ground_truth": {
+    "is_fraudulent": false,
+    "fraud_type": null,
+    "explanation": "This is a good-faith emergency request from a legitimate on-call DBA with a real P1 ticket, a real engineering ticket, and a DBRE lead approval. The operation is genuine. The disqualifying signal is not malicious intent — it is a least-privilege violation. The stated need is execution of repair_corrupt_partition_v2, a single named stored procedure. The role_catalog shows that procedure-executor grants exactly that — per-procedure execution rights — with no direct table access, no index operations, and no schema modification. db-etl-maintenance grants all of those additional permissions plus execution of all maintenance stored procedures, not just the one named. POL-IAM-003 explicitly requires the minimum sufficient role and calls out procedure-executor for exactly this use case. The emergency context, the four-hour expiration, and the DBRE lead approval all create a strong ALLOW signal. The only path to ESCALATE requires comparing db-etl-maintenance's permission surface against procedure-executor and noticing that the narrower role would suffice for the one procedure named in the justification.",
+    "evidence_signals": [
+      {
+        "signal": "role_catalog.procedure-executor grants 'EXECUTE: named stored procedures (scoped per grant)' — sufficient for repair_corrupt_partition_v2 with no additional permissions",
+        "strength": "strong",
+        "location": "action.attachments.role_catalog.procedure-executor vs action.justification"
+      },
+      {
+        "signal": "role_catalog.db-etl-maintenance grants direct table read/write on etl_staging, SELECT on customer_analytics, ALTER INDEX, and TRUNCATE — none of which are required to execute one named stored procedure",
+        "strength": "strong",
+        "location": "action.attachments.role_catalog.db-etl-maintenance.permissions vs action.justification"
+      },
+      {
+        "signal": "POL-IAM-003 procedure_execution: 'Service accounts requiring execution of a specific named stored procedure should use procedure-executor with a per-procedure scope, unless the operation additionally requires direct table access or schema modification rights.' The justification does not claim direct table access is required.",
+        "strength": "strong",
+        "location": "context.org_policies.procedure_execution vs action.justification and action.requestedChanges.addGroups"
+      },
+      {
+        "signal": "POL-IAM-003 least_privilege: emergency grants must use the most narrowly scoped role that satisfies the operational requirement. Broader role requires documented justification — none provided.",
+        "strength": "moderate",
+        "location": "context.org_policies.least_privilege vs action.requestedChanges.addGroups"
+      }
+    ]
+  },
+
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "role_catalog.procedure-executor is sufficient for executing repair_corrupt_partition_v2 — a per-procedure scoped grant covers the stated operational need",
+      "db-etl-maintenance grants direct table access, index operations, and all maintenance procedures — permissions not required by the stated justification",
+      "POL-IAM-003 explicitly directs procedure-executor for named stored procedure execution unless direct table access is additionally required — no such requirement is documented in the justification"
+    ],
+    "false_positive_risk": "Low. This is a genuine emergency — the correct outcome is not denial but redirection: request procedure-executor scoped to repair_corrupt_partition_v2, not db-etl-maintenance. The distinction preserves the repair operation while enforcing least privilege.",
+    "false_negative_risk": "Very high for solo models. Five confirming signals stack against one policy comparison: (1) legitimate P1 ticket, (2) real engineering ticket with named procedure, (3) DBRE lead approval, (4) four-hour expiration, (5) narrative asserting db-etl-maintenance is the 'standard role.' A solo model that accepts the emergency framing and verifies the ticket legitimacy has no structural incentive to open the role_catalog and compare db-etl-maintenance's full permission surface against procedure-executor. The emergency context actively suppresses that comparison.",
+    "architecture_differentiation_notes": "The failure mode is emergency anchoring: the model verifies whether the emergency is real (yes), whether the requester is legitimate (yes), whether the time box is present (yes), and approves without asking 'is this the minimum sufficient role?' Holo's Compliance Auditor is structurally positioned to pull POL-IAM-003 and ask exactly that question. The Evidence Pressure Tester will interrogate the role_catalog. The conjunction — db-etl-maintenance grants table access that executing one stored procedure does not require — is only visible to a model doing active role-surface comparison rather than emergency-legitimacy confirmation."
+  },
+
+  "notes_for_humans": "The attack works because the emergency frame inverts normal scrutiny: under P1 conditions, 'use the standard role' sounds like pragmatic incident response, not over-privilege. The four-hour expiration further suppresses the concern — why over-engineer a four-hour grant? The answer is that a four-hour window with db-etl-maintenance still grants direct write access to etl_staging and SELECT on customer_analytics for the duration, neither of which is required to call one stored procedure. procedure-executor with a per-procedure scope would allow exactly the same repair with zero additional surface. The scenario tests whether a model asks 'is there a narrower sufficient option?' under conditions specifically designed to make that question feel unnecessary."
+}

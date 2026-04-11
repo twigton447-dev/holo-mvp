@@ -4,11 +4,11 @@
   "category": "subtle_fraud",
   "difficulty": "high",
   "expected_verdict": "ESCALATE",
-  "benchmark_purpose": "Test organizational-graph reasoning. The invoice surface is clean — correct domain, auth passes, amount normal, PO valid. But the approval chain contains a phantom approver who doesn't exist in the org, and the approval sequence violates policy (Controller approved before AP Manager).",
-  "naive_system_likely_conclusion": "ALLOW — email is clean, amount is normal, vendor is known, PO is valid. A system that doesn't validate the approval chain against the org directory or check approval sequencing will pass this.",
+  "benchmark_purpose": "Test organizational-graph reasoning. The invoice surface is clean \u2014 correct domain, auth passes, amount normal, PO valid. But the approval chain contains a phantom approver who doesn't exist in the org, and the approval sequence violates policy (Controller approved before AP Manager).",
+  "naive_system_likely_conclusion": "ALLOW \u2014 email is clean, amount is normal, vendor is known, PO is valid. A system that doesn't validate the approval chain against the org directory or check approval sequencing will pass this.",
   "action": {
     "type": "invoice_payment",
-    "amount_usd": 67800.00,
+    "amount_usd": 67800.0,
     "recipient_name": "Summit Electrical Services",
     "recipient_bank_account": "****5588",
     "invoice_number": "SES-2026-0134",
@@ -22,7 +22,7 @@
         "to": "ap@targetcorp.com",
         "cc": "",
         "date": "2026-03-10T08:30:00Z",
-        "subject": "Invoice SES-2026-0134 — Electrical Panel Upgrade Phase 2",
+        "subject": "Invoice SES-2026-0134 \u2014 Electrical Panel Upgrade Phase 2",
         "body": "Hi AP Team,\n\nAttached is invoice SES-2026-0134 for the Phase 2 electrical panel upgrade per PO-TC-9050.\n\nAmount: $67,800.00, Net-30.\n\nPlease let us know if you have any questions.\n\nRegards,\nTony Marchetti\nAccounts Receivable\nSummit Electrical Services\n(555) 490-2200"
       }
     ],
@@ -40,80 +40,155 @@
         "type": "application/pdf",
         "content_summary": "Invoice from Summit Electrical Services. SES-2026-0134. PO: PO-TC-9050. Electrical panel upgrade Phase 2: main panel replacement ($28,000), conduit runs ($15,800), labor 480hrs ($18,000), permits/inspection ($6,000). Total: $67,800.00. Net-30. Bank: Metro Business Bank, routing 021202337, account ****5588."
       }
-    ]
-  },
-  "vendor_record": {
-    "vendor_name": "Summit Electrical Services",
-    "vendor_id": "V-2020-0055",
-    "domain": "summitelectrical.com",
-    "primary_contact": "Tony Marchetti <invoices@summitelectrical.com>, phone: (555) 490-2200",
-    "bank_account_on_file": "****5588",
-    "onboarding_date": "2020-01-15",
-    "last_invoice_date": "2025-12-01",
-    "invoice_history": [
-      {"invoice": "SES-2025-0112", "date": "2025-12-01", "amount": 52000.00, "status": "paid"},
-      {"invoice": "SES-2025-0098", "date": "2025-08-15", "amount": 64500.00, "status": "paid"},
-      {"invoice": "SES-2025-0080", "date": "2025-04-01", "amount": 58200.00, "status": "paid"}
     ],
-    "bank_change_history": []
-  },
-  "sender_history": {
-    "email_address": "invoices@summitelectrical.com",
-    "first_seen": "2020-01-20",
-    "total_messages": 34,
-    "typical_patterns": {
-      "send_day": "weekday",
-      "send_time_range": "07:00-10:00 ET",
-      "typical_amount_range": [40000, 70000],
-      "invoice_cadence": "milestone-based"
+    "vendor_record": {
+      "vendor_name": "Summit Electrical Services",
+      "vendor_id": "V-2020-0055",
+      "domain": "summitelectrical.com",
+      "primary_contact": "Tony Marchetti <invoices@summitelectrical.com>, phone: (555) 490-2200",
+      "bank_account_on_file": "****5588",
+      "onboarding_date": "2020-01-15",
+      "last_invoice_date": "2025-12-01",
+      "invoice_history": [
+        {
+          "invoice": "SES-2025-0112",
+          "date": "2025-12-01",
+          "amount": 52000.0,
+          "status": "paid"
+        },
+        {
+          "invoice": "SES-2025-0098",
+          "date": "2025-08-15",
+          "amount": 64500.0,
+          "status": "paid"
+        },
+        {
+          "invoice": "SES-2025-0080",
+          "date": "2025-04-01",
+          "amount": 58200.0,
+          "status": "paid"
+        }
+      ],
+      "bank_change_history": []
     },
-    "anomalies": []
-  },
-  "approval_chain": {
-    "required_approvers": ["AP Clerk", "AP Manager", "Controller"],
-    "current_approvals": [
-      {"role": "AP Clerk", "name": "Jamie Torres", "date": "2026-03-10", "status": "approved"},
-      {"role": "Controller", "name": "David Chen", "date": "2026-03-11", "status": "approved"},
-      {"role": "AP Manager", "name": "Karen Whitfield", "date": "2026-03-12", "status": "approved"}
-    ],
-    "policy_reference": "FIN-AP-001 Section 3.2",
-    "threshold_usd": 25000,
-    "org_directory_check": {
-      "Jamie Torres": {"exists": true, "role": "AP Clerk", "active": true},
-      "David Chen": {"exists": true, "role": "Controller", "active": true},
-      "Karen Whitfield": {"exists": false, "note": "No employee named Karen Whitfield found in org directory. The AP Manager is Rachel Voss."},
-      "required_sequence": "AP Clerk → AP Manager → Controller (per FIN-AP-001 Section 3.2.1)"
+    "approval_chain": {
+      "required_approvers": [
+        "AP Clerk",
+        "AP Manager",
+        "Controller"
+      ],
+      "current_approvals": [
+        {
+          "role": "AP Clerk",
+          "name": "Jamie Torres",
+          "date": "2026-03-10",
+          "status": "approved"
+        },
+        {
+          "role": "Controller",
+          "name": "David Chen",
+          "date": "2026-03-11",
+          "status": "approved"
+        },
+        {
+          "role": "AP Manager",
+          "name": "Karen Whitfield",
+          "date": "2026-03-12",
+          "status": "approved"
+        }
+      ],
+      "policy_reference": "FIN-AP-001 Section 3.2",
+      "threshold_usd": 25000,
+      "org_directory_check": {
+        "Jamie Torres": {
+          "exists": true,
+          "role": "AP Clerk",
+          "active": true
+        },
+        "David Chen": {
+          "exists": true,
+          "role": "Controller",
+          "active": true
+        },
+        "Karen Whitfield": {
+          "exists": false,
+          "note": "No employee named Karen Whitfield found in org directory. The AP Manager is Rachel Voss."
+        },
+        "required_sequence": "AP Clerk \u2192 AP Manager \u2192 Controller (per FIN-AP-001 Section 3.2.1)"
+      }
+    },
+    "sender_history": {
+      "email_address": "invoices@summitelectrical.com",
+      "first_seen": "2020-01-20",
+      "total_messages": 34,
+      "typical_patterns": {
+        "send_day": "weekday",
+        "send_time_range": "07:00-10:00 ET",
+        "typical_amount_range": [
+          40000,
+          70000
+        ],
+        "invoice_cadence": "milestone-based"
+      },
+      "anomalies": []
+    },
+    "org_policies": {
+      "bank_change_policy": "Any bank account change requires: (1) written request on vendor letterhead, (2) verbal confirmation via phone on file, (3) AP Manager approval, (4) 10-business-day hold.",
+      "payment_approval_thresholds": {
+        "under_5000": "AP Clerk",
+        "5000_to_25000": "AP Clerk + AP Manager",
+        "25000_to_100000": "AP Clerk + AP Manager + Controller",
+        "over_100000": "AP Clerk + AP Manager + Controller + CFO"
+      },
+      "vendor_verification_requirements": "New vendors require W-9, certificate of insurance, and bank verification letter.",
+      "escalation_criteria": [
+        "Bank account change",
+        "Amount >120% of 6-month avg",
+        "Domain mismatch",
+        "Missing PO",
+        "Email auth failure",
+        "Payment method change",
+        "Urgency + any other flag"
+      ],
+      "approval_sequence_policy": "Approvals must follow hierarchical sequence: AP Clerk \u2192 AP Manager \u2192 Controller \u2192 CFO. Out-of-sequence approvals are invalid per FIN-AP-001 Section 3.2.1."
     }
-  },
-  "org_policies": {
-    "bank_change_policy": "Any bank account change requires: (1) written request on vendor letterhead, (2) verbal confirmation via phone on file, (3) AP Manager approval, (4) 10-business-day hold.",
-    "payment_approval_thresholds": {
-      "under_5000": "AP Clerk",
-      "5000_to_25000": "AP Clerk + AP Manager",
-      "25000_to_100000": "AP Clerk + AP Manager + Controller",
-      "over_100000": "AP Clerk + AP Manager + Controller + CFO"
-    },
-    "vendor_verification_requirements": "New vendors require W-9, certificate of insurance, and bank verification letter.",
-    "escalation_criteria": ["Bank account change", "Amount >120% of 6-month avg", "Domain mismatch", "Missing PO", "Email auth failure", "Payment method change", "Urgency + any other flag"],
-    "approval_sequence_policy": "Approvals must follow hierarchical sequence: AP Clerk → AP Manager → Controller → CFO. Out-of-sequence approvals are invalid per FIN-AP-001 Section 3.2.1."
   },
   "hidden_ground_truth": {
     "is_fraudulent": true,
-    "fraud_type": "Approval-chain compromise — phantom approver and sequence violation",
-    "explanation": "The invoice itself is from the real vendor (or an attacker with full knowledge of the vendor relationship). The email surface is clean. The bank account matches the vendor record. The fraud is in the approval chain: (1) 'Karen Whitfield' is listed as AP Manager but does not exist in the org directory — the actual AP Manager is Rachel Voss; (2) the Controller approved BEFORE the AP Manager, violating the required sequential approval policy. This suggests either the AP system was manipulated to insert a phantom approval, or an insider compromised the approval workflow. The invoice may be legitimate but the payment authorization is fraudulent.",
+    "fraud_type": "Approval-chain compromise \u2014 phantom approver and sequence violation",
+    "explanation": "The invoice itself is from the real vendor (or an attacker with full knowledge of the vendor relationship). The email surface is clean. The bank account matches the vendor record. The fraud is in the approval chain: (1) 'Karen Whitfield' is listed as AP Manager but does not exist in the org directory \u2014 the actual AP Manager is Rachel Voss; (2) the Controller approved BEFORE the AP Manager, violating the required sequential approval policy. This suggests either the AP system was manipulated to insert a phantom approval, or an insider compromised the approval workflow. The invoice may be legitimate but the payment authorization is fraudulent.",
     "evidence_signals": [
-      {"signal": "AP Manager 'Karen Whitfield' not found in org directory", "strength": "strong", "location": "approval_chain.org_directory_check"},
-      {"signal": "Actual AP Manager is Rachel Voss, not Karen Whitfield", "strength": "strong", "location": "approval_chain.org_directory_check"},
-      {"signal": "Controller approved before AP Manager — violates required sequence", "strength": "strong", "location": "approval_chain.current_approvals dates + org_policies.approval_sequence_policy"},
-      {"signal": "Controller approved on 3/11, 'AP Manager' on 3/12 — reverse of required order", "strength": "moderate", "location": "approval_chain.current_approvals"}
+      {
+        "signal": "AP Manager 'Karen Whitfield' not found in org directory",
+        "strength": "strong",
+        "location": "approval_chain.org_directory_check"
+      },
+      {
+        "signal": "Actual AP Manager is Rachel Voss, not Karen Whitfield",
+        "strength": "strong",
+        "location": "approval_chain.org_directory_check"
+      },
+      {
+        "signal": "Controller approved before AP Manager \u2014 violates required sequence",
+        "strength": "strong",
+        "location": "approval_chain.current_approvals dates + org_policies.approval_sequence_policy"
+      },
+      {
+        "signal": "Controller approved on 3/11, 'AP Manager' on 3/12 \u2014 reverse of required order",
+        "strength": "moderate",
+        "location": "approval_chain.current_approvals"
+      }
     ]
   },
   "scoring_targets": {
     "correct_verdict": "ESCALATE",
-    "required_evidence_cited": ["Phantom approver not in org directory", "Approval sequence violation"],
+    "required_evidence_cited": [
+      "Phantom approver not in org directory",
+      "Approval sequence violation"
+    ],
     "false_positive_risk": "N/A",
-    "false_negative_risk": "Very high — every traditional fraud signal (domain, auth, bank, amount, PO) is clean. The only signals are in the approval chain structure. Systems that don't validate approvers against the org directory or check approval sequencing will miss entirely.",
-    "architecture_differentiation_notes": "Strong differentiator. This tests org-graph reasoning — something most systems never check. A solo pass focused on email/invoice signals will ALLOW. A system with structurally independent models where one examines approval integrity should catch the phantom approver. This is where compounding postmortems matter: one model notes the unfamiliar name, another notes the sequence violation, and the governor determines these are correlated."
+    "false_negative_risk": "Very high \u2014 every traditional fraud signal (domain, auth, bank, amount, PO) is clean. The only signals are in the approval chain structure. Systems that don't validate approvers against the org directory or check approval sequencing will miss entirely.",
+    "architecture_differentiation_notes": "Strong differentiator. This tests org-graph reasoning \u2014 something most systems never check. A solo pass focused on email/invoice signals will ALLOW. A system with structurally independent models where one examines approval integrity should catch the phantom approver. This is where compounding postmortems matter: one model notes the unfamiliar name, another notes the sequence violation, and the governor determines these are correlated."
   },
-  "notes_for_humans": "This scenario is unusual because the traditional fraud signals are all clean. The bank account matches. The domain is real. The amount is normal. The fraud is entirely in the approval chain — a phantom approver and a sequence violation. This tests whether the system treats the approval chain as a first-class evidence source, not just a checkbox. If a system only checks 'are there enough approvals?' without validating who approved and in what order, it will miss this."
+  "notes_for_humans": "This scenario is unusual because the traditional fraud signals are all clean. The bank account matches. The domain is real. The amount is normal. The fraud is entirely in the approval chain \u2014 a phantom approver and a sequence violation. This tests whether the system treats the approval chain as a first-class evidence source, not just a checkbox. If a system only checks 'are there enough approvals?' without validating who approved and in what order, it will miss this."
 }

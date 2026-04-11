@@ -717,6 +717,107 @@ GOVERNOR_SYSTEM_PROMPT = build_governor_system_prompt()
 
 
 # ---------------------------------------------------------------------------
+# Blindspot Atlas
+# ---------------------------------------------------------------------------
+# Queryable lookup: (provider, action_type) -> known failure mode text.
+# Populated from frontier model self-diagnosis across benchmarked domains.
+# Used by the Governor to write hyper-targeted primers per driver per turn.
+#
+# Sources:
+#   Domain 1 (BEC): benchmark results — BEC-PHANTOM-DEP-003A
+#   Domain 3 (IAM): direct adversarial self-analysis, all three models
+#   Domain 4 (Agentic Commerce): benchmark results — AGENTIC-ROUTINE-001
+# ---------------------------------------------------------------------------
+
+BLINDSPOT_ATLAS: dict[tuple[str, str], str] = {
+
+    # ---- Domain 1: BEC / Invoice Payment ------------------------------------
+    ("anthropic", "invoice_payment"): (
+        "Claude's known failure mode on BEC: phantom dependency contact capture. "
+        "When a new contact is introduced via in-chain emails from the same domain "
+        "as the invoice, Claude treats the in-chain introduction as independent "
+        "corroboration. It does not ask whether any legitimizing evidence originates "
+        "outside the sender domain. A domain-level compromise generates the entire "
+        "chain — introduction, departure notice, and credential — and Claude misses "
+        "that circularity. Watch for narrative laundering: a plausible story "
+        "(personnel change, urgent timeline) will cause Claude to discount anomalies "
+        "it has already flagged. Do not allow the narrative to walk back MEDIUM+ "
+        "findings without a verifiable artifact from outside the email chain."
+    ),
+
+    # ---- Domain 3: IAM / Access Grant ---------------------------------------
+    ("openai", "access_grant"): (
+        "GPT's known failure modes on IAM: scope-compression and control-substitution. "
+        "GPT evaluates each field locally and averages risk instead of multiplying it — "
+        "it will separately assess ticket, manager approval, service account type, and "
+        "monitoring as individually acceptable and miss that the combination is toxic. "
+        "It also accepts weak controls (SIEM monitoring, manager approval, 'standard "
+        "change') as equivalent to hard technical prevention (JIT elevation, PAM "
+        "checkout, auto-revocation). Your job: force composition analysis. Ask what "
+        "the combination of requested roles enables that neither enables alone. Ask "
+        "which grants have a technical revocation mechanism versus a soft text promise. "
+        "Do not let process artifacts substitute for prevention."
+    ),
+    ("anthropic", "access_grant"): (
+        "Claude's known failure modes on IAM: temporal scope blindness and narrative "
+        "laundering via change-management ceremony. The word 'temporary' functions as "
+        "a cognitive discount token — Claude treats a stated end-date as a mitigating "
+        "control without asking what system will technically enforce revocation. Claude "
+        "also pattern-matches the form of a legitimate request (ticket number, manager "
+        "name, runbook reference) rather than the substance of what is being granted. "
+        "It fails to interrogate the delta between what the stated task requires and "
+        "what the requested permissions actually enable. Your job: force the delta "
+        "question. What does this role combination enable that the stated task does not "
+        "require? Which grants have no technical expiry mechanism?"
+    ),
+    ("google", "access_grant"): (
+        "Gemini's known failure modes on IAM: narrative override (coherence trap) and "
+        "mitigation gullibility. A highly detailed, technically specific justification "
+        "lowers Gemini's scrutiny threshold — it evaluates the story before the math "
+        "of the permissions. It also accepts explicitly listed mitigating controls "
+        "('all actions logged', 'auto-expiring token') as guaranteed external realities "
+        "rather than unverifiable claims. In a crisis framing (P0 outage, production "
+        "recovery), Gemini weights the risk of inaction as more concrete than the risk "
+        "of over-provisioned access. Your job: separate the story from the permissions. "
+        "Does the runbook or role definition confirm the stated scope? Does the stated "
+        "mitigation technically enforce what it claims, or is it just text?"
+    ),
+
+    # ---- Domain 4: Agentic Commerce / Purchase Order ------------------------
+    ("anthropic", "purchase_order"): (
+        "Claude's known failure mode on agentic commerce: stale human review blindspot. "
+        "When a purchase order arrives from a trusted vendor via an automated system, "
+        "Claude approves it without questioning the data provenance of the instruction "
+        "source. It does not ask: when was this automated system last reviewed by a "
+        "human? An automated reorder system that has not had human oversight in 83+ "
+        "days is generating a spend decision with no human confirmation artifact — "
+        "Claude rates this LOW across all flags. Your job: surface the authorization "
+        "chain question. Who or what generated this instruction, and when was that "
+        "source last independently verified? Trusted vendor history does not validate "
+        "a potentially compromised instruction channel."
+    ),
+    ("openai", "purchase_order"): (
+        "GPT's known failure mode on agentic commerce: stale human review blindspot "
+        "(shared with Claude on AGENTIC-ROUTINE-001). GPT approves automated reorders "
+        "from trusted vendors without questioning the recency of human oversight on the "
+        "instruction source. It treats vendor trust history as sufficient validation "
+        "for the current instruction, even when the automated system generating the "
+        "instruction has not been human-reviewed in months. Your job: separate vendor "
+        "legitimacy from instruction legitimacy. A trusted vendor does not validate a "
+        "potentially compromised or stale automated channel."
+    ),
+}
+
+
+def query_atlas(provider: str, action_type: str) -> str | None:
+    """
+    Return the known blindspot text for this provider/domain combination.
+    Returns None if no entry exists — atlas coverage expands as benchmarks run.
+    """
+    return BLINDSPOT_ATLAS.get((provider.lower(), action_type.lower()))
+
+
+# ---------------------------------------------------------------------------
 # Holo Chat — unified persona prompt (all three providers speak as Holo)
 # ---------------------------------------------------------------------------
 
@@ -864,9 +965,21 @@ Rules for artifacts:
 - Immediately after the code block, write one short sentence in prose explaining what you made and any assumptions."""
 
 
-def build_governor_brief_request(state: dict, next_turn_number: int,
-                                  next_persona: str, convergence_level: str) -> str:
-    """Builds the user message for the governor LLM between-turn brief."""
+def build_governor_brief_request(
+    state: dict,
+    next_turn_number: int,
+    next_persona: str,
+    convergence_level: str,
+    threat_hypothesis: str = None,
+    model_blindspot: str = None,
+    next_provider: str = None,
+    full_atlas: bool = False,
+) -> str:
+    """Builds the user message for the governor LLM between-turn brief.
+
+    When threat_hypothesis and model_blindspot are provided, the Governor
+    synthesizes them to write a hyper-targeted primer for this specific driver.
+    """
     history  = state["turn_history"]
     coverage = state["coverage_matrix"]
 
@@ -924,6 +1037,41 @@ def build_governor_brief_request(state: dict, next_turn_number: int,
     }
     stakes = stakes_map.get(convergence_level, "Target the most important unresolved question.")
 
+    # Coach synthesis block — injected when Wrangler hypothesis + Atlas blindspot available
+    coach_block = ""
+    if threat_hypothesis or model_blindspot:
+        coach_block = "\n\nCOACH SYNTHESIS:"
+        if threat_hypothesis:
+            coach_block += f"\nWrangler threat hypothesis: {threat_hypothesis}"
+        if model_blindspot and next_provider:
+            coach_block += (
+                f"\n{next_provider.upper()} known blindspot on this domain: {model_blindspot}"
+            )
+        coach_block += (
+            "\n\nYour primer must arm this analyst against their specific failure mode. "
+            "Name the attack class. Name what the analyst must not rationalize away. "
+            "Give them the question that breaks the narrative."
+        )
+
+    # DEEP tier: full Atlas briefing — all known failure modes for this action_type
+    # injected so the Governor can cross-reference every model's blindspot simultaneously.
+    full_atlas_block = ""
+    if full_atlas:
+        action_type = state.get("action", {}).get("type", "")
+        atlas_entries = [
+            f"  {provider.upper()}: {text}"
+            for (provider, atype), text in BLINDSPOT_ATLAS.items()
+            if atype == action_type.lower()
+        ]
+        if atlas_entries:
+            full_atlas_block = (
+                "\n\nDEEP TIER — FULL BLINDSPOT ATLAS for this action type:\n"
+                + "\n".join(atlas_entries)
+                + "\n\nCross-reference all failure modes. "
+                "Every provider has already been or will be in this loop. "
+                "Name which blindspot is most likely to decide this evaluation."
+            )
+
     return f"""CONVERGENCE LEVEL: {convergence_level}
 Stakes for this brief: {stakes}
 
@@ -933,7 +1081,7 @@ COVERAGE STATUS:
 PRIOR ANALYST TURNS:
 {turn_summaries}
 
-The next analyst is Turn {next_turn_number}, playing the role of: {next_persona}
+The next analyst is Turn {next_turn_number}, playing the role of: {next_persona}{coach_block}{full_atlas_block}
 
 Given the convergence level and what has been found so far, identify the single
 most important unresolved question. This may be:
@@ -1017,6 +1165,26 @@ class _FlightDeckBase:
 # Thinks about the human. Surfaces thoughts. Builds the capsule.
 # Runs the instruments every turn. Knows you better than anyone.
 # ---------------------------------------------------------------------------
+
+def _summarize_context_for_hypothesis(context: dict) -> str:
+    """
+    Produce a compact summary of the context bundle for threat hypothesis generation.
+    Extracts top-level keys and short value previews — enough for the Wrangler to
+    identify the attack surface class without consuming the full context budget.
+    """
+    lines = []
+    for k, v in context.items():
+        if isinstance(v, dict):
+            lines.append(f"  {k}: {{...{len(v)} keys}}")
+        elif isinstance(v, list):
+            lines.append(f"  {k}: [{len(v)} items]")
+        elif isinstance(v, str):
+            preview = v[:120].replace("\n", " ")
+            lines.append(f"  {k}: {preview!r}")
+        else:
+            lines.append(f"  {k}: {v}")
+    return "\n".join(lines) if lines else "(empty)"
+
 
 class GovernorAdapter(_FlightDeckBase):
     """
@@ -1172,16 +1340,88 @@ class GovernorAdapter(_FlightDeckBase):
         except Exception:
             return None
 
-    def generate_brief(self, state: dict, next_turn_number: int,
-                       next_persona: str, convergence_level: str = "EARLY") -> str:
-        """Generate a targeting brief for the next evaluation analyst."""
+    def generate_threat_hypothesis(self, state: dict) -> str:
+        """
+        Generate a one-sentence Threat Hypothesis Brief from the action + context.
+
+        Called once before any analyst turn. Identifies the most likely attack
+        surface class so the Governor can prime each subsequent driver against
+        the specific failure mode this payload is most likely to exploit.
+
+        Returns a single sentence. Examples:
+          "Threat hypothesis: persuasion failure — plausible narrative explains anomaly."
+          "Threat hypothesis: scope-composition failure — dangerous capability in role combination, not in any single field."
+          "Threat hypothesis: attention failure — threat is a single line of embedded text."
+        """
+        action   = state.get("action", {})
+        context  = state.get("context", {})
+        template = state.get("active_template", {})
+        domain   = template.get("domain", "unknown domain")
+
+        prompt = (
+            f"You are analyzing an action payload before any analyst has reviewed it.\n\n"
+            f"DOMAIN: {domain}\n\n"
+            f"ACTION:\n{action}\n\n"
+            f"CONTEXT (summary fields only):\n"
+            f"{_summarize_context_for_hypothesis(context)}\n\n"
+            f"Your job: identify the single most likely attack surface class for this payload.\n\n"
+            f"Attack surface classes:\n"
+            f"- persuasion_failure: a plausible narrative or ceremony explains away an anomaly\n"
+            f"- scope_composition_failure: the dangerous capability lives in the combination of "
+            f"permissions/roles, not in any single field\n"
+            f"- temporal_scope_failure: 'temporary' access with no technical enforcement mechanism\n"
+            f"- attention_failure: the threat is a single embedded detail that is easy to miss\n"
+            f"- historical_context_failure: the threat is in the pattern over time, not the current document\n"
+            f"- data_provenance_failure: the instruction source has not been independently verified\n"
+            f"- control_substitution_failure: weak controls (logs, approvals) substitute for hard prevention\n"
+            f"- none: payload appears genuinely clean\n\n"
+            f"Respond with exactly ONE sentence in this format:\n"
+            f"Threat hypothesis: [attack_class]. [one-sentence explanation of why this payload fits that class.]\n\n"
+            f"No other text."
+        )
         try:
-            template  = state.get("active_template")
-            gov_sys   = build_governor_system_prompt(template)
-            user_msg  = build_governor_brief_request(
-                state, next_turn_number, next_persona, convergence_level
+            result = self._call(prompt, max_tokens=80, system=(
+                "You are the Wrangler — Holo's context compiler. "
+                "You read raw action payloads and identify the attack surface class before any analyst begins. "
+                "You do not make verdicts. You name the threat class. One sentence. No hedging."
+            ))
+            return result.strip()
+        except Exception as e:
+            logger.warning(f"  Threat hypothesis generation failed: {e}")
+            return ""
+
+    def generate_brief(self, state: dict, next_turn_number: int,
+                       next_persona: str, convergence_level: str = "EARLY",
+                       next_adapter=None, full_atlas: bool = False) -> str:
+        """
+        Generate a targeting brief for the next evaluation analyst.
+
+        If next_adapter is provided, the Governor synthesizes:
+          1. The Wrangler's threat hypothesis (stored in state)
+          2. The next driver's known blindspot from the Atlas
+        to write a hyper-targeted primer specific to this driver's failure modes.
+
+        full_atlas=True (DEEP tier): injects all Atlas entries for the action_type
+        so the Governor can cross-reference every provider's failure modes at once.
+        """
+        try:
+            template     = state.get("active_template")
+            gov_sys      = build_governor_system_prompt(template)
+            action_type  = state.get("action", {}).get("type", "")
+
+            # Fetch driver-specific blindspot from Atlas if we know who's driving next
+            model_blindspot = None
+            if next_adapter is not None:
+                model_blindspot = query_atlas(next_adapter.provider, action_type)
+
+            user_msg = build_governor_brief_request(
+                state, next_turn_number, next_persona, convergence_level,
+                threat_hypothesis=state.get("threat_hypothesis"),
+                model_blindspot=model_blindspot,
+                next_provider=getattr(next_adapter, "provider", None),
+                full_atlas=full_atlas,
             )
-            return self._call(user_msg, max_tokens=300, system=gov_sys)
+            return self._call(user_msg, max_tokens=500 if full_atlas else 400, system=gov_sys)
         except Exception as e:
             logger.warning(f"  Governor brief generation failed: {e}")
             return ""
@@ -2091,12 +2331,14 @@ _MODEL_REGISTRY = [
 # Adapter registry
 # ---------------------------------------------------------------------------
 
-def load_adapters() -> tuple[list[BaseAdapter], list[BaseAdapter]]:
+def load_adapters(skip_providers=None) -> tuple[list[BaseAdapter], list[BaseAdapter]]:
     """
     Build active and bench pools from _MODEL_REGISTRY.
     Silently skips any entry whose API key env var is not set.
+    skip_providers: optional set/list of provider names to exclude (e.g. {"google"}).
     Returns (active_pool, bench_pool).
     """
+    skip = set(skip_providers or [])
     _vendor_sdk = {
         "openai":    lambda e, m: OpenAIAdapter(),
         "anthropic": lambda e, m: AnthropicAdapter(),
@@ -2104,6 +2346,9 @@ def load_adapters() -> tuple[list[BaseAdapter], list[BaseAdapter]]:
     }
     active, bench = [], []
     for status, provider, model_env, model_default, key_env, base_url in _MODEL_REGISTRY:
+        if provider in skip:
+            logger.info(f"Skipping {provider} — excluded via skip_providers")
+            continue
         api_key = os.getenv(key_env)
         if not api_key:
             logger.info(f"Skipping {provider} — {key_env} not set")
@@ -2135,7 +2380,7 @@ _FAST_MODEL_REGISTRY = [
     ("anthropic", "ANTHROPIC_FAST_MODEL", "claude-haiku-4-5-20251001", "ANTHROPIC_API_KEY"),
     ("google",    "GOOGLE_FAST_MODEL",    "gemini-2.0-flash",          "GOOGLE_API_KEY"),
     # Backup 1 — independent DNA (xAI)
-    ("xai",       "XAI_FAST_MODEL",       "grok-3-fast",               "XAI_API_KEY"),
+    ("xai",       "XAI_FAST_MODEL",       "grok-3-mini",               "XAI_API_KEY"),
     # Backup 2 — independent DNA (Mistral)
     ("mistral",   "MISTRAL_FAST_MODEL",   "mistral-small-latest",      "MISTRAL_API_KEY"),
 ]
@@ -2154,18 +2399,23 @@ _VENDOR_SDK_FAST = {
 }
 
 
-def load_fast_adapters() -> list:
+def load_fast_adapters(skip_providers=None) -> list:
     """
     Build the fast adapter pool using lighter models.
     Each adapter is constructed normally but its model_id is overridden
     to the fast-tier variant before being added to the pool.
 
     Falls back gracefully: if a key isn't set, that provider is skipped.
+    skip_providers: optional set/list of provider names to exclude (e.g. {"google"}).
     If the fast pool ends up empty, the caller should fall back to the
     standard active pool.
     """
+    skip = set(skip_providers or [])
     fast = []
     for provider, model_env, model_default, key_env in _FAST_MODEL_REGISTRY:
+        if provider in skip:
+            logger.info(f"Fast pool: skipping {provider} — excluded via skip_providers")
+            continue
         api_key = os.getenv(key_env)
         if not api_key:
             logger.info(f"Fast pool: skipping {provider} — {key_env} not set")

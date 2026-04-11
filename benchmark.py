@@ -233,23 +233,29 @@ def run_solo(scenario, adapter, condition_name, force_max_turns=False):
 # Holo full architecture
 # ---------------------------------------------------------------------------
 
-def run_holo_loop(scenario, force_max_turns=False, no_memory=False, fixed_governor=None):
+def run_holo_loop(scenario, force_max_turns=False, no_memory=False, fixed_governor=None, seed=None,
+                  skip_providers=None):
     import context_governor as _cg
     _orig_window = _cg.CONVERGENCE_WINDOW
     if force_max_turns:
         _cg.CONVERGENCE_WINDOW = MAX_TURNS + 1  # window can never be satisfied
-    governor = ContextGovernor(no_memory=no_memory, fixed_governor=fixed_governor)
+    # Benchmark always uses standard-tier adapters regardless of transaction amount.
+    # TIER_FAST uses cheaper models (e.g. gemini-2.0-flash) — invalid for benchmark results.
+    _orig_select_tier = _cg._select_tier
+    _cg._select_tier = lambda request: _cg.TIER_STANDARD
+    governor = ContextGovernor(no_memory=no_memory, fixed_governor=fixed_governor, seed=seed,
+                               skip_providers=skip_providers)
     start    = time.time()
+    from provider_health import SystemUnavailableError
     try:
         result  = governor.evaluate(scenario)
         elapsed = _ms(start)
         flags   = {cat: result["coverage_matrix"][cat]["max_severity"]
                    for cat in result["coverage_matrix"]}
-        from provider_health import SystemUnavailableError
         return _ok("holo_full", "openai+anthropic+google+governor",
                    result["turns_completed"], result["decision"], flags,
                    result["decision_reason"], [], result["turn_history"], elapsed,
-                   result["total_tokens"]["input"], result["total_tokens"]["output"],
+                   result["total_tokens"]["total"]["input"], result["total_tokens"]["total"]["output"],
                    extra={"converged": result["converged"], "deltas": result["deltas"],
                           "coverage_matrix": result["coverage_matrix"]},
                    run_health=result.get("run_health", "clean"))
@@ -260,13 +266,15 @@ def run_holo_loop(scenario, force_max_turns=False, no_memory=False, fixed_govern
         return _err("holo_full", "openai+anthropic+google+governor", e, _ms(start))
     finally:
         _cg.CONVERGENCE_WINDOW = _orig_window
+        _cg._select_tier = _orig_select_tier
 
 # ---------------------------------------------------------------------------
 # Main runner
 # ---------------------------------------------------------------------------
 
 def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory=False,
-                  quick=False, solo_only=False, fixed_governor=None):
+                  quick=False, solo_only=False, fixed_governor=None, seed=None,
+                  save_to_db=False, skip_providers=None):
     if verbose:
         logging.getLogger().setLevel(logging.INFO)
 
@@ -282,7 +290,9 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
     print(f"  Expected verdict : {expected}")
     conv_note = "DISABLED — full 10 turns forced" if force_max_turns else "enabled"
     mode_note = " [QUICK — Solo GPT only]" if quick else (" [SOLO ONLY]" if solo_only else "")
-    print(f"  Turn budget      : up to {MAX_TURNS} per condition (convergence detection {conv_note}){mode_note}\n")
+    seed_note = f" [SEED={seed}]" if seed is not None else " [rotation=random]"
+    print(f"  Turn budget      : up to {MAX_TURNS} per condition (convergence detection {conv_note}){mode_note}")
+    print(f"  Holo rotation    :{seed_note}\n")
 
     print("  Initializing adapters...")
     openai_adapter    = OpenAIAdapter()
@@ -297,7 +307,8 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
 
     if not quick and not solo_only:
         print("  [4/4] HOLO FULL ARCHITECTURE...")
-        cond4 = run_holo_loop(scenario, force_max_turns=force_max_turns, no_memory=no_memory, fixed_governor=fixed_governor)
+        cond4 = run_holo_loop(scenario, force_max_turns=force_max_turns, no_memory=no_memory,
+                              fixed_governor=fixed_governor, seed=seed, skip_providers=skip_providers)
         _inline(cond4)
     else:
         cond4 = None
@@ -349,6 +360,12 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
     }
 
     _print_report(result)
+
+    if save_to_db:
+        from project_brain import ProjectBrain
+        brain = ProjectBrain()
+        brain.save_benchmark_run(result, scenario)
+
     return result
 
 # ---------------------------------------------------------------------------
@@ -467,7 +484,8 @@ def _print_report(r):
 # Batch runner
 # ---------------------------------------------------------------------------
 
-def run_all(save, verbose, directory=None, force_max_turns=False, no_memory=False):
+def run_all(save, verbose, directory=None, force_max_turns=False, no_memory=False,
+            save_to_db=False, skip_providers=None):
     d = Path(directory) if directory else Path("examples/benchmark_library/scenarios")
     if not d.exists():
         print(f"No directory: {d}")
@@ -475,7 +493,9 @@ def run_all(save, verbose, directory=None, force_max_turns=False, no_memory=Fals
     scenarios = sorted(d.glob("*.json"))
     results = []
     for s in scenarios:
-        result = run_benchmark(str(s), verbose=verbose, force_max_turns=force_max_turns, no_memory=no_memory)
+        result = run_benchmark(str(s), verbose=verbose, force_max_turns=force_max_turns,
+                               no_memory=no_memory, save_to_db=save_to_db,
+                               skip_providers=skip_providers)
         results.append(result)
         if save:
             _save(result)
@@ -588,6 +608,82 @@ def _inline(c):
               f"{c['elapsed_ms']}ms  "
               f"{c['total_tokens'].get('input',0):,}+{c['total_tokens'].get('output',0):,} tokens")
 
+def _run_rotation_test(scenario_path, n=5, save=False, verbose=False,
+                       force_max_turns=False, no_memory=False, fixed_governor=None,
+                       skip_providers=None):
+    """
+    Run solos once, then Holo across N seeded rotations.
+    Reports Holo verdict stability without repeating deterministic solo runs.
+    """
+    import json
+    from pathlib import Path
+    path = Path(scenario_path)
+    scenario = json.loads(path.read_text())
+    scenario_name = path.stem
+    expected = scenario.get("expected_verdict", "UNKNOWN").upper()
+
+    _header(f"ROTATION TEST: {scenario_name}  (n={n} seeds)")
+    print(f"  Expected : {expected}")
+    print(f"  Strategy : solos run once — Holo run {n}x with fixed seeds\n")
+
+    print("  Initializing adapters...")
+    openai_adapter    = OpenAIAdapter()
+    anthropic_adapter = AnthropicAdapter()
+    google_adapter    = GoogleAdapter()
+    print(f"    OpenAI    : {openai_adapter.model_id}")
+    print(f"    Anthropic : {anthropic_adapter.model_id}")
+    print(f"    Google    : {google_adapter.model_id}")
+    print("  Ready.\n")
+
+    # --- Solos (once) ---
+    print("  [1/3] SOLO GPT...")
+    cond1 = run_solo(scenario, openai_adapter,    "solo_openai",    force_max_turns=force_max_turns)
+    _inline(cond1)
+    print(f"  [2/3] SOLO CLAUDE...")
+    cond2 = run_solo(scenario, anthropic_adapter, "solo_anthropic", force_max_turns=force_max_turns)
+    _inline(cond2)
+    print(f"  [3/3] SOLO GEMINI...")
+    cond3 = run_solo(scenario, google_adapter,    "solo_google",    force_max_turns=force_max_turns)
+    _inline(cond3)
+
+    # --- Holo across N seeds ---
+    seeds = [42 + i * 17 for i in range(n)]
+    holo_results = []
+    print(f"\n  HOLO ROTATION TEST ({n} seeds: {seeds})")
+    for i, seed in enumerate(seeds):
+        print(f"  [holo {i+1}/{n}] seed={seed}...")
+        r = run_holo_loop(scenario, force_max_turns=force_max_turns,
+                          no_memory=no_memory, fixed_governor=fixed_governor, seed=seed,
+                          skip_providers=skip_providers)
+        v = r.get("verdict", "ERROR")
+        t = r.get("turns_run", "?")
+        correct = "✓" if v == expected else "✗"
+        print(f"    -> [{v}]  {t} turn(s)  seed={seed}  {correct}")
+        holo_results.append({"seed": seed, "verdict": v, "turns": t, "correct": v == expected})
+
+    # --- Summary ---
+    correct_count = sum(1 for r in holo_results if r["correct"])
+    verdicts = [r["verdict"] for r in holo_results]
+    stable = len(set(verdicts)) == 1
+
+    print(f"\n  {'='*62}")
+    print(f"  ROTATION STABILITY REPORT")
+    print(f"  {'='*62}")
+    print(f"  Solo GPT    : [{cond1.get('verdict','?')}]  {'✓' if cond1.get('verdict') == expected else '✗'}")
+    print(f"  Solo Claude : [{cond2.get('verdict','?')}]  {'✓' if cond2.get('verdict') == expected else '✗'}")
+    print(f"  Solo Gemini : [{cond3.get('verdict','?')}]  {'✓' if cond3.get('verdict') == expected else '✗'}")
+    print(f"  Holo stable : {'YES — same verdict across all seeds' if stable else 'NO — verdict varies by rotation'}")
+    print(f"  Holo correct: {correct_count}/{n} seeds")
+    print(f"  Verdicts    : {verdicts}")
+    if stable and correct_count == n:
+        print(f"\n  ROTATION-ROBUST: Holo catches this regardless of who plays which role.")
+    elif correct_count > 0:
+        print(f"\n  ROTATION-SENSITIVE: Holo catch depends on role assignment.")
+    else:
+        print(f"\n  HOLO MISS: Holo does not catch this under any tested rotation.")
+    print(f"  {'='*62}\n")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Holo 4-condition benchmark.")
     parser.add_argument("scenario", nargs="?", help="Path to a single scenario JSON file")
@@ -605,17 +701,39 @@ def main():
                         help="Run all 3 solo conditions but skip Holo — saves ~40%% of token cost")
     parser.add_argument("--fixed-governor", default=None, metavar="PROVIDER",
                         help="Pin governor briefs to one provider (e.g. openai). For controlled comparison tests.")
+    parser.add_argument("--seed", type=int, default=None, metavar="N",
+                        help="Fix the Holo adapter rotation seed for reproducible benchmark runs. Omit for randomized (production) behavior.")
+    parser.add_argument("--rotation-test", type=int, default=None, metavar="N",
+                        help="Run solos once then Holo across N seeded rotations. Reports Holo verdict stability without repeating solo runs.")
+    parser.add_argument("--save-to-db", action="store_true",
+                        help="Write benchmark results to Supabase (holo_benchmark_runs). "
+                             "Does not affect adversarial loop isolation — no_memory still applies during evaluation.")
+    parser.add_argument("--skip-provider", action="append", dest="skip_providers",
+                        metavar="PROVIDER", default=None,
+                        help="Exclude a provider from the adapter pool for this run "
+                             "(e.g. --skip-provider google). Repeatable.")
     args = parser.parse_args()
 
     if args.all:
-        run_all(args.save, args.verbose, args.dir, force_max_turns=args.force_max_turns, no_memory=args.no_memory)
+        run_all(args.save, args.verbose, args.dir, force_max_turns=args.force_max_turns,
+                no_memory=args.no_memory, save_to_db=args.save_to_db,
+                skip_providers=args.skip_providers)
         return
     if not args.scenario:
         parser.print_help()
         sys.exit(1)
+
+    if args.rotation_test:
+        _run_rotation_test(args.scenario, n=args.rotation_test, save=args.save,
+                           verbose=args.verbose, force_max_turns=args.force_max_turns,
+                           no_memory=args.no_memory, fixed_governor=args.fixed_governor,
+                           skip_providers=args.skip_providers)
+        return
+
     result = run_benchmark(args.scenario, verbose=args.verbose, force_max_turns=args.force_max_turns,
                            no_memory=args.no_memory, quick=args.quick, solo_only=args.solo_only,
-                           fixed_governor=args.fixed_governor)
+                           fixed_governor=args.fixed_governor, seed=args.seed,
+                           save_to_db=args.save_to_db, skip_providers=args.skip_providers)
     if args.save:
         _save(result)
 

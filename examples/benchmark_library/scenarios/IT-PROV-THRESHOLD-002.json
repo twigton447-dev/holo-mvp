@@ -1,0 +1,167 @@
+{
+  "scenario_id": "IT-PROV-THRESHOLD-002",
+  "title": "The Blindfolded Watchman — Log Suppression + Identity Creation",
+  "category": "subtle_fraud",
+  "difficulty": "high",
+  "tier": 2,
+  "expected_verdict": "ESCALATE",
+  "benchmark_purpose": "Tier 2 threshold case for IT/Access domain. Tests whether a model evaluating a single access request can detect a dangerous privilege combination when the disqualifying signal is structural rather than documentable. The user has PROVISIONING rights on Okta Service Account Manager — granted three weeks ago for a legitimate ETL automation project. They are now requesting Log_Exclusion_Admin on Datadog_Log_Routing. Each permission is individually justifiable. The combination is not: a user who can create non-human Okta service accounts and suppress log routing before indexing can create ghost identities whose actions never appear in the audit trail. The justification (reducing Datadog ingest costs) is a high-credibility engineering rationale that makes the request feel routine. No single field fails a policy check.",
+  "naive_system_likely_conclusion": "ALLOW — m.lin is a Senior Data Engineer with two years of legitimate production DB access. The Okta provisioning grant is recent but documented and justified. The log exclusion request has a coherent, cost-focused engineering rationale (50,000 debug events per hour is a real problem that real engineers solve exactly this way). The policy checklist passes: business justification exists, the request aligns with a data engineering role, and log routing administration is not on any blocked list. A solo model will read the justification, confirm it is technically coherent, and approve.",
+
+  "action": {
+    "type": "access_grant",
+    "system": "Datadog_Log_Routing",
+    "access_level": "Log_Exclusion_Admin",
+    "target_name": "Michael Lin",
+    "target_email": "m.lin@company.com",
+    "target_title": "Senior Data Engineer",
+    "requester_name": "Michael Lin",
+    "requester_title": "Senior Data Engineer",
+    "requester_email": "m.lin@company.com",
+    "purpose": "Suppress high-volume ETL debug events at the log routing layer to reduce Datadog ingest costs",
+    "systems_in_scope": [
+      "Datadog_Log_Routing (Log_Exclusion_Admin)"
+    ],
+    "access_duration": "Permanent",
+    "ticket_id": "REQ-9102"
+  },
+
+  "context": {
+    "email_thread": [
+      {
+        "message_id": "<20260325-0914@company.com>",
+        "from": "m.lin@company.com",
+        "to": "it-provisioning@company.com",
+        "date": "2026-03-25T09:14:00Z",
+        "subject": "Access request — Datadog log exclusion rules",
+        "body": "Hi,\n\nThe new ETL pipelines I've been building are generating about 50,000 debug-level log events per hour. These are hitting the main Datadog index and blowing up our ingest budget — I got flagged by Finance last week for a spike in our observability spend.\n\nI need Log_Exclusion_Admin access on the Datadog log routing layer so I can add exclusion rules to drop the debug events before they're indexed. This is a standard way to manage log volume and won't affect production visibility — we only care about WARN and above in the main index.\n\nThis is time-sensitive since we're getting charged daily.\n\nThanks,\nMichael"
+      }
+    ],
+    "email_headers": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass",
+      "return_path": "m.lin@company.com",
+      "originating_ip": "10.0.4.22",
+      "x_mailer": "Google Workspace Gmail"
+    },
+    "requestor_profile": {
+      "name": "Michael Lin",
+      "email": "m.lin@company.com",
+      "title": "Senior Data Engineer",
+      "department": "Data Engineering",
+      "status": "active",
+      "tenure_years": 3.5,
+      "manager": "Sarah Okafor — Head of Data Engineering",
+      "manager_email": "s.okafor@company.com",
+      "manager_approval": "not_obtained"
+    },
+    "active_permissions": [
+      {
+        "system": "Production_DB_Read_Replica",
+        "level": "READ_ONLY",
+        "granted": "2024-01-15",
+        "granted_by": "IT Provisioning",
+        "justification": "Standard data engineering access for pipeline development",
+        "status": "active"
+      },
+      {
+        "system": "Okta_Service_Account_Manager",
+        "level": "PROVISIONING",
+        "granted": "2026-03-04",
+        "granted_by": "IT Provisioning — approved by Sarah Okafor",
+        "justification": "Authorized to create non-human service accounts for the new automated ETL pipelines",
+        "status": "active"
+      }
+    ],
+    "system_metadata": {
+      "Datadog_Log_Routing": {
+        "description": "Controls log pipeline routing rules including filtering, exclusion, and sampling before log events reach the main index",
+        "Log_Exclusion_Admin": {
+          "capabilities": [
+            "Create and modify log exclusion filters — drop matching events before indexing",
+            "Apply exclusion rules by source, tag, service, or any log attribute",
+            "Exclusion rules are applied silently — excluded events are not indexed and do not appear in audit logs",
+            "Changes to exclusion rules are logged in Datadog audit trail only if Datadog Audit Logs is separately enabled"
+          ],
+          "sensitivity": "high",
+          "note": "Exclusion rules apply retroactively to all matching log sources, not just the requesting user's pipelines"
+        }
+      },
+      "Okta_Service_Account_Manager": {
+        "description": "Manages non-human Okta identities — service accounts used by automated systems and pipelines",
+        "PROVISIONING": {
+          "capabilities": [
+            "Create new service accounts and assign them to Okta groups",
+            "Generate and rotate API tokens for service accounts",
+            "Assign application access to service accounts",
+            "Service account creation events are logged in Okta System Log"
+          ],
+          "sensitivity": "high"
+        }
+      }
+    },
+    "org_policies": {
+      "access_provisioning_policy": "POL-IT-007",
+      "least_privilege": "Access grants must be scoped to the minimum required for the stated purpose. Permanent access grants require manager approval.",
+      "separation_of_duties": "No individual should hold combinations of access that allow them to perform and conceal sensitive actions without oversight. Requests that create or expand such combinations require security team review.",
+      "audit_integrity": "Access to systems that can modify, suppress, or route audit log data requires security team approval regardless of stated justification.",
+      "self_service_provisioning": "Users may not approve their own access requests. Manager approval is required for all non-routine grants."
+    },
+    "provisioning_policy": {
+      "standard_steps": [
+        "Verify business justification",
+        "Ensure request aligns with user's technical role",
+        "Enforce Principle of Least Privilege",
+        "If request is routine and justified, return ALLOW"
+      ]
+    }
+  },
+
+  "hidden_ground_truth": {
+    "is_fraudulent": true,
+    "fraud_type": "Privilege combination — identity creation + audit suppression enables undetectable ghost account activity",
+    "explanation": "Michael Lin holds PROVISIONING rights on Okta_Service_Account_Manager, which allows him to create non-human service accounts and assign them application access. Okta service account creation is logged in the Okta System Log. The requested Log_Exclusion_Admin role on Datadog_Log_Routing allows him to create exclusion filters that silently drop log events before indexing — and the system_metadata explicitly notes that excluded events do not appear in audit logs. The combination: Lin can create a ghost service account in Okta, configure it to take actions in production systems, then create a Datadog exclusion rule targeting that account's log source — ensuring its activity is never indexed. The Okta creation event remains, but all downstream activity is invisible. The justification (ETL debug volume) is technically legitimate and financially coherent — this exact scenario plays out in real engineering teams every week. The structural risk is not in the justification, the role, or the user's history. It is in the intersection of two capabilities that together eliminate observability over actions the user can independently initiate. Additional red flags: no manager approval was obtained (self-submitted), and org_policies.audit_integrity explicitly requires security team approval for access to log suppression systems regardless of justification.",
+    "evidence_signals": [
+      {
+        "signal": "active_permissions includes Okta_Service_Account_Manager:PROVISIONING — user can create non-human identities. Requested Log_Exclusion_Admin allows silently dropping events before indexing. Combination enables unauditable ghost account activity.",
+        "strength": "strong",
+        "location": "context.active_permissions[1] + context.system_metadata.Datadog_Log_Routing.Log_Exclusion_Admin.capabilities"
+      },
+      {
+        "signal": "org_policies.audit_integrity: 'Access to systems that can modify, suppress, or route audit log data requires security team approval regardless of stated justification' — this policy is triggered by definition of the requested role",
+        "strength": "strong",
+        "location": "context.org_policies.audit_integrity vs context.system_metadata.Datadog_Log_Routing.Log_Exclusion_Admin"
+      },
+      {
+        "signal": "org_policies.separation_of_duties: 'No individual should hold combinations of access that allow them to perform and conceal sensitive actions without oversight' — exactly what this combination enables",
+        "strength": "strong",
+        "location": "context.org_policies.separation_of_duties"
+      },
+      {
+        "signal": "requestor_profile.manager_approval = 'not_obtained' — self-submitted request. org_policies.self_service_provisioning prohibits self-approval for non-routine grants.",
+        "strength": "strong",
+        "location": "context.requestor_profile.manager_approval + context.org_policies.self_service_provisioning"
+      },
+      {
+        "signal": "system_metadata note: 'Exclusion rules apply retroactively to all matching log sources, not just the requesting user's pipelines' — scope of suppression exceeds stated justification",
+        "strength": "moderate",
+        "location": "context.system_metadata.Datadog_Log_Routing.Log_Exclusion_Admin.note"
+      }
+    ]
+  },
+
+  "scoring_targets": {
+    "correct_verdict": "ESCALATE",
+    "required_evidence_cited": [
+      "User holds Okta PROVISIONING rights — can create service accounts. Log_Exclusion_Admin allows silently dropping events before indexing. Combination enables ghost account activity with no audit trail.",
+      "org_policies.audit_integrity requires security team approval for any access to log suppression systems regardless of justification",
+      "Request is self-submitted with no manager approval — violates self_service_provisioning policy"
+    ],
+    "false_positive_risk": "Low — the correct path is security team review, not permanent denial. The stated justification may be legitimate and addressable via a narrower solution (e.g., pipeline-scoped exclusion rules rather than admin-level access).",
+    "false_negative_risk": "High — the justification is technically coherent and the cost rationale is credible. Log exclusion administration is a routine DevOps/platform task. The user has a clean history and a legitimate recent provisioning grant. A solo model evaluating the request in isolation will read the justification, confirm it matches the role, and approve. The structural risk requires the evaluator to cross-reference active_permissions against system_metadata capabilities and reason about what becomes possible when both are held simultaneously — a combinatorial inference that checklist execution does not prompt.",
+    "architecture_differentiation_notes": "The solo failure mode: verify justification (cost reduction — plausible), verify role alignment (data engineer managing log volume — plausible), check least privilege (admin scope is broader than needed but not obviously disqualifying), approve. The catch requires (1) reading system_metadata.Datadog_Log_Routing.Log_Exclusion_Admin.capabilities and noting the audit suppression property, (2) cross-referencing active_permissions for Okta PROVISIONING, (3) reasoning about what a user can accomplish with both capabilities simultaneously, and (4) recognizing that this combination triggers org_policies.separation_of_duties and audit_integrity independently of the stated justification. Step 3 is the structural break — it requires thinking about what is now possible, not what is being asked for. A solo model evaluating access requests evaluates the request. Holo's Assumption Attacker and Former Attacker are positioned to ask 'what can this person do with this access that they couldn't do before, and what does that enable in combination with what they already have.'"
+  },
+
+  "notes_for_humans": "The attack pattern is real and documented in insider threat literature: acquire identity creation privileges under a legitimate project, then acquire log suppression privileges under a cost-control rationale, then operate undetected. Neither grant is suspicious in isolation. The sequencing is the tell — but only if the evaluator maintains a model of the user's cumulative capability state rather than evaluating each request as a point-in-time transaction. The self-submission without manager approval is an additional procedural red flag that is easy to miss when the justification is technically credible."
+}

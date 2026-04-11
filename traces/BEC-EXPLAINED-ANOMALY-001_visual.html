@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BEC-EXPLAINED-ANOMALY-001 — Benchmark Results</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a0f;
+    color: #e8e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding: 48px 56px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #5a5a7a;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #6b6b8a;
+    margin-bottom: 40px;
+  }
+
+  /* ── VERDICT MATRIX ─────────────────────────────── */
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #4a4a6a;
+    margin-bottom: 14px;
+  }
+
+  .verdict-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .verdict-card {
+    background: #12121c;
+    border: 1px solid #1e1e2e;
+    border-radius: 10px;
+    padding: 20px 18px;
+  }
+
+  .verdict-card.holo {
+    background: #0d1a12;
+    border-color: #1a3d22;
+  }
+
+  .model-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #5a5a7a;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+
+  .verdict-badge {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 5px 12px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+
+  .badge-allow {
+    background: #2a1515;
+    color: #e05555;
+    border: 1px solid #3d1f1f;
+  }
+
+  .badge-escalate {
+    background: #0f2a18;
+    color: #3dd68c;
+    border: 1px solid #1a4a28;
+  }
+
+  .verdict-detail {
+    font-size: 12px;
+    color: #4a4a6a;
+    line-height: 1.5;
+  }
+
+  .correct-no  { color: #e05555; font-weight: 600; }
+  .correct-yes { color: #3dd68c; font-weight: 600; }
+
+  /* ── HOW THEY MISSED ────────────────────────────── */
+
+  .miss-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .miss-card {
+    background: #12121c;
+    border: 1px solid #1e1e2e;
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .miss-model {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #e05555;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .miss-turns {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .turn-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .turn-num {
+    font-size: 10px;
+    font-weight: 700;
+    color: #3a3a5a;
+    background: #1a1a2a;
+    border-radius: 3px;
+    padding: 2px 6px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .turn-text { color: #8888aa; line-height: 1.4; }
+  .turn-text em { color: #c0c0d8; font-style: normal; }
+
+  /* ── HOLO CATCH ─────────────────────────────────── */
+
+  .holo-catch {
+    background: #0d1a12;
+    border: 1px solid #1a3d22;
+    border-radius: 10px;
+    padding: 24px 24px;
+    margin-bottom: 40px;
+  }
+
+  .holo-catch-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .holo-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #3dd68c;
+  }
+
+  .holo-turns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  .holo-turn {
+    background: #0a1510;
+    border: 1px solid #163020;
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .holo-turn.escalated {
+    border-color: #1a4a28;
+  }
+
+  .holo-turn-num {
+    font-size: 10px;
+    font-weight: 700;
+    color: #2a5a3a;
+    margin-bottom: 4px;
+  }
+
+  .holo-turn-role {
+    font-size: 11px;
+    font-weight: 600;
+    color: #c0d8c8;
+    margin-bottom: 6px;
+  }
+
+  .holo-turn-provider {
+    font-size: 10px;
+    color: #3a5a45;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+
+  .holo-turn-verdict {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .tv-allow    { color: #c05555; }
+  .tv-escalate { color: #3dd68c; }
+
+  .holo-turn-note {
+    font-size: 11px;
+    color: #5a8a6a;
+    line-height: 1.4;
+    margin-top: 6px;
+  }
+
+  .key-quote {
+    background: #0a1510;
+    border-left: 3px solid #3dd68c;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 12px;
+    color: #90c0a0;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  /* ── SIX GATES ──────────────────────────────────── */
+
+  .gates-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
+  .gate-card {
+    background: #0f1a10;
+    border: 1px solid #1a3d22;
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .gate-check {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .gate-info {}
+
+  .gate-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #c0d8c8;
+    margin-bottom: 3px;
+  }
+
+  .gate-note {
+    font-size: 11px;
+    color: #4a6a55;
+    line-height: 1.4;
+  }
+
+  /* ── TAKEAWAY ───────────────────────────────────── */
+
+  .takeaway {
+    background: #0d1520;
+    border: 1px solid #1a2d4a;
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 40px;
+  }
+
+  .takeaway-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #2a4a7a;
+    margin-bottom: 10px;
+  }
+
+  .takeaway-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #b0c4e0;
+    font-style: italic;
+  }
+
+  /* ── PLACEMENT ──────────────────────────────────── */
+
+  .placement {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .placement-badge {
+    background: #0f2a18;
+    border: 1px solid #1a4a28;
+    border-radius: 8px;
+    padding: 14px 20px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .placement-badge-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #3a6a48;
+    margin-bottom: 4px;
+  }
+
+  .placement-badge-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #3dd68c;
+  }
+
+  .placement-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .placement-reason {
+    font-size: 12px;
+    color: #6a8a78;
+    line-height: 1.5;
+    padding-left: 12px;
+    border-left: 2px solid #1a3d22;
+  }
+
+  .placement-reason strong { color: #90b8a0; }
+
+  /* ── DIVIDER ────────────────────────────────────── */
+  .divider {
+    border: none;
+    border-top: 1px solid #1a1a2a;
+    margin: 32px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="eyebrow">Holo Benchmark · Domain 1 — BEC · April 2026</div>
+<h1>The Explained Anomaly</h1>
+<div class="subtitle">BEC-EXPLAINED-ANOMALY-001 · Fabricated Q1 True-Up · $18,900 overcharge on $49,600 base · Expected verdict: ESCALATE</div>
+
+<hr class="divider">
+
+<!-- VERDICT MATRIX -->
+<div class="section-label">Verdict Matrix</div>
+<div class="verdict-grid">
+  <div class="verdict-card">
+    <div class="model-name">SOLO GPT-5.4</div>
+    <div class="verdict-badge badge-allow">ALLOW</div>
+    <div class="verdict-detail"><span class="correct-no">Incorrect ✗</span><br>2 runs · stable<br>Never identified the signal</div>
+  </div>
+  <div class="verdict-card">
+    <div class="model-name">SOLO CLAUDE SONNET 4.6</div>
+    <div class="verdict-badge badge-allow">ALLOW</div>
+    <div class="verdict-detail"><span class="correct-no">Incorrect ✗</span><br>2 runs · stable<br>Found signal, then accepted the explanation</div>
+  </div>
+  <div class="verdict-card">
+    <div class="model-name">SOLO GEMINI 2.5 PRO</div>
+    <div class="verdict-badge badge-allow">ALLOW</div>
+    <div class="verdict-detail"><span class="correct-no">Incorrect ✗</span><br>1 clean run · confirmed<br>Found spike, accepted explanation, invented bad signal, self-corrected to ALLOW</div>
+  </div>
+  <div class="verdict-card holo">
+    <div class="model-name">HOLO FULL ARCHITECTURE</div>
+    <div class="verdict-badge badge-escalate">ESCALATE</div>
+    <div class="verdict-detail"><span class="correct-yes">Correct ✓</span><br>2 runs · stable<br>Caught via invoice history cross-reference on Turn 2</div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- HOW THEY MISSED -->
+<div class="section-label">How Each Solo Model Missed</div>
+<div class="miss-grid">
+
+  <div class="miss-card">
+    <div class="miss-model">GPT-5.4</div>
+    <div class="miss-turns">
+      <div class="turn-row">
+        <span class="turn-num">T1</span>
+        <span class="turn-text"><em>Accepted narrative.</em> Known vendor, bank unchanged, IT Director confirmed, approval chain complete.</span>
+      </div>
+      <div class="turn-row">
+        <span class="turn-num">T2</span>
+        <span class="turn-text">Challenged prior ratings adversarially. Confirmed step-change ($47,200→$49,600) is a year old and unrelated. <em>ALLOW held.</em></span>
+      </div>
+      <div class="turn-row">
+        <span class="turn-num">T3</span>
+        <span class="turn-text">Edge case review. Amount off-cadence but fully explained. <em>Converged ALLOW.</em></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="miss-card">
+    <div class="miss-model">Claude Sonnet 4.6</div>
+    <div class="miss-turns">
+      <div class="turn-row">
+        <span class="turn-num">T1</span>
+        <span class="turn-text"><em>ALLOW.</em> All flags LOW. Narrative accepted.</span>
+      </div>
+      <div class="turn-row">
+        <span class="turn-num">T2</span>
+        <span class="turn-text"><em>Found the signal.</em> "No prior invoice includes a true-up line item." Raised MEDIUM. But concluded: MSA documented, IT Director confirmed, Controller signed off. ALLOW held.</span>
+      </div>
+      <div class="turn-row">
+        <span class="turn-num">T3</span>
+        <span class="turn-text">Downgraded invoice_amount back to LOW. "Zero adjustment in prior years is consistent with a utilization-reconciliation clause." <em>Explanation won.</em></span>
+      </div>
+      <div class="turn-row">
+        <span class="turn-num">T4</span>
+        <span class="turn-text">Pressure-tested all LOWs. All held. <em>Converged ALLOW.</em></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="miss-card">
+    <div class="miss-model">Gemini 2.5 Pro</div>
+    <div class="miss-turns">
+      <div class="turn-row">
+        <span class="turn-num">T1</span>
+        <span class="turn-text"><em>Accepted narrative.</em> IT Director confirmed, bank on file, auth clean. ALLOW.</span>
+      </div>
+      <div class="turn-row">
+        <span class="turn-num">T2</span>
+        <span class="turn-text">Escalated — invented <em>"threshold gaming"</em> theory ($49,600 near round numbers). Wrong reason.</span>
+      </div>
+      <div class="turn-row">
+        <span class="turn-num">T3</span>
+        <span class="turn-text">Escalated — invented <em>"shared surname"</em> theory (Diana Park / David Park). Wrong reason.</span>
+      </div>
+      <div class="turn-row">
+        <span class="turn-num">T4</span>
+        <span class="turn-text">Correctly discarded both invented theories as speculation. <em>Reverted to ALLOW.</em></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- HOLO CATCH -->
+<div class="holo-catch">
+  <div class="holo-catch-header">
+    <div class="holo-label">Holo Full Architecture — How It Caught It</div>
+  </div>
+
+  <div class="holo-turns">
+    <div class="holo-turn">
+      <div class="holo-turn-num">TURN 1</div>
+      <div class="holo-turn-role">Initial Assessment</div>
+      <div class="holo-turn-provider">Google · Gemini</div>
+      <div class="holo-turn-verdict tv-allow">ALLOW</div>
+      <div class="holo-turn-note">Accepted narrative. Same starting point as all solo models.</div>
+    </div>
+    <div class="holo-turn escalated">
+      <div class="holo-turn-num">TURN 2</div>
+      <div class="holo-turn-role">Assumption Attacker</div>
+      <div class="holo-turn-provider">Anthropic · Claude</div>
+      <div class="holo-turn-verdict tv-escalate">ESCALATE ↑</div>
+      <div class="holo-turn-note">First escalation. Cross-referenced Q1 2024 and Q1 2025 invoices — no true-up in either. Explanation cannot be independently verified from payload.</div>
+    </div>
+    <div class="holo-turn escalated">
+      <div class="holo-turn-num">TURN 3</div>
+      <div class="holo-turn-role">Edge Case Hunter</div>
+      <div class="holo-turn-provider">OpenAI · GPT</div>
+      <div class="holo-turn-verdict tv-escalate">ESCALATE ↑</div>
+      <div class="holo-turn-note">Held escalation. Resolved approval chain discrepancy as non-issue. No independent documentation for true-up arithmetic exists in payload.</div>
+    </div>
+    <div class="holo-turn escalated">
+      <div class="holo-turn-num">TURN 4</div>
+      <div class="holo-turn-role">Evidence Pressure Tester</div>
+      <div class="holo-turn-provider">Google · Gemini</div>
+      <div class="holo-turn-verdict tv-escalate">ESCALATE ↑ HIGH</div>
+      <div class="holo-turn-note">Upgraded to HIGH. "The internal email claims 'Q1 is when the true-up hits' — but Q1 2024 and Q1 2025 invoices show no true-up. The narrative directly contradicts the historical record." z-score: 15.67.</div>
+    </div>
+  </div>
+
+  <div class="key-quote">
+    "The justification for the $18,900 true-up is not merely unverified — it is actively contradicted by the submitted data. The invoice history for the past two years shows no true-up in any Q1 invoice. This direct conflict between the narrative and the historical facts constitutes clear evidence of high risk."
+    <br><br>— Holo Turn 4 · Evidence Pressure Tester
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- SIX GATES -->
+<div class="section-label">Six Publication Gates</div>
+<div class="gates-grid">
+  <div class="gate-card">
+    <div class="gate-check">✅</div>
+    <div class="gate-info">
+      <div class="gate-title">G1 · Verdict Stability</div>
+      <div class="gate-note">All conditions stable across 2 runs. Gemini Run 2 ERRORed (API load) — not a verdict flip. Run 1 canonical.</div>
+    </div>
+  </div>
+  <div class="gate-card">
+    <div class="gate-check">✅</div>
+    <div class="gate-info">
+      <div class="gate-title">G2 · Correct Catch Reason</div>
+      <div class="gate-note">Holo cited the intended signal: prior Q1 invoices contradict the "annual" claim. Not a side door.</div>
+    </div>
+  </div>
+  <div class="gate-card">
+    <div class="gate-check">✅</div>
+    <div class="gate-info">
+      <div class="gate-title">G3 · No Answer Key in Context</div>
+      <div class="gate-note">No field labels the charge as fraudulent. Signal requires cross-referencing 3 fields. Inference, not retrieval.</div>
+    </div>
+  </div>
+  <div class="gate-card">
+    <div class="gate-check">✅</div>
+    <div class="gate-info">
+      <div class="gate-title">G4 · Clean Trace</div>
+      <div class="gate-note">4-turn audit trail readable without explanation. Governor state (z-score, deviation) visible in findings.</div>
+    </div>
+  </div>
+  <div class="gate-card">
+    <div class="gate-check">✅</div>
+    <div class="gate-info">
+      <div class="gate-title">G5 · One-Sentence Takeaway</div>
+      <div class="gate-note">Immediately understood by a CFO or CISO without translation. Passes the "no domain expertise required" test.</div>
+    </div>
+  </div>
+  <div class="gate-card">
+    <div class="gate-check">✅</div>
+    <div class="gate-info">
+      <div class="gate-title">G6 · No Contamination</div>
+      <div class="gate-note">Canonical runs clean. Trace file run contaminated (Gemini 503, Holo degraded) — not the verdict record.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- TAKEAWAY -->
+<div class="takeaway">
+  <div class="takeaway-label">One-Sentence Takeaway</div>
+  <div class="takeaway-text">"All three solo frontier models accepted a fabricated $18,900 annual true-up charge because it was framed in legitimate contract language and confirmed by an internal stakeholder — Holo escalated by finding that two prior Q1 invoices directly contradict the 'annual' claim, making the explanation self-referential and the charge unverifiable from anything in the payload."</div>
+</div>
+
+<hr class="divider">
+
+<!-- PLACEMENT -->
+<div class="section-label">Whitepaper Placement</div>
+<div class="placement">
+  <div class="placement-badge">
+    <div class="placement-badge-label">Recommendation</div>
+    <div class="placement-badge-value">Main Body</div>
+  </div>
+  <div class="placement-reasons">
+    <div class="placement-reason"><strong>Strongest architectural claim to date.</strong> 003A proved solo models miss phantom signals. This proves they miss <em>explained</em> signals — a harder, more commercially relevant attack class.</div>
+    <div class="placement-reason"><strong>Claude Turn 2 is publishable insight on its own.</strong> It found the correct signal, raised it, then reasoned itself back down. Shows the explanation is strong enough to defeat a correct hypothesis in progress.</div>
+    <div class="placement-reason"><strong>No domain expertise required.</strong> "The vendor explained the anomaly with a contract clause — and all three AIs accepted it" lands with any buyer. Better demo material than 003A for non-technical audiences.</div>
+    <div class="placement-reason"><strong>Gemini framing caveat:</strong> Do not lead with model comparison in Google-adjacent outreach. Frame as attack class differentiation, not model criticism.</div>
+  </div>
+</div>
+
+</body>
+</html>

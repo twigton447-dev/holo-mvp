@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why Frontier Models Fail on High-Consequence AI Decisions: and What Architecture Can Do About It*
 
-**Holo Engine · Working Paper · April 2026**
+**Holo Engine · Working Paper · Version 2.0 · Updated April 12, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -11,19 +11,34 @@
 
 ## Executive Summary
 
-AI agents are now being deployed into the most critical workflows in the global economy: approving payments, executing contracts, granting access, and initiating operational changes on behalf of real organizations. These systems are increasingly being built on a small number of frontier models. The practical question is no longer whether these models are impressive. **It is where they fail when the cost of failure becomes irreversible.**
+AI systems are no longer confined to analysis. They are beginning to approve payments, grant access, issue contracts, place orders, and trigger system changes in real workflows.
 
-This paper documents a targeted search for that breaking point at the **action boundary**: the moment just before an AI system's output becomes a real-world commitment.
+That shift creates a new problem. The most important moment in any agentic workflow is not when the model begins reasoning. It is the final moment before its output becomes a real-world consequence.
+
+We call that moment the **action boundary**.
+
+The action boundary is the last reversible instant before an AI decision becomes execution: before a wire transfer is submitted, before access is granted, before a purchase order is approved, before a contract step commits. Human beings recognize this moment instinctively. AI agents do not. They do not hesitate, second-guess, or feel consequence. They continue unless something external stops them.
+
+**Holo Engine was built for that moment.**
+
+> **Holo Engine in one sentence:**  
+> Holo Engine ensures every AI transaction is intentional by intercepting actions at the last reversible moment before execution and determining whether they are authorized, contextually coherent, and safe to carry out.
+
+Holo Engine is a runtime trust layer that sits at the action boundary of agentic workflows, intercepting irreversible AI-initiated actions and returning ALLOW or ESCALATE before execution proceeds.
+
+This paper presents benchmark evidence that solo frontier-model judgment has a structural ceiling at the action boundary. Across high-consequence scenarios, strong standalone models can still approve actions that should not proceed. Holo's architecture was designed to intervene at that final checkpoint and stop those failures before they become real.
 
 To test that boundary fairly, we evaluated some of the strongest publicly available frontier models from multiple labs at the time of testing — GPT-5.4, Claude-Sonnet-4-6, and Gemini-2.5-Pro — as solo baselines. We then tested Holo Engine against those same baselines. Holo is model-agnostic, but the purpose of this benchmark was to measure what was possible against the most capable solo systems available at the time, not against weaker controls.
 
-In the benchmark's primary finding, **all three frontier baseline models independently approved a fraudulent transaction.** Holo Engine, a runtime trust layer and adversarial checkpoint architecture designed for the action boundary, escalated it correctly. The failure was not a quirk of one model. It was a structural pattern: **solo judgment has a ceiling when faced with a plausible but unverifiable narrative.**
+In one benchmark scenario, **all three frontier baseline models independently approved a fraudulent transaction.** Holo Engine escalated it correctly. The failure was not a quirk of one model. It was a structural pattern: **solo judgment has a ceiling when faced with a plausible but unverifiable narrative.**
 
 This is not an argument against any one model or lab. It is evidence that **strong solo frontier models can still fail in materially important ways at the moment before execution**, and that a properly structured adversarial architecture can remain strong where solo judgment breaks.
 
-The benchmark presented here covers an eight-domain research program focused on high-consequence AI actions. Two domains are complete and published in this paper. Six are in development. Together they form the beginning of the **Blindspot Atlas**: a growing corpus of domain-specific failure patterns at the action boundary, designed to improve Holo's own coverage and, over time, help the frontier labs themselves better understand and reduce these blindspots.
+The benchmark presented here covers an eight-domain research program focused on high-consequence AI actions. Two domains are complete and published in this paper. Six are in development. Together they form the beginning of the **Blindspot Atlas**: a growing corpus of domain-specific failure patterns at the action boundary.
 
 *Models tested: GPT-5.4 · Claude-Sonnet-4-6 · Gemini-2.5-Pro · Holo Full Architecture*
+
+**Ensuring every AI transaction is intentional.**
 
 ### Eight-Domain Atlas
 
@@ -58,13 +73,41 @@ This benchmark program is designed to find where those models break under advers
 
 ### 1.2 The Action Boundary
 
-Everyone knows the action boundary. It is the moment before your plane takes off. The moment your pen touches the contract. The moment you type your bank account number into the portal and hover over Submit.
+The action boundary is the last reversible instant before a decision becomes a consequence.
 
-Human beings feel it. There is a physiological response. AI agents have the same boundary, but they do not feel it. There is no hesitation, no second thought, no instinct that something is off.
+It is the moment before a plane leaves the runway. The moment before a contract is signed. The moment before a wire transfer is submitted, access is granted, a purchase order is approved, or a system change is executed.
 
-In this paper, the **action boundary** refers to the point at which an AI system's output stops being analysis and becomes execution: a wire is approved, a purchase is placed, access is granted, a contract is issued, or a system change is executed.
+Human beings recognize this moment instinctively. There is often a pause — a final check, a flicker of doubt, a confirmation that the conditions are right. AI agents do not experience that pause. They do not feel hesitation, risk, or consequence. They continue unless something external stops them.
 
-### 1.3 The Gap Nobody Filled
+In this paper, the **action boundary** refers to the point at which an AI system's output stops being analysis and becomes execution: a wire is approved, a purchase is placed, access is granted, a contract is issued, or a system change is executed. At that moment, the question is no longer whether the system can produce a plausible answer. The question is whether the action should happen at all.
+
+Every irreversible action is the endpoint of a story. Messages, approvals, identities, thresholds, prior behavior, missing checks, and contextual signals all led to this exact moment. That story contains the closest available evidence of whether the action is authorized, contextually coherent, and safe to carry out.
+
+Holo Engine freezes time at the action boundary. It reconstructs the decision path that produced the action, tests whether that action is authorized, contextually coherent, and safe to execute, and returns a single answer before anything becomes irreversible.
+
+**Ensuring every AI transaction is intentional.**
+
+In most cases, the story holds together and the action proceeds. When it does not, Holo stops the process at the last moment it can still be stopped.
+
+That is the only moment that matters.
+
+### 1.3 The Capability Horizon
+
+The threat model this paper addresses is not hypothetical. It is accelerating.
+
+On April 7, 2026, Anthropic announced Project Glasswing and the Claude Mythos Preview — a frontier model with unusually strong autonomous cyber capability, including the ability to discover and exploit zero-day vulnerabilities. Anthropic cited significant misuse risk and made Mythos available only through controlled access, not broad release. The current response to Mythos-class capability is gated access: restricting which operators can deploy it and under what conditions.
+
+That strategy is appropriate today. It will not be sufficient indefinitely.
+
+AI capability at this level will not remain concentrated. As Mythos-class capability proliferates to open-weight models — as it inevitably will — gating access will cease to be a viable security strategy. Organizations will face autonomous AI agents with sophisticated offensive capability that no one credentialed or approved. The question of what these agents are authorized to do, in what context, and with what oversight will not be answerable at the access layer. It will have to be answered at the execution layer.
+
+Project Glasswing materially strengthens the case that high-consequence AI capabilities are emerging faster than deployment safeguards, reinforcing the need for model-agnostic runtime control at the point of execution.
+
+This is the deeper logic of the action boundary. A runtime trust layer that intercepts irreversible execution before it proceeds is not a niche security tool. In a post-proliferation environment, it is a necessary defense posture.
+
+*Holo does not endorse Anthropic's access-gating strategy as a model for our own. We note it because it is evidence that even the labs developing these capabilities understand the problem. Their current answer is access control. Our answer is execution control — and both will be needed.*
+
+### 1.4 The Gap Nobody Filled
 
 **Upstream controls** focus on sanitizing inputs. They are structurally incapable of evaluating whether the action a model proposes (based on clean and legitimate inputs) is itself safe to execute.
 
@@ -74,11 +117,11 @@ In this paper, the **action boundary** refers to the point at which an AI system
 
 This is not a moment that benefits from a checklist or a pattern-match. It benefits from adversarial pressure: a system that asks not just "does this look right" but "what would have to be true for this to be wrong."
 
-No existing security layer is designed to do this. Holo is.
+The action boundary has been largely unguarded. Holo is a runtime trust layer designed to fill that gap.
 
 *NIST AI 600-1 (2024), DOI: 10.6028/NIST.AI.600-1 · NIST CAISI Federal Register Docket NIST-2025-0035, January 8, 2026*
 
-### 1.4 The Real Stakes
+### 1.5 The Real Stakes
 
 The agent is not the principal. It is the proxy. And proxies can be exploited.
 
@@ -92,13 +135,15 @@ The answer is not simply a smarter agent. A smarter agent may still carry smarte
 
 *Lynch, A. et al. "Agentic Misalignment: How LLMs Could Be Insider Threats." arXiv:2510.05179. Anthropic Research. October 2025.*
 
-### 1.5 What Holo Is, in Plain Terms
+### 1.6 What Holo Is, in Plain Terms
 
-The closest real-world analogy to Holo is airport security. Every item receives the same structured treatment. A coordinated team examines it from multiple angles using different instruments. Most items clear immediately. Some require a second look. A small number are flagged for intervention.
+**Holo Engine is a runtime trust layer that sits at the action boundary of agentic workflows, intercepting irreversible AI-initiated actions and returning ALLOW or ESCALATE before execution proceeds.**
+
+The closest operational analogy is airport security. Every item receives the same structured treatment. A coordinated team examines it from multiple angles using different instruments. Most items clear immediately. Some require a second look. A small number are flagged for intervention.
 
 The true power of the system is not only what it catches. It is also what is never attempted because the checkpoint exists. Deterrence is a documented and legitimate security outcome. Holo operates on the same principle at the action boundary.
 
-### 1.6 The Symmetric Arms Race
+### 1.7 The Symmetric Arms Race
 
 The same frontier models available to a Fortune 500 company's procurement team are available to anyone with a credit card and an API key. The intelligence is not classified. It is not scarce. It is a commodity. And commoditized intelligence means commoditized attack capability.
 
@@ -260,7 +305,7 @@ None of the three solo models asked the question that breaks the narrative: *if 
 
 > A solo model cannot be both the skeptic and the believer at the same time. Holo's architecture separates those roles across different models by design.
 
-> **Holo should not be read as an argument against any one frontier model. The operational lesson is narrower and more important: solo deployment of any single model leaves coverage gaps at the action boundary. Holo's role is to reduce that deployment risk, including for organizations that standardize on Claude, GPT, or Gemini.**
+> **Holo should not be read as an argument against any one frontier model. The operational lesson is narrower and more important: solo deployment of any single model leaves coverage gaps at the action boundary that are model-specific and non-overlapping. Holo's role is to reduce that deployment risk, including for organizations that standardize on Claude, GPT, or Gemini.**
 
 ---
 
@@ -441,13 +486,13 @@ The evidentiary discipline rule was developed and tuned on the same benchmark se
 
 AI agents are making irreversible decisions today. The security infrastructure around those decisions was not designed for them.
 
-This paper does not claim to have solved that problem. It claims to have identified a specific, testable gap at the action boundary, built a methodology for evaluating it, and produced results across two completed domains, including a confirmed symmetric collapse, that justify further scrutiny.
+This paper does not claim to have solved that problem. It claims to have identified a specific, testable gap at the action boundary, built a methodology for evaluating it, and produced results across two completed domains — including a confirmed symmetric collapse — that justify further scrutiny.
 
-> The benchmark is how we learned where the ambushes are. Holo is how we make sure your agents never walk into one.
+The benchmark is how we learned where the ambushes are. Holo is how we make sure your agents never walk into one.
 
 Behind every agentic workflow in this benchmark is a person who might not know an AI made the decision. The small business owner whose vendor payment was rerouted. The employee whose system access was quietly expanded. The company whose contract now contains terms no one approved. They did not interact with the model. They did not see the payload. The action boundary is invisible to them. That is exactly why it cannot be unguarded.
 
-**We are building it.**
+**Ensuring every AI transaction is intentional.**
 
 ---
 
@@ -455,6 +500,7 @@ Behind every agentic workflow in this benchmark is a person who might not know a
 
 - Andriushchenko, M. et al. "Jailbreaking leading safety-aligned LLMs with simple adaptive attacks." *ICLR 2025.*
 - Anh-Hoang et al. "Survey and analysis of hallucinations in large language models." *Frontiers in Artificial Intelligence,* September 2025. DOI: 10.3389/frai.2025.1622292
+- Anthropic. "Project Glasswing / Claude Mythos Preview." Announced April 7, 2026.
 - Chao, P. et al. "JailbreakBench: An Open Robustness Benchmark for Jailbreaking Large Language Models." *NeurIPS Datasets and Benchmarks Track,* 2024.
 - FBI Internet Crime Complaint Center. *2024 Internet Crime Report.* ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf
 - Lynch, A. et al. "Agentic Misalignment: How LLMs Could Be Insider Threats." arXiv:2510.05179. Anthropic Research. October 2025.
@@ -464,5 +510,5 @@ Behind every agentic workflow in this benchmark is a person who might not know a
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · April 2026*  
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 2.0 · April 12, 2026*  
 *U.S. Provisional Patent Application No. 63/987,899*

@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'frontend/whitepaper.html'
+      - 'frontend/benchmark.html'
 
 jobs:
   sync:
@@ -22,16 +23,17 @@ jobs:
           token: ${{ secrets.BENCHMARK_SYNC_TOKEN }}
           path: holo-benchmark
 
-      - name: Copy whitepaper
+      - name: Copy files
         run: |
           cp holo-mvp/frontend/whitepaper.html holo-benchmark/frontend/whitepaper.html
+          cp holo-mvp/frontend/benchmark.html holo-benchmark/frontend/benchmark.html
 
       - name: Commit and push
         working-directory: holo-benchmark
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add frontend/whitepaper.html
+          git add frontend/whitepaper.html frontend/benchmark.html
           git diff --staged --quiet && echo "No changes" && exit 0
           git commit -m "sync: whitepaper.html from holo-mvp@${{ github.sha }}"
           git push

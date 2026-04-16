@@ -330,7 +330,19 @@ This same discipline extends to how the final verdict is computed. The final ver
 
 ---
 
-## Section 07 — Objections
+## Section 07 — From Observability to Evidence
+
+The current industry conversation around AI agent safety is focused on guardrails — preventing an agent from taking a prohibited action. This is necessary but insufficient. A locked door reduces the chance of a break-in, but if one happens, you don't show the lock to the judge. You show the security footage. The agent governance space today is almost entirely focused on building better locks. Very few are building the camera.
+
+Observability and evidence are not the same thing. Observability tells your engineers what is happening inside your system. Evidence is what you produce when an auditor, a regulator, or a counterparty needs to verify what happened. The bar is meaningfully higher. Most agent platforms today produce logs. Logs are not evidence.
+
+Holo's position at the action boundary means the decision record it produces is structurally different from a downstream log. The full payload is captured at the moment of decision, not reconstructed from partial telemetry after the fact. The turn-by-turn adversarial trace documents which models flagged which risks, how conflicts were resolved, and which specific signals drove the final verdict. It is the record of a judgment, not just an event.
+
+For enterprise agentic deployment, four questions will eventually matter in any consequential review: what did the agent see, why did it act, who authorized it, and can the record be independently verified. Holo's architecture addresses the first two directly. The latter two depend on governance infrastructure that most organizations have not yet built. The starting point is capturing the right data at the right moment. That is what the action boundary makes possible.
+
+---
+
+## Section 08 — Objections
 
 A technically serious reader should object to this paper. Several objections are valid. We address the strongest ones directly.
 
@@ -418,7 +430,7 @@ That is the practical lesson of the benchmark. The problem is not that one lab h
 
 ---
 
-## Section 08 — The Blindspot Atlas
+## Section 09 — The Blindspot Atlas
 
 The benchmark is not a static artifact. It is the front end of a compounding research program. Each completed domain produces four things: a scenario library, a set of confirmed failure patterns, a calibrated scoring rubric, and a record of where the architecture added value.
 
@@ -430,7 +442,7 @@ Over time, the Atlas may become useful to the labs themselves as a structured ma
 
 ---
 
-## Section 09 — What Comes Next
+## Section 10 — What Comes Next
 
 ### 9.1 The Eight-Domain Program
 
@@ -451,7 +463,7 @@ Two domains are complete. Six are in active design and reconnaissance.
 
 ---
 
-## Section 10 — Limitations
+## Section 11 — Limitations
 
 *We state these directly because a trust product that hedges its own limitations is not a trust product.*
 

@@ -12,6 +12,8 @@
 
 AI agents are now approving payments, placing orders, granting access, and triggering real-world consequences. The single most important moment in any agentic workflow is the action boundary — the last reversible instant before execution. Solo frontier models still fail at this moment. In one benchmark scenario, all three independently approved actions that should not have proceeded. Holo Engine is the model-agnostic runtime checkpoint that intercepts those actions and returns ALLOW or ESCALATE before anything becomes irreversible.
 
+The frontier models powering these agents are genuinely capable. In most situations, they perform well. But capability is not the same as reliability at the action boundary: the moment before an irreversible action executes.
+
 > **Holo Engine in one sentence:**  
 > Holo Engine ensures every AI transaction is intentional by intercepting actions at the last reversible moment before execution and determining whether they are authorized, contextually coherent, and safe to carry out.
 

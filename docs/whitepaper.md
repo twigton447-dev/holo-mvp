@@ -10,14 +10,20 @@
 
 ## Executive Summary
 
-AI agents are now approving payments, placing orders, granting access, and triggering real-world consequences. The single most important moment in any agentic workflow is the action boundary — the last reversible instant before execution. Solo frontier models still fail at this moment. In one benchmark scenario, all three independently approved actions that should not have proceeded. Holo Engine is the model-agnostic runtime checkpoint that intercepts those actions and returns ALLOW or ESCALATE before anything becomes irreversible.
+AI agents are making consequential decisions autonomously. They approve payments. They provision access. They execute contracts. They change vendors. And they do it without a human in the loop.
 
-The frontier models powering these agents are genuinely capable. In most situations, they perform well. But capability is not the same as reliability at the action boundary: the moment before an irreversible action executes.
+The frontier models powering these agents (GPT-5.4, Claude Sonnet 4.6, Gemini 2.5 Pro) are genuinely capable. In most situations, they perform well. But capability is not the same as reliability at the action boundary: the moment before an irreversible action executes.
+
+At that moment, solo frontier models have a structural problem. Their blindspots are real, they are non-overlapping, and they are exploitable. A pattern that one model catches, another approves. An attack designed to exploit narrative acceptance will fool a model that resists authority spoofing. No single model has consistent coverage across attack classes.
+
+This paper presents empirical evidence of that failure. In controlled benchmark testing across two domains — AP/BEC wire fraud and agentic commerce — GPT-5.4, Claude Sonnet 4.6, and Gemini 2.5 Pro each independently approved a fraudulent transaction constructed using documented real-world attack patterns. Holo Engine caught it every time.
 
 > **Holo Engine in one sentence:**  
-> Holo Engine ensures every AI transaction is intentional by intercepting actions at the last reversible moment before execution and determining whether they are authorized, contextually coherent, and safe to carry out.
+> A runtime trust layer that sits at the action boundary. Before an agent executes an irreversible action, Holo evaluates the payload through an adversarial council of structurally different AI models. No single model decides. The system returns one verdict: ALLOW or ESCALATE, with a full reasoning trace.
 
-**Ensuring every AI transaction is intentional.**
+The benchmark is public. The payloads are reproducible. The API is live.
+
+The finding is not that frontier models are weak. It is that solo judgment has a structural ceiling at the action boundary, and that ceiling is lower than most deployment teams assume.
 
 ### Eight-Domain Atlas
 

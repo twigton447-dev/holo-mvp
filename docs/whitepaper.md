@@ -330,7 +330,7 @@ The governor is deterministic and algorithmic. It does not learn from prior eval
 
 ### 6.5 State and Verdict Integrity
 
-No summarization occurs between turns. Summarization is lossy. The compressor decides what matters, which means it can bury the signal the next analyst needs to find. A model cannot surface a contradiction in Turn 3 if the summary from Turn 2 edited that contradiction out. Full raw state is more expensive. It is the correct tradeoff.
+No summarization occurs between turns. Summarization is lossy. Whatever compresses the state decides what matters, which means it can bury the signal the next analyst needs to find. A model cannot surface a contradiction in Turn 3 if the summary from Turn 2 edited that contradiction out. Full raw state is more expensive. It is the correct tradeoff.
 
 This same discipline extends to how the final verdict is computed. The final verdict is computed by the governor, not by a model. This avoids anchoring: a synthesizing model is influenced by the most recent turn, the most confidently expressed finding, or the most rhetorically forceful prior analyst.
 

@@ -25,6 +25,8 @@ The benchmark is public. The payloads are reproducible. The API is live.
 
 The finding is not that frontier models are weak. It is that solo judgment has a structural ceiling at the action boundary, and that ceiling is lower than most deployment teams assume.
 
+The roadmap goes further. Cryptographic signing of every decision record, anchored to an immutable ledger, means any auditor can verify independently — without trusting Holo's infrastructure. The record of the decision becomes as trustworthy as the decision itself.
+
 ### Eight-Domain Atlas
 
 | # | Domain | Status |
@@ -345,6 +347,8 @@ Observability and evidence are not the same thing. Observability tells your engi
 Holo's position at the action boundary means the decision record it produces is structurally different from a downstream log. The full payload is captured at the moment of decision, not reconstructed from partial telemetry after the fact. The turn-by-turn adversarial trace documents which models flagged which risks, how conflicts were resolved, and which specific signals drove the final verdict. It is the record of a judgment, not just an event.
 
 For enterprise agentic deployment, four questions will eventually matter in any consequential review: what did the agent see, why did it act, who authorized it, and can the record be independently verified. Holo's architecture addresses the first two directly. The latter two depend on governance infrastructure that most organizations have not yet built. The starting point is capturing the right data at the right moment. That is what the action boundary makes possible.
+
+One natural extension is cryptographic signing of the decision record — anchoring the verdict and its full trace to an immutable ledger so any third party can verify integrity without trusting Holo's infrastructure. That is on the roadmap, not in today's product.
 
 ---
 

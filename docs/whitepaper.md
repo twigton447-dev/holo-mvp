@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why Frontier Models Fail on High-Consequence AI Decisions: and What Architecture Can Do About It*
 
-**Holo Engine · Working Paper · Version 2.0 · Updated April 12, 2026**
+**Holo Engine · Working Paper · Version 2.2 · Updated April 16, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  

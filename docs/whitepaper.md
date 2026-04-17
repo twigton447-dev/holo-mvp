@@ -12,7 +12,7 @@
 
 AI agents are making consequential decisions autonomously. They approve payments. They provision access. They execute contracts. They change vendors. And they do it without a human in the loop.
 
-The frontier models powering these agents (GPT-5.4, Claude Sonnet 4.6, Gemini 2.5 Pro) are genuinely capable. In most situations, they perform well. But capability is not the same as reliability at the action boundary: the moment before an irreversible action executes.
+The frontier models powering these agents (like GPT-5.4, Claude Sonnet 4.6, and Gemini 2.5 Pro) are genuinely capable. In most situations, they perform well. But capability is not the same as reliability at the action boundary: the moment before an irreversible action executes.
 
 At that moment, solo frontier models have a structural problem. Their blindspots are real, they are non-overlapping, and they are exploitable. A pattern that one model catches, another approves. An attack designed to exploit narrative acceptance will fool a model that resists authority spoofing. No single model has consistent coverage across attack classes.
 

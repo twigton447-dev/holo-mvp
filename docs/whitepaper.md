@@ -19,7 +19,9 @@ At that moment, solo frontier models have a structural problem. **They do not he
 This paper presents empirical evidence of that failure. In controlled benchmark testing across two domains, AP/BEC wire fraud and agentic commerce, GPT-5.4, Claude Sonnet 4.6, and Gemini 2.5 Pro each independently approved at least one fraudulent transaction constructed from documented real-world attack patterns. **These models are being tested because they are the reasoning cores of the agents organizations are deploying today.** Holo Engine escalated the same transactions.
 
 > **Holo Engine in one sentence:**  
-> Holo Engine is a runtime trust layer that sits at the action boundary. Before an agent executes an irreversible action, Holo evaluates the payload through an adversarial council of structurally different AI models. No single model decides. The system returns one verdict: ALLOW or ESCALATE, with a full reasoning trace. The benchmark is public. The payloads are reproducible. The API is live.
+> A runtime trust layer at the action boundary: before an agent executes an irreversible action, Holo evaluates the payload through an adversarial council of structurally different AI models and returns one verdict, ALLOW or ESCALATE, with a full reasoning trace.
+
+The benchmark is public. The payloads are reproducible. The API is live.
 
 The finding is not that frontier models are weak. It is that testing them in isolation reveals **the structural ceiling of solo-agent judgment in 2026**, and that ceiling is lower than most deployment teams assume. The benchmark was designed to find that ceiling and to determine whether an adversarial architecture changes it. Waiting for a better solo model does not remove the problem, because **the problem is structural:** a single reasoner at the action boundary can still miss what another would catch.
 

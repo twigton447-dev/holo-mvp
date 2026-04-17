@@ -14,7 +14,7 @@ AI agents are making consequential decisions autonomously. They approve payments
 
 The frontier models powering these agents (like GPT-5.4, Claude Sonnet 4.6, and Gemini 2.5 Pro) are genuinely capable. In most situations, they perform well. But capability is not the same as reliability at the action boundary: the moment before an irreversible action executes.
 
-At that moment, solo frontier models have a structural problem. Their blindspots are real, they are non-overlapping, and they are exploitable. A pattern that one model catches, another approves. An attack designed to exploit narrative acceptance will fool a model that resists authority spoofing. No single model has consistent coverage across attack classes.
+At that moment, solo frontier models have a structural problem. They do not hesitate. They hallucinate confidence. Their blindspots are real, they are non-overlapping, and they are exploitable. A pattern that one model catches, another approves. An attack designed to exploit narrative acceptance will fool a model that resists authority spoofing. No single model has consistent coverage across attack classes.
 
 This paper presents empirical evidence of that failure. In controlled benchmark testing across two domains — AP/BEC wire fraud and agentic commerce — GPT-5.4, Claude Sonnet 4.6, and Gemini 2.5 Pro each independently approved a fraudulent transaction constructed using documented real-world attack patterns. Holo Engine caught it every time.
 

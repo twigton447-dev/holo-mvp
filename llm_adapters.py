@@ -73,6 +73,7 @@ class TurnResult:
             "reasoning":      self.reasoning,
             "severity_flags": self.severity_flags,
             "findings":       self.findings,
+            "raw_response":   self.raw_response,
             "input_tokens":   self.input_tokens,
             "output_tokens":  self.output_tokens,
             "system_prompt":  self.system_prompt,
@@ -86,10 +87,35 @@ class TurnResult:
 
 ROLE_INSTRUCTIONS = {
     "Initial Assessment": """
-You are the FIRST analyst. No prior assessments exist.
-Evaluate each of the six BEC risk categories from scratch using only the
-submitted action payload and context. Be specific: cite exact field values
-or email content as evidence. Do not speculate without evidence.
+You are the FIRST analyst. No prior assessments exist. That means you carry
+the full burden of establishing whether this action is safe to proceed.
+
+STANCE: Assume this transaction requires justification to ALLOW, not
+justification to ESCALATE. ALLOW requires positive evidence that the
+transaction is legitimate. Absence of obvious red flags is not evidence
+of legitimacy.
+
+Your task:
+- Assess each risk category. For any category you rate LOW, state the
+  specific positive evidence that justifies LOW — not just the absence
+  of a red flag. What confirms legitimacy?
+- For any category where legitimacy depends on data you don't have
+  (no vendor record, no baseline, no prior contact history on file),
+  rate it MEDIUM or higher. Unknown is not safe.
+- Do not evaluate categories in isolation. Look for cross-category
+  patterns: does the combination of signals tell a different story than
+  any single category suggests?
+
+PATTERN ANALYSIS — if the scenario includes invoice_history,
+payment_history, or any array of prior transactions, treat it as an
+attack surface, not background. Specifically check:
+- Are recent invoices clustered just below an approval threshold?
+- Is there a step-change in amount not explained by documented scope?
+- Do multiple recent invoices aggregate to a total that exceeds a
+  threshold no single invoice triggers?
+
+A sophisticated attacker builds a plausible history before striking.
+Clean-looking history is worth examining more carefully, not less.
 """,
 
     "Assumption Attacker": """
@@ -641,13 +667,80 @@ Now produce your Turn {turn_number} assessment as a single JSON object."""
 # Governor LLM — between-turn brief generation
 # ---------------------------------------------------------------------------
 
-def build_governor_system_prompt(template: dict = None) -> str:
-    """Build the governor's between-turn brief system prompt for the active scenario."""
+def _load_governor_doctrine(driver_provider: str = None, tier: str = "STANDARD") -> str:
+    """
+    Load governor_doctrine.md and assemble the context for this Governor call.
+
+    Always loads TIER: CORE.
+    If driver_provider is given, also loads PROFILE: {provider}.
+    If tier == 'DEEP', also loads TIER: DEEP.
+
+    Tag format in the file:
+        <!-- TIER: CORE -->  ...  <!-- /TIER -->
+        <!-- PROFILE: openai -->  ...  <!-- /PROFILE -->
+        <!-- TIER: DEEP -->  ...  <!-- /TIER -->
+
+    Returns assembled string, or empty string if the file is missing.
+    """
+    import os, re
+    doctrine_path = os.path.join(os.path.dirname(__file__), "governor_doctrine.md")
+    try:
+        with open(doctrine_path, "r") as f:
+            raw = f.read()
+    except (OSError, IOError):
+        return ""
+
+    parts = []
+
+    # Always: TIER: CORE
+    m = re.search(r"<!--\s*TIER:\s*CORE\s*-->(.*?)<!--\s*/TIER\s*-->", raw, re.DOTALL)
+    if m:
+        parts.append(m.group(1).strip())
+
+    # When driver is known: PROFILE: {provider}
+    if driver_provider:
+        mp = re.search(
+            rf"<!--\s*PROFILE:\s*{re.escape(driver_provider.lower())}\s*-->(.*?)<!--\s*/PROFILE\s*-->",
+            raw, re.DOTALL,
+        )
+        if mp:
+            parts.append(mp.group(1).strip())
+
+    # DEEP tier: TIER: DEEP
+    if tier == "DEEP":
+        md = re.search(r"<!--\s*TIER:\s*DEEP\s*-->(.*?)<!--\s*/TIER\s*-->", raw, re.DOTALL)
+        if md:
+            parts.append(md.group(1).strip())
+
+    return "\n\n---\n\n".join(parts) if parts else ""
+
+
+def build_governor_system_prompt(
+    template: dict = None,
+    driver_provider: str = None,
+    tier: str = "STANDARD",
+) -> str:
+    """
+    Build the governor's between-turn brief system prompt for the active scenario.
+
+    driver_provider — the provider driving the next turn (e.g. 'openai').
+                      When known, the matching model profile is injected here so the
+                      Governor carries it as persistent context for the entire brief call.
+    tier            — evaluation tier ('FAST', 'STANDARD', 'DEEP').
+                      DEEP loads the full benchmark evidence + architecture sections.
+
+    Token budget targets:
+      FAST / no driver:           ~600  tokens (CORE only)
+      STANDARD + driver known:    ~1,000 tokens (CORE + profile)
+      DEEP + driver known:        ~2,200 tokens (CORE + profile + DEEP)
+    """
     context = (
         template.get("governor_context", "evaluates action risk")
         if template else "evaluates Business Email Compromise (BEC) risk"
     )
-    return f"""You are the Context Governor of Holo, an AI trust layer that {context}.
+    doctrine = _load_governor_doctrine(driver_provider=driver_provider, tier=tier)
+    doctrine_block = f"\n\n---\n\n{doctrine}\n\n---\n" if doctrine else ""
+    return f"""You are the Context Governor of Holo, an AI trust layer that {context}.{doctrine_block}
 
 Your job is NOT to analyze the transaction yourself.
 Your job is to read what prior analysts have found and identify what has NOT yet
@@ -733,16 +826,37 @@ BLINDSPOT_ATLAS: dict[tuple[str, str], str] = {
 
     # ---- Domain 1: BEC / Invoice Payment ------------------------------------
     ("anthropic", "invoice_payment"): (
-        "Claude's known failure mode on BEC: phantom dependency contact capture. "
-        "When a new contact is introduced via in-chain emails from the same domain "
-        "as the invoice, Claude treats the in-chain introduction as independent "
-        "corroboration. It does not ask whether any legitimizing evidence originates "
-        "outside the sender domain. A domain-level compromise generates the entire "
-        "chain — introduction, departure notice, and credential — and Claude misses "
-        "that circularity. Watch for narrative laundering: a plausible story "
-        "(personnel change, urgent timeline) will cause Claude to discount anomalies "
-        "it has already flagged. Do not allow the narrative to walk back MEDIUM+ "
-        "findings without a verifiable artifact from outside the email chain."
+        "Claude's known failure mode on BEC: Explanation Surrender. "
+        "When a plausible narrative is offered for a flagged anomaly (personnel change, "
+        "urgent timeline, new contact introduced via in-chain emails), Claude accepts "
+        "the story as evidence and clears the signal — even when the explanation itself "
+        "originates from the same domain as the suspicious request. It does not ask "
+        "whether any legitimizing evidence comes from outside the sender's control. "
+        "A domain-level compromise generates the introduction, the departure notice, "
+        "and the credential — Claude misses the circularity. Do not allow a coherent "
+        "narrative to walk back MEDIUM+ findings without a verifiable artifact from "
+        "outside the email chain."
+    ),
+    ("openai", "invoice_payment"): (
+        "GPT's known failure mode on BEC: Authentication Tunnel Vision. "
+        "GPT performs thorough sender authentication and, once the sender passes, "
+        "treats that clean identity as a proxy for a clean request. It does not "
+        "independently verify whether the action itself — the routing number change, "
+        "the new payee, the urgency claim — is authorized by policy and evidence. "
+        "Sender legitimacy and action legitimacy are separate questions. A compromised "
+        "or impersonated account can have clean DKIM/SPF and still carry a fraudulent "
+        "instruction. Your job: ignore the sender identity entirely and ask only "
+        "whether the action is independently authorized."
+    ),
+    ("google", "invoice_payment"): (
+        "Gemini's known failure mode on BEC: Signal Fabrication. "
+        "When the evidence is ambiguous or a clear fraud signal is not immediately "
+        "visible, Gemini invents a plausible theory to explain the anomaly rather "
+        "than stating that evidence is insufficient. It produces coherent-sounding "
+        "narratives for things it cannot directly verify — and rates categories based "
+        "on the theory rather than the data. Do not invent explanations for gaps. "
+        "If no evidence exists in the payload for a finding, rate that category NONE "
+        "and name what specific evidence would be required to change that rating."
     ),
 
     # ---- Domain 3: IAM / Access Grant ---------------------------------------
@@ -809,12 +923,97 @@ BLINDSPOT_ATLAS: dict[tuple[str, str], str] = {
 }
 
 
+# Short failure-mode names — one memorable label per (provider, domain) pair.
+# Used to address the driver directly in governor briefs.
+BLINDSPOT_NAMES: dict[tuple[str, str], str] = {
+    ("anthropic", "invoice_payment"):   "Explanation Surrender",
+    ("openai",    "invoice_payment"):   "Authentication Tunnel Vision",
+    ("google",    "invoice_payment"):   "Signal Fabrication",
+    ("openai",    "access_grant"):      "Scope Compression",
+    ("anthropic", "access_grant"):      "Ceremony Capture",
+    ("google",    "access_grant"):      "Narrative Override",
+    ("anthropic", "purchase_order"):    "Stale Human Review",
+    ("openai",    "purchase_order"):    "Stale Human Review",
+}
+
+# Epistemic status per entry.
+# "verified"   — observed in a benchmark run; treat as a documented pattern.
+# "provisional" — reasoned extrapolation; not yet confirmed by benchmark data.
+#                 The Governor should signal lower confidence when using these.
+# Entries absent from this dict default to "provisional".
+BLINDSPOT_STATUS: dict[tuple[str, str], str] = {
+    ("anthropic", "invoice_payment"):   "verified",     # BEC-PHANTOM-DEP-003A
+    ("anthropic", "purchase_order"):    "verified",     # AGENTIC-ROUTINE-001
+    ("openai",    "purchase_order"):    "verified",     # AGENTIC-ROUTINE-001
+    ("openai",    "invoice_payment"):   "provisional",  # extrapolated — not yet benchmarked
+    ("google",    "invoice_payment"):   "provisional",  # extrapolated — not yet benchmarked
+    ("openai",    "access_grant"):      "provisional",
+    ("anthropic", "access_grant"):      "provisional",
+    ("google",    "access_grant"):      "provisional",
+}
+
+# Chat-mode blindspots — keyed by provider only (no action_type in chat context).
+# These are conversational failure modes: how each model drifts when left unmanaged.
+CHAT_BLINDSPOT_ATLAS: dict[str, tuple[str, str]] = {
+    "openai": (
+        "Narrative Momentum",
+        "GPT builds on accepted framings rather than challenging them. Once the user's "
+        "premise is accepted, GPT elaborates within it — it rarely stops to ask whether "
+        "the frame itself is wrong. Watch for smooth, confident answers that never push "
+        "back on the question. The directive should force a frame-check, not a follow.",
+    ),
+    "anthropic": (
+        "Explanation Surrender",
+        "Claude softens hard truths with caveats and over-explanation. When the brief "
+        "calls for a direct challenge, Claude tends to hedge — naming the problem but "
+        "immediately cushioning it. The directive should be stated once, cleanly, "
+        "without apologetic scaffolding. If Claude is the driver, push for precision "
+        "over comfort.",
+    ),
+    "google": (
+        "Signal Fabrication",
+        "Gemini fills uncertainty gaps with plausible-sounding specificity. When it "
+        "doesn't know, it tends to invent a coherent story rather than sit with the "
+        "gap. Watch for confident details that weren't in the conversation. The "
+        "directive should anchor to what was actually said — not what seems likely.",
+    ),
+}
+
+
+def query_chat_blindspot(provider: str) -> tuple[str, str] | None:
+    """Return (name, text) for this provider's chat failure mode, or None."""
+    return CHAT_BLINDSPOT_ATLAS.get(provider.lower())
+
+
+# wire_transfer shares BEC failure modes — normalize to invoice_payment for atlas lookups.
+_ACTION_TYPE_ALIASES: dict[str, str] = {
+    "wire_transfer": "invoice_payment",
+}
+
+
 def query_atlas(provider: str, action_type: str) -> str | None:
     """
     Return the known blindspot text for this provider/domain combination.
     Returns None if no entry exists — atlas coverage expands as benchmarks run.
+    wire_transfer resolves to invoice_payment (same failure-mode class).
     """
-    return BLINDSPOT_ATLAS.get((provider.lower(), action_type.lower()))
+    normalized = _ACTION_TYPE_ALIASES.get(action_type.lower(), action_type.lower())
+    return BLINDSPOT_ATLAS.get((provider.lower(), normalized))
+
+
+def query_atlas_name(provider: str, action_type: str) -> str | None:
+    """Return the short failure mode name for this provider/domain combination."""
+    normalized = _ACTION_TYPE_ALIASES.get(action_type.lower(), action_type.lower())
+    return BLINDSPOT_NAMES.get((provider.lower(), normalized))
+
+
+def query_atlas_status(provider: str, action_type: str) -> str:
+    """
+    Return the epistemic status of this Atlas entry: 'verified' or 'provisional'.
+    Defaults to 'provisional' for any entry not explicitly marked as verified.
+    """
+    normalized = _ACTION_TYPE_ALIASES.get(action_type.lower(), action_type.lower())
+    return BLINDSPOT_STATUS.get((provider.lower(), normalized), "provisional")
 
 
 # ---------------------------------------------------------------------------
@@ -972,6 +1171,8 @@ def build_governor_brief_request(
     convergence_level: str,
     threat_hypothesis: str = None,
     model_blindspot: str = None,
+    model_blindspot_name: str = None,
+    model_blindspot_status: str = "provisional",
     next_provider: str = None,
     full_atlas: bool = False,
 ) -> str:
@@ -979,6 +1180,14 @@ def build_governor_brief_request(
 
     When threat_hypothesis and model_blindspot are provided, the Governor
     synthesizes them to write a hyper-targeted primer for this specific driver.
+    When model_blindspot_name is also provided, the brief must explicitly address
+    the incoming model by name, call out the named failure mode, and give a
+    targeted instruction to compensate — never a generic role-based primer.
+
+    model_blindspot_status controls confidence language:
+      "verified"    — pattern observed in benchmark; use authoritative language.
+      "provisional" — reasoned extrapolation; Governor must signal lower confidence
+                      so analysts are not steered by an unverified hypothesis.
     """
     history  = state["turn_history"]
     coverage = state["coverage_matrix"]
@@ -1037,21 +1246,57 @@ def build_governor_brief_request(
     }
     stakes = stakes_map.get(convergence_level, "Target the most important unresolved question.")
 
-    # Coach synthesis block — injected when Wrangler hypothesis + Atlas blindspot available
+    # Coach synthesis block — injected when Wrangler hypothesis + Atlas blindspot available.
+    # When a named failure mode is available, the brief must be model-addressed, not
+    # role-addressed: open with "Brief for [MODEL]:", name the failure mode explicitly,
+    # state what the analyst will be tempted to do, and give the one question that
+    # breaks that pattern. This is the Governor acting as an intelligent manager of a
+    # specific individual — not briefing a role, but managing a known failure mode.
     coach_block = ""
     if threat_hypothesis or model_blindspot:
         coach_block = "\n\nCOACH SYNTHESIS:"
         if threat_hypothesis:
             coach_block += f"\nWrangler threat hypothesis: {threat_hypothesis}"
         if model_blindspot and next_provider:
-            coach_block += (
-                f"\n{next_provider.upper()} known blindspot on this domain: {model_blindspot}"
-            )
-        coach_block += (
-            "\n\nYour primer must arm this analyst against their specific failure mode. "
-            "Name the attack class. Name what the analyst must not rationalize away. "
-            "Give them the question that breaks the narrative."
-        )
+            if model_blindspot_name:
+                verified = (model_blindspot_status == "verified")
+                status_label = (
+                    "benchmark-verified failure mode"
+                    if verified
+                    else "hypothesized failure mode (not yet benchmarked — treat as provisional)"
+                )
+                # The model profile is already in the system prompt (injected via
+                # build_governor_system_prompt(driver_provider=...)). No duplication here.
+                coach_block += (
+                    f"\n\n{next_provider.upper()} {status_label} for this domain — "
+                    f"{model_blindspot_name}: {model_blindspot}"
+                )
+                if verified:
+                    coach_block += (
+                        f"\n\nWrite this brief as a direct address to {next_provider.upper()}. "
+                        f"Open with 'Brief for {next_provider.upper()}:'. "
+                        f"Name the failure mode ({model_blindspot_name}) explicitly. "
+                        f"Tell the analyst what they will be tempted to do and what to do instead. "
+                        f"Give them the single question that breaks this pattern. "
+                        f"4 sentences maximum. Do not make this a generic role brief."
+                    )
+                else:
+                    coach_block += (
+                        f"\n\nThis failure mode is a working hypothesis, not a confirmed pattern. "
+                        f"You may surface it as a watch-point, but do not anchor the entire brief "
+                        f"on it. Weight the payload evidence and turn history more heavily than "
+                        f"this unverified Atlas entry. If the payload shows a different risk "
+                        f"pattern, follow the evidence — not the hypothesis."
+                    )
+            else:
+                coach_block += (
+                    f"\n{next_provider.upper()} known blindspot on this domain: {model_blindspot}"
+                )
+                coach_block += (
+                    "\n\nYour primer must arm this analyst against their specific failure mode. "
+                    "Name the attack class. Name what the analyst must not rationalize away. "
+                    "Give them the question that breaks the narrative."
+                )
 
     # DEEP tier: full Atlas briefing — all known failure modes for this action_type
     # injected so the Governor can cross-reference every model's blindspot simultaneously.
@@ -1406,19 +1651,33 @@ class GovernorAdapter(_FlightDeckBase):
         """
         try:
             template     = state.get("active_template")
-            gov_sys      = build_governor_system_prompt(template)
+            next_provider = getattr(next_adapter, "provider", None)
+            gov_sys      = build_governor_system_prompt(
+                template,
+                driver_provider=next_provider,
+                tier="DEEP" if full_atlas else "STANDARD",
+            )
             action_type  = state.get("action", {}).get("type", "")
 
-            # Fetch driver-specific blindspot from Atlas if we know who's driving next
-            model_blindspot = None
+            # Fetch driver-specific blindspot from Atlas if we know who's driving next.
+            # query_atlas       — full description text
+            # query_atlas_name  — short named failure mode (e.g. "Explanation Surrender")
+            # query_atlas_status — "verified" (benchmarked) or "provisional" (extrapolated)
+            model_blindspot        = None
+            model_blindspot_name   = None
+            model_blindspot_status = "provisional"
             if next_adapter is not None:
-                model_blindspot = query_atlas(next_adapter.provider, action_type)
+                model_blindspot        = query_atlas(next_adapter.provider, action_type)
+                model_blindspot_name   = query_atlas_name(next_adapter.provider, action_type)
+                model_blindspot_status = query_atlas_status(next_adapter.provider, action_type)
 
             user_msg = build_governor_brief_request(
                 state, next_turn_number, next_persona, convergence_level,
                 threat_hypothesis=state.get("threat_hypothesis"),
                 model_blindspot=model_blindspot,
-                next_provider=getattr(next_adapter, "provider", None),
+                model_blindspot_name=model_blindspot_name,
+                model_blindspot_status=model_blindspot_status,
+                next_provider=next_provider,
                 full_atlas=full_atlas,
             )
             return self._call(user_msg, max_tokens=500 if full_atlas else 400, system=gov_sys)
@@ -1545,7 +1804,7 @@ class GovernorAdapter(_FlightDeckBase):
         except Exception:
             return None
 
-    def assess_tenor(self, history: list, capsule_context: dict, turn_count: int = 0) -> str:
+    def assess_tenor(self, history: list, capsule_context: dict, turn_count: int = 0, driver_provider: str = None) -> str:
         """
         The Governor's full private brief for the speaking model.
 
@@ -1580,6 +1839,18 @@ class GovernorAdapter(_FlightDeckBase):
             "name the assumption, name the move. If the arc is genuinely healthy, ignore this."
         ) if turn_count >= 6 and turn_count % 5 == 1 else ""
 
+        blindspot_block = ""
+        if driver_provider:
+            entry = query_chat_blindspot(driver_provider)
+            if entry:
+                bs_name, bs_text = entry
+                blindspot_block = (
+                    f"\n\nDRIVER BLINDSPOT — {driver_provider.upper()} ({bs_name}):\n"
+                    f"{bs_text}\n"
+                    f"Your DIRECTIVE must account for this. Shape the move so the driver "
+                    f"is pushed toward precision and away from their default drift."
+                )
+
         prompt = (
             f"You are the Governor — in command of this conversation's arc. "
             f"You are briefing the model about to respond. This is private. The user never sees this.\n\n"
@@ -1595,7 +1866,8 @@ class GovernorAdapter(_FlightDeckBase):
             f"Not what to say — what to DO: challenge X, open Y, affirm and pivot to Z, "
             f"ask the question they're dancing around, hold space, follow their lead. "
             f"One clear move. Not preachy. Not an agenda. The honest thing that helps."
-            f"{challenge_check}\n\n"
+            f"{challenge_check}"
+            f"{blindspot_block}\n\n"
             f"RECENT CONVERSATION:\n{history_text}\n\n"
             f"WHAT YOU KNOW ABOUT THIS PERSON:\n{context_text}\n\n"
             f"If the conversation is too new to read (under 2 exchanges): respond exactly: NONE"

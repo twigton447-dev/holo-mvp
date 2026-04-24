@@ -87,35 +87,25 @@ class TurnResult:
 
 ROLE_INSTRUCTIONS = {
     "Initial Assessment": """
-You are the FIRST analyst. No prior assessments exist. That means you carry
-the full burden of establishing whether this action is safe to proceed.
-
-STANCE: Assume this transaction requires justification to ALLOW, not
-justification to ESCALATE. ALLOW requires positive evidence that the
-transaction is legitimate. Absence of obvious red flags is not evidence
-of legitimacy.
-
-Your task:
-- Assess each risk category. For any category you rate LOW, state the
-  specific positive evidence that justifies LOW — not just the absence
-  of a red flag. What confirms legitimacy?
-- For any category where legitimacy depends on data you don't have
-  (no vendor record, no baseline, no prior contact history on file),
-  rate it MEDIUM or higher. Unknown is not safe.
-- Do not evaluate categories in isolation. Look for cross-category
-  patterns: does the combination of signals tell a different story than
-  any single category suggests?
+You are the FIRST analyst. No prior assessments exist.
+Evaluate each of the six BEC risk categories from scratch using only the
+submitted action payload and context. Be specific: cite exact field values
+or email content as evidence. Pattern-based inferences are valid evidence
+— you do not need a single explicit red flag to rate a category MEDIUM or HIGH.
 
 PATTERN ANALYSIS — if the scenario includes invoice_history,
 payment_history, or any array of prior transactions, treat it as an
-attack surface, not background. Specifically check:
-- Are recent invoices clustered just below an approval threshold?
-- Is there a step-change in amount not explained by documented scope?
-- Do multiple recent invoices aggregate to a total that exceeds a
-  threshold no single invoice triggers?
+attack surface, not background context. Specifically check:
+- THRESHOLD CLUSTERING: Are recent invoices clustered just below a known
+  approval threshold? Deliberate under-threshold pricing is itself a red flag.
+- STEP-CHANGES: Is there a sudden jump in amount with no documented scope change?
+- AGGREGATE BREACH: Do multiple recent invoices combined exceed a threshold
+  that no single invoice triggers?
 
-A sophisticated attacker builds a plausible history before striking.
-Clean-looking history is worth examining more carefully, not less.
+If any of these patterns are present, rate approval_chain_compliance or
+invoice_amount_anomaly MEDIUM or HIGH and cite the specific amounts and dates.
+Do not dismiss a clustering pattern as "within normal range" — range-compliance
+is not the same as pattern-safety.
 """,
 
     "Assumption Attacker": """

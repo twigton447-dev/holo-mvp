@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why Frontier Models Fail on High-Consequence AI Decisions: and What Architecture Can Do About It*
 
-**Holo Engine · Working Paper · Version 2.3 · Updated April 24, 2026**
+**Holo Engine · Working Paper · Version 2.4 · Updated April 24, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -14,7 +14,7 @@ AI agents are making consequential decisions autonomously. They approve payments
 
 The frontier models powering these agents, including GPT-5.4, Claude Sonnet 4.6, and Gemini 2.5 Pro, are genuinely capable. In most situations, they perform well. But **capability is not the same as reliability at the action boundary:** the moment before an irreversible action executes.
 
-At that moment, solo frontier models have a structural problem. **They do not hesitate. They hallucinate confidence.** Their blindspots are real, non-overlapping, and exploitable. A pattern that one model catches, another approves. An attack designed to exploit narrative acceptance will fool a model that resists authority spoofing. **No single model has consistent coverage across attack classes.**
+At that moment, solo frontier models have a structural problem. **They do not hesitate. They produce confident outputs without appropriate uncertainty signaling.** Their blindspots are real, non-overlapping, and exploitable. A pattern that one model catches, another approves. An attack designed to exploit narrative acceptance will fool a model that resists authority spoofing. **No single model has consistent coverage across attack classes.**
 
 This paper presents empirical evidence of that failure. In controlled benchmark testing across two domains, AP/BEC wire fraud and agentic commerce, GPT-5.4, Claude Sonnet 4.6, and Gemini 2.5 Pro each independently approved at least one fraudulent transaction constructed from documented real-world attack patterns. **These models are being tested because they are the reasoning cores of the agents organizations are deploying today.** Holo Engine escalated the same transactions.
 
@@ -27,7 +27,7 @@ The finding is not that frontier models are weak. It is that testing them in iso
 
 Holo uses those same frontier models inside an adversarial runtime architecture. As the underlying models improve, the architecture improves with them. **The point is not to replace frontier intelligence. It is to govern it at the moment where a miss becomes irreversible.**
 
-**Holo does not eliminate probabilistic model behavior. It constrains it inside a deterministic evidence and adjudication layer that can be pressure-tested, diagnosed, and hardened.** The model turns within the adversarial reactor remain probabilistic. The verdict computation is deterministic: algorithmic, auditable, and not influenced by the confidence of the last model to speak.
+**Holo does not eliminate probabilistic model behavior. It constrains it inside a deterministic evidence and adjudication layer that can be pressure-tested, diagnosed, and hardened.** The model turns within the adversarial reactor remain probabilistic. The verdict computation is deterministic: algorithmic, auditable, and not influenced by the confidence of the last model to speak. That distinction matters because it is what makes the system inspectable rather than opaque.
 
 The benchmark now includes rotation-stability testing as part of proof quality. The strongest current flagship result holds across randomized model and role assignments in 9 of 10 independent runs. The single miss is diagnosable: it followed a specific sequence condition rather than random drift. That inspectability — the ability to name what failed and why — is part of the product's value, not a caveat.
 
@@ -534,4 +534,4 @@ Behind every agentic workflow in this benchmark is a person who might not know a
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 2.3 · April 24, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 2.4 · April 24, 2026*

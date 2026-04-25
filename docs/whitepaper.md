@@ -10,34 +10,23 @@
 
 ## Executive Summary
 
-AI agents are making consequential decisions autonomously. They approve payments. They provision access. They execute contracts. They change vendors. And they do it without a human in the loop.
+Most AI security catches what is visible or prohibited: prompt injection, jailbreaks, policy violations, data leaks, and obvious rule breaks. Holo Engine is built for the actions that pass those checks but still do not add up.
 
-The frontier models powering these agents, including GPT-5.4, Claude Sonnet 4.6, and Gemini 2.5 Pro, are genuinely capable. In most situations, they perform well. But **capability is not the same as reliability at the action boundary:** the moment before an irreversible action executes.
+The invoice looks clean. The vendor is known. Bank details are unchanged. The approval path is complete. The claimed Q1 true-up matches the amount. But prior Q1 invoices show this true-up pattern never existed. The explanation contradicts the record.
 
-At that moment, solo frontier models have a structural problem. **They do not hesitate. They produce confident outputs without appropriate uncertainty signaling.** Their blindspots are real, non-overlapping, and exploitable. A pattern that one model catches, another approves. An attack designed to exploit narrative acceptance will fool a model that resists authority spoofing. **No single model has consistent coverage across attack classes.**
+The reorder looks routine. The vendor, item, quantity, and price match five prior orders. It sits inside the autonomous threshold. But the inventory system that generated it had no human review for 83 days. No trusted person initiated or approved this specific action. The authorization chain is broken.
 
-This paper presents empirical evidence of that failure. In controlled benchmark testing across two domains, AP/BEC wire fraud and agentic commerce, GPT-5.4, Claude Sonnet 4.6, and Gemini 2.5 Pro each independently approved at least one fraudulent transaction constructed from documented real-world attack patterns. **These models are being tested because they are the reasoning cores of the agents organizations are deploying today.** Holo Engine escalated the same transactions.
+These are not always fraud. Sometimes an AI system or automation chain fills a missing context, relies on stale data, hallucinates an assumption upstream, or continues a workflow after the human authorization link has gone cold.
 
-> **Holo Engine in one sentence:**  
-> A deterministic pre-execution adjudicator for probabilistic agents taking irreversible actions: Holo evaluates high-consequence payloads through an adversarial council of structurally different AI models and returns one verdict, ALLOW or ESCALATE, with a full reasoning trace.
+Holo is the last reversible checkpoint before a high-consequence AI action executes. It does not replace runtime security, policy engines, DLP, or observability. Those layers handle what is known or prohibited. Holo adjudicates the unresolved middle: actions that pass surface checks but contain contradictions in history, provenance, or authorization.
+
+It uses structured adversarial review across models to compensate for their distributed blindspots. The output is simple and auditable: ALLOW or ESCALATE.
 
 The benchmark is public. The payloads are reproducible. The API is live.
 
-The finding is not that frontier models are weak. It is that testing them in isolation reveals **the structural ceiling of solo-agent judgment in 2026**, and that ceiling is lower than most deployment teams assume. Waiting for a better solo model does not remove the problem, because **the problem is structural:** a single reasoner at the action boundary can still miss what another would catch.
+The strongest current flagship result (BEC-EXPLAINED-ANOMALY-001) holds in 9 of 10 sequences under Architecture Stability Test conditions. The single miss is diagnosable. This is not universal coverage. It is proof of a narrow but commercially important class of high-consequence actions where surface policy passes, solo model judgment fails, and adversarial adjudication changes the outcome.
 
-Holo uses those same frontier models inside an adversarial runtime architecture. As the underlying models improve, the architecture improves with them. **The point is not to replace frontier intelligence. It is to govern it at the moment where a miss becomes irreversible.**
-
-Holo is not a replacement for runtime security, policy enforcement, or observability. Runtime policy layers can intercept agent actions at the surface. Holo is the second-stage adjudicator for the narrower class of high-consequence actions that pass surface policy but still contain unresolved semantic contradictions. It is designed to be called by systems that can see the action but should not decide it alone.
-
-**Holo does not eliminate probabilistic model behavior.** Probabilistic model turns generate the evidence. Holo's verdict layer deterministically adjudicates the final action state: algorithmic, auditable, and not influenced by the confidence of the last model to speak. That distinction matters because it is what makes the system inspectable rather than opaque.
-
-The benchmark now includes rotation-stability testing in two distinct modes. The **Architecture Stability Test** runs every seed at a fixed turn budget with full adversarial pressure, testing whether the architectural catch holds regardless of sequence. The **Runtime Distribution** runs under production-convergence conditions, where the governor exits early when a case stabilizes, characterizing what the deployed system experiences. These two modes answer different questions and are reported separately.
-
-The strongest current flagship result holds in 9 of 10 sequences under Architecture Stability Test conditions. The single miss is diagnosable: it followed a specific sequence condition rather than random drift. That inspectability — the ability to name what failed and why — is part of the product's value, not a caveat.
-
-The current evidence does not prove universal coverage. It proves something narrower and more commercially important: there is a testable class of high-consequence actions where surface policy passes, solo model judgment fails, and adversarial adjudication changes the outcome.
-
-Because Holo captures the full payload and turn-by-turn reasoning trace at the moment of decision, it also creates the foundation for something the current agent stack largely lacks: a decision record that can be cryptographically signed and anchored to an immutable ledger, so auditors and counterparties can verify what happened without relying on Holo's own infrastructure.
+Holo is not a replacement for Layer 1 systems. It is the second-stage adjudicator those systems should call when they can see the action but should not decide it alone.
 
 ### Eight-Domain Atlas
 

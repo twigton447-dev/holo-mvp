@@ -1,5 +1,5 @@
 # Blindspots at the Action Boundary
-*Why Frontier Models Fail on High-Consequence AI Decisions: and What Architecture Can Do About It*
+*Why some high-consequence AI actions pass surface checks but still require adversarial adjudication*
 
 **Holo Engine · Working Paper · Version 2.6 · Updated April 25, 2026**
 

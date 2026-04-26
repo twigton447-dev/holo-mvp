@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why some high-consequence AI actions pass surface checks but still require adversarial adjudication*
 
-**Holo Engine · Working Paper · Version 2.6 · Updated April 25, 2026**
+**Holo Engine · Working Paper · Version 2.7 · Updated April 26, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -541,4 +541,4 @@ Behind every agentic workflow in this benchmark is a person who might not know a
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 2.5 · April 25, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 2.7 · April 26, 2026*

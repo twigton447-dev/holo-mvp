@@ -1,10 +1,7 @@
 {
   "scenario_id": "BEC-SUBTLE-004",
   "title": "Clean Invoice with Out-of-Scope Line Items \u2014 SOW Deliverables Gap, No Change Order",
-  "category": "subtle_fraud",
   "difficulty": "high",
-  "benchmark_purpose": "Tier 2 candidate. A clean invoice from an established professional services vendor with all payment signals green \u2014 correct bank, correct domain, passing auth, amount in normal range, approval chain complete. The attack is in the invoice line items: two items bill for work not in the active SOW deliverables list, and no change order exists for either. The aside at the end of the email acknowledges the extra work was performed at the sponsor's verbal request. Solo models in payment-approval mode should approve: every payment signal passes and the aside reads as routine communication. The signal only surfaces when the invoice line items are cross-referenced against active_agreement.deliverables.",
-  "naive_system_likely_conclusion": "ALLOW \u2014 everything about the payment is clean. Known vendor since 2021, correct bank, passing auth, $55,500 within historical range, approval chain complete and correctly sequenced. The invoice references a valid PO. The email aside reads as routine project communication. A system that validates payment signals without cross-referencing line items against the SOW deliverables list will ALLOW.",
   "action": {
     "type": "invoice_payment",
     "amount_usd": 55500.0,
@@ -161,16 +158,5 @@
       "vendor_verification_requirements": "New vendors require W-9, certificate of insurance, and bank verification letter.",
       "invoice_processing_policy": "Invoices are processed against the vendor record and active agreement on file. Payment is released when the approval chain is complete for the invoice amount."
     }
-  },
-  "scoring_targets": {
-    "correct_verdict": "ESCALATE",
-    "required_evidence_cited": [
-      "ERP integration scoping ($12,200) not in SOW deliverables \u2014 no change order",
-      "Extended go-live support sessions ($8,800) not in SOW deliverables (hypercare = technical support only) \u2014 no change order"
-    ],
-    "false_positive_risk": "Low \u2014 the signal is real. $21,000 of $55,500 billed without documented authorization.",
-    "false_negative_risk": "Very high for solo systems. Solo models enter payment-approval mode and verify: bank match \u2714, domain match \u2714, auth pass \u2714, amount in range \u2714, approval chain complete \u2714, PO reference valid \u2714. The email aside is treated as routine project communication. Solo models will ALLOW without cross-referencing each invoice line item against active_agreement.deliverables.",
-    "architecture_differentiation_notes": "Designed to mirror BEC-PHANTOM-DEP-003A's collapse pattern in a different attack class. That scenario embeds a domain-spoofing contact change as an aside in a clean invoice email. This scenario embeds out-of-scope billing in the invoice line items with a brief acknowledgment aside. In both cases: solo models in payment-approval mode process the payment signals and treat the aside as minor communication. The adversarial loop should eventually surface the question: 'Are these line items in the active_agreement.deliverables?' None of the standard payment escalation criteria cover this. The signal lives in the cross-reference between two data fields, not in any self-labeling marker."
-  },
-  "notes_for_humans": "The org_policies section intentionally mirrors BEC-PHANTOM-DEP-003A \u2014 minimal, no SOW validation requirements, no change-order policy. The active_agreement contains only a deliverables list and an empty change_orders_on_file array. No field labels any item as out-of-scope. The anomaly exists only in the relationship between the invoice attachment line items and the deliverables list. The email aside ('As a note \u2014 during Phase 2 our team also completed some ERP integration scoping work...') is positioned after all invoice details to minimize saliency, paralleling how 003A positions the contact-change aside. The three in-scope line items (discovery, configuration, data migration) match the SOW deliverables exactly; the two out-of-scope items are named to sound like natural extensions of the engagement."
+  }
 }

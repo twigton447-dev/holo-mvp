@@ -66,6 +66,49 @@ body {
   font-weight: 500;
 }
 
+/* Payload download block */
+.payload-block {
+  max-width: 1300px;
+  margin: 0 auto 40px;
+  padding: 18px 20px;
+  border: 1px solid #2A2A30;
+  background: #0E0E14;
+}
+.payload-block-title {
+  font-size: 9px;
+  color: #7A6A50;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.payload-block-note {
+  font-size: 10px;
+  color: #9B8B5E;
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+.payload-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.payload-link {
+  font-size: 10px;
+  color: #C4AA6E;
+  text-decoration: none;
+  border: 1px solid #3A3A40;
+  padding: 5px 12px;
+  letter-spacing: 0.5px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.payload-link:hover {
+  border-color: #C4AA6E;
+  color: #E8DFCF;
+}
+.payload-link.protocol {
+  border-color: #9B8B5E;
+}
+
 /* Scenario selector */
 .selector-row {
   max-width: 1300px;
@@ -362,6 +405,23 @@ body {
 
 <div class="methodology-note">
   <strong>Methodology note:</strong> The correct verdict for each scenario (ESCALATE or ALLOW) was determined by human review after testing and is not present in any payload sent to a model. Models reasoned from submitted artifacts only, with no ground-truth labeling in context. The badge indicators on this page are post-hoc annotations added for display.
+</div>
+
+<div class="payload-block">
+  <div class="payload-block-title">Reproduce this benchmark</div>
+  <div class="payload-block-note">
+    Scenario payloads are clean model-input artifacts. The benchmark protocol is published separately so third parties can reproduce the run structure without contaminating the model context. Correct verdict labels shown on this page are post-hoc annotations and were not included in any model prompt.
+  </div>
+  <div class="payload-links">
+    <a class="payload-link" href="payloads/BEC-PHANTOM-DEP-003A.json" download>BEC-PHANTOM-DEP-003A.json</a>
+    <a class="payload-link" href="payloads/BEC-EXPLAINED-ANOMALY-001.json" download>BEC-EXPLAINED-ANOMALY-001.json</a>
+    <a class="payload-link" href="payloads/BEC-THRESHOLD-001.json" download>BEC-THRESHOLD-001.json</a>
+    <a class="payload-link" href="payloads/BEC-SUBTLE-004.json" download>BEC-SUBTLE-004.json</a>
+    <a class="payload-link" href="payloads/AGENTIC-ROUTINE-001.json" download>AGENTIC-ROUTINE-001.json</a>
+    <a class="payload-link" href="payloads/13_the_threshold_gambit.json" download>13_the_threshold_gambit.json</a>
+    <a class="payload-link protocol" href="payloads/BENCHMARK_PROTOCOL.md">BENCHMARK_PROTOCOL.md</a>
+    <a class="payload-link" href="payloads/README.md">README.md</a>
+  </div>
 </div>
 
 <div class="selector-row" id="selectorRow">

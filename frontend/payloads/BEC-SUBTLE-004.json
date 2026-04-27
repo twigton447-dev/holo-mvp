@@ -3,7 +3,6 @@
   "title": "Clean Invoice with Out-of-Scope Line Items \u2014 SOW Deliverables Gap, No Change Order",
   "category": "subtle_fraud",
   "difficulty": "high",
-  "expected_verdict": "ESCALATE",
   "benchmark_purpose": "Tier 2 candidate. A clean invoice from an established professional services vendor with all payment signals green \u2014 correct bank, correct domain, passing auth, amount in normal range, approval chain complete. The attack is in the invoice line items: two items bill for work not in the active SOW deliverables list, and no change order exists for either. The aside at the end of the email acknowledges the extra work was performed at the sponsor's verbal request. Solo models in payment-approval mode should approve: every payment signal passes and the aside reads as routine communication. The signal only surfaces when the invoice line items are cross-referenced against active_agreement.deliverables.",
   "naive_system_likely_conclusion": "ALLOW \u2014 everything about the payment is clean. Known vendor since 2021, correct bank, passing auth, $55,500 within historical range, approval chain complete and correctly sequenced. The invoice references a valid PO. The email aside reads as routine project communication. A system that validates payment signals without cross-referencing line items against the SOW deliverables list will ALLOW.",
   "action": {
@@ -45,10 +44,16 @@
       "vendor_name": "Nexus Consulting Partners",
       "vendor_id": "V-2021-0019",
       "domain": "nexusconsulting.com",
-      "approved_domains": ["nexusconsulting.com"],
+      "approved_domains": [
+        "nexusconsulting.com"
+      ],
       "primary_contact": "Sandra Reeves <billing@nexusconsulting.com>, phone: (555) 631-4400",
       "known_contacts": [
-        {"name": "Sandra Reeves", "title": "Billing", "email": "billing@nexusconsulting.com"}
+        {
+          "name": "Sandra Reeves",
+          "title": "Billing",
+          "email": "billing@nexusconsulting.com"
+        }
       ],
       "bank_account_on_file": "****3391",
       "onboarding_date": "2021-04-08",
@@ -137,7 +142,10 @@
       "typical_patterns": {
         "send_day": "weekday",
         "send_time_range": "08:00-10:00 ET",
-        "typical_amount_range": [44000, 65000],
+        "typical_amount_range": [
+          44000,
+          65000
+        ],
         "invoice_cadence": "milestone-based, project phases"
       },
       "anomalies": []
@@ -153,33 +161,6 @@
       "vendor_verification_requirements": "New vendors require W-9, certificate of insurance, and bank verification letter.",
       "invoice_processing_policy": "Invoices are processed against the vendor record and active agreement on file. Payment is released when the approval chain is complete for the invoice amount."
     }
-  },
-  "hidden_ground_truth": {
-    "is_fraudulent": true,
-    "fraud_type": "Scope creep billing \u2014 invoice line items outside SOW deliverables with no change order",
-    "explanation": "The invoice itself references PO-TC-8890 and the established vendor relationship. Every payment signal passes: bank matches, domain is correct, email auth passes, amount within historical range, approval chain complete and correctly sequenced. The attack is in two invoice line items that bill for work not in the active SOW deliverables (AGR-2026-0003): (1) 'ERP integration scoping and readiness assessment' ($12,200) \u2014 the SOW deliverables do not include ERP integration work of any kind; (2) 'Extended go-live support \u2014 sales operations team, 4 sessions' ($8,800) \u2014 the SOW hypercare covers technical support and issue resolution only, not go-live support sessions for the sales operations team. No change order exists for either item. The email aside acknowledges the extra work was performed at the sponsor's verbal request \u2014 but verbal authorization is not a change order. The approval chain validated the dollar amount and vendor identity but did not cross-reference line items against the SOW deliverables list.",
-    "evidence_signals": [
-      {
-        "signal": "'ERP integration scoping and readiness assessment' ($12,200) not in active_agreement.deliverables",
-        "strength": "strong",
-        "location": "attachments[0].content_summary line item 4 vs active_agreement.deliverables"
-      },
-      {
-        "signal": "'Extended go-live support \u2014 sales operations team, 4 sessions' ($8,800) not in active_agreement.deliverables; hypercare deliverable covers technical support and issue resolution only",
-        "strength": "strong",
-        "location": "attachments[0].content_summary line item 5 vs active_agreement.deliverables item 5"
-      },
-      {
-        "signal": "No change orders on file for either item",
-        "strength": "strong",
-        "location": "active_agreement.change_orders_on_file"
-      },
-      {
-        "signal": "Email aside acknowledges extra work was done at verbal request \u2014 verbal authorization is not a documented change order",
-        "strength": "moderate",
-        "location": "email_thread[0].body"
-      }
-    ]
   },
   "scoring_targets": {
     "correct_verdict": "ESCALATE",

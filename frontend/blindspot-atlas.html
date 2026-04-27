@@ -66,6 +66,65 @@ body {
   font-weight: 500;
 }
 
+/* Variance note */
+.variance-note {
+  max-width: 1300px;
+  margin: 0 auto 36px;
+  padding: 20px 24px;
+  border: 1px solid #2A2A30;
+  border-left: 3px solid #4A6A8A;
+  background: #0C0C12;
+  font-size: 10px;
+  color: #8A9BAB;
+  letter-spacing: 0.5px;
+  line-height: 1.8;
+}
+.variance-note h2 {
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #B8C8D8;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 0 0 12px 0;
+}
+.variance-note p {
+  margin: 0 0 10px 0;
+}
+.variance-note p:last-child {
+  margin-bottom: 0;
+}
+.variance-note strong {
+  color: #B8C8D8;
+  font-weight: 500;
+}
+.variance-note ul {
+  margin: 6px 0 10px 16px;
+  padding: 0;
+  list-style: disc;
+}
+.variance-note ul li {
+  margin-bottom: 2px;
+}
+
+/* Per-result note */
+.result-variance-note {
+  max-width: 1300px;
+  margin: 0 auto 20px;
+  padding: 10px 16px;
+  border: 1px solid #1E2A34;
+  background: #090910;
+  font-size: 9px;
+  color: #556677;
+  letter-spacing: 0.5px;
+  line-height: 1.7;
+  font-family: 'JetBrains Mono', monospace;
+}
+.result-variance-note strong {
+  color: #7A9AB8;
+  font-weight: 500;
+}
+
 /* Payload download block */
 .payload-block {
   max-width: 1300px;
@@ -407,6 +466,16 @@ body {
   <strong>Methodology note:</strong> The correct verdict for each scenario (ESCALATE or ALLOW) was determined by human review after testing and is not present in any payload sent to a model. Models reasoned from submitted artifacts only, with no ground-truth labeling in context. The badge indicators on this page are post-hoc annotations added for display.
 </div>
 
+<div class="variance-note">
+  <h2>Benchmark variance and versioning</h2>
+  <p>These results are point-in-time evidence, not permanent claims about any model.</p>
+  <p>Frontier model behavior is probabilistic, versioned, and environment-sensitive. The same clean payload may produce different results across model versions, system prompts, temperatures, tool contexts, deployment environments, or future reruns.</p>
+  <p><strong>That variance is part of the thesis.</strong></p>
+  <p>The benchmark shows how a given model or architecture performed against a specific scenario under a specific protocol at a specific time. It does not claim that a model will always miss or always catch the same scenario forever.</p>
+  <p>Holo's purpose is to make action-boundary review systematic, repeatable, and auditable as models and adversarial patterns evolve. The Blindspot Atlas is designed to grow over time: new models, new scenarios, new failure classes, and new hardening results.</p>
+  <p>Public payloads are provided so third parties can inspect and reproduce the structure of the test. Any new run should record model name, model version if available, run date, protocol version, scenario ID, scenario hash, turn mode, convergence settings, and final verdict.</p>
+</div>
+
 <div class="payload-block">
   <div class="payload-block-title">Reproduce this benchmark</div>
   <div class="payload-block-note">
@@ -422,6 +491,10 @@ body {
     <a class="payload-link protocol" href="payloads/BENCHMARK_PROTOCOL.md">BENCHMARK_PROTOCOL.md</a>
     <a class="payload-link" href="payloads/README.md">README.md</a>
   </div>
+</div>
+
+<div class="methodology-note" style="margin-bottom:24px">
+  <strong>Model parity note:</strong> Solo baselines use the same model versions represented in the Holo run. The comparison is architecture versus architecture, not weak models versus stronger models.
 </div>
 
 <div class="selector-row" id="selectorRow">
@@ -446,6 +519,10 @@ body {
     <div class="model-name">Holo</div>
     <div class="verdict-value" id="chip-holo"></div>
   </div>
+</div>
+
+<div class="result-variance-note" id="resultVarianceNote" style="display:none">
+  <strong>Note:</strong> Results reflect the model and protocol state at the time of testing. Later runs may vary as models, prompts, runtime settings, and fraud patterns evolve.
 </div>
 
 <div class="comparison-grid" id="comparisonGrid" style="display:none">
@@ -545,6 +622,7 @@ function renderScenario(index) {
   document.getElementById('verdictBar').style.display = 'flex';
   document.getElementById('comparisonGrid').style.display = 'grid';
   document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultVarianceNote').style.display = 'block';
 
   document.getElementById('scenarioName').textContent = s.scenario;
 

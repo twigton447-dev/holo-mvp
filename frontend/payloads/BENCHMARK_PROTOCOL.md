@@ -327,3 +327,23 @@ The governor uses the category ratings to detect convergence and compute the fin
 ## Solo vs. Holo baseline
 
 The solo-model baselines in the published results used the same role prompts, the same role order, the same turn budget, and the same convergence rules as Holo. The only variable removed is structural independence: in solo runs, one model plays every role. In Holo runs, structurally different model families are assigned across turns, and the final verdict is computed by a deterministic governor rather than inferred from the last model turn.
+
+---
+
+## Model selection and parity
+
+For each benchmark run, we used the strongest accessible frontier models available to us from the three major model families at the time of testing.
+
+In some cases, the latest announced model was not available through the benchmark harness or compatible API path. For example, if a newer Gemini model was not accessible for this test path, we used the strongest compatible Gemini model available at the time.
+
+The important control is parity.
+
+The same model versions used in the solo baselines were also used inside the Holo adjudication condition. A solo GPT run used the same GPT version represented in Holo. A solo Claude run used the same Claude version represented in Holo. A solo Gemini run used the same Gemini version represented in Holo.
+
+This means the benchmark is not comparing weak solo models against stronger Holo models. It is comparing decision architectures:
+
+- single-model baseline judgment
+- single-model adversarial scaffold, where applicable
+- multi-model adversarial adjudication with deterministic governor logic
+
+The question is not "which model is smartest forever?" The question is whether a structured action-boundary adjudication process produces a safer, more inspectable decision than relying on one model family alone.

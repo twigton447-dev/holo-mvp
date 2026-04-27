@@ -152,6 +152,26 @@ Rotation stability testing uses two distinct configurations that answer differen
 
 These two modes measure different properties of the system. Results from one mode should not be reported alongside results from the other without distinguishing which is which. Where a result appears in this paper, the mode is specified.
 
+### 2.6 Model Selection and Parity
+
+For each benchmark run, we used the strongest accessible frontier models available to us from the three major model families at the time of testing.
+
+In some cases, the latest announced model was not available through the benchmark harness or compatible API path. For example, if a newer Gemini model was not accessible for this test path, we used the strongest compatible Gemini model available at the time.
+
+The important control is parity.
+
+The same model versions used in the solo baselines were also used inside the Holo adjudication condition. A solo GPT run used the same GPT version represented in Holo. A solo Claude run used the same Claude version represented in Holo. A solo Gemini run used the same Gemini version represented in Holo.
+
+This means the benchmark is not comparing weak solo models against stronger Holo models. It is comparing decision architectures:
+
+- single-model baseline judgment
+- single-model adversarial scaffold, where applicable
+- multi-model adversarial adjudication with deterministic governor logic
+
+The question is not "which model is smartest forever?" The question is whether a structured action-boundary adjudication process produces a safer, more inspectable decision than relying on one model family alone.
+
+> **Model parity note:** Solo baselines use the same model versions represented in the Holo run. The comparison is architecture versus architecture, not weak models versus stronger models.
+
 ---
 
 ## Section 03 — Domain 1: Accounts Payable / Business Email Compromise
@@ -510,6 +530,37 @@ The strongest current flagship result is high-confidence, not a production guara
 
 **Benchmark as hardening instrument**  
 The benchmark is not only a marketing artifact. It is a pressure-testing instrument. The hardening process — running scenarios across seeds, identifying failures, tracing them to specific model and role conditions — is an ongoing function, not a one-time evaluation. Results published here represent a snapshot of a system under continuous pressure-testing.
+
+---
+
+## Point-in-Time Evidence, Living Control Layer
+
+Benchmark results should be read as point-in-time evidence, not fixed laws of model behavior.
+
+A public scenario can be rerun later and produce a different result. That is expected. Frontier models are versioned systems. Their behavior changes across releases, system prompts, temperature settings, tool context, runtime environments, and vendor-side updates that may not be fully visible to the tester.
+
+This does not weaken the benchmark. It is part of the problem Holo is built to address.
+
+The action boundary cannot rely on the assumption that one model will consistently recognize every high-consequence anomaly. Coverage is model-specific, version-specific, protocol-specific, and attack-class-specific. As models improve, adversarial tactics improve with them. The blind spots do not disappear; they move.
+
+Holo is designed as a living control layer at the action boundary. Its model roster, adversarial scenario library, evaluation policy, and hardening logic can evolve as new models and new failure classes appear. The goal is not to preserve one static benchmark forever. The goal is to maintain a continuously updated adjudication process for irreversible actions.
+
+The Blindspot Atlas should therefore be understood as a growing evidence base. Each scenario records what was tested, when it was tested, under which protocol, and how the architecture behaved. Future scenarios and future model runs will expand that atlas rather than replace the core thesis.
+
+**Run metadata recommendation**
+
+Each published result should include:
+- scenario ID
+- payload version or hash
+- protocol version
+- run date
+- model name
+- model version when available
+- turn mode (convergence or fixed AST)
+- max turns
+- convergence settings
+- final verdict
+- whether the run was solo baseline, solo adversarial scaffold, or Holo adjudication
 
 ---
 

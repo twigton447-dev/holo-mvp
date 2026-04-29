@@ -12,8 +12,6 @@
 
 Most AI security catches what is visible or prohibited: prompt injection, jailbreaks, policy violations, data leaks. Holo Engine is built for what passes those checks. The invoice looks clean, the vendor is known, the approval path is complete. But prior records show this payment pattern never existed. **The explanation contradicts the record.**
 
-The reorder looks routine. The vendor, item, quantity, and price match five prior orders. It sits inside the autonomous threshold. But the inventory system that generated it had no human review for 83 days. No trusted person initiated or approved this specific action. **The authorization chain is broken.**
-
 These are not always fraud. Sometimes an AI system or automation chain fills a missing context, relies on stale data, hallucinates an assumption upstream, or continues a workflow after the human authorization link has gone cold.
 
 Holo is **the last reversible checkpoint** before a high-consequence AI action executes. It does not replace runtime security, policy engines, DLP, or observability. Those layers handle what is known or prohibited. **Holo adjudicates the unresolved middle:** actions that pass surface checks but contain contradictions in history, provenance, or authorization.

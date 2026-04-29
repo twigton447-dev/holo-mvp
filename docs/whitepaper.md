@@ -10,19 +10,21 @@
 
 ## Executive Summary
 
-Most AI security catches what is visible or prohibited: prompt injection, jailbreaks, policy violations, data leaks. Holo Engine is built for what passes those checks. The invoice looks clean, the vendor is known, the approval path is complete. But prior records show this payment pattern never existed. **The explanation contradicts the record.**
+Most AI security systems catch what is visible or explicitly prohibited: prompt injection, jailbreaks, policy violations, and data leaks. They are much weaker at a different class of failure: actions that pass every formal check and are still wrong.
 
-These are not always fraud. Sometimes an AI system or automation chain fills a missing context, relies on stale data, hallucinates an assumption upstream, or continues a workflow after the human authorization link has gone cold.
+A payment request can come from a known vendor. The approval path can be complete. The metadata can look clean. And yet the business story does not add up. The payment pattern never existed. The explanation contradicts prior records. The authorization chain has gone stale. Nothing is obviously broken, but the action should still not proceed.
 
-Holo is **the last reversible checkpoint** before a high-consequence AI action executes. It does not replace runtime security, policy engines, DLP, or observability. Those layers handle what is known or prohibited. **Holo adjudicates the unresolved middle:** actions that pass surface checks but contain contradictions in history, provenance, or authorization.
+This is the gap Holo Engine is built to govern.
 
-It uses structured adversarial review across models to compensate for their distributed blindspots. The output is simple and auditable: **ALLOW or ESCALATE.**
+Holo is **the last reversible checkpoint** before a high-consequence AI action executes. It does not replace runtime security, policy engines, DLP, or observability. Those systems handle what is known, prohibited, or already observable. **Holo adjudicates the unresolved middle:** actions that pass surface checks but contain contradictions in history, provenance, or authorization.
+
+Its architecture uses adversarial multi-model review to pressure-test the action before it binds. The output is simple and auditable: **ALLOW or ESCALATE.**
 
 The benchmark is public. The payloads are reproducible. The API is live.
 
-The strongest current flagship result (BEC-EXPLAINED-ANOMALY-001) returned ESCALATE across 10 of 10 pre-declared seeds in a canonical forced-pressure Architecture Stability Test. This is not universal coverage or a production reliability claim. It is evidence that adversarial adjudication can change the outcome on a narrow but commercially important class of high-consequence actions where **surface policy passes, solo model judgment fails, and adversarial adjudication changes the outcome.**
+The strongest current flagship result, BEC-EXPLAINED-ANOMALY-001, returned ESCALATE across 10 of 10 pre-declared seeds in a canonical forced-pressure Architecture Stability Test, while all three solo frontier model baselines returned ALLOW under the same benchmark conditions. This is not a claim of universal coverage or production reliability. It is evidence that adversarial adjudication can change the outcome on a narrow but commercially important class of high-consequence actions where **surface policy passes, solo model judgment fails, and a second-stage decision architecture catches what the solo model misses.**
 
-Holo is not a replacement for Layer 1 systems. It is the second-stage adjudicator those systems should call when they can see the action but should not decide it alone.
+Holo is not a replacement for Layer 1 systems. It is the second-stage adjudicator those systems should call when they can see the action, but should not decide it alone.
 
 ### Eight-Domain Atlas
 

@@ -10,9 +10,7 @@
 
 ## Executive Summary
 
-Most AI security catches what is visible or prohibited: prompt injection, jailbreaks, policy violations, data leaks, and obvious rule breaks. Holo Engine is built for the actions that **pass those checks but still do not add up.**
-
-The invoice looks clean. The vendor is known. Bank details are unchanged. The approval path is complete. The claimed Q1 true-up matches the amount. But prior Q1 invoices show this true-up pattern never existed. **The explanation contradicts the record.**
+Most AI security catches what is visible or prohibited: prompt injection, jailbreaks, policy violations, data leaks. Holo Engine is built for what passes those checks. The invoice looks clean, the vendor is known, the approval path is complete. But prior records show this payment pattern never existed. **The explanation contradicts the record.**
 
 The reorder looks routine. The vendor, item, quantity, and price match five prior orders. It sits inside the autonomous threshold. But the inventory system that generated it had no human review for 83 days. No trusted person initiated or approved this specific action. **The authorization chain is broken.**
 

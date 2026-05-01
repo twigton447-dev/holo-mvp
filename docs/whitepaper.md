@@ -10,21 +10,19 @@
 
 ## Executive Summary
 
-In human-driven workflows, the point of no return is the **commit boundary**—the final check before code is pushed or regulated content is published. In autonomous AI systems, that exact same threshold is the **action boundary**—the millisecond before an agent wires money, provisions server access, or executes a legal contract. The vocabulary changes, but the structural vulnerability is identical: once crossed, the action is irreversible.
+In human-driven workflows, the point of no return is the commit boundary—the final check before code is pushed or regulated content is published. In autonomous AI systems, that exact same threshold is the action boundary—the millisecond before an agent wires money, provisions server access, or executes a legal contract. The vocabulary changes, but the structural vulnerability is identical: once crossed, the action is irreversible.
 
-Most AI security systems catch what is visible or explicitly prohibited: prompt injection, jailbreaks, policy violations, and data leaks. They are much weaker at a different class of failure: actions that pass every formal check and are still wrong.
+And in both worlds, the most dangerous failures are not the obvious ones. They are the actions that look clean, compliant, and complete—right up until the damage is done.
 
-A payment request can come from a known vendor. The approval path can be complete. The metadata can look clean. And yet the business story does not add up. The payment pattern never existed. The explanation contradicts prior records. The authorization chain has gone stale. Nothing is obviously broken, but the action should still not proceed.
+Most AI security is built to catch visible violations: prompt injection, jailbreaks, policy breaches, and data leakage. It is much weaker at a harder class of failure, where a payment request can come from a known vendor, the approval path is complete, and the metadata looks clean. And yet, the business story does not add up. The payment pattern never existed. The explanation contradicts prior records. The authorization chain has gone stale.
 
-This is the gap Holo Engine is built to govern.
+**Nothing is obviously broken, but the action should still not proceed.**
 
-Holo is **the last reversible checkpoint** before a high-consequence AI action executes. It does not replace runtime security, policy engines, DLP, or observability. Those systems handle what is known, prohibited, or already observable. **Holo adjudicates the unresolved middle:** actions that pass surface checks but contain contradictions in history, provenance, or authorization.
+Holo Engine was built to govern this exact gap. It is the last reversible checkpoint before a high-consequence AI action executes. Its architecture uses adversarial multi-model review to pressure-test the full context of an action before it binds. The output is simple and auditable: ALLOW or ESCALATE.
 
-Its architecture uses adversarial multi-model review to pressure-test the action before it binds. The output is simple and auditable: **ALLOW or ESCALATE.**
+In the benchmark's flagship test case, all three solo frontier models approved a fraudulent transaction. Under the exact same conditions, Holo's architecture returned ESCALATE consistently across repeated, seeded runs. This is not a claim of universal coverage or production reliability. It is evidence that adjudication architecture can change the outcome on a narrow but commercially important class of actions where surface policy passes, solo model judgment fails, and a second-stage decision architecture catches what the solo model misses.
 
-The strongest current flagship result, BEC-EXPLAINED-ANOMALY-001, returned ESCALATE across 10 of 10 pre-declared seeds in a canonical forced-pressure Architecture Stability Test, while all three solo frontier model baselines returned ALLOW under the same benchmark conditions. This is not a claim of universal coverage or production reliability. It is evidence that adversarial adjudication can change the outcome on a narrow but commercially important class of high-consequence actions where **surface policy passes, solo model judgment fails, and a second-stage decision architecture catches what the solo model misses.**
-
-Holo is not a replacement for Layer 1 systems. It is the second-stage adjudicator those systems should call when they can see the action, but should not decide it alone.
+Holo does not replace runtime security, policy engines, or observability. Those systems handle what is known or prohibited. Holo adjudicates the unresolved middle—actions that pass every surface check but still require a final, adversarial judgment call.
 
 ### Eight-Domain Atlas
 

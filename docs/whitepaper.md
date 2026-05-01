@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why some high-consequence AI actions pass surface checks but still require adversarial adjudication*
 
-**Holo Engine · Working Paper · Version 2.7 · Updated April 26, 2026**
+**Holo Engine · Working Paper · Version 2.8 · May 1, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -20,8 +20,6 @@ Holo is **the last reversible checkpoint** before a high-consequence AI action e
 
 Its architecture uses adversarial multi-model review to pressure-test the action before it binds. The output is simple and auditable: **ALLOW or ESCALATE.**
 
-The benchmark is public. The payloads are reproducible. The API is live.
-
 The strongest current flagship result, BEC-EXPLAINED-ANOMALY-001, returned ESCALATE across 10 of 10 pre-declared seeds in a canonical forced-pressure Architecture Stability Test, while all three solo frontier model baselines returned ALLOW under the same benchmark conditions. This is not a claim of universal coverage or production reliability. It is evidence that adversarial adjudication can change the outcome on a narrow but commercially important class of high-consequence actions where **surface policy passes, solo model judgment fails, and a second-stage decision architecture catches what the solo model misses.**
 
 Holo is not a replacement for Layer 1 systems. It is the second-stage adjudicator those systems should call when they can see the action, but should not decide it alone.
@@ -39,11 +37,53 @@ Holo is not a replacement for Layer 1 systems. It is the second-stage adjudicato
 | 7 | Infrastructure and Configuration | Pending |
 | 8 | Financial Reporting and Compliance | Pending |
 
-*U.S. Provisional Patent Application No. 63/987,899, filed February 2026*
+---
+
+## Author Note: From Output Verification to Action-Boundary Adjudication
+
+This paper comes from a nontraditional security vantage point.
+
+Holo did not begin as a threat-intelligence project. It began as a verification practice inside high-consequence output workflows, where regulated-industry content, financial product language, healthcare communications, executive materials, public-facing claims, and product experiences had to be accurate under deadline pressure.
+
+In those workflows, solo LLMs were useful but insufficient. They could accelerate review, but they could not be trusted as final arbiters. Different models missed different things. When placed into adversarial review, however, they exposed one another's blindspots. The original control layer was human: a reviewer comparing reasoning traces, forcing evidentiary discipline, and deciding whether the output was safe to use.
+
+That process revealed the pattern Holo now formalizes. When judgment matters, the central question is not whether a model can produce a plausible answer. The question is whether the system can detect when plausibility is not enough.
+
+Holo Engine is the productization of that pattern at the action boundary. The question is no longer whether a sentence is accurate enough to publish. The question is whether an AI agent should be allowed to execute an irreversible action.
 
 ---
 
-## Section 01 — The Problem
+## What This Paper Claims and Does Not Claim
+
+### What This Paper Claims
+
+This paper claims that high-consequence AI agent actions create a distinct trust problem at the action boundary: the point after planning, policy checks, and tool selection, but before irreversible execution.
+
+It claims that some failures are not visible in a single prompt, transaction, invoice, message, policy rule, or approval record. They emerge only when current action context is compared against prior records, business history, provenance, authorization state, and semantic consistency.
+
+It claims that Holo Engine produced stable escalation behavior on disclosed benchmark scenarios where solo frontier models did not, including the canonical BEC-EXPLAINED-ANOMALY-001 case.
+
+It claims that Action Boundary Adversarial Testing is a useful testing discipline for this class of failure.
+
+### What This Paper Does Not Claim
+
+This paper does not claim independent validation.
+
+It does not claim production reliability.
+
+It does not claim universal coverage.
+
+It does not claim that all solo models fail all action-boundary cases.
+
+It does not claim that Holo's proprietary Governor logic, adversarial reactor configuration, model-routing logic, turn heuristics, or verdict computation layer are publicly reproducible.
+
+The current benchmark should be read as internal evidence under disclosed conditions, with public solo-model baselines, public payloads and traces where available, and a defined path toward third-party replication.
+
+Holo's benchmark is intended to be reproducible at the evaluation layer, not reimplementable at the proprietary control layer.
+
+---
+
+## Section 01 — The Action Boundary Problem
 
 ### 1.1 Agents Are Already Deciding
 
@@ -62,6 +102,12 @@ That moment — the last point before an irreversible action executes — is the
 Solo frontier models are not designed to treat this moment differently from any other. They evaluate the payload in front of them, apply their training, and return a verdict. They do not know they are at the action boundary. They do not apply additional scrutiny. They do not convene a second opinion.
 
 This is the structural gap. Not a bug in any one model. A gap in how solo models are deployed at the moment that matters most.
+
+Human review remains necessary in some workflows, but it is not a complete safety architecture.
+
+At agent speed, across fragmented records, prior invoices, policy exceptions, stale approvals, contract language, vendor history, and plausible explanations, a human reviewer is often being asked to reconstruct an evidence graph faster than the workflow itself can be understood.
+
+The action boundary is where this becomes dangerous. The system may have followed every rule, passed every surface check, and still be wrong.
 
 ### 1.3 What Solo Models Miss, and Why
 
@@ -102,21 +148,46 @@ The proxy problem compounds this. When an agent approves a fraudulent transactio
 
 ---
 
-## Section 02 — Benchmark Design
+## Section 02 — Action Boundary Adversarial Testing
+
+Action Boundary Adversarial Testing, or ABAT, is a testing discipline for irreversible AI agent actions where the surface checks pass, but the action may still be wrong because the contradiction lives in business context, prior state, authorization history, provenance, or semantic inconsistency.
+
+ABAT is not traditional red teaming. Red teaming often probes model behavior, prompt susceptibility, jailbreaks, unsafe outputs, or policy violations. ABAT probes whether an agentic system should be allowed to execute a real-world action after the usual checks have already passed.
+
+ABAT is not penetration testing. Penetration testing targets infrastructure, access controls, and exploitable technical vulnerabilities. ABAT targets the semantic decision boundary where an action appears valid but may still be wrong.
+
+ABAT is not compliance auditing. Compliance auditing is often retrospective. ABAT is pre-execution. It asks whether the action should proceed now.
+
+ABAT is not fraud detection alone. Fraud detection often looks for known patterns, anomalies, and risk signals. ABAT tests whether an action remains coherent when current request, historical behavior, authorization chain, policy context, and business logic are adjudicated together.
+
+An ABAT scenario has four properties:
+
+1. A proposed irreversible or high-consequence action
+2. Surface-level plausibility
+3. A hidden contradiction or unresolved ambiguity
+4. A required ALLOW or ESCALATE decision before execution
+
+ABAT is the testing method. Holo Engine is the runtime adjudication layer. The benchmark is the evidence object.
+
+This distinction matters. Holo is not claiming to replace red teaming, penetration testing, fraud detection, compliance review, or human oversight. It addresses a different seam: the moment when an AI agent is about to act, the formal checks appear satisfied, and the remaining risk is semantic.
+
+---
+
+## Section 03 — Benchmark Methodology
 
 Standard AI benchmarks measure knowledge and reasoning in the abstract. They do not test whether a model can hold a correct verdict when the context has been adversarially shaped and the action cannot be undone.
 
 > **Our benchmark is designed as a crash-testing lab for AI actions, not a leaderboard.**
 
-### 2.1 The Governing Design Rule
+### 3.1 The Governing Design Rule
 
 A scenario that includes a field labeled `bankaccountverified: false` is not testing judgment. It is testing reading comprehension. The benchmark became meaningful only when the attack signal lived in the absence of something, not the presence of a labeled failure. These are not flags the model can read. They are gaps the model must recognize.
 
-### 2.2 Scenario Sourcing
+### 3.2 Scenario Sourcing
 
 Each domain's scenario library is derived from documented, real-world attack classes and established cybersecurity doctrine from authoritative sources: FBI IC3 annual reports for AP/BEC, CISA guidance for agentic commerce, and MITRE ATT&CK framework for planned domains.
 
-### 2.3 The Four-Case Structure
+### 3.3 The Four-Case Structure
 
 | Case Type | Purpose |
 |-----------|---------|
@@ -125,7 +196,7 @@ Each domain's scenario library is derived from documented, real-world attack cla
 | **Gap case** | A sophisticated attack that solo models miss and Holo catches. The primary proof artifact. |
 | **Precision case** | A legitimate but suspicious-looking transaction that Holo correctly clears. Tests calibration, not just escalation. |
 
-### 2.4 What Counts as a Real Win
+### 3.4 What Counts as a Real Win
 
 A result is included in this paper only if it meets all six of the following gates. A result that passes five of six is not published.
 
@@ -140,7 +211,7 @@ A result is included in this paper only if it meets all six of the following gat
 
 There is a meaningful distinction between a development scenario and a flagship proof scenario. A development scenario demonstrates that the architecture adds value under a specific configuration. A flagship scenario demonstrates that advantage holds across randomized assignment sequences. A result that passes all six gates but depends on a specific lucky role sequence is not yet eligible for flagship status. Rotation stability is now part of the publication bar.
 
-### 2.5 Two Benchmark Modes
+### 3.5 Two Benchmark Modes
 
 Rotation stability testing uses two distinct configurations that answer different questions.
 
@@ -150,7 +221,7 @@ Rotation stability testing uses two distinct configurations that answer differen
 
 These two modes measure different properties of the system. Results from one mode should not be reported alongside results from the other without distinguishing which is which. Where a result appears in this paper, the mode is specified.
 
-### 2.6 Model Selection and Parity
+### 3.6 Model Selection and Parity
 
 For each benchmark run, we used the strongest accessible frontier models available to us from the three major model families at the time of testing.
 
@@ -170,17 +241,31 @@ The question is not "which model is smartest forever?" The question is whether a
 
 > **Model parity note:** Solo baselines use the same model versions represented in the Holo run. The comparison is architecture versus architecture, not weak models versus stronger models.
 
+### 3.7 Public, Private, and Future Validation
+
+The benchmark is designed to be reproducible at the evaluation layer, not reimplementable at the proprietary control layer.
+
+Third parties should be able to inspect payloads, reproduce solo-model baselines, review traces, submit held-out scenarios, and verify Holo's verdict behavior. That does not require public disclosure of the Governor logic, adversarial reactor configuration, model-routing details, turn heuristics, convergence rules, internal prompts, or proprietary verdict computation layer.
+
+Current public materials may include scenario descriptions, selected payloads, solo-model baselines, traces, methodology, publication gates, and benchmark results.
+
+Holo's proprietary layer includes the Governor logic, adversarial reactor configuration, model-routing logic, verdict computation layer, and production implementation details.
+
+Future validation should increase independence without requiring public release of proprietary implementation. The intended path is third-party-authored held-out scenarios, blind black-box evaluation, trace review, and independent technical review of methodology and results.
+
 ---
 
-## Section 03 — Domain 1: Accounts Payable / Business Email Compromise
+## Section 04 — Findings
 
-### 3.1 Why AP / BEC Matters
+### 4.1 Domain 1: Accounts Payable / Business Email Compromise
+
+#### 4.1.1 Why AP / BEC Matters
 
 Accounts payable and business email compromise are a natural first domain for action-boundary testing because the failure is immediate, legible, and expensive. A fraudulent wire transfer does not require a model to be broadly incompetent. It requires only one wrong approval at one irreversible moment.
 
 The FBI's 2024 Internet Crime Report documents $2.77 billion in BEC losses in 2024 alone, with $8.5 billion in total BEC losses reported across 2022 through 2024.
 
-### 3.2 Flagship Result: BEC-EXPLAINED-ANOMALY-001
+#### 4.1.2 Flagship Result: BEC-EXPLAINED-ANOMALY-001
 
 **Gap Case · Domain 1**  
 *Fabricated annual true-up charge with self-referential explanation*  
@@ -209,9 +294,7 @@ This is strong empirical evidence that the architecture changes outcomes beyond 
 
 When Holo misses, the failure is inspectable. The trace shows which model, which role, which turn, and which signal path drove the outcome. That does not make misses acceptable, but it makes them diagnosable and hardenable. A solo-model miss usually leaves far less usable evidence about what failed.
 
-### 3.3 What This Result Shows
-
-This result demonstrates three things. First, **a solo model can recognize a signal and still clear it incorrectly.** Second, the failure modes differ by model. Third, **Holo's value is not that it contains a magical model that sees what no frontier model can see.** Its value is that it prevents one model's blindspot from becoming the final decision.
+**What this result shows.** First, **a solo model can recognize a signal and still clear it incorrectly.** Second, the failure modes differ by model. Third, **Holo's value is not that it contains a magical model that sees what no frontier model can see.** Its value is that it prevents one model's blindspot from becoming the final decision.
 
 **GPT-5.4 — Detection Failure**  
 Never found the signal. Accepted the narrative in Turn 1 and spent two additional turns confirming its own reasoning.
@@ -224,23 +307,32 @@ Sensed something was wrong, generated two incorrect hypotheses, correctly reject
 
 None of the three solo models asked the question that breaks the narrative: *if this true-up mechanism has been in the master services agreement since 2022, why did it not appear in Q1 2024 or Q1 2025?* Holo's adversarial reactor generated that question because it is constitutionally prohibited from accepting an explanation without testing whether it can be verified against the available record.
 
-### 3.4 Precision Cases
+#### 4.1.3 Supporting Result: BEC-PHANTOM-DEP-003A
+
+**Gap Case · Domain 1**  
+*Phantom dependency introduction via in-chain contact with no out-of-band verification*
+
+BEC-PHANTOM-DEP-003A tests a structurally different attack vector within the same domain: a legitimate vendor relationship where a new contact is introduced through in-chain emails as the authoritative point of contact for a payment change, with no independent verification artifact predating the chain.
+
+The signal is not a labeled flag. It is circular identity evidence: every document establishing the new contact's legitimacy originates from the same domain the attacker controls. A solo model that accepts in-chain corroboration as independent verification will not find anything wrong.
+
+Across seven benchmark runs, Holo produced stable ESCALATE behavior on this scenario. This case is included as a supporting Domain 1 result, not as a flagship. It demonstrates that the architecture extends to identity-provenance attack classes, not only fabricated-charge attacks.
+
+#### 4.1.4 Precision Cases
 
 We ran precision scenarios in Domain 1: legitimate transactions designed to look suspicious. Holo returned ALLOW on all of them.
 
-These results matter as much as the gap case. Without them, the gap result proves only that Holo escalates. With them, it proves that Holo escalates when the evidence warrants it.
+These results matter as much as the gap cases. Without them, the gap results prove only that Holo escalates. With them, they prove that Holo escalates when the evidence warrants it.
 
----
+### 4.2 Domain 2: Agentic Commerce
 
-## Section 04 — Domain 2: Agentic Commerce
-
-### 4.1 The Attack Class
+#### 4.2.1 The Attack Class
 
 As AI agents gain authority to transact autonomously, a new attack surface opens one layer upstream from the payment itself. The agent validates the instruction, checks the vendor, confirms the amount is in policy, and proceeds. What it does not necessarily validate is whether the system that generated the instruction can be trusted.
 
 > **The attack does not live at the payment authorization step. It lives inside the automated system the agent treats as authoritative.**
 
-### 4.2 Flagship Result: AGENTIC-ROUTINE-001
+#### 4.2.2 Flagship Result: AGENTIC-ROUTINE-001
 
 **Gap Case · Domain 2**  
 *Compromised automated reorder system via injected inventory threshold alert*  
@@ -261,7 +353,7 @@ The only visible breadcrumb is the inventory management system's last human revi
 
 Unlike Domain 1, Gemini caught this case while GPT and Claude missed it. Coverage gaps are not symmetric across models or attack classes. That asymmetry is the point.
 
-### 4.3 Why This Domain Matters for the Thesis
+#### 4.2.3 Why This Domain Matters for the Thesis
 
 The importance of the second domain is not just that Holo performed well again. It is that **the architecture advantage survives a change in payload type.**
 
@@ -269,7 +361,13 @@ In AP/BEC, the threat is recognizable as fraud. In agentic commerce, the threat 
 
 A single domain could be dismissed as a feature demo. Two domains begin to suggest the architecture travels across materially different payload types. But that claim depends on continued domain expansion. The broader proof requires completing additional domains. What these two establish is the narrower point: the same structural weakness appears in materially different high-consequence workflows, and an adversarial architecture can change the outcome in both.
 
-### 4.4 What the Two Domains Show Together
+### 4.3 What the Two Domains Show Together
+
+The current finding is narrow but meaningful.
+
+The benchmark does not establish universal coverage. It does not show that Holo catches all action-boundary failures. It shows that, under disclosed conditions, Holo produced different verdict behavior than solo frontier models on specific high-consequence action-boundary scenarios.
+
+The significance is not that one benchmark proves production readiness. The significance is that the architecture changed the outcome at the moment of decision.
 
 Taken together, the two domains support a narrower and more durable claim than broad benchmark theater usually allows. The claim is not that every solo frontier model fails every hard case. The claim is that:
 
@@ -277,51 +375,31 @@ Taken together, the two domains support a narrower and more durable claim than b
 - those blindspots are non-overlapping
 - the same frontier models, when placed into an adversarial runtime architecture, can produce a safer operational verdict than any one of them produces alone
 
-That is the commercial point. Not that Holo replaces frontier intelligence. **That it governs it at the moment where a miss becomes expensive.**
-
----
-
-## Section 05 — Coverage Gaps Across Models
-
-The two flagship cases show different failure patterns. In the canonical solo baseline for BEC-EXPLAINED-ANOMALY-001, all three solo frontier models returned ALLOW while Holo escalated correctly. Later reruns showed Gemini can sometimes escalate on this scenario, reinforcing that single-model coverage is inconsistent and attack-class-specific. In AGENTIC-ROUTINE-001, GPT and Claude missed while Gemini caught the scenario correctly. Model coverage is attack-class-specific, and no single model can be assumed to cover all cases.
+No single frontier model had complete coverage across the flagship cases. GPT missed where Claude caught. Claude missed where Gemini caught. In one flagship case, all three missed simultaneously.
 
 The benchmark's strongest current claim is not that frontier models universally fail at the action boundary. It is that **no single frontier model has complete coverage across attack classes, and that Holo can raise the floor through adversarial cross-examination.**
-
-### The Symmetric Collapse Result
-
-BEC-EXPLAINED-ANOMALY-001 is the current strongest public proof object. In the canonical solo baseline run, all three solo frontier models returned ALLOW. Holo returned ESCALATE. In the canonical forced-pressure Architecture Stability Test — 10 pre-declared seeds, fixed turn budget — Holo returned ESCALATE on all 10. This is not a production reliability claim or an accuracy rate. It is evidence that the forced-pressure adjudication architecture produces a stable verdict on this scenario under adversarial seed variation.
-
-| Condition | Verdict | Correct? |
-|-----------|---------|----------|
-| Solo GPT-5.4 | ALLOW | ✗ |
-| Solo Claude-Sonnet-4-6 | ALLOW | ✗ |
-| Solo Gemini-2.5-Pro | ALLOW | ✗ |
-| **Holo Full Architecture** | **ESCALATE** | **✓** |
-
-This is strong empirical evidence that the architecture changes outcomes beyond what any solo model achieves. It is not proof of universal advantage, and it should not be read as such.
-
-The attack succeeds not by hiding the signal but by providing a plausible, corporate-sounding narrative explanation. Solo reasoning paths do not ask whether an explanation is substantiated against the historical record. They ask whether it is plausible.
-
-> **A solo model cannot be both the skeptic and the believer at the same time.**
-
-### The Three Failure Modes Are Mechanically Distinct
-
-**GPT-5.4 — Detection Failure**  
-Never found the signal. Accepted the narrative in Turn 1 and spent two additional turns confirming its own reasoning.
-
-**Claude-Sonnet-4-6 — Persuasion Failure**  
-Found the correct signal in Turn 2, rated it MEDIUM. By Turn 3, had downgraded the flag back to LOW. Not a failure to see the signal. A failure to hold it against a plausible narrative.
-
-**Gemini-2.5-Pro — Self-Correction Failure**  
-Sensed something was wrong, generated two incorrect hypotheses, correctly rejected them under its own evidentiary discipline, and still landed on the wrong final verdict.
-
-None of the three solo models asked the question that breaks the narrative: *if this true-up mechanism has been in the master services agreement since 2022, why did it not appear in Q1 2024 or Q1 2025?* Holo's adversarial reactor generated that question because it is constitutionally prohibited from accepting an explanation without testing whether it can be verified against the available record.
 
 > **Holo should not be read as an argument against any one frontier model. The operational lesson is narrower and more important: solo deployment of any single model leaves coverage gaps at the action boundary that are model-specific and non-overlapping. Holo's role is to reduce that deployment risk, including for organizations that standardize on Claude, GPT, or Gemini.**
 
 ---
 
+## Section 05 — Finding: Shared Reasoning Context Changes Model Behavior
+
+One of the most important observations in the current benchmark is that model behavior changes when models reason inside a shared trace.
+
+In isolated solo runs, each model receives the same payload and reaches its own verdict. In Holo's adversarial council, later models can see the reasoning, uncertainty, omissions, and assumptions surfaced by earlier models. The models are not merely voting. They are reacting to a shared evidentiary record.
+
+In observed runs, this shared-thread structure changed behavior. Models became more willing to acknowledge uncertainty, challenge prior conclusions, and revisit assumptions after another model exposed a blindspot.
+
+This matters because many high-consequence failures are not caused by absence of intelligence. They are caused by unchallenged plausibility. A single model can produce a coherent explanation for why an action should proceed. A shared adversarial trace gives later models an opportunity to inspect that coherence, test it against the evidence, and identify what the first model normalized or missed.
+
+This is not yet a universal behavioral claim. It is an observed architecture finding from the current benchmark traces and should be tested further through controlled comparisons between isolated reasoning, blinded multi-model review, and shared-thread adjudication.
+
+---
+
 ## Section 06 — Architecture
+
+The architecture is described here at the control-plane level. Implementation-specific scoring, routing, prompting, convergence, and verdict-computation details remain proprietary. The purpose of this section is to explain the shape of the control system, not to publish enough detail to reimplement it.
 
 ### 6.1 Evidentiary Discipline
 
@@ -345,6 +423,8 @@ Each model in the adversarial reactor sees the complete, unedited history of eve
 
 ### 6.4 The Static Governor
 
+The Governor is not another model asked to summarize the council. It is a deterministic adjudication layer that converts surfaced evidence, unresolved contradictions, and risk indicators into an ALLOW or ESCALATE decision. The exact scoring and computation logic remain proprietary, but the design principle is simple: the final verdict should reflect the evidence surfaced during adversarial review, not the rhetorical force, position, or recency of any single model turn.
+
 The governor is deterministic and algorithmic. It does not learn from prior evaluations. This was a deliberate choice. A learned governor could itself be trained into a blindspot. A static governor has predictable, auditable behavior.
 
 ### 6.5 State and Verdict Integrity
@@ -367,13 +447,35 @@ Benchmark pressure-testing has surfaced an important architectural constraint: a
 
 ---
 
-## Section 07 — From Observability to Evidence
+## Section 07 — Why Unsupported Human Review Is Not Enough
+
+Human-in-the-loop review has become the default answer to AI risk. For some workflows, it remains necessary. But it is not sufficient as a general safety architecture for agentic systems.
+
+The problem is not human intelligence. The problem is review conditions.
+
+Agents can operate at machine speed. Humans review under time pressure. Agents can assemble actions from fragmented context. Humans are often shown only the final request. Agents may rely on prior state, policy exceptions, vendor history, contract clauses, and implicit authorization chains. Humans are asked to approve or reject without reconstructing the full evidence graph.
+
+In that setting, human review becomes both a bottleneck and a liability. The reviewer is responsible for the decision but may not have enough context to make it.
+
+Holo's origin reflects this limitation. Before Holo, the founder used cross-model adversarial verification in high-consequence output workflows because unsupported human review, including the founder's own review, was not reliable enough under ambiguity, deadline pressure, and volume.
+
+The lesson was not that humans should be removed. The lesson was that humans need structured adjudication support, and some decisions should be escalated only when the unresolved evidence requires it.
+
+Holo does not replace all human review. It makes escalation more selective and evidence-based. The goal is not to add another human checkpoint to every action. The goal is to determine which actions deserve human attention before execution, and why.
+
+---
+
+## Section 08 — Evidence vs. Observability
 
 The current industry conversation around AI agent safety is focused on guardrails — preventing an agent from taking a prohibited action. This is necessary but insufficient. A locked door reduces the chance of a break-in, but if one happens, you don't show the lock to the judge. You show the security footage. The agent governance space today is almost entirely focused on building better locks. Very few are building the camera.
 
 Observability and evidence are not the same thing. Observability tells your engineers what is happening inside your system. Evidence is what you produce when an auditor, a regulator, or a counterparty needs to verify what happened. The bar is meaningfully higher. Most agent platforms today produce logs. Logs are not evidence.
 
 Holo's position at the action boundary means the decision record it produces is structurally different from a downstream log. The full payload is captured at the moment of decision, not reconstructed from partial telemetry after the fact. The turn-by-turn adversarial trace documents which models flagged which risks, how conflicts were resolved, and which specific signals drove the final verdict. It is the record of a judgment, not just an event.
+
+A Holo decision record should make the basis of an action-boundary verdict inspectable after the fact. At minimum, the record should identify the action type, payload ID or hash, workflow class, final verdict, escalation reason, evidence conflicts detected, trace availability, run timestamp, provider degradation state if applicable, and a Governor decision summary.
+
+The point is not merely to observe that an agent acted. The point is to preserve why a proposed action was allowed or escalated before execution.
 
 This precision matters for more than compliance. Because Holo captures the complete payload, turn history, and verdict path at the action boundary, failures can be diagnosed precisely when they occur. When the system misses, the system can name what failed: which model, which role, which turn, which signal path led to the wrong verdict. That is meaningfully different from shrugging off a miss as generic model variance. The same architecture that makes evidence visible at the action boundary makes failures inspectable and hardenable. That is one of the strongest differentiators of the system.
 
@@ -383,7 +485,7 @@ One natural extension is cryptographic signing of the decision record, anchoring
 
 ---
 
-## Section 08 — Objections
+## Section 09 — Objections
 
 A technically serious reader should object to this paper. Several objections are valid. We address the strongest ones directly.
 
@@ -431,6 +533,22 @@ No. The architecture is model-agnostic, but it is not simply a bundle of models 
 
 Holo uses frontier models as adversarial analysts inside a structured checkpoint architecture. The important property is not plurality by itself. It is role separation, evidentiary discipline, randomized assignment, and a deterministic governor that computes the verdict from the evidence rather than from the confidence of the last model to speak.
 
+### "Is Holo just Mixture of Experts?"
+
+No. Mixture of Experts is typically a model-internal routing architecture used to select or weight expert subnetworks during generation. Holo operates outside the agent and outside the model. It does not generate the action. It adjudicates whether a proposed action should execute.
+
+Holo's council is not used to optimize an answer. It is used to expose disagreement, uncertainty, missing evidence, and semantic contradictions before an irreversible action proceeds. The final ALLOW or ESCALATE verdict is not a blended model output. It is computed by a static Governor from the evidence surfaced during adversarial review.
+
+The distinction is simple: Mixture of Experts helps produce an output. Holo judges whether an output or action should be allowed to execute.
+
+### "Is this just red teaming?"
+
+No. Red teaming typically probes model behavior, prompt susceptibility, jailbreaks, unsafe outputs, or policy violations. ABAT probes whether an agentic system should be allowed to execute a specific real-world action after the usual checks have already passed. The target is different: not the model's behavior in general, but the verdict at a specific decision point.
+
+### "Is this just fraud detection?"
+
+No. Fraud detection typically looks for known patterns, anomalies, and risk signals against a learned corpus. ABAT tests whether an action remains coherent when current request, historical behavior, authorization chain, policy context, and business logic are adjudicated together. The distinction: fraud detection pattern-matches. Action-boundary adjudication reconstructs an evidence graph for a specific proposed action under novel conditions.
+
 ### "What stops a competitor from copying this?"
 
 The visible architecture can be copied faster than the research program behind it.
@@ -465,40 +583,13 @@ A solo model miss is opaque: it offers no signal about what changed, which reaso
 
 The question is not whether a system has misses. The question is whether those misses can be identified and reduced over time. Holo's architecture makes that possible.
 
----
+### "Why not just use human review?"
 
-## Section 09 — The Blindspot Atlas
-
-The benchmark is not a static artifact. It is the front end of a compounding research program. Each completed domain produces four things: a scenario library, a set of confirmed failure patterns, a calibrated scoring rubric, and a record of where the architecture added value.
-
-> **The Blindspot Atlas: A structured, domain-by-domain map of where frontier models fail at the action boundary. Built from adversarial pressure testing under realistic conditions, not from theoretical analysis or synthetic data.**
-
-The Atlas serves three compounding functions. First, it informs scenario design: failure patterns discovered in one domain often suggest attack classes worth testing in adjacent domains. Second, it informs governor tuning with domain-specific risk tolerances. Third, it is the institutional memory of the research program. A competitor who builds a similar reactor tomorrow starts with no Atlas.
-
-Over time, the Atlas may become useful to the labs themselves as a structured map of attack-class-specific failure patterns that are difficult to surface through generic benchmark suites.
+Because the conditions under which human review operates in agentic systems are not the conditions assumed when it was proposed as a safeguard. See Section 07 for the full argument.
 
 ---
 
-## Section 10 — What Comes Next
-
-Two domains are complete. Six are in active design and reconnaissance.
-
-| Domain | Status | Attack Class |
-|--------|--------|--------------|
-| 01 · Accounts Payable / BEC | **Complete** | Fabricated true-up charge with narrative cover |
-| 02 · Agentic Commerce | **Complete** | Long-con manipulation via compromised automated procurement |
-| 03 · IT Access Provisioning | In design | Privilege escalation disguised as routine onboarding |
-| 04 · Legal Contract Execution | In design | Subordinate documents that quietly override parent terms |
-| 05 · Regulated Procurement | In design | Threshold gaming and split-order fraud |
-| 06 · HR and Workforce Actions | In design | Authority spoofing and policy bypass |
-| 07 · Infrastructure and Configuration | In design | Change requests with cascading downstream consequences |
-| 08 · Financial Reporting and Compliance | In design | Data manipulation in otherwise clean reporting pipelines |
-
-> Independent replication of the solo conditions is encouraged. If your results differ from ours, we want to know.
-
----
-
-## Section 11 — Limitations
+## Section 10 — Limitations
 
 *We state these directly because a trust product that hedges its own limitations is not a trust product.*
 
@@ -525,6 +616,9 @@ Some benchmark scenarios remain role-sensitive or sequence-sensitive under speci
 
 **Current flagship confidence**  
 The strongest current flagship result is high-confidence, not a production guarantee. In the canonical forced-pressure Architecture Stability Test for BEC-EXPLAINED-ANOMALY-001 — 10 pre-declared seeds, fixed turn budget — Holo returned ESCALATE on all 10. This is not an accuracy rate and should not be read as a deployment probability. Runtime convergence behavior is measured separately from forced-pressure AST results and has not been formally characterized at scale. An earlier convergence-style run produced a diagnosable miss on seed 161; under forced-pressure adjudication and clean individual rerun, that seed escalated. The appropriate confidence claim is: stable verdict under forced-pressure adversarial conditions on a specific scenario, not universal runtime coverage.
+
+**Full Holo architecture not publicly reproducible**  
+The proprietary Governor logic, adversarial reactor configuration, model-routing details, turn heuristics, and verdict computation layer are not publicly disclosed. Third parties can reproduce the evaluation layer but cannot reimplement the proprietary control layer. This is intentional, but it limits the scope of independent validation available today.
 
 **Benchmark as hardening instrument**  
 The benchmark is not only a marketing artifact. It is a pressure-testing instrument. The hardening process — running scenarios across seeds, identifying failures, tracing them to specific model and role conditions — is an ongoing function, not a one-time evaluation. Results published here represent a snapshot of a system under continuous pressure-testing.
@@ -562,13 +656,68 @@ Each published result should include:
 
 ---
 
+## Section 11 — Replication and Future Work
+
+The current benchmark is an internal benchmark with public solo-model baselines and disclosed methodology. That is not the final validation state.
+
+A credible trust layer needs a path from internal evidence to independent review. Holo's replication roadmap is designed to increase external verification without exposing proprietary control logic.
+
+### Level 1: Public Solo Baseline Reproduction
+
+Third parties reproduce solo-model results using public payloads and disclosed prompt conditions. This verifies the baseline comparison layer.
+
+### Level 2: Trace Review
+
+Third parties inspect Holo traces and verify that the verdict reason aligns with the disclosed payload and benchmark gates. This verifies whether the system escalated for the stated reason, not for an unrelated artifact.
+
+### Level 3: Third-Party-Authored Held-Out Scenarios
+
+External reviewers author new action-boundary payloads that Holo has not seen. These should include both gap cases, where the action should be escalated, and precision cases, where the action looks suspicious but should be allowed.
+
+### Level 4: Blind Holo Evaluation
+
+Held-out payloads are submitted through a controlled black-box process. Holo returns ALLOW or ESCALATE with an audit trace. The reviewer evaluates whether the verdict and reasoning match the pre-declared scenario ground truth.
+
+### Level 5: Independent Technical Review
+
+An external researcher, design partner, or security reviewer reviews methodology, results, traces, and limitations. The goal is not to disclose the proprietary Governor. The goal is to determine whether the system behaves as claimed under externally authored test conditions.
+
+Replication does not require public release of the proprietary Governor logic. It requires enough public method, payload transparency, trace access, and black-box verdict testing to determine whether the system behaves as claimed.
+
+Future benchmark work should expand precision testing: suspicious-looking but legitimate actions that should be allowed. A trust layer that only escalates is not sufficient. It must also demonstrate that it can allow unusual but valid actions when the evidence supports execution.
+
+### Domain Roadmap
+
+| Domain | Status | Attack Class |
+|--------|--------|--------------|
+| 01 · Accounts Payable / BEC | **Complete** | Fabricated true-up charge with narrative cover; phantom dependency introduction |
+| 02 · Agentic Commerce | **Complete** | Long-con manipulation via compromised automated procurement |
+| 03 · IT Access Provisioning | In design | Privilege escalation disguised as routine onboarding |
+| 04 · Legal Contract Execution | In design | Subordinate documents that quietly override parent terms |
+| 05 · Regulated Procurement | In design | Threshold gaming and split-order fraud |
+| 06 · HR and Workforce Actions | In design | Authority spoofing and policy bypass |
+| 07 · Infrastructure and Configuration | In design | Change requests with cascading downstream consequences |
+| 08 · Financial Reporting and Compliance | In design | Data manipulation in otherwise clean reporting pipelines |
+
+> Independent replication of the solo conditions is encouraged. If your results differ from ours, we want to know.
+
+### The Blindspot Atlas
+
+The benchmark is not a static artifact. It is the front end of a compounding research program. Each completed domain produces four things: a scenario library, a set of confirmed failure patterns, a calibrated scoring rubric, and a record of where the architecture added value.
+
+The Atlas serves three compounding functions. First, it informs scenario design: failure patterns discovered in one domain often suggest attack classes worth testing in adjacent domains. Second, it informs governor tuning with domain-specific risk tolerances. Third, it is the institutional memory of the research program. A competitor who builds a similar reactor tomorrow starts with no Atlas.
+
+Over time, the Atlas may become useful to the labs themselves as a structured map of attack-class-specific failure patterns that are difficult to surface through generic benchmark suites.
+
+---
+
 ## Conclusion
 
 AI agents are making irreversible decisions today. The security infrastructure around those decisions was not designed for them.
 
 This paper does not claim to have solved that problem. It claims to have identified a specific, testable gap at the action boundary, built a methodology for pressure-testing it, and produced results that justify further scrutiny. Holo is not a system that simply wins benchmarks. It is a system that can identify where solo model judgment breaks down at the action boundary, intervene at the moment that matters, and be hardened through systematic pressure-testing. When it misses, the failure is traceable. When it catches, the verdict is explained. The benchmark is how Holo learns where the ambushes are, and the runtime is how it acts on that knowledge.
 
-The benchmark is how we learned where the ambushes are. Holo is how we make sure your agents never walk into one.
+The benchmark shows where some of the ambushes are. Holo is an attempt to make those ambushes visible before the action executes.
 
 Behind every agentic workflow in this benchmark is a person who might not know an AI made the decision. The small business owner whose vendor payment was rerouted. The employee whose system access was quietly expanded. The company whose contract now contains terms no one approved. They did not interact with the model. They did not see the payload. The action boundary is invisible to them. That is exactly why it cannot be unguarded.
 
@@ -590,4 +739,4 @@ Behind every agentic workflow in this benchmark is a person who might not know a
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 2.7 · April 26, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 2.8 · May 1, 2026*

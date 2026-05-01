@@ -79,6 +79,8 @@ It does not claim that Holo's proprietary Governor logic, adversarial reactor co
 
 The current benchmark should be read as internal evidence under disclosed conditions, with public solo-model baselines, public payloads and traces where available, and a defined path toward third-party replication.
 
+The benchmark is a point-in-time snapshot from April 2026. It reflects the API-available frontier models selected for stability, accessibility, and cross-lab diversity at the time of testing. It does not claim that these were the only capable models available, that no stronger model existed in any environment, or that the same results would necessarily hold across future model versions.
+
 Holo's benchmark is intended to be reproducible at the evaluation layer, not reimplementable at the proprietary control layer.
 
 ---
@@ -252,6 +254,16 @@ Current public materials may include scenario descriptions, selected payloads, s
 Holo's proprietary layer includes the Governor logic, adversarial reactor configuration, model-routing logic, verdict computation layer, and production implementation details.
 
 Future validation should increase independence without requiring public release of proprietary implementation. The intended path is third-party-authored held-out scenarios, blind black-box evaluation, trace review, and independent technical review of methodology and results.
+
+### 3.8 Model Roster Parity
+
+The benchmark uses the same three-model roster in the solo baseline condition and inside Holo's adversarial council.
+
+This matters. If Holo used stronger, newer, or different models than the solo baselines, the result could be confounded by model capability. The benchmark would not show whether the architecture changed the outcome; it might only show that stronger models performed better.
+
+To avoid that confound, the canonical comparison holds the model roster constant. The same models that were tested as solo adjudicators were also used inside Holo. The variable being tested is the adjudication architecture: isolated single-model judgment versus shared adversarial review plus deterministic Governor adjudication.
+
+The models were selected because they were API-available, operationally stable, and represented different frontier model families at the time of testing. The benchmark should be read as a point-in-time architecture comparison, not a permanent ranking of model capability.
 
 ---
 
@@ -599,6 +611,13 @@ Two domains and a limited number of published scenario types are not sufficient 
 
 **No adversarial testing of architecture**  
 The benchmark tests whether Holo catches threats that solo models miss. It does not test whether an informed adversary, aware of Holo's architecture, could design payloads specifically engineered to survive the adversarial reactor. That is a real and important gap. It is on the research roadmap.
+
+**Point-in-time model snapshot**  
+The benchmark reflects a specific model roster and model state around April 2026. Frontier models change quickly. API behavior, reasoning patterns, safety tuning, context handling, and tool-use behavior may shift across versions.
+
+The benchmark therefore should not be read as a permanent claim about any specific model provider. It is a point-in-time test of whether Holo's architecture changed verdict behavior when the model roster was held constant.
+
+A reasonable hypothesis is that adversarial adjudication can improve coverage across other sufficiently capable and diverse model rosters, but that hypothesis must be tested. The current benchmark does not prove that the same results would hold with every future model or every alternate model combination.
 
 **Model version sensitivity**  
 Benchmark results are tied to specific model versions at a specific point in time. Results reported here reflect GPT-5.4, Claude-Sonnet-4-6, and Gemini-2.5-Pro as evaluated in April 2026. Future model versions may produce different outcomes on the same scenarios. For that reason, the Blindspot Atlas matters more than any single benchmark object: the durable contribution is the growing map of failure patterns, not the permanence of any one scenario result.

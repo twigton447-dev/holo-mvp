@@ -140,28 +140,31 @@
       opacity: 1;
     }
 
-    /* Sweep cone — rotates around the radar center */
-    .radar-sweep-wrap {
+    /* Sweep cone */
+    .sweep {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: min(90vw, 90vh, 700px);
-      height: min(90vw, 90vh, 700px);
-      transform: translate(-50%, -50%);
+      inset: 0;
+      border-radius: 50%;
+      background:
+        conic-gradient(
+          from 132deg,
+          transparent 0deg,
+          transparent 306deg,
+          rgba(245, 185, 54, 0.08) 314deg,
+          rgba(245, 185, 54, 0.60) 338deg,
+          rgba(245, 185, 54, 0.03) 356deg,
+          transparent 360deg
+        );
+      animation: sweepTurn 36s linear infinite;
+      mix-blend-mode: screen;
+      filter: blur(0.2px);
       pointer-events: none;
       z-index: 1;
-      animation: sweep 12s linear infinite;
-      transform-origin: center center;
     }
 
-    .radar-sweep-wrap svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    @keyframes sweep {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to   { transform: translate(-50%, -50%) rotate(360deg); }
+    @keyframes sweepTurn {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
     }
 
     /* Signal dots */
@@ -464,7 +467,7 @@
       .site-nav { gap: 20px; }
 
       .hero { padding: 60px 24px 48px; min-height: calc(100vh - 54px); }
-      .radar-scope, .radar-sweep-wrap { width: min(95vw, 95vh); height: min(95vw, 95vh); }
+      .radar-scope { width: min(95vw, 95vh); height: min(95vw, 95vh); }
 
       .hero-actions { flex-direction: column; align-items: center; }
 
@@ -556,23 +559,7 @@
       </svg>
 
       <!-- Animated sweep cone -->
-      <div class="radar-sweep-wrap" aria-hidden="true">
-        <svg viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="sweepGrad" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#C19A3B" stop-opacity="0.18"/>
-              <stop offset="100%" stop-color="#C19A3B" stop-opacity="0"/>
-            </radialGradient>
-            <clipPath id="ringClip">
-              <circle cx="300" cy="300" r="272"/>
-            </clipPath>
-          </defs>
-          <!-- Sweep wedge: ~35deg arc from center -->
-          <path d="M300,300 L300,28 A272,272 0 0,1 466,91 Z" fill="url(#sweepGrad)" opacity="0.55" clip-path="url(#ringClip)"/>
-          <!-- Bright leading edge -->
-          <line x1="300" y1="300" x2="300" y2="28" stroke="#C19A3B" stroke-width="1" opacity="0.45"/>
-        </svg>
-      </div>
+      <div class="sweep" aria-hidden="true"></div>
 
       <div class="hero-content">
 

@@ -15,7 +15,7 @@
   <meta name="description" content="Holo sits at the action boundary and returns ALLOW or ESCALATE before irreversible AI actions execute." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -39,12 +39,42 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     a { color: inherit; text-decoration: none; }
 
+    /* ── RADAR BACKGROUND ── */
+    .radar-bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── CORNER DECORATORS ── */
+    .corner {
+      position: fixed;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(138,122,82,0.4);
+      line-height: 1.7;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .corner-tl { top: 18px; left: 20px; }
+    .corner-tr { top: 18px; right: 20px; text-align: right; }
+    .corner-bl { bottom: 18px; left: 20px; }
+    .corner-br { bottom: 18px; right: 20px; text-align: right; }
+
     /* ── NAV ── */
     nav {
+      position: relative;
+      z-index: 10;
       padding: 20px 48px;
       display: flex;
       justify-content: space-between;
@@ -64,13 +94,15 @@
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--ink);
-      opacity: 0.58;
+      opacity: 0.5;
       transition: opacity 0.15s;
     }
     .nav-links a:hover { opacity: 1; }
 
     /* ── MAIN ── */
     main {
+      position: relative;
+      z-index: 1;
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -80,37 +112,35 @@
       padding: 48px 40px 36px;
     }
 
-    .hero-mark { margin-bottom: 28px; }
+    .hero-mark { margin-bottom: 32px; opacity: 0.7; }
 
-    /* ── WORDMARK ──
-       paint-stroke trick: hair-thin text-shadow in same color
-       thickens the letterform without changing weight class      */
+    /* ── WORDMARK ── */
     .hero-wordmark {
       font-family: var(--serif);
-      font-size: clamp(5rem, 14vw, 9.5rem);
+      font-size: clamp(5rem, 15vw, 10rem);
       font-weight: 700;
-      letter-spacing: 0.22em;
-      text-indent: 0.22em;
+      letter-spacing: 0.28em;
+      text-indent: 0.28em;
       color: var(--ink);
-      /* subtle shadow in all four directions thickens strokes */
       text-shadow:
-        0.7px  0px   0 var(--ink),
-       -0.7px  0px   0 var(--ink),
-        0px    0.7px 0 var(--ink),
-        0px   -0.7px 0 var(--ink);
+        0.6px  0    0 var(--ink),
+       -0.6px  0    0 var(--ink),
+        0      0.6px 0 var(--ink),
+        0     -0.6px 0 var(--ink);
       line-height: 1;
       display: block;
-      margin-bottom: 16px;
     }
 
-    /* ── TAGLINE ── */
-    .hero-tagline {
-      font-family: var(--sans);
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.24em;
+    .hero-engine {
+      font-family: var(--mono);
+      font-size: clamp(0.6rem, 1.4vw, 0.85rem);
+      font-weight: 500;
+      letter-spacing: 0.55em;
+      text-indent: 0.55em;
       text-transform: uppercase;
       color: var(--gold);
+      margin-top: 10px;
+      display: block;
     }
 
     /* ── DIVIDER ── */
@@ -121,32 +151,59 @@
       margin: 36px auto;
     }
 
-    /* ── BODY COPY ── */
-    .hero-body { max-width: 480px; }
-
-    .hero-body p {
+    /* ── TAGLINE ── */
+    .hero-tagline {
       font-family: var(--sans);
-      font-size: 17px;
+      font-size: 13px;
       font-weight: 500;
-      line-height: 1.65;
+      letter-spacing: 0.06em;
       color: var(--ink);
-      opacity: 0.75;
-      letter-spacing: 0.01em;
+      opacity: 0.55;
+      max-width: 420px;
+      line-height: 1.65;
     }
 
-    /* ── RAISE LINE ── */
-    .raise-line {
-      margin-top: 44px;
+    /* ── LINKS ── */
+    .hero-links {
+      margin-top: 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .hero-link-primary {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      border: 1px solid rgba(80,62,36,0.25);
+      padding: 9px 20px;
+      border-radius: 3px;
+      opacity: 0.8;
+      transition: opacity 0.15s, border-color 0.15s;
+    }
+    .hero-link-primary:hover { opacity: 1; border-color: rgba(80,62,36,0.5); }
+
+    .hero-link-ghost {
       font-family: var(--mono);
       font-size: 10px;
       font-weight: 500;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--gold);
+      padding: 9px 4px;
+      opacity: 0.75;
+      transition: opacity 0.15s;
     }
+    .hero-link-ghost:hover { opacity: 1; }
 
     /* ── FOOTER ── */
     footer {
+      position: relative;
+      z-index: 1;
       padding: 16px 48px;
       border-top: 1px solid var(--border);
       display: flex;
@@ -157,65 +214,131 @@
       font-family: var(--mono);
       font-size: 10px;
       letter-spacing: 0.1em;
-      color: var(--muted);
+      color: rgba(138,122,82,0.6);
     }
 
     @media (max-width: 600px) {
       nav { padding: 16px 24px; }
       .nav-links li + li { margin-left: 20px; }
       main { padding: 36px 24px 28px; }
+      .corner { display: none; }
     }
   </style>
+  <script data-goatcounter="https://holoengine.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 
+  <!-- RADAR BACKGROUND -->
+  <svg class="radar-bg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <style>
+        .r-ring { fill: none; stroke: rgba(138,122,82,0.10); stroke-width: 0.6; }
+        .r-line { stroke: rgba(138,122,82,0.07); stroke-width: 0.5; }
+        .r-tick { stroke: rgba(138,122,82,0.18); stroke-width: 0.6; }
+        .r-label { font-family: 'JetBrains Mono', monospace; font-size: 7px; fill: rgba(138,122,82,0.3); letter-spacing: 0.08em; }
+      </style>
+    </defs>
+
+    <!-- Crosshair lines through center (500,500) -->
+    <line class="r-line" x1="0" y1="500" x2="1000" y2="500"/>
+    <line class="r-line" x1="500" y1="0" x2="500" y2="1000"/>
+    <!-- Diagonal grid lines -->
+    <line class="r-line" x1="0" y1="0" x2="1000" y2="1000" stroke-opacity="0.04"/>
+    <line class="r-line" x1="1000" y1="0" x2="0" y2="1000" stroke-opacity="0.04"/>
+
+    <!-- Concentric circles centered at 500,500 -->
+    <circle class="r-ring" cx="500" cy="500" r="80"/>
+    <circle class="r-ring" cx="500" cy="500" r="160"/>
+    <circle class="r-ring" cx="500" cy="500" r="240"/>
+    <circle class="r-ring" cx="500" cy="500" r="320"/>
+    <circle class="r-ring" cx="500" cy="500" r="420" stroke-opacity="0.07"/>
+    <circle class="r-ring" cx="500" cy="500" r="530" stroke-opacity="0.05"/>
+    <circle class="r-ring" cx="500" cy="500" r="660" stroke-opacity="0.04"/>
+
+    <!-- Cardinal tick marks on rings -->
+    <!-- Ring 160 -->
+    <line class="r-tick" x1="500" y1="336" x2="500" y2="344"/>
+    <line class="r-tick" x1="500" y1="656" x2="500" y2="664"/>
+    <line class="r-tick" x1="336" y1="500" x2="344" y2="500"/>
+    <line class="r-tick" x1="656" y1="500" x2="664" y2="500"/>
+    <!-- Ring 240 -->
+    <line class="r-tick" x1="500" y1="256" x2="500" y2="264"/>
+    <line class="r-tick" x1="500" y1="736" x2="500" y2="744"/>
+    <line class="r-tick" x1="256" y1="500" x2="264" y2="500"/>
+    <line class="r-tick" x1="736" y1="500" x2="744" y2="500"/>
+    <!-- Ring 320 -->
+    <line class="r-tick" x1="500" y1="176" x2="500" y2="184"/>
+    <line class="r-tick" x1="500" y1="816" x2="500" y2="824"/>
+    <line class="r-tick" x1="176" y1="500" x2="184" y2="500"/>
+    <line class="r-tick" x1="816" y1="500" x2="824" y2="500"/>
+
+    <!-- Range labels on right side of rings -->
+    <text class="r-label" x="664" y="497">160</text>
+    <text class="r-label" x="744" y="497">240</text>
+    <text class="r-label" x="824" y="497">320</text>
+
+    <!-- Bearing arc label markers at top of outermost ring -->
+    <text class="r-label" text-anchor="middle" x="500" y="74">000°</text>
+    <text class="r-label" text-anchor="start"  x="924" y="503">090°</text>
+    <text class="r-label" text-anchor="middle" x="500" y="932">180°</text>
+    <text class="r-label" text-anchor="end"    x="76"  y="503">270°</text>
+
+    <!-- Sweep indicator line (static, faint) -->
+    <line stroke="rgba(138,122,82,0.06)" stroke-width="1" x1="500" y1="500" x2="740" y2="200"/>
+  </svg>
+
+  <!-- CORNER DECORATORS -->
+  <div class="corner corner-tl">34.0522° N<br>118.2437° W</div>
+  <div class="corner corner-tr">Open Benchmark v2.8<br>April 2026</div>
+  <div class="corner corner-br">Bearing 122°<br>Range 302 KM</div>
+
+  <!-- NAV -->
   <nav>
     <a href="/" class="nav-logo">
-      <!-- nav: 3 equal-weight rings + governor dot -->
-      <svg width="26" height="26" viewBox="0 0 100 100" fill="none">
-        <polygon points="50,4 96,27 96,73 50,96 4,73 4,27"              stroke="#090d18" stroke-width="2" fill="none" opacity="0.55"/>
-        <polygon points="50,20 80,37 80,63 50,80 20,63 20,37"           stroke="#090d18" stroke-width="2" fill="none" opacity="0.55"/>
-        <polygon points="50,36 65,44.5 65,55.5 50,64 35,55.5 35,44.5"  stroke="#090d18" stroke-width="2" fill="none" opacity="0.55"/>
+      <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+        <polygon points="50,4 96,27 96,73 50,96 4,73 4,27"             stroke="#0f0f0e" stroke-width="2" fill="none" opacity="0.4"/>
+        <polygon points="50,20 80,37 80,63 50,80 20,63 20,37"          stroke="#0f0f0e" stroke-width="2" fill="none" opacity="0.55"/>
+        <polygon points="50,36 65,44.5 65,55.5 50,64 35,55.5 35,44.5" stroke="#0f0f0e" stroke-width="2" fill="none" opacity="0.75"/>
         <circle cx="50" cy="50" r="4.5" fill="#8a7a52"/>
       </svg>
     </a>
 
     <ul class="nav-links">
-      <li><a href="whitepaper.html">Whitepaper</a></li>
-      <li><a href="benchmark.html">Benchmark</a></li>
+      <li><a href="/whitepaper">Whitepaper</a></li>
+      <li><a href="/benchmark">Benchmark</a></li>
       <li><a href="https://github.com/twigton447-dev/holo-benchmark" target="_blank">GitHub</a></li>
     </ul>
   </nav>
 
+  <!-- MAIN -->
   <main>
 
-    <!-- hero mark: 3 equal-weight rings + governor dot -->
     <div class="hero-mark">
-      <svg width="130" height="130" viewBox="0 0 100 100" fill="none">
-        <polygon points="50,4 96,27 96,73 50,96 4,73 4,27"              stroke="#090d18" stroke-width="1.6" fill="none" opacity="0.55"/>
-        <polygon points="50,20 80,37 80,63 50,80 20,63 20,37"           stroke="#090d18" stroke-width="1.6" fill="none" opacity="0.55"/>
-        <polygon points="50,36 65,44.5 65,55.5 50,64 35,55.5 35,44.5"  stroke="#090d18" stroke-width="1.6" fill="none" opacity="0.55"/>
+      <svg width="56" height="56" viewBox="0 0 100 100" fill="none">
+        <polygon points="50,4 96,27 96,73 50,96 4,73 4,27"             stroke="#0f0f0e" stroke-width="1.8" fill="none" opacity="0.3"/>
+        <polygon points="50,20 80,37 80,63 50,80 20,63 20,37"          stroke="#0f0f0e" stroke-width="1.8" fill="none" opacity="0.5"/>
+        <polygon points="50,36 65,44.5 65,55.5 50,64 35,55.5 35,44.5" stroke="#0f0f0e" stroke-width="1.8" fill="none" opacity="0.8"/>
         <circle cx="50" cy="50" r="5.5" fill="#8a7a52"/>
       </svg>
     </div>
 
     <span class="hero-wordmark">HOLO</span>
-    <div class="hero-tagline">Pre-execution adjudication for high-consequence AI agent actions</div>
+    <span class="hero-engine">Engine</span>
 
     <div class="hero-divider"></div>
 
-    <div class="hero-body">
-      <p>Holo sits at the action boundary and returns ALLOW or ESCALATE before irreversible AI actions execute.</p>
-    </div>
+    <p class="hero-tagline">Pre-execution adjudication for high-consequence AI agent actions</p>
+    <p class="hero-tagline" style="margin-top:10px;font-size:12px;opacity:0.4">Holo sits at the action boundary and returns ALLOW or ESCALATE before irreversible AI actions execute.</p>
 
-    <div style="margin-top:44px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
-      <a href="whitepaper.html" style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink);border:1.5px solid var(--border);padding:9px 18px;border-radius:4px;opacity:0.85;transition:opacity .15s">Read the Whitepaper</a>
-      <a href="benchmark.html" style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink);border:1.5px solid var(--border);padding:9px 18px;border-radius:4px;opacity:0.85;transition:opacity .15s">Review the Benchmark</a>
-      <a href="/payloads" style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);padding:9px 0;opacity:0.85;transition:opacity .15s">View Payloads →</a>
+    <div class="hero-links">
+      <a href="/whitepaper" class="hero-link-primary">Read the Whitepaper</a>
+      <a href="/benchmark" class="hero-link-primary">Review the Benchmark</a>
+      <a href="/payloads" class="hero-link-ghost">View Payloads →</a>
     </div>
 
   </main>
 
+  <!-- FOOTER -->
   <footer>
     <p>Holo Engine &nbsp;&middot;&nbsp; hello@holoengine.ai</p>
   </footer>

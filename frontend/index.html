@@ -27,7 +27,6 @@
       --gold-faint: rgba(245, 185, 54, 0.14);
       --white:      #f5f1e8;
       --muted:      rgba(245, 241, 232, 0.72);
-      --line:       rgba(245, 185, 54, 0.28);
       --mono:       'JetBrains Mono', 'Courier New', Courier, monospace;
       --serif:      'EB Garamond', Georgia, 'Times New Roman', serif;
     }
@@ -43,7 +42,6 @@
     }
 
     body { overflow-x: hidden; }
-
     a { color: inherit; text-decoration: none; }
 
     /* ── PAGE ── */
@@ -51,33 +49,28 @@
       min-height: 100vh;
       position: relative;
       background:
-        radial-gradient(circle at 72% 48%, rgba(245, 185, 54, 0.12), transparent 28%),
-        radial-gradient(circle at 18% 25%, rgba(90, 135, 180, 0.10), transparent 35%),
+        radial-gradient(circle at 72% 48%, rgba(245, 185, 54, 0.09), transparent 28%),
+        radial-gradient(circle at 18% 25%, rgba(90, 135, 180, 0.08), transparent 35%),
         linear-gradient(115deg, #020812 0%, #06111f 48%, #020812 100%);
       overflow: hidden;
     }
 
-    /* Subtle grid — masked toward radar side */
-    .page::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(245, 185, 54, 0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245, 185, 54, 0.045) 1px, transparent 1px);
-      background-size: 64px 64px;
-      mask-image: radial-gradient(circle at 72% 48%, black 0%, transparent 62%);
-      opacity: 0.4;
-      pointer-events: none;
-    }
-
-    /* Edge vignette */
     .page::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.28) 72%, rgba(0,0,0,0.72) 100%);
+      background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.22) 68%, rgba(0,0,0,0.65) 100%);
       pointer-events: none;
+    }
+
+    /* ── FULL-PAGE PARTICLE CANVAS ── */
+    #particleCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
     }
 
     /* ── NAV ── */
@@ -142,14 +135,8 @@
       letter-spacing: 0.04em;
       transition: background 0.15s, border-color 0.15s;
     }
-    .nav-cta:hover {
-      background: rgba(245, 185, 54, 0.08);
-      border-color: var(--gold);
-    }
-    .nav-cta:focus-visible {
-      outline: 2px solid var(--gold);
-      outline-offset: 3px;
-    }
+    .nav-cta:hover { background: rgba(245, 185, 54, 0.08); border-color: var(--gold); }
+    .nav-cta:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
     /* ── HERO ── */
     .hero {
@@ -163,10 +150,7 @@
       padding: 40px 56px 72px;
     }
 
-    .copy {
-      max-width: 720px;
-      padding-top: 42px;
-    }
+    .copy { max-width: 720px; padding-top: 42px; }
 
     h1 {
       font-family: var(--mono);
@@ -241,9 +225,10 @@
       width: min(720px, 48vw);
       aspect-ratio: 1;
       border-radius: 50%;
-      filter: drop-shadow(0 0 28px rgba(245, 185, 54, 0.14));
+      filter: drop-shadow(0 0 22px rgba(245, 185, 54, 0.10));
     }
 
+    /* Fewer rings, lower opacity */
     .radar-core {
       position: absolute;
       inset: 0;
@@ -252,25 +237,24 @@
         repeating-radial-gradient(
           circle,
           transparent 0,
-          transparent 42px,
-          rgba(245, 185, 54, 0.20) 43px,
-          transparent 45px
+          transparent 68px,
+          rgba(245, 185, 54, 0.11) 69px,
+          transparent 71px
         ),
         repeating-conic-gradient(
           from 0deg,
-          rgba(245, 185, 54, 0.18) 0deg,
-          rgba(245, 185, 54, 0.18) 0.5deg,
-          transparent 0.7deg,
-          transparent 10deg
+          rgba(245, 185, 54, 0.09) 0deg,
+          rgba(245, 185, 54, 0.09) 0.4deg,
+          transparent 0.6deg,
+          transparent 30deg
         ),
-        radial-gradient(circle, rgba(245, 185, 54, 0.18) 0%, rgba(245, 185, 54, 0.05) 42%, transparent 72%);
-      border: 1px solid rgba(245, 185, 54, 0.42);
+        radial-gradient(circle, rgba(245, 185, 54, 0.08) 0%, rgba(245, 185, 54, 0.02) 42%, transparent 72%);
+      border: 1px solid rgba(245, 185, 54, 0.22);
       box-shadow:
-        inset 0 0 34px rgba(245, 185, 54, 0.12),
-        0 0 36px rgba(245, 185, 54, 0.08);
+        inset 0 0 28px rgba(245, 185, 54, 0.06),
+        0 0 24px rgba(245, 185, 54, 0.04);
     }
 
-    /* Crosshair lines (static — inside radar-core) */
     .radar-core::before,
     .radar-core::after {
       content: "";
@@ -278,12 +262,11 @@
       inset: 50% auto auto 0;
       width: 100%;
       height: 1px;
-      background: rgba(245, 185, 54, 0.38);
+      background: rgba(245, 185, 54, 0.18);
       transform-origin: center;
     }
     .radar-core::after { transform: rotate(90deg); }
 
-    /* Sweep beam */
     .sweep {
       position: absolute;
       inset: 0;
@@ -291,85 +274,60 @@
       background: conic-gradient(
         from 132deg,
         transparent 0deg,
-        transparent 296deg,
-        rgba(245, 185, 54, 0.06) 308deg,
-        rgba(245, 185, 54, 0.55) 334deg,
-        rgba(245, 185, 54, 0.02) 354deg,
+        transparent 300deg,
+        rgba(245, 185, 54, 0.04) 312deg,
+        rgba(245, 185, 54, 0.42) 336deg,
+        rgba(245, 185, 54, 0.01) 354deg,
         transparent 360deg
       );
-      animation: sweepTurn 48s linear infinite;
+      animation: sweepTurn 52s linear infinite;
       mix-blend-mode: screen;
-      filter: blur(0.3px);
+      filter: blur(0.4px);
     }
 
     .center-dot {
       position: absolute;
       top: 50%; left: 50%;
-      width: 10px; height: 10px;
+      width: 7px; height: 7px;
       transform: translate(-50%, -50%);
       border-radius: 50%;
       background: #ffd76a;
-      box-shadow: 0 0 10px #ffd76a, 0 0 32px rgba(245, 185, 54, 0.7);
+      box-shadow: 0 0 8px #ffd76a, 0 0 22px rgba(245, 185, 54, 0.55);
       z-index: 2;
     }
 
-    /* Blips */
-    .blip {
-      position: absolute;
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: #ffd76a;
-      box-shadow: 0 0 8px #ffd76a, 0 0 20px rgba(245, 185, 54, 0.7);
-      opacity: 0.88;
-      animation: blipPulse 3.8s ease-in-out infinite;
-    }
-    .b1 { top: 26%; left: 62%; animation-delay: 0.2s; }
-    .b2 { top: 38%; left: 73%; animation-delay: 0.7s; }
-    .b3 { top: 52%; left: 81%; animation-delay: 1.3s; }
-    .b4 { top: 68%; left: 68%; animation-delay: 1.9s; }
-    .b5 { top: 32%; left: 38%; animation-delay: 2.4s; }
-    .b6 { top: 58%; left: 35%; animation-delay: 3.1s; }
-
-    /* Degree labels */
+    /* Degree labels — tiny, symbolic */
     .degree {
       position: absolute;
       color: var(--gold);
-      font-size: 13px;
-      opacity: 0.88;
-      text-shadow: 0 0 8px rgba(245, 185, 54, 0.35);
+      font-size: 7px;
+      letter-spacing: 0.05em;
+      opacity: 0.32;
     }
-    .d0   { top: -28px;  left: 49%; }
-    .d30  { top: 6%;     right: 10%; }
-    .d60  { top: 27%;    right: -35px; }
-    .d90  { top: 49%;    right: -48px; }
-    .d120 { bottom: 24%; right: -28px; }
-    .d150 { bottom: 5%;  right: 14%; }
-    .d180 { bottom: -30px; left: 49%; }
-    .d210 { bottom: 5%;  left: 12%; }
-    .d240 { bottom: 24%; left: -28px; }
-    .d270 { top: 49%;    left: -45px; }
-    .d300 { top: 27%;    left: -30px; }
-    .d330 { top: 6%;     left: 10%; }
+    .d0   { top: -18px;  left: 49%; }
+    .d90  { top: 49%;    right: -36px; }
+    .d180 { bottom: -20px; left: 49%; }
+    .d270 { top: 49%;    left: -33px; }
 
     /* HUD panels */
     .hud {
       position: absolute;
       color: var(--gold);
-      border: 1px solid rgba(245, 185, 54, 0.35);
-      padding: 14px 18px;
-      font-size: 13px;
-      line-height: 1.55;
-      background: rgba(0, 0, 0, 0.14);
-      box-shadow: inset 0 0 14px rgba(245, 185, 54, 0.04);
+      border: 1px solid rgba(245, 185, 54, 0.22);
+      padding: 12px 16px;
+      font-size: 11px;
+      line-height: 1.6;
+      background: rgba(0, 0, 0, 0.10);
+      opacity: 0.65;
     }
-    .hud-top    { top: 74px;    right: 30px; }
-    .hud-bottom { right: 30px;  bottom: 64px; }
+    .hud-top    { top: 74px;   right: 30px; }
+    .hud-bottom { right: 30px; bottom: 64px; }
 
     /* Crosshair decorators */
     .cross {
       position: absolute;
-      width: 34px; height: 34px;
-      opacity: 0.8;
+      width: 28px; height: 28px;
+      opacity: 0.45;
     }
     .cross::before, .cross::after {
       content: "";
@@ -381,38 +339,18 @@
     .cross-one { top: 96px; left: 42px; }
     .cross-two { right: -18px; top: 44%; }
 
-    /* Dot field */
-    .dotfield {
-      position: absolute;
-      right: -34px; top: 18%;
-      width: 80px; height: 360px;
-      background-image: radial-gradient(var(--gold-soft) 1px, transparent 1px);
-      background-size: 18px 18px;
-      opacity: 0.36;
-    }
-
     /* ── ANIMATIONS ── */
     @keyframes sweepTurn {
       from { transform: rotate(0deg); }
       to   { transform: rotate(360deg); }
     }
 
-    @keyframes blipPulse {
-      0%, 100% { opacity: 0.45; transform: scale(0.9); }
-      50%       { opacity: 1;    transform: scale(1.25); }
-    }
-
     /* ── RESPONSIVE ── */
     @media (max-width: 1100px) {
       .nav { padding: 32px 28px 0; }
       .nav-links { display: none; }
-
-      .hero {
-        grid-template-columns: 1fr;
-        padding: 36px 28px 64px;
-      }
+      .hero { grid-template-columns: 1fr; padding: 36px 28px 64px; }
       .copy { padding-top: 20px; }
-
       .radar-wrap { min-height: 520px; margin-top: 30px; }
       .radar { width: min(680px, 86vw); }
       .hud-top, .hud-bottom { right: 0; }
@@ -426,13 +364,16 @@
       .subcopy { font-size: 17px; }
       .button { width: 100%; }
       .radar-wrap { min-height: 420px; }
-      .degree, .hud, .dotfield, .cross-two { display: none; }
+      .degree, .hud, .cross-two { display: none; }
     }
   </style>
 </head>
 
 <body>
   <main class="page">
+
+    <!-- PARTICLE CANVAS -->
+    <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
     <header class="nav">
       <a class="brand" href="/" aria-label="Holo Engine home">
@@ -464,7 +405,6 @@
       <div class="radar-wrap" aria-hidden="true">
         <div class="cross cross-one"></div>
         <div class="cross cross-two"></div>
-        <div class="dotfield"></div>
 
         <div class="hud hud-top">
           34.0522° N<br />
@@ -476,25 +416,10 @@
           <div class="sweep"></div>
           <div class="center-dot"></div>
 
-          <span class="blip b1"></span>
-          <span class="blip b2"></span>
-          <span class="blip b3"></span>
-          <span class="blip b4"></span>
-          <span class="blip b5"></span>
-          <span class="blip b6"></span>
-
           <span class="degree d0">000</span>
-          <span class="degree d30">030</span>
-          <span class="degree d60">060</span>
           <span class="degree d90">090</span>
-          <span class="degree d120">120</span>
-          <span class="degree d150">150</span>
           <span class="degree d180">180</span>
-          <span class="degree d210">210</span>
-          <span class="degree d240">240</span>
           <span class="degree d270">270</span>
-          <span class="degree d300">300</span>
-          <span class="degree d330">330</span>
         </div>
 
         <div class="hud hud-bottom">
@@ -505,5 +430,103 @@
 
     </section>
   </main>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('particleCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const GOLD  = [245, 185, 54];
+      const WHITE = [220, 215, 205];
+      const BLUE  = [100, 160, 220];
+
+      const MODELS = [
+        'GPT-5.5', 'GPT-5.5', 'GPT-5.5', 'GPT-5.5', 'GPT-5.5',
+        'GPT-5.5', 'GPT-5.5', 'GPT-5.5', 'GPT-5.5', 'GPT-5.5',
+        'Claude 4.6', 'Claude 4.6', 'Claude 4.6', 'Claude 4.6', 'Claude 4.6',
+        'Claude 4.6', 'Claude 4.6', 'Claude 4.6', 'Claude 4.6', 'Claude 4.6',
+        'Gemini 3.1', 'Gemini 3.1', 'Gemini 3.1', 'Gemini 3.1', 'Gemini 3.1',
+        'Gemini 3.1', 'Gemini 3.1', 'Gemini 3.1', 'Gemini 3.1', 'Gemini 3.1',
+        'Claude Opus 4.7', 'Claude Opus 4.7', 'Claude Opus 4.7', 'Claude Opus 4.7',
+        'GPT-4o', 'GPT-4o', 'GPT-4o', 'GPT-4o',
+        'Gemini 2.0', 'Gemini 2.0', 'Gemini 2.0',
+        'Llama 4', 'Llama 4', 'Llama 4',
+        'Mistral Large', 'Mistral Large',
+        'Grok 3', 'Grok 3',
+        'DeepSeek R2', 'DeepSeek R2',
+      ];
+
+      let W, H, dpr, particles;
+
+      function rand(a, b) { return a + Math.random() * (b - a); }
+      function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+      function makeParticle(labeled) {
+        const color = Math.random() < 0.55 ? GOLD : Math.random() < 0.6 ? WHITE : BLUE;
+        return {
+          x: rand(0, W),
+          y: rand(0, H),
+          vx: rand(-0.12, 0.12),
+          vy: rand(-0.12, 0.12),
+          r: labeled ? rand(1.4, 2.2) : rand(0.4, 1.1),
+          alpha: labeled ? rand(0.28, 0.52) : rand(0.06, 0.22),
+          color,
+          label: labeled ? pick(MODELS) : null,
+          pulse: rand(0, Math.PI * 2),
+          pulseSpeed: rand(0.004, 0.012),
+        };
+      }
+
+      function build() {
+        dpr = window.devicePixelRatio || 1;
+        W = canvas.offsetWidth;
+        H = canvas.offsetHeight;
+        canvas.width  = W * dpr;
+        canvas.height = H * dpr;
+        ctx.scale(dpr, dpr);
+
+        particles = [];
+        // ~1400 background specks
+        for (let i = 0; i < 1400; i++) particles.push(makeParticle(false));
+        // labeled model dots — one per MODELS entry × ~2 instances
+        for (let i = 0; i < MODELS.length * 2; i++) particles.push(makeParticle(true));
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < -40) p.x = W + 40;
+          if (p.x > W + 40) p.x = -40;
+          if (p.y < -40) p.y = H + 40;
+          if (p.y > H + 40) p.y = -40;
+
+          p.pulse += p.pulseSpeed;
+          const alphaFactor = p.label ? 0.7 + 0.3 * Math.sin(p.pulse) : 1;
+          const a = p.alpha * alphaFactor;
+          const [r, g, b] = p.color;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
+          ctx.fill();
+
+          if (p.label) {
+            ctx.font = '7px JetBrains Mono, Courier New, monospace';
+            ctx.fillStyle = `rgba(${r},${g},${b},${Math.min(a * 0.85, 0.38)})`;
+            ctx.fillText(p.label, p.x + p.r + 3, p.y + 3);
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      build();
+      draw();
+      window.addEventListener('resize', build);
+    })();
+  </script>
 </body>
 </html>

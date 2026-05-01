@@ -45,6 +45,8 @@ This paper comes from a nontraditional security vantage point.
 
 Holo did not begin as a threat-intelligence project. It began as a verification practice inside high-consequence output workflows, where regulated-industry content, financial product language, healthcare communications, executive materials, public-facing claims, and product experiences had to be accurate under deadline pressure.
 
+The author is not a traditional security engineer and does not claim that background. The relevant experience is different: years spent building and reviewing high-consequence content, product language, executive communications, financial workflows, and healthcare materials where plausible output was not enough. The work required verification under ambiguity, not just generation under deadline.
+
 In those workflows, solo LLMs were useful but insufficient. They could accelerate review, but they could not be trusted as final arbiters. Different models missed different things. When placed into adversarial review, however, they exposed one another's blindspots. The original control layer was human: a reviewer comparing reasoning traces, forcing evidentiary discipline, and deciding whether the output was safe to use.
 
 That process revealed the pattern Holo now formalizes. When judgment matters, the central question is not whether a model can produce a plausible answer. The question is whether the system can detect when plausibility is not enough.
@@ -67,21 +69,15 @@ It claims that Action Boundary Adversarial Testing is a useful testing disciplin
 
 ### What This Paper Does Not Claim
 
-This paper does not claim independent validation.
+- **Not independent validation.** This is a vendor-built benchmark. The same team designed the scenarios and built the system.
+- **Not production reliability.** The results do not establish how the system performs at scale or under live deployment conditions.
+- **Not universal coverage.** Two completed domains are not a census of model capability at the action boundary.
+- **Not a permanent claim about any model provider.** The results reflect a specific model roster at a specific point in time.
+- **Not public reproducibility of Holo's proprietary control layer.** The Governor logic, adversarial reactor configuration, model-routing details, turn heuristics, and verdict computation layer are proprietary.
 
-It does not claim production reliability.
+The benchmark is a point-in-time internal architecture comparison from April 2026. The same API-available frontier models were used inside and outside Holo. The variable being tested is adjudication architecture: isolated single-model judgment versus shared adversarial review with deterministic Governor adjudication.
 
-It does not claim universal coverage.
-
-It does not claim that all solo models fail all action-boundary cases.
-
-It does not claim that Holo's proprietary Governor logic, adversarial reactor configuration, model-routing logic, turn heuristics, or verdict computation layer are publicly reproducible.
-
-The current benchmark should be read as internal evidence under disclosed conditions, with public solo-model baselines, public payloads and traces where available, and a defined path toward third-party replication.
-
-The benchmark is a point-in-time snapshot from April 2026. It reflects the API-available frontier models selected for stability, accessibility, and cross-lab diversity at the time of testing. It does not claim that these were the only capable models available, that no stronger model existed in any environment, or that the same results would necessarily hold across future model versions.
-
-Holo's benchmark is intended to be reproducible at the evaluation layer, not reimplementable at the proprietary control layer.
+The solo-model baselines are publicly reproducible. The full Holo architecture is not.
 
 ---
 

@@ -658,6 +658,8 @@
 
   <p>Holo did not begin as a threat-intelligence project. It began as a verification practice inside high-consequence output workflows, where regulated-industry content, financial product language, healthcare communications, executive materials, public-facing claims, and product experiences had to be accurate under deadline pressure.</p>
 
+  <p>The author is not a traditional security engineer and does not claim that background. The relevant experience is different: years spent building and reviewing high-consequence content, product language, executive communications, financial workflows, and healthcare materials where plausible output was not enough. The work required verification under ambiguity, not just generation under deadline.</p>
+
   <p>In those workflows, solo LLMs were useful but insufficient. They could accelerate review, but they could not be trusted as final arbiters. Different models missed different things. When placed into adversarial review, however, they exposed one another's blindspots. The original control layer was human: a reviewer comparing reasoning traces, forcing evidentiary discipline, and deciding whether the output was safe to use.</p>
 
   <p>That process revealed the pattern Holo now formalizes. When judgment matters, the central question is not whether a model can produce a plausible answer. The question is whether the system can detect when plausibility is not enough.</p>
@@ -683,29 +685,25 @@
 
   <h3>What This Paper Does Not Claim</h3>
 
-  <p>This paper does not claim independent validation.</p>
+  <ul>
+    <li><strong>Not independent validation.</strong> This is a vendor-built benchmark. The same team designed the scenarios and built the system.</li>
+    <li><strong>Not production reliability.</strong> The results do not establish how the system performs at scale or under live deployment conditions.</li>
+    <li><strong>Not universal coverage.</strong> Two completed domains are not a census of model capability at the action boundary.</li>
+    <li><strong>Not a permanent claim about any model provider.</strong> The results reflect a specific model roster at a specific point in time.</li>
+    <li><strong>Not public reproducibility of Holo's proprietary control layer.</strong> The Governor logic, adversarial reactor configuration, model-routing details, turn heuristics, and verdict computation layer are proprietary.</li>
+  </ul>
 
-  <p>It does not claim production reliability.</p>
+  <p>The benchmark is a point-in-time internal architecture comparison from April 2026. The same API-available frontier models were used inside and outside Holo. The variable being tested is adjudication architecture: isolated single-model judgment versus shared adversarial review with deterministic Governor adjudication.</p>
 
-  <p>It does not claim universal coverage.</p>
-
-  <p>It does not claim that all solo models fail all action-boundary cases.</p>
-
-  <p>It does not claim that Holo's proprietary Governor logic, adversarial reactor configuration, model-routing logic, turn heuristics, or verdict computation layer are publicly reproducible.</p>
-
-  <p>The current benchmark should be read as internal evidence under disclosed conditions, with public solo-model baselines, public payloads and traces where available, and a defined path toward third-party replication.</p>
-
-  <p>The benchmark is a point-in-time snapshot from April 2026. It reflects the API-available frontier models selected for stability, accessibility, and cross-lab diversity at the time of testing. It does not claim that these were the only capable models available, that no stronger model existed in any environment, or that the same results would necessarily hold across future model versions.</p>
-
-  <p>Holo's benchmark is intended to be reproducible at the evaluation layer, not reimplementable at the proprietary control layer.</p>
+  <p>The solo-model baselines are publicly reproducible. The full Holo architecture is not.</p>
 </div>
 
 <!-- TABLE OF CONTENTS -->
 <nav class="toc">
   <div class="toc-label">Contents</div>
   <ol class="toc-list">
-    <li><a href="#front-matter-author"><span class="toc-num">—</span><span class="toc-title">Front Matter: Author Note</span></a></li>
-    <li><a href="#front-matter-claims"><span class="toc-num">—</span><span class="toc-title">Front Matter: What This Paper Claims and Does Not Claim</span></a></li>
+    <li><a href="#front-matter-author"><span class="toc-num">—</span><span class="toc-title">Author Note</span></a></li>
+    <li><a href="#front-matter-claims"><span class="toc-num">—</span><span class="toc-title">What This Paper Claims and Does Not Claim</span></a></li>
     <li><a href="#s1"><span class="toc-num">01</span><span class="toc-title">The Action Boundary Problem</span></a></li>
     <li><a href="#s2"><span class="toc-num">02</span><span class="toc-title">Action Boundary Adversarial Testing</span></a></li>
     <li><a href="#s3"><span class="toc-num">03</span><span class="toc-title">Benchmark Methodology</span></a></li>

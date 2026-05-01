@@ -10,17 +10,17 @@
 
 ## Executive Summary
 
-In human-driven workflows, the point of no return is the commit boundary: the final check before code is pushed or regulated content is published. In autonomous AI systems, that exact same threshold is the action boundary: the millisecond before an agent wires money, provisions server access, or executes a legal contract. The vocabulary changes, but the structural vulnerability is identical: once crossed, the action is irreversible.
+In human-driven workflows, the point of no return is the commit boundary: the final check before code is pushed or regulated content is published. In autonomous AI systems, that exact same threshold is the **action boundary**: the millisecond before an agent wires money, provisions server access, or executes a legal contract. The vocabulary changes, but the structural vulnerability is identical: once crossed, the action is irreversible.
 
-And in both worlds, the most dangerous failures are not the obvious ones. They are the actions that look clean, compliant, and complete, right up until the damage is done.
+And in both worlds, the most dangerous failures are not the obvious ones. They are the actions that **look clean, compliant, and complete**, right up until the damage is done.
 
 Most AI security is built to catch visible violations: prompt injection, jailbreaks, policy breaches, and data leakage. It is much weaker at a harder class of failure, where a payment request can come from a known vendor, the approval path is complete, and the metadata looks clean. And yet, the business story does not add up. The payment pattern never existed. The explanation contradicts prior records. The authorization chain has gone stale.
 
 **Nothing is obviously broken, but the action should still not proceed.**
 
-Holo Engine was built to govern this exact gap. It is the last reversible checkpoint before a high-consequence AI action executes. Its architecture uses adversarial multi-model review to pressure-test the full context of an action before it binds. The output is simple and auditable: **ALLOW or ESCALATE.**
+Holo Engine was built to govern this exact gap. It is the **last reversible checkpoint** before a high-consequence AI action executes. Its architecture uses adversarial multi-model review to pressure-test the full context of an action before it binds. The output is simple and auditable: **ALLOW or ESCALATE.**
 
-In the benchmark's flagship test case, all three solo frontier models approved a fraudulent transaction. Under the exact same conditions, Holo's architecture returned ESCALATE consistently across repeated, seeded runs. This is not a claim of universal coverage or production reliability. It is evidence that adjudication architecture can change the outcome on a narrow but commercially important class of actions where surface policy passes, solo model judgment fails, and a second-stage decision architecture catches what the solo model misses.
+In the benchmark's flagship test case, **all three solo frontier models approved a fraudulent transaction.** Under the exact same conditions, Holo's architecture returned ESCALATE consistently across repeated, seeded runs. This is not a claim of universal coverage or production reliability. It is evidence that adjudication architecture can change the outcome on a narrow but commercially important class of actions where surface policy passes, solo model judgment fails, and a second-stage decision architecture catches what the solo model misses.
 
 Holo does not replace runtime security, policy engines, or observability. Those systems handle what is known or prohibited. Holo adjudicates the unresolved middle: actions that pass every surface check but still require a final, adversarial judgment call.
 

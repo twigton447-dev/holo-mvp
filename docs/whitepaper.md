@@ -10,6 +10,8 @@
 
 ## Executive Summary
 
+In human-driven workflows, the point of no return is the **commit boundary**—the final check before code is pushed or regulated content is published. In autonomous AI systems, that exact same threshold is the **action boundary**—the millisecond before an agent wires money, provisions server access, or executes a legal contract. The vocabulary changes, but the structural vulnerability is identical: once crossed, the action is irreversible.
+
 Most AI security systems catch what is visible or explicitly prohibited: prompt injection, jailbreaks, policy violations, and data leaks. They are much weaker at a different class of failure: actions that pass every formal check and are still wrong.
 
 A payment request can come from a known vendor. The approval path can be complete. The metadata can look clean. And yet the business story does not add up. The payment pattern never existed. The explanation contradicts prior records. The authorization chain has gone stale. Nothing is obviously broken, but the action should still not proceed.
@@ -39,19 +41,17 @@ Holo is not a replacement for Layer 1 systems. It is the second-stage adjudicato
 
 ---
 
-## Author Note: From Output Verification to Action-Boundary Adjudication
+## Author Note: From Human Review to Autonomous Action
 
-This paper comes from a nontraditional security vantage point.
+This architecture was not born in a traditional cybersecurity lab. It was forged in the trenches of high-consequence workflows.
 
-Holo did not begin as a threat-intelligence project. It began as a verification practice inside high-consequence output workflows, where regulated-industry content, financial product language, healthcare communications, executive materials, public-facing claims, and product experiences had to be accurate under deadline pressure.
+The author's background is not in network security, but in managing the absolute edge of the "commit and push" across mortgage, finance, healthcare, and regulatory-adjacent environments. In these domains, plausible output is a liability. Before work could be published, submitted, or pushed live, it had to be aggressively adjudicated against the full context: source material, prior claims, legal sensitivity, product rules, stakeholder intent, and brand consequence.
 
-The author is not a traditional security engineer and does not claim that background. The relevant experience is different: years spent building and reviewing high-consequence content, product language, executive communications, financial workflows, and healthcare materials where plausible output was not enough. The work required verification under ambiguity, not just generation under deadline.
+That process demanded massive volume, velocity, and absolute precision at the same time. Human judgment alone could not scale. A single frontier model could not be trusted. A casual mix of models was structurally insufficient. The only method that survived contact with reality was cross-model adversarial verification: forcing different models to inspect the same material, expose each other's blindspots, and surface contradictions before anything crossed the commit boundary.
 
-In those workflows, solo LLMs were useful but insufficient. They could accelerate review, but they could not be trusted as final arbiters. Different models missed different things. When placed into adversarial review, however, they exposed one another's blindspots. The original control layer was human: a reviewer comparing reasoning traces, forcing evidentiary discipline, and deciding whether the output was safe to use.
+This was the manual version of Holo before it had a name. Thousands of micro-decisions were executed this way under extreme deadline pressure in live commercial environments, where a single miss could trigger severe legal, financial, or reputational fallout. The operational proof is not theoretical: the adjudicated outputs shipped, supported major brands, and held up flawlessly in the real world without a single adverse operational event.
 
-That process revealed the pattern Holo now formalizes. When judgment matters, the central question is not whether a model can produce a plausible answer. The question is whether the system can detect when plausibility is not enough.
-
-Holo Engine is the productization of that pattern at the action boundary. The question is no longer whether a sentence is accurate enough to publish. The question is whether an AI agent should be allowed to execute an irreversible action.
+Holo Engine productizes this proven survival mechanism at the AI action boundary. The question is no longer whether a sentence is safe to publish. The question is whether an autonomous agent should be allowed to execute an irreversible action before the context has been fully and adversarially adjudicated.
 
 ---
 

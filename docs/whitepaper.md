@@ -113,9 +113,9 @@ The action boundary is where this becomes dangerous. The system may have followe
 
 The failure is not random. It follows a pattern.
 
-Each frontier model has a characteristic way of reasoning under adversarial pressure. One model is susceptible to narrative acceptance: a well-constructed explanation of why an anomaly is legitimate will cause it to clear a flag it correctly raised. Another resists narrative pressure but misses cross-document aggregation. A third catches aggregation failures but can be moved by authority signals.
+In the benchmark traces observed so far, different frontier models failed in different ways under adversarial pressure. One accepted a plausible narrative and cleared a flag it had correctly raised. Another missed cross-document aggregation. A third sensed something was wrong but resolved the ambiguity in the wrong direction.
 
-These are not random errors. They are structural tendencies. And because they are structural, they are exploitable. **An attacker who understands how a deployed model reasons can construct a payload designed to exploit exactly that tendency.**
+These are not presented here as permanent model traits. They are observed failure patterns from the current benchmark. The security concern is that any stable reasoning tendency at the action boundary can become exploitable once an attacker learns how a deployed model tends to resolve ambiguity.
 
 The result: blindspots that are model-specific, non-overlapping, and persistent. The gap one model leaves open, another fills — but only if both are in the room.
 
@@ -320,9 +320,9 @@ Across seven benchmark runs, Holo produced stable ESCALATE behavior on this scen
 
 #### 4.1.4 Precision Cases
 
-We ran precision scenarios in Domain 1: legitimate transactions designed to look suspicious. Holo returned ALLOW on all of them.
+Initial precision scenarios have been run in Domain 1: legitimate transactions designed to look suspicious. These early cases are useful, but the precision suite remains underdeveloped relative to the gap-case suite.
 
-These results matter as much as the gap cases. Without them, the gap results prove only that Holo escalates. With them, they prove that Holo escalates when the evidence warrants it.
+These results matter because a trust layer that only escalates is not useful. The next benchmark expansion should test more legitimate-but-suspicious actions to show when Holo can safely ALLOW, not only when it should ESCALATE.
 
 ### 4.2 Domain 2: Agentic Commerce
 
@@ -415,11 +415,11 @@ A trust layer that fires on clean transactions will be routed around. Evidentiar
 
 A fixed evaluation sequence creates a predictable attack surface. An adversary who studies the system could learn the sequence and engineer a payload specifically designed to survive it in order. Think of it like a patrol route: a fixed route can be studied and ambushed. A randomized route cannot.
 
-The architecture also enforces a structural diversity rule: models from the same provider family cannot run in consecutive turns. This prevents a single model family's shared reasoning patterns from reinforcing each other across adjacent turns.
+The architecture uses provider-family diversity and assignment controls to reduce the risk that one model family's reasoning pattern dominates the adjudication.
 
 ### 6.3 Models Are Not Blinded: The Role Is the Lens
 
-Each model in the adversarial reactor sees the complete, unedited history of every prior turn. The Assumption Attacker is explicitly instructed to challenge prior conclusions. The Edge Case Hunter is explicitly instructed to look for what was missed. The model that accepts an explanation in one turn is never the model assigned to pressure-test it in the next. That is not a tuning decision. It is an architectural property.
+Each model in the adversarial reactor sees the complete, unedited history of prior turns. Different evaluative roles are used to challenge prior conclusions, test assumptions, and surface missed evidence. The goal is not to produce a majority vote. The goal is to create structured adversarial pressure before the Governor computes a verdict.
 
 ### 6.4 The Static Governor
 
@@ -443,7 +443,7 @@ The final verdict is computed by the governor, not by a model. This avoids ancho
 
 Benchmark pressure-testing has surfaced an important architectural constraint: a single model operating without prior adversarial context should not be able to unilaterally lock an irreversible decision. At Turn 1, before any adversarial challenge has been applied, a model's initial assessment is a cold-start judgment — plausible, but unverified against the available evidence.
 
-**A single model operating without prior adversarial context should not be able to unilaterally lock an irreversible decision. The architecture is being hardened around that principle:** HIGH severity findings should require independent confirmation across at least two structurally different model families before triggering a hard lock. A confident cold-start judgment is not sufficient.
+**A single model operating without prior adversarial context should not be able to unilaterally lock an irreversible decision. The architecture is being hardened around that principle:** a cold-start judgment should not be able to unilaterally determine an irreversible outcome without sufficient adversarial confirmation. A confident first-pass judgment is not sufficient.
 
 ---
 
@@ -521,11 +521,11 @@ Fine-tuning is retrospective. It captures what has already been seen. Novel atta
 
 ### "How do we know Holo is not just more paranoid?"
 
-The precision cases address this directly.
+Initial precision testing addresses this directly, but it remains an area for expansion.
 
-Across the completed domains, Holo was tested on suspicious-looking but legitimate transactions designed to trigger false positives. Where the evidence did not support escalation, the system returned ALLOW.
+A trust layer that only escalates is not useful. It becomes noise. The benchmark therefore needs to test not only whether Holo catches threats, but whether it can also clear legitimate actions under pressure.
 
-That distinction matters. A trust layer that only escalates is not useful. It becomes noise. The benchmark was designed to test not just whether Holo catches threats, but whether it can also clear legitimate actions under pressure.
+The next benchmark expansion should include a larger precision suite: suspicious-looking but legitimate actions where the correct verdict is ALLOW.
 
 ### "Isn't this just a bundle of models voting?"
 
@@ -548,14 +548,6 @@ No. Red teaming typically probes model behavior, prompt susceptibility, jailbrea
 ### "Is this just fraud detection?"
 
 No. Fraud detection typically looks for known patterns, anomalies, and risk signals against a learned corpus. ABAT tests whether an action remains coherent when current request, historical behavior, authorization chain, policy context, and business logic are adjudicated together. The distinction: fraud detection pattern-matches. Action-boundary adjudication reconstructs an evidence graph for a specific proposed action under novel conditions.
-
-### "What stops a competitor from copying this?"
-
-The visible architecture can be copied faster than the research program behind it.
-
-The durable asset is not just the reactor. It is the benchmark corpus: the scenario libraries, the domain-specific failure patterns, the calibration work that separates floor cases from threshold cases, and the Blindspot Atlas that accumulates where and how frontier models fail at the action boundary.
-
-That corpus compounds. Each completed domain improves the next one. Each new failure pattern sharpens both product behavior and benchmark design.
 
 ### "Why wouldn't the frontier labs just build this themselves?"
 

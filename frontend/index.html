@@ -256,17 +256,33 @@
         0 0 24px rgba(245, 185, 54, 0.04);
     }
 
-    .radar-core::before,
-    .radar-core::after {
-      content: "";
+    .radar-hline {
       position: absolute;
-      inset: 50% auto auto 0;
-      width: 100%;
-      height: 1px;
-      background: rgba(245, 185, 54, 0.18);
-      transform-origin: center;
+      top: 50%; left: 0;
+      width: 100%; height: 1px;
+      background: rgba(245, 185, 54, 0.52);
+      box-shadow: 0 0 6px rgba(245, 185, 54, 0.22);
     }
-    .radar-core::after { transform: rotate(90deg); }
+
+    .radar-vline {
+      position: absolute;
+      left: 50%; top: 0;
+      width: 1px; height: 100%;
+      background: rgba(245, 185, 54, 0.16);
+    }
+
+    .action-boundary-label {
+      position: absolute;
+      top: calc(50% + 5px);
+      right: 7%;
+      font-family: var(--mono);
+      font-size: 7px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(245, 185, 54, 0.42);
+      pointer-events: none;
+      white-space: nowrap;
+    }
 
     .sweep {
       position: absolute;
@@ -414,8 +430,11 @@
 
         <div class="radar">
           <div class="radar-core"></div>
+          <div class="radar-hline"></div>
+          <div class="radar-vline"></div>
           <div class="sweep"></div>
           <div class="center-dot"></div>
+          <span class="action-boundary-label">Action Boundary</span>
 
           <span class="degree d0">000</span>
           <span class="degree d90">090</span>

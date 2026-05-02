@@ -103,12 +103,12 @@
 
     .brand-sub {
       display: block;
-      margin-top: 7px;
+      margin-top: 8px;
       font-family: var(--mono);
-      font-size: clamp(11px, 1.1vw, 17px);
+      font-size: clamp(13px, 1.35vw, 21px);
       color: var(--gold);
       font-weight: 400;
-      /* letter-spacing set by JS to match HOLO width exactly */
+      /* letter-spacing and text-indent set by JS to match HOLO width */
     }
 
     .nav-links {
@@ -438,13 +438,25 @@
       const main = document.querySelector('.brand-main');
       const sub  = document.querySelector('.brand-sub');
       if (!main || !sub) return;
+
+      // Measure HOLO: temporarily shrink-wrap to text content
+      main.style.width = 'fit-content';
       const targetW = main.getBoundingClientRect().width;
+      main.style.width = '';
+
+      // Measure ENGINE text at zero spacing
       sub.style.letterSpacing = '0px';
       sub.style.textIndent    = '0px';
+      sub.style.width         = 'fit-content';
       const baseW = sub.getBoundingClientRect().width;
-      const chars = sub.textContent.length; // "ENGINE" = 6
-      const ls = Math.max(0, (targetW - baseW) / chars);
+      sub.style.width = '';
+
+      // letter-spacing adds after every character including the last.
+      // To make the box match targetW: baseW + n*ls = targetW
+      const n  = sub.textContent.trim().length;
+      const ls = Math.max(0, (targetW - baseW) / n);
       sub.style.letterSpacing = ls + 'px';
+      // Indent by half a gap to optically cancel trailing space on the right
       sub.style.textIndent    = (ls / 2) + 'px';
     }
     document.fonts.ready.then(alignWordmark);

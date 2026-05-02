@@ -39,20 +39,6 @@ Holo does not replace runtime security, policy engines, or observability. Those 
 
 ---
 
-## Author Note: From Human Review to Autonomous Action
-
-This architecture was not born in a traditional cybersecurity lab. It was forged in the trenches of high-consequence workflows.
-
-The author's background is not in network security, but in managing the absolute edge of the "commit and push" across mortgage, finance, healthcare, and regulatory-adjacent environments. In these domains, plausible output is a liability. Before work could be published, submitted, or pushed live, it had to be aggressively adjudicated against the full context: source material, prior claims, legal sensitivity, product rules, stakeholder intent, and brand consequence.
-
-That process demanded massive volume, velocity, and absolute precision at the same time. Human judgment alone could not scale. A single frontier model could not be trusted. A casual mix of models was structurally insufficient. The only method that survived contact with reality was cross-model adversarial verification: forcing different models to inspect the same material, expose each other's blindspots, and surface contradictions before anything crossed the commit boundary.
-
-This was the manual version of Holo before it had a name. Thousands of micro-decisions were executed this way under extreme deadline pressure in live commercial environments, where a single miss could trigger severe legal, financial, or reputational fallout. The operational proof is not theoretical: the adjudicated outputs shipped, supported major brands, and held up flawlessly in the real world without a single adverse operational event.
-
-Holo Engine productizes this proven survival mechanism at the AI action boundary. The question is no longer whether a sentence is safe to publish. The question is whether an autonomous agent should be allowed to execute an irreversible action before the context has been fully and adversarially adjudicated.
-
----
-
 ## What This Paper Claims and Does Not Claim
 
 ### What This Paper Claims

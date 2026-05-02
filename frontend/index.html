@@ -52,7 +52,7 @@
         radial-gradient(circle at 72% 48%, rgba(245, 185, 54, 0.09), transparent 28%),
         radial-gradient(circle at 18% 25%, rgba(90, 135, 180, 0.09), transparent 35%),
         linear-gradient(160deg, #06111f 0%, #04101c 40%, #06111f 100%);
-      overflow: hidden;
+      overflow-x: clip;
     }
 
     .page::after {
@@ -218,12 +218,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 680px;
+      min-height: 880px;
+      overflow: visible;
     }
 
     .radar {
       position: relative;
-      width: min(720px, 48vw);
+      width: min(1040px, 66vw);
       aspect-ratio: 1;
       border-radius: 50%;
       filter: drop-shadow(0 0 22px rgba(245, 185, 54, 0.10));
@@ -368,8 +369,8 @@
       .nav-links { display: none; }
       .hero { grid-template-columns: 1fr; padding: 36px 28px 64px; }
       .copy { padding-top: 20px; }
-      .radar-wrap { min-height: 520px; margin-top: 30px; }
-      .radar { width: min(680px, 86vw); }
+      .radar-wrap { min-height: 620px; margin-top: 30px; }
+      .radar { width: min(780px, 92vw); }
       .hud-top, .hud-bottom { right: 0; }
     }
 
@@ -380,7 +381,7 @@
       h1 { font-size: 40px; line-height: 1.2; }
       .subcopy { font-size: 17px; }
       .button { width: 100%; }
-      .radar-wrap { min-height: 420px; }
+      .radar-wrap { min-height: 480px; }
       .degree, .hud, .cross-two { display: none; }
     }
   </style>

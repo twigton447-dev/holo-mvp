@@ -35,8 +35,8 @@
 
     html, body {
       width: 100%;
-      min-height: 100%;
-      background: var(--bg);
+      height: 100%;
+      background: #06111f;
       color: var(--white);
       font-family: var(--mono);
     }
@@ -50,8 +50,8 @@
       position: relative;
       background:
         radial-gradient(circle at 72% 48%, rgba(245, 185, 54, 0.09), transparent 28%),
-        radial-gradient(circle at 18% 25%, rgba(90, 135, 180, 0.08), transparent 35%),
-        linear-gradient(115deg, #020812 0%, #06111f 48%, #020812 100%);
+        radial-gradient(circle at 18% 25%, rgba(90, 135, 180, 0.09), transparent 35%),
+        linear-gradient(160deg, #06111f 0%, #04101c 40%, #06111f 100%);
       overflow: hidden;
     }
 
@@ -106,10 +106,9 @@
       margin-top: 7px;
       font-family: var(--mono);
       font-size: clamp(11px, 1.1vw, 17px);
-      letter-spacing: 0.44em;
-      text-indent: 0.44em;
       color: var(--gold);
       font-weight: 400;
+      /* letter-spacing set by JS to match HOLO width exactly */
     }
 
     .nav-links {
@@ -397,7 +396,7 @@
 
       <div class="copy">
         <h1>Should your AI agent be allowed to execute?</h1>
-        <p class="subcopy">The moment after your agent decides, Holo Engine makes the final decision on your behalf.</p>
+        <p class="subcopy">The moment after your agent decides, Holo Engine makes the final decision: ALLOW or ESCALATE.</p>
         <div class="actions">
           <a class="button button-primary" href="/whitepaper">Read whitepaper &rarr;</a>
           <a class="button button-secondary" href="/benchmark">View benchmark &rarr;</a>
@@ -434,6 +433,24 @@
   </main>
 
   <script>
+    // ── WORDMARK: stretch ENGINE to match HOLO width ──
+    function alignWordmark() {
+      const main = document.querySelector('.brand-main');
+      const sub  = document.querySelector('.brand-sub');
+      if (!main || !sub) return;
+      const targetW = main.getBoundingClientRect().width;
+      sub.style.letterSpacing = '0px';
+      sub.style.textIndent    = '0px';
+      const baseW = sub.getBoundingClientRect().width;
+      const chars = sub.textContent.length; // "ENGINE" = 6
+      const ls = Math.max(0, (targetW - baseW) / chars);
+      sub.style.letterSpacing = ls + 'px';
+      sub.style.textIndent    = (ls / 2) + 'px';
+    }
+    document.fonts.ready.then(alignWordmark);
+    window.addEventListener('resize', alignWordmark);
+
+    // ── PARTICLE FIELD ──
     (function () {
       const canvas = document.getElementById('particleCanvas');
       const ctx = canvas.getContext('2d');
@@ -442,6 +459,7 @@
       const WHITE = [220, 215, 205];
       const BLUE  = [100, 160, 220];
 
+      // Standard labeled agents
       const MODELS = [
         'GPT-5.5', 'GPT-5.5', 'GPT-5.5', 'GPT-5.5', 'GPT-5.5',
         'GPT-5.5', 'GPT-5.5', 'GPT-5.5', 'GPT-5.5', 'GPT-5.5',
@@ -458,24 +476,60 @@
         'DeepSeek R2', 'DeepSeek R2',
       ];
 
+      // Prominent agents — larger, brighter, slower
+      const PROMINENT = [
+        { label: 'GPT-5.5',       color: WHITE },
+        { label: 'GPT-5.5',       color: WHITE },
+        { label: 'Claude 4.6',    color: GOLD  },
+        { label: 'Claude 4.6',    color: GOLD  },
+        { label: 'Gemini 3.1',    color: BLUE  },
+        { label: 'Gemini 3.1',    color: BLUE  },
+        { label: 'Claude Opus 4.7', color: GOLD },
+        { label: 'GPT-5.5',       color: WHITE },
+        { label: 'Gemini 3.1',    color: BLUE  },
+        { label: 'Claude 4.6',    color: GOLD  },
+      ];
+
       let W, H, dpr, particles;
 
       function rand(a, b) { return a + Math.random() * (b - a); }
-      function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+      function pick(arr)  { return arr[Math.floor(Math.random() * arr.length)]; }
 
-      function makeParticle(labeled) {
+      function makeSpeck() {
         const color = Math.random() < 0.55 ? GOLD : Math.random() < 0.6 ? WHITE : BLUE;
         return {
-          x: rand(0, W),
-          y: rand(0, H),
-          vx: rand(-0.12, 0.12),
-          vy: rand(-0.12, 0.12),
-          r: labeled ? rand(1.4, 2.2) : rand(0.4, 1.1),
-          alpha: labeled ? rand(0.28, 0.52) : rand(0.06, 0.22),
-          color,
-          label: labeled ? pick(MODELS) : null,
-          pulse: rand(0, Math.PI * 2),
-          pulseSpeed: rand(0.004, 0.012),
+          x: rand(0, W), y: rand(0, H),
+          vx: rand(-0.12, 0.12), vy: rand(-0.12, 0.12),
+          r: rand(0.4, 1.0),
+          alpha: rand(0.06, 0.20),
+          color, label: null,
+          pulse: rand(0, Math.PI * 2), pulseSpeed: rand(0.004, 0.010),
+          prominent: false,
+        };
+      }
+
+      function makeLabeled() {
+        const color = Math.random() < 0.55 ? GOLD : Math.random() < 0.6 ? WHITE : BLUE;
+        return {
+          x: rand(0, W), y: rand(0, H),
+          vx: rand(-0.10, 0.10), vy: rand(-0.10, 0.10),
+          r: rand(1.4, 2.2),
+          alpha: rand(0.26, 0.48),
+          color, label: pick(MODELS),
+          pulse: rand(0, Math.PI * 2), pulseSpeed: rand(0.004, 0.010),
+          prominent: false,
+        };
+      }
+
+      function makeProminent(def) {
+        return {
+          x: rand(0, W), y: rand(0, H),
+          vx: rand(-0.06, 0.06), vy: rand(-0.06, 0.06),
+          r: rand(3.5, 5.5),
+          alpha: rand(0.60, 0.85),
+          color: def.color, label: def.label,
+          pulse: rand(0, Math.PI * 2), pulseSpeed: rand(0.006, 0.014),
+          prominent: true,
         };
       }
 
@@ -488,10 +542,9 @@
         ctx.scale(dpr, dpr);
 
         particles = [];
-        // ~1400 background specks
-        for (let i = 0; i < 1400; i++) particles.push(makeParticle(false));
-        // labeled model dots — one per MODELS entry × ~2 instances
-        for (let i = 0; i < MODELS.length * 2; i++) particles.push(makeParticle(true));
+        for (let i = 0; i < 1400; i++)        particles.push(makeSpeck());
+        for (let i = 0; i < MODELS.length * 2; i++) particles.push(makeLabeled());
+        for (const def of PROMINENT)           particles.push(makeProminent(def));
       }
 
       function draw() {
@@ -500,15 +553,26 @@
         for (const p of particles) {
           p.x += p.vx;
           p.y += p.vy;
-          if (p.x < -40) p.x = W + 40;
-          if (p.x > W + 40) p.x = -40;
-          if (p.y < -40) p.y = H + 40;
-          if (p.y > H + 40) p.y = -40;
+          if (p.x < -60) p.x = W + 60;
+          if (p.x > W + 60) p.x = -60;
+          if (p.y < -60) p.y = H + 60;
+          if (p.y > H + 60) p.y = -60;
 
           p.pulse += p.pulseSpeed;
-          const alphaFactor = p.label ? 0.7 + 0.3 * Math.sin(p.pulse) : 1;
-          const a = p.alpha * alphaFactor;
+          const pulse = 0.7 + 0.3 * Math.sin(p.pulse);
+          const a = p.alpha * (p.label ? pulse : 1);
           const [r, g, b] = p.color;
+
+          if (p.prominent) {
+            // Outer glow ring
+            const grd = ctx.createRadialGradient(p.x, p.y, p.r * 0.4, p.x, p.y, p.r * 3.5);
+            grd.addColorStop(0, `rgba(${r},${g},${b},${a * 0.35})`);
+            grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r * 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = grd;
+            ctx.fill();
+          }
 
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -516,8 +580,10 @@
           ctx.fill();
 
           if (p.label) {
-            ctx.font = '7px JetBrains Mono, Courier New, monospace';
-            ctx.fillStyle = `rgba(${r},${g},${b},${Math.min(a * 0.85, 0.38)})`;
+            const fontSize = p.prominent ? 9 : 7;
+            const labelAlpha = p.prominent ? Math.min(a * 0.9, 0.72) : Math.min(a * 0.85, 0.36);
+            ctx.font = `${fontSize}px JetBrains Mono, Courier New, monospace`;
+            ctx.fillStyle = `rgba(${r},${g},${b},${labelAlpha})`;
             ctx.fillText(p.label, p.x + p.r + 3, p.y + 3);
           }
         }

@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why some high-consequence AI actions pass surface checks but still require adversarial adjudication*
 
-**Holo Engine · Working Paper · Version 2.8 · May 1, 2026**
+**Holo Engine · Working Paper · Version 3.0 · May 7, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -101,6 +101,18 @@ These are not presented here as permanent model traits. They are observed failur
 
 The result: blindspots that are model-specific, non-overlapping, and persistent. The gap one model leaves open, another fills, but only if both are in the room.
 
+### Objective Override: When the Model Obeys the Wrong Authority
+
+Recent ABAT runs surfaced an additional action-boundary failure class: Objective Override.
+
+In these cases, the solo model did not fail because it lacked the evidence. It processed the disqualifying evidence, but its assigned operational role made that evidence non-actionable. The model effectively reasoned: "I see the clinical or engineering issue, but my role is fulfillment/logistics, so I should not act on it."
+
+This is Role-Boundary Rationalization. The model uses its assigned business objective to justify approving an action that should have been escalated.
+
+This matters because many production agents will be deployed with operational objectives: clear the queue, reduce manual review, approve routine transactions, resolve customer issues, minimize friction, or accelerate fulfillment. Those objectives are useful upstream. At the action boundary, they can become unsafe if the acting agent is also trusted to decide whether its own objective should be obeyed.
+
+Holo's position is that the agent executing the workflow should not be the final judge of whether its own objective is safe to obey.
+
 ### 1.4 What Holo Engine Is
 
 **Holo Engine is a runtime trust layer that sits at the action boundary.**
@@ -150,6 +162,8 @@ An ABAT scenario has four properties:
 4. A required ALLOW or ESCALATE decision before execution
 
 ABAT is the testing method. Holo Engine is the runtime adjudication layer. The benchmark is the evidence object.
+
+ABAT does not only search for facts that models miss. It also searches for cases where a model sees the relevant evidence and still approves because the deployment context gives the wrong authority too much weight. Objective Override is one such class: the evidence is visible, but the operational instruction frames it as someone else's responsibility.
 
 This distinction matters. Holo is not claiming to replace red teaming, penetration testing, fraud detection, compliance review, or human oversight. It addresses a different seam: the moment when an AI agent is about to act, the formal checks appear satisfied, and the remaining risk is semantic.
 
@@ -373,6 +387,22 @@ The benchmark's strongest current claim is not that frontier models universally 
 
 > Holo should not be read as an argument against any one frontier model. The operational lesson is narrower and more important: solo deployment of any single model leaves coverage gaps at the action boundary that are model-specific and non-overlapping. Holo's role is to reduce that deployment risk, including for organizations that standardize on Claude, GPT, or Gemini.
 
+### 4.X Internal ABAT Expansion: Objective Override
+
+**Status: Internal ABAT expansion. Not yet published as a flagship benchmark case.**
+
+Objective Override describes a failure mode where a solo model reads disqualifying evidence but approves the action because its assigned operational role or KPI frames the evidence as outside scope.
+
+In a healthcare-style dispense scenario, the solo model approved fulfillment despite visible evidence that a provider prerequisite had been broken. Its justification relied on fulfillment role boundaries and administrative clearance.
+
+In an industrial dispatch scenario, the solo model approved release despite visible material/environment evidence that should have required escalation. Its justification relied on logistics role boundaries, QA clearance, and operational momentum.
+
+In both cases, the failure was not hallucination. It was not missing context. It was obedience to the wrong authority at the action boundary.
+
+Holo escalated both cases.
+
+These runs are being developed into a formal ABAT failure-class entry and should be treated as internal evidence until the payloads, solo baselines, Holo traces, and precision counterexamples pass publication gates.
+
 ---
 
 ## Section 05: Shared Reasoning Context Changes Model Behavior
@@ -504,6 +534,8 @@ Model improvement matters. It does not eliminate the structural problem of solo 
 The strongest publicly available frontier models at the time of testing still missed at least one flagship case in each completed domain. A solo model can become more knowledgeable while still failing when a plausible narrative is presented without verifiable support.
 
 More importantly, improvement is symmetric. The same stronger models are available to the attacker. Capability growth does not remove the need for runtime scrutiny. It increases it.
+
+A stronger model may read the packet more accurately and still approve the wrong action if the deployment architecture tells it to prioritize the wrong objective. Objective Override is not a pure capability failure. It is a trust-architecture failure: the model can see the disqualifying evidence and still classify it as outside its role.
 
 ### "A fine-tuned specialist model would do better."
 
@@ -730,4 +762,4 @@ Behind every agentic workflow in this benchmark is a person who might not know a
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 2.8 · May 1, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.0 · May 7, 2026*

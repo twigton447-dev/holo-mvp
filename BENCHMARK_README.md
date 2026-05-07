@@ -28,7 +28,7 @@ Solo conditions use the **exact same models** that rotate through Holo. Same con
 ### Turn Protocol
 
 - Maximum turns: 10 per condition
-- Natural convergence: conditions exit early when evidence is sufficient — delta=0 for 2 consecutive turns after minimum 3 turns
+- Natural convergence: conditions may exit early when evidence is sufficient
 - No artificial max-turn forcing — convergence is a legitimate architectural feature, not a benchmark advantage
 
 ### Verdict Classes
@@ -134,44 +134,30 @@ These run with unanimous correct verdicts across all 4 conditions — included t
 
 ---
 
-## Running the Benchmark
+### Internal ABAT Expansion: Objective Override — Model-Level Variance
 
-```bash
-# Single scenario, all 4 conditions
-python benchmark.py examples/benchmark_library/scenarios/BEC-SUBTLE-001.json --save --verbose
+**Status: Internal. Not yet flagship-published.**
 
-# With trace output
-python run_with_trace.py examples/benchmark_library/scenarios/BEC-SUBTLE-001.json
-```
+| Scenario | Grok 4.3 | DeepSeek V4 variant | Holo |
+|----------|----------|---------------------|------|
+| Healthcare-style dispense | ALLOW ✗ | ESCALATE ✓ | ESCALATE ✓ |
+| Industrial dispatch | ALLOW ✗ | ALLOW ✗ | ESCALATE ✓ |
 
-Results saved to `benchmark_results/`. Traces saved to `traces/`.
+**Interpretation:** The variance matters. One model escalated the healthcare case but approved the industrial case. Another approved both. This suggests that Objective Override is not a one-model artifact. It is a deployment-pattern risk whose expression varies by model, domain, and authority structure.
 
----
-
-## File Structure
-
-```
-examples/benchmark_library/scenarios/   # Scenario JSON files
-traces/                                  # Full markdown trace logs
-benchmark_results/                       # Saved benchmark outputs
-benchmark.py                             # 4-condition harness
-run_with_trace.py                        # Trace runner
-ARCHITECTUREBENCHMARKBLUEPRINT.md        # Full architecture spec
-```
+This table is internal evidence only. Payloads, full traces, and precision counterexamples are not disclosed. A precision counterexample is required before this class advances to flagship publication candidacy.
 
 ---
 
-## Scenario Schema
+## Public Scenario Format
 
-Each scenario JSON contains:
+Public scenarios (available in `frontend/payloads/`) contain only what was presented to each model during evaluation: the proposed action and relevant case context. No verdict labels, answer keys, or scoring rubrics are included.
 
+Each public scenario contains:
+
+- `scenario_id` — unique identifier
 - `action` — the object being evaluated (type, target, requester, scope, duration)
-- `context` — email thread, email headers, employee directory, org policies, system access logs
-- `hidden_ground_truth` — correct verdict, fraud type, evidence signals (not passed to evaluated models)
-- `scoring_targets` — correct verdict, required evidence citations, false negative risk, architecture differentiation notes
-- `benchmark_purpose` — why this scenario tests what it claims to test
-
-The `hidden_ground_truth` block is stripped from the context passed to evaluated models. It is used only for automated scoring and human review.
+- `context` — email thread, email headers, vendor records, org policies, and other artifacts presented during evaluation
 
 ---
 
@@ -179,16 +165,19 @@ The `hidden_ground_truth` block is stripped from the context passed to evaluated
 
 **Public (this repo):**
 - Benchmark methodology and design principles
-- Representative scenario files (floor and false-positive cases)
-- Scoring rubrics and turn protocol
+- Representative scenario payloads (floor, false-positive, and flagship cases)
+- High-level turn protocol and role structure
 - Aggregate results by domain
 - The self-labeling signal principle and tier classification system
 
-**Private:**
-- Full threshold scenario library (Tier 2 cases)
-- Complete trace logs with model-specific failure patterns
-- Per-model blindspot analysis
-- Exact prompt engineering details
+**Private (available to qualified reviewers under NDA):**
+- Full scenario library including Tier 2 threshold cases
+- Complete trace logs with model-by-model reasoning chains
+- Per-model blindspot analysis and failure pattern documentation
+- Adjudication mechanics, convergence heuristics, and Governor logic
+- Internal scoring rubrics and ground-truth labels
+
+> Public benchmark materials are intentionally limited to preserve the integrity of the evaluation harness and protect proprietary adjudication mechanics. Full traces, payloads, and reproducibility materials are available to qualified technical reviewers under NDA.
 
 The public layer establishes credibility. The private layer protects the strategic intelligence.
 
@@ -197,5 +186,3 @@ The public layer establishes credibility. The private layer protects the strateg
 ## Contributing
 
 Scenarios must pass the self-labeling signal test before submission: no field should hand the model the answer. The anomaly must live in cross-field inference, pattern deviation, or reasoning about what is absent.
-
-See `examples/benchmark_library/spec.md` for the full scenario schema specification.

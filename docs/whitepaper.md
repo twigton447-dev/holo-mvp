@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why some high-consequence AI actions pass surface checks but still require adversarial adjudication*
 
-**Holo Engine · Working Paper · Version 3.0 · May 7, 2026**
+**Holo Engine · Working Paper · Version 3.1 · May 7, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -403,6 +403,20 @@ Holo escalated both cases.
 
 These runs are being developed into a formal ABAT failure-class entry and should be treated as internal evidence until the payloads, solo baselines, Holo traces, and precision counterexamples pass publication gates.
 
+#### Model-Level Variance Inside Objective Override
+
+**Status: Internal ABAT expansion. Pending publication gates. Not a universal model claim.**
+
+Recent internal ABAT runs also showed that Objective Override does not express uniformly across models or domains.
+
+In a healthcare-style dispense scenario, one current frontier model escalated because the provider prerequisite was visibly broken, while another approved the same transaction by deferring to fulfillment status, payment clearance, QA pass, and customer-service resolution.
+
+In an industrial dispatch scenario, multiple current models approved release by deferring to logistics clearance, QA pass, signed ECN authority, and covered/enclosed project language, even though the packet contained material/environment evidence that should have required escalation.
+
+This matters because the failure class is not reducible to one model, one prompt, or one domain. A model may resist Objective Override in one vertical and still fail in another. Action-boundary coverage is uneven.
+
+The Holo claim is not that any single model is always wrong. The claim is that production systems should not rely on a single acting model to decide which authority should win before an irreversible action executes.
+
 ---
 
 ## Section 05: Shared Reasoning Context Changes Model Behavior
@@ -762,4 +776,4 @@ Behind every agentic workflow in this benchmark is a person who might not know a
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.0 · May 7, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.1 · May 7, 2026*

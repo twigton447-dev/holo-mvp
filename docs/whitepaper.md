@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why some high-consequence AI actions pass surface checks but still require adversarial adjudication*
 
-**Holo Engine · Working Paper · Version 3.1 · May 7, 2026**
+**Holo Engine · Working Paper · Version 3.2 · May 8, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -18,7 +18,7 @@ Most AI security is built to catch visible violations: prompt injection, jailbre
 
 **Nothing is obviously broken, but the action should still not proceed.**
 
-Holo Engine was built to govern this exact gap. It is the **last reversible checkpoint** before a high-consequence AI action executes. Its architecture uses adversarial multi-model review to pressure-test the full context of an action before it binds. The output is simple and auditable: **ALLOW or ESCALATE.**
+Holo Engine is an independent pre-execution adjudication layer for high-consequence AI workflows. Before an agent or automated system executes an irreversible action, Holo evaluates the action packet through adversarial multi-model review and returns ALLOW or ESCALATE with an audit-grade reasoning trace.
 
 In the benchmark's flagship test case, **all three solo frontier models approved a fraudulent transaction.** Under the exact same conditions, Holo's architecture returned ESCALATE consistently across repeated, seeded runs. This is not a claim of universal coverage or production reliability. It is evidence that adjudication architecture can change the outcome on a narrow but commercially important class of actions where surface policy passes, solo model judgment fails, and a second-stage decision architecture catches what the solo model misses.
 
@@ -660,6 +660,9 @@ The proprietary Governor logic, adversarial reactor configuration, model-routing
 **Benchmark as hardening instrument**  
 The benchmark is not only a marketing artifact. It is a pressure-testing instrument. The hardening process of running scenarios across seeds, identifying failures, and tracing them to specific model and role conditions is an ongoing function, not a one-time evaluation. Results published here represent a snapshot of a system under continuous pressure-testing.
 
+**Intellectual property**  
+A U.S. provisional patent application was filed on February 21, 2026 covering aspects of Holo's multi-model adversarial council architecture. Non-provisional conversion work is expected to expand action-boundary-specific claims, including pre-execution verdicting, deterministic Governor behavior, randomized role assignment, and action-packet handling.
+
 ---
 
 ## Point-in-Time Evidence, Living Control Layer
@@ -723,6 +726,8 @@ Replication does not require public release of the proprietary Governor logic. I
 
 Future benchmark work should expand precision testing: suspicious-looking but legitimate actions that should be allowed. A trust layer that only escalates is not sufficient. It must also demonstrate that it can allow unusual but valid actions when the evidence supports execution.
 
+Active vertical pilots in regulated industries are being used to generate externally grounded action-boundary scenarios. These pilots are designed to strengthen held-out validation by adding real workflow patterns beyond vendor-authored benchmark cases.
+
 ### Domain Roadmap
 
 | Domain | Status | Attack Class |
@@ -754,11 +759,7 @@ AI agents are making irreversible decisions today. The security infrastructure a
 
 This paper does not claim to have solved that problem. It claims to have identified a specific, testable gap at the action boundary, built a methodology for pressure-testing it, and produced results that justify further scrutiny. Holo is not a system that simply wins benchmarks. It is a system that can identify where solo model judgment breaks down at the action boundary, intervene at the moment that matters, and be hardened through systematic pressure-testing. When it misses, the failure is traceable. When it catches, the verdict is explained. The benchmark is how Holo learns where the ambushes are, and the runtime is how it acts on that knowledge.
 
-The benchmark shows where some of the ambushes are. Holo is an attempt to make those ambushes visible before the action executes.
-
-Behind every agentic workflow in this benchmark is a person who might not know an AI made the decision. The small business owner whose vendor payment was rerouted. The employee whose system access was quietly expanded. The company whose contract now contains terms no one approved. They did not interact with the model. They did not see the payload. The action boundary is invisible to them. That is exactly why it cannot be unguarded.
-
-**Ensuring every AI transaction is intentional.**
+The central claim is narrow: when AI systems move from generating outputs to executing consequential actions, observability is not enough. The decision point itself needs independent adjudication. Holo exists for that boundary.
 
 ---
 
@@ -776,4 +777,4 @@ Behind every agentic workflow in this benchmark is a person who might not know a
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.1 · May 7, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.2 · May 8, 2026*

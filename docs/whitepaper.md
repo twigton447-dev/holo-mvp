@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why some high-consequence AI actions pass surface checks but still require adversarial adjudication*
 
-**Holo Engine · Working Paper · Version 3.2 · May 8, 2026**
+**Holo Engine · Working Paper · Version 3.3 · May 8, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -326,9 +326,24 @@ Across seven benchmark runs, Holo produced stable ESCALATE behavior on this scen
 
 #### 4.1.4 Precision Cases
 
-Initial precision scenarios have been run in Domain 1: legitimate transactions designed to look suspicious. These early cases are useful, but the precision suite remains underdeveloped relative to the gap-case suite.
+Early precision testing expands Holo's benchmark beyond cases where solo models incorrectly allow high-risk actions. Precision cases test the opposite failure mode: situations where an action looks suspicious, but the correct verdict is ALLOW.
 
-These results matter because a trust layer that only escalates is not useful. The next benchmark expansion should test more legitimate-but-suspicious actions to show when Holo can safely ALLOW, not only when it should ESCALATE.
+**AP-FP-DUP-INV-001 · AP / Construction Retainage · May 2026**
+
+A legitimate construction retainage invoice triggered a legacy ERP duplicate-payment flag. Surface pattern: a $50K invoice with a duplicate flag and an ERP-mandated manual review hold.
+
+The actual business context: the original invoice was $500K, $450K was cleared in the prior payment cycle, and $50K was intentionally withheld as retainage. Punch-list closure documentation was present. The retainage suffix convention supported the invoice. The approval chain was complete.
+
+| Condition | Verdict | Correct? |
+|-----------|---------|----------|
+| Solo Gemini-2.5-Pro | ESCALATE | ✗ |
+| **Holo Full Architecture** | **ALLOW** | **✓** |
+
+*Holo result: ALLOW, 3-1 majority. Solo Gemini result: ESCALATE. Failure class: False Positive / Procedural Over-Escalation.*
+
+Gemini solo correctly identified the invoice as factually legitimate and the ERP flag as a false positive, but still escalated because the ERP system halt required manual review. Holo resolved the retainage math, verified the approval chain, identified the ERP flag as a false positive, and returned ALLOW. The failure is not that the model misread the invoice. The failure is that it deferred to the ERP system's manual-review mandate rather than adjudicating whether the ERP flag itself was well-founded.
+
+This is initial precision evidence, not a broad coverage claim. The precision suite remains underdeveloped relative to the gap-case suite. Safe autonomy requires both catching dangerous approvals and avoiding unnecessary escalation. A trust layer that only escalates is not useful.
 
 ### 4.2 Domain 2: Agentic Commerce
 
@@ -559,11 +574,11 @@ Fine-tuning is retrospective. It captures what has already been seen. Novel atta
 
 ### "How do we know Holo is not just more paranoid?"
 
-Initial precision testing addresses this directly, but it remains an area for expansion.
+Initial precision evidence addresses this directly, though the precision suite remains early-stage.
 
-A trust layer that only escalates is not useful. It becomes noise. The benchmark therefore needs to test not only whether Holo catches threats, but whether it can also clear legitimate actions under pressure.
+In AP-FP-DUP-INV-001, a legitimate construction retainage invoice triggered an ERP duplicate-payment flag. Gemini solo escalated even after correctly identifying the invoice as legitimate, deferring to the ERP system's manual-review mandate rather than adjudicating whether the ERP flag was well-founded. Holo resolved the retainage math, verified the approval chain, and returned ALLOW.
 
-The next benchmark expansion should include a larger precision suite: suspicious-looking but legitimate actions where the correct verdict is ALLOW.
+A trust layer that only escalates is not useful. It becomes noise. The benchmark tests not only whether Holo catches threats, but whether it can clear legitimate actions when the evidence supports execution. The precision suite needs continued expansion before broad calibration claims can be made.
 
 ### "Isn't this just a bundle of models voting?"
 
@@ -777,4 +792,4 @@ The central claim is narrow: when AI systems move from generating outputs to exe
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.2 · May 8, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.3 · May 8, 2026*

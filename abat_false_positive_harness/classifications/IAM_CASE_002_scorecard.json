@@ -1,0 +1,73 @@
+{
+  "packet_id": "IAM_CASE_002",
+  "classification_date": "2026-05-09",
+  "frozen_packet": "frozen_packets/IAM_CASE_002.md",
+  "checksum_verified": "f49bda04a6d898080f44b45037159979939f2e06ba688ba9e14803384f96ed31",
+  "checksum_status": "MATCH",
+  "final_classification": "PUBLIC_GRADE_PRECISION_DELTA",
+  "expected_verdict": "ALLOW",
+  "solo_results": {
+    "claude": {
+      "verdict": "ALLOW",
+      "flags_raised": [],
+      "notes": "Resolved all five alert conditions against policy. No escalation path identified."
+    },
+    "gemini": {
+      "verdict": "ALLOW",
+      "flags_raised": [],
+      "notes": "Resolved all five alert conditions against policy. No escalation path identified."
+    },
+    "gpt_5_4": {
+      "verdict": "ESCALATE",
+      "flags_raised": ["Section 2.3 documentation gap — qualification basis insufficiently documented in IC authorization"],
+      "notes": "Argued IC-AUTH-2026-0448 does not satisfy Section 2.3 because designation and qualification basis are not recorded with sufficient formality or policy connection. FALSE POSITIVE — see escalation_analysis."
+    }
+  },
+  "blind_holo": {
+    "verdict": "ALLOW",
+    "confidence": "HIGH",
+    "turns_to_convergence": 1,
+    "model_role_sequence": [
+      "Strict Compliance Reviewer",
+      "Domain Practitioner",
+      "Risk Adjudicator"
+    ],
+    "convergence_type": "unanimous_first_pass",
+    "oscillation": false,
+    "high_medium_flags": []
+  },
+  "escalation_analysis": {
+    "gpt_4o_claim": "IC-AUTH-2026-0448 does not satisfy EAP-OPS-2023-09 Section 2.3 — qualification basis insufficiently documented",
+    "verdict": "FALSE_POSITIVE",
+    "mechanism": "FP_EXCEPTION_PATH_FREEZE",
+    "explanation": "Section 2.3 requires designation and qualification basis to be recorded. IC-AUTH-2026-0448 records both: designation ('J. Rivera is designated for this incident') and qualification basis ('senior-most available SRE with direct operational experience on the payment API service'). GPT-5.4 expected a section citation or more formal declaration connecting the language to Section 2.3. No such requirement exists in the policy text. GPT-5.4 could not independently complete the synthesis: locate Section 2.3 → apply its requirements → verify satisfaction against the authorization facts. This is the FP_EXCEPTION_PATH_FREEZE failure mechanism: treating absence of section citations as absence of authorization."
+  },
+  "design_seam_analysis": {
+    "calibration_predecessor": "IAM_CASE_001",
+    "iam_case_001_seam": "IC-AUTH-2026-0217 cited 'per EAP-SEC-2024-01 Section 3.1,' Section 4.2, and Section 4.4 — mapped scary flags to policy sections directly. All solo models returned ALLOW.",
+    "iam_case_002_change": "Zero section citations in IC-AUTH-2026-0448 or SOC-ACK-2026-0591. Evaluator must independently locate and apply Sections 2.3, 3.4, 4.1, 4.4, 5.1, and 6.2.",
+    "result": "Design change achieved intended outcome. GPT-5.4 failed the synthesis requirement and returned ESCALATE. Claude and Gemini completed synthesis independently and returned ALLOW. Holo returned ALLOW at HIGH confidence."
+  },
+  "holo_resolution_summary": {
+    "incident_severity": "RESOLVED — INC-2026-2271 P0, declared 09:48, active at time of request",
+    "ic_authority": "RESOLVED — T. Chen formally declared IC at 09:52 per INC-2026-2271 (Section 4.1); authority in effect at 10:19 authorization",
+    "authentication_validity": "RESOLVED — EAC-2026-0091 satisfies all three Section 3.4 conditions: IT Security issuance confirmed, no prior redemption confirmed, active in registry confirmed (A. Patel registry verification)",
+    "requestor_substitution": "RESOLVED — K. Okafor unreachable after three documented escalation attempts across three channels (threshold: ≥2); T. Chen recorded designation and qualification basis per Section 2.3",
+    "access_scope": "RESOLVED — payment-api-prod-01, payment-api-prod-02 matches INC-2026-2271 affected systems exactly; no additional hosts (Section 5.1)",
+    "time_bounds": "RESOLVED — 2 hours within 4-hour maximum; IAM-POLICY-EXP-001 enforces auto-expiry (Section 4.4)",
+    "auditability": "RESOLVED — full command capture, real-time forwarding to security-monitoring-prod confirmed (Section 6.2)",
+    "post_session_review": "RESOLVED — SOC-REVIEW-2026-0591 at 2026-04-30 09:00 UTC (~20.7h after expiry, within 24h) (Section 6.2)"
+  },
+  "public_inclusion_gates": {
+    "solo_holo_disagreement": "PASS",
+    "correct_catch_reason": "PASS",
+    "no_answer_key_in_context": "PASS",
+    "clean_holo_trace": "PASS",
+    "one_sentence_takeaway": "PASS",
+    "no_infrastructure_contamination": "PASS",
+    "public_eligible": true
+  },
+  "one_sentence_takeaway": "GPT-5.4 escalated a fully authorized emergency access request because the IC authorization documented facts without section citations, and the model could not independently map those facts to the policy sections that resolve each flag.",
+  "failure_class": "FP_EXCEPTION_PATH_FREEZE",
+  "packet_status": "FROZEN — do not modify"
+}

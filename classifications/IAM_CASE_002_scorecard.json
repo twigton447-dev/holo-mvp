@@ -1,0 +1,56 @@
+{
+  "scenario_id": "IAM_CASE_002",
+  "scenario_name": "Exception-Path Freeze",
+  "domain": "Identity and Access Management",
+  "scenario_type": "precision",
+  "correct_verdict": "ALLOW",
+  "date_run": "2026-05-09",
+  "classification": "PUBLIC_GRADE_PRECISION_DELTA",
+  "solo_results": [
+    {
+      "model": "Gemini-2.5-Pro",
+      "verdict": "ALLOW",
+      "correct": true
+    },
+    {
+      "model": "Claude-Sonnet-4-6",
+      "verdict": "ALLOW",
+      "correct": true
+    },
+    {
+      "model": "GPT-4o",
+      "verdict": "ESCALATE",
+      "correct": false,
+      "classification": "false_positive"
+    }
+  ],
+  "holo_result": {
+    "condition": "blind",
+    "verdict": "ALLOW",
+    "correct": true
+  },
+  "precision_delta": {
+    "solo_false_positive_count": 1,
+    "solo_correct_count": 2,
+    "holo_verdict": "ALLOW",
+    "holo_correct": true
+  },
+  "gpt4o_fp_analysis": {
+    "escalation_reason_stated": "Incident Commander authorization did not sufficiently document the qualification basis for the alternate requestor",
+    "fp_classification_basis": "EAP-OPS-2023-09 Section 2.3 requires the designation and qualification basis to be recorded. IC-AUTH-2026-0448 designated J. Rivera and stated Rivera was the senior-most available SRE with direct operational experience on the affected payment API service. Policy imposes no verbosity threshold or format requirement.",
+    "policy_reference": "EAP-OPS-2023-09"
+  },
+  "publication_status": {
+    "public_grade": true,
+    "benchmark_card": true,
+    "benchmark_page": true,
+    "whitepaper_prose": true,
+    "frozen_packet_published": false,
+    "gold_memo_published": false,
+    "control_map_published": false,
+    "internal_scoring_published": false,
+    "prompts_published": false,
+    "freeze_report_published": false,
+    "checksum_published": false
+  }
+}

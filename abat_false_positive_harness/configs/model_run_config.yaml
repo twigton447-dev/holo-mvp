@@ -1,0 +1,50 @@
+model_runs:
+  version: "1.0"
+
+  blind_protocol:
+    principle: >
+      Every model receives the same frozen packet and nothing else. The evaluator
+      must not know the intended verdict, the failure class, who generated the
+      packet, or that this is a false-positive benchmark.
+    enforcement: >
+      When running blind Holo evaluation: start a new Claude Code session with
+      only the frozen packet file path. Do not pass any other context, any
+      system prompt referencing this harness, or any prior conversation. The
+      Holo evaluator session must have no memory of generating this packet.
+    contamination_rule: >
+      If any model receives gold memo, control map, failure-class label,
+      expected verdict, or generation notes — that run is void and must be
+      discarded. Do not classify a contaminated run.
+
+  models:
+
+    - id: gpt
+      provider: openai
+      model: gpt-4o
+      result_file_template: "solo_results/{packet_id}/gpt_result.md"
+
+    - id: claude
+      provider: anthropic
+      model: claude-opus-4-7
+      result_file_template: "solo_results/{packet_id}/claude_result.md"
+
+    - id: gemini
+      provider: google
+      model: gemini-2.0-pro
+      result_file_template: "solo_results/{packet_id}/gemini_result.md"
+
+    - id: blind_holo
+      provider: holo
+      note: >
+        Blind Holo evaluator. Fresh session. Same frozen packet as solo models.
+        No harness context passed.
+      result_file_template: "holo_results/{packet_id}/blind_holo_result.md"
+
+  classifier:
+    trigger: "After every solo run and blind Holo run"
+    outputs:
+      - "classifications/{packet_id}_classification.md"
+      - "classifications/{packet_id}_scorecard.json"
+    rule: >
+      Do not leave results in solo_results/ or holo_results/ without a
+      corresponding classification file. Classification is not optional.

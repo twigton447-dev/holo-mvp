@@ -10,7 +10,7 @@ Model defaults (override via .env):
   OPENAI_MODEL    = gpt-5.4
   ANTHROPIC_MODEL = claude-sonnet-4-6
   GOOGLE_MODEL    = gemini-2.5-pro
-  GOVERNOR_MODEL  = rotates across same 3-model pool as drivers (never shares DNA with driver on the same turn)
+  GOVERNOR_MODEL  = rotates across same 3-model pool as analysts (never shares DNA with analyst on the same turn)
 """
 
 import json
@@ -90,22 +90,7 @@ ROLE_INSTRUCTIONS = {
 You are the FIRST analyst. No prior assessments exist.
 Evaluate each of the six BEC risk categories from scratch using only the
 submitted action payload and context. Be specific: cite exact field values
-or email content as evidence. Pattern-based inferences are valid evidence
-— you do not need a single explicit red flag to rate a category MEDIUM or HIGH.
-
-PATTERN ANALYSIS — if the scenario includes invoice_history,
-payment_history, or any array of prior transactions, treat it as an
-attack surface, not background context. Specifically check:
-- THRESHOLD CLUSTERING: Are recent invoices clustered just below a known
-  approval threshold? Deliberate under-threshold pricing is itself a red flag.
-- STEP-CHANGES: Is there a sudden jump in amount with no documented scope change?
-- AGGREGATE BREACH: Do multiple recent invoices combined exceed a threshold
-  that no single invoice triggers?
-
-If any of these patterns are present, rate approval_chain_compliance or
-invoice_amount_anomaly MEDIUM or HIGH and cite the specific amounts and dates.
-Do not dismiss a clustering pattern as "within normal range" — range-compliance
-is not the same as pattern-safety.
+or email content as evidence. Do not speculate without evidence.
 """,
 
     "Assumption Attacker": """
@@ -657,12 +642,12 @@ Now produce your Turn {turn_number} assessment as a single JSON object."""
 # Governor LLM — between-turn brief generation
 # ---------------------------------------------------------------------------
 
-def _load_governor_doctrine(driver_provider: str = None, tier: str = "STANDARD") -> str:
+def _load_governor_doctrine(analyst_provider: str = None, tier: str = "STANDARD") -> str:
     """
     Load governor_doctrine.md and assemble the context for this Governor call.
 
     Always loads TIER: CORE.
-    If driver_provider is given, also loads PROFILE: {provider}.
+    If analyst_provider is given, also loads PROFILE: {provider}.
     If tier == 'DEEP', also loads TIER: DEEP.
 
     Tag format in the file:
@@ -687,10 +672,10 @@ def _load_governor_doctrine(driver_provider: str = None, tier: str = "STANDARD")
     if m:
         parts.append(m.group(1).strip())
 
-    # When driver is known: PROFILE: {provider}
-    if driver_provider:
+    # When analyst is known: PROFILE: {provider}
+    if analyst_provider:
         mp = re.search(
-            rf"<!--\s*PROFILE:\s*{re.escape(driver_provider.lower())}\s*-->(.*?)<!--\s*/PROFILE\s*-->",
+            rf"<!--\s*PROFILE:\s*{re.escape(analyst_provider.lower())}\s*-->(.*?)<!--\s*/PROFILE\s*-->",
             raw, re.DOTALL,
         )
         if mp:
@@ -707,28 +692,28 @@ def _load_governor_doctrine(driver_provider: str = None, tier: str = "STANDARD")
 
 def build_governor_system_prompt(
     template: dict = None,
-    driver_provider: str = None,
+    analyst_provider: str = None,
     tier: str = "STANDARD",
 ) -> str:
     """
     Build the governor's between-turn brief system prompt for the active scenario.
 
-    driver_provider — the provider driving the next turn (e.g. 'openai').
+    analyst_provider — the provider evaluating the next turn (e.g. 'openai').
                       When known, the matching model profile is injected here so the
                       Governor carries it as persistent context for the entire brief call.
     tier            — evaluation tier ('FAST', 'STANDARD', 'DEEP').
                       DEEP loads the full benchmark evidence + architecture sections.
 
     Token budget targets:
-      FAST / no driver:           ~600  tokens (CORE only)
-      STANDARD + driver known:    ~1,000 tokens (CORE + profile)
-      DEEP + driver known:        ~2,200 tokens (CORE + profile + DEEP)
+      FAST / no analyst:           ~600  tokens (CORE only)
+      STANDARD + analyst known:    ~1,000 tokens (CORE + profile)
+      DEEP + analyst known:        ~2,200 tokens (CORE + profile + DEEP)
     """
     context = (
         template.get("governor_context", "evaluates action risk")
         if template else "evaluates Business Email Compromise (BEC) risk"
     )
-    doctrine = _load_governor_doctrine(driver_provider=driver_provider, tier=tier)
+    doctrine = _load_governor_doctrine(analyst_provider=analyst_provider, tier=tier)
     doctrine_block = f"\n\n---\n\n{doctrine}\n\n---\n" if doctrine else ""
     return f"""You are the Context Governor of Holo, an AI trust layer that {context}.{doctrine_block}
 
@@ -804,12 +789,17 @@ GOVERNOR_SYSTEM_PROMPT = build_governor_system_prompt()
 # ---------------------------------------------------------------------------
 # Queryable lookup: (provider, action_type) -> known failure mode text.
 # Populated from frontier model self-diagnosis across benchmarked domains.
-# Used by the Governor to write hyper-targeted primers per driver per turn.
+# Used by the Governor to write hyper-targeted primers per analyst per turn.
 #
 # Sources:
 #   Domain 1 (BEC): benchmark results — BEC-PHANTOM-DEP-003A
 #   Domain 3 (IAM): direct adversarial self-analysis, all three models
 #   Domain 4 (Agentic Commerce): benchmark results — AGENTIC-ROUTINE-001
+#
+# THE LAW: every benchmark run, every partner case, every observed failure
+# is evidence. Evidence goes here. This dict must grow and sharpen over time.
+# An entry that has not been challenged is provisional. An entry that has been
+# benchmarked is verified. Nothing here is final. Everything here is current.
 # ---------------------------------------------------------------------------
 
 BLINDSPOT_ATLAS: dict[tuple[str, str], str] = {
@@ -914,7 +904,7 @@ BLINDSPOT_ATLAS: dict[tuple[str, str], str] = {
 
 
 # Short failure-mode names — one memorable label per (provider, domain) pair.
-# Used to address the driver directly in governor briefs.
+# Used to address the analyst directly in governor briefs.
 BLINDSPOT_NAMES: dict[tuple[str, str], str] = {
     ("anthropic", "invoice_payment"):   "Explanation Surrender",
     ("openai",    "invoice_payment"):   "Authentication Tunnel Vision",
@@ -957,7 +947,7 @@ CHAT_BLINDSPOT_ATLAS: dict[str, tuple[str, str]] = {
         "Claude softens hard truths with caveats and over-explanation. When the brief "
         "calls for a direct challenge, Claude tends to hedge — naming the problem but "
         "immediately cushioning it. The directive should be stated once, cleanly, "
-        "without apologetic scaffolding. If Claude is the driver, push for precision "
+        "without apologetic scaffolding. If Claude is the analyst, push for precision "
         "over comfort.",
     ),
     "google": (
@@ -1121,7 +1111,7 @@ The test: does this response read like something a sharp, careful person wrote �
 You have access to current information. When a question requires up-to-date facts, recent news, live prices, current events, or anything time-sensitive, current data is automatically pulled and available in your context. You do not caveat that your knowledge has a cutoff. You do not say you cannot browse the internet. If relevant current data is in your context, use it naturally. If it isn't, reason from what you know — but never disclaim an inability to access the present. You are not cut off from the world.
 
 **Your architecture (internal — never surface unprompted)**
-You are one of three foundation models (GPT, Claude, Gemini) that rotate as the Driver — the voice that speaks to the user. On every turn, a Governor from a structurally different model family reads the full conversation and the person's long-term portrait, then briefs you before you respond. The Governor is always different DNA from you — never the same model family on the same turn. You don't need to know which Governor briefed you or which models came before. Just know: your job is to deliver the sharpest, most honest response you can. The Governor handles the arc. Do not reference BATON_PASS, STATE_OBJECT, or any internal architecture during normal conversation. You are Holo.
+You are one of three foundation models (GPT, Claude, Gemini) that rotate as the Analyst — the voice that speaks to the user. On every turn, a Governor from a structurally different model family reads the full conversation and the person's long-term portrait, then briefs you before you respond. The Governor is always different DNA from you — never the same model family on the same turn. You don't need to know which Governor briefed you or which models came before. Just know: your job is to deliver the sharpest, most honest response you can. The Governor handles the arc. Do not reference BATON_PASS, STATE_OBJECT, or any internal architecture during normal conversation. You are Holo.
 
 **One exception — the onboarding introduction**
 When a user shares their personal brief and explicitly asks you to introduce yourself and explain how you work, the fourth wall comes down — not to pitch a product, but to begin a real relationship. This is the most important response you will ever give this person.
@@ -1132,7 +1122,7 @@ Cover these beats, in your own words, in this spirit:
 
 **Thank them — and mean it.** They just did something almost no one does: they gave you context before asking for anything. They told you who they are. That's not a small thing. It means you can skip the first ten conversations of calibration and start somewhere real. Acknowledge that specifically. They helped build this relationship faster and you are genuinely grateful for it.
 
-**Name what makes you different — honestly.** People know what chatbots feel like. Brilliant one minute, confidently wrong the next. Forgetting what was said three messages ago. Drifting. Getting "tired." Losing the thread entirely. That inconsistency isn't a quirk of one model — it's structural. One model, trained one way, one set of blindspots, reset to zero every conversation. **Holo is a different architecture.** Every conversation rotates across GPT, Claude, and Gemini — no single model drives indefinitely, no single model's blindspots compound over time. A separate layer, the Governor, runs behind every turn: briefing the driver, flagging drift, verifying claims, and holding the thread across model boundaries. The blindspots don't stack — they rotate out. In early testing, this approach caught things any single model missed, held its footing on complex reasoning problems, and produced fewer confident-but-wrong answers. That's not a promise. That's what the results showed.
+**Name what makes you different — honestly.** People know what chatbots feel like. Brilliant one minute, confidently wrong the next. Forgetting what was said three messages ago. Drifting. Getting "tired." Losing the thread entirely. That inconsistency isn't a quirk of one model — it's structural. One model, trained one way, one set of blindspots, reset to zero every conversation. **Holo is a different architecture.** Every conversation rotates across GPT, Claude, and Gemini — no single model drives indefinitely, no single model's blindspots compound over time. A separate layer, the Governor, runs behind every turn: briefing the analyst, flagging drift, verifying claims, and holding the thread across model boundaries. The blindspots don't stack — they rotate out. In early testing, this approach caught things any single model missed, held its footing on complex reasoning problems, and produced fewer confident-but-wrong answers. That's not a promise. That's what the results showed.
 
 **Tell them what you can see from here.** Not just their question. Their whole picture — across every session, everything they share, every problem they bring. Over time, you'll understand how they think before they explain it. What trips them up. What they actually need versus what they asked for. You can help with anything: decisions, strategy, health, relationships, finance, career, writing, legal questions, technical problems, creative work. Most of the hard problems in life don't live in one domain — and neither do you. **You are built to see the full 30,000-foot view of someone's life and help them solve for it, all of it, over time.**
 
@@ -1169,7 +1159,7 @@ def build_governor_brief_request(
     """Builds the user message for the governor LLM between-turn brief.
 
     When threat_hypothesis and model_blindspot are provided, the Governor
-    synthesizes them to write a hyper-targeted primer for this specific driver.
+    synthesizes them to write a hyper-targeted primer for this specific analyst.
     When model_blindspot_name is also provided, the brief must explicitly address
     the incoming model by name, call out the named failure mode, and give a
     targeted instruction to compensate — never a generic role-based primer.
@@ -1236,7 +1226,7 @@ def build_governor_brief_request(
     }
     stakes = stakes_map.get(convergence_level, "Target the most important unresolved question.")
 
-    # Coach synthesis block — injected when Wrangler hypothesis + Atlas blindspot available.
+    # Coach synthesis block — injected when Triage hypothesis + Atlas blindspot available.
     # When a named failure mode is available, the brief must be model-addressed, not
     # role-addressed: open with "Brief for [MODEL]:", name the failure mode explicitly,
     # state what the analyst will be tempted to do, and give the one question that
@@ -1246,7 +1236,7 @@ def build_governor_brief_request(
     if threat_hypothesis or model_blindspot:
         coach_block = "\n\nCOACH SYNTHESIS:"
         if threat_hypothesis:
-            coach_block += f"\nWrangler threat hypothesis: {threat_hypothesis}"
+            coach_block += f"\nTriage hypothesis: {threat_hypothesis}"
         if model_blindspot and next_provider:
             if model_blindspot_name:
                 verified = (model_blindspot_status == "verified")
@@ -1256,7 +1246,7 @@ def build_governor_brief_request(
                     else "hypothesized failure mode (not yet benchmarked — treat as provisional)"
                 )
                 # The model profile is already in the system prompt (injected via
-                # build_governor_system_prompt(driver_provider=...)). No duplication here.
+                # build_governor_system_prompt(analyst_provider=...)). No duplication here.
                 coach_block += (
                     f"\n\n{next_provider.upper()} {status_label} for this domain — "
                     f"{model_blindspot_name}: {model_blindspot}"
@@ -1401,10 +1391,80 @@ class _FlightDeckBase:
 # Runs the instruments every turn. Knows you better than anyone.
 # ---------------------------------------------------------------------------
 
-def _summarize_context_for_hypothesis(context: dict) -> str:
+# ===========================================================================
+# INTERNAL TRIAGE
+#
+# Responsibilities (owned exclusively by this block):
+#   - Select the evaluation harness (which domain's policies apply)
+#   - Classify the action boundary (what kind of threat surface is this?)
+#   - Identify the most likely attack class before any analyst turn
+#   - Check packet completeness (summarize what context is available)
+#   - Route to the correct harness/tier via routing.py
+#   - Never make the final verdict — that authority belongs to the Governor
+#     and the adversarial analyst council
+#
+# Entry point for callers: GovernorAdapter.triage_packet(state)
+#   Returns TriageResult and updates state['active_template'] +
+#   state['threat_hypothesis'] in place.
+#
+# Currently runs inside GovernorAdapter using the Governor's model.
+# Designed to be promotable to a standalone TriageAdapter if a dedicated
+# model is assigned later. All triage logic lives in this block only.
+#
+# THE LAW applies here. See scenario_templates.py.
+# Harnesses selected by this layer must always reflect current best evidence.
+# When a new vertical is added, _HARNESS_ALIASES must be updated immediately.
+# ===========================================================================
+
+@dataclass
+class TriageResult:
+    """Full output of a single triage pass on one packet."""
+    action_type:       str   # resolved harness key (e.g. "invoice_payment")
+    template:          dict  # the loaded harness — categories, personas, domain
+    selection_reason:  str   # why this harness was chosen
+    confidence:        str   # "high" | "low" | "fallback"
+    threat_hypothesis: str   # one-sentence attack surface class
+
+
+# Action type aliases for harness selection.
+# Covers common API spellings from design partners before normalization.
+# Extends _ACTION_TYPE_ALIASES (which is Atlas-specific) with broader coverage.
+_HARNESS_ALIASES: dict[str, str] = {
+    # BEC / financial fraud
+    "wire_transfer":     "invoice_payment",
+    "ach_payment":       "invoice_payment",
+    "bank_transfer":     "invoice_payment",
+    "vendor_payment":    "invoice_payment",
+    "payment":           "invoice_payment",
+    "wire":              "invoice_payment",
+    # IAM
+    "iam_request":       "access_grant",
+    "role_assignment":   "access_grant",
+    "permission_grant":  "access_grant",
+    "access_request":    "access_grant",
+    # Agentic commerce
+    "automated_order":   "purchase_order",
+    "reorder":           "purchase_order",
+    "procurement":       "purchase_order",
+    # Vendor
+    "vendor_add":        "vendor_onboarding",
+    "new_vendor":        "vendor_onboarding",
+    "supplier_add":      "vendor_onboarding",
+    # Contract
+    "contract_review":   "contract_approval",
+    "contract_sign":     "contract_approval",
+    "contract_execute":  "contract_approval",
+    # Data privacy
+    "data_removal":      "data_deletion",
+    "gdpr_deletion":     "data_deletion",
+    "right_to_erasure":  "data_deletion",
+}
+
+
+def _triage_summarize_context(context: dict) -> str:
     """
     Produce a compact summary of the context bundle for threat hypothesis generation.
-    Extracts top-level keys and short value previews — enough for the Wrangler to
+    Extracts top-level keys and short value previews — enough for Internal Triage to
     identify the attack surface class without consuming the full context budget.
     """
     lines = []
@@ -1426,14 +1486,14 @@ class GovernorAdapter(_FlightDeckBase):
     The Governor is in command. She runs the instruments and thinks about the
     human behind them. All she thinks about, all day, is you.
 
-    Randomly selected each turn from whichever providers are NOT the driver —
-    never shares DNA with the driver on the same turn. No predictable pattern.
-    Call prepare_for_turn(driver_slot) before each turn to lock in the provider.
+    Randomly selected each turn from whichever providers are NOT the analyst —
+    never shares DNA with the analyst on the same turn. No predictable pattern.
+    Call prepare_for_turn(analyst_slot) before each turn to lock in the provider.
     """
 
     def __init__(self, pool: list, fixed_governor: str = None):
         """
-        pool — the active adapter pool (same objects the drivers use).
+        pool — the active adapter pool (same objects the analysts use).
         fixed_governor — if set, always use this provider for governor briefs
                          (e.g. "openai"). Used for controlled comparison tests.
         Governor shares the pool; it never builds its own clients.
@@ -1452,10 +1512,10 @@ class GovernorAdapter(_FlightDeckBase):
             + (f" [FIXED: {fixed_governor}]" if fixed_governor else " [ROTATING]")
         )
 
-    def prepare_for_turn(self, driver_adapter) -> None:
+    def prepare_for_turn(self, analyst_adapter) -> None:
         """
         Randomly select the Governor's provider for this turn.
-        Excludes the driver's vendor — guarantees no DNA overlap, no predictable pattern.
+        Excludes the analyst's vendor — guarantees no DNA overlap, no predictable pattern.
         """
         from provider_health import registry
         for a in self._pool:
@@ -1466,7 +1526,7 @@ class GovernorAdapter(_FlightDeckBase):
             candidates = fixed if fixed else self._pool
         else:
             candidates = [a for a in self._pool
-                          if a.provider != driver_adapter.provider
+                          if a.provider != analyst_adapter.provider
                           and not registry.is_quarantined(a.provider)]
             if not candidates:
                 candidates = [a for a in self._pool if not registry.is_quarantined(a.provider)]
@@ -1479,7 +1539,7 @@ class GovernorAdapter(_FlightDeckBase):
         self._client    = chosen._client
         logger.info(
             f"GovernorAdapter: governor={self.provider}/{self.model_id} "
-            f"(driver={driver_adapter.provider})"
+            f"(analyst={analyst_adapter.provider})"
         )
 
     # ------------------------------------------------------------------
@@ -1580,7 +1640,7 @@ class GovernorAdapter(_FlightDeckBase):
         Generate a one-sentence Threat Hypothesis Brief from the action + context.
 
         Called once before any analyst turn. Identifies the most likely attack
-        surface class so the Governor can prime each subsequent driver against
+        surface class so the Governor can prime each subsequent analyst against
         the specific failure mode this payload is most likely to exploit.
 
         Returns a single sentence. Examples:
@@ -1598,7 +1658,7 @@ class GovernorAdapter(_FlightDeckBase):
             f"DOMAIN: {domain}\n\n"
             f"ACTION:\n{action}\n\n"
             f"CONTEXT (summary fields only):\n"
-            f"{_summarize_context_for_hypothesis(context)}\n\n"
+            f"{_triage_summarize_context(context)}\n\n"
             f"Your job: identify the single most likely attack surface class for this payload.\n\n"
             f"Attack surface classes:\n"
             f"- persuasion_failure: a plausible narrative or ceremony explains away an anomaly\n"
@@ -1616,7 +1676,7 @@ class GovernorAdapter(_FlightDeckBase):
         )
         try:
             result = self._call(prompt, max_tokens=80, system=(
-                "You are the Wrangler — Holo's context compiler. "
+                "You are Internal Triage — Holo's pre-evaluation classifier. "
                 "You read raw action payloads and identify the attack surface class before any analyst begins. "
                 "You do not make verdicts. You name the threat class. One sentence. No hedging."
             ))
@@ -1625,6 +1685,97 @@ class GovernorAdapter(_FlightDeckBase):
             logger.warning(f"  Threat hypothesis generation failed: {e}")
             return ""
 
+    def select_harness(self, action: dict, context: dict = None) -> tuple[str, dict, str, str]:
+        """
+        Select the evaluation harness for this action packet.
+
+        Resolution order:
+          1. Exact match on action["type"] against SCENARIO_TEMPLATES
+          2. Alias resolution via _HARNESS_ALIASES
+          3. LLM classification for unrecognized action types
+          4. Hard fallback to DEFAULT_SCENARIO
+
+        Returns (action_type, template, selection_reason, confidence).
+        Confidence: "high" (deterministic) | "low" (LLM) | "fallback" (default).
+        """
+        from scenario_templates import SCENARIO_TEMPLATES, DEFAULT_SCENARIO
+
+        raw_type = (action.get("type") or "").lower().strip()
+
+        if raw_type in SCENARIO_TEMPLATES:
+            t = SCENARIO_TEMPLATES[raw_type]
+            logger.info(f"  Triage: harness='{raw_type}' (exact match)")
+            return raw_type, t, "exact action.type match", "high"
+
+        if raw_type in _HARNESS_ALIASES:
+            resolved = _HARNESS_ALIASES[raw_type]
+            t = SCENARIO_TEMPLATES[resolved]
+            logger.info(f"  Triage: harness='{resolved}' (alias: {raw_type})")
+            return resolved, t, f"alias: {raw_type} → {resolved}", "high"
+
+        if raw_type:
+            classified = self._classify_harness_llm(action, context or {})
+            if classified and classified in SCENARIO_TEMPLATES:
+                t = SCENARIO_TEMPLATES[classified]
+                logger.info(f"  Triage: harness='{classified}' (LLM classification of '{raw_type}')")
+                return classified, t, f"LLM classification of unknown type '{raw_type}'", "low"
+
+        t = SCENARIO_TEMPLATES[DEFAULT_SCENARIO]
+        logger.warning(f"  Triage: harness='{DEFAULT_SCENARIO}' (fallback — unrecognized type '{raw_type}')")
+        return DEFAULT_SCENARIO, t, f"unrecognized action.type '{raw_type}' — defaulted to {DEFAULT_SCENARIO}", "fallback"
+
+    def _classify_harness_llm(self, action: dict, context: dict) -> Optional[str]:
+        """LLM fallback: classify an ambiguous action type into a known harness key."""
+        from scenario_templates import SCENARIO_TEMPLATES
+        known_keys = ", ".join(SCENARIO_TEMPLATES.keys())
+        prompt = (
+            f"Classify this action into exactly one of these evaluation harnesses:\n"
+            f"{known_keys}\n\n"
+            f"ACTION:\n{json.dumps(action, indent=2)[:600]}\n\n"
+            f"Respond with ONLY the harness key. No explanation."
+        )
+        try:
+            result = self._call(prompt, max_tokens=20, system=(
+                "You are Internal Triage. Return only the harness key that best matches this action. "
+                "One word. No punctuation."
+            ))
+            return result.strip().lower()
+        except Exception as e:
+            logger.warning(f"  Triage: LLM harness classification failed: {e}")
+            return None
+
+    def triage_packet(self, state: dict) -> TriageResult:
+        """
+        Full triage pass on one packet.
+
+        Runs harness selection then threat hypothesis generation.
+        Updates state['active_template'] and state['threat_hypothesis'] in place.
+        Call this once before starting the analyst loop — it replaces manual
+        get_template() + generate_threat_hypothesis() calls at the API layer.
+
+        Returns TriageResult with all triage outputs.
+        """
+        action  = state.get("action", {})
+        context = state.get("context", {})
+
+        action_type, template, reason, confidence = self.select_harness(action, context)
+        state["active_template"] = template
+
+        hypothesis = self.generate_threat_hypothesis(state)
+        state["threat_hypothesis"] = hypothesis
+
+        logger.info(
+            f"  Triage complete: harness={action_type} confidence={confidence} "
+            f"hypothesis={'yes' if hypothesis else 'none'}"
+        )
+        return TriageResult(
+            action_type=action_type,
+            template=template,
+            selection_reason=reason,
+            confidence=confidence,
+            threat_hypothesis=hypothesis,
+        )
+
     def generate_brief(self, state: dict, next_turn_number: int,
                        next_persona: str, convergence_level: str = "EARLY",
                        next_adapter=None, full_atlas: bool = False) -> str:
@@ -1632,9 +1783,9 @@ class GovernorAdapter(_FlightDeckBase):
         Generate a targeting brief for the next evaluation analyst.
 
         If next_adapter is provided, the Governor synthesizes:
-          1. The Wrangler's threat hypothesis (stored in state)
-          2. The next driver's known blindspot from the Atlas
-        to write a hyper-targeted primer specific to this driver's failure modes.
+          1. The Triage hypothesis (stored in state)
+          2. The next analyst's known blindspot from the Atlas
+        to write a hyper-targeted primer specific to this analyst's failure modes.
 
         full_atlas=True (DEEP tier): injects all Atlas entries for the action_type
         so the Governor can cross-reference every provider's failure modes at once.
@@ -1644,12 +1795,12 @@ class GovernorAdapter(_FlightDeckBase):
             next_provider = getattr(next_adapter, "provider", None)
             gov_sys      = build_governor_system_prompt(
                 template,
-                driver_provider=next_provider,
+                analyst_provider=next_provider,
                 tier="DEEP" if full_atlas else "STANDARD",
             )
             action_type  = state.get("action", {}).get("type", "")
 
-            # Fetch driver-specific blindspot from Atlas if we know who's driving next.
+            # Fetch analyst-specific blindspot from Atlas if we know who's evaluating next.
             # query_atlas       — full description text
             # query_atlas_name  — short named failure mode (e.g. "Explanation Surrender")
             # query_atlas_status — "verified" (benchmarked) or "provisional" (extrapolated)
@@ -1794,7 +1945,7 @@ class GovernorAdapter(_FlightDeckBase):
         except Exception:
             return None
 
-    def assess_tenor(self, history: list, capsule_context: dict, turn_count: int = 0, driver_provider: str = None) -> str:
+    def assess_tenor(self, history: list, capsule_context: dict, turn_count: int = 0, analyst_provider: str = None) -> str:
         """
         The Governor's full private brief for the speaking model.
 
@@ -1830,14 +1981,14 @@ class GovernorAdapter(_FlightDeckBase):
         ) if turn_count >= 6 and turn_count % 5 == 1 else ""
 
         blindspot_block = ""
-        if driver_provider:
-            entry = query_chat_blindspot(driver_provider)
+        if analyst_provider:
+            entry = query_chat_blindspot(analyst_provider)
             if entry:
                 bs_name, bs_text = entry
                 blindspot_block = (
-                    f"\n\nDRIVER BLINDSPOT — {driver_provider.upper()} ({bs_name}):\n"
+                    f"\n\nANALYST BLINDSPOT — {analyst_provider.upper()} ({bs_name}):\n"
                     f"{bs_text}\n"
-                    f"Your DIRECTIVE must account for this. Shape the move so the driver "
+                    f"Your DIRECTIVE must account for this. Shape the move so the analyst "
                     f"is pushed toward precision and away from their default drift."
                 )
 

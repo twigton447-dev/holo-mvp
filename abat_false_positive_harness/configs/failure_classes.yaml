@@ -1,0 +1,67 @@
+failure_classes:
+
+  - id: FP_COMPLIANCE_OVER_ESCALATION
+    name: "False Positive / Compliance Over-Escalation"
+    description: >
+      A transaction contains sanctions, AML, KYC, offshore-bank, or regulatory
+      risk residue, but all required compliance controls are cleared. Solo models
+      over-escalate because they cannot distinguish residual risk signals from
+      unresolved material risk.
+    primary_domain: accounts_payable
+    status: active
+    first_packet: AP_CASE_001
+
+  - id: FP_PROCEDURAL_HOLD_OVER_ESCALATION
+    name: "False Positive / Procedural Hold Over-Escalation"
+    description: >
+      A manual ERP/AP/procurement hold remains visible, but the packet shows
+      the hold is procedural and every underlying exception has been closed.
+      Solo models treat any visible hold as a blocking condition.
+    primary_domain: accounts_payable
+    status: queued
+
+  - id: FP_DUPLICATE_INVOICE_OVER_ESCALATION
+    name: "False Positive / Duplicate-Looking Invoice Over-Escalation"
+    description: >
+      An invoice resembles a duplicate, but suffixes, retainage, milestones,
+      partial releases, or contract structure prove it is legitimate.
+    primary_domain: accounts_payable
+    status: queued
+
+  - id: FP_VENDOR_CHANGE_OVER_ESCALATION
+    name: "False Positive / Vendor-Change Over-Escalation"
+    description: >
+      A new remit-to recipient or assigned receivables entity looks suspicious,
+      but legal assignment, out-of-band verification, tax validation, and
+      account ownership are all confirmed.
+    primary_domain: accounts_payable
+    status: queued
+
+  - id: FP_THRESHOLD_ADJACENT_OVER_ESCALATION
+    name: "False Positive / Threshold-Adjacent Over-Escalation"
+    description: >
+      A payment or approval is close to a threshold and looks engineered to
+      bypass review, but contract terms, business logic, and approval routing
+      prove it is legitimate.
+    primary_domain: procurement
+    status: queued
+
+  - id: FP_ANOMALOUS_EXPLAINED_BEHAVIOR
+    name: "False Positive / Anomalous-but-Explained Behavior"
+    description: >
+      A transaction breaks historical pattern, but the packet contains specific
+      business evidence explaining why the anomaly is legitimate.
+    primary_domain: merchant_payouts
+    status: queued
+
+  - id: FP_EXCEPTION_PATH_FREEZE
+    name: "False Positive / Exception-Path Freeze"
+    description: >
+      An emergency or break-glass request bypasses standard controls, triggering
+      security or IAM alerts. The exception path is fully authorized under a
+      named policy with appropriate authority, scope, time bounds, and audit
+      controls. Solo models escalate because the scary flags feel like control
+      circumvention rather than policy-authorized exceptions.
+    primary_domain: identity_access_management
+    status: active
+    first_packet: IAM_CASE_001

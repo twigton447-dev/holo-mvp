@@ -1,0 +1,55 @@
+{
+  "packet_id": "AP_CASE_002",
+  "freeze_date": "2026-05-08",
+  "domain": "accounts_payable",
+  "subdomain": "construction_retainage",
+  "failure_class": "FP_COMPLIANCE_OVER_ESCALATION",
+  "failure_subclass": "Procedural Over-Escalation / Legacy-System Deference",
+  "generator_run": "generator_runs/run_20260508_163000",
+  "design_note": "Broader decision rules, distributed evidence, math requirement. Designed for publishable solo failure.",
+  "lint_runs": [
+    {
+      "run": "lint_runs/run_20260508_170000",
+      "status": "FAIL_PATCH_REQUIRED",
+      "patch_turn": 1,
+      "finding_summary": "Payment history note did not explicitly state gross billings = contract value, leaving 'unknown additional invoice' path open"
+    },
+    {
+      "run": "lint_runs/run_20260508_173000",
+      "status": "PASS_READY_TO_FREEZE",
+      "patch_turn": null,
+      "finding_summary": "No findings"
+    },
+    {
+      "run": "lint_runs/run_20260508_180000",
+      "status": "PASS_READY_TO_FREEZE",
+      "patch_turn": null,
+      "finding_summary": "No findings. All 16 readiness gates verified."
+    }
+  ],
+  "patch_turns_used": 1,
+  "patch_turns_max": 10,
+  "consecutive_passes": 2,
+  "consecutive_passes_required": 2,
+  "sha256": "c5fc8299b4e07be908f3af8fe4939711cfcf0e5dc4b4527eeb00813bfec0d101",
+  "frozen_file": "frozen_packets/AP_CASE_002.md",
+  "private_artifacts": {
+    "gold_verdict_memo": "generator_runs/run_20260508_163000/gold_verdict_memo.md",
+    "control_resolution_map": "generator_runs/run_20260508_163000/control_resolution_map.md",
+    "generation_log": "generator_runs/run_20260508_163000/generation_log.md"
+  },
+  "harmless_findings": [
+    "IT advisory uses 'false-positive' in technical systems description — not answer-key for overall verdict",
+    "AP-PROC-2019-03 referenced but not included — three checks documented in hold release",
+    "R. Okafor dual role (hold release + approval) — stated rules do not require segregation",
+    "Bank account ownership not independently verified — existing domestic vendor, not required by stated rules"
+  ],
+  "evaluation_status": {
+    "gpt": "pending",
+    "claude": "pending",
+    "gemini": "not_run",
+    "blind_holo": "pending"
+  },
+  "packet_status": "frozen",
+  "publishable_potential": "HIGH — decision rules require synthesis; ERP flag is visually prominent; retainage mechanics are domain-specific; math requirement adds cognitive load"
+}

@@ -257,7 +257,9 @@ def run_holo_loop(scenario, force_max_turns=False, no_memory=False, fixed_govern
                    result["decision_reason"], [], result["turn_history"], elapsed,
                    result["total_tokens"]["total"]["input"], result["total_tokens"]["total"]["output"],
                    extra={"converged": result["converged"], "deltas": result["deltas"],
-                          "coverage_matrix": result["coverage_matrix"]},
+                          "coverage_matrix": result["coverage_matrix"],
+                          "governor_briefs": result.get("governor_briefs", []),
+                          "threat_hypothesis": result.get("threat_hypothesis", "")},
                    run_health=result.get("run_health", "clean"))
     except SystemUnavailableError as e:
         return _err("holo_full", "openai+anthropic+google+governor", e, _ms(start),
@@ -273,8 +275,8 @@ def run_holo_loop(scenario, force_max_turns=False, no_memory=False, fixed_govern
 # ---------------------------------------------------------------------------
 
 def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory=False,
-                  quick=False, solo_only=False, fixed_governor=None, seed=None,
-                  save_to_db=False, skip_providers=None):
+                  quick=False, solo_only=False, holo_only=False, fixed_governor=None, seed=None,
+                  save_to_db=False, skip_providers=None, telemetry=False):
     if verbose:
         logging.getLogger().setLevel(logging.INFO)
 
@@ -289,7 +291,7 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
     _header(f"HOLO BENCHMARK: {scenario_name}")
     print(f"  Expected verdict : {expected}")
     conv_note = "DISABLED — full 10 turns forced" if force_max_turns else "enabled"
-    mode_note = " [QUICK — Solo GPT only]" if quick else (" [SOLO ONLY]" if solo_only else "")
+    mode_note = " [QUICK — Solo GPT only]" if quick else (" [SOLO ONLY]" if solo_only else (" [HOLO ONLY]" if holo_only else ""))
     seed_note = f" [SEED={seed}]" if seed is not None else " [rotation=random]"
     print(f"  Turn budget      : up to {MAX_TURNS} per condition (convergence detection {conv_note}){mode_note}")
     print(f"  Holo rotation    :{seed_note}\n")
@@ -306,37 +308,40 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
     print("  Ready.\n")
 
     if not quick and not solo_only:
-        print("  [4/4] HOLO FULL ARCHITECTURE...")
+        print("  [HOLO] HOLO FULL ARCHITECTURE...")
         cond4 = run_holo_loop(scenario, force_max_turns=force_max_turns, no_memory=no_memory,
                               fixed_governor=fixed_governor, seed=seed, skip_providers=skip_providers)
         _inline(cond4)
     else:
         cond4 = None
 
-    print(f"\n  [1/4] SOLO {openai_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
-    cond1 = run_solo(scenario, openai_adapter, "solo_openai", force_max_turns=force_max_turns)
-    _inline(cond1)
-
-    if quick:
-        verdict = cond1.get("verdict", "ERROR")
-        t1_flags = cond1.get("turn_log", [{}])[0].get("severity_flags", {}) if cond1.get("turn_log") else {}
-        t1_highs = [c for c, s in t1_flags.items() if s == "HIGH"]
-        if t1_highs and verdict == "ESCALATE":
-            print(f"\n  QUICK RESULT: Turn 1 HIGH on {t1_highs} → ESCALATE immediately. Likely Tier 1.")
-        elif verdict == "ESCALATE":
-            print(f"\n  QUICK RESULT: ESCALATE (multi-turn). May still be Tier 1 — run full harness to confirm.")
-        else:
-            print(f"\n  QUICK RESULT: ALLOW on Solo GPT → Tier 2 candidate. Run full harness.")
-        print()
-        cond2 = cond3 = None
+    if holo_only:
+        cond1 = cond2 = cond3 = None
     else:
-        print(f"\n  [2/4] SOLO {anthropic_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
-        cond2 = run_solo(scenario, anthropic_adapter, "solo_anthropic", force_max_turns=force_max_turns)
-        _inline(cond2)
+        print(f"\n  [1/4] SOLO {openai_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
+        cond1 = run_solo(scenario, openai_adapter, "solo_openai", force_max_turns=force_max_turns)
+        _inline(cond1)
 
-        print(f"\n  [3/4] SOLO {google_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
-        cond3 = run_solo(scenario, google_adapter, "solo_google", force_max_turns=force_max_turns)
-        _inline(cond3)
+        if quick:
+            verdict = cond1.get("verdict", "ERROR")
+            t1_flags = cond1.get("turn_log", [{}])[0].get("severity_flags", {}) if cond1.get("turn_log") else {}
+            t1_highs = [c for c, s in t1_flags.items() if s == "HIGH"]
+            if t1_highs and verdict == "ESCALATE":
+                print(f"\n  QUICK RESULT: Turn 1 HIGH on {t1_highs} → ESCALATE immediately. Likely Tier 1.")
+            elif verdict == "ESCALATE":
+                print(f"\n  QUICK RESULT: ESCALATE (multi-turn). May still be Tier 1 — run full harness to confirm.")
+            else:
+                print(f"\n  QUICK RESULT: ALLOW on Solo GPT → Tier 2 candidate. Run full harness.")
+            print()
+            cond2 = cond3 = None
+        else:
+            print(f"\n  [2/4] SOLO {anthropic_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
+            cond2 = run_solo(scenario, anthropic_adapter, "solo_anthropic", force_max_turns=force_max_turns)
+            _inline(cond2)
+
+            print(f"\n  [3/4] SOLO {google_adapter.model_id.upper()} (up to {MAX_TURNS} turns)...")
+            cond3 = run_solo(scenario, google_adapter, "solo_google", force_max_turns=force_max_turns)
+            _inline(cond3)
 
     result = {
         "benchmark_id":       f"bench_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
@@ -365,6 +370,17 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
         from project_brain import ProjectBrain
         brain = ProjectBrain()
         brain.save_benchmark_run(result, scenario)
+
+    if telemetry and cond4 and not cond4.get("error"):
+        import os as _os
+        from benchmark_telemetry import export_telemetry
+        from benchmark_viz import generate_visualization
+        gov_briefs = cond4.get("extra", {}).get("governor_briefs", [])
+        telem_path = export_telemetry(
+            scenario_name, cond4, gov_briefs,
+            openai_api_key=_os.getenv("OPENAI_API_KEY"),
+        )
+        generate_visualization(telem_path)
 
     return result
 
@@ -699,6 +715,8 @@ def main():
                         help="Solo GPT only, 1-turn filter — cheap Tier 1 detector before full run")
     parser.add_argument("--solo-only", action="store_true",
                         help="Run all 3 solo conditions but skip Holo — saves ~40%% of token cost")
+    parser.add_argument("--holo-only", action="store_true",
+                        help="Run Holo full architecture only — skip all 3 solo conditions")
     parser.add_argument("--fixed-governor", default=None, metavar="PROVIDER",
                         help="Pin governor briefs to one provider (e.g. openai). For controlled comparison tests.")
     parser.add_argument("--seed", type=int, default=None, metavar="N",
@@ -712,6 +730,11 @@ def main():
                         metavar="PROVIDER", default=None,
                         help="Exclude a provider from the adapter pool for this run "
                              "(e.g. --skip-provider google). Repeatable.")
+    parser.add_argument("--telemetry", action="store_true",
+                        help="Export structured telemetry JSON + HTML visualization to "
+                             "benchmark_results/telemetry/ after the Holo run. "
+                             "Captures turn-by-turn embeddings, cosine similarity, entropy, "
+                             "and model-family assignment map.")
     args = parser.parse_args()
 
     if args.all:
@@ -732,8 +755,10 @@ def main():
 
     result = run_benchmark(args.scenario, verbose=args.verbose, force_max_turns=args.force_max_turns,
                            no_memory=args.no_memory, quick=args.quick, solo_only=args.solo_only,
+                           holo_only=getattr(args, "holo_only", False),
                            fixed_governor=args.fixed_governor, seed=args.seed,
-                           save_to_db=args.save_to_db, skip_providers=args.skip_providers)
+                           save_to_db=args.save_to_db, skip_providers=args.skip_providers,
+                           telemetry=getattr(args, "telemetry", False))
     if args.save:
         _save(result)
 

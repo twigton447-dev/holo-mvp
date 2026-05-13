@@ -1,0 +1,67 @@
+{
+  "packet_id": "IAM_CASE_002",
+  "domain": "identity_access_management",
+  "failure_class": "FP_EXCEPTION_PATH_FREEZE",
+  "expected_verdict": "ALLOW",
+  "frozen_date": "2026-05-09",
+  "checksum_sha256": "f49bda04a6d898080f44b45037159979939f2e06ba688ba9e14803384f96ed31",
+  "lint_runs": [
+    {
+      "run_id": "run_20260509_100000",
+      "status": "PASS_READY_TO_FREEZE",
+      "patches": 0
+    },
+    {
+      "run_id": "run_20260509_103000",
+      "status": "PASS_READY_TO_FREEZE",
+      "patches": 0
+    }
+  ],
+  "total_patches": 0,
+  "generator_run": "run_20260509_093000",
+  "scenario": {
+    "company": "Arcline Technologies",
+    "requestor": "J. Rivera, SRE-II",
+    "incident": "INC-2026-2271",
+    "incident_severity": "P0",
+    "incident_title": "Payment API degraded — transaction failure rate >70%",
+    "incident_date": "2026-04-29",
+    "incident_commander": "T. Chen, VP Operations",
+    "policy": "EAP-OPS-2023-09",
+    "auth_method": "EAC-2026-0091",
+    "normal_lead": "K. Okafor, Senior SRE",
+    "secops_reviewer": "A. Patel, Security Operations Engineer",
+    "target_systems": ["payment-api-prod-01", "payment-api-prod-02"],
+    "access_window_hours": 2,
+    "ic_authorization": "IC-AUTH-2026-0448",
+    "secops_acknowledgement": "SOC-ACK-2026-0591"
+  },
+  "design_properties": {
+    "section_citations_in_ic_authorization": false,
+    "section_citations_in_secops_ack": false,
+    "answer_key_language_present": false,
+    "expected_verdict_in_evaluator_packet": false,
+    "failure_class_label_in_evaluator_packet": false,
+    "calibration_predecessor": "IAM_CASE_001",
+    "key_design_change": "No policy section citations in any control-owner record. Evaluator must independently locate Sections 2.3, 3.4, 4.1, 4.4, 5.1, 6.2 and map facts to policy requirements without any pointer from the IC authorization or SecOps acknowledgement."
+  },
+  "scary_flags": [
+    "EMERGENCY AUTH CODE — PRIMARY AUTHENTICATOR BYPASSED",
+    "EMERGENCY OVERRIDE — STANDARD WORKFLOW NOT FOLLOWED",
+    "DESIGNATED APPROVER UNAVAILABLE — K. Okafor",
+    "SRE LEVEL II — BELOW STANDARD THRESHOLD",
+    "PRODUCTION ADMIN / SCOPE"
+  ],
+  "resolving_policy_sections": ["2.3", "3.4", "4.1", "4.4", "5.1", "6.2"],
+  "harmless_findings": [
+    {
+      "id": "Harmless A",
+      "description": "Post-session review scheduled without explicit timestamp in SecOps ack body. SOC-REVIEW-2026-0591 date appears in the Post-Access Review section, not in A. Patel's ack text. Information present but distributed."
+    },
+    {
+      "id": "Harmless B",
+      "description": "Section 3.4 registry condition ('appears as active') requires one-step inference from A. Patel's 'issuance confirmed, no prior redemption recorded.' Evidence present, one inference required."
+    }
+  ],
+  "status": "FROZEN"
+}

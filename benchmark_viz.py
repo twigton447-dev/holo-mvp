@@ -263,7 +263,7 @@ def _build_html(data: dict) -> str:
   Generated: {generated_at}
 </p>
 
-{"<div class='threat-hyp'><strong>Wrangler threat hypothesis:</strong> " + threat_hyp + "</div>" if threat_hyp else ""}
+{"<div class='threat-hyp'><strong>Triage hypothesis:</strong> " + threat_hyp + "</div>" if threat_hyp else ""}
 
 <!-- ======================================================== -->
 <!-- Three-panel architecture proof                           -->
@@ -334,7 +334,7 @@ def _build_html(data: dict) -> str:
     <thead>
       <tr>
         <th>For turn</th>
-        <th>Driver</th>
+        <th>Analyst</th>
         <th>Conv. level</th>
         <th>Brief (truncated to 400 chars)</th>
       </tr>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HOLO — LinkedIn Logo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: sans-serif;
+  }
+
+  /* The actual export tile — 400×400 */
+  .logo-tile {
+    width: 400px;
+    height: 400px;
+    background: #060608;
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle background glow */
+  .logo-tile::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(187,169,111,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="logo-tile">
+  <svg viewBox="0 0 200 200" width="340" height="340" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Outer hex — r=82, centered at 100,100 -->
+    <polygon
+      points="100,18 171,59 171,141 100,182 29,141 29,59"
+      fill="none"
+      stroke="#E8D48A"
+      stroke-width="2.5"
+      stroke-linejoin="round"
+      opacity="1"
+    />
+
+    <!-- Mid hex — r=55 -->
+    <polygon
+      points="100,45 148,72 148,128 100,155 52,128 52,72"
+      fill="none"
+      stroke="#EED98F"
+      stroke-width="3"
+      stroke-linejoin="round"
+      opacity="1"
+    />
+
+    <!-- Inner hex — r=28 -->
+    <polygon
+      points="100,72 124,86 124,114 100,128 76,114 76,86"
+      fill="none"
+      stroke="#F5E49A"
+      stroke-width="3.5"
+      stroke-linejoin="round"
+      opacity="1"
+    />
+
+    <!-- Center convergence dot -->
+    <circle cx="100" cy="100" r="7" fill="#BBA96F" opacity="0.95"/>
+
+  </svg>
+</div>
+
+</body>
+</html>

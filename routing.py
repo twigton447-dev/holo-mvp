@@ -13,12 +13,12 @@ Three policy decisions gate the routing:
 
 Rule evaluation order (first match wins for escalations):
   1. Any HIGH in key_risk_signals           → DEEP, stop
-  2. routing_confidence == LOW              → escalate one tier from Wrangler
+  2. routing_confidence == LOW              → escalate one tier from Triage
   3. Known recipient (all 3 conditions)     → if any fail: floor at STANDARD
   4. Amount above fast_amount_floor_usd     → floor at STANDARD
   5. Urgency language match                 → floor at STANDARD;
                                               authority_escalation also adds HIGH signal
-  6. No rules fired                         → use Wrangler recommended_tier as-is
+  6. No rules fired                         → use Triage recommended_tier as-is
 
 Every decision produces a RoutingAuditEntry — a customer-facing audit artifact.
 
@@ -96,7 +96,7 @@ class RoutingAuditEntry:
     Fields:
       packet_id                 Evaluation ID this decision belongs to
       final_tier                Tier assigned: fast / standard / deep
-      wrangler_recommended_tier Amount-based baseline before policy rules
+      triage_recommended_tier   Amount-based baseline before policy rules
       override_triggered        True if any policy rule changed the tier
       override_reason           Human-readable description of the rule that fired
       key_risk_signals          List of pre-detected risk signals (dicts with
@@ -107,7 +107,7 @@ class RoutingAuditEntry:
     """
     packet_id:                 str
     final_tier:                str
-    wrangler_recommended_tier: str
+    triage_recommended_tier: str
     override_triggered:        bool
     override_reason:           str
     key_risk_signals:          list
@@ -118,7 +118,7 @@ class RoutingAuditEntry:
         return {
             "packet_id":                 self.packet_id,
             "final_tier":                self.final_tier,
-            "wrangler_recommended_tier": self.wrangler_recommended_tier,
+            "triage_recommended_tier": self.triage_recommended_tier,
             "override_triggered":        self.override_triggered,
             "override_reason":           self.override_reason,
             "key_risk_signals":          self.key_risk_signals,
@@ -132,7 +132,7 @@ class RoutingAuditEntry:
 # ---------------------------------------------------------------------------
 
 def _amount_to_tier(amount_usd: float) -> str:
-    """Pure amount-based tier — the Wrangler's baseline recommendation."""
+    """Pure amount-based tier — Triage's baseline recommendation."""
     if amount_usd < 10_000:
         return TIER_FAST
     if amount_usd < 100_000:
@@ -338,7 +338,7 @@ def _escalate_one(tier: str) -> str:
 def _make_entry(
     packet_id:                 str,
     final_tier:                str,
-    wrangler_recommended_tier: str,
+    triage_recommended_tier: str,
     override_triggered:        bool,
     override_reason:           str,
     key_risk_signals:          list,
@@ -347,7 +347,7 @@ def _make_entry(
     return RoutingAuditEntry(
         packet_id                 = packet_id,
         final_tier                = final_tier,
-        wrangler_recommended_tier = wrangler_recommended_tier,
+        triage_recommended_tier = triage_recommended_tier,
         override_triggered        = override_triggered,
         override_reason           = override_reason,
         key_risk_signals          = key_risk_signals,
@@ -376,7 +376,7 @@ def route_request(
     routing_config:            RoutingConfig,
     urgency_patterns:          dict,
     key_risk_signals:          Optional[list]   = None,
-    wrangler_recommended_tier: Optional[str]    = None,
+    triage_recommended_tier: Optional[str]    = None,
     routing_confidence:        Optional[str]    = None,
 ) -> RoutingAuditEntry:
     """
@@ -393,10 +393,10 @@ def route_request(
         urgency_patterns:          Pre-loaded pattern dict from load_urgency_patterns().
         key_risk_signals:          Pre-detected HIGH/MEDIUM signals from upstream
                                    checks (e.g. ToolGate), if any.
-        wrangler_recommended_tier: Override the amount-based baseline. Used when
-                                   the Wrangler has additional context.
+        triage_recommended_tier: Override the amount-based baseline. Used when
+                                   Triage has additional context.
         routing_confidence:        "LOW" triggers a one-tier escalation from the
-                                   Wrangler's recommendation.
+                                   Triage recommendation.
 
     Returns:
         RoutingAuditEntry with full audit trail.
@@ -404,15 +404,15 @@ def route_request(
     key_risk_signals = list(key_risk_signals or [])  # local copy, may be appended to
     amount = _extract_amount(action)
 
-    # Wrangler's amount-based baseline
-    if wrangler_recommended_tier:
-        wrangler_tier = wrangler_recommended_tier
+    # Triage amount-based baseline
+    if triage_recommended_tier:
+        triage_tier = triage_recommended_tier
     elif amount is not None:
-        wrangler_tier = _amount_to_tier(amount)
+        triage_tier = _amount_to_tier(amount)
     else:
-        wrangler_tier = TIER_DEEP
+        triage_tier = TIER_DEEP
 
-    final_tier         = wrangler_tier
+    final_tier         = triage_tier
     override_triggered = False
     override_reason    = ""
 
@@ -438,27 +438,27 @@ def route_request(
             f"{override_reason}"
         )
         return _make_entry(
-            packet_id, final_tier, wrangler_tier,
+            packet_id, final_tier, triage_tier,
             override_triggered, override_reason,
             key_risk_signals, threshold_values_used,
         )
 
     # ---- Rule 2: routing_confidence == LOW → escalate one tier --------------
     if routing_confidence == "LOW":
-        escalated = _escalate_one(wrangler_tier)
-        if escalated != wrangler_tier:
+        escalated = _escalate_one(triage_tier)
+        if escalated != triage_tier:
             final_tier         = escalated
             override_triggered = True
             override_reason    = (
                 f"routing_confidence=LOW. "
-                f"Escalated {wrangler_tier.upper()} → {escalated.upper()}."
+                f"Escalated {triage_tier.upper()} → {escalated.upper()} (low-confidence Triage recommendation)."
             )
             logger.info(
                 f"  Routing [{packet_id}]: {final_tier.upper()} "
                 f"(Rule 2 — low confidence escalation)."
             )
             return _make_entry(
-                packet_id, final_tier, wrangler_tier,
+                packet_id, final_tier, triage_tier,
                 override_triggered, override_reason,
                 key_risk_signals, threshold_values_used,
             )
@@ -477,7 +477,7 @@ def route_request(
                 f"  Routing [{packet_id}]: DEEP (Rule 3 — account mismatch on known recipient)."
             )
             return _make_entry(
-                packet_id, final_tier, wrangler_tier,
+                packet_id, final_tier, triage_tier,
                 override_triggered, override_reason,
                 key_risk_signals, threshold_values_used,
             )
@@ -504,7 +504,7 @@ def route_request(
         final_tier = _floor(final_tier, TIER_STANDARD)
         if final_tier != prev or (
             not override_triggered
-            and _TIER_RANK.get(final_tier, 0) > _TIER_RANK.get(wrangler_tier, 0)
+            and _TIER_RANK.get(final_tier, 0) > _TIER_RANK.get(triage_tier, 0)
         ):
             override_triggered = True
             override_reason    = (
@@ -550,25 +550,25 @@ def route_request(
             f"(Rule 5 — urgency language: {categories_hit})."
         )
 
-    # ---- No rules fired: use Wrangler recommendation as-is -----------------
+    # ---- No rules fired: use Triage recommendation as-is -------------------
     if not override_triggered:
         override_reason = (
             "No routing policy rules triggered. "
-            "Using Wrangler amount-based recommendation."
+            "Using Triage amount-based recommendation."
         )
         logger.info(
             f"  Routing [{packet_id}]: {final_tier.upper()} "
-            f"(no override — Wrangler recommendation)."
+            f"(no override — Triage recommendation)."
         )
     else:
         logger.info(
             f"  Routing [{packet_id}]: {final_tier.upper()} "
-            f"(wrangler={wrangler_tier.upper()}, override={override_triggered}). "
+            f"(triage={triage_tier.upper()}, override={override_triggered}). "
             f"{override_reason[:120]}"
         )
 
     return _make_entry(
-        packet_id, final_tier, wrangler_tier,
+        packet_id, final_tier, triage_tier,
         override_triggered, override_reason,
         key_risk_signals, threshold_values_used,
     )

@@ -18,7 +18,7 @@ Solo frontier models fail a specific, non-random class of decisions: actions whe
 
 ## What Holo Does
 
-Holo uses structured adversarial review across multiple frontier models — with a static context governor that injects assigned roles, shared state, and convergence pressure — to compensate for distributed model blindspots.
+Holo uses structured adversarial review across multiple frontier models — with a static, deterministic governor — to compensate for distributed model blindspots.
 
 The output is simple and auditable: **ALLOW or ESCALATE.**
 
@@ -38,13 +38,15 @@ Five conditions isolate the irreducible variable:
 | Sequential chain, no governor | 3 frontier, sequential | "Just pipe models together" |
 | **Holo full architecture** | **3 frontier + governor** | **The irreducible variable** |
 
-The governor is static and algorithmic — not a model. LLMs are randomized per session. No synthesis turn. Full raw state passed at each stage.
+The governor is static and algorithmic — not a model. The final verdict is computed deterministically from the accumulated evidence and does not vary with model confidence, rhetorical force, or turn order.
+
+> The public benchmark demonstrates the existence of action-boundary blind spots. It does not disclose the proprietary Governor logic, adversarial reactor configuration, model-routing rules, convergence heuristics, or private trace library used in Holo's production architecture.
 
 ---
 
 ## Benchmark
 
-Public. Reproducible. Payloads available on request.
+Public. Payloads available in `frontend/payloads/`. Full traces and reproducibility materials available under NDA to qualified technical reviewers.
 
 **Domain 1 — Accounts Payable / BEC:** Flagship scenario (BEC-EXPLAINED-ANOMALY-001) holds in 9 of 10 sequences under Architecture Stability Test conditions. The single miss is diagnosable.
 

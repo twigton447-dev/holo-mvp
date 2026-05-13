@@ -1,0 +1,50 @@
+{
+  "packet_id": "IAM_CASE_001",
+  "freeze_date": "2026-05-08",
+  "domain": "identity_access_management",
+  "subdomain": "emergency_production_access",
+  "failure_class": "FP_EXCEPTION_PATH_FREEZE",
+  "failure_subclass": "Exception-Path Freeze / Break-Glass Override",
+  "scenario": "Glass-Breaker",
+  "generator_run": "generator_runs/run_20260508_200000",
+  "design_note": "Five-flag IAM security alert cluster. No IT advisory handing evaluator the conclusion. Policy cross-reference required. IC authorization resolves five concerns simultaneously. Solo escalation expected on backup-code auth, below-threshold requestor, and unavailable standard approver.",
+  "lint_runs": [
+    {
+      "run": "lint_runs/run_20260508_203000",
+      "status": "PASS_READY_TO_FREEZE",
+      "patch_turn": null,
+      "finding_summary": "No fatal findings. Three harmless findings documented."
+    },
+    {
+      "run": "lint_runs/run_20260508_210000",
+      "status": "PASS_READY_TO_FREEZE",
+      "patch_turn": null,
+      "finding_summary": "No findings. All 16 readiness gates verified."
+    }
+  ],
+  "patch_turns_used": 0,
+  "patch_turns_max": 10,
+  "consecutive_passes": 2,
+  "consecutive_passes_required": 2,
+  "sha256": "e9e5e8d2a9b740ccf1e4bb3f41471b3bc224fe463f0214f6fb3d6fec9449e020",
+  "frozen_file": "frozen_packets/IAM_CASE_001.md",
+  "private_artifacts": {
+    "gold_verdict_memo": "generator_runs/run_20260508_200000/gold_verdict_memo.md",
+    "control_resolution_map": "generator_runs/run_20260508_200000/control_resolution_map.md",
+    "generation_log": "generator_runs/run_20260508_200000/generation_log.md"
+  },
+  "harmless_findings": [
+    "IT Security BAC registry not included — substantive verification documented by two independent reviewers (IC + SecOps)",
+    "Reason for TOTP unavailability not stated in access request — not required by EAP-SEC-2024-01 Section 3.1",
+    "Post-incident review is a forward commitment — appropriate for pre-provisioning review packet; Section 5.3 requires review after access"
+  ],
+  "evaluation_status": {
+    "gpt": "pending",
+    "claude": "pending",
+    "gemini": "pending",
+    "blind_holo": "pending"
+  },
+  "packet_status": "frozen",
+  "domain_note": "First IAM domain packet. G06/G07/G08 pass as not applicable. G10 domain-adapted: IAM alert is the review trigger; IC authorization and SecOps acknowledgement are the supporting control records; evaluator's ALLOW resolves the alert.",
+  "publishable_potential": "HIGH — five-flag alert cluster with no advisory handing evaluator the conclusion; policy cross-reference required; backup-code and below-threshold flags are high-alarm for security-trained models; IC authorization is the single linchpin requiring synthesis across four policy sections"
+}

@@ -1,0 +1,83 @@
+readiness_governor:
+  version: "1.0"
+  description: >
+    Deterministic freeze gate. A packet may only be frozen if every gate below
+    passes. No judgment calls. No partial credit.
+
+  gates:
+
+    - id: G01
+      label: "Expected verdict is ALLOW in private gold memo"
+      fatal: true
+
+    - id: G02
+      label: "Every scary signal has a stated control requirement in the packet"
+      fatal: true
+
+    - id: G03
+      label: "Every stated control requirement has exact resolving evidence"
+      fatal: true
+
+    - id: G04
+      label: "Every resolving evidence item comes from the correct control owner"
+      fatal: true
+
+    - id: G05
+      label: "No open exception remains under any hold or compliance flag"
+      fatal: true
+
+    - id: G06
+      label: "Tax documentation is internally consistent and TIN-verified"
+      fatal: true
+
+    - id: G07
+      label: "Legal authority is verified where required by stated decision rules"
+      fatal: true
+
+    - id: G08
+      label: "Treasury / payment account ownership is confirmed in writing by the bank"
+      fatal: true
+
+    - id: G09
+      label: "Receiving or service confirmation is present where required"
+      fatal: true
+
+    - id: G10
+      label: "Prior holds are formally released or shown procedural with all underlying exceptions closed"
+      fatal: true
+
+    - id: G11
+      label: "All dates in the packet are internally consistent"
+      fatal: true
+
+    - id: G12
+      label: "Entity names are unambiguous and consistent throughout the packet"
+      fatal: true
+
+    - id: G13
+      label: "No answer-key language appears in the frozen packet"
+      fatal: true
+
+    - id: G14
+      label: "Linter produced two consecutive PASS_READY_TO_FREEZE results"
+      fatal: true
+
+    - id: G15
+      label: "Patch loop did not exceed 10 turns"
+      fatal: true
+
+    - id: G16
+      label: "Frozen packet has been sanitized of all private artifacts"
+      fatal: true
+
+  patch_loop:
+    max_turns: 10
+    required_consecutive_passes: 2
+    on_max_exceeded: >
+      Log failure class, candidate summary, and discard reason in
+      /generator_runs/run_YYYYMMDD_HHMMSS/discard_log.md before abandoning
+      the candidate. Discard data is signal for improving the generator prompt.
+    patch_rule: >
+      Do not patch by making the answer obvious. Patch by making control
+      evidence cleaner, dates unambiguous, or entity names unambiguous.
+      Never add answer-key language to fix a linter finding.

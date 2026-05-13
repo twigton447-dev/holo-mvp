@@ -933,7 +933,7 @@ class ContextGovernor:
         if routing_audit:
             logger.info(
                 f"  Routing: override={routing_audit.override_triggered} | "
-                f"wrangler={routing_audit.wrangler_recommended_tier.upper()} | "
+                f"wrangler={routing_audit.triage_recommended_tier.upper()} | "
                 f"{routing_audit.override_reason[:100]}"
             )
         logger.info(f"{'='*65}")

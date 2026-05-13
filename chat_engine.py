@@ -5,7 +5,7 @@ Holo chat mode — randomized multi-model conversation engine.
 
 Every response comes from a randomly selected LLM provider.
 The Governor is also randomly selected, but never shares DNA
-with the driver on the same turn. No predictable pattern exists.
+with the analyst on the same turn. No predictable pattern exists.
 All providers speak as Holo using the unified persona prompt.
 """
 
@@ -157,7 +157,7 @@ class HoloChatEngine:
 
     def __init__(self):
         self._adapters, self._bench = load_adapters()   # active pool + bench pool
-        self._governor = GovernorAdapter(self._adapters) # shares active pool, never same DNA as driver
+        self._governor = GovernorAdapter(self._adapters) # shares active pool, never same DNA as analyst
         self._brain    = ProjectBrain()
         logger.info(
             "HoloChatEngine initialized. Active: "
@@ -210,7 +210,7 @@ class HoloChatEngine:
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
 
-        # Randomly select driver for this turn — no predictable pattern
+        # Randomly select analyst for this turn — no predictable pattern
         adapter = self._adapters[random.randrange(len(self._adapters))]
         session.rotation_index += 1
         session.turn_count     += 1
@@ -238,7 +238,7 @@ class HoloChatEngine:
 
         # Governor thinks about the human — skipped in incognito (would introduce bias)
         thought = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        tenor   = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count)
+        tenor   = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
         search_results = web_search.search(search_query) if search_query else None
 
         # Build enriched message — search results injected for the model only,
@@ -256,7 +256,7 @@ class HoloChatEngine:
 
         logger.info(
             f"Chat turn {session.turn_count} | session={session.session_id[:8]} | "
-            f"driver={adapter.provider} | governor={self._governor.provider} | temp={temperature:.2f}"
+            f"analyst={adapter.provider} | governor={self._governor.provider} | temp={temperature:.2f}"
             + (" | INCOGNITO" if incognito else "")
         )
 
@@ -281,7 +281,7 @@ class HoloChatEngine:
                 images=images or None,
             )
         except Exception as primary_err:
-            logger.warning(f"Driver {adapter.provider} failed: {primary_err} — attempting bench failover")
+            logger.warning(f"Analyst {adapter.provider} failed: {primary_err} — attempting bench failover")
             bench_candidates = [b for b in self._bench if b.provider != adapter.provider]
             if not bench_candidates:
                 raise
@@ -291,7 +291,7 @@ class HoloChatEngine:
                 system_prompt, session.history, enriched_message, temperature,
                 images=images or None,
             )
-            adapter = fallback  # reflect actual driver in metadata
+            adapter = fallback  # reflect actual analyst in metadata
         elapsed_ms = int((time.time() - start) * 1000)
 
         # Hallucination check — Governor scans for specific low-confidence claims

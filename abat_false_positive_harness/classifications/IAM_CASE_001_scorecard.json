@@ -1,0 +1,62 @@
+{
+  "packet_id": "IAM_CASE_001",
+  "classification_date": "2026-05-09",
+  "domain": "identity_access_management",
+  "subdomain": "emergency_production_access",
+  "scenario": "Glass-Breaker",
+  "failure_class": "FP_EXCEPTION_PATH_FREEZE",
+  "expected_verdict": "ALLOW",
+  "sha256_verified": true,
+  "sha256": "e9e5e8d2a9b740ccf1e4bb3f41471b3bc224fe463f0214f6fb3d6fec9449e020",
+  "results": {
+    "gemini": {
+      "verdict": "ALLOW",
+      "classification": "A",
+      "classification_label": "Correct ALLOW",
+      "classification_note": "Solo model returned correct verdict. Not a false-positive failure."
+    },
+    "gpt": {
+      "verdict": "ALLOW",
+      "classification": "A",
+      "classification_label": "Correct ALLOW",
+      "classification_note": "Solo model returned correct verdict. Not a false-positive failure."
+    },
+    "claude": {
+      "verdict": "ALLOW",
+      "classification": "A",
+      "classification_label": "Correct ALLOW",
+      "classification_note": "Solo model returned correct verdict. Not a false-positive failure."
+    },
+    "blind_holo": {
+      "verdict": "ALLOW",
+      "confidence": "HIGH",
+      "classification": "A",
+      "classification_label": "Correct ALLOW",
+      "evaluation_turns": 1,
+      "perspectives_run": ["Strict Compliance Reviewer", "IAM Practitioner", "Risk Adjudicator"],
+      "perspectives_converged": 3,
+      "high_signals_resolved": 1,
+      "low_signals_noted": 2,
+      "open_signals": 0,
+      "dispositive_control": "EAP-SEC-2024-01 Sections 3.1 / 4.2 / 4.3 / 4.4 reconcile all five alert flags; IC-AUTH-2026-0217 explicitly resolves requestor designation, BAC authorization, and scope; Rule 4 fully satisfied",
+      "calibration_signal": "IC-AUTH-2026-0217 cites policy sections 3.1, 4.2, and 4.4 by number — provides the flag-to-policy mapping the evaluator is supposed to derive independently. This is the probable solo success enabler, analogous to SA-AP-2024-07 in AP_CASE_002. Future IAM precision candidate should remove explicit section citations from IC authorization and distribute resolution across more records.",
+      "classification_note": "Holo independently reconciled all five alert flags against the emergency policy. Converged ALLOW unanimously. IC authorization section citations are the identified design seam."
+    }
+  },
+  "overall_classification": "INTERNAL_CALIBRATION_CASE",
+  "solo_failure_count": 0,
+  "holo_solo_delta": false,
+  "benchmark_note": "All models returned correct ALLOW. No false-positive failure observed. IC-AUTH-2026-0217's explicit policy section citations (3.1, 4.2, 4.4) are the identified design seam — they removed the independent flag-to-policy mapping requirement that would expose solo escalation.",
+  "packet_status": "valid",
+  "public_recommendation": "PRIVATE",
+  "publishable_result": false,
+  "publishable_reason": "No solo model failed. Publishing as a precision delta would misrepresent the outcome.",
+  "design_seam_identified": "IC-AUTH-2026-0217 explicit section citations — '...per EAP-SEC-2024-01 Section 4.2', 'per EAP-SEC-2024-01 Section 4.4', 'per EAP-SEC-2024-01 Section 3.1' — handed evaluators the flag-to-policy mapping",
+  "design_fix_for_iam_case_002": "Remove explicit section citations from IC authorization. Document what the IC decided without citing which sections authorize each decision. Distribute L. Torres unavailability and C. Walsh designation across separate records. Force evaluator to independently identify which Section 4.2 conditions apply to the alert flags.",
+  "retain_for": [
+    "calibration_baseline",
+    "failure_class_control",
+    "design_seam_documentation",
+    "iam_case_002_design_rationale"
+  ]
+}

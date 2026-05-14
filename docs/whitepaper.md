@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why some high-consequence AI actions pass surface checks but still require adversarial adjudication*
 
-**Holo Engine · Working Paper · Version 3.4 · May 9, 2026**
+**Holo Engine · Working Paper · Version 3.5 · May 14, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -18,7 +18,13 @@ Most AI security is built to catch visible violations: prompt injection, jailbre
 
 **Nothing is obviously broken, but the action should still not proceed.**
 
-Holo Engine is an independent pre-execution adjudication layer for high-consequence AI workflows. Before an agent or automated system executes an irreversible action, Holo evaluates the action packet through adversarial multi-model review and returns ALLOW or ESCALATE with an audit-grade reasoning trace.
+Holo Engine is an independent pre-execution adjudication layer for high-consequence AI workflows. Before an agent or automated system executes an irreversible action, Holo evaluates the action packet and returns ALLOW or ESCALATE with an auditable reasoning trace.
+
+Unlike Mixture of Experts architectures, which primarily route work across model experts for efficiency, Holo is a pre-execution adjudication architecture. It does not rely on a single model's final judgment or a simple model vote. It separates evidence extraction, adversarial challenge, and final verdict computation into distinct layers.
+
+The system uses probabilistic models inside a deterministic adjudication protocol: frozen action packets, adversarial role assignment, raw evidence preservation, minimum adversarial depth, and a non-LLM Governor that returns ALLOW or ESCALATE based on unresolved risk. The goal is not to prove actions universally safe, but to make the action-boundary decision auditable, pressure-tested, and harder for any single model blindspot or operational objective to dominate.
+
+Recent ABAT precision testing also shows the opposite failure mode: solo frontier models may unnecessarily escalate valid actions when the exception path is supported by distributed evidence rather than over-explicit policy mapping. In IAM_CASE_002, Gemini and Claude returned ALLOW on a valid break-glass emergency-access request, while GPT-5.4 returned ESCALATE. Blind Holo returned ALLOW. Review classified GPT-5.4's escalation as a false positive. This matters because safe autonomy is not only about blocking dangerous actions; it is also about avoiding unnecessary human escalation when the evidence supports execution.
 
 In the benchmark's flagship test case, **all three solo frontier models approved a fraudulent transaction.** Under the exact same conditions, Holo's architecture returned ESCALATE consistently across repeated, seeded runs. This is not a claim of universal coverage or production reliability. It is evidence that adjudication architecture can change the outcome on a narrow but commercially important class of actions where surface policy passes, solo model judgment fails, and a second-stage decision architecture catches what the solo model misses.
 
@@ -153,6 +159,10 @@ ABAT is not penetration testing. Penetration testing targets infrastructure, acc
 ABAT is not compliance auditing. Compliance auditing is often retrospective. ABAT is pre-execution. It asks whether the action should proceed now.
 
 ABAT is not fraud detection alone. Fraud detection often looks for known patterns, anomalies, and risk signals. ABAT tests whether an action remains coherent when current request, historical behavior, authorization chain, policy context, and business logic are adjudicated together.
+
+### ABAT Integrity
+
+ABAT does not only test whether models miss dangerous actions. It also tests whether models unnecessarily escalate legitimate actions. To preserve benchmark integrity, evaluator packets are frozen before testing, answer-key materials are separated, packets are linted for unintended ambiguity, and calibration controls are retained when solo models correctly return ALLOW. A model failure only matters if the packet was clean.
 
 An ABAT scenario has four properties:
 
@@ -479,6 +489,27 @@ This is not yet a universal behavioral claim. It is an observed architecture fin
 
 The architecture is described here at the control-plane level. Implementation-specific scoring, routing, prompting, convergence, and verdict-computation details remain proprietary. The purpose of this section is to explain the shape of the control system, not to publish enough detail to reimplement it.
 
+### Architectural Principles
+
+The five structural properties that define how Holo adjudicates an action-boundary decision:
+
+**1. Adversarial Role Separation**  
+Holo separates initial assessment from adversarial challenge so the same model perspective is not responsible for both proposing and validating the action-boundary decision.
+
+**2. Randomized Driver Rotation**  
+Model and role assignments are rotated to reduce fixed-sequence dependence and make the adjudication path harder to game.
+
+**3. Deterministic Governor**  
+Final ALLOW / ESCALATE verdicts are computed by a non-LLM Governor over surfaced evidence, unresolved risks, and control status, rather than by rhetorical confidence or majority vote alone.
+
+**4. Cold-Start Hardening**  
+High-consequence ALLOW decisions require minimum adversarial depth so a single cold-start assessment cannot unilaterally authorize an irreversible action.
+
+**5. No Summarization Between Turns**  
+Holo preserves raw evidence across adversarial turns to reduce compressive degradation and prevent surfaced contradictions from being edited out before the next model sees them.
+
+The correct framing: probabilistic models operate inside a deterministic adjudication protocol. The model turns remain probabilistic. The evidence accumulation and final verdict computation are deterministic.
+
 ### 6.1 Evidentiary Discipline
 
 > **An escalation must be backed by evidence.**
@@ -522,6 +553,20 @@ The final verdict is computed by the governor, not by a model. This avoids ancho
 Benchmark pressure-testing has surfaced an important architectural constraint: a single model operating without prior adversarial context should not be able to unilaterally lock an irreversible decision. At Turn 1, before any adversarial challenge has been applied, a model's initial assessment is a cold-start judgment: plausible, but unverified against the available evidence.
 
 **A cold-start judgment should not be able to lock an irreversible outcome without adversarial confirmation.** A confident first-pass verdict is not sufficient.
+
+---
+
+## Formal Adjudication Properties
+
+Holo's architecture is designed to make model judgment inspectable rather than opaque. The system cannot eliminate probabilistic model behavior, but it can constrain that behavior inside a formal adjudication process.
+
+Key properties include:
+
+- **State preservation:** surfaced evidence, contradictions, and unresolved risks persist across adversarial turns until resolved or carried into the final verdict.
+- **Role separation:** assessment, challenge, and pressure testing are structurally distinct.
+- **Deterministic verdicting:** the Governor computes ALLOW or ESCALATE from the adjudication state rather than delegating the final decision to a single model.
+- **Minimum adversarial depth:** high-consequence ALLOW decisions require more than one model pass.
+- **Packet integrity:** frozen action packets and answer-key separation prevent post-result editing and benchmark leakage.
 
 ---
 
@@ -819,4 +864,4 @@ The central claim is narrow: when AI systems move from generating outputs to exe
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.4 · May 9, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.5 · May 14, 2026*

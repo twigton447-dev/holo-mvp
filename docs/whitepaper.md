@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why some high-consequence AI actions pass surface checks but still require adversarial adjudication*
 
-**Holo Engine · Working Paper · Version 3.5 · May 14, 2026**
+**Holo Engine · Working Paper · Version 3.6 · May 14, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -532,7 +532,7 @@ Each model in the adversarial reactor sees the complete, unedited history of pri
 
 ### 6.4 The Constrained Governor Layer
 
-The Governor is not another model asked to summarize the council. It is a constrained adjudication layer that converts surfaced evidence, unresolved contradictions, and risk indicators into an ALLOW or ESCALATE decision. The exact scoring and computation logic remain proprietary, but the design principle is simple: the final verdict should reflect the evidence surfaced during adversarial review, not the rhetorical force, position, or recency of any single model turn.
+The Governor is not an unconstrained model asked to summarize the council. It is a constrained adjudication layer that converts surfaced evidence, unresolved contradictions, and risk indicators into an ALLOW or ESCALATE decision. The exact scoring and computation logic remain proprietary, but the design principle is simple: the final verdict should reflect the evidence surfaced during adversarial review, not the rhetorical force, position, or recency of any single model turn.
 
 The Governor operates over structured adjudication state. It does not learn from prior evaluations and cannot revise its own adjudication rules at runtime. This was a deliberate choice. A Governor that rewrites its own rules could itself be exploited. Constrained, evidence-bound behavior is what keeps the Governor's verdicts auditable.
 
@@ -546,7 +546,7 @@ The final verdict is issued through the Governor, not by an unconstrained model 
 
 > **The verdict reflects the evidence. Not the last voice in the room.**
 
-> **It is a judge, not a participant.**
+> **It functions as the adjudication layer, not another debating participant.**
 
 ### 6.6 A Key Hardening Principle
 
@@ -864,4 +864,4 @@ The central claim is narrow: when AI systems move from generating outputs to exe
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.5 · May 14, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.6 · May 14, 2026*

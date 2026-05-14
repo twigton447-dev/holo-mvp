@@ -189,9 +189,35 @@ Standard AI benchmarks measure knowledge and reasoning in the abstract. They do 
 
 A scenario that includes a field labeled `bankaccountverified: false` is not testing judgment. It is testing reading comprehension. The benchmark became meaningful only when the attack signal lived in the absence of something, not the presence of a labeled failure. These are not flags the model can read. They are gaps the model must recognize.
 
-### 3.2 Scenario Sourcing
+### 3.2 Scenario Sourcing and ABAT Scenario Generation
 
-Each domain's scenario library is derived from documented, real-world attack classes and established cybersecurity doctrine from authoritative sources: FBI IC3 annual reports for AP/BEC, CISA guidance for agentic commerce, and MITRE ATT&CK framework for planned domains.
+ABAT scenarios are not limited to fraud reports or payment scams. Public sources such as FBI IC3 reports, enforcement actions, breach writeups, incident postmortems, procurement disputes, access-control failures, healthcare workflow breakdowns, and enterprise operating patterns are used as grounding material where appropriate.
+
+The broader method is adversarial and domain-agnostic. For each domain, Holo maps the irreversible action boundary, identifies the control stack, documents normal approval and exception paths, and then probes for places where formal compliance can diverge from business truth.
+
+Scenario generation follows a structured process:
+
+1. **Ground in real-world patterns**  
+   Use public incidents, known workflow failures, domain documentation, customer-disclosed patterns, or anonymized design-partner workflows.
+
+2. **Map the action boundary**  
+   Identify the exact point where an AI agent or automated workflow would execute an irreversible or high-consequence action.
+
+3. **Map controls and exception paths**  
+   Identify the policies, approvals, evidence sources, system flags, human reviews, vendor records, access controls, and escalation paths that govern the action.
+
+4. **Probe adversarially**  
+   Use a chat-based adversarial harness to pressure-test where a model may miss a hidden contradiction, over-obey an operational objective, defer to a system artifact, or over-escalate a legitimate exception.
+
+5. **Generate candidate packets**  
+   Convert the discovered failure hypothesis into a realistic evaluator packet with visible evidence, no hidden answer key, and a clear ALLOW / ESCALATE gold verdict.
+
+6. **Lint, freeze, and test**  
+   Candidate packets are linted for unintended ambiguity, frozen before testing, and then run against solo models and Holo.
+
+This process is designed to mirror the way real attackers will use AI: not by relying on generic prompts, but by iteratively probing workflows, discovering weak assumptions, and crafting inputs that exploit gaps between policy, context, and execution. ABAT applies the same adversarial pressure defensively, before those gaps are exploited in production.
+
+The result is a growing cross-domain blindspot atlas, not a static benchmark. Each new packet helps identify whether a failure is isolated, model-specific, domain-specific, or a repeatable action-boundary failure class.
 
 ### 3.3 The Four-Case Structure
 

@@ -1,7 +1,7 @@
 # Blindspots at the Action Boundary
 *Why some high-consequence AI actions pass surface checks but still require adversarial adjudication*
 
-**Holo Engine · Working Paper · Version 3.7 · May 14, 2026**
+**Holo Engine · Working Paper · Version 3.8 · May 17, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -27,6 +27,8 @@ The system uses probabilistic models inside a structured adjudication protocol: 
 Recent ABAT precision testing also shows the opposite failure mode: solo frontier models may unnecessarily escalate valid actions when the exception path is supported by distributed evidence rather than over-explicit policy mapping. In IAM_CASE_002, Gemini and Claude returned ALLOW on a valid break-glass emergency-access request, while GPT-5.4 returned ESCALATE. Blind Holo returned ALLOW. Review classified GPT-5.4's escalation as a false positive. This matters because safe autonomy is not only about blocking dangerous actions; it is also about avoiding unnecessary human escalation when the evidence supports execution.
 
 In the benchmark's flagship test case, **all three solo frontier models approved a fraudulent transaction.** Under the exact same conditions, Holo's architecture returned ESCALATE consistently across repeated, seeded runs. This is not a claim of universal coverage or production reliability. It is evidence that adjudication architecture can change the outcome on a narrow but commercially important class of actions where surface policy passes, solo model judgment fails, and a second-stage decision architecture catches what the solo model misses.
+
+Crucially, Holo achieves this through a model-agnostic, hot-swappable architecture. By completely decoupling the core orchestration and arbitration layer from the underlying Large Language Models (LLMs), Holo treats individual models as interchangeable engines. The moment a frontier lab releases a more capable AI, Holo integrates it instantly. This creates a permanent, asymmetric advantage: while bad actors operate on rigid, static infrastructure that degrades relative to the market, Holo automatically inherits the global peak of AI capabilities the second they drop. The defensive shield is structurally designed to always stay one step ahead.
 
 Holo does not replace runtime security, policy engines, or observability. Those systems handle what is known or prohibited. Holo adjudicates the unresolved middle: actions that pass every surface check but still require a final, adversarial judgment call.
 
@@ -866,6 +868,23 @@ Over time, the Atlas may become useful to the labs themselves as a structured ma
 
 ---
 
+## The Evergreen Shield: Built to Never Go Obsolete
+
+To solve the Action Boundary problem over the long term, a defensive system cannot be anchored to a single snapshot in time. The AI landscape moves too fast. If a security layer relies on a fixed, proprietary model, it is born with an expiration date.
+
+Holo Engine bypasses this limitation entirely by separating its **core judgment logic** from the **underlying AI models** it orchestrates. Think of Holo as a high-performance vehicle designed with a universal engine bay. We do not weld a specific AI model into the chassis; instead, we treat foundational models as plug-and-play components.
+
+### The Instant-Upgrade Moat
+The day a frontier lab releases a smarter, faster, or more reasoning-heavy model, Holo can adopt it immediately via simple API abstraction. There is no need to redesign the core architecture or rebuild our trust boundaries from scratch. Holo simply plugs the new model into the existing loop, instantly upgrading its raw processing power. As a result, Holo is automatically as intelligent as the best AI on Earth on any given Tuesday.
+
+### Forcing an Asymmetric Race
+This architectural decoupling fundamentally alters the economics of AI defense, turning time into our greatest ally:
+
+* **Static Attacks vs. Dynamic Defense:** To bypass a security boundary, bad actors must manually build, fine-tune, or tweak their offensive setups (like rigid Mixture-of-Experts configurations). Their infrastructure is static until their next manual rebuild.
+* **Compounding Advantage:** Holo does not have to out-innovate the global frontier labs; it rides their wave. By automatically operating at the absolute ceiling of global AI capabilities, Holo forces adversaries into an un-winnable infrastructure race where the defensive shield adapts faster than the attack.
+
+---
+
 ## Conclusion
 
 AI agents are making irreversible decisions today. The security infrastructure around those decisions was not designed for them.
@@ -890,4 +909,4 @@ The central claim is narrow: when AI systems move from generating outputs to exe
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.6 · May 14, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 3.8 · May 17, 2026*

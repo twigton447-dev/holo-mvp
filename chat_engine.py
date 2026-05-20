@@ -394,14 +394,184 @@ class HoloChatEngine:
             "thread_health_level": session.thread_health_level,
             "elapsed_ms":          elapsed_ms,
             "tokens":              {"input": in_tok, "output": out_tok},
-            "thought":             thought,   # {"text": str, "color": str} or None
-            "handoff":             handoff,   # {suggested, message, new_thread} or None
+            "thought":             thought,
+            "handoff":             handoff,
             "incognito":           incognito,
+            "search_query":        search_query,
             "_provider":           adapter.provider,
             "_governor":           session.governor_provider,
             "_governor_turns_held": session.turn_count - session.governor_locked_since,
             "_temperature":        temperature,
             "artifacts":           artifacts_saved,
+        }
+
+    def stream_message(self, session_id: str, user_message: str,
+                       capsule_id: Optional[str] = None,
+                       images: Optional[List[Dict[str, Any]]] = None,
+                       incognito: bool = False):
+        """
+        Generator variant of send_message.
+
+        Yields strings (text chunks) while the analyst streams its response,
+        then yields a single sentinel dict with metadata once streaming is complete:
+          {"done": True, "session_id": ..., "turn_number": ..., "thought": ...,
+           "thread_health_level": ..., "thread_health_score": ..., "searched": bool,
+           "artifacts": [...], "handoff": ...}
+
+        The Governor's pre-turn work (temperature, search decision, tenor) runs
+        synchronously before streaming starts. Post-turn work (context extraction,
+        consolidation, thread naming, Supabase persist) runs in a background thread
+        after the stream completes so the caller never blocks on it.
+        """
+        session             = self.get_or_create_session(session_id)
+        session.last_active = time.time()
+
+        if incognito:
+            capsule_context = {}
+            life_context    = []
+            last_session    = None
+        else:
+            capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+            life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
+            last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
+
+        adapter = self._adapters[random.randrange(len(self._adapters))]
+        session.rotation_index += 1
+        session.turn_count     += 1
+
+        if _should_rotate_governor(session):
+            self._governor.prepare_for_turn(adapter)
+            session.governor_provider             = self._governor.provider
+            session.governor_locked_since         = session.turn_count
+            session.governor_rotation_threshold   = random.randint(7, 11)
+        else:
+            self._governor.lock_to_provider(session.governor_provider)
+
+        temperature  = self._governor.assess_chat_temperature(user_message, session.history)
+        search_query = self._governor.should_search(user_message, session.history)
+        thought      = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        tenor        = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
+        search_results = web_search.search(search_query) if search_query else None
+        searched = search_results is not None
+
+        enriched_message = user_message
+        if search_results:
+            enriched_message = (
+                f"{user_message}\n\n"
+                f"[BACKGROUND CONTEXT: The following search results were retrieved to help you answer. "
+                f"Use them silently — do not mention, quote, or reference that a search was performed. "
+                f"If the results are irrelevant to the question, ignore them entirely.]\n\n"
+                f"{search_results}"
+            )
+
+        system_prompt = HOLO_CHAT_SYSTEM_PROMPT
+        if not incognito:
+            system_prompt += (
+                "\n\n" + _health_context(session)
+                + ("\n\n" + _life_context_block(life_context) if life_context else "")
+                + ("\n\n" + _last_session_block(last_session) if last_session else "")
+                + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
+                + ("\n\nCAPTAIN BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
+            )
+
+        # Signal search before tokens arrive so the UI can show the indicator
+        if searched:
+            yield {"searching": True}
+
+        # Stream analyst response token by token
+        accumulated = []
+        in_tok = out_tok = 0
+        for chunk in adapter.stream_chat_call(
+            system_prompt, session.history, enriched_message, temperature, images=images or None
+        ):
+            if isinstance(chunk, dict) and chunk.get("done"):
+                in_tok  = chunk.get("in_tok", 0)
+                out_tok = chunk.get("out_tok", 0)
+            else:
+                accumulated.append(chunk)
+                yield chunk
+
+        response_text = "".join(accumulated)
+
+        # Post-stream: claims check (may append a correction to response_text)
+        response_text, flagged_claims = self._governor.verify_claims(response_text, web_search.search)
+        if flagged_claims:
+            corrections = [f["correction"] for f in flagged_claims if f.get("correction")]
+            if corrections:
+                note = " · ".join(corrections)
+                correction_text = f"\n\n*One thing worth correcting: {note}*"
+                response_text  += correction_text
+                yield correction_text
+
+        # Commit history
+        session.history.append({"role": "user",      "content": user_message})
+        session.history.append({"role": "assistant",  "content": response_text})
+
+        # Extract artifacts
+        artifacts_saved = []
+        if capsule_id and not incognito:
+            artifacts_saved = _extract_and_save_artifacts(
+                self._brain, response_text, capsule_id, session.session_id, session.turn_count
+            )
+
+        # Link session on first turn
+        if capsule_id and session.turn_count == 1 and not incognito:
+            self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id)
+            self._brain.append_session_history(capsule_id, session.session_id, user_message)
+
+        # Background: context extraction, consolidation, thread naming, Supabase persist
+        def _post_stream():
+            try:
+                if capsule_id and not incognito:
+                    updates = self._governor.extract_context_updates(session.history, capsule_context)
+                    for key, value in updates.items():
+                        self._brain.set_capsule_context(capsule_id, key, value)
+                    if session.thread_health_level == "RED":
+                        result = self._governor.consolidate_session(session.history, capsule_context, session.session_id)
+                        if result.get("session_note"):
+                            self._brain.save_consolidation(capsule_id, session.session_id, result["session_note"])
+                        if result.get("life_context"):
+                            self._brain.upsert_life_context(capsule_id, result["life_context"])
+                    if session.turn_count == 2:
+                        name = self._governor.name_session(list(session.history))
+                        if name:
+                            self._brain.update_session_name(capsule_id, session.session_id, name)
+                self._brain.save_chat_turn(
+                    session_id    = session.session_id,
+                    turn_number   = session.turn_count,
+                    user_message  = user_message,
+                    holo_response = response_text,
+                    provider      = adapter.provider,
+                    temperature   = temperature,
+                    capsule_id    = capsule_id,
+                )
+            except Exception as e:
+                logger.warning(f"Post-stream background task failed: {e}")
+
+        threading.Thread(target=_post_stream, daemon=True).start()
+
+        handoff = None
+        if session.thread_health_level == "RED":
+            handoff = {
+                "suggested":  True,
+                "message":    "This thread is getting long. Everything important has been saved: your portrait, open threads, what shifted this session. Before you continue, tell me: how much context do you want carried into the next thread? (Full detail, key points only, or just pick up where we left off and I'll calibrate.)",
+                "new_thread": "/chat",
+            }
+
+        yield {
+            "done":                True,
+            "session_id":          session.session_id,
+            "response":            response_text,
+            "turn_number":         session.turn_count,
+            "thread_health_score": session.thread_health_score,
+            "thread_health_level": session.thread_health_level,
+            "thought":             thought,
+            "searched":            searched,
+            "artifacts":           artifacts_saved,
+            "handoff":             handoff,
+            "incognito":           incognito,
+            "_provider":           adapter.provider,
+            "_temperature":        temperature,
         }
 
     def get_history(self, session_id: str) -> Optional[List[Dict[str, str]]]:

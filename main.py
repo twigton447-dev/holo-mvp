@@ -47,9 +47,10 @@ logger = logging.getLogger("holo.main")
 # ---------------------------------------------------------------------------
 
 from contextlib import asynccontextmanager
+import json
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -851,7 +852,70 @@ async def chat(
         "tokens":              result["tokens"],
         "thought":             result.get("thought"),
         "artifacts":           result.get("artifacts", []),
+        "handoff":             result.get("handoff"),
+        "searched":            result.get("search_query") is not None,
     })
+
+
+@app.post("/v1/chat/stream")
+async def chat_stream(
+    request: Request,
+    _key: str = Depends(_verify_key),
+):
+    """
+    Server-Sent Events variant of /v1/chat.
+
+    Streams analyst tokens as they arrive. Each SSE event carries a JSON payload:
+      {"type": "token",     "text": "..."}          — incremental text chunk
+      {"type": "searching"}                          — Governor triggered a web search
+      {"type": "done",      "session_id": "...", ...} — final metadata (same fields as /v1/chat)
+
+    The client should fall back to /v1/chat if this endpoint is unavailable.
+    """
+    if _chat_engine is None:
+        raise HTTPException(status_code=503, detail="Chat engine not initialized.")
+
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+
+    message = body.get("message", "").strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="Missing required field: message")
+
+    session_id = body.get("session_id")
+    images     = body.get("images") or None
+    incognito  = bool(body.get("incognito", False))
+    capsule    = get_capsule_from_request(request.headers.get("Authorization"))
+    capsule_id = (capsule["sub"] if capsule else None) if not incognito else None
+
+    def _sse(event: dict) -> str:
+        return f"data: {json.dumps(event)}\n\n"
+
+    def _generate():
+        try:
+            for chunk in _chat_engine.stream_message(
+                session_id, message, capsule_id=capsule_id, images=images, incognito=incognito
+            ):
+                if isinstance(chunk, dict) and chunk.get("done"):
+                    yield _sse({"type": "done", **{k: v for k, v in chunk.items() if k != "done"}})
+                elif isinstance(chunk, dict) and chunk.get("searching"):
+                    yield _sse({"type": "searching"})
+                else:
+                    yield _sse({"type": "token", "text": chunk})
+        except Exception as e:
+            logger.error(f"Stream error: {type(e).__name__}: {e}", exc_info=True)
+            yield _sse({"type": "error", "detail": "Stream interrupted. Please try again."})
+
+    return StreamingResponse(
+        _generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.get("/v1/capsule/portrait")

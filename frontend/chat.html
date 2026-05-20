@@ -397,6 +397,9 @@
       #thread-panel-close { font-size: 26px; padding: 8px 10px; color: var(--text); }
       #thread-panel-header { padding: 16px 16px 12px; }
       #thread-new-btn button { font-size: 15px; padding: 13px 16px; }
+      /* Hide secondary header actions on small screens — keep avatar + send */
+      #incognito-btn, #thread-toggle, #new-thread, #theme-toggle { display: none; }
+      #incognito-badge { display: none !important; }
     }
   </style>
 </head>
@@ -1526,14 +1529,10 @@
     const text  = input.value.trim();
     if (!text) return;
 
-    // Reset inactivity timer and invalidate surface cache on new message
     resetInactivityTimer();
     _surfaceLoaded = false;
-
-    // Clear empty state
     document.getElementById("empty")?.remove();
 
-    // Read any attachments — text files appended to message, images sent separately
     const { text: attachmentText, images } = await readAttachmentsAsText();
     const fullMessage = text + attachmentText;
 
@@ -1544,92 +1543,200 @@
     isLoading = true;
     document.getElementById("send").disabled = true;
 
-    // Collect object URLs for image previews before clearing attachedFiles
-    const imagePreviewUrls = attachedFiles
-      .filter(isImageFile)
-      .map(f => URL.createObjectURL(f));
-    appendMessage("user", text, imagePreviewUrls); // show text + image previews
+    const imagePreviewUrls = attachedFiles.filter(isImageFile).map(f => URL.createObjectURL(f));
+    appendMessage("user", text, imagePreviewUrls);
     const typingEl = appendTyping();
     scrollToBottom();
     startAmbientBubbles();
 
+    const reqBody = { message: fullMessage, session_id: sessionId };
+    if (images && images.length > 0) reqBody.images = images;
+    if (incognitoMode) reqBody.incognito = true;
+
+    // Attempt streaming first; fall back to non-streaming on failure
+    let streamOk = false;
     try {
-      const body = { message: fullMessage, session_id: sessionId };
-      if (images && images.length > 0) body.images = images;
-      if (incognitoMode) body.incognito = true;
-
-      const res = await fetch("/v1/chat", {
-        method:  "POST",
-        headers: authHeaders(),
-        body:    JSON.stringify(body),
+      const res = await fetch("/v1/chat/stream", {
+        method: "POST", headers: authHeaders(), body: JSON.stringify(reqBody),
       });
+      if (res.ok && res.body) {
+        streamOk = true;
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let   buf     = "";
+        let   holoEl  = null;   // the streaming bubble element
+        let   bubbleEl = null;
+        let   accumulated = "";
+        let   doneData = null;
 
-      stopAmbientBubbles();
-      typingEl.remove();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split("\n");
+          buf = lines.pop();  // keep incomplete last line
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            let evt;
+            try { evt = JSON.parse(line.slice(6)); } catch { continue; }
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        appendError(err.detail || `Error ${res.status}`);
-        return;
-      }
-
-      const data = await res.json();
-      sessionId = data.session_id;
-      appendHoloMessage(data);
-      // Add new thread to panel on first turn; refresh after turn 2 so Captain name replaces preview
-      if (data.turn_number === 1) {
-        const firstMsg = document.querySelectorAll(".msg.user .bubble")[0]?.innerText || "";
-        prependSession(data.session_id, firstMsg);
-      } else if (data.turn_number === 2) {
-        setTimeout(() => loadSessionList(), 5000);  // Captain names thread async
-        setTimeout(() => loadSessionList(), 12000); // fallback if Captain was slow
-      }
-
-      // Track turns and show free-limit banner if needed
-      turnCount++;
-      if (turnCount === FREE_TURN_LIMIT && !capsuleToken) {
-        document.getElementById("free-limit-banner").classList.remove("hidden");
-      }
-
-      // Thought bubble from Captain — slight delay so it feels organic
-      if (data.thought) {
-        setTimeout(() => spawnThought(data.thought), 1800);
-      }
-
-      // If new artifacts were saved this turn, prepend to registry
-      if (data.artifacts && data.artifacts.length > 0) {
-        for (const a of data.artifacts) {
-          _artifactRegistry.unshift({ artifact_id: a.artifact_id, title: a.title, created_at: new Date().toISOString() });
+            if (evt.type === "searching") {
+              typingEl.querySelector(".bubble").textContent = "Searching the web…";
+            } else if (evt.type === "token") {
+              if (!holoEl) {
+                stopAmbientBubbles();
+                typingEl.remove();
+                holoEl   = createStreamingBubble();
+                bubbleEl = holoEl.querySelector(".bubble");
+                document.getElementById("messages").appendChild(holoEl);
+                holoEl.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+              accumulated += evt.text;
+              bubbleEl.innerHTML = renderMarkdown(accumulated);
+              scrollToBottom();
+            } else if (evt.type === "done") {
+              doneData = evt;
+            } else if (evt.type === "error") {
+              stopAmbientBubbles();
+              typingEl.remove();
+              appendError(evt.detail || "Something went wrong. Please try again.");
+            }
+          }
         }
-        if (_activePanelTab === "artifacts") renderArtifactList();
-      }
 
-      // Silently refresh what Holo knows — Captain may have extracted new facts
-      setTimeout(() => refreshMemoryContext(), 2000);
+        // Handle stream that ended with no tokens and no done event
+        if (!holoEl && !doneData) {
+          stopAmbientBubbles();
+          if (typingEl.parentNode) typingEl.remove();
+          appendError("Connection interrupted. Please try again.");
+          streamOk = false;
+        }
 
-      // Thread handoff — Captain tells the user it's time to move, in its own voice
-      if (data.handoff && data.handoff.suggested) {
-        setTimeout(() => showHandoff(data.handoff), 1200);
+        // Finalize the streaming bubble with full rendering + actions
+        if (doneData && holoEl) {
+          finalizeStreamingBubble(holoEl, doneData.response || accumulated);
+          sessionId = doneData.session_id;
+          if (doneData.turn_number === 1) {
+            const firstMsg = document.querySelectorAll(".msg.user .bubble")[0]?.innerText || "";
+            prependSession(doneData.session_id, firstMsg);
+          } else if (doneData.turn_number === 2) {
+            setTimeout(() => loadSessionList(), 5000);
+            setTimeout(() => loadSessionList(), 12000);
+          }
+          turnCount++;
+          if (turnCount === FREE_TURN_LIMIT && !capsuleToken) {
+            document.getElementById("free-limit-banner").classList.remove("hidden");
+          }
+          if (doneData.thought) setTimeout(() => spawnThought(doneData.thought), 1800);
+          if (doneData.artifacts && doneData.artifacts.length > 0) {
+            for (const a of doneData.artifacts) {
+              _artifactRegistry.unshift({ artifact_id: a.artifact_id, title: a.title, created_at: new Date().toISOString() });
+            }
+            if (_activePanelTab === "artifacts") renderArtifactList();
+          }
+          setTimeout(() => refreshMemoryContext(), 2000);
+          if (doneData.handoff && doneData.handoff.suggested) setTimeout(() => showHandoff(doneData.handoff), 1200);
+          if (doneData.thread_health_level === "YELLOW" && doneData.turn_number >= 14 && !document.getElementById("thread-nudge")) {
+            const nudge = document.createElement("div");
+            nudge.id = "thread-nudge";
+            nudge.style.cssText = "text-align:center;padding:8px 16px;font-size:12px;color:var(--text4);";
+            nudge.innerHTML = `This thread is getting long. <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;">Start a fresh one</a> to keep Holo sharp.`;
+            document.getElementById("messages").appendChild(nudge);
+            scrollToBottom();
+          }
+        }
       }
-
-      // YELLOW nudge — warn early before context gets too heavy
-      if (data.thread_health_level === "YELLOW" && data.turn_number >= 14 && !document.getElementById("thread-nudge")) {
-        const nudge = document.createElement("div");
-        nudge.id = "thread-nudge";
-        nudge.style.cssText = "text-align:center;padding:8px 16px;font-size:12px;color:var(--text4);";
-        nudge.innerHTML = `This thread is getting long. <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;">Start a fresh one</a> to keep Holo sharp.`;
-        document.getElementById("messages").appendChild(nudge);
-        scrollToBottom();
-      }
-    } catch (e) {
-      console.error("Chat fetch error:", e);
-      stopAmbientBubbles();
-      typingEl.remove();
-      appendError("Network error — check that the Holo server is running.");
-    } finally {
-      isLoading = false;
-      document.getElementById("send").disabled = false;
+    } catch (_streamErr) {
+      streamOk = false;
     }
+
+    if (!streamOk) {
+      // Non-streaming fallback
+      try {
+        stopAmbientBubbles();
+        typingEl.querySelector && (typingEl.querySelector(".bubble").textContent = "Thinking…");
+        const res = await fetch("/v1/chat", {
+          method: "POST", headers: authHeaders(), body: JSON.stringify(reqBody),
+        });
+        stopAmbientBubbles();
+        typingEl.remove();
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          appendError(err.detail || "Something went wrong. Please try again.");
+          return;
+        }
+        const data = await res.json();
+        sessionId = data.session_id;
+        appendHoloMessage(data);
+        if (data.turn_number === 1) {
+          const firstMsg = document.querySelectorAll(".msg.user .bubble")[0]?.innerText || "";
+          prependSession(data.session_id, firstMsg);
+        } else if (data.turn_number === 2) {
+          setTimeout(() => loadSessionList(), 5000);
+          setTimeout(() => loadSessionList(), 12000);
+        }
+        turnCount++;
+        if (turnCount === FREE_TURN_LIMIT && !capsuleToken) {
+          document.getElementById("free-limit-banner").classList.remove("hidden");
+        }
+        if (data.thought) setTimeout(() => spawnThought(data.thought), 1800);
+        if (data.artifacts && data.artifacts.length > 0) {
+          for (const a of data.artifacts) {
+            _artifactRegistry.unshift({ artifact_id: a.artifact_id, title: a.title, created_at: new Date().toISOString() });
+          }
+          if (_activePanelTab === "artifacts") renderArtifactList();
+        }
+        setTimeout(() => refreshMemoryContext(), 2000);
+        if (data.handoff && data.handoff.suggested) setTimeout(() => showHandoff(data.handoff), 1200);
+        if (data.thread_health_level === "YELLOW" && data.turn_number >= 14 && !document.getElementById("thread-nudge")) {
+          const nudge = document.createElement("div");
+          nudge.id = "thread-nudge";
+          nudge.style.cssText = "text-align:center;padding:8px 16px;font-size:12px;color:var(--text4);";
+          nudge.innerHTML = `This thread is getting long. <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;">Start a fresh one</a> to keep Holo sharp.`;
+          document.getElementById("messages").appendChild(nudge);
+          scrollToBottom();
+        }
+      } catch (e) {
+        stopAmbientBubbles();
+        if (typingEl.parentNode) typingEl.remove();
+        appendError("Connection interrupted. Please try again.");
+      }
+    }
+
+    isLoading = false;
+    document.getElementById("send").disabled = false;
+  }
+
+  function createStreamingBubble() {
+    const msg = document.createElement("div");
+    msg.className = "msg holo";
+    msg.innerHTML = `<div class="holo-icon">✦</div><div class="holo-body"><div class="bubble"></div></div>`;
+    return msg;
+  }
+
+  function finalizeStreamingBubble(msgEl, fullText) {
+    const { mainText, suggestions } = parseResponse(fullText);
+    const responseId = "r" + Date.now();
+    const chipsHtml = suggestions.length ? `
+      <div class="chips">
+        ${suggestions.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}
+      </div>` : "";
+    const body = msgEl.querySelector(".holo-body");
+    body.innerHTML = `
+      <div class="bubble" id="${responseId}">${renderMarkdown(mainText)}</div>
+      ${chipsHtml}
+      <div class="msg-actions">
+        <button class="msg-action" title="Copy" onclick="copyMsg('${responseId}', this)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <button class="msg-action" title="Good response">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+        </button>
+        <button class="msg-action" title="Not helpful">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+        </button>
+      </div>`;
+    msgEl.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function appendMessage(role, text, imageUrls) {

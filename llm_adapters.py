@@ -2414,6 +2414,18 @@ class BaseAdapter:
         """
         raise NotImplementedError
 
+    def stream_chat_call(self, system: str, history: list, user_message: str,
+                         temperature: float = 0.5,
+                         images: Optional[list] = None):
+        """
+        Streaming variant. Yields text chunks (str), then a final sentinel dict:
+        {"done": True, "in_tok": int, "out_tok": int}
+        Falls back to non-streaming if not overridden.
+        """
+        text, in_tok, out_tok = self.chat_call(system, history, user_message, temperature, images)
+        yield text
+        yield {"done": True, "in_tok": in_tok, "out_tok": out_tok}
+
     def run_turn(self, state: dict, turn_number: int, role: str,
                  temperature: float = 0.2) -> TurnResult:
         """
@@ -2538,6 +2550,42 @@ class OpenAIAdapter(BaseAdapter):
         out_tok = response.usage.completion_tokens
         return text, in_tok, out_tok
 
+    def stream_chat_call(self, system: str, history: list, user_message: str,
+                         temperature: float = 0.5,
+                         images: Optional[list] = None):
+        """Yield text chunks via OpenAI streaming. Final item is {"done": True, "in_tok": n, "out_tok": n}."""
+        messages = [{"role": "system", "content": system}]
+        messages += history
+        if images:
+            pdfs        = [i for i in images if i.get("mimeType") == "application/pdf"]
+            vision_imgs = [i for i in images if i.get("mimeType") != "application/pdf"]
+            text_msg = user_message
+            if pdfs:
+                names = ", ".join(i["name"] for i in pdfs)
+                text_msg += f"\n\n[PDF attached: {names} — full PDF reading not available on this turn.]"
+            if vision_imgs:
+                content: list = [{"type": "text", "text": text_msg}]
+                for img in vision_imgs:
+                    content.append({"type": "image_url", "image_url": {"url": f"data:{img['mimeType']};base64,{img['data']}"}})
+                messages.append({"role": "user", "content": content})
+            else:
+                messages.append({"role": "user", "content": text_msg})
+        else:
+            messages.append({"role": "user", "content": user_message})
+        stream = self._client.chat.completions.create(
+            model=self.model_id, temperature=temperature,
+            max_completion_tokens=4096, messages=messages, stream=True,
+            stream_options={"include_usage": True},
+        )
+        in_tok = out_tok = 0
+        for chunk in stream:
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
+            if chunk.usage:
+                in_tok  = chunk.usage.prompt_tokens
+                out_tok = chunk.usage.completion_tokens
+        yield {"done": True, "in_tok": in_tok, "out_tok": out_tok}
+
 
 # ---------------------------------------------------------------------------
 # Anthropic adapter
@@ -2615,6 +2663,29 @@ class AnthropicAdapter(BaseAdapter):
         in_tok  = response.usage.input_tokens
         out_tok = response.usage.output_tokens
         return text, in_tok, out_tok
+
+    def stream_chat_call(self, system: str, history: list, user_message: str,
+                         temperature: float = 0.5,
+                         images: Optional[list] = None):
+        """Yield text chunks via Anthropic streaming. Final item is {"done": True, "in_tok": n, "out_tok": n}."""
+        if images:
+            user_content: list = [{"type": "text", "text": user_message}]
+            for img in images:
+                if img.get("mimeType") == "application/pdf":
+                    user_content.append({"type": "document", "source": {"type": "base64", "media_type": "application/pdf", "data": img["data"]}})
+                else:
+                    user_content.append({"type": "image", "source": {"type": "base64", "media_type": img["mimeType"], "data": img["data"]}})
+            messages = list(history) + [{"role": "user", "content": user_content}]
+        else:
+            messages = list(history) + [{"role": "user", "content": user_message}]
+        with self._client.messages.stream(
+            model=self.model_id, temperature=temperature,
+            max_tokens=4096, system=system, messages=messages,
+        ) as stream:
+            for text in stream.text_stream:
+                yield text
+            final = stream.get_final_message()
+            yield {"done": True, "in_tok": final.usage.input_tokens, "out_tok": final.usage.output_tokens}
 
 
 # ---------------------------------------------------------------------------
@@ -2695,6 +2766,41 @@ class GoogleAdapter(BaseAdapter):
                 if attempt < 2:
                     _time.sleep(2 ** attempt)
         raise last_err
+
+    def stream_chat_call(self, system: str, history: list, user_message: str,
+                         temperature: float = 0.5,
+                         images: Optional[list] = None):
+        """Yield text chunks via Google streaming. Final item is {"done": True, "in_tok": n, "out_tok": n}."""
+        from google.genai import types
+        conv_text = ""
+        for m in history:
+            role = "USER" if m["role"] == "user" else "HOLO"
+            conv_text += f"\n{role}: {m['content']}\n"
+        full_user = f"{conv_text}\nUSER: {user_message}" if conv_text else user_message
+        combined  = f"{system}\n\n---\n\n{full_user}"
+        if images:
+            import base64
+            contents: list = [combined]
+            for img in images:
+                raw_bytes = base64.b64decode(img["data"])
+                contents.append(types.Part.from_bytes(data=raw_bytes, mime_type=img["mimeType"]))
+        else:
+            contents = combined
+        in_tok = out_tok = 0
+        for chunk in self._client.models.generate_content_stream(
+            model=self.model_id,
+            contents=contents,
+            config=types.GenerateContentConfig(temperature=temperature, max_output_tokens=4096),
+        ):
+            if chunk.text:
+                yield chunk.text
+            try:
+                if chunk.usage_metadata:
+                    in_tok  = chunk.usage_metadata.prompt_token_count or in_tok
+                    out_tok = chunk.usage_metadata.candidates_token_count or out_tok
+            except Exception:
+                pass
+        yield {"done": True, "in_tok": in_tok, "out_tok": out_tok}
 
 
 # ---------------------------------------------------------------------------

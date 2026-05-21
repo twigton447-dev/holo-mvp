@@ -2502,7 +2502,7 @@ class OpenAIAdapter(BaseAdapter):
         response = self._client.chat.completions.create(
             model           = self.model_id,
             temperature     = temperature,
-            max_completion_tokens = 2048,
+            max_completion_tokens = 2700,
             response_format = {"type": "json_object"},
             messages        = [
                 {"role": "system", "content": system},

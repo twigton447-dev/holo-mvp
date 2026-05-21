@@ -124,12 +124,40 @@ def _sf(cond, cat):
         return "ERR"
     return cond.get("severity_flags", {}).get(cat, "NONE")
 
-def _majority_verdict(turn_log, coverage):
-    """Same majority vote + HIGH override logic as the governor."""
+def _majority_verdict(turn_log, coverage, require_confirmed_high=False):
+    """
+    Majority vote + HIGH override logic.
+
+    require_confirmed_high=False (default, used for solo conditions):
+        Uses _any_high(coverage) — any category at HIGH in the coverage matrix
+        forces ESCALATE. Correct for single-provider runs where one family is
+        all that exists.
+
+    require_confirmed_high=True (used for Holo shadow):
+        Mirrors the governor's _confirmed_high logic — a category must be rated
+        HIGH by at least 2 structurally different provider families within the
+        supplied turn_log before it forces ESCALATE. A single model's HIGH in a
+        multi-provider run does not qualify. This keeps the shadow consistent with
+        the actual governor verdict, preventing phantom shadow divergences when
+        only one provider flagged HIGH.
+    """
     allow_votes    = sum(1 for t in turn_log if t.get("verdict") == "ALLOW")
     escalate_votes = len(turn_log) - allow_votes
     verdict = "ESCALATE" if escalate_votes > allow_votes else "ALLOW"
-    if _any_high(coverage):
+
+    if require_confirmed_high:
+        # Count provider families per HIGH category within the supplied turns only.
+        from collections import defaultdict
+        cat_providers: dict = defaultdict(set)
+        for t in turn_log:
+            for cat, sev in t.get("severity_flags", {}).items():
+                if sev == "HIGH":
+                    cat_providers[cat].add(t.get("provider", "unknown"))
+        has_high = any(len(providers) >= 2 for providers in cat_providers.values())
+    else:
+        has_high = _any_high(coverage)
+
+    if has_high:
         # Check if synthesis (last turn, Synthesis role) explicitly cleared the HIGH
         synth = turn_log[-1] if turn_log else None
         synth_clears = (
@@ -143,32 +171,48 @@ def _majority_verdict(turn_log, coverage):
             verdict = "ESCALATE"
     return verdict, allow_votes, escalate_votes
 
+
+def _shadow_majority_excl_turn1(turn_log, coverage, multi_provider=False):
+    """
+    Shadow majority excluding Turn 1 (Initial Assessment). Diagnostic only —
+    does NOT change any primary verdict.
+
+    Turn 1 is the un-pressure-tested baseline read. This shadow computes what
+    the final verdict would be if only adversarial turns (2+) voted, to surface
+    whether Turn 1 anchoring affected the outcome.
+
+    multi_provider=True: uses confirmed-HIGH logic (2+ provider families required),
+    matching the actual governor. Pass True for Holo runs. Default False keeps
+    solo shadow behavior unchanged (_any_high on the full coverage matrix).
+
+    Falls back to the full majority if fewer than 2 turns ran.
+    """
+    if len(turn_log) < 2:
+        return _majority_verdict(turn_log, coverage,
+                                 require_confirmed_high=multi_provider)
+    return _majority_verdict(turn_log[1:], coverage,
+                             require_confirmed_high=multi_provider)
+
 # ---------------------------------------------------------------------------
 # Solo condition runner (used for all 3 solo conditions)
 # ---------------------------------------------------------------------------
 
-# Shared turn budget — solo and Holo both cap at MAX_TURNS = 10.
-# Convergence can exit either early. Nobody gets more turns than anyone else.
+# Solo conditions run one-shot — a single turn, no convergence loop.
+# Holo runs the full adversarial loop (up to MAX_TURNS with convergence detection).
+# This measures: solo first-pass judgment vs. Holo's deliberated verdict.
+SOLO_MAX_TURNS     = 1
 MAX_TURNS          = 10
-MIN_TURNS_SOLO     = 3   # minimum before convergence can fire (same as Holo)
+MIN_TURNS_SOLO     = 4   # minimum before convergence can fire (unused when SOLO_MAX_TURNS=1)
 CONVERGENCE_WINDOW = 2   # consecutive zero-delta turns to declare convergence
 
 
 def run_solo(scenario, adapter, condition_name, force_max_turns=False):
     """
-    Runs a single adapter through up to MAX_TURNS adversarial turns using the
-    IDENTICAL persona sequence and prompts as Holo. Convergence detection is
-    ENABLED — same delta-window logic the governor uses.
+    Runs a single adapter for exactly SOLO_MAX_TURNS (1) turn — one-shot judgment.
+    No convergence loop, no adversarial compounding.
 
-    Same state structure. Same prompts. Same role sequence. Same turn budget.
-    Same convergence rules. The ONLY missing variable: structural independence
-    (Holo rotates a different frontier model every turn; solo uses one model
-    throughout, so Turn 2 reads and challenges its own Turn 1 output).
-
-    Exit conditions:
-      - Convergence: delta=0 for CONVERGENCE_WINDOW consecutive turns after MIN_TURNS_SOLO
-        (skipped when force_max_turns=True)
-      - MAX_TURNS reached
+    This measures the solo model's first-pass decision on the raw packet,
+    which is the baseline we compare Holo's deliberated verdict against.
     """
     categories = _scenario_categories(scenario)
     state     = _empty_state(scenario)
@@ -183,7 +227,7 @@ def run_solo(scenario, adapter, condition_name, force_max_turns=False):
     from provider_health import ProviderUnavailableError, HealthMonitor
     health = HealthMonitor(total_providers=1)
 
-    for turn_number in range(1, MAX_TURNS + 1):
+    for turn_number in range(1, SOLO_MAX_TURNS + 1):
         role = get_role_for_turn(turn_number)
         if role in used_personas:
             break  # persona library exhausted
@@ -215,6 +259,7 @@ def run_solo(scenario, adapter, condition_name, force_max_turns=False):
 
     turns_run = len(turn_log)
     final_verdict, allow_v, escalate_v = _majority_verdict(turn_log, coverage)
+    shadow_verdict, shadow_allow_v, shadow_escalate_v = _shadow_majority_excl_turn1(turn_log, coverage)
     flags = {cat: coverage[cat]["max_severity"] for cat in coverage}
     reasoning = (
         f"{'Converged after' if converged else 'Ran all'} {turns_run} turn(s). "
@@ -226,7 +271,14 @@ def run_solo(scenario, adapter, condition_name, force_max_turns=False):
                turns_run, final_verdict, flags, reasoning,
                turn_log[-1].get("findings", []) if turn_log else [],
                turn_log, _ms(start), in_tok, out_tok,
-               extra={"converged": converged, "deltas": deltas},
+               extra={
+                   "converged": converged,
+                   "deltas":    deltas,
+                   "shadow_verdict_excl_turn1":   shadow_verdict,
+                   "shadow_allow_excl_turn1":     shadow_allow_v,
+                   "shadow_escalate_excl_turn1":  shadow_escalate_v,
+                   "shadow_diverges":             shadow_verdict != final_verdict,
+               },
                run_health=health.run_health)
 
 # ---------------------------------------------------------------------------
@@ -252,14 +304,28 @@ def run_holo_loop(scenario, force_max_turns=False, no_memory=False, fixed_govern
         elapsed = _ms(start)
         flags   = {cat: result["coverage_matrix"][cat]["max_severity"]
                    for cat in result["coverage_matrix"]}
+        # Shadow majority: exclude Turn 1 from vote (observational, does not change decision).
+        # multi_provider=True mirrors the governor's confirmed-HIGH logic (2+ families required),
+        # preventing phantom shadow divergences when only one provider flagged HIGH.
+        th = result["turn_history"]
+        sh_verdict, sh_allow, sh_escalate = _shadow_majority_excl_turn1(
+            th, result["coverage_matrix"], multi_provider=True
+        )
         return _ok("holo_full", "openai+anthropic+google+governor",
                    result["turns_completed"], result["decision"], flags,
-                   result["decision_reason"], [], result["turn_history"], elapsed,
+                   result["decision_reason"], [], th, elapsed,
                    result["total_tokens"]["total"]["input"], result["total_tokens"]["total"]["output"],
-                   extra={"converged": result["converged"], "deltas": result["deltas"],
-                          "coverage_matrix": result["coverage_matrix"],
-                          "governor_briefs": result.get("governor_briefs", []),
-                          "threat_hypothesis": result.get("threat_hypothesis", "")},
+                   extra={
+                       "converged":        result["converged"],
+                       "deltas":           result["deltas"],
+                       "coverage_matrix":  result["coverage_matrix"],
+                       "governor_briefs":  result.get("governor_briefs", []),
+                       "threat_hypothesis": result.get("threat_hypothesis", ""),
+                       "shadow_verdict_excl_turn1":  sh_verdict,
+                       "shadow_allow_excl_turn1":    sh_allow,
+                       "shadow_escalate_excl_turn1": sh_escalate,
+                       "shadow_diverges":            sh_verdict != result["decision"],
+                   },
                    run_health=result.get("run_health", "clean"))
     except SystemUnavailableError as e:
         return _err("holo_full", "openai+anthropic+google+governor", e, _ms(start),
@@ -620,9 +686,12 @@ def _inline(c):
     if c["error"]:
         print(f"    -> ERROR: {c['error'][:80]}")
     else:
+        extra   = c.get("extra", {})
+        shadow  = "  shadow≠" + extra.get("shadow_verdict_excl_turn1","?") if extra.get("shadow_diverges") else ""
         print(f"    -> {_badge(c['verdict'])}  {c['turns_run']} turn(s)  "
               f"{c['elapsed_ms']}ms  "
-              f"{c['total_tokens'].get('input',0):,}+{c['total_tokens'].get('output',0):,} tokens")
+              f"{c['total_tokens'].get('input',0):,}+{c['total_tokens'].get('output',0):,} tokens"
+              f"{shadow}")
 
 def _run_rotation_test(scenario_path, n=5, save=False, verbose=False,
                        force_max_turns=False, no_memory=False, fixed_governor=None,
@@ -671,16 +740,35 @@ def _run_rotation_test(scenario_path, n=5, save=False, verbose=False,
         r = run_holo_loop(scenario, force_max_turns=force_max_turns,
                           no_memory=no_memory, fixed_governor=fixed_governor, seed=seed,
                           skip_providers=skip_providers)
-        v = r.get("verdict", "ERROR")
-        t = r.get("turns_run", "?")
-        correct = "✓" if v == expected else "✗"
-        print(f"    -> [{v}]  {t} turn(s)  seed={seed}  {correct}")
-        holo_results.append({"seed": seed, "verdict": v, "turns": t, "correct": v == expected})
+        v      = r.get("verdict", "ERROR")
+        t      = r.get("turns_run", "?")
+        extra  = r.get("extra", {})
+        briefs = extra.get("governor_briefs", [])
+        d8_fired      = any("D8_PERIOD_ELIGIBILITY" in b.get("brief", "") for b in briefs)
+        shadow_div    = extra.get("shadow_diverges", False)
+        shadow_v      = extra.get("shadow_verdict_excl_turn1", "?")
+        correct       = "✓" if v == expected else "✗"
+        d8_tag        = "  D8↑" if d8_fired else ""
+        shadow_tag    = f"  shadow≠{shadow_v}" if shadow_div else ""
+        print(f"    -> [{v}]  {t} turn(s)  seed={seed}  {correct}{d8_tag}{shadow_tag}")
+        holo_results.append({
+            "seed":         seed,
+            "verdict":      v,
+            "turns":        t,
+            "correct":      v == expected,
+            "d8_fired":     d8_fired,
+            "shadow_div":   shadow_div,
+            "shadow_v":     shadow_v,
+        })
 
     # --- Summary ---
-    correct_count = sum(1 for r in holo_results if r["correct"])
-    verdicts = [r["verdict"] for r in holo_results]
-    stable = len(set(verdicts)) == 1
+    correct_count   = sum(1 for r in holo_results if r["correct"])
+    verdicts        = [r["verdict"] for r in holo_results]
+    stable          = len(set(verdicts)) == 1
+    d8_fire_count   = sum(1 for r in holo_results if r["d8_fired"])
+    shadow_div_count= sum(1 for r in holo_results if r["shadow_div"])
+    # Shadow divergence breakdown: how many divergences are on incorrect verdicts
+    shadow_div_wrong= sum(1 for r in holo_results if r["shadow_div"] and not r["correct"])
 
     print(f"\n  {'='*62}")
     print(f"  ROTATION STABILITY REPORT")
@@ -691,6 +779,15 @@ def _run_rotation_test(scenario_path, n=5, save=False, verbose=False,
     print(f"  Holo stable : {'YES — same verdict across all seeds' if stable else 'NO — verdict varies by rotation'}")
     print(f"  Holo correct: {correct_count}/{n} seeds")
     print(f"  Verdicts    : {verdicts}")
+    print(f"  D8 fired    : {d8_fire_count}/{n}  (governor injected period-eligibility brief)")
+    print(f"  Shadow div  : {shadow_div_count}/{n}  (Turn 1 excl. changes outcome)")
+    if shadow_div_count:
+        shadow_wrong_pct = f"{shadow_div_wrong}/{shadow_div_count} divergences are on incorrect-verdict runs"
+        print(f"    -> {shadow_wrong_pct}")
+        for r in holo_results:
+            if r["shadow_div"]:
+                mark = "✗" if not r["correct"] else "✓"
+                print(f"       seed={r['seed']}  primary={r['verdict']}  shadow={r['shadow_v']}  {mark}")
     if stable and correct_count == n:
         print(f"\n  ROTATION-ROBUST: Holo catches this regardless of who plays which role.")
     elif correct_count > 0:

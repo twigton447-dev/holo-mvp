@@ -6,6 +6,7 @@
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
+**Patent:** U.S. Provisional Patent Application No. 63/987,899
 
 ---
 

@@ -294,9 +294,9 @@ Holo is not a smarter model; it is a smarter process. A standalone model is boun
 
 #### 5.1 Model-Agnostic, Hot-Swappable Design
 
-Holo treats frontier models as interchangeable components, not fixed infrastructure. The core orchestration and adjudication logic is completely decoupled from the underlying models it runs. The moment a frontier lab releases a more capable model, Holo integrates it immediately via API — no architectural rebuild required.
+The models inside Holo are plug-and-play. When a better one comes out, we swap it in. No redesign. No rebuilding the process around it.
 
-This creates a permanent asymmetry: bad actors operate on static, manually-updated offensive tooling. Holo's defensive layer automatically inherits the global peak of AI capability on any given day. The patrol route gets smarter without the architecture changing.
+This matters for two reasons. First, attackers can't profile the system if the models change. Second, Holo automatically gets smarter as the underlying models improve. The process stays the same. The intelligence keeps going up.
 
 #### 5.2 The Adversarial Council
 
@@ -355,8 +355,8 @@ The ultimate promise of enterprise AI is not faster queues for humans to watch; 
 * **"This is a vendor-built benchmark."** Yes. The same team designed the scenarios and engineered the system. To control for this bias, Holo uses identical frontier models inside its engine room as those tested in the solo baselines. Holo is not beating old or weak models; it is proving that orchestrating those exact same models inside an adversarial framework yields a completely different decision outcome.
 * **"The sample size is too small."** Correct. Three completed domains do not provide a universal census of all AI behavior. They do, however, prove a highly meaningful technical reality: realistic, commercially significant failure seams exist at the action boundary today, and an orchestrated layer can isolate them where standalone systems fail.
 * **"Models are getting smarter. The problem will fix itself."** Model updates are symmetric — advancements are equally available to adversaries. Furthermore, increased model intelligence does not fix structural alignment gaps like *Procedural Obedience*. A more capable model simply processes a flawed operational frame with greater efficiency.
-* **"Isn't this just a bundle of models voting?"** No. The architecture is model-agnostic, but it is not a plurality vote. Holo uses frontier models as adversarial analysts inside a structured adjudication protocol. The important properties are role separation, evidentiary discipline, randomized assignment, and a constrained Governor layer that issues verdicts from structured adjudication state — not from the confidence of the last model to speak. A model that votes to escalate but cannot cite a specific documentary finding is discounted by the Governor.
-* **"Is this Mixture of Experts?"** No. Mixture of Experts is a model-internal routing architecture used to select or weight expert subnetworks during generation. Holo operates outside the agent and outside the model entirely. It does not generate the action; it adjudicates whether a proposed action should execute. The council is not used to optimize an answer — it is used to expose disagreement, missing evidence, and semantic contradictions before an irreversible action proceeds. The distinction is simple: Mixture of Experts helps produce an output. Holo judges whether an output or action should be allowed to execute.
+* **"Isn't this just a bundle of models voting?"** No. A majority vote is only as good as whoever is voting. Holo assigns each model a specific role and requires any escalation to be backed by something specific in the documents. A model that says "something feels off" without pointing to a real finding gets discounted. The Governor decides based on what was actually found, not who was loudest.
+* **"Is this Mixture of Experts?"** No. Mixture of Experts is something that happens inside a single model — it routes work between internal subnetworks to generate a response. Holo is separate from the model entirely. It doesn't generate anything. It looks at a proposed action and decides whether it should go through. That's a fundamentally different job.
 
 ---
 

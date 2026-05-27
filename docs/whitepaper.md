@@ -2,7 +2,7 @@
 
 ### WHY SOME HIGH-CONSEQUENCE AI ACTIONS PASS SURFACE CHECKS BUT STILL REQUIRE ADVERSARIAL ADJUDICATION
 
-**Holo Engine · Working Paper · Version 4.01 · May 26, 2026**
+**Holo Engine · Working Paper · Version 4.02 · May 26, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -404,13 +404,27 @@ The development roadmap currently covers eight core enterprise action boundaries
 | **02. Agentic Commerce** | **Complete** |
 | **03. IT Access Provisioning** | In Design |
 | **04. Legal Contract Execution** | In Design |
-| **05. Regulated Procurement** | In Design |
+| **05. Regulated Procurement** | Active |
 | **06. HR and Workforce Actions** | In Design |
 | **07. Infrastructure and Configuration** | In Design |
 | **08. Financial Reporting and Compliance** | **Complete** |
+
+### Domain 5: Regulated Procurement
+
+Holo is currently being extended into regulated procurement workflows, where the action boundary is often hidden inside the structure of the transaction.
+
+In these workflows, the risky question is not always "Is this purchase order valid?" It is often more precise: "Which part of this procurement action is actually executable right now?"
+
+That distinction matters. A purchase order may contain current release quantities, forecast quantities, held line items, pending quality reviews, and future capacity planning in the same packet. A model that treats the whole document as one executable action can make both kinds of mistakes. It may allow a release that should stop, or it may escalate a safe action because a non-executable future line looks risky.
+
+This domain is useful because it forces Holo to test a harder question: not just whether the evidence contains a risk, but whether that risk attaches to the action being approved at the boundary.
+
+The early work in this domain is being used to harden the Governor around executable-scope reasoning. Before Holo escalates or allows a regulated procurement action, the system must first identify what is actually being released, shipped, committed, or authorized.
+
+This is the same pattern Holo looks for across domains. The facts may change, but the failure shape repeats: the model sees a risk, but must still decide whether that risk belongs to the action at hand.
 
 Independent validation of all solo baseline metrics is actively encouraged. Payload documentation and open-source validation scripts are available at holoengine.ai/payloads.
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 4.01 · May 26, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 4.02 · May 26, 2026*

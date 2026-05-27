@@ -2,7 +2,7 @@
 
 ### WHY SOME HIGH-CONSEQUENCE AI ACTIONS PASS SURFACE CHECKS BUT STILL REQUIRE ADVERSARIAL ADJUDICATION
 
-**Holo Engine · Working Paper · Version 4.04 · May 27, 2026**
+**Holo Engine · Working Paper · Version 4.05 · May 27, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -370,7 +370,7 @@ The action boundary does not govern a real-time consumer chat interface. A corpo
 
 Financially, a full Holo review costs between **$0.30 and $1.00** in API compute per transaction.
 
-This creates a highly asymmetric value proposition: for the price of a cup of coffee, an enterprise applies rigorous, institutional-grade cross-examination to a multi-million dollar transaction. Saving pennies on API tokens while exposing an organization to catastrophic operational liability is a severe miscalibration. The direct and indirect costs of a single broken ledger close or fraud event dwarf the lifetime operational cost of the trust layer. At the action boundary, verification is cheap; mistakes are existential.
+At $0.30 to $1.00 per transaction, the economics are not close. Saving pennies on API tokens while exposing an organization to catastrophic operational liability is a severe miscalibration. The direct and indirect costs of a single broken ledger close or fraud event dwarf the lifetime operational cost of the trust layer. At the action boundary, verification is cheap; mistakes are existential.
 
 ---
 
@@ -439,4 +439,4 @@ Independent validation of all solo baseline metrics is actively encouraged. Payl
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 4.04 · May 27, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 4.05 · May 27, 2026*

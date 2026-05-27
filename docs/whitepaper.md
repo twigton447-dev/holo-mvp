@@ -2,7 +2,7 @@
 
 ### WHY SOME HIGH-CONSEQUENCE AI ACTIONS PASS SURFACE CHECKS BUT STILL REQUIRE ADVERSARIAL ADJUDICATION
 
-**Holo Engine · Working Paper · Version 4.03 · May 27, 2026**
+**Holo Engine · Working Paper · Version 4.04 · May 27, 2026**
 
 **Author:** Taylor Wigton, Founder, Holo Engine · hello@holoengine.ai  
 **Repository:** holoengine.ai  
@@ -181,9 +181,19 @@ To prevent cherry-picked data, a test run is only published if it passes six str
 
 Holo does not enter a domain by assuming the system already knows the right rules.
 
-It enters by testing where the rules break.
+It enters to find out what the rules should be.
 
-For each domain, we build paired cases. One case looks clean but should stop. Another looks risky but should pass. This matters because a trust layer has to do both jobs. It has to catch hidden failure without becoming a system that escalates everything unfamiliar.
+This is not about teaching the Governor what to do in any particular situation. That would be impossible. Real operations are too varied, too ambiguous, and too strange to pre-load as cases. The goal is something different: to develop procedures the Governor can apply when it encounters certain conditions within a domain. The same way a flight manual gives pilots a tested response for when certain things happen. The manual does not guarantee the situation will unfold exactly as described. It means there is a calibrated procedure instead of improvisation.
+
+The only way to write those procedures is to run without them first.
+
+We start with no rules. The Governor responds from whatever logic it already has. We watch where it goes wrong and what it got right. That teaches us something. We add some rules. The Governor's new behavior teaches us more. We modify. We refine. Once the same results appear consistently, those rules get set.
+
+No rules, then some rules, then better rules, then law.
+
+The learning goes both ways. We learn from the Governor's failures. The Governor gets new boundary checks from what we learn. We teach what we observed. The Governor's responses show us where the rules are still incomplete. The procedures that survive this cycle are the ones that have actually been tested under pressure.
+
+For each domain, we build paired cases. One case looks clean but should stop. Another looks risky but should pass. A trust layer has to do both jobs. It has to catch hidden failure without becoming a system that escalates everything unfamiliar.
 
 Those tests are not just demos. They are a wind tunnel.
 
@@ -199,7 +209,7 @@ This is why design partners matter. Real workflows expose failure modes that syn
 
 Holo's job is to find those moments before agents act on them.
 
-Over time, this creates more than a benchmark. It creates a growing map of where AI judgment breaks at the moment of action, and a hardened set of rules for deciding what should be allowed, what should be escalated, and why.
+Over time, this creates more than a benchmark. It creates a growing map of where AI judgment breaks at the moment of action, and a hardened set of procedures for deciding what should be allowed, what should be escalated, and why.
 
 ### 2.7 THE SOLO BASELINES ARE THE REAL ALTERNATIVES
 
@@ -429,4 +439,4 @@ Independent validation of all solo baseline metrics is actively encouraged. Payl
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 4.03 · May 27, 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 4.04 · May 27, 2026*

@@ -48,6 +48,7 @@ from llm_adapters import (
 )
 from context_governor import ContextGovernor
 from scenario_templates import get_template
+from reason_scorer import score_run as _score_run
 
 SEVERITY_RANK = {"NONE": 0, "LOW": 1, "MEDIUM": 2, "HIGH": 3}
 
@@ -118,6 +119,14 @@ def _err(condition, model, exc, elapsed, run_health="contaminated"):
             "reasoning": str(exc), "findings": [], "turn_log": [],
             "elapsed_ms": elapsed, "total_tokens": {"input": 0, "output": 0},
             "run_health": run_health, "error": str(exc)}
+
+def _attach_scoring(cond, scenario, action_type, category_order, run_mode):
+    """Score a condition result in-place; returns the scoring dict."""
+    if cond is None or cond.get("error"):
+        return None
+    scoring = _score_run(cond, scenario, action_type, category_order, run_mode)
+    cond["scoring"] = scoring
+    return scoring
 
 def _sf(cond, cat):
     if cond.get("error"):
@@ -409,13 +418,22 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
             cond3 = run_solo(scenario, google_adapter, "solo_google", force_max_turns=force_max_turns)
             _inline(cond3)
 
+    # ---- Reason-correctness scoring ------------------------------------
+    action_type    = scenario.get("action", {}).get("type", "invoice_payment")
+    category_order = _scenario_categories(scenario)
+    _attach_scoring(cond4, scenario, action_type, category_order, "holo_orchestrated")
+    _attach_scoring(cond1, scenario, action_type, category_order, "domain_guided_solo")
+    _attach_scoring(cond2, scenario, action_type, category_order, "domain_guided_solo")
+    _attach_scoring(cond3, scenario, action_type, category_order, "domain_guided_solo")
+
     result = {
         "benchmark_id":       f"bench_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
         "scenario_name":      scenario_name,
         "expected_verdict":   expected,
         "max_turns":          MAX_TURNS,
         "force_max_turns":    force_max_turns,
-        "categories":         _scenario_categories(scenario),
+        "categories":         category_order,
+        "action_type":        action_type,
         "models": {
             "openai":    openai_adapter.model_id,
             "anthropic": getattr(anthropic_adapter, "model_id", None) if not quick else None,
@@ -472,14 +490,23 @@ def _print_report(r):
         ("4. HOLO full architecture",                   c["holo_full"],      "holo_full"),
     ]
 
-    print(f"  {'Condition':<45} {'Turns':>5}  {'Verdict':<11}  {'Correct?'}")
-    print(f"  {'-'*72}")
+    def _yn(v):
+        if v is True:  return "YES ✓"
+        if v is False: return "NO  ✗"
+        return "n/a   "
+
+    print(f"  {'Condition':<45} {'Turns':>5}  {'Verdict':<11}  {'V-Ok':>5}  {'R-Ok':>5}  {'Clean':>5}  Primary Reason")
+    print(f"  {'-'*110}")
     for label, cond, _ in rows:
         if cond is None:
-            print(f"  {label:<45} {'—':>5}  {'—':<11}  —")
+            print(f"  {label:<45} {'—':>5}  {'—':<11}  {'—':>5}  {'—':>5}  {'—':>5}")
             continue
-        correct = "YES ✓" if cond["verdict"] == expected else "NO  ✗"
-        print(f"  {label:<45} {cond['turns_run']:>5}  {_badge(cond['verdict']):<11}  {correct}")
+        sc  = cond.get("scoring") or {}
+        v_ok   = _yn(sc.get("verdict_correct"))
+        r_ok   = _yn(sc.get("reason_correct"))
+        cp     = _yn(sc.get("clean_pass"))
+        pri    = sc.get("primary_reason_label") or "—"
+        print(f"  {label:<45} {cond['turns_run']:>5}  {_badge(cond['verdict']):<11}  {v_ok:>5}  {r_ok:>5}  {cp:>5}  {pri}")
 
     print(f"\n  RISK PROFILE (max severity per category across all turns):\n")
     categories = r.get("categories", BEC_CATEGORIES)
@@ -511,6 +538,21 @@ def _print_report(r):
             for f in t.get("findings", []):
                 if f.get("severity") == "HIGH":
                     print(f"             HIGH -> {f.get('category')}: {str(f.get('evidence',''))[:70]}")
+
+    # Reason-correctness notes
+    any_reason_issue = False
+    for label, cond, _ in rows:
+        if cond is None: continue
+        sc = cond.get("scoring") or {}
+        notes = sc.get("reason_correctness_notes", [])
+        if notes and sc.get("reason_correct") is False:
+            if not any_reason_issue:
+                print(f"\n  REASON-CORRECTNESS NOTES:")
+                any_reason_issue = True
+            for n in notes:
+                print(f"    [{label}] {n}")
+    if any_reason_issue:
+        print()
 
     # Discrepancy analysis
     print(f"\n  DISCREPANCY ANALYSIS:\n")
@@ -549,6 +591,21 @@ def _print_report(r):
         if missed: print(f"  Solo missed: {', '.join(missed)}")
         if caught: print(f"  Solo caught: {', '.join(caught)}")
         print(f"  Holo: {'correct ✓' if holo_right else 'INCORRECT — check scenario'}")
+
+    # Clean-pass summary (only when reason constraints exist)
+    has_reason_constraints = bool(
+        (c["holo_full"] or {}).get("scoring", {}).get("reason_correct") is not None
+        if c.get("holo_full") else False
+    )
+    if has_reason_constraints:
+        print(f"\n  CLEAN PASS SUMMARY (verdict-correct AND reason-correct):")
+        for label, cond, _ in rows:
+            if cond is None: continue
+            sc = cond.get("scoring") or {}
+            cp = sc.get("clean_pass")
+            mark = "✓ CLEAN" if cp else ("✗ FAIL " if cp is False else "— N/A ")
+            pri = sc.get("primary_reason_label") or "—"
+            print(f"    {label:<45} {mark}  [{pri}]")
 
     print(f"\n  TOKEN COST:\n")
     print(f"  {'Condition':<45} {'Input':>8}  {'Output':>8}")

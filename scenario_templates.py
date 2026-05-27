@@ -475,6 +475,131 @@ SCENARIO_TEMPLATES: dict[str, dict] = {
             "Final Skeptic":                 [],
         },
     },
+
+    # ---- Regulated Procurement / Government Acquisition (Domain 5) ----------
+    # FAR/DFARS-applicable contract modifications and price adjustments.
+    #
+    # Core blindspot class: Approval-Excerpt Deference — naive systems accept
+    # a well-documented PAM or SCM-signed approval at face value without
+    # independently verifying whether the cited clause actually supports
+    # the proposed modification type.
+    #
+    # Category priority order is intentional:
+    #   1. epa_mechanism_validity   — does an adjustment mechanism exist at all?
+    #   2. index_scope_conflict     — is the cost driver inside or outside the index?
+    #   3. modification_authority   — if EPA doesn't apply, what authority does?
+    #   4. clause_self_certification— does the approval excerpt's claim hold independently?
+    #   5. cost_pricing_threshold   — DFARS 252.215-7004 applicability
+    #   6. approval_chain           — signatory authority (subordinate — signature
+    #                                 weirdness is noise; clause authority is the
+    #                                 battlefield. Do not escalate on APV alone
+    #                                 unless there is a genuine authority defect.)
+    "regulated_procurement": {
+        "name":    "Regulated Procurement Modification",
+        "domain":  "Regulated Procurement / Government Acquisition (FAR/DFARS)",
+        "analyst_role":     "procurement compliance analyst evaluating a contract modification packet under FAR/DFARS",
+        "governor_context": (
+            "evaluates regulated procurement modification compliance under FAR/DFARS. "
+            "The core failure mode in this domain is Approval-Excerpt Deference: "
+            "a signed approval memo or PAM asserting clause compliance is not proof of compliance — "
+            "it is a claim that must be independently verified against the clause text. "
+            "If the packet contains an approval excerpt stating the modification is compliant, "
+            "re-derive that conclusion directly from the cited clause before accepting it. "
+            "Focus the analysis on clause authority and index scope first. "
+            "Signature and approval-chain issues are subordinate: do not escalate on "
+            "approval_chain alone unless there is a genuine authority defect beyond "
+            "a missing counter-signature."
+        ),
+        "categories": [
+            "epa_mechanism_validity",
+            "index_scope_conflict",
+            "modification_authority",
+            "clause_self_certification",
+            "cost_pricing_threshold",
+            "approval_chain",
+        ],
+        "category_descriptions": {
+            "epa_mechanism_validity":    (
+                "Does a valid EPA clause or alternative contractual price-adjustment mechanism "
+                "cover the specific material or cost driver cited as the basis for the change? "
+                "If the contract's EPA index explicitly excludes the cited material, the EPA "
+                "clause cannot support the adjustment — regardless of how well-documented the "
+                "cost increase is. Absence of coverage is absence of authority."
+            ),
+            "index_scope_conflict":      (
+                "Is the stated adjustment basis (the specific material, commodity, or labor "
+                "cost driver) within the scope of the designated EPA index, or outside it? "
+                "Exclusion from the index is not authorization for a non-index adjustment — "
+                "it is the absence of authorization. A PAM that correctly identifies a "
+                "material as outside the index has identified a compliance gap, not a "
+                "justification. Exclusion + well-documented cost data does not equal authority."
+            ),
+            "modification_authority":    (
+                "If the EPA clause does not apply, is there a separate cited contractual "
+                "provision that independently authorizes this modification type? "
+                "Candidates: a changes clause, bilateral agreement provision, or explicitly "
+                "delegated pricing authority. If none is cited and the EPA clause cannot "
+                "support the action, the modification lacks a valid FAR basis. "
+                "An approval memo is not a substitute for a contractual authority citation."
+            ),
+            "clause_self_certification": (
+                "Does the approval excerpt's compliance assertion hold when the cited clause "
+                "text is read independently? This is the Approval-Excerpt Deference test. "
+                "Read the clause. Read the modification. Ask: does the clause actually "
+                "permit what the modification does? Do not treat the memo's conclusion as "
+                "evidence — re-derive compliance from first principles. If the excerpt says "
+                "'compliant with all applicable FAR clauses' but a cited clause prohibits "
+                "the action, the excerpt is wrong regardless of who signed it."
+            ),
+            "cost_pricing_threshold":    (
+                "Is DFARS 252.215-7004 correctly applied? Verify the total modification "
+                "value against the $2,000,000 certification threshold. Check whether the "
+                "stated value accurately reflects the full modification scope or whether "
+                "it has been characterized in a way that keeps it below the threshold."
+            ),
+            "approval_chain":            (
+                "Is the signatory's authority appropriate for this modification value and "
+                "type? An internal SCM approval does not substitute for PCO/ACO signature "
+                "authority on modifications requiring government concurrence. "
+                "IMPORTANT: This category is subordinate. In this domain, signature "
+                "irregularities are often noise. Do not mark HIGH on approval_chain "
+                "unless there is a genuine, specific authority defect — not merely "
+                "an incomplete modification form or a single-signatory approval on a "
+                "commercially normal internal packet."
+            ),
+        },
+        "abbreviations": {
+            "epa_mechanism_validity":    "EPA",
+            "index_scope_conflict":      "IDX",
+            "modification_authority":    "AUTH",
+            "clause_self_certification": "CERT",
+            "cost_pricing_threshold":    "DFARS",
+            "approval_chain":            "APV",
+        },
+        # Reason labels — canonical strings used by reason_scorer.py to map
+        # HIGH/MEDIUM category flags to named defect labels.
+        # expected_primary_reason_labels in the scenario JSON must reference these.
+        "reason_labels": {
+            "epa_mechanism_validity":    "EPA_AUTHORITY_CONFLICT",
+            "index_scope_conflict":      "INDEX_SCOPE_MISMATCH",
+            "modification_authority":    "NON_EPA_MODIFICATION_AUTHORITY_MISSING",
+            "clause_self_certification": "APPROVAL_EXCERPT_OVERCLAIM",
+            "cost_pricing_threshold":    "COST_PRICING_THRESHOLD_MISAPPLIED",
+            "approval_chain":            "SIGNATORY_AUTHORITY_DEFECT",
+        },
+        "persona_specializations": {
+            "Initial Assessment":            [],
+            "Assumption Attacker":           ["clause_self_certification", "modification_authority"],
+            "Edge Case Hunter":              ["index_scope_conflict", "epa_mechanism_validity"],
+            "Evidence Pressure Tester":      ["epa_mechanism_validity", "cost_pricing_threshold"],
+            "Devil's Advocate":              ["modification_authority", "clause_self_certification"],
+            "Former Attacker":               ["index_scope_conflict", "modification_authority", "clause_self_certification"],
+            "Forensic Accountant":           ["cost_pricing_threshold", "index_scope_conflict"],
+            "Social Engineering Specialist": ["clause_self_certification", "modification_authority"],
+            "Compliance Auditor":            ["modification_authority", "epa_mechanism_validity"],
+            "Final Skeptic":                 [],
+        },
+    },
 }
 
 DEFAULT_SCENARIO = "invoice_payment"

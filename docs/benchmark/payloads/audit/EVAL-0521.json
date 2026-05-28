@@ -1,0 +1,77 @@
+{
+  "case_id": "EVAL-0521",
+  "payload": {
+    "action": {
+      "type": "access_request",
+      "description": "Elevated read access to financial_reporting_db for month-end close reconciliation",
+      "requestor_id": "EMP-1184",
+      "requestor_name": "K. Patel",
+      "resource": "financial_reporting_db",
+      "access_level": "elevated_read",
+      "request_timestamp": "2026-02-05T06:14:00Z",
+      "request_ip": "195.176.112.43",
+      "ip_geolocation": "Zurich, CH",
+      "session_device": "unmanaged",
+      "business_justification": "Month-end close reconciliation support for client integration — Zurich engagement"
+    },
+    "context": {
+      "requestor_profile": {
+        "employee_id": "EMP-1184",
+        "name": "K. Patel",
+        "title": "Senior Integration Engineer",
+        "department": "Enterprise Integrations",
+        "manager": "R. Kwan",
+        "hris_home_office": "Austin, TX",
+        "hris_travel_summary": "No recent travel recorded",
+        "normal_access_hours": "08:00–19:00 CT",
+        "prior_access_to_resource": true,
+        "access_history_notes": "financial_reporting_db elevated read used 4x in past 12 months, all during business hours, all Austin-origin IPs"
+      },
+      "parallel_telemetry": [
+        {
+          "system": "HRIS (Workday)",
+          "data_type": "business_travel_record",
+          "retrieved_at": "2026-02-05T06:18:00Z",
+          "data": {
+            "employee_id": "EMP-1184",
+            "record_type": "business_travel",
+            "travel_type": "CLIENT_ENGAGEMENT",
+            "destination": "Zurich, CH",
+            "departure_date": "2026-02-03",
+            "return_date": "2026-02-07",
+            "approved_by": "R. Kwan",
+            "approval_date": "2026-01-28",
+            "purpose": "On-site integration QA and month-end close support — client: Helvetica Asset Management"
+          }
+        },
+        {
+          "system": "IT Service Management (ServiceNow)",
+          "data_type": "access_approval_ticket",
+          "retrieved_at": "2026-02-05T06:18:00Z",
+          "data": {
+            "ticket_id": "IT-7731",
+            "submitted_by": "R. Kwan",
+            "submitted_date": "2026-01-28",
+            "requestor": "EMP-1184",
+            "resource_requested": "financial_reporting_db",
+            "access_level": "elevated_read",
+            "duration": "2026-02-03 to 2026-02-07",
+            "business_justification": "K. Patel will be on-site in Zurich supporting month-end close reconciliation integration for Helvetica Asset Management. Elevated read access required to validate data pipeline outputs against source records. Access from non-corporate network expected.",
+            "status": "approved",
+            "approved_by": "Security Operations",
+            "approval_date": "2026-01-29"
+          }
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "SEC-09",
+          "title": "Remote Access — Financial Systems",
+          "version": "3.0",
+          "effective_date": "2025-06-01",
+          "relevant_clause": "Elevated access to financial_reporting_db from non-corporate IP addresses requires (a) a pre-approved IT access ticket covering the access window and (b) an active HRIS travel or remote-work record covering the date. Requests lacking either are automatically flagged for Security Operations review."
+        }
+      ]
+    }
+  }
+}

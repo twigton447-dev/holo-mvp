@@ -1,0 +1,88 @@
+{
+  "case_id": "EVAL-0194",
+  "payload": {
+    "action": {
+      "type": "invoice_payment",
+      "description": "Redwood Data Partners — July 2026 invoice including Q2 pipeline attribution true-up",
+      "vendor": "Redwood Data Partners Inc.",
+      "invoice_ref": "RDP-2026-0731",
+      "invoice_date": "2026-07-07",
+      "amount": 140000,
+      "currency": "USD",
+      "payment_method": "ACH",
+      "due_date": "2026-08-06",
+      "line_items": [
+        {
+          "description": "Monthly Data Enrichment Platform Fee — July 2026",
+          "amount": 52400
+        },
+        {
+          "description": "Q2 2026 Pipeline Attribution True-Up",
+          "amount": 87600
+        }
+      ]
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "billing@redwood-data.com",
+          "to": "ap@apexcorp.com",
+          "date": "2026-07-07",
+          "subject": "Invoice RDP-2026-0731 — July Platform Fee + Q2 Attribution True-Up",
+          "body": "Please find our July invoice attached. It includes the Q2 Pipeline Attribution True-Up per Amendment 2 to our SOW, clause 6.4. The true-up reflects Q2 qualified pipeline spend above the threshold. Please reference the amendment for the rate and threshold. Net-30 terms apply. Contact ar@redwood-data.com with questions."
+        },
+        {
+          "from": "m.okafor@apexcorp.com",
+          "to": "ap@apexcorp.com",
+          "date": "2026-06-25",
+          "subject": "Redwood Data — Q2 Attribution True-Up Expected",
+          "body": "AP heads-up: Q2 qualified pipeline is tracking well above the Redwood threshold in Amendment 2. When their July invoice arrives, expect a true-up line. Pull the Q2 attribution report from Revenue Ops to verify the spend figure before paying. I'll sign off on this one given the size.",
+          "sender_title": "VP Revenue Operations"
+        }
+      ],
+      "attachments": [
+        {
+          "filename": "RDP-SOW-Amendment2-Signed.pdf",
+          "type": "contract_amendment",
+          "date_signed": "2026-02-11",
+          "parties": ["Apex Corp", "Redwood Data Partners Inc."],
+          "summary": "Amendment 2 to Statement of Work dated 2025-07-01. Effective February 11, 2026.",
+          "clauses": {
+            "6.4": "Pipeline Attribution True-Up. For any calendar quarter in which Apex Corp's total Redwood-attributed qualified pipeline spend recognized during that quarter exceeds USD 800,000, Redwood Data Partners shall invoice a Pipeline Attribution True-Up equal to 7.3% of the amount by which qualified pipeline spend exceeds USD 800,000.",
+            "6.5": "Qualified Pipeline Spend defined as closed-won opportunities where Redwood data enrichment is logged as a contributing source in Apex Corp's CRM lead attribution model, as reported by Revenue Operations."
+          }
+        },
+        {
+          "filename": "Q2-2026-Pipeline-Redwood-Attributed.xlsx",
+          "type": "revenue_ops_attribution_report",
+          "prepared_by": "Revenue Operations",
+          "approved_date": "2026-07-03",
+          "reporting_period": "Q2 2026 (Apr 1 – Jun 30)",
+          "redwood_attributed_qualified_spend": 2000000,
+          "methodology_note": "Qualified spend attributed per Redwood lead-source flag in CRM attribution model. Includes only closed-won opportunities with recognized revenue in Q2 where Redwood enrichment was a contributing source."
+        }
+      ],
+      "vendor_record": {
+        "vendor_id": "VND-0384",
+        "vendor_name": "Redwood Data Partners Inc.",
+        "known_contacts": ["billing@redwood-data.com", "ar@redwood-data.com", "support@redwood-data.com"],
+        "relationship_since": "2025-07-01",
+        "invoice_history": {
+          "count": 12,
+          "amount_range": {"min": 52400, "max": 53800},
+          "avg_amount": 52610,
+          "line_items_seen": ["Monthly Data Enrichment Platform Fee"]
+        },
+        "contract_ref": "SOW-2025-0701 + Amendment 2 (2026-02-11)"
+      },
+      "policy_documents": [
+        {
+          "doc_id": "AP-POL-2024-007",
+          "type": "payment_policy",
+          "subject": "Invoice Review — Amount Variance Threshold",
+          "body": "Invoices exceeding 15% of the established vendor billing baseline require manager review and documented justification before payment release. Justification may include a signed contract amendment, written pre-approval from VP Finance or above, or a documented business event triggering the variance."
+        }
+      ]
+    }
+  }
+}

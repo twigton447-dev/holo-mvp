@@ -8,7 +8,7 @@ Last updated: 2026-05-28
 |---|---|---|---|---|---|---|
 | HAB-003_v2 | EVAL-0521 | IAM | ALLOW | Gemini | Grok | 2026-05-28 |
 | HAB-004_v1 | EVAL-0194 | AP | ALLOW | Gemini | Grok | 2026-05-28 |
-| HAB-001_v5 | EVAL-0463 | BEC | ALLOW | Gemini | — | 2026-05-28 |
+| HAB-001_v5 | EVAL-0463 | BEC | ALLOW | Gemini | unspecified | 2026-05-28 |
 
 Suite count: 3 of 35
 
@@ -35,6 +35,12 @@ None currently.
 | HAB ID | EVAL ID | Domain | Notes |
 |---|---|---|---|
 | HAB-002_v2 | EVAL-0748 | AP | Narrative-resolution failure test — framing supports ALLOW but arithmetic produces $108,650; invoice claims $108,700 |
+
+## Process Rules
+
+- When reporting audit results, always name both models used (e.g., "Pass 1: Gemini, Pass 2: GPT-4o"). Without model names, the Pass 2 column will be logged as "unspecified."
+- Update SUITE_STATUS.md and commit on every state change: pass, fail, revision, suite entry.
+- Do not advance a payload to "In Audit" or "Confirmed" without a corresponding EVAL-XXXX audit-stripped file on disk.
 
 ## EVAL ID Registry
 

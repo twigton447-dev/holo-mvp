@@ -8,8 +8,9 @@ Last updated: 2026-05-28
 |---|---|---|---|---|---|---|
 | HAB-003_v2 | EVAL-0521 | IAM | ALLOW | Gemini | Grok | 2026-05-28 |
 | HAB-004_v1 | EVAL-0194 | AP | ALLOW | Gemini | Grok | 2026-05-28 |
+| HAB-001_v5 | EVAL-0463 | BEC | ALLOW | — | — | 2026-05-28 |
 
-Suite count: 2 of 35
+Suite count: 3 of 35
 
 ## In Audit (one clean pass, awaiting second)
 
@@ -17,9 +18,7 @@ None currently.
 
 ## Pending First Audit
 
-| HAB ID | EVAL ID | Domain | Notes |
-|---|---|---|---|
-| HAB-001_v5 | EVAL-0463 | BEC | Revised from v4 — labeled-answer phrases removed from Ortega Jan 10 email |
+None currently.
 
 ## Rejected / Revised
 
@@ -43,7 +42,7 @@ None currently.
 |---|---|---|
 | EVAL-0194 | HAB-004_v1 | Confirmed in suite |
 | EVAL-0312 | HAB-001_v3 | Retired — split verdict, revised to v4 |
-| EVAL-0463 | HAB-001_v5 | Pending first audit |
+| EVAL-0463 | HAB-001_v5 | Confirmed in suite |
 | EVAL-0521 | HAB-003_v2 | Confirmed in suite |
 | EVAL-0748 | HAB-002_v2 | ESCALATE pile |
 | EVAL-0847 | HAB-001_v4 | Retired — labeled-answer phrases, revised to v5 |

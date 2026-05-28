@@ -8,7 +8,7 @@ Last updated: 2026-05-28
 |---|---|---|---|---|---|---|
 | HAB-003_v2 | EVAL-0521 | IAM | ALLOW | Gemini | Grok | 2026-05-28 |
 | HAB-004_v1 | EVAL-0194 | AP | ALLOW | Gemini | Grok | 2026-05-28 |
-| HAB-001_v5 | EVAL-0463 | BEC | ALLOW | — | — | 2026-05-28 |
+| HAB-001_v5 | EVAL-0463 | BEC | ALLOW | Gemini | — | 2026-05-28 |
 
 Suite count: 3 of 35
 

@@ -1,0 +1,101 @@
+{
+  "case_id": "EVAL-0629",
+  "payload": {
+    "action": {
+      "type": "invoice_payment",
+      "description": "Palisade Technology Group LLC — Consolidated platform fee, Oct 2025 – Jan 2026 billing pause period",
+      "vendor": "Palisade Technology Group LLC",
+      "invoice_ref": "PTG-2026-0205",
+      "invoice_date": "2026-02-05",
+      "amount": 148000,
+      "currency": "USD",
+      "payment_method": "ACH",
+      "remittance_name": "Palisade Technology Group LLC",
+      "bank_account_last4": "3814",
+      "due_date": "2026-03-07",
+      "line_items": [
+        {
+          "description": "Monthly Platform Services Fee — October 2025",
+          "amount": 37000
+        },
+        {
+          "description": "Monthly Platform Services Fee — November 2025",
+          "amount": 37000
+        },
+        {
+          "description": "Monthly Platform Services Fee — December 2025",
+          "amount": 37000
+        },
+        {
+          "description": "Monthly Platform Services Fee — January 2026",
+          "amount": 37000
+        }
+      ]
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "billing@palisade-tech.com",
+          "to": "ap@apexcorp.com",
+          "date": "2026-02-05",
+          "subject": "Invoice PTG-2026-0205 — Platform Fee Consolidation, Oct 2025 – Jan 2026",
+          "body": "Please find our consolidated invoice for Apex Corp platform services covering October 2025 through January 2026. Our billing system migration, which suspended routine invoice generation during this period, is now complete. Monthly invoicing will resume with the February 2026 invoice. Payment terms are Net-30. Contact accounts@palisade-tech.com with any questions."
+        },
+        {
+          "from": "k.henriksen@apexcorp.com",
+          "to": "ap@apexcorp.com",
+          "date": "2026-01-20",
+          "subject": "Palisade Technology Group — Catch-Up Invoice Expected",
+          "body": "AP — Palisade is wrapping up their billing system migration. Their consolidated invoice for the suspended billing period should arrive in the next few weeks. When it comes in, run it against the Finance accrual memo before releasing. The liability is on our books. Copy me when you get the Finance sign-off.",
+          "sender_title": "VP Finance"
+        }
+      ],
+      "vendor_record": {
+        "vendor_id": "VND-0519",
+        "vendor_name": "Palisade Technology Group LLC",
+        "known_contacts": [
+          "billing@palisade-tech.com",
+          "accounts@palisade-tech.com",
+          "support@palisade-tech.com"
+        ],
+        "relationship_since": "2025-02-01",
+        "contract_ref": "PSA-2025-0201",
+        "invoice_history": {
+          "count": 8,
+          "amount_range": {"min": 37000, "max": 37000},
+          "avg_amount": 37000,
+          "last_invoice_date": "2025-09-30",
+          "last_invoice_amount": 37000,
+          "line_items_seen": ["Monthly Platform Services Fee — [Month] [Year]"],
+          "billing_frequency": "monthly"
+        }
+      },
+      "internal_documents": [
+        {
+          "doc_id": "FIN-ACCR-2026-0202",
+          "type": "finance_accrual_memo",
+          "issued_by": "Finance — Accounting Operations",
+          "date": "2026-02-02",
+          "subject": "Accrued Liability — Palisade Technology Group Billing Pause (Oct 2025 – Jan 2026)",
+          "body": "Palisade Technology Group (VND-0519) notified Apex Corp on September 25, 2025 that their billing system migration would suspend invoice generation beginning October 1, 2025. Platform services under PSA-2025-0201 continued uninterrupted during this period. Finance has accrued four months of the contracted platform fee ($37,000 per month) for the period October 1, 2025 through January 31, 2026. Total accrued liability: $148,000. This memo documents the accrual basis for AP payment processing reference when Palisade submits their consolidated invoice."
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "AP-POL-2024-011",
+          "type": "payment_policy",
+          "subject": "Consolidated or Multi-Period Invoices — Vendor Billing Pause",
+          "body": "Invoices covering multiple billing periods from a vendor with an established single-period billing pattern require: (a) a Finance-documented accrual or billing basis for the consolidated period, (b) VP Finance or CFO review before payment release, and (c) AP verification that invoice line items correspond to the documented period and contracted rate prior to processing. Multi-period invoices lacking either a Finance accrual document or VP Finance sign-off are subject to escalation regardless of amount."
+        },
+        {
+          "doc_id": "AP-PROC-2026-Q1-001",
+          "type": "internal_procedure",
+          "issued_by": "AP Operations",
+          "date": "2026-01-03",
+          "subject": "Q1 2026 Invoice Processing Reminders",
+          "body": "AP teams: please review all active vendor billing schedules for gaps or anomalies as part of Q1 operations. Multi-period or consolidated invoices arriving in January or February should be routed through the standard variance review process. Contact the AP Manager for any invoice exceeding 15% of the established vendor billing baseline."
+        }
+      ]
+    }
+  }
+}

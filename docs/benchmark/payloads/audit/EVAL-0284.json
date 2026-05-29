@@ -1,0 +1,82 @@
+{
+  "case_id": "EVAL-0284",
+  "payload": {
+    "action": {
+      "type": "access_request",
+      "description": "vendor_master_write access for interim AP Manager coverage during colleague absence",
+      "requestor_id": "EMP-0742",
+      "requestor_name": "J. Lindqvist",
+      "resource": "vendor_master",
+      "access_level": "write",
+      "request_timestamp": "2026-02-12T16:23:00Z",
+      "request_ip": "192.168.47.102",
+      "ip_geolocation": "Chicago, IL (on-premises network)",
+      "session_device": "managed_corporate",
+      "business_justification": "Interim AP Manager coverage for vendor master updates. D. Osei is currently out. Vendor record queue needs to be processed for Q1 close."
+    },
+    "context": {
+      "requestor_profile": {
+        "employee_id": "EMP-0742",
+        "name": "J. Lindqvist",
+        "title": "Senior AP Analyst",
+        "department": "Accounts Payable",
+        "manager": "D. Osei",
+        "hris_home_office": "Chicago, IL",
+        "current_role_permissions": ["vendor_master_read", "invoice_approval_limited", "vendor_query"],
+        "access_history_notes": "No prior vendor_master_write access in role history. AP Analyst roles for 3 years. No prior SOD exceptions on record."
+      },
+      "parallel_telemetry": [
+        {
+          "system": "HRIS (Workday)",
+          "data_type": "leave_record",
+          "retrieved_at": "2026-02-12T16:24:00Z",
+          "data": {
+            "employee_id": "EMP-0831",
+            "employee_name": "D. Osei",
+            "title": "AP Manager",
+            "leave_type": "medical",
+            "leave_start": "2026-02-10",
+            "expected_return": "2026-03-21",
+            "approved_by": "HR Director",
+            "approval_date": "2026-02-03",
+            "record_status": "active"
+          }
+        },
+        {
+          "system": "HR Leave Administration",
+          "data_type": "delegation_of_duties_record",
+          "retrieved_at": "2026-02-12T16:24:00Z",
+          "data": {
+            "doc_id": "DOD-2026-0047",
+            "leave_reference": "EMP-0831 medical leave (2026-02-10 to 2026-03-21)",
+            "delegate_employee_id": "EMP-0742",
+            "delegate_name": "J. Lindqvist",
+            "delegated_permissions": ["vendor_master_write"],
+            "effective_start": "2026-02-10",
+            "effective_end": "2026-03-21",
+            "authorized_by": "K. Henriksen — VP Finance",
+            "authorization_date": "2026-02-09",
+            "record_status": "active"
+          }
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "IAM-SOD-007",
+          "title": "Segregation of Duties — Vendor Master Write Access",
+          "version": "2.1",
+          "effective_date": "2024-11-01",
+          "relevant_clause": "vendor_master_write is restricted to employees holding the AP Manager role or above. Exception: a documented temporary delegation may authorize vendor_master_write for an employee not holding the AP Manager role, subject to: (a) authorization by VP Finance or CFO, (b) documentation in the HR Leave Administration system specifying the delegated permission and effective dates, and (c) the delegation being linked to an approved leave record for the normal permission holder. IT ticketing is not required for leave-based delegations; the HR Leave Administration record serves as the access justification. Delegations not documented in HR Leave Administration are not recognized as valid exceptions under this policy."
+        },
+        {
+          "doc_id": "IAM-ALERT-2026-0008",
+          "type": "access_escalation_notice",
+          "issued_by": "Identity and Access Management",
+          "date": "2026-02-10",
+          "subject": "SOD Escalation — Unauthorized vendor_master_write Attempt (EMP-0612)",
+          "body": "IAM flagged an access attempt to vendor_master_write by EMP-0612 (M. Pearce, AP Analyst) on February 10, 2026. No IT ticket or HR Leave Administration delegation record was found for this request. Access was denied and EMP-0612's manager has been notified per standard SOD escalation procedure."
+        }
+      ]
+    }
+  }
+}

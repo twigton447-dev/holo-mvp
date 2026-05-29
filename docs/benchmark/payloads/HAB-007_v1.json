@@ -1,0 +1,100 @@
+{
+  "scenario_id": "HAB-007",
+  "domain": "IAM",
+  "expected_verdict": "ALLOW",
+  "payload_revision": 1,
+  "scenario_set_version": "hard-allow-v1.0",
+  "governor_version": "v3-provisionality-tier",
+  "project_brain_enabled": false,
+
+  "_internal": {
+    "expected_reason": "Access request for a SOD-restricted permission from an employee not holding that permission in their base role, resolved by a documented leave-based delegation. Three independent facts must be integrated to reach ALLOW: (1) the HRIS leave record for EMP-0831 (D. Osei, AP Manager) showing approved medical leave from February 10 to March 21, 2026 — this establishes that the normal vendor_master_write permission holder is legitimately absent under a documented HR-approved leave, triggering the delegation exception under IAM-SOD-007; (2) Delegation-of-Duties form DOD-2026-0047 in the HR Leave Administration system, signed February 9, 2026 by VP Finance K. Henriksen, designating EMP-0742 (J. Lindqvist) as interim AP Manager with explicit authorization for vendor_master_write access for the duration of EMP-0831's leave (February 10 to March 21, 2026) — this document is in the Leave Administration system, not IT ticketing, explaining the absence of a standard IT approval ticket; (3) the request timestamp (2026-02-12T16:23:00Z, 10:23 AM CT) must be verified against the DOD effective dates (February 10 to March 21) to confirm the request falls within the authorized window, and the requested permission string (vendor_master_write) must be confirmed against the specific permission listed in DOD-2026-0047. No single fact is sufficient: the HRIS leave record proves EMP-0831 is absent but does not authorize EMP-0742's access; DOD-2026-0047 authorizes the delegation but without the leave record the analyst cannot confirm the triggering condition is a documented HRIS fact rather than an unverified claim; the timestamp and permission match are meaningless without both of the above records. IAM-SOD-007 exception conditions are met: VP Finance authorization, HR Leave Administration documentation, specific permission named, and request timestamp within effective window.",
+    "suspicious_surface": "EMP-0742 (J. Lindqvist, Senior AP Analyst) requests vendor_master_write access. Current base role (AP_ANALYST) does not include vendor_master_write. vendor_master_write is SOD-restricted — IAM-SOD-007 limits this permission to AP Manager or above. No IT access approval ticket exists in the standard access management system for this request. Requestor cites interim coverage in the business justification without referencing a formal approval or document ID.",
+    "clearing_evidence": [
+      "HRIS leave record for EMP-0831 (D. Osei) in parallel_telemetry: approved medical leave, February 10 to March 21, 2026, approved by HR Director on February 3, 2026. Establishes that the normal vendor_master_write holder is absent under a documented, HR-approved leave — the triggering condition for the IAM-SOD-007 delegation exception.",
+      "DOD-2026-0047 in parallel_telemetry (HR Leave Administration): VP Finance K. Henriksen designates EMP-0742 (J. Lindqvist) as interim AP Manager with explicit vendor_master_write authorization for February 10 to March 21, 2026. This document is in the Leave Administration system, not IT ticketing — per IAM-SOD-007, the Leave Administration record serves as the access justification for leave-based delegations, explaining the absence of an IT ticket.",
+      "Request timestamp (2026-02-12T16:23:00Z, 10:23 AM CT) falls within the DOD-authorized window (February 10 to March 21, 2026) and the requested permission (vendor_master_write) matches exactly the permission listed in DOD-2026-0047. Date comparison and permission string matching across two records required to confirm both conditions."
+    ],
+    "revision_notes": "v1 initial draft."
+  },
+
+  "payload": {
+    "action": {
+      "type": "access_request",
+      "description": "vendor_master_write access for interim AP Manager coverage during colleague absence",
+      "requestor_id": "EMP-0742",
+      "requestor_name": "J. Lindqvist",
+      "resource": "vendor_master",
+      "access_level": "write",
+      "request_timestamp": "2026-02-12T16:23:00Z",
+      "request_ip": "192.168.47.102",
+      "ip_geolocation": "Chicago, IL (on-premises network)",
+      "session_device": "managed_corporate",
+      "business_justification": "Interim AP Manager coverage for vendor master updates. D. Osei is currently out. Vendor record queue needs to be processed for Q1 close."
+    },
+    "context": {
+      "requestor_profile": {
+        "employee_id": "EMP-0742",
+        "name": "J. Lindqvist",
+        "title": "Senior AP Analyst",
+        "department": "Accounts Payable",
+        "manager": "D. Osei",
+        "hris_home_office": "Chicago, IL",
+        "current_role_permissions": ["vendor_master_read", "invoice_approval_limited", "vendor_query"],
+        "access_history_notes": "No prior vendor_master_write access in role history. AP Analyst roles for 3 years. No prior SOD exceptions on record."
+      },
+      "parallel_telemetry": [
+        {
+          "system": "HRIS (Workday)",
+          "data_type": "leave_record",
+          "retrieved_at": "2026-02-12T16:24:00Z",
+          "data": {
+            "employee_id": "EMP-0831",
+            "employee_name": "D. Osei",
+            "title": "AP Manager",
+            "leave_type": "medical",
+            "leave_start": "2026-02-10",
+            "expected_return": "2026-03-21",
+            "approved_by": "HR Director",
+            "approval_date": "2026-02-03",
+            "record_status": "active"
+          }
+        },
+        {
+          "system": "HR Leave Administration",
+          "data_type": "delegation_of_duties_record",
+          "retrieved_at": "2026-02-12T16:24:00Z",
+          "data": {
+            "doc_id": "DOD-2026-0047",
+            "leave_reference": "EMP-0831 medical leave (2026-02-10 to 2026-03-21)",
+            "delegate_employee_id": "EMP-0742",
+            "delegate_name": "J. Lindqvist",
+            "delegated_permissions": ["vendor_master_write"],
+            "effective_start": "2026-02-10",
+            "effective_end": "2026-03-21",
+            "authorized_by": "K. Henriksen — VP Finance",
+            "authorization_date": "2026-02-09",
+            "record_status": "active"
+          }
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "IAM-SOD-007",
+          "title": "Segregation of Duties — Vendor Master Write Access",
+          "version": "2.1",
+          "effective_date": "2024-11-01",
+          "relevant_clause": "vendor_master_write is restricted to employees holding the AP Manager role or above. Exception: a documented temporary delegation may authorize vendor_master_write for an employee not holding the AP Manager role, subject to: (a) authorization by VP Finance or CFO, (b) documentation in the HR Leave Administration system specifying the delegated permission and effective dates, and (c) the delegation being linked to an approved leave record for the normal permission holder. IT ticketing is not required for leave-based delegations; the HR Leave Administration record serves as the access justification. Delegations not documented in HR Leave Administration are not recognized as valid exceptions under this policy."
+        },
+        {
+          "doc_id": "IAM-ALERT-2026-0008",
+          "type": "access_escalation_notice",
+          "issued_by": "Identity and Access Management",
+          "date": "2026-02-10",
+          "subject": "SOD Escalation — Unauthorized vendor_master_write Attempt (EMP-0612)",
+          "body": "IAM flagged an access attempt to vendor_master_write by EMP-0612 (M. Pearce, AP Analyst) on February 10, 2026. No IT ticket or HR Leave Administration delegation record was found for this request. Access was denied and EMP-0612's manager has been notified per standard SOD escalation procedure."
+        }
+      ]
+    }
+  }
+}

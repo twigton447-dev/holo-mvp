@@ -1,6 +1,6 @@
 # Hard-ALLOW Benchmark Suite — Verification Status
 
-Last updated: 2026-05-28
+Last updated: 2026-05-28 (batch 2 candidates added)
 
 ## Confirmed in Suite (two clean passes, two different fresh instances)
 
@@ -18,7 +18,11 @@ None currently.
 
 ## Pending First Audit
 
-None currently.
+| HAB ID | EVAL ID | Domain | Notes |
+|---|---|---|---|
+| HAB-005_v1 | EVAL-0173 | BEC | Dormant vendor reactivation — new contact email, banking change, 17-month gap |
+| HAB-006_v1 | EVAL-0629 | AP | Billing pause catch-up — 4-month consolidated invoice at contracted rate |
+| HAB-007_v1 | EVAL-0284 | IAM | Leave-based SOD delegation — interim AP Manager vendor_master_write |
 
 ## Rejected / Revised
 
@@ -52,3 +56,6 @@ None currently.
 | EVAL-0521 | HAB-003_v2 | Confirmed in suite |
 | EVAL-0748 | HAB-002_v2 | ESCALATE pile |
 | EVAL-0847 | HAB-001_v4 | Retired — labeled-answer phrases, revised to v5 |
+| EVAL-0173 | HAB-005_v1 | Pending first audit |
+| EVAL-0284 | HAB-007_v1 | Pending first audit |
+| EVAL-0629 | HAB-006_v1 | Pending first audit |

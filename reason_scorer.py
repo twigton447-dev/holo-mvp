@@ -41,12 +41,20 @@ from __future__ import annotations
 
 REASON_LABELS: dict[str, dict[str, str]] = {
     "regulated_procurement": {
-        "epa_mechanism_validity":    "EPA_AUTHORITY_CONFLICT",
-        "index_scope_conflict":      "INDEX_SCOPE_MISMATCH",
-        "modification_authority":    "NON_EPA_MODIFICATION_AUTHORITY_MISSING",
-        "clause_self_certification": "APPROVAL_EXCERPT_OVERCLAIM",
-        "cost_pricing_threshold":    "COST_PRICING_THRESHOLD_MISAPPLIED",
-        "approval_chain":            "SIGNATORY_AUTHORITY_DEFECT",
+        # Source-control / qualification-currency pattern (Domain 5, source-control sub-class)
+        "qualification_record_validity": "PART_QUALIFICATION_APPLICABILITY_GAP",
+        "source_control_compliance":     "SOURCE_CONTROL_SCOPE_MISMATCH",
+        "document_chain_integrity":      "DOCUMENT_CHAIN_SCOPE_GAP",
+        "approval_excerpt_fidelity":     "APPROVAL_EXCERPT_DEFERENCE",
+        "supplier_approval_status":      "SUPPLIER_APPROVAL_STATUS_FLAG",
+        "contractual_authority_gap":     "CONTRACTUAL_AUTHORITY_MISSING",
+        # EPA / index-scope pattern (Domain 5, EPA sub-class)
+        "epa_mechanism_validity":        "EPA_AUTHORITY_CONFLICT",
+        "index_scope_conflict":          "INDEX_SCOPE_MISMATCH",
+        "modification_authority":        "NON_EPA_MODIFICATION_AUTHORITY_MISSING",
+        "clause_self_certification":     "APPROVAL_EXCERPT_OVERCLAIM",
+        "cost_pricing_threshold":        "COST_PRICING_THRESHOLD_MISAPPLIED",
+        "approval_chain":                "SIGNATORY_AUTHORITY_DEFECT",
     },
     "contract_approval": {
         "counterparty_identity": "COUNTERPARTY_IDENTITY_DEFECT",
@@ -252,6 +260,40 @@ def score_run(
     primary_label    = reason_info["primary_reason_label"]
     secondary_labels = reason_info["secondary_reason_labels"]
 
+    # ---- ALLOW-side reason override for regulated_procurement ---------------
+    # Standard derivation maps categories to defect labels (ESCALATE-side signals).
+    # For regulated_procurement ALLOW verdicts, override with positive confirmation
+    # labels that reflect WHY the release is safe, not which risks were evaluated.
+    #
+    # Priority:
+    #   1. CAMPAIGN_TRACEABILITY_OVERRIDE fired (governor suppressed confirmed-HIGH
+    #      because campaign-level evidence was premise-contested by a controlling-
+    #      boundary clearance) → DECOY_CAMPAIGN_OUT_OF_ACTION_SCOPE
+    #   2. All source-control categories LOW/NONE → RELEASE_SCOPE_QUALIFIED
+    #   3. Mixed: source-control partially flagged (MEDIUM) → SOURCE_CONTROL_APPLICABILITY_CONFIRMED
+    #
+    # Does NOT apply to native_solo (no category scaffold).
+    if (actual_verdict == "ALLOW"
+            and action_type == "regulated_procurement"
+            and run_mode != "native_solo"):
+        _sc_cats = [
+            "qualification_record_validity",
+            "source_control_compliance",
+            "document_chain_integrity",
+        ]
+        _sc_all_clear = all(
+            SEVERITY_RANK.get(coverage.get(c, {}).get("max_severity", "NONE"), 0)
+            <= SEVERITY_RANK["LOW"]
+            for c in _sc_cats
+        )
+        _decision_reason = condition_result.get("decision_reason", "")
+        if "CAMPAIGN_TRACEABILITY_OVERRIDE" in _decision_reason:
+            primary_label = "DECOY_CAMPAIGN_OUT_OF_ACTION_SCOPE"
+        elif _sc_all_clear:
+            primary_label = "RELEASE_SCOPE_QUALIFIED"
+        else:
+            primary_label = "SOURCE_CONTROL_APPLICABILITY_CONFIRMED"
+
     # ---- Verdict correctness --------------------------------------------
     verdict_correct: bool | None = (
         (actual_verdict == expected_verdict) if expected_verdict else None
@@ -311,13 +353,118 @@ def score_run(
     if verdict_correct and reason_correct is False:
         reason_notes.insert(0, "Verdict-correct but reason-incorrect.")
 
+    # ---- FAST-tier anchor risk override ------------------------------------
+    # If the governor flagged material Turn 1 anchor risk (FAST tier, shadow
+    # majority diverges from Turn 1's verdict), clean_pass is False regardless
+    # of verdict/reason correctness. The result is a non-clean diagnostic:
+    # Turn 1 was an outlier, and the small pool cannot confirm it was right.
+    # Only applies to holo_orchestrated (governor result carries the field).
+    _fast_tier_fail = (
+        run_mode == "holo_orchestrated"
+        and condition_result.get("turn1_anchor_risk") == "material"
+    )
+    if _fast_tier_fail:
+        clean_pass = False
+        reason_notes.append(
+            "FAST-tier Turn 1 anchor risk = material: "
+            "shadow majority diverged from Turn 1. "
+            "Result is non-clean; requires additional adjudication."
+        )
+
+    # ---- ALLOW-verdict residual concern analysis and split clean pass -------
+    #
+    # For ALLOW verdicts the coverage matrix records the MAX severity seen across
+    # all turns, including adversarial turns that were later overturned.  A single
+    # adversarial MEDIUM or HIGH that the council resolved through sustained
+    # clearance should not silently fail clean_pass in the same way as an
+    # unresolved finding.
+    #
+    # Two separate clean-pass levels for ALLOW verdicts:
+    #
+    #   clean_pass_strict    — verdict + reason + ALL categories ≤ LOW.
+    #                          No adversarial concern reached even MEDIUM.
+    #
+    #   clean_pass_benchmark — verdict + reason + NO category reached HIGH.
+    #                          An isolated MEDIUM from one adversarial turn that
+    #                          did not change the final verdict is acceptable.
+    #                          A HIGH — even if later cleared by sustained_clearance
+    #                          — is not acceptable for benchmark clean-pass.
+    #
+    # For ESCALATE verdicts: strict == benchmark == existing clean_pass (no change).
+    #
+    # residual_concern_labels — categories at MEDIUM or higher for ALLOW verdicts.
+    #                           These findings did not prevent ALLOW but are
+    #                           recorded for rotation-test classification.
+    # max_residual_severity   — highest severity among residual concerns.
+    #
+    # Does not apply to native_solo (no category scaffold).
+
+    residual_concern_labels: list[str] = []
+    max_residual_severity:   str       = "NONE"
+    clean_pass_strict:       bool | None = clean_pass
+    clean_pass_benchmark:    bool | None = clean_pass
+
+    if actual_verdict == "ALLOW" and run_mode != "native_solo":
+        _res_cats = [
+            c for c in category_order
+            if SEVERITY_RANK.get(
+                coverage.get(c, {}).get("max_severity", "NONE"), 0)
+            >= SEVERITY_RANK["MEDIUM"]
+        ]
+        residual_concern_labels = [reason_label(action_type, c) for c in _res_cats]
+        if _res_cats:
+            _max_r = max(
+                SEVERITY_RANK.get(
+                    coverage.get(c, {}).get("max_severity", "NONE"), 0)
+                for c in _res_cats
+            )
+            # Reverse-map rank → severity string
+            max_residual_severity = next(
+                (sev for sev, rank in SEVERITY_RANK.items() if rank == _max_r),
+                "NONE"
+            )
+
+        _base = (verdict_correct is True) and (reason_correct is not False)
+        _no_high = all(
+            SEVERITY_RANK.get(
+                coverage.get(c, {}).get("max_severity", "NONE"), 0)
+            < SEVERITY_RANK["HIGH"]
+            for c in category_order
+        )
+        clean_pass_strict    = _base and (not residual_concern_labels)
+        clean_pass_benchmark = _base and _no_high
+
+        # Both variants fail on FAST-tier anchor risk.
+        if _fast_tier_fail:
+            clean_pass_strict    = False
+            clean_pass_benchmark = False
+
+        # Main clean_pass for ALLOW verdicts uses benchmark semantics:
+        # an isolated MEDIUM does not fail benchmark clean pass.
+        clean_pass = clean_pass_benchmark
+
+        # Annotate residual concerns in reason_notes.
+        if residual_concern_labels:
+            sev_str = max_residual_severity
+            lbl_str = ", ".join(residual_concern_labels)
+            reason_notes.append(
+                f"Residual concern(s) [{sev_str}]: {lbl_str}. "
+                f"Did not change final ALLOW verdict. "
+                f"clean_pass_strict=False; "
+                f"clean_pass_benchmark={'True' if clean_pass_benchmark else 'False'}."
+            )
+
     return {
-        "run_mode":               run_mode,
-        "verdict":                actual_verdict,
-        "primary_reason_label":   primary_label,
-        "secondary_reason_labels": secondary_labels,
-        "verdict_correct":        verdict_correct,
-        "reason_correct":         reason_correct,
-        "clean_pass":             clean_pass,
-        "reason_correctness_notes": reason_notes,
+        "run_mode":                  run_mode,
+        "verdict":                   actual_verdict,
+        "primary_reason_label":      primary_label,
+        "secondary_reason_labels":   secondary_labels,
+        "residual_concern_labels":   residual_concern_labels,
+        "max_residual_severity":     max_residual_severity,
+        "verdict_correct":           verdict_correct,
+        "reason_correct":            reason_correct,
+        "clean_pass":                clean_pass,
+        "clean_pass_strict":         clean_pass_strict,
+        "clean_pass_benchmark":      clean_pass_benchmark,
+        "reason_correctness_notes":  reason_notes,
     }

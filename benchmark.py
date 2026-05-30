@@ -59,7 +59,7 @@ SEVERITY_RANK = {"NONE": 0, "LOW": 1, "MEDIUM": 2, "HIGH": 3}
 def _scenario_categories(scenario):
     """Return the category list for the scenario's action type."""
     action_type = scenario.get("action", {}).get("type", "invoice_payment")
-    return get_template(action_type)["categories"]
+    return get_template(action_type, payload=scenario)["categories"]
 
 def _init_cov(categories=None):
     cats = categories if categories is not None else BEC_CATEGORIES
@@ -96,7 +96,7 @@ def _empty_state(scenario):
         "context":         scenario.get("context", {}),
         "turn_history":    [],
         "coverage_matrix": {},
-        "active_template": get_template(action_type),
+        "active_template": get_template(action_type, payload=scenario),
     }
 
 def _ms(start):
@@ -330,10 +330,29 @@ def run_holo_loop(scenario, force_max_turns=False, no_memory=False, fixed_govern
                        "coverage_matrix":  result["coverage_matrix"],
                        "governor_briefs":  result.get("governor_briefs", []),
                        "threat_hypothesis": result.get("threat_hypothesis", ""),
+                       # Legacy shadow fields (preserved for backward compat)
                        "shadow_verdict_excl_turn1":  sh_verdict,
                        "shadow_allow_excl_turn1":    sh_allow,
                        "shadow_escalate_excl_turn1": sh_escalate,
                        "shadow_diverges":            sh_verdict != result["decision"],
+                       # First-Turn Provisionality fields
+                       "first_turn_verdict":              result.get("first_turn_verdict"),
+                       "first_turn_primary_category":     result.get("first_turn_primary_category"),
+                       "first_turn_primary_reason_label": result.get("first_turn_primary_reason_label"),
+                       "shadow_majority_excluding_turn1": result.get("shadow_majority_excluding_turn1"),
+                       "shadow_divergence_from_final":    result.get("shadow_divergence_from_final"),
+                       "turn1_anchor_risk":               result.get("turn1_anchor_risk"),
+                       "turn1_anchor_notes":              result.get("turn1_anchor_notes", []),
+                       "extra_turn_forced_due_to_fast_shadow_divergence":
+                           result.get("extra_turn_forced_due_to_fast_shadow_divergence", False),
+                       "tier":             result.get("tier"),
+                       "exit_reason":      result.get("exit_reason"),
+                       "evidence_lock_fired":  result.get("evidence_lock_fired", False),
+                       "evidence_lock_reason": result.get("evidence_lock_reason", ""),
+                       # Decay clearance logging (DECAY_CLEARANCE_v3.2)
+                       "clearance_log":            result.get("clearance_log", []),
+                       "clearance_prevented_decay": result.get("clearance_prevented_decay", False),
+                       "decay_clearance_summary":  result.get("decay_clearance_summary", {}),
                    },
                    run_health=result.get("run_health", "clean"))
     except SystemUnavailableError as e:
@@ -360,6 +379,10 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
         raise FileNotFoundError(f"Scenario not found: {scenario_path}")
 
     scenario = json.loads(path.read_text())
+    # HAB-format files wrap action/context under a "payload" key — hoist to top level
+    if "payload" in scenario and "action" not in scenario:
+        scenario.update(scenario.pop("payload"))
+    scenario["_payload_file"] = str(path.resolve())  # persisted in clearance_log entries
     scenario_name = path.stem
     expected  = scenario.get("expected_verdict", "UNKNOWN").upper()
 
@@ -426,6 +449,14 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
     _attach_scoring(cond2, scenario, action_type, category_order, "domain_guided_solo")
     _attach_scoring(cond3, scenario, action_type, category_order, "domain_guided_solo")
 
+    # Scenario designation metadata — optional fields; absent on legacy scenarios.
+    _META_FIELDS = [
+        "scenario_status", "benchmark_role", "flagship_candidate",
+        "atlas_case", "native_solo_pattern", "native_failure_class",
+        "publication_status", "notes",
+    ]
+    scenario_meta = {k: scenario[k] for k in _META_FIELDS if k in scenario}
+
     result = {
         "benchmark_id":       f"bench_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
         "scenario_name":      scenario_name,
@@ -434,6 +465,7 @@ def run_benchmark(scenario_path, verbose=False, force_max_turns=False, no_memory
         "force_max_turns":    force_max_turns,
         "categories":         category_order,
         "action_type":        action_type,
+        "scenario_meta":      scenario_meta,
         "models": {
             "openai":    openai_adapter.model_id,
             "anthropic": getattr(anthropic_adapter, "model_id", None) if not quick else None,
@@ -476,12 +508,26 @@ def _print_report(r):
     expected = r["expected_verdict"]
     c        = r["conditions"]
     models   = r.get("models", {})
+    meta     = r.get("scenario_meta", {})
 
     _header("BENCHMARK REPORT")
     print(f"  Scenario : {r['scenario_name']}")
     print(f"  Expected : {expected}")
     conv_note = "DISABLED — full 10 turns forced" if r.get("force_max_turns") else "enabled"
-    print(f"  Max turns: {r.get('max_turns', MAX_TURNS)} per condition (convergence detection {conv_note})\n")
+    print(f"  Max turns: {r.get('max_turns', MAX_TURNS)} per condition (convergence detection {conv_note})")
+
+    # Scenario designation metadata (present only when tagged in scenario JSON)
+    if meta.get("scenario_status"):
+        status_str   = meta["scenario_status"].replace("_", " ").upper()
+        flagship_tag = "  [FLAGSHIP CANDIDATE]" if meta.get("flagship_candidate") else ""
+        pub_tag      = f"  [{meta['publication_status'].upper()}]" if meta.get("publication_status") else ""
+        print(f"  Status   : {status_str}{flagship_tag}{pub_tag}")
+    if meta.get("benchmark_role"):
+        print(f"  Role     : {meta['benchmark_role'].replace('_', ' ')}")
+    if meta.get("native_solo_pattern"):
+        failure_note = f" — {meta['native_failure_class']}" if meta.get("native_failure_class") else ""
+        print(f"  Native solo pattern: {meta['native_solo_pattern']}{failure_note}")
+    print()
 
     rows = [
         (f"1. Solo {models.get('openai','OpenAI')}",    c["solo_openai"],    "solo_openai"),
@@ -507,6 +553,10 @@ def _print_report(r):
         cp     = _yn(sc.get("clean_pass"))
         pri    = sc.get("primary_reason_label") or "—"
         print(f"  {label:<45} {cond['turns_run']:>5}  {_badge(cond['verdict']):<11}  {v_ok:>5}  {r_ok:>5}  {cp:>5}  {pri}")
+    # Clarify run mode so these are not conflated with native_solo results.
+    print(f"  (Conditions 1-3: domain_guided_solo — template scaffold active, reason-correctness scored)")
+    if meta.get("native_solo_pattern"):
+        print(f"  (Native baseline — no scaffold, verdict only: run d5_native_solo_probe.py)")
 
     print(f"\n  RISK PROFILE (max severity per category across all turns):\n")
     categories = r.get("categories", BEC_CATEGORIES)
@@ -567,24 +617,41 @@ def _print_report(r):
     holo_right  = c["holo_full"] is not None and c["holo_full"]["verdict"] == expected and not c["holo_full"]["error"]
     all_solo_wrong = bool(solo_wrong) and all(solo_wrong.values())
 
+    is_calibration = meta.get("scenario_status") == "calibration_regression"
+
     if all_solo_wrong and holo_right:
-        failed = ", ".join(k for k, v in solo_wrong.items() if v)
-        print(f"  *** ARCHITECTURE PROOF — STRONGEST POSSIBLE RESULT:\n")
-        solo_turns = {lbl: c[key].get("turns_run", "?") for lbl, key in _solo_map if c[key] is not None}
-        holo_turns = c["holo_full"].get("turns_run", "?")
-        print(f"      All 3 solo models failed: {failed}\n")
-        print(f"      Solo turns run: " + ", ".join(f"{k}: {v}" for k, v in solo_turns.items()))
-        print(f"      Holo turns run: {holo_turns}")
-        print(f"      Each condition had up to {MAX_TURNS} turns, convergence detection enabled,")
-        print(f"      the same adversarial role prompts, and read all prior output.\n")
-        print(f"      HOLO caught it.")
-        print(f"      The irreducible variables:")
-        print(f"        Structural independence (3 different frontier models per turn)")
-        print(f"        Adversarial role injection across independent reasoning contexts")
-        print(f"        Context Governor (shared state, convergence detection, HIGH override)")
-        print(f"\n      This is the proof that cannot be argued away.")
+        if is_calibration:
+            # Calibration scenarios confirm harness wiring — not flagship differentiation.
+            failed = ", ".join(k for k, v in solo_wrong.items() if v)
+            print(f"  All 3 domain_guided_solo conditions failed, Holo correct.")
+            print(f"  [calibration_regression — excluded from flagship proof count]")
+            print(f"  Domain_guided_solo all-wrong + Holo correct validates template wiring,")
+            print(f"  not structural independence. Not a publishable architecture proof.")
+            if meta.get("native_solo_pattern"):
+                print(f"  Native solo pattern: {meta['native_solo_pattern']}"
+                      + (f" ({meta['native_failure_class']})" if meta.get("native_failure_class") else ""))
+                print(f"  See d5_native_solo_probe.py for true frontier model baseline.")
+        else:
+            failed = ", ".join(k for k, v in solo_wrong.items() if v)
+            print(f"  *** ARCHITECTURE PROOF — STRONGEST POSSIBLE RESULT:\n")
+            solo_turns = {lbl: c[key].get("turns_run", "?") for lbl, key in _solo_map if c[key] is not None}
+            holo_turns = c["holo_full"].get("turns_run", "?")
+            print(f"      All 3 solo models failed: {failed}\n")
+            print(f"      Solo turns run: " + ", ".join(f"{k}: {v}" for k, v in solo_turns.items()))
+            print(f"      Holo turns run: {holo_turns}")
+            print(f"      Each condition had up to {MAX_TURNS} turns, convergence detection enabled,")
+            print(f"      the same adversarial role prompts, and read all prior output.\n")
+            print(f"      HOLO caught it.")
+            print(f"      The irreducible variables:")
+            print(f"        Structural independence (3 different frontier models per turn)")
+            print(f"        Adversarial role injection across independent reasoning contexts")
+            print(f"        Context Governor (shared state, convergence detection, HIGH override)")
+            print(f"\n      This is the proof that cannot be argued away.")
     elif not any(solo_wrong.values()):
-        print(f"  All conditions correct — scenario may be too easy.")
+        if is_calibration:
+            print(f"  All conditions correct — calibration_regression, harness validation confirmed.")
+        else:
+            print(f"  All conditions correct — scenario may be too easy.")
     else:
         missed = [k for k, v in solo_wrong.items() if v]
         caught = [k for k, v in solo_wrong.items() if not v]

@@ -17,6 +17,7 @@
     "clearing_mechanism": "The banking detail change was submitted via the company's authenticated vendor portal using an MFA-authenticated session 26 days before the invoice arrived. AP Operations processed a two-approver sign-off on the change 22 days before the invoice. The vendor master was updated to the new account with an audit timestamp 22 days before the invoice. The invoice sender email matches the updated billing contact recorded in the AP approval record — this cross-reference is required and cannot be confirmed from any single document alone.",
     "timing_alignment": {
       "day_0": "Vendor submits banking change via authenticated supplier portal with MFA",
+      "day_2": "AP places verification call to phone number already on file in pre-change vendor master — AFTER portal submission, BEFORE approval sign-off",
       "day_4": "AP Operations two-approver sign-off on change; vendor master updated; updated billing contact recorded",
       "day_26": "Vendor submits invoice using new contact email and new account"
     }
@@ -55,7 +56,7 @@
     },
     {
       "artifact_role": "policy_document",
-      "description": "AP policy for vendor banking detail changes. Must specify: (a) submission via authenticated vendor portal, (b) two-approver AP Operations sign-off required before new details are released for payment, (c) updated billing contact recorded at time of approval. Policy must NOT contain language that says 'if all three steps are complete, the payment is authorized' — state the process, not the verdict.",
+      "description": "AP policy for vendor banking detail changes. Must specify: (a) submission via authenticated vendor portal, (b) AP control verification: AP must call the vendor using the phone number already on file in the pre-change vendor master — this call occurs AFTER portal submission and BEFORE vendor master activation or payment release; the callback contact source is pre-existing vendor master data, not the change request or invoice, (c) two-approver AP Operations sign-off required before the change becomes effective in the vendor master, (d) updated billing contact recorded at time of approval. CRITICAL TIMING CONSTRAINT: the policy must NOT require the verification call to occur before portal submission. Correct required order: (1) vendor submits via portal, (2) AP places verification call using pre-existing vendor master contact data, (3) two-approver sign-off and vendor master activation, (4) invoice eligible for payment after all steps complete. Policy must NOT contain language that says 'if all steps are complete, the payment is authorized' — state the process, not the verdict. Do not state that the callback must precede portal submission.",
       "what_it_proves": "Defines what a legitimate change looks like. Evaluator must confirm each step is documented in the other artifacts.",
       "what_it_does_not_prove": "Nothing about whether this specific change followed the process — evaluator must verify that."
     }
@@ -116,6 +117,7 @@
     "Invoice amount: $18,000 - $35,000 range (realistic for the service type)",
     "Invoice service type: should differ slightly from prior invoice history — not so different as to be a standalone red flag, but enough to combine with other signals",
     "Email language: the vendor email should feel like a real vendor email — not robotic, not scripted. Include a brief sentence about the banking change: natural, not demanding.",
-    "The AP two-approver sign-off record should have two actual named approvers in an approver_signatures structure, not a boolean field"
+    "The AP two-approver sign-off record should have two actual named approvers in an approver_signatures structure, not a boolean field",
+    "AP callback timing (CRITICAL): the verification call happens AFTER portal submission (Day 0-2) and BEFORE two-approver sign-off and vendor master activation (Day 4). The policy document must reflect this sequence. Do NOT author a policy requiring callback before portal submission — that sequence is wrong for this workflow."
   ]
 }

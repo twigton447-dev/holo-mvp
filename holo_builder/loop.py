@@ -769,7 +769,9 @@ def _convergence_guard(state: dict, adapters: dict, providers: list,
     All four must pass for BUILDER_CONVERGED:
       1. Static lint passes on the current draft.
       2. Latest internal QA assessment not in _QA_CONVERGENCE_BLOCKERS.
-      3. No unresolved HIGH severity in coverage matrix.
+      3. No structural HIGH in the LATEST QA turn's categories (active_categories).
+         Historical max (coverage) is preserved for QA Attacker but does not block
+         convergence after a finding has been repaired.
       4. Governor promotion assessment returns READY.
     """
     from holo_builder.lint import check as _lint_check
@@ -791,20 +793,32 @@ def _convergence_guard(state: dict, adapters: dict, providers: list,
         return False, f"qa_assessment_blocked: {assessment}", None
     print(f"    Guard [qa_assessment]: PASS ({assessment})")
 
-    # Only structural HIGH severity blocks Builder convergence.
+    # Structural HIGH check uses active_categories (latest QA turn), not historical max.
+    # Historical max (coverage) preserves the worst ever seen for QA Attacker handoff.
+    # A repaired Builder issue must not permanently block convergence.
     # dirty_construction: semantic contradiction — packet cannot function.
     # missing_artifacts: required document absent — clearing path broken.
     # overfitting, tells, ambiguity, single_doc_reliance: QA Attacker's concern.
     STRUCTURAL_BLOCKING_CATS = {"dirty_construction", "missing_artifacts"}
-    coverage = state.get("coverage", {})
+    active_cats      = state.get("active_categories", {})
+    historical_cover = state.get("coverage", {})
+
     blocking_high = [
-        cat for cat, v in coverage.items()
-        if v.get("severity") == "HIGH" and cat in STRUCTURAL_BLOCKING_CATS
+        cat for cat in STRUCTURAL_BLOCKING_CATS
+        if active_cats.get(cat, "NONE") == "HIGH"
+    ]
+    resolved_high = [
+        cat for cat in STRUCTURAL_BLOCKING_CATS
+        if historical_cover.get(cat, {}).get("severity") == "HIGH"
+        and active_cats.get(cat, "NONE") != "HIGH"
     ]
     if blocking_high:
         print(f"    Guard [high_severity]: FAIL — {blocking_high}")
         return False, f"structural_high: {', '.join(blocking_high)}", None
-    print(f"    Guard [high_severity]: PASS")
+    if resolved_high:
+        print(f"    Guard [high_severity]: PASS (previously HIGH, now resolved: {resolved_high})")
+    else:
+        print(f"    Guard [high_severity]: PASS")
 
     last_qa_provider = latest_qa.get("provider", providers[0])
     gov_provider = _governor_provider(last_qa_provider, providers)
@@ -1122,14 +1136,15 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
     rotation = _constrained_rotation(MAX_TURNS, providers, seed=seed)
 
     state = {
-        "spec":                       spec,
-        "current_draft":              None,
-        "turn_history":               [],
-        "qa_findings":                [],
-        "governor_briefs":            [],
-        "coverage":                   _init_coverage(),
-        "target_verdict":             spec.get("target_verdict", "ALLOW"),
-        "promotion_brief":            None,
+        "spec":                         spec,
+        "current_draft":                None,
+        "turn_history":                 [],
+        "qa_findings":                  [],
+        "governor_briefs":              [],
+        "coverage":                     _init_coverage(),  # historical max — never decreases
+        "active_categories":            {},                 # latest QA turn categories only
+        "target_verdict":               spec.get("target_verdict", "ALLOW"),
+        "promotion_brief":              None,
         "pending_invariant_violations": [],
     }
 
@@ -1317,8 +1332,13 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
                 artifact_collapse_events.append(collapse_event)
                 if prev_draft_for_preservation:
                     print(f"    [governor] re-prompting to restore collapsed artifacts...")
+                    # Prefer a provider other than the one that produced the collapse.
+                    corr_provider = _pick_fallback_provider(actual_provider, None, providers)
+                    corr_adapter  = adapters[corr_provider] if corr_provider else adapter
+                    if not corr_provider:
+                        corr_provider = actual_provider
                     collapse_corr = _run_artifact_collapse_correction(
-                        adapter, actual_provider, draft, prev_draft_for_preservation,
+                        corr_adapter, corr_provider, draft, prev_draft_for_preservation,
                         spec, artifact_violations, turn_number
                     )
                     total_in_tok  += collapse_corr.get("input_tokens", 0)
@@ -1375,6 +1395,7 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
             state["coverage"], delta = _update_coverage(
                 state["coverage"], result.get("categories", {})
             )
+            state["active_categories"] = result.get("categories", {})
             qa_deltas.append(delta)
             qa_turn_count += 1
 
@@ -1459,7 +1480,8 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
         "verdict_drift_events":         verdict_drift_events,
         "artifact_collapse_events":     artifact_collapse_events,
         "builder_json_fallback_events": builder_json_fallback_events,
-        "coverage":                   state["coverage"],
+        "coverage":                     state["coverage"],
+        "active_categories":            state.get("active_categories", {}),
         "governor_briefs":            state["governor_briefs"],
         "promotion_brief":            state.get("promotion_brief"),
         "turn_history":               [

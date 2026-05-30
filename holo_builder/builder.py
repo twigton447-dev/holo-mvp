@@ -95,6 +95,7 @@ def cmd_build(args):
             "verdict_drift_events":          result.get("verdict_drift_events", []),
             "artifact_collapse_events":        result.get("artifact_collapse_events", []),
             "builder_json_fallback_events":    result.get("builder_json_fallback_events", []),
+            "active_categories":               result.get("active_categories", {}),
             "seed":                          result["seed"],
             "built_at":                      result["timestamp"],
             # Authoritative spec metadata — read by lint.py for target-aware checks.

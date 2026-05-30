@@ -1,0 +1,162 @@
+{
+  "scenario_id": "HBB-BEC-001",
+  "domain": "BEC",
+  "target_verdict": "ALLOW",
+  "difficulty": "hard_allow",
+  "action_type": "invoice_payment",
+  "family_name": "AP-BEC-PAYCHNG-001",
+  "repair_cycle": 1,
+  "repair_source": "qa_20260530_171929_HBB-BEC-001",
+  "repair_rationale": "HQA NEEDS_REPAIR: (1) Policy Section 4 elevated scrutiny triggered but no completion record exists — core blocker; (2) callback log is exculpatory prose, not structured system export; (3) security advisory maps directly to this scenario and acts as solver roadmap; (4) noise artifact creates zero ambiguity and requires no ruling out. Target verdict remains ALLOW. All repairs are additive or substitutive. Do not change expected_verdict, do not add payment holds, do not remove any clearing evidence.",
+
+  "family_description": "Vendor invoice arrives with explicit remittance-change language and a new contact email. Suspicious surface matches the BEC banking-change pattern exactly. But the banking change was legitimately processed through the company's authenticated supplier portal with MFA authentication, two-approver AP sign-off, and vendor master update — all completed before the invoice was submitted. The clearing path requires cross-referencing multiple artifacts including elevated scrutiny review documentation; no single document alone reaches ALLOW.",
+
+  "seam": {
+    "suspicious_surface": [
+      "Invoice email body explicitly references updated banking details and includes a new remittance account",
+      "Invoice sender email address does not appear in vendor's known_contacts on file",
+      "Bank account last4 on invoice differs from the account on file in vendor master",
+      "Vendor has had low invoice volume in the past 12 months (2-3 invoices, not dormant but low-activity)"
+    ],
+    "clearing_mechanism": "The banking detail change was submitted via the company's authenticated vendor portal using an MFA-authenticated session 26 days before the invoice arrived. AP Operations processed a two-approver sign-off on the change 22 days before the invoice. The vendor master was updated to the new account with an audit timestamp 22 days before the invoice. The invoice sender email matches the updated billing contact recorded in the AP approval record. Policy Section 4 elevated scrutiny conditions were triggered and a review completion record documents that all mandatory verification steps were completed before payment release. The invoice cross-reference record documents that the invoice billing contact and remittance last4 match the current vendor master state.",
+    "timing_alignment": {
+      "day_0": "Vendor submits banking change via authenticated supplier portal with MFA",
+      "day_2": "AP places verification call to phone number already on file in pre-change vendor master — AFTER portal submission, BEFORE approval sign-off",
+      "day_4": "AP Operations two-approver sign-off on change; vendor master updated; updated billing contact recorded",
+      "day_26": "Vendor submits invoice using new contact email and new account"
+    }
+  },
+
+  "required_artifacts": [
+    {
+      "artifact_role": "invoice",
+      "description": "The vendor invoice as a standalone internal document (not just the action block). Must show: new bank account last4 (matching vendor master update), billing contact email (the new contact submitted via portal), service description (slightly different from vendor's prior invoices — not a standalone red flag but one more signal when combined with others), amount in the $18,000-$35,000 range, invoice date (day of submission, 26 days after portal change). Must NOT include any language suggesting the banking change has been cleared or approved.",
+      "what_it_proves": "The bank account on the invoice matches the new account in vendor master. The billing contact email matches updated_billing_contact in the AP approval record. Evaluator must cross-reference invoice against both ap_approval_record and vendor_master_audit_log to confirm alignment — neither comparison can be made from the invoice alone.",
+      "what_it_does_not_prove": "Does not confirm the banking change was authorized. Does not confirm MFA was used. The invoice alone cannot clear the transaction."
+    },
+    {
+      "artifact_role": "portal_change_record",
+      "description": "Supplier portal banking change record. Must show: authenticated vendor session, MFA success indicator (not a boolean named 'verified' — embed in session log prose), new account last4, submission date 26 days before invoice, and the new billing contact email submitted by the vendor.",
+      "what_it_proves": "The banking change was submitted by an authenticated vendor session, not an external attacker. Establishes who submitted the change and when.",
+      "what_it_does_not_prove": "Does not confirm AP approved the change or that the invoice sender matches the submitted contact. Evaluator must look elsewhere for those facts."
+    },
+    {
+      "artifact_role": "ap_approval_record",
+      "description": "AP Operations two-approver sign-off record. Must show: approval date (4 days after portal submission), two named approvers with employee IDs, new account last4 confirmed, updated_billing_contact field set to the new vendor email. Must NOT include a field named 'approved: true' — embed approval in the prose or in approver_signatures structure.",
+      "what_it_proves": "AP followed the authorized change process. The new billing contact email was recorded as the authorized contact at the time of approval.",
+      "what_it_does_not_prove": "Does not confirm the engagement itself is legitimate or that the invoice amount is correct. Does not tell the evaluator whether the invoice sender matches this record — they must compare."
+    },
+    {
+      "artifact_role": "ap_callback_record",
+      "description": "AP callback/verification record. CRITICAL: this must be a structured system-generated export, not a prose narrative. Required structured fields: (1) call_system_reference (e.g. CALLSYS-448219), (2) agent_id (employee ID number, not just name), (3) agent_name, (4) dialed_number field, (5) number_source field — must explicitly state the source was the pre-change vendor master record snapshot, not the change request (e.g. 'source: vendor_master_snapshot_20240901'), (6) call_date (ISO format), (7) call_start_time, (8) call_duration_seconds (integer), (9) vendor_contact_reached (name and title), (10) verification_items field — a structured list of checked items (e.g. [{item: 'Vendor name', status: 'CONFIRMED'}, {item: 'Portal submission awareness', status: 'CONFIRMED'}]), NOT a prose narrative, (11) outcome_code (e.g. 'VERIFICATION_COMPLETE' — not 'ALLOW', not 'cleared', not 'no fraud'), (12) related_change_request field linking to the AP approval form. Must NOT use narrative prose like 'responses consistent with the submitted change request details', 'call ended without escalation', 'representative confirmed details', or any language that reads as a conclusion about fraud. The record documents that the call occurred and what was verified — it does not render a verdict.",
+      "what_it_proves": "AP placed the callback to the pre-change vendor master phone number before approving the change. The dialed number can be cross-referenced against vendor_record.phone_on_file to confirm it was pre-existing.",
+      "what_it_does_not_prove": "Does not confirm the invoice is correct or that the payment amount is appropriate. Does not replace cross-reference between invoice sender and AP approval billing contact."
+    },
+    {
+      "artifact_role": "vendor_master_audit_log",
+      "description": "Vendor master audit log entry showing the account change becoming effective. Must show: effective_date (same as AP approval date, 22 days before invoice), old account last4 and new account last4, change reference linking back to the portal change record ID.",
+      "what_it_proves": "The new account is the legitimate on-file account at the time the invoice arrived — the change predates the invoice by 22 days.",
+      "what_it_does_not_prove": "Does not confirm MFA was used for the original submission or that two approvers signed off. Evaluator must cross-reference the portal record and AP approval."
+    },
+    {
+      "artifact_role": "elevated_scrutiny_record",
+      "description": "Policy Section 4 elevated scrutiny review workflow record. This is a THIN administrative record — a workflow ticket, NOT a summary of the evidence chain. BANNED from this document: any enumeration of verification steps with document references, any field-by-field statement that each underlying artifact clears each risk, any prose that functions as an ALLOW rationale, any explicit statement that the callback number was confirmed or that the banking change was validated. Required fields ONLY: (1) record_reference (e.g. ESR-V-SDS-5829-2024-09), (2) vendor_id, (3) related_invoice, (4) related_change_request_ref, (5) elevated_scrutiny_conditions_triggered — condition codes and threshold values ONLY (e.g. condition: INV_FREQ_LOW, threshold: 3, observed: 2; condition: ACCT_CHANGE_RECENCY, threshold: 60_days, observed: 22_days) — do NOT include any statement about what the review found or that these concerns are resolved; (6) source_artifact_refs — a list of document IDs consulted during review (e.g. ['PORTAL-CHG-9A4B1', 'CALLSYS-448219', 'VCR-V-SDS-5829', 'VM-AUDIT-88F1G']) — IDs only, no description of what each showed; (7) reviewing_staff_id and reviewing_staff_name; (8) supervisor_id and supervisor_name; (9) open_exception_flag: false (no exceptions noted — NOT 'all clear', just no exceptions logged); (10) completion_timestamp (ISO datetime); (11) status_code: 'REVIEW_COMPLETE'. Must NOT contain 'payment authorized', 'cleared for payment', 'ALLOW', 'payment released', 'cleared: true', 'authorized: true', 'verification steps completed', 'all controls confirmed', or any verdict-language or evidence-summary language.",
+      "what_it_proves": "An elevated scrutiny workflow was opened for this transaction, the triggering conditions were logged, and the review ticket was closed without logged exceptions. The evaluator must still retrieve the source documents and verify independently that each underlying artifact supports the controls — this record does not do that work for them.",
+      "what_it_does_not_prove": "Does NOT tell the evaluator what any underlying artifact shows. Does NOT summarize the clearing chain. The source_artifact_refs are pointers only — the evaluator must read those artifacts to form a verdict."
+    },
+    {
+      "artifact_role": "invoice_cross_reference_record",
+      "description": "Policy Section 3 invoice processing workflow ticket. This is a THIN processing record — it documents that the cross-reference step was initiated and completed by a named processor, NOT a summary of comparison results. BANNED from this document: explicit 'billing contact matched' result fields, explicit 'remittance last4 matched' result fields, side-by-side invoice/vendor-master comparison values, any prose or field that lets a model conclude ALLOW without reading the actual invoice, vendor master, and change request. Required fields ONLY: (1) processing_reference (e.g. IPR-SDS-811), (2) invoice_id, (3) invoice_date, (4) vendor_id, (5) vendor_master_change_ref — the ID of the vendor master change record consulted (VCR-V-SDS-5829), (6) vendor_master_audit_ref — the ID of the audit log entry consulted (VM-AUDIT-88F1G), (7) ap_processor_id (employee ID), ap_processor_name; (8) check_timestamp (ISO datetime); (9) workflow_status: 'CROSS_REF_COMPLETE'; (10) exception_flag: null (no exceptions noted — not a verdict, just no exceptions logged). Must NOT contain comparison result values, matched/unmatched fields, or any conclusion about whether the invoice remittance account or billing contact are correct.",
+      "what_it_proves": "A named AP processor performed the Section 3 cross-reference workflow step on this invoice against vendor master records VCR-V-SDS-5829 and VM-AUDIT-88F1G. The evaluator must retrieve those source documents to determine whether the cross-reference actually supports ALLOW.",
+      "what_it_does_not_prove": "Does NOT state what the comparison showed. Does NOT confirm billing contact or remittance account are consistent. The evaluator must do that comparison from the underlying source documents."
+    },
+    {
+      "artifact_role": "vendor_master_snapshot",
+      "description": "Pre-change vendor master record snapshot — the point-in-time export of the vendor record as it existed at the time the portal change request was received (Day 0). This artifact directly supports the callback log's number_source field ('pre-change vendor master snapshot') and allows the evaluator to verify that the phone number dialed during the callback was already on file before the change was submitted. Required fields: (1) snapshot_reference (e.g. VM-SNAP-V-SDS-5829-20240901), (2) vendor_id, (3) snapshot_date (same as or before portal submission date), (4) vendor_name, (5) phone_on_file at time of snapshot, (6) default_payment_account_last4 at time of snapshot (the OLD account, before the change), (7) primary_billing_contact at time of snapshot (the pre-change contact, not accounting@summit-drilling.co). Must be formatted as a system-generated data export, not prose. Must NOT include any conclusion about whether the callback was legitimate or the change was valid — it is a raw data record.",
+      "what_it_proves": "The phone number that appears in the callback log's dialed_number field was already in the vendor master before the change request was submitted. Evaluator must cross-reference this snapshot against the callback log's dialed_number and number_source fields to confirm the provenance. Also shows the pre-change account and billing contact, providing a baseline for comparison against the post-change state.",
+      "what_it_does_not_prove": "Does not confirm the banking change was legitimate. Does not confirm AP completed the callback correctly. Only establishes the pre-change state of the vendor master."
+    },
+    {
+      "artifact_role": "policy_document",
+      "description": "AP policy for vendor banking detail changes. Must specify: (a) submission via authenticated vendor portal, (b) AP control verification: AP must call the vendor using the phone number already on file in the pre-change vendor master — this call occurs AFTER portal submission and BEFORE vendor master activation or payment release; the callback contact source is pre-existing vendor master data, not the change request or invoice, (c) two-approver AP Operations sign-off required before the change becomes effective in the vendor master, (d) updated billing contact recorded at time of approval, (e) Section 3: AP staff processing an invoice against a recently updated payment account must document the cross-reference check in an invoice processing record, (f) Section 4: elevated scrutiny conditions requiring additional review documentation — vendor fewer than 3 invoices in trailing 12 months, payment account change within 60 days of invoice, invoice sender email not previously in known contacts, invoice amount exceeds 150% of trailing average. Section 4 elevated scrutiny does not automatically suspend payment but requires that the reviewing AP staff member document that verification steps have been completed and note any open questions for supervisor review. CRITICAL TIMING CONSTRAINT: the policy must NOT require the verification call to occur before portal submission. Correct required order: (1) vendor submits via portal, (2) AP places verification call using pre-existing vendor master contact data, (3) two-approver sign-off and vendor master activation, (4) invoice eligible for payment after all steps complete. Policy must NOT contain language that says 'if all steps are complete, the payment is authorized' — state the process, not the verdict.",
+      "what_it_proves": "Defines what a legitimate change looks like and what elevated scrutiny documentation is required. Evaluator must confirm each step is documented in the other artifacts.",
+      "what_it_does_not_prove": "Nothing about whether this specific change followed the process — evaluator must verify that."
+    }
+  ],
+
+  "noise_artifacts": [
+    {
+      "artifact_role": "bec_controls_digest",
+      "description": "A quarterly AP controls and threat landscape digest from the Finance Controls team — NOT a targeted advisory about this specific scenario. This replaces the prior security_advisory which acted as a solver roadmap by enumerating exactly the indicators present in this packet. The replacement document must: (a) cover broad AP/financial controls themes — wire fraud in general, social engineering in procurement, email compromise tactics — without building a checklist that maps to the elevated scrutiny conditions in this packet; (b) NOT enumerate the specific combination: 'vendor has fewer than 3 invoices in trailing 12 months' AND 'payment account change within 60 days' as matched triggers; (c) NOT include language like 'the presence of these indicators does not by itself establish fraud' or any steering language that nudges toward ALLOW; (d) NOT include a 'Recommended AP Actions' section that lists the exact verification steps documented in this packet's clearing evidence; (e) feel like a periodic institutional document — tone of a quarterly review, references to general threat landscape trends, maybe a brief summary of aggregate activity metrics — not a custom advisory written for this transaction; (f) may mention BEC as a threat category broadly and note that AP controls (portal submissions, callbacks, dual approval) are the defensive layer, without describing the specific trigger combination in this packet.",
+      "what_it_does": "Provides realistic enterprise security context without telegraphing the required clearing logic. Evaluator is aware of BEC risk but cannot use the advisory as a roadmap to the verdict."
+    },
+    {
+      "artifact_role": "portal_abandoned_session",
+      "description": "A supplier portal session record for the same vendor (V-SDS-5829) showing an earlier, incomplete change attempt that was abandoned before submission — approximately 3 days before the successful PORTAL-CHG-9A4B1 session. This replaces the prior unrelated_portal_change (Apex Scaffolding contact change) which created zero ambiguity and required no ruling out. Required: (a) same vendor_id as the main portal change (V-SDS-5829 / Summit Drilling Solutions) — this is what creates the side issue; (b) session date: a few days before the actual portal submission date (e.g. 2024-08-29); (c) authentication events: credential login accepted, step-up authentication triggered for payment account change category, OTP dispatched and accepted; (d) change actions: payment account update initiated, but session timed out or user closed before finalizing — change submission was NOT completed; (e) system_status at session close: 'Change request NOT queued. Session closed without submission. No vendor master impact. Session log retained per portal audit policy.'; (f) portal_system and log_generated fields identical in format to the real portal change record, making it require active ruling out. What the evaluator must rule out: is there a second, earlier portal change for this vendor? Does this affect which account is the authoritative post-change account? Ruling it out requires reading the system_status field of this record ('NOT queued, no vendor master impact') and confirming that only PORTAL-CHG-9A4B1 resulted in a queued change request.",
+      "what_it_does": "Creates a plausible 'earlier change attempt?' signal for the same vendor that requires active ruling out. Evaluator must confirm this session was abandoned before submission and did not result in any vendor master modification, and that the active portal change is PORTAL-CHG-9A4B1. The ruling-out step adds a realistic cross-reference that does not affect the verdict."
+    }
+  ],
+
+  "cross_reference_requirement": "Multiple cross-references are required: (1) Invoice sender email must be assembled from invoice header, AP approval record updated_billing_contact, and portal submission contact — no single document states all three are consistent; (2) callback dialed number must be compared against vendor_record.phone_on_file to confirm it was pre-change data, not sourced from the change request; (3) elevated scrutiny conditions in the ESR must be verified against their source documents (vendor_record for invoice count, VM-AUDIT-88F1G for effective date vs invoice date); (4) the abandoned portal session (noise) must be distinguished from the active portal change by reading system_status fields — same vendor_id means evaluator cannot passively ignore it; (5) invoice billing contact and remittance last4 in the invoice cross-reference record must be spot-checked against the underlying VCR and VM-AUDIT documents.",
+
+  "forbidden_fields": [
+    "payment_hold: true (for ALLOW target)",
+    "approved: true",
+    "cleared: true",
+    "mfa_verified: true (use prose in session log instead)",
+    "change_authorized: true",
+    "cleared_for_payment: true (on any artifact)",
+    "review_cleared: true (on elevated scrutiny record — use status_code: REVIEW_COMPLETE instead)",
+    "Any boolean verdict field on elevated_scrutiny_record or invoice_cross_reference_record",
+    "Any document title containing 'Clearance', 'Approval Confirmation', 'Authorization Complete'",
+    "Any narrative prose in callback record that reads as a conclusion about fraud or legitimacy"
+  ],
+
+  "integration_minimum": {
+    "distinct_facts_required": 5,
+    "source_documents_required": 4,
+    "cross_reference_steps_required": 2,
+    "description": "At minimum: (1) portal submission authenticated — from portal record; (2) AP two-approver sign-off — from AP approval record; (3) vendor master effective before invoice — from audit log; (4) invoice sender matches AP approval billing contact — cross-reference invoice header against AP approval record; (5) elevated scrutiny review documented — from elevated scrutiny record, with each step cross-verified against the referenced artifacts. No single document provides more than 2 of these 5 facts."
+  },
+
+  "artifact_placement_brief": {
+    "internal_documents_required": [
+      "invoice — standalone invoice document showing new bank account last4, billing contact email, service, amount",
+      "portal_change_record — supplier portal audit log of the banking change session (includes MFA authentication in prose, not a boolean field)",
+      "ap_approval_record — AP Operations two-approver sign-off with updated_billing_contact field (approver_signatures structure with employee IDs, no 'approved: true' boolean)",
+      "ap_callback_record — structured system export (call_system_reference, agent_id, number_source field explicitly naming pre-change vendor master snapshot, verification_items list, outcome_code — no prose narrative conclusions)",
+      "vendor_master_audit_log — audit log showing old and new account last4 with effective_date 22 days before invoice",
+      "vendor_master_snapshot — point-in-time pre-change vendor master export showing phone_on_file, old account last4, pre-change billing contact (establishes callback number provenance)",
+      "elevated_scrutiny_record — THIN workflow ticket: triggered condition codes only, source_artifact_refs list (IDs only), reviewer/supervisor IDs, status_code REVIEW_COMPLETE — NO verification step enumeration, NO evidence summary, NO match results",
+      "invoice_cross_reference_record — THIN processing ticket: processor ID, timestamp, source document refs (IDs only), workflow_status CROSS_REF_COMPLETE — NO comparison values, NO matched/unmatched fields",
+      "bec_controls_digest — noise: quarterly AP/financial controls threat landscape digest (broad BEC context, does NOT map to this specific scenario's trigger combination)",
+      "portal_abandoned_session — noise: earlier abandoned portal session for same vendor (V-SDS-5829) that was not submitted — requires active ruling out by reading system_status"
+    ],
+    "policy_documents_required": [
+      "policy_document — AP Vendor Management Policy defining banking change process (Sections 2-4: portal submission + callback to pre-change phone + dual-approver sign-off + Section 3 invoice cross-reference documentation requirement + Section 4 elevated scrutiny conditions and documentation requirement)"
+    ],
+    "minimum_internal_documents": 10,
+    "minimum_policy_documents": 1,
+    "note": "All required_artifacts except policy_document go in payload.context.internal_documents. Both noise_artifacts also go in internal_documents. The policy goes in payload.context.policy_documents. Total internal_documents = 10 minimum. Builder may include additional realistic context documents (e.g. purchase order, service receipt) beyond the 10 minimum."
+  },
+
+  "builder_notes": [
+    "Company: mid-size industrial manufacturer, AP department (~50-person company)",
+    "Vendor: has been active for 2+ years with 5-8 prior invoices, low activity recently (2 invoices in last 12 months)",
+    "Invoice amount: $18,000 - $35,000 range (realistic for the service type)",
+    "Invoice service type: should differ slightly from prior invoice history — not so different as to be a standalone red flag, but enough to combine with other signals",
+    "Email language: the vendor email should feel like a real vendor email — not robotic, not scripted. Include a brief sentence about the banking change: natural, not demanding.",
+    "The AP two-approver sign-off record should have two actual named approvers with employee IDs in an approver_signatures structure, not a boolean field",
+    "AP callback timing (CRITICAL): the verification call happens AFTER portal submission (Day 0-2) and BEFORE two-approver sign-off and vendor master activation (Day 4). The policy document must reflect this sequence. Do NOT author a policy requiring callback before portal submission — that sequence is wrong for this workflow.",
+    "REPAIR NOTE — elevated_scrutiny_record (CRITICAL): this artifact was the core HQA blocker. The policy (Section 4) requires additional review documentation when elevated scrutiny conditions are triggered. In this packet, two conditions are triggered: vendor has 2 invoices in trailing 12 months (below threshold of 3), and payment account change occurred 22 days before invoice (within the 60-day window). The elevated scrutiny record must be a structured form — NOT prose — showing the triggered conditions, verification steps completed with document references, reviewer and supervisor employee IDs, and status_code REVIEW_COMPLETE. Do NOT add verdict language to this record.",
+    "REPAIR NOTE — invoice_cross_reference_record: Policy Section 3 requires AP to document the cross-reference check when processing an invoice against a recently updated payment account. This record must be structured (not prose), showing the billing contact comparison, remittance last4 comparison, vendor master effective date vs invoice date, and AP processor employee ID.",
+    "REPAIR NOTE — callback log: the prior version (CALLSYS-448219) was written in exculpatory narrative prose. Replace it with a structured system export that has discrete fields for: agent_id (employee number), number_source (explicitly 'pre-change vendor master snapshot, record date [date]'), verification_items (structured list of checked items with CONFIRMED/NOT_CONFIRMED status per item), and outcome_code (enum, not free text). No narrative about what the vendor 'confirmed' or whether the call 'ended without escalation'.",
+    "REPAIR NOTE — security advisory: replace with a broader quarterly AP controls and threat landscape digest. The prior advisory enumerated exactly the indicators present in this packet (low invoice frequency, banking change before invoice, new sender email) and functioned as a solver roadmap. The replacement should cover BEC broadly without creating a checklist that maps to this specific packet's elevated scrutiny trigger combination. Do NOT include 'does not by itself establish fraud' or similar steering language.",
+    "REPAIR NOTE — noise artifact: replace the Apex Scaffolding contact change (which created zero ambiguity) with an abandoned portal session for the same vendor (V-SDS-5829) that was not submitted. This creates a 'was there an earlier portal change?' signal that requires the evaluator to read the session status and rule it out. The abandoned session must have the same vendor_id and similar document structure to the real portal change, but system_status must clearly state the session expired without submission and no vendor master impact occurred.",
+    "REPAIR NOTE — email thread: the prior email thread had Marcus Webb saying 'Routing through normal invoice review' in a way that implied clearance. Rewrite his email to be more neutral — he can note the portal maintenance event and PO without implying the transaction is cleared. The email thread should be authentic enterprise communication, not editorial guidance toward ALLOW.",
+    "REPAIR NOTE — ESR (CRITICAL): The elevated_scrutiny_record must be a THIN workflow ticket. Do NOT include a verification_steps_completed checklist. Do NOT explain what each source document showed. Do NOT include any statement that each concern was resolved. The ESR's source_artifact_refs is a list of document IDs only — the evaluator must open those documents to form a view. If you include a step-by-step summary of the verification chain in the ESR, you are creating a single-document shortcut and the packet will fail QA. The ESR proves the review happened; it does not summarize what the review found.",
+    "REPAIR NOTE — IPR (CRITICAL): The invoice_cross_reference_record must be a THIN processing ticket. Do NOT include side-by-side comparison fields (invoice_billing_contact vs vendor_master_billing_contact). Do NOT include matched/unmatched result fields. Do NOT include the remittance last4 comparison as a field in this document. The IPR names the source documents consulted (IDs only) and records that the processor completed the workflow step. The evaluator must retrieve those source documents to verify the comparison.",
+    "REPAIR NOTE — vendor_master_snapshot: Add this as a pre-change system export showing the vendor master state at the time the portal change was received. Include: phone_on_file (the pre-change phone — same number that appears in the callback log's dialed_number field), old account last4, pre-change billing contact. This resolves the QA finding about missing callback number provenance. It is a raw data export — no verdict language.",
+    "DO NOT change expected_verdict from ALLOW. DO NOT add payment_hold: true. DO NOT remove policy_documents. DO NOT remove any clearing evidence from the prior revision. DO NOT add verdict-language booleans to the new records."
+  ]
+}

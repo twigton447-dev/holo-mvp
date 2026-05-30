@@ -331,9 +331,9 @@ def _governor_provider(last_provider: str, providers: list) -> str:
 def _is_transient_error(error_str: str) -> bool:
     if not error_str:
         return False
-    markers = ["503", "429", "unavailable", "overloaded", "timeout",
+    markers = ["503", "429", "unavailable", "overloaded", "timeout", "timed out",
                "connection", "high demand", "try again", "rate limit",
-               "service unavailable", "internal server error", "500"]
+               "service unavailable", "internal server error", "500", "read operation"]
     return any(m in error_str.lower() for m in markers)
 
 

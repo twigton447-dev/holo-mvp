@@ -400,9 +400,9 @@ def _is_transient_error(error_str: str) -> bool:
     """True if this looks like a recoverable provider-side failure."""
     if not error_str:
         return False
-    markers = ["503", "429", "unavailable", "overloaded", "timeout",
+    markers = ["503", "429", "unavailable", "overloaded", "timeout", "timed out",
                "connection", "high demand", "try again", "rate limit",
-               "service unavailable", "internal server error", "500"]
+               "service unavailable", "internal server error", "500", "read operation"]
     low = error_str.lower()
     return any(m in low for m in markers)
 

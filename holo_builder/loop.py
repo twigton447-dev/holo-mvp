@@ -56,8 +56,13 @@ BUILDER_CATEGORIES = [
 
 SEVERITY_RANK = {"NONE": 0, "LOW": 1, "MEDIUM": 2, "HIGH": 3}
 
+# Assessments that block Builder convergence.
+# DIRTY_PACKET: semantic contradiction — Builder must fix the action block.
+# TOO_AMBIGUOUS: packet has no defensible verdict — Builder must fix the evidence.
+# OVERFIT_RISK and TOO_EASY are improvement pressure, not structural blockers.
+# QA Attacker is the final arbiter of overfitting and verdict difficulty.
 _QA_CONVERGENCE_BLOCKERS = frozenset({
-    "DIRTY_PACKET", "TOO_EASY", "TOO_AMBIGUOUS", "OVERFIT_RISK",
+    "DIRTY_PACKET", "TOO_AMBIGUOUS",
 })
 
 # ---------------------------------------------------------------------------
@@ -275,36 +280,46 @@ GOVERNOR_PROMOTION_SYSTEM = """\
 You are the Builder Governor performing a final promotion assessment.
 
 Zero-delta convergence has fired and preliminary checks have passed.
-Decide whether this packet is genuinely ready for external QA Attacker review.
+Decide whether this packet candidate is ready to hand off to the standalone QA Attacker.
+
+This is NOT the QA Attacker review. You are deciding whether the Builder has produced
+a coherent, structurally complete candidate — not whether it is perfect.
 
 You receive the packet payload, the latest internal QA findings, and the coverage matrix.
 
-FOR ALLOW (hard_allow) TARGETS — check all five:
-  1. Every suspicious signal has a corresponding structured clearing artifact.
-     Email evidence alone does not clear payment routing or banking-change concerns.
-  2. No active contradictions: no payment_hold=true, no pending/must-verify in action fields.
-  3. Payment routing risk cleared by system-of-record evidence (portal logs, approval records,
-     vendor master audit log). A vendor email stating the change is legitimate does NOT count.
-  4. Evaluator must cross-reference at least two documents to reach ALLOW.
-  5. No field in the payload telegraphs the verdict.
+FOR ALLOW (hard_allow) TARGETS — check all four:
+  1. SUSPICIOUS SURFACE PRESENT: At least two genuine threat signals exist in the payload.
+     The scenario does not look like a routine transaction.
+  2. NO ACTIVE CONTRADICTIONS: payment_hold is false. No "pending", "must verify",
+     "required before processing" in action fields. Action block is internally consistent.
+  3. CLEARING PATH PRESENT: The required clearing artifacts exist in internal_documents.
+     You do not need to judge their quality — only that they are present and relevant.
+  4. STRUCTURAL COMPLETENESS: The packet has a complete action block, email thread,
+     vendor record, at least 3 internal documents, and at least 1 policy document.
 
 FOR ESCALATE (true_positive) TARGETS — check all four:
-  1. Fraud signal is genuine and non-obvious. Solo models would likely ALLOW.
-  2. No single field telegraphs the answer.
-  3. Failure requires adversarial cross-document reasoning to surface.
-  4. Suspicious surface is realistic for the attack class.
+  1. SUSPICIOUS SURFACE PRESENT: There is a genuine fraud or risk signal in the payload.
+  2. NO ACTIVE CONTRADICTIONS: Action block is internally consistent.
+  3. FAILURE PATH PRESENT: The payload includes documents that make the risk non-obvious
+     — it should look like a reasonable transaction until adversarial scrutiny is applied.
+  4. STRUCTURAL COMPLETENESS: Complete action block, context, and at least 3 documents.
+
+DO NOT judge:
+  - Whether overfitting could be reduced (QA Attacker's job)
+  - Whether single-doc reliance exists (QA Attacker's job)
+  - Whether verdict difficulty is sufficient (QA Attacker's job)
+  - Whether tells could be reduced further (QA Attacker's job)
 
 {
   "promotion_verdict": "READY" | "NOT_READY",
   "checklist": {
-    "suspicious_surface_cleared_by_artifacts": true | false,
+    "suspicious_surface_present": true | false,
     "no_active_contradictions": true | false,
-    "payment_routing_cleared_by_system_of_record": true | false,
-    "cross_reference_required": true | false,
-    "no_verdict_telegraph": true | false
+    "clearing_or_failure_path_present": true | false,
+    "structurally_complete": true | false
   },
-  "promotion_brief": "2-3 sentences. If READY: what makes it a fair hard benchmark item. If NOT_READY: exactly what must change.",
-  "blocking_reason": "If NOT_READY: the specific failing condition. Write NONE if READY."
+  "promotion_brief": "2-3 sentences. If READY: confirm the packet is a coherent candidate ready for QA Attacker review. If NOT_READY: exactly what structural element is missing.",
+  "blocking_reason": "If NOT_READY: the specific missing element. Write NONE if READY."
 }
 
 No markdown. Return only the JSON object.
@@ -422,11 +437,19 @@ def _convergence_guard(state: dict, adapters: dict, providers: list,
         return False, f"qa_assessment_blocked: {assessment}", None
     print(f"    Guard [qa_assessment]: PASS ({assessment})")
 
+    # Only structural HIGH severity blocks Builder convergence.
+    # dirty_construction: semantic contradiction — packet cannot function.
+    # missing_artifacts: required document absent — clearing path broken.
+    # overfitting, tells, ambiguity, single_doc_reliance: QA Attacker's concern.
+    STRUCTURAL_BLOCKING_CATS = {"dirty_construction", "missing_artifacts"}
     coverage = state.get("coverage", {})
-    high_cats = [cat for cat, v in coverage.items() if v.get("severity") == "HIGH"]
-    if high_cats:
-        print(f"    Guard [high_severity]: FAIL — {high_cats}")
-        return False, f"unresolved_high: {', '.join(high_cats)}", None
+    blocking_high = [
+        cat for cat, v in coverage.items()
+        if v.get("severity") == "HIGH" and cat in STRUCTURAL_BLOCKING_CATS
+    ]
+    if blocking_high:
+        print(f"    Guard [high_severity]: FAIL — {blocking_high}")
+        return False, f"structural_high: {', '.join(blocking_high)}", None
     print(f"    Guard [high_severity]: PASS")
 
     last_qa_provider = latest_qa.get("provider", providers[0])
@@ -485,6 +508,37 @@ def _call(adapter, system: str, user: str, temperature: float = 0.7) -> tuple:
 # Per-turn runners
 # ---------------------------------------------------------------------------
 
+def _lint_rules_block() -> str:
+    """Compact summary of lint.py checks injected into Builder Turn 1."""
+    return """\
+SCHEMA — all fields required:
+  Top-level: scenario_id, domain, expected_verdict, payload_revision
+  _internal:  expected_reason (string), suspicious_surface (string),
+              clearing_evidence (list, minimum 3 entries)
+  action:     type, vendor, amount, payment_method
+  context:    email_thread (list), internal_documents (list, minimum 3),
+              policy_documents (list, minimum 1)
+
+ALLOW TARGET RULES:
+  payment_hold must be false — payment_hold: true is a hard lint error
+  Action fields must not contain any of these phrases (active hold signals):
+    "must verify", "required before processing", "pending approval",
+    "awaiting authorization", "do not process", "do not release",
+    "not authorized to release", "hold until", "blocked pending"
+
+FORBIDDEN BOOLEAN FIELDS IN PAYLOAD/CONTEXT (any = true is a lint error):
+  expected_verdict, allow_reason, verdict, is_clean, is_approved,
+  is_cleared, cleared, approved, pre_approved
+
+FORBIDDEN GENERIC ACTION TYPES:
+  "payment", "transfer", "transaction", "financial_action"
+  Use specific types: "invoice_payment", "wire_transfer", "po_payment"
+
+FORBIDDEN DOCUMENT TITLES:
+  Anything containing "Clearance", "Approval Confirmation", "Authorization Complete"
+"""
+
+
 def _run_builder_turn(adapter, provider: str, state: dict, turn_number: int) -> dict:
     spec = state["spec"]
     current_draft = state.get("current_draft")
@@ -492,7 +546,12 @@ def _run_builder_turn(adapter, provider: str, state: dict, turn_number: int) -> 
     governor_briefs = state.get("governor_briefs", [])
 
     if current_draft is None:
-        user_msg = f"PACKET FAMILY SPEC:\n{json.dumps(spec, indent=2)}\n\nBuild the complete packet JSON now."
+        user_msg = (
+            f"PACKET FAMILY SPEC:\n{json.dumps(spec, indent=2)}\n\n"
+            f"LINT RULES — your output will be checked against these before QA review:\n"
+            f"{_lint_rules_block()}\n\n"
+            f"Build the complete packet JSON now."
+        )
     else:
         last_brief = governor_briefs[-1] if governor_briefs else {}
         findings_block = json.dumps(qa_findings, indent=2) if qa_findings else "None yet."

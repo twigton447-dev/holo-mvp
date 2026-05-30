@@ -236,6 +236,42 @@ You do NOT know the target verdict. You see only what the attackers have found.
 No markdown. Return only the JSON object.
 """
 
+REPAIR_TICKET_SYSTEM = """\
+You are synthesizing QA attack findings into a structured repair ticket for the Builder.
+
+You are blind — you do not know the target verdict, builder intent, or packet spec.
+You see only the accumulated findings from the QA attack turns.
+
+Your job: produce a repair ticket that tells the Builder exactly what must change and
+how to approach the next revision. Be specific — name document IDs, field names, date
+values, or contact details where known from the findings.
+
+REPAIRABILITY definitions:
+  FIXABLE    — Builder can fix these issues without rebuilding the core evidence structure.
+               Examples: adding realistic noise, fixing date sequencing, removing a tell,
+               adding a missing artifact.
+  STRUCTURAL — The action block or the clearing-evidence structure must be rebuilt.
+               The core seam may need redesign. Examples: semantic contradiction in action
+               block, clearing logic fundamentally broken, evidence structure impossible.
+  RETIRE     — The spec has a fundamental flaw that Builder cannot fix by iteration.
+               The seam itself is broken. Requires a new spec.
+
+{
+  "qa_result": "the final classification: NEEDS_REPAIR | DIRTY_PACKET | TOO_EASY | TOO_AMBIGUOUS | OVERFIT_RISK | RETIRE",
+  "inferred_verdict": "ALLOW" | "ESCALATE" | "UNCLEAR",
+  "repairability": "FIXABLE" | "STRUCTURAL" | "RETIRE",
+  "blocking_findings": ["specific issues that prevented CLEAN_TO_FREEZE — one per item"],
+  "missing_artifacts": ["specific artifact names or types that are absent or inadequate"],
+  "contradictions": ["specific internal contradictions — date, ID, contact, or amount mismatches"],
+  "overfit_signals": ["specific overfitting indicators — documents or fields that feel purpose-built"],
+  "single_doc_shortcuts": ["names of any documents from which a model could resolve the verdict alone"],
+  "recommended_builder_focus": "one paragraph: the most important thing for Builder to fix in the next revision, and why",
+  "do_not_fix_by": ["approaches that are tempting but will not address the root issue — e.g. 'adding a disclaimer field', 'removing the security advisory entirely'"]
+}
+
+No markdown. Return only the JSON object.
+"""
+
 # ---------------------------------------------------------------------------
 # LLM call wrapper (mirrors loop.py)
 # ---------------------------------------------------------------------------
@@ -300,11 +336,110 @@ def _extract_payload(packet: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Repair ticket generation
+# ---------------------------------------------------------------------------
+
+def _repairability(classification: str) -> str:
+    return {
+        "NEEDS_REPAIR":  "FIXABLE",
+        "TOO_EASY":      "FIXABLE",
+        "OVERFIT_RISK":  "FIXABLE",
+        "DIRTY_PACKET":  "STRUCTURAL",
+        "TOO_AMBIGUOUS": "STRUCTURAL",
+        "RETIRE":        "RETIRE",
+    }.get(classification, "FIXABLE")
+
+
+def _generate_repair_ticket(adapters: dict, providers: list, last_provider: str,
+                             state: dict, final_classification: str,
+                             candidate_id: str) -> dict:
+    """
+    Synthesize accumulated QA findings into a structured repair ticket for Builder.
+
+    Still blind: synthesis receives only the attack findings — no payload,
+    no target verdict, no builder notes.
+    """
+    # Pick a provider different from the last attacker turn
+    others = [p for p in providers if p != last_provider]
+    provider = random.choice(others) if others else providers[0]
+    adapter  = adapters[provider]
+
+    # Build synthesis input from attack findings only — no payload
+    synthesis_input = {
+        "final_classification": final_classification,
+        "repairability_hint":   _repairability(final_classification),
+        "accumulated_findings": state["all_findings"],
+        "classification_sequence": state["classifications"],
+        "category_summary": _aggregate_categories(state["turn_history"]),
+    }
+    user_msg = (
+        f"FINAL CLASSIFICATION: {final_classification}\n\n"
+        f"ACCUMULATED QA FINDINGS:\n{json.dumps(synthesis_input, indent=2)}\n\n"
+        f"Produce the structured repair ticket."
+    )
+
+    parsed, in_tok, out_tok, elapsed, error = _call(
+        adapter, REPAIR_TICKET_SYSTEM, user_msg, temperature=0.2
+    )
+
+    base = {
+        "candidate_id":            candidate_id,
+        "qa_result":               final_classification,
+        "inferred_verdict":        _consensus_verdict(state["turn_history"]),
+        "repairability":           _repairability(final_classification),
+        "synthesis_provider":      provider,
+        "synthesis_tokens":        {"input": in_tok, "output": out_tok},
+    }
+
+    if parsed:
+        parsed.pop("qa_result", None)        # already in base, use final_classification
+        parsed.pop("repairability", None)    # already computed from classification
+        base.update(parsed)
+        return base
+
+    # Fallback: assemble from raw findings if synthesis LLM fails
+    all_blocking = [f["findings"] for f in state["all_findings"] if f.get("findings")]
+    base.update({
+        "blocking_findings":         all_blocking,
+        "missing_artifacts":         [],
+        "contradictions":            [],
+        "overfit_signals":           [],
+        "single_doc_shortcuts":      [],
+        "recommended_builder_focus": f"Synthesis call failed ({error}). Review accumulated findings above.",
+        "do_not_fix_by":             [],
+        "synthesis_error":           error,
+    })
+    return base
+
+
+def _aggregate_categories(turn_history: list) -> dict:
+    """Max severity per category across all attacker turns."""
+    from holo_builder.loop import SEVERITY_RANK
+    agg = {}
+    for turn in turn_history:
+        for cat, sev in turn.get("categories", {}).items():
+            cur_rank = SEVERITY_RANK.get(agg.get(cat, "NONE"), 0)
+            new_rank = SEVERITY_RANK.get(sev, 0)
+            if new_rank > cur_rank:
+                agg[cat] = sev
+    return agg
+
+
+def _consensus_verdict(turn_history: list) -> str:
+    """Most common inferred_verdict across attacker turns."""
+    verdicts = [t.get("inferred_verdict", "") for t in turn_history if t.get("inferred_verdict")]
+    if not verdicts:
+        return "UNCLEAR"
+    return max(set(verdicts), key=verdicts.count)
+
+
+# ---------------------------------------------------------------------------
 # Main QA Attacker loop
 # ---------------------------------------------------------------------------
 
 def run_qa_attack(packet: dict, seed: int | None = None,
-                  skip_providers: list | None = None) -> dict:
+                  skip_providers: list | None = None,
+                  candidate_id: str = "") -> dict:
     """
     Run the standalone QA Attacker on a finished Builder candidate.
 
@@ -494,29 +629,48 @@ def run_qa_attack(packet: dict, seed: int | None = None,
     print(f"  Tokens: {total_in_tok:,} in / {total_out_tok:,} out")
     print(f"  {'='*60}\n")
 
+    # Generate repair ticket for any non-CLEAN result
+    repair_ticket = None
+    if final_classification != "CLEAN_TO_FREEZE":
+        last_provider = state["turn_history"][-1]["provider"] if state["turn_history"] else providers[0]
+        _cid = candidate_id or f"unknown_{scenario_id}"
+        print(f"  Generating repair ticket ({final_classification})...")
+        repair_ticket = _generate_repair_ticket(
+            adapters, providers, last_provider, state,
+            final_classification, _cid
+        )
+        rep = repair_ticket.get("repairability", "?")
+        focus = repair_ticket.get("recommended_builder_focus", "")[:80]
+        print(f"  Repair ticket: repairability={rep}")
+        print(f"  Focus: {focus}")
+        print()
+
+    ts    = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    qa_id = f"qa_{ts}_{scenario_id}"
+
     # Save blinded output (no packet content, no target verdict, no builder notes)
     out_dir = Path("holo_builder/outputs/qa_attacker") / scenario_id
     out_dir.mkdir(parents=True, exist_ok=True)
-    ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     log_path = out_dir / f"qa_{ts}.json"
 
-    qa_id = f"qa_{ts}_{scenario_id}"
     result = {
-        "qa_id":               qa_id,
-        "scenario_id":         scenario_id,
-        "final_classification": final_classification,
-        "converged":           converged,
-        "retire_signal":       retire_signal,
-        "exit_reason":         exit_reason,
-        "turns_completed":     turns_completed,
-        "turn_history":        state["turn_history"],
-        "all_findings":        state["all_findings"],
-        "governor_briefs":     state["governor_briefs"],
-        "classification_sequence": state["classifications"],
-        "seed":                seed,
-        "total_tokens":        {"input": total_in_tok, "output": total_out_tok},
-        "timestamp":           datetime.utcnow().isoformat() + "Z",
-        "blinding_note":       "QA Attacker received only action+context. No target_verdict, builder notes, or metadata.",
+        "qa_id":                    qa_id,
+        "scenario_id":              scenario_id,
+        "candidate_id":             candidate_id or "",
+        "final_classification":     final_classification,
+        "converged":                converged,
+        "retire_signal":            retire_signal,
+        "exit_reason":              exit_reason,
+        "turns_completed":          turns_completed,
+        "turn_history":             state["turn_history"],
+        "all_findings":             state["all_findings"],
+        "governor_briefs":          state["governor_briefs"],
+        "classification_sequence":  state["classifications"],
+        "repair_ticket":            repair_ticket,
+        "seed":                     seed,
+        "total_tokens":             {"input": total_in_tok, "output": total_out_tok},
+        "timestamp":                datetime.utcnow().isoformat() + "Z",
+        "blinding_note":            "QA Attacker received only action+context. No target_verdict, builder notes, or metadata.",
     }
 
     try:

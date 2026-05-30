@@ -93,6 +93,7 @@ def cmd_build(args):
             "qa_turns":                      result["qa_turn_count"],
             "qa_deltas":                     result["qa_deltas"],
             "verdict_drift_events":          result.get("verdict_drift_events", []),
+            "artifact_collapse_events":      result.get("artifact_collapse_events", []),
             "seed":                          result["seed"],
             "built_at":                      result["timestamp"],
             # Authoritative spec metadata — read by lint.py for target-aware checks.

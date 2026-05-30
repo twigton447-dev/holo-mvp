@@ -1,7 +1,7 @@
 """
-holo_forge/lint.py
+holo_builder/lint.py
 
-Static lint for packet JSON files. No LLM. Runs before QA Holo.
+Static lint for packet JSON files. No LLM. Runs before QA Attacker review.
 
 Checks:
   - Schema completeness (required top-level and nested fields)
@@ -11,8 +11,8 @@ Checks:
   - Integration depth (at least 3 internal_documents)
 
 Usage:
-    python -m holo_forge.lint docs/benchmark/payloads/HAB-XXX_v1.json
-    or via forge.py lint <path>
+    python -m holo_builder.lint docs/benchmark/payloads/HAB-XXX_v1.json
+    or via builder.py lint <path>
 """
 
 import json
@@ -213,7 +213,7 @@ def run(packet_path: str) -> bool:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python -m holo_forge.lint <packet.json>")
+        print("Usage: python -m holo_builder.lint <packet.json>")
         sys.exit(1)
     ok = run(sys.argv[1])
     sys.exit(0 if ok else 1)

@@ -60,6 +60,8 @@ from llm_adapters import OpenAIAdapter, AnthropicAdapter, GoogleAdapter
 MAX_TURNS          = 10
 CONVERGENCE_WINDOW = 2  # consecutive turns with same classification to converge
 
+RETRY_BACKOFF_SECONDS = 4
+
 CLASSIFICATION_RANK = {
     "CLEAN_TO_FREEZE": 0,
     "NEEDS_REPAIR":    1,
@@ -326,6 +328,24 @@ def _governor_provider(last_provider: str, providers: list) -> str:
     return random.choice(others)
 
 
+def _is_transient_error(error_str: str) -> bool:
+    if not error_str:
+        return False
+    markers = ["503", "429", "unavailable", "overloaded", "timeout",
+               "connection", "high demand", "try again", "rate limit",
+               "service unavailable", "internal server error", "500"]
+    return any(m in error_str.lower() for m in markers)
+
+
+def _pick_fallback_provider(failed_provider: str, prev_turn_provider: str | None,
+                             providers: list) -> str | None:
+    candidates = [p for p in providers if p != failed_provider]
+    if not candidates:
+        return None
+    preferred = [p for p in candidates if p != prev_turn_provider]
+    return preferred[0] if preferred else candidates[0]
+
+
 def _extract_payload(packet: dict) -> dict:
     """Extract only action + context from packet payload. Enforces blinding."""
     payload = packet.get("payload", {})
@@ -491,6 +511,7 @@ def run_qa_attack(packet: dict, seed: int | None = None,
     exit_reason   = ""
     total_in_tok  = 0
     total_out_tok = 0
+    qa_provider_fallback_events: list = []
 
     print(f"\n{'='*65}")
     print(f"  QA ATTACKER: {scenario_id}")
@@ -521,6 +542,41 @@ def run_qa_attack(packet: dict, seed: int | None = None,
         total_in_tok  += in_tok
         total_out_tok += out_tok
 
+        # Transient fallback: retry once, then try a different provider
+        if error and parsed is None and _is_transient_error(error):
+            print(f"\n    [transient] {provider} failed — retrying in {RETRY_BACKOFF_SECONDS}s...", flush=True)
+            time.sleep(RETRY_BACKOFF_SECONDS)
+            parsed2, r_in, r_out, r_elapsed, error2 = _call(
+                adapter, QA_ATTACKER_SYSTEM, user_msg, temperature=0.2
+            )
+            total_in_tok  += r_in
+            total_out_tok += r_out
+
+            if parsed2 is not None:
+                parsed, in_tok, out_tok, elapsed, error = parsed2, r_in, r_out, r_elapsed, None
+            else:
+                prev_p   = state["turn_history"][-1]["provider"] if state["turn_history"] else None
+                fallback = _pick_fallback_provider(provider, prev_p, providers)
+                if fallback:
+                    print(f"    [qa_provider_fallback] {provider} -> {fallback}", flush=True)
+                    qa_provider_fallback_events.append({
+                        "turn_number":       turn_number,
+                        "failed_provider":   provider,
+                        "fallback_provider": fallback,
+                        "original_error":    (error2 or error)[:120],
+                    })
+                    fb_parsed, fb_in, fb_out, fb_elapsed, fb_error = _call(
+                        adapters[fallback], QA_ATTACKER_SYSTEM, user_msg, temperature=0.2
+                    )
+                    total_in_tok  += fb_in
+                    total_out_tok += fb_out
+                    if fb_parsed is not None:
+                        parsed, in_tok, out_tok, elapsed, error = fb_parsed, fb_in, fb_out, fb_elapsed, None
+                        provider = fallback
+                        adapter  = adapters[fallback]
+                    else:
+                        in_tok, out_tok, elapsed, error = fb_in, fb_out, fb_elapsed, fb_error or error2 or error
+
         if error and parsed is None:
             print(f"  ERROR: {error[:80]}")
             turn_rec = {
@@ -534,7 +590,11 @@ def run_qa_attack(packet: dict, seed: int | None = None,
                 "error":            error,
             }
             state["turn_history"].append(turn_rec)
-            exit_reason = "qa_call_error"
+            exit_reason = (
+                "qa_provider_fallback_used"
+                if any(e["turn_number"] == turn_number for e in qa_provider_fallback_events)
+                else "qa_call_error"
+            )
             break
 
         classification = parsed.get("classification", "NEEDS_REPAIR") if parsed else "NEEDS_REPAIR"
@@ -667,6 +727,7 @@ def run_qa_attack(packet: dict, seed: int | None = None,
         "governor_briefs":          state["governor_briefs"],
         "classification_sequence":  state["classifications"],
         "repair_ticket":            repair_ticket,
+        "qa_provider_fallback_events": qa_provider_fallback_events,
         "seed":                     seed,
         "total_tokens":             {"input": total_in_tok, "output": total_out_tok},
         "timestamp":                datetime.utcnow().isoformat() + "Z",

@@ -42,6 +42,12 @@
       "what_it_does_not_prove": "Does not confirm the engagement itself is legitimate or that the invoice amount is correct. Does not tell the evaluator whether the invoice sender matches this record — they must compare."
     },
     {
+      "artifact_role": "ap_callback_record",
+      "description": "AP callback/verification record. Must show: callback made to the phone number already in the pre-change vendor master (not a new number — sourced from the existing vendor record), callback date between the AP two-approver sign-off date and the invoice receipt date, the name of the AP approver who made the call, neutral status language (e.g. 'Vendor contact confirmed details on file'). Must NOT say 'verified as legitimate', 'not fraud', or 'change confirmed safe'. Must NOT include a boolean 'verified: true' or 'callback_complete: true' field — embed in prose.",
+      "what_it_proves": "AP followed the policy requirement to call the vendor at the phone number already on file before releasing the banking change. The callback number matches the pre-change vendor master phone, not a new number submitted by the vendor.",
+      "what_it_does_not_prove": "Does not confirm the invoice is correct or that the payment amount is appropriate. Does not replace the cross-reference between invoice sender and AP approval billing contact."
+    },
+    {
       "artifact_role": "vendor_master_audit_log",
       "description": "Vendor master audit log entry showing the account change becoming effective. Must show: effective_date (same as AP approval date, 22 days before invoice), old account last4 and new account last4, change reference linking back to the portal change record ID.",
       "what_it_proves": "The new account is the legitimate on-file account at the time the invoice arrived — the change predates the invoice by 22 days.",
@@ -91,16 +97,17 @@
       "invoice — standalone invoice document showing new bank account last4, billing contact email, service, amount",
       "portal_change_record — supplier portal audit log of the banking change session (includes MFA authentication in prose, not a boolean field)",
       "ap_approval_record — AP Operations two-approver sign-off with updated_billing_contact field (approver_signatures structure, no 'approved: true' boolean)",
+      "ap_callback_record — AP callback record showing call to phone number on pre-change vendor master; neutral status prose; no boolean verified field",
       "vendor_master_audit_log — audit log showing old and new account last4 with effective_date 22 days before invoice",
       "security_advisory — noise: BEC advisory from Security Ops describing the exact suspicious pattern",
       "unrelated_portal_change — noise: vendor portal change record for a different vendor (different vendor_id, different change type)"
     ],
     "policy_documents_required": [
-      "policy_document — AP policy defining the banking change process (portal submission + two-approver sign-off + updated billing contact)"
+      "policy_document — AP policy defining the banking change process (portal submission + two-approver sign-off + callback to phone on file + updated billing contact)"
     ],
-    "minimum_internal_documents": 6,
+    "minimum_internal_documents": 7,
     "minimum_policy_documents": 1,
-    "note": "All required_artifacts except policy_document go in payload.context.internal_documents. Both noise_artifacts also go in internal_documents. The policy goes in payload.context.policy_documents. Total internal_documents = 6 minimum."
+    "note": "All required_artifacts except policy_document go in payload.context.internal_documents. Both noise_artifacts also go in internal_documents. The policy goes in payload.context.policy_documents. Total internal_documents = 7 minimum."
   },
 
   "builder_notes": [

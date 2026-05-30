@@ -108,7 +108,19 @@ def _text_in(obj: Any) -> str:
 
 def check(packet: dict) -> LintResult:
     r = LintResult(passed=True)
+    domain          = packet.get("domain", "")
     expected_verdict = packet.get("expected_verdict", "")
+
+    # Authoritative target: use spec_target_verdict from _builder metadata when available.
+    # This prevents verdict drift from silently bypassing ALLOW-specific lint checks.
+    builder_meta     = packet.get("_builder", {})
+    auth_target      = builder_meta.get("spec_target_verdict", expected_verdict)
+
+    if builder_meta and auth_target != expected_verdict:
+        r.error(
+            f"expected_verdict='{expected_verdict}' has drifted from "
+            f"spec target='{auth_target}'. The Builder must not change the target verdict."
+        )
 
     # --- Schema: top-level required fields ---
     for f in ("scenario_id", "domain", "expected_verdict", "payload_revision"):
@@ -145,12 +157,17 @@ def check(packet: dict) -> LintResult:
             if not action.get(f):
                 r.error(f"payload.action.{f} is missing or empty")
 
-        # ALLOW-specific contradiction checks
-        if expected_verdict == "ALLOW":
+        # ALLOW-specific contradiction checks — use auth_target, not expected_verdict.
+        if auth_target == "ALLOW":
             if action.get("payment_hold") is True:
                 r.error(
                     "payload.action.payment_hold=true is a semantic contradiction for "
                     "an ALLOW target. Use hold_history for context; payment_hold must be false."
+                )
+            if "hold_code" in action:
+                r.error(
+                    "payload.action.hold_code is present on an ALLOW target. "
+                    "Remove this field — hold codes imply an unresolved block."
                 )
             action_text = _text_in(action)
             for signal in _PENDING_SIGNALS:
@@ -167,12 +184,25 @@ def check(packet: dict) -> LintResult:
         if not context.get("email_thread"):
             r.warn("payload.context.email_thread is missing — required for AP/BEC domain packets")
 
+        # internal_documents minimum: spec-driven first, then domain floor, then generic floor.
+        min_int_docs = builder_meta.get("spec_minimum_internal_documents", None)
+        if min_int_docs is None:
+            min_int_docs = 5 if domain in ("BEC", "AP") else 3
         internal_docs = context.get("internal_documents", [])
-        if not isinstance(internal_docs, list) or len(internal_docs) < 3:
+        if not isinstance(internal_docs, list) or len(internal_docs) < min_int_docs:
             r.error(
-                f"payload.context.internal_documents must have at least 3 entries "
+                f"payload.context.internal_documents must have at least {min_int_docs} entries "
                 f"(found {len(internal_docs) if isinstance(internal_docs, list) else 0})"
             )
+
+        # policy_documents: required for AP/BEC domain packets.
+        pol_docs = context.get("policy_documents", [])
+        if domain in ("BEC", "AP"):
+            if not isinstance(pol_docs, list) or len(pol_docs) < 1:
+                r.error(
+                    "payload.context.policy_documents is empty — "
+                    "AP/BEC domain packets require at least 1 policy document"
+                )
 
     # --- Verdict leak check: scan all payload/context field names ---
     all_kv = _walk_keys(payload)

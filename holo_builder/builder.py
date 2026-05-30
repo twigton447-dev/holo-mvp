@@ -82,17 +82,24 @@ def cmd_build(args):
         packet_dir.mkdir(parents=True, exist_ok=True)
         packet_path = packet_dir / f"{scenario_id}_v1.json"
 
+        spec = result.get("spec", {})
         final_draft["_builder"] = {
-            "builder_id":      result["builder_id"],
-            "builder_status":  result["builder_status"],
-            "converged":       result["converged"],
-            "retire_signal":   result["retire_signal"],
-            "exit_reason":     result["exit_reason"],
-            "turns":           result["turns_completed"],
-            "qa_turns":        result["qa_turn_count"],
-            "qa_deltas":       result["qa_deltas"],
-            "seed":            result["seed"],
-            "built_at":        result["timestamp"],
+            "builder_id":                    result["builder_id"],
+            "builder_status":                result["builder_status"],
+            "converged":                     result["converged"],
+            "retire_signal":                 result["retire_signal"],
+            "exit_reason":                   result["exit_reason"],
+            "turns":                         result["turns_completed"],
+            "qa_turns":                      result["qa_turn_count"],
+            "qa_deltas":                     result["qa_deltas"],
+            "verdict_drift_events":          result.get("verdict_drift_events", []),
+            "seed":                          result["seed"],
+            "built_at":                      result["timestamp"],
+            # Authoritative spec metadata — read by lint.py for target-aware checks.
+            "spec_target_verdict":           spec.get("target_verdict"),
+            "spec_minimum_internal_documents": (
+                spec.get("artifact_placement_brief", {}).get("minimum_internal_documents", 3)
+            ),
         }
 
         packet_path.write_text(json.dumps(final_draft, indent=2))
@@ -115,6 +122,9 @@ def cmd_build(args):
             failed = events[0]["failed_provider"] if events else "unknown"
             print(f"\n  BUILDER_PROVIDER_FALLBACK_USED: all providers failed for a turn ({failed}).")
             print("  Transient infrastructure issue — rerun. Partial candidate is not promotable.")
+        elif builder_status == "BUILDER_VERDICT_DRIFT_UNRESOLVABLE":
+            print(f"\n  BUILDER_VERDICT_DRIFT_UNRESOLVABLE: Turn 1 produced wrong verdict and correction failed.")
+            print("  Check spec and Builder system prompt. Partial candidate is not promotable.")
         else:
             print(f"\n  BUILDER_EXHAUSTED ({result['turns_completed']} turns, no convergence).")
             print("  Review the builder result and consider adjusting the spec or seam.")

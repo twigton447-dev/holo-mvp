@@ -56,6 +56,8 @@ BUILDER_CATEGORIES = [
 
 SEVERITY_RANK = {"NONE": 0, "LOW": 1, "MEDIUM": 2, "HIGH": 3}
 
+RETRY_BACKOFF_SECONDS = 4
+
 # Assessments that block Builder convergence.
 # DIRTY_PACKET: semantic contradiction — Builder must fix the action block.
 # TOO_AMBIGUOUS: packet has no defensible verdict — Builder must fix the evidence.
@@ -371,6 +373,84 @@ def _governor_provider(qa_provider: str, providers: list) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Provider fallback helpers
+# ---------------------------------------------------------------------------
+
+def _is_transient_error(error_str: str) -> bool:
+    """True if this looks like a recoverable provider-side failure."""
+    if not error_str:
+        return False
+    markers = ["503", "429", "unavailable", "overloaded", "timeout",
+               "connection", "high demand", "try again", "rate limit",
+               "service unavailable", "internal server error", "500"]
+    low = error_str.lower()
+    return any(m in low for m in markers)
+
+
+def _pick_fallback_provider(failed_provider: str, prev_turn_provider: str | None,
+                             providers: list) -> str | None:
+    """
+    Pick a fallback provider: not the failed one.
+    Prefer to also skip prev_turn_provider to preserve no-consecutive-repeat spirit.
+    Returns None if no eligible fallback exists.
+    """
+    candidates = [p for p in providers if p != failed_provider]
+    if not candidates:
+        return None
+    preferred = [p for p in candidates if p != prev_turn_provider]
+    return preferred[0] if preferred else candidates[0]
+
+
+def _run_turn_with_fallback(turn_fn, provider: str, adapter, adapters: dict,
+                             providers: list, state: dict,
+                             turn_number: int) -> tuple:
+    """
+    Run turn_fn with one retry on transient error, then one fallback provider.
+    Returns (result, actual_provider_used, fallback_events).
+
+    fallback_events is a list of dicts logged when fallback was invoked.
+    If the fallback also fails, the result will still carry an error — the
+    caller decides whether to break or continue.
+    """
+    fallback_events = []
+
+    result = turn_fn(adapter, provider, state, turn_number)
+
+    if result.get("error") and _is_transient_error(result["error"]):
+        print(f"\n    [transient] {provider} failed — retrying in {RETRY_BACKOFF_SECONDS}s...")
+        time.sleep(RETRY_BACKOFF_SECONDS)
+        result = turn_fn(adapter, provider, state, turn_number)
+
+        if result.get("error"):
+            prev_provider = (
+                state["turn_history"][-1]["provider"] if state["turn_history"] else None
+            )
+            fallback = _pick_fallback_provider(provider, prev_provider, providers)
+
+            if fallback:
+                print(f"    [provider_fallback] {provider} -> {fallback}")
+                fallback_events.append({
+                    "turn_number":       turn_number,
+                    "event":             "provider_fallback",
+                    "failed_provider":   provider,
+                    "fallback_provider": fallback,
+                    "original_error":    result["error"][:120],
+                })
+                result = turn_fn(adapters[fallback], fallback, state, turn_number)
+                return result, fallback, fallback_events
+            else:
+                fallback_events.append({
+                    "turn_number":       turn_number,
+                    "event":             "provider_fallback_exhausted",
+                    "failed_provider":   provider,
+                    "fallback_provider": None,
+                    "original_error":    result["error"][:120],
+                })
+
+    return result, provider, fallback_events
+
+
+# ---------------------------------------------------------------------------
 # Convergence guard
 # ---------------------------------------------------------------------------
 
@@ -546,9 +626,24 @@ def _run_builder_turn(adapter, provider: str, state: dict, turn_number: int) -> 
     governor_briefs = state.get("governor_briefs", [])
 
     if current_draft is None:
+        artifact_brief = spec.get("artifact_placement_brief")
+        placement_block = ""
+        if artifact_brief:
+            min_int = artifact_brief.get("minimum_internal_documents", 3)
+            int_docs = "\n".join(f"  - {d}" for d in artifact_brief.get("internal_documents_required", []))
+            pol_docs = "\n".join(f"  - {d}" for d in artifact_brief.get("policy_documents_required", []))
+            placement_block = (
+                f"ARTIFACT PLACEMENT — REQUIRED FOR THIS PACKET (checked before QA review):\n"
+                f"payload.context.internal_documents MUST contain ALL {min_int} of these:\n"
+                f"{int_docs}\n"
+                f"payload.context.policy_documents MUST contain:\n"
+                f"{pol_docs}\n"
+                f"Note: {artifact_brief.get('note', '')}\n\n"
+            )
         user_msg = (
             f"PACKET FAMILY SPEC:\n{json.dumps(spec, indent=2)}\n\n"
-            f"LINT RULES — your output will be checked against these before QA review:\n"
+            + placement_block
+            + f"LINT RULES — your output will be checked against these before QA review:\n"
             f"{_lint_rules_block()}\n\n"
             f"Build the complete packet JSON now."
         )
@@ -722,7 +817,8 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
         "promotion_brief": None,
     }
 
-    qa_deltas:    list[int] = []
+    qa_deltas:           list[int]  = []
+    all_fallback_events: list[dict] = []
     qa_turn_count = 0
     converged     = False
     retire_signal = False
@@ -747,13 +843,20 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
         print(f"  Turn {turn_number:>2} | {provider:<9} | {role}", end="", flush=True)
 
         if is_builder:
-            result = _run_builder_turn(adapter, provider, state, turn_number)
+            result, actual_provider, fb_events = _run_turn_with_fallback(
+                _run_builder_turn, provider, adapter, adapters, providers, state, turn_number
+            )
+            all_fallback_events.extend(fb_events)
             total_in_tok  += result.get("input_tokens", 0)
             total_out_tok += result.get("output_tokens", 0)
 
             if result.get("error"):
-                print(f"  ERROR: {result['error'][:80]}")
-                exit_reason = "builder_error"
+                if fb_events:
+                    print(f"  ALL PROVIDERS FAILED (transient): {result['error'][:80]}")
+                    exit_reason = "provider_all_failed"
+                else:
+                    print(f"  ERROR: {result['error'][:80]}")
+                    exit_reason = "builder_error"
                 state["turn_history"].append(result)
                 break
 
@@ -763,14 +866,21 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
             print(f"  -> draft rev={rev}  {result['elapsed_ms']}ms")
 
         else:
-            result = _run_internal_qa_turn(adapter, provider, state, turn_number)
+            result, actual_provider, fb_events = _run_turn_with_fallback(
+                _run_internal_qa_turn, provider, adapter, adapters, providers, state, turn_number
+            )
+            all_fallback_events.extend(fb_events)
             total_in_tok  += result.get("input_tokens", 0)
             total_out_tok += result.get("output_tokens", 0)
             state["turn_history"].append(result)
 
             if result.get("error"):
-                print(f"  ERROR: {result['error'][:80]}")
-                exit_reason = "qa_error"
+                if fb_events:
+                    print(f"  ALL PROVIDERS FAILED (transient): {result['error'][:80]}")
+                    exit_reason = "provider_all_failed"
+                else:
+                    print(f"  ERROR: {result['error'][:80]}")
+                    exit_reason = "qa_error"
                 break
 
             assessment = result.get("assessment", "NEEDS_REPAIR")
@@ -834,6 +944,8 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
         builder_status = "BUILDER_RETIRED"
     elif converged:
         builder_status = "BUILDER_CONVERGED"
+    elif exit_reason == "provider_all_failed":
+        builder_status = "BUILDER_PROVIDER_FALLBACK_USED"
     else:
         builder_status = "BUILDER_EXHAUSTED"
 
@@ -849,25 +961,27 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
     print(f"  {'='*60}\n")
 
     return {
-        "builder_id":      f"builder_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{scenario_id}",
-        "scenario_id":     scenario_id,
-        "spec":            spec,
-        "builder_status":  builder_status,
-        "converged":       converged,
-        "retire_signal":   retire_signal,
-        "exit_reason":     exit_reason,
-        "turns_completed": turns_completed,
-        "qa_turn_count":   qa_turn_count,
-        "qa_deltas":       qa_deltas,
-        "coverage":        state["coverage"],
-        "governor_briefs": state["governor_briefs"],
-        "promotion_brief": state.get("promotion_brief"),
-        "turn_history":    [
+        "builder_id":            f"builder_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{scenario_id}",
+        "scenario_id":           scenario_id,
+        "spec":                  spec,
+        "builder_status":        builder_status,
+        "converged":             converged,
+        "retire_signal":         retire_signal,
+        "exit_reason":           exit_reason,
+        "turns_completed":       turns_completed,
+        "qa_turn_count":         qa_turn_count,
+        "qa_deltas":             qa_deltas,
+        "provider_fallback_used": len(all_fallback_events) > 0,
+        "fallback_events":       all_fallback_events,
+        "coverage":              state["coverage"],
+        "governor_briefs":       state["governor_briefs"],
+        "promotion_brief":       state.get("promotion_brief"),
+        "turn_history":          [
             {k: v for k, v in t.items() if k != "draft"}
             for t in state["turn_history"]
         ],
-        "final_draft":     state.get("current_draft"),
-        "seed":            seed,
-        "total_tokens":    {"input": total_in_tok, "output": total_out_tok},
-        "timestamp":       datetime.utcnow().isoformat() + "Z",
+        "final_draft":           state.get("current_draft"),
+        "seed":                  seed,
+        "total_tokens":          {"input": total_in_tok, "output": total_out_tok},
+        "timestamp":             datetime.utcnow().isoformat() + "Z",
     }

@@ -110,6 +110,11 @@ def cmd_build(args):
                 print("  Lint FAIL. Fix errors before QA Attacker review.")
         elif builder_status == "BUILDER_RETIRED":
             print(f"\n  BUILDER_RETIRED: structural flaw. Build a new spec.")
+        elif builder_status == "BUILDER_PROVIDER_FALLBACK_USED":
+            events = result.get("fallback_events", [])
+            failed = events[0]["failed_provider"] if events else "unknown"
+            print(f"\n  BUILDER_PROVIDER_FALLBACK_USED: all providers failed for a turn ({failed}).")
+            print("  Transient infrastructure issue — rerun. Partial candidate is not promotable.")
         else:
             print(f"\n  BUILDER_EXHAUSTED ({result['turns_completed']} turns, no convergence).")
             print("  Review the builder result and consider adjusting the spec or seam.")
@@ -178,6 +183,8 @@ def cmd_status(args):
         print("  Next: python holo_builder/builder.py qa-attack docs/benchmark/payloads/<scenario>_v1.json")
     elif builder_status == "BUILDER_RETIRED":
         print("  Retired: rebuild the spec, do not re-run this packet.")
+    elif builder_status == "BUILDER_PROVIDER_FALLBACK_USED":
+        print("  Provider fallback exhausted: rerun — transient infrastructure issue.")
     elif builder_status == "BUILDER_EXHAUSTED":
         print("  Exhausted: consider adjusting the seam or spec, then re-run.")
 

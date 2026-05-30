@@ -36,7 +36,7 @@ Usage:
   result = run_qa_attack(packet_dict, skip_providers=["google"])
 
   or via CLI:
-  python holo_builder/builder.py qa-attack docs/benchmark/payloads/FORGE-BEC-001_v1.json
+  python holo_builder/builder.py qa-attack docs/benchmark/payloads/HBB-BEC-001_v1.json
 """
 
 import json

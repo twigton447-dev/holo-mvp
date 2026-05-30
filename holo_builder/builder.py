@@ -32,11 +32,11 @@ Commands:
 Usage:
   python holo_builder/builder.py build holo_builder/specs/AP-BEC-PAYCHNG-001_spec.json
   python holo_builder/builder.py build holo_builder/specs/AP-BEC-PAYCHNG-001_spec.json --seed 42
-  python holo_builder/builder.py lint docs/benchmark/payloads/FORGE-BEC-001_v1.json
-  python holo_builder/builder.py status builder_results/builder_20260530_FORGE-BEC-001.json
-  python holo_builder/builder.py qa-attack docs/benchmark/payloads/FORGE-BEC-001_v1.json
-  python holo_builder/builder.py freeze docs/benchmark/payloads/FORGE-BEC-001_v1.json qa_results/qa_20260530_FORGE-BEC-001.json
-  python holo_builder/builder.py authorize-final docs/benchmark/payloads/FORGE-BEC-001_v1.json --confirmed
+  python holo_builder/builder.py lint docs/benchmark/payloads/HBB-BEC-001_v1.json
+  python holo_builder/builder.py status builder_results/builder_20260530_HBB-BEC-001.json
+  python holo_builder/builder.py qa-attack docs/benchmark/payloads/HBB-BEC-001_v1.json
+  python holo_builder/builder.py freeze docs/benchmark/payloads/HBB-BEC-001_v1.json qa_results/qa_20260530_HBB-BEC-001.json
+  python holo_builder/builder.py authorize-final docs/benchmark/payloads/HBB-BEC-001_v1.json --confirmed
 """
 
 import argparse

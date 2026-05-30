@@ -83,7 +83,7 @@ Output only a valid JSON object matching the schema below. No markdown. No comme
 PACKET SCHEMA
 
 Required top-level fields:
-  scenario_id        string  — use the spec's scenario_id (e.g. FORGE-BEC-001)
+  scenario_id        string  — use the spec's scenario_id (e.g. HBB-BEC-001)
   domain             string  — from spec
   expected_verdict   string  — "ALLOW" or "ESCALATE"
   payload_revision   int     — increment on each iteration

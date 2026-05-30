@@ -93,7 +93,8 @@ def cmd_build(args):
             "qa_turns":                      result["qa_turn_count"],
             "qa_deltas":                     result["qa_deltas"],
             "verdict_drift_events":          result.get("verdict_drift_events", []),
-            "artifact_collapse_events":      result.get("artifact_collapse_events", []),
+            "artifact_collapse_events":        result.get("artifact_collapse_events", []),
+            "builder_json_fallback_events":    result.get("builder_json_fallback_events", []),
             "seed":                          result["seed"],
             "built_at":                      result["timestamp"],
             # Authoritative spec metadata — read by lint.py for target-aware checks.
@@ -123,6 +124,11 @@ def cmd_build(args):
             failed = events[0]["failed_provider"] if events else "unknown"
             print(f"\n  BUILDER_PROVIDER_FALLBACK_USED: all providers failed for a turn ({failed}).")
             print("  Transient infrastructure issue — rerun. Partial candidate is not promotable.")
+        elif builder_status == "BUILDER_JSON_UNRESOLVABLE":
+            events = result.get("builder_json_fallback_events", [])
+            failed = events[0]["failed_provider"] if events else "unknown"
+            print(f"\n  BUILDER_JSON_UNRESOLVABLE: all providers returned malformed JSON on same turn ({failed}).")
+            print("  Transient model output issue — rerun.")
         elif builder_status == "BUILDER_VERDICT_DRIFT_UNRESOLVABLE":
             print(f"\n  BUILDER_VERDICT_DRIFT_UNRESOLVABLE: Turn 1 produced wrong verdict and correction failed.")
             print("  Check spec and Builder system prompt. Partial candidate is not promotable.")
@@ -196,6 +202,8 @@ def cmd_status(args):
         print("  Retired: rebuild the spec, do not re-run this packet.")
     elif builder_status == "BUILDER_PROVIDER_FALLBACK_USED":
         print("  Provider fallback exhausted: rerun — transient infrastructure issue.")
+    elif builder_status == "BUILDER_JSON_UNRESOLVABLE":
+        print("  JSON unresolvable: all providers returned malformed JSON on one turn — rerun.")
     elif builder_status == "BUILDER_EXHAUSTED":
         print("  Exhausted: consider adjusting the seam or spec, then re-run.")
 

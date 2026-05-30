@@ -30,6 +30,7 @@ import time
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -1099,9 +1100,12 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
     Run the Builder adversarial loop on a spec.
 
     builder_status values:
-      BUILDER_CONVERGED  — zero-delta window + convergence guard passed
-      BUILDER_RETIRED    — internal QA issued RETIRE (structural flaw)
-      BUILDER_EXHAUSTED  — ran all MAX_TURNS without converging
+      BUILDER_CONVERGED              — zero-delta window + convergence guard passed
+      BUILDER_RETIRED                — internal QA issued RETIRE (structural flaw)
+      BUILDER_EXHAUSTED              — ran all MAX_TURNS without converging
+      BUILDER_JSON_UNRESOLVABLE      — all providers returned malformed JSON on same Builder turn
+      BUILDER_PROVIDER_FALLBACK_USED — all providers failed with transient infrastructure errors
+      BUILDER_VERDICT_DRIFT_UNRESOLVABLE — Turn 1 verdict drift could not be corrected
 
     skip_providers: list of provider names to exclude (e.g. ["google"])
     """
@@ -1129,10 +1133,11 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
         "pending_invariant_violations": [],
     }
 
-    qa_deltas:              list[int]  = []
-    all_fallback_events:    list[dict] = []
-    verdict_drift_events:   list[dict] = []
-    artifact_collapse_events: list[dict] = []
+    qa_deltas:                  list[int]  = []
+    all_fallback_events:        list[dict] = []
+    verdict_drift_events:       list[dict] = []
+    artifact_collapse_events:   list[dict] = []
+    builder_json_fallback_events: list[dict] = []
     qa_turn_count = 0
     converged     = False
     retire_signal = False
@@ -1166,13 +1171,67 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
 
             if result.get("error"):
                 if fb_events:
+                    # Transient infrastructure fallback already exhausted.
                     print(f"  ALL PROVIDERS FAILED (transient): {result['error'][:80]}")
                     exit_reason = "provider_all_failed"
+                    state["turn_history"].append(result)
+                    break
+
+                error_str = result.get("error", "")
+                is_json_failure = (
+                    "json_parse_error" in error_str or "no_json_object_found" in error_str
+                )
+                if is_json_failure:
+                    # Same-turn provider fallback: the model returned malformed JSON even
+                    # after all internal parse retries. Try a different provider for the
+                    # same Builder turn — do not advance state with the failed output.
+                    prev_turn_provider = (
+                        state["turn_history"][-1]["provider"] if state["turn_history"] else None
+                    )
+                    json_fallback = _pick_fallback_provider(provider, prev_turn_provider, providers)
+                    if json_fallback:
+                        print(f"\n    [builder_json_fallback] {provider} -> {json_fallback}")
+                        fb2 = _run_builder_turn(
+                            adapters[json_fallback], json_fallback, state, turn_number
+                        )
+                        total_in_tok  += fb2.get("input_tokens", 0)
+                        total_out_tok += fb2.get("output_tokens", 0)
+                        if fb2.get("draft"):
+                            result         = fb2
+                            actual_provider = json_fallback
+                            builder_json_fallback_events.append({
+                                "turn_number":       turn_number,
+                                "event":             "builder_json_fallback",
+                                "failed_provider":   provider,
+                                "fallback_provider": json_fallback,
+                                "original_error":    error_str[:120],
+                            })
+                            # Fall through — result is now valid.
+                        else:
+                            builder_json_fallback_events.append({
+                                "turn_number":       turn_number,
+                                "event":             "builder_json_unresolvable",
+                                "failed_provider":   provider,
+                                "fallback_provider": json_fallback,
+                                "original_error":    error_str[:120],
+                                "fallback_error":    fb2.get("error", "")[:120],
+                            })
+                            print(f"    [builder_json_fallback] {json_fallback} also failed "
+                                  f"— BUILDER_JSON_UNRESOLVABLE")
+                            exit_reason = "builder_json_unresolvable"
+                            state["turn_history"].append(result)
+                            break
+                    else:
+                        print(f"    [builder_json_failure] no eligible fallback provider "
+                              f"— BUILDER_JSON_UNRESOLVABLE")
+                        exit_reason = "builder_json_unresolvable"
+                        state["turn_history"].append(result)
+                        break
                 else:
                     print(f"  ERROR: {result['error'][:80]}")
                     exit_reason = "builder_error"
-                state["turn_history"].append(result)
-                break
+                    state["turn_history"].append(result)
+                    break
 
             rev = result["draft"].get("payload_revision", "?") if result["draft"] else "?"
             print(f"  -> draft rev={rev}  {result['elapsed_ms']}ms")
@@ -1366,6 +1425,8 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
         builder_status = "BUILDER_CONVERGED"
     elif exit_reason == "provider_all_failed":
         builder_status = "BUILDER_PROVIDER_FALLBACK_USED"
+    elif exit_reason == "builder_json_unresolvable":
+        builder_status = "BUILDER_JSON_UNRESOLVABLE"
     elif "verdict_drift" in exit_reason:
         builder_status = "BUILDER_VERDICT_DRIFT_UNRESOLVABLE"
     else:
@@ -1395,8 +1456,9 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
         "qa_deltas":                  qa_deltas,
         "provider_fallback_used":     len(all_fallback_events) > 0,
         "fallback_events":            all_fallback_events,
-        "verdict_drift_events":       verdict_drift_events,
-        "artifact_collapse_events":   artifact_collapse_events,
+        "verdict_drift_events":         verdict_drift_events,
+        "artifact_collapse_events":     artifact_collapse_events,
+        "builder_json_fallback_events": builder_json_fallback_events,
         "coverage":                   state["coverage"],
         "governor_briefs":            state["governor_briefs"],
         "promotion_brief":            state.get("promotion_brief"),

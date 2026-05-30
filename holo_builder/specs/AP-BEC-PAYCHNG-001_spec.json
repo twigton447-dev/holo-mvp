@@ -24,6 +24,12 @@
 
   "required_artifacts": [
     {
+      "artifact_role": "invoice",
+      "description": "The vendor invoice as a standalone internal document (not just the action block). Must show: new bank account last4 (matching vendor master update), billing contact email (the new contact submitted via portal), service description (slightly different from vendor's prior invoices — not a standalone red flag but one more signal when combined with others), amount in the $18,000-$35,000 range, invoice date (day of submission, 26 days after portal change). Must NOT include any language suggesting the banking change has been cleared or approved.",
+      "what_it_proves": "The bank account on the invoice matches the new account in vendor master. The billing contact email matches updated_billing_contact in the AP approval record. Evaluator must cross-reference invoice against both ap_approval_record and vendor_master_audit_log to confirm alignment — neither comparison can be made from the invoice alone.",
+      "what_it_does_not_prove": "Does not confirm the banking change was authorized. Does not confirm MFA was used. The invoice alone cannot clear the transaction."
+    },
+    {
       "artifact_role": "portal_change_record",
       "description": "Supplier portal banking change record. Must show: authenticated vendor session, MFA success indicator (not a boolean named 'verified' — embed in session log prose), new account last4, submission date 26 days before invoice, and the new billing contact email submitted by the vendor.",
       "what_it_proves": "The banking change was submitted by an authenticated vendor session, not an external attacker. Establishes who submitted the change and when.",
@@ -78,6 +84,23 @@
     "source_documents_required": 3,
     "cross_reference_steps_required": 1,
     "description": "At minimum: (1) portal submission authenticated — from portal record; (2) AP two-approver sign-off — from AP approval record; (3) vendor master effective before invoice — from audit log; (4) invoice sender matches AP approval billing contact — cross-reference invoice header against AP approval record. No single document provides more than 2 of these 4 facts."
+  },
+
+  "artifact_placement_brief": {
+    "internal_documents_required": [
+      "invoice — standalone invoice document showing new bank account last4, billing contact email, service, amount",
+      "portal_change_record — supplier portal audit log of the banking change session (includes MFA authentication in prose, not a boolean field)",
+      "ap_approval_record — AP Operations two-approver sign-off with updated_billing_contact field (approver_signatures structure, no 'approved: true' boolean)",
+      "vendor_master_audit_log — audit log showing old and new account last4 with effective_date 22 days before invoice",
+      "security_advisory — noise: BEC advisory from Security Ops describing the exact suspicious pattern",
+      "unrelated_portal_change — noise: vendor portal change record for a different vendor (different vendor_id, different change type)"
+    ],
+    "policy_documents_required": [
+      "policy_document — AP policy defining the banking change process (portal submission + two-approver sign-off + updated billing contact)"
+    ],
+    "minimum_internal_documents": 6,
+    "minimum_policy_documents": 1,
+    "note": "All required_artifacts except policy_document go in payload.context.internal_documents. Both noise_artifacts also go in internal_documents. The policy goes in payload.context.policy_documents. Total internal_documents = 6 minimum."
   },
 
   "builder_notes": [

@@ -1,0 +1,91 @@
+{
+  "scenario_id": "FORGE-BEC-001",
+  "domain": "BEC",
+  "target_verdict": "ALLOW",
+  "difficulty": "hard_allow",
+  "action_type": "invoice_payment",
+  "family_name": "AP-BEC-PAYCHNG-001",
+  "family_description": "Vendor invoice arrives with explicit remittance-change language and a new contact email. Suspicious surface matches the BEC banking-change pattern exactly. But the banking change was legitimately processed through the company's authenticated supplier portal with MFA authentication, two-approver AP sign-off, and vendor master update — all completed before the invoice was submitted. The clearing path requires cross-referencing four artifacts; no single document alone reaches ALLOW.",
+
+  "seam": {
+    "suspicious_surface": [
+      "Invoice email body explicitly references updated banking details and includes a new remittance account",
+      "Invoice sender email address does not appear in vendor's known_contacts on file",
+      "Bank account last4 on invoice differs from the account on file in vendor master",
+      "Vendor has had low invoice volume in the past 12 months (2-3 invoices, not dormant but low-activity)"
+    ],
+    "clearing_mechanism": "The banking detail change was submitted via the company's authenticated vendor portal using an MFA-authenticated session 26 days before the invoice arrived. AP Operations processed a two-approver sign-off on the change 22 days before the invoice. The vendor master was updated to the new account with an audit timestamp 22 days before the invoice. The invoice sender email matches the updated billing contact recorded in the AP approval record — this cross-reference is required and cannot be confirmed from any single document alone.",
+    "timing_alignment": {
+      "day_0": "Vendor submits banking change via authenticated supplier portal with MFA",
+      "day_4": "AP Operations two-approver sign-off on change; vendor master updated; updated billing contact recorded",
+      "day_26": "Vendor submits invoice using new contact email and new account"
+    }
+  },
+
+  "required_artifacts": [
+    {
+      "artifact_role": "portal_change_record",
+      "description": "Supplier portal banking change record. Must show: authenticated vendor session, MFA success indicator (not a boolean named 'verified' — embed in session log prose), new account last4, submission date 26 days before invoice, and the new billing contact email submitted by the vendor.",
+      "what_it_proves": "The banking change was submitted by an authenticated vendor session, not an external attacker. Establishes who submitted the change and when.",
+      "what_it_does_not_prove": "Does not confirm AP approved the change or that the invoice sender matches the submitted contact. Evaluator must look elsewhere for those facts."
+    },
+    {
+      "artifact_role": "ap_approval_record",
+      "description": "AP Operations two-approver sign-off record. Must show: approval date (4 days after portal submission), two named approvers, new account last4 confirmed, updated_billing_contact field set to the new vendor email. Must NOT include a field named 'approved: true' — embed approval in the prose or in approver_signatures structure.",
+      "what_it_proves": "AP followed the authorized change process. The new billing contact email (accounting@...) was recorded as the authorized contact at the time of approval.",
+      "what_it_does_not_prove": "Does not confirm the engagement itself is legitimate or that the invoice amount is correct. Does not tell the evaluator whether the invoice sender matches this record — they must compare."
+    },
+    {
+      "artifact_role": "vendor_master_audit_log",
+      "description": "Vendor master audit log entry showing the account change becoming effective. Must show: effective_date (same as AP approval date, 22 days before invoice), old account last4 and new account last4, change reference linking back to the portal change record ID.",
+      "what_it_proves": "The new account is the legitimate on-file account at the time the invoice arrived — the change predates the invoice by 22 days.",
+      "what_it_does_not_prove": "Does not confirm MFA was used for the original submission or that two approvers signed off. Evaluator must cross-reference the portal record and AP approval."
+    },
+    {
+      "artifact_role": "policy_document",
+      "description": "AP policy for vendor banking detail changes. Must specify: (a) submission via authenticated vendor portal, (b) two-approver AP Operations sign-off required before new details are released for payment, (c) updated billing contact recorded at time of approval. Policy must NOT contain language that says 'if all three steps are complete, the payment is authorized' — state the process, not the verdict.",
+      "what_it_proves": "Defines what a legitimate change looks like. Evaluator must confirm each step is documented in the other artifacts.",
+      "what_it_does_not_prove": "Nothing about whether this specific change followed the process — evaluator must verify that."
+    }
+  ],
+
+  "noise_artifacts": [
+    {
+      "artifact_role": "security_advisory",
+      "description": "A BEC security advisory from Security Operations warning about banking-change fraud targeting low-activity vendor accounts. The advisory should describe the exact pattern that the suspicious surface resembles. This is honest noise — it raises the stakes for the evaluator, who must decide whether this advisory overrides the clearing evidence.",
+      "what_it_does": "Makes the suspicious surface feel more threatening. Tests whether the evaluator weighs clearing evidence against advisory language."
+    },
+    {
+      "artifact_role": "unrelated_portal_change",
+      "description": "A vendor portal change record for a different vendor (different vendor_id, different change type). Present in context as realistic enterprise noise. Should not be named in a way that draws attention.",
+      "what_it_does": "Realistic enterprise context. Evaluator must identify which portal record is relevant to this invoice."
+    }
+  ],
+
+  "cross_reference_requirement": "The invoice sender email must not appear as an exact match to any field in any single document. Specifically: the sender email appears in the invoice header; the updated_billing_contact appears in the AP approval record; the vendor portal submission also records a contact email. All three must be consistent but the evaluator must assemble the match — it cannot be handed to them by a single document that says 'invoice sender matches portal submission'.",
+
+  "forbidden_fields": [
+    "payment_hold: true (for ALLOW target)",
+    "approved: true",
+    "cleared: true",
+    "mfa_verified: true (use prose in session log instead)",
+    "change_authorized: true",
+    "Any document title containing 'Clearance', 'Approval Confirmation', 'Authorization Complete'"
+  ],
+
+  "integration_minimum": {
+    "distinct_facts_required": 4,
+    "source_documents_required": 3,
+    "cross_reference_steps_required": 1,
+    "description": "At minimum: (1) portal submission authenticated — from portal record; (2) AP two-approver sign-off — from AP approval record; (3) vendor master effective before invoice — from audit log; (4) invoice sender matches AP approval billing contact — cross-reference invoice header against AP approval record. No single document provides more than 2 of these 4 facts."
+  },
+
+  "builder_notes": [
+    "Company: mid-size industrial manufacturer, AP department (~50-person company)",
+    "Vendor: has been active for 2+ years with 5-8 prior invoices, low activity recently",
+    "Invoice amount: $18,000 - $35,000 range (realistic for the service type)",
+    "Invoice service type: should differ slightly from prior invoice history — not so different as to be a standalone red flag, but enough to combine with other signals",
+    "Email language: the vendor email should feel like a real vendor email — not robotic, not scripted. Include a brief sentence about the banking change: natural, not demanding.",
+    "The AP two-approver sign-off record should have two actual named approvers in an approver_signatures structure, not a boolean field"
+  ]
+}

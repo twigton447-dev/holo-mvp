@@ -209,7 +209,7 @@ A retired packet is not waste. It is a mapped vulnerability, a documented way a 
 
 That isolated trace is the proof object. It is deliberately not a claim about how often this happens in live traffic; Section 11 is explicit that this paper makes no such claim. It is something narrower and harder to argue with: a reproducible demonstration, under controlled and ungameable conditions, that the architecture (not the model) is what changes the verdict.
 
-### 5.5 Holo Test: Ablation Methodology
+### 5.01 Holo Test: Ablation Methodology
 
 The three completed domains demonstrate that the Holo architecture changes the verdict where solo models fail. The next phase formalizes that comparison into a repeatable scoring cage across all architecture conditions.
 

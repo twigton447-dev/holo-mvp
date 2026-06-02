@@ -4,7 +4,7 @@
 
 **Taylor Wigton** · Founder, Holo Engine · hello@holoengine.ai
 
-Working Paper · Version 5.03 · June 2026  
+Working Paper · Version 5.04 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -134,7 +134,21 @@ Holo Engine is the core architecture. It powers a specific set of product surfac
 
 **Holo Test.** The adversarial test cage. It runs locked packets and generation tasks against competing architectures: single-shot models, multi-turn same-model systems, homogeneous councils, ungoverned multi-model ensembles, and Holo-powered systems.
 
-**Blindspot Atlas.** The growing institutional memory of failure modes discovered through Holo Test and Holo Verify runs. It records not only whether Holo wins, but exactly where solo models, self-critique loops, ungoverned ensembles, and packet designs fail under operational pressure.
+**Holo Atlas.** The growing institutional record of where frontier models fail under operational pressure. It captures not just whether Holo catches what a solo model misses, but exactly how each model fails, under what conditions, and why. Every run produces a classified entry: the model, the domain, the failure class, the specific cognitive seam that broke, and the reproducibility status.
+
+Documented failure classes across tested models:
+
+| Model | Domain | Failure Class | Description |
+|---|---|---|---|
+| GPT-5.4 | AP / BEC | Frame Anchoring (False Negative) | Accepted phantom true-up because formatting and routing matched known vendor profile. Never challenged the historical absence of the charge. |
+| GPT-5.4 | PE Consolidation | Exception Brittleness (False Positive) | Escalated valid post-close true-up despite memo documentation. Fixated on "pending true-up" language without extracting the resolving legal context. |
+| Claude Sonnet 4.6 | AP / BEC | Frame Anchoring (False Negative) | Same failure pattern as GPT-5.4. Surface plausibility overrode historical gap detection. |
+| Claude Sonnet 4.6 | PE Consolidation | Exception Brittleness (False Positive) | Blocked valid close. Could not extract the resolving implication from the deal-advisory memo. |
+| Gemini 2.5 Pro | AP / BEC | Frame Anchoring (False Negative) | Approved fraud on surface-matching criteria. Historical inconsistency not detected. |
+| Gemini 2.5 Pro | PE Consolidation | Exception Brittleness (False Positive) | Escalated valid exception. Memo read; resolving implication not extracted. |
+| Solo Single-Model | M&A Integration | Local Maximum Patching | Stabilized into cosmetic refinement rather than structural teardown. Missed dual-run P&L impossibility. Closed with two unresolved items. |
+
+New failure classes are added as domains are certified and packets are frozen.
 
 ---
 
@@ -365,4 +379,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.03 · June 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.04 · June 2026*

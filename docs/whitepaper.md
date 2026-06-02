@@ -4,7 +4,7 @@
 
 **Taylor Wigton** · Founder, Holo Engine · hello@holoengine.ai
 
-Working Paper · Version 5.06 · June 2026  
+Working Paper · Version 5.07 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -66,7 +66,7 @@ This architecture is deployed in two directions to enable trusted delegation:
 
 **At the action boundary:** It acts as a runtime shield (Holo Verify). It intercepts a proposed action, evaluates the packet through a structured adversarial cross-examination, and uses a constrained Governor to return a binary verdict: ALLOW or ESCALATE.
 
-**In the generative process:** It acts as a work-product forge (Holo Builder). It drops early drafts into a multi-turn adversarial furnace, forcing high-volatility structural teardowns to resolve hidden contradictions before an artifact is finalized.
+**In the generative process:** It acts as a work-product forge (Holo Builder). It drops early drafts into a multi-turn adversarial reactor, forcing high-volatility structural teardowns to resolve hidden contradictions before an artifact is finalized.
 
 Whether intercepting a fraudulent wire or stress-testing a high-stakes M&A strategy, the underlying job is the same. Holo sits at the threshold of reliance and asks a simple question: This action or artifact appears ready. Has it actually survived enough hostile scrutiny to be safe?
 
@@ -84,7 +84,7 @@ You can point it at **creation**: an unfinished artifact exists, and the reactor
 
 These look like different products. They are the same opposing force. In the evaluative case, the collision adjudicates someone else's output. In the generative case, the collision forges the output in the first place. The shared core is identical: decoupled model families, assigned adversarial roles, a constrained Governor that rules on documentary evidence rather than rhetorical confidence, and a hard rule that any objection must point to something specific or be discounted.
 
-Splitting reliance risk this way is not a marketing convenience. It maps onto a real seam in how AI fails. Creation failures and permission failures are different shapes. A drafting model leaves a logical hole; a deciding model rubber-stamps a clean-looking lie. You want the furnace before the artifact exists and the gate before the action commits. One reactor, two harnesses, two moments.
+Splitting reliance risk this way is not a marketing convenience. It maps onto a real seam in how AI fails. Creation failures and permission failures are different shapes. A drafting model leaves a logical hole; a deciding model rubber-stamps a clean-looking lie. You want the reactor running before the artifact exists and the gate before the action commits. One reactor, two harnesses, two moments.
 
 The rest of this paper does the proven half first, because evidence should come before architecture.
 
@@ -94,7 +94,7 @@ When you build an environment that forces different models to challenge one anot
 
 **The Evaluative Harness (The Action Boundary Shield):** Used by Holo Verify. This configuration assumes the data packet or decision has already been generated. Holo sits silently at the final execution checkpoint and evaluates the payload against anchor constraints, returning a binary operational verdict: ALLOW or ESCALATE.
 
-**The Generative Harness (The Work-Product Forge):** Used by Holo Builder. This configuration assumes the starting material is a rough draft or incomplete strategy. It drops the draft into a constrained 10-turn adversarial furnace. Specialized critic agents, such as an Edge Case Scanner and Hostile Challenger, attack the document's logic from different angles. The loop forces high-volatility structural teardowns early, then rebuilds until unresolved issues converge to absolute zero.
+**The Generative Harness (The Work-Product Forge):** Used by Holo Builder. This configuration assumes the starting material is a rough draft or incomplete strategy. It drops the draft into a constrained 10-turn adversarial reactor. Specialized critic agents, such as an Edge Case Scanner and Hostile Challenger, attack the document's logic from different angles. The loop forces high-volatility structural teardowns early, then rebuilds until unresolved issues converge to absolute zero.
 
 ---
 
@@ -304,21 +304,21 @@ Required provenance for every published score: packet ID, packet hash, model coh
 
 ---
 
-## 6. The Generative Harness: The Work-Product Furnace
+## 6. The Generative Harness: The Work-Product Forge
 
 *This is design intent. It runs on the same reactor described in Section 3, but it is not yet backed by a public benchmark the way the evaluative side is. Read it as where the engine points next, not as a measured result.*
 
 The evaluative harness judges a finished action. The generative harness does the opposite job: it takes an artifact that does not exist yet, or exists only as a rough draft, and forges it.
 
-The mechanism is the same opposing force, turned inward. A draft (a contract, a filing, an analysis, a plan) is dropped into an adversarial furnace and run across a constrained, multi-turn loop. The council members are not advisors here; they are attackers. A labeled edge-case scanner hunts for the input that breaks the logic. A policy guardian hunts for the clause that violates a rule. Each turn, they try to break the document; each turn, the draft is hardened against what they found.
+The mechanism is the same opposing force, turned inward. A draft (a contract, a filing, an analysis, a plan) is run through the adversarial reactor across a constrained, multi-turn loop. The council members are not advisors here; they are attackers. A labeled edge-case scanner hunts for the input that breaks the logic. A policy guardian hunts for the clause that violates a rule. Each turn, they try to break the document; each turn, the draft is hardened against what they found.
 
 The loop is bounded, not open-ended. It runs toward a termination condition: closure, with no open issues the council can still substantiate. That condition is the generative analogue of the evaluative ALLOW. Where the Evaluative Harness ends by saying *this action is safe to release*, the Generative Harness ends by saying *this document has survived everything we could throw at it*.
 
-The reason this is worth doing as a separate harness, rather than asking one capable model to "write a really good draft," is the same structural reason from Section 1. A drafting model trusts its own draft. It will defend the hole it left rather than find it. The furnace replaces self-trust with sustained, role-separated attack, and it stops only when the attacks stop landing.
+The reason this is worth doing as a separate harness, rather than asking one capable model to "write a really good draft," is the same structural reason from Section 1. A drafting model trusts its own draft. It will defend the hole it left rather than find it. The reactor replaces self-trust with sustained, role-separated attack, and it stops only when the attacks stop landing.
 
-A concrete shape it takes: a firm drops a thirty-page M&A contract into the furnace not to proofread it, but to stress it. Instead of cleaning up grammar, the council surfaces a compliance loophole hidden in the interaction between two clauses, and a dual-run P&L penalty that a single drafting model had confidently invented and left in place. The point is not that the document gets polished. The point is that its *logic* gets attacked by something that does not share its assumptions.
+A concrete shape it takes: a firm drops a thirty-page M&A contract into the reactor not to proofread it, but to stress it. Instead of cleaning up grammar, the council surfaces a compliance loophole hidden in the interaction between two clauses, and a dual-run P&L penalty that a single drafting model had confidently invented and left in place. The point is not that the document gets polished. The point is that its *logic* gets attacked by something that does not share its assumptions.
 
-Honesty requires a boundary here. The evaluative claims in this paper are benchmarked; the generative ones are not yet. "Runs until zero open issues" is a termination rule, not a guarantee of correctness; a furnace can only catch what its attackers are capable of raising. The generative harness inherits the reactor's strengths and its limits equally.
+Honesty requires a boundary here. The evaluative claims in this paper are benchmarked; the generative ones are not yet. "Runs until zero open issues" is a termination rule, not a guarantee of correctness; the reactor can only catch what its attackers are capable of raising. The generative harness inherits the reactor's strengths and its limits equally.
 
 ---
 
@@ -355,7 +355,7 @@ The reactor is domain-agnostic, but the work of trusting it is not. Holo does no
 > *The following are illustrations of where an adversarial trust layer could matter, not capabilities Holo has benchmarked. No ABAT results exist for either, and the consequences in both are severe enough that they should be treated with more caution than the enterprise domains, not less.*
 >
 > - **Defense intelligence.** An intelligence system drafts a briefing that informs a high-consequence decision. An evaluative layer could, in principle, catch embedded contradictions or stale source material and escalate before a flawed report reaches a human commander: a stop-the-line safety function, not a targeting one.
-> - **Clinical decision support.** Before a treatment plan is finalized, a generative furnace could force several models to argue the protocol against each other and surface an interaction that a single model missed. In a domain where the cost of a wrong verdict is measured in lives, "we have not tested this" is the only honest current statement.
+> - **Clinical decision support.** Before a treatment plan is finalized, a generative reactor could force several models to argue the protocol against each other and surface an interaction that a single model missed. In a domain where the cost of a wrong verdict is measured in lives, "we have not tested this" is the only honest current statement.
 
 The discipline that makes the enterprise benchmark credible is exactly the discipline these two domains would demand before any real claim. They belong on a horizon, clearly labeled, not in the results table.
 
@@ -392,7 +392,7 @@ The promise of enterprise AI was never faster queues for humans to babysit. It i
 - **No independent third-party validation.** This is an internal research paper with public, reproducible solo baselines. The reactor itself is proprietary and available only for controlled review.
 - **No production reliability metrics.** Benchmark results are architecture-stability results under controlled conditions, not live-traffic probabilities. Performance in production will vary with data-engineering quality.
 - **No claim that Holo replaces traditional security.** Firewalls, identity and access management, and logging still handle the known infrastructure layer. Holo adjudicates the unresolved semantic middle.
-- **No benchmark behind the Generative Harness yet.** Section 6 describes design intent on a proven reactor. Its termination condition (closure with no open issues) is a stopping rule, not a correctness guarantee. The furnace can only catch what its attackers can raise.
+- **No benchmark behind the Generative Harness yet.** Section 6 describes design intent on a proven reactor. Its termination condition (closure with no open issues) is a stopping rule, not a correctness guarantee. The reactor can only catch what its attackers can raise.
 - **No claims at all in the illustrative frontier domains.** Defense and clinical examples in Section 8 are illustrations of shape, not tested capabilities, and are deliberately held out of every results table.
 
 The restraint is the point. A trust layer that overclaims is just another thing you have to check.
@@ -411,4 +411,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.06 · June 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.07 · June 2026*

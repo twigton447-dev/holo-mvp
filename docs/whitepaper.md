@@ -4,7 +4,7 @@
 
 **Taylor Wigton** · Founder, Holo Engine · hello@holoengine.ai
 
-Working Paper · Version 5.04 · June 2026  
+Working Paper · Version 5.05 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -119,6 +119,22 @@ Holo is not a smarter model. It is a smarter process. A standalone model is boun
 **Evidentiary discipline.** Every escalation must attach to a specific documentary variance. A model that votes to escalate but cannot name the finding gets discounted. This is what keeps the signal clean instead of nervous.
 
 The Governor is not treated as finished. Each domain test is used to find where its rules are too weak, too broad, or too willing to trust agreement among models. When a run exposes a bad shared premise, that failure becomes a new boundary check.
+
+### How Each Domain Hardens the System
+
+Holo does not enter a domain assuming it knows the rules. It enters to find out what they should be. We test the Governor against baseline logic, observe where it fails under pressure, and tighten the constraints. Every failed run becomes a regression test that hardens the architecture. No rules, then some rules, then law.
+
+### The False Positive Imperative
+
+A trust layer that flags everything is a bottleneck, not a safeguard. True viability at the action boundary requires an exceptionally low **false positive rate**: the ability to correctly clear complex, messy, but legitimate business exceptions. If a system escalates safe actions out of blind caution, it creates false friction and destroys the ROI of automation. A viable trust layer must catch hidden fraud without breaking the normal operational workflow.
+
+### Forging the Wind Tunnel with Holo Builder
+
+Standard AI benchmarks ask abstract questions. They do not test if an action should execute. To build a true wind tunnel, we use Holo Builder and Holo Test to actively forge the scenarios themselves. By running the adversarial reactor in reverse, agentic personas act as blindspot architects, intentionally burying subtle structural contradictions deep inside sub-ledgers, legal histories, and procurement packets. We push the payloads to their absolute limits to ensure we are testing the hardest possible realities before an agent acts in production.
+
+### The Ablation Cage: Apples-to-Apples Testing
+
+We built this rigorous testing infrastructure because our true competitors are the default alternative architectures: native solo models, same-model self-critique loops, and ungoverned multi-model ensembles. To prove Holo Engine is superior, we require an apples-to-apples ablation cage. Each forged payload is locked and run across all competing architectures under identical conditions. This completely isolates the orchestration layer, proving empirically that adversarial architecture, not just raw model intelligence, is what actually survives the wind tunnel.
 
 ---
 
@@ -379,4 +395,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.04 · June 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.05 · June 2026*

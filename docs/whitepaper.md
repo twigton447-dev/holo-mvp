@@ -4,7 +4,7 @@
 
 **Taylor Wigton** · Founder, Holo Engine · hello@holoengine.ai
 
-Working Paper · Version 5.0 (integration draft) · May 2026  
+Working Paper · Version 5.01 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -209,7 +209,7 @@ A retired packet is not waste. It is a mapped vulnerability, a documented way a 
 
 That isolated trace is the proof object. It is deliberately not a claim about how often this happens in live traffic; Section 11 is explicit that this paper makes no such claim. It is something narrower and harder to argue with: a reproducible demonstration, under controlled and ungameable conditions, that the architecture (not the model) is what changes the verdict.
 
-### 5.01 Holo Test: Ablation Methodology
+### 5.5 Holo Test: Ablation Methodology
 
 The three completed domains demonstrate that the Holo architecture changes the verdict where solo models fail. The next phase formalizes that comparison into a repeatable scoring cage across all architecture conditions.
 
@@ -332,4 +332,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.0 integration draft · May 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.01 · June 2026*

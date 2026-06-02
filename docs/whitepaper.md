@@ -116,25 +116,6 @@ Holo Engine is the core architecture. It powers a specific set of product surfac
 
 **Blindspot Atlas.** The growing institutional memory of failure modes discovered through Holo Test and Holo Verify runs. It records not only whether Holo wins, but exactly where solo models, self-critique loops, ungoverned ensembles, and packet designs fail under operational pressure.
 
-### Holo Test: Ablation Methodology
-
-Each candidate packet or generation task is hash-locked, run against a declared model cohort, and evaluated across native solo models, same-model multi-turn systems, homogeneous councils, ungoverned multi-model ensembles, and Holo-powered systems. The purpose is not to prove that one model is smarter, but to isolate whether adversarial architecture improves judgment, stability, evidence integration, and readiness at high-stakes decision points.
-
-Across early runs, the strongest signal is not that more models or more turns automatically improve judgment. In several cases, unstructured self-critique or ungoverned multi-model handoff degraded performance. Architecture, not model count, is the control surface.
-
-**Table X: Holo Test Ablation Results**
-*(Status: In progress. Final scores will be added after packet freeze, provenance capture, and repeatable cohort runs.)*
-
-| Architecture Condition | Verdict / Score | Turn Count | Failure Mode / Note |
-|---|---|---|---|
-| Native Solo | *Pending* | — | — |
-| Same-Model Self-Critique | *Pending* | — | — |
-| Homogeneous Council | *Pending* | — | — |
-| Ungoverned Multi-Model | *Pending* | — | — |
-| **Holo Engine (Full)** | ***Pending*** | — | — |
-
-Required provenance for every published score: packet ID, packet hash, model cohort, condition, verdict/score, correctness, turn count, token count, failure mode, trace path, judge model, and freeze status.
-
 ---
 
 ## 4. The Evaluative Harness: The Action Boundary
@@ -227,6 +208,27 @@ A retired packet is not waste. It is a mapped vulnerability, a documented way a 
 **The proof object.** What survives this process is not a logic puzzle. It is a reconstruction of the forensic conditions of a real enterprise failure: evidence scattered across documents, with the *problem exists* signal and the *problem is controlled* signal deliberately held in balance, so that neither a reflexive ALLOW nor a reflexive ESCALATE is correct without genuine synthesis. Freeze one of those signals, hold everything else fixed, and run the ablation. The trace then isolates a single seam: the precise point where a hardened solo model, handed all the same evidence, commits a false ALLOW, and the reactor's checkpoint forces the correct ESCALATE.
 
 That isolated trace is the proof object. It is deliberately not a claim about how often this happens in live traffic; Section 11 is explicit that this paper makes no such claim. It is something narrower and harder to argue with: a reproducible demonstration, under controlled and ungameable conditions, that the architecture (not the model) is what changes the verdict.
+
+### 5.5 Holo Test: Ablation Methodology
+
+The three completed domains demonstrate that the Holo architecture changes the verdict where solo models fail. The next phase formalizes that comparison into a repeatable scoring cage across all architecture conditions.
+
+Each candidate packet or generation task is hash-locked, run against a declared model cohort, and evaluated across native solo models, same-model multi-turn systems, homogeneous councils, ungoverned multi-model ensembles, and Holo-powered systems. The purpose is not to prove that one model is smarter, but to isolate whether adversarial architecture improves judgment, stability, evidence integration, and readiness at high-stakes decision points.
+
+Across early runs, the strongest signal is not that more models or more turns automatically improve judgment. In several cases, unstructured self-critique or ungoverned multi-model handoff degraded performance. Architecture, not model count, is the control surface.
+
+**Table X: Holo Test Ablation Results**
+*(Status: In progress. Final scores will be added after packet freeze, provenance capture, and repeatable cohort runs.)*
+
+| Architecture Condition | Verdict / Score | Turn Count | Failure Mode / Note |
+|---|---|---|---|
+| Native Solo | *Pending* | — | — |
+| Same-Model Self-Critique | *Pending* | — | — |
+| Homogeneous Council | *Pending* | — | — |
+| Ungoverned Multi-Model | *Pending* | — | — |
+| **Holo Engine (Full)** | ***Pending*** | — | — |
+
+Required provenance for every published score: packet ID, packet hash, model cohort, condition, verdict/score, correctness, turn count, token count, failure mode, trace path, judge model, and freeze status.
 
 ---
 

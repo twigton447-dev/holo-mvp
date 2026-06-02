@@ -4,7 +4,7 @@
 
 **Taylor Wigton** · Founder, Holo Engine · hello@holoengine.ai
 
-Working Paper · Version 5.05 · June 2026  
+Working Paper · Version 5.06 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -249,6 +249,14 @@ Real enterprise decisions are not certainty machines. They are defensible-risk c
 
 So we took authorial control away from the LLM.
 
+### The Holo Packet Factory: Deterministic Payload Engineering
+
+Standard AI benchmarks rely on static, text-based question-and-answer pairs. Action Boundary Testing requires complex, multi-document financial and operational environments. You cannot test enterprise AI reliability using manually typed draft documents.
+
+To ensure absolute reproducibility, all scenarios are engineered through the Holo Packet Factory. This is a deterministic Python backend designed to forge high-fidelity corporate environments.
+
+When an adversarial scenario is built, such as a PE consolidation with a hidden stub-period anomaly, the entire multi-document payload is programmatically generated. Every artifact, email timestamp, and sub-ledger entry is cryptographically hash-locked and committed to an immutable evaluation ledger. This ensures zero variance in the underlying data layer. When a solo frontier model and the Holo Engine are run against the exact same hash-locked payload, the test is strictly deterministic. The only variable being measured is the quality of the orchestration architecture.
+
 **The Fact Graph.** Ground truth in the Holo Builder factory is owned by a Python-driven Fact Graph, not a model. The Fact Graph holds the immutable realities of a scenario (entity IDs, execution timestamps, role hierarchies, cross-reference rules) and generates artifacts one at a time, enforcing exactly which facts are permitted and which are forbidden in each. The model's job is demoted to rendering: filling specific prose slots inside a rigid structure it does not control. We no longer ask a model to invent reality. We ask it to narrate a reality we constructed deterministically. A scenario built this way cannot hallucinate its own answer key, because the answer key was never the model's to write.
 
 **The QA Attacker.** Deterministic construction is necessary but not sufficient; a packet can be perfectly consistent and still be solvable by a trick. So before any packet reaches the reactor, it goes through the Holo QA Attacker, a blind, destructive layer whose only mandate is to break it. HQA hunts for single-document reliance, overfitting, and tells: any path that lets a solver reach the right verdict without performing the multi-document synthesis the scenario is supposed to demand. If a shortcut exists, HQA finds it, and the factory retires or repairs the packet.
@@ -317,6 +325,14 @@ Honesty requires a boundary here. The evaluative claims in this paper are benchm
 ## 7. Integration and Scale
 
 Holo is not a walled garden, and it is not an interface a person logs into. It is a headless API designed to sit inside infrastructure that already exists (document and contract-lifecycle systems, financial platforms, agent frameworks) rather than asking anyone to migrate to it.
+
+**Asynchronous Webhook Architecture.** The calling system passes a structured JSON packet (source material, anchor constraints, agent directives) and receives an immediate 202 Accepted. When the adversarial loop resolves, Holo POSTs the audited output and telemetry receipt back to the provided webhook.
+
+**Massive Context Capacity (2 Million Tokens).** Holo can process up to 2 million tokens per job, roughly 1.5 million words or 3,000 pages of dense legal text, regulatory playbooks, financial sub-ledgers, and supporting documentation in a single run.
+
+**Localized Knowledge Graphing.** Upon ingestion, the unstructured payload is mapped into a localized Knowledge Graph. This allows the adversarial agents to track upstream and downstream dependencies while performing live web context synthesis for real-time verification against current case law, market data, or regulatory updates.
+
+**Domain-Agnostic Deployment.** Because it is headless, Holo integrates seamlessly into existing infrastructure. It connects to standard Document Management Systems (iManage, NetDocuments), Contract Lifecycle Management platforms (Ironclad), and backend APIs. The exact same architecture can harden a legal draft inside a CLM, or sit at the action boundary of an HR platform to return ALLOW/ESCALATE before an automated adverse employment action commits.
 
 It integrates through an asynchronous job-and-webhook architecture. A system submits a packet as a job and continues; Holo returns the verdict or the finished artifact to a webhook when the reactor is done. This is the right shape for the work: an adversarial loop takes seconds to tens of seconds, which is invisible inside a wire approval or a contract close and intolerable inside a synchronous chat. The architecture matches the latency to the use.
 
@@ -395,4 +411,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.05 · June 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.06 · June 2026*

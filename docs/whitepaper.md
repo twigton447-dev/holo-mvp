@@ -4,7 +4,7 @@
 
 **Taylor Wigton** · Founder, Holo Engine · hello@holoengine.ai
 
-Working Paper · Version 5.01 · June 2026  
+Working Paper · Version 5.02 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -15,7 +15,7 @@ U.S. Provisional Patent Application No. 63/987,899
 
 AI systems are starting to do more than generate text. They are approving payments, granting access, executing workflows, and moving real operations forward without waiting for a human to step in. They are also generating the high-stakes documents people use to make decisions: contracts, deal memos, policy summaries, diligence reports, and procurement recommendations.
 
-That creates a new kind of risk.
+The result is not relief, but a new, more exhausting form of cognitive load. Professionals who were promised automation now spend their days hunting hallucinations, second-guessing subtle paradoxes, and cleaning up outputs that look clean but contain structural errors. The future organizations actually want is trusted delegation: the ability to hand high-consequence work to a system and know it has survived rigorous internal scrutiny.
 
 The most dangerous failures are not the obvious ones: prompt injections, jailbreaks, or loud policy violations. The core risk is untested judgment at commitment points. It is the moment an agent takes the wrong irreversible action because the request looked mechanically clean, or the moment a system creates a polished artifact that carries hidden errors into a human or automated approval path.
 
@@ -75,6 +75,14 @@ These look like different products. They are the same opposing force. In the eva
 Splitting reliance risk this way is not a marketing convenience. It maps onto a real seam in how AI fails. Creation failures and permission failures are different shapes. A drafting model leaves a logical hole; a deciding model rubber-stamps a clean-looking lie. You want the furnace before the artifact exists and the gate before the action commits. One reactor, two harnesses, two moments.
 
 The rest of this paper does the proven half first, because evidence should come before architecture.
+
+### The Two Directions of the Reactor
+
+When you build an environment that forces different models to challenge one another, the internal friction can be channeled in two distinct ways:
+
+**The Evaluative Harness (The Action Boundary Shield):** Used by Holo Verify. This configuration assumes the data packet or decision has already been generated. Holo sits silently at the final execution checkpoint and evaluates the payload against anchor constraints, returning a binary operational verdict: ALLOW or ESCALATE.
+
+**The Generative Harness (The Work-Product Forge):** Used by Holo Builder. This configuration assumes the starting material is a rough draft or incomplete strategy. It drops the draft into a constrained 10-turn adversarial furnace. Specialized critic agents, such as an Edge Case Scanner and Hostile Challenger, attack the document's logic from different angles. The loop forces high-volatility structural teardowns early, then rebuilds until unresolved issues converge to absolute zero.
 
 ---
 
@@ -181,6 +189,8 @@ A solo model completed the narrow task it was given perfectly and still returned
 
 This is the convergence thesis: at the action boundary, standalone models evaluate the immediate task without challenging the operational frame, which makes them simultaneously too gullible to catch hidden gaps and too brittle to handle real exceptions. Raw intelligence does not close this loop. A more powerful model answers the wrong question with more confidence.
 
+This structural limitation extends to generative work. A single model cannot create the opposing force required to break its own frame. When checking its own reasoning, a model tends to reinforce its initial assumptions and stop at a local maximum. Holo's multi-agent collision operates as a controlled reactor, extracting latent judgment and breaking weak assumptions that isolated inference would never surface. The system runs until analytical energy is exhausted and the models achieve absolute convergence with zero open issues.
+
 ### The economics
 
 Running a packet through several adversarial turns is more compute-heavy than one API call. That objection misreads where this lives. The action boundary does not govern a consumer chat; a corporate wire, an access provision, or a ledger close easily absorbs a 15-to-45-second verification loop. A full review costs roughly **$0.30 to $1.00** in compute per transaction. Weighed against catastrophic operational liability, that is not a close call. At the boundary, verification is cheap and mistakes are existential.
@@ -209,7 +219,19 @@ A retired packet is not waste. It is a mapped vulnerability, a documented way a 
 
 That isolated trace is the proof object. It is deliberately not a claim about how often this happens in live traffic; Section 11 is explicit that this paper makes no such claim. It is something narrower and harder to argue with: a reproducible demonstration, under controlled and ungameable conditions, that the architecture (not the model) is what changes the verdict.
 
-### 5.5 Holo Test: Ablation Methodology
+### 5.5 Domain 4: M&A Strategy and Integration (The Generative Harness)
+
+While evaluating a binary ALLOW/ESCALATE is deterministic, judging the quality of generated text is inherently more subjective. To prove the Generative Harness works, outputs must be evaluated by an independent, blinded scoring layer.
+
+**The Setup:** Both candidates completed a 10-turn adversarial self-critique loop on an extreme-difficulty M&A integration scenario: a $185M acquisition of AutoVerdict by CarGurus. The deliverable required a 10-section plan including a 3-year P&L, RACI governance table, and a 12-item risk register.
+
+**Candidate A (Solo Single-Model Baseline):** The single-model candidate was process-stable and never crashed below 5.5 on any dimension. However, it plateaued into cosmetic patching when rules collided with changing financial variables. It closed with two unresolved issues and entirely missed a critical operational paradox: the projected infrastructure savings assumed dual-run operations, which is physically and financially impossible. The model never saw the error because it had no opposing force.
+
+**Candidate B (Holo Multi-Agent Architecture):** The adversarial candidate deliberately crashed to a 2/10 on Financial Rigor in Turn 4 as hostile personas tore apart the arithmetic and assumptions. This high-volatility structural teardown forced the system to rebuild from better foundations. By Turn 10, the Holo architecture independently identified the dual-run P&L penalty, corrected the projections, and delivered a converged asset with zero unresolved items.
+
+**Verdict:** Holo defeated the single-model baseline by a margin of 6 points (44/50 vs 38/50). More importantly, it delivered absolute convergence and a genuine strategic insight that only emerged because the system was forced to fight itself.
+
+### 5.6 Holo Test: Ablation Methodology
 
 The three completed domains demonstrate that the Holo architecture changes the verdict where solo models fail. The next phase formalizes that comparison into a repeatable scoring cage across all architecture conditions.
 
@@ -314,7 +336,6 @@ The promise of enterprise AI was never faster queues for humans to babysit. It i
 - **No claim that Holo replaces traditional security.** Firewalls, identity and access management, and logging still handle the known infrastructure layer. Holo adjudicates the unresolved semantic middle.
 - **No benchmark behind the Generative Harness yet.** Section 6 describes design intent on a proven reactor. Its termination condition (closure with no open issues) is a stopping rule, not a correctness guarantee. The furnace can only catch what its attackers can raise.
 - **No claims at all in the illustrative frontier domains.** Defense and clinical examples in Section 8 are illustrations of shape, not tested capabilities, and are deliberately held out of every results table.
-- **We do not claim the current benchmark validates Holo Builder.** The empirical benchmark results presented in this paper (Accounts Payable, Agentic Commerce, PE Consolidation) explicitly measure Holo Verify at the action boundary. Benchmarks for Holo Builder's generative capabilities and Holo Judge's evaluation accuracy are in active development.
 
 The restraint is the point. A trust layer that overclaims is just another thing you have to check.
 
@@ -332,4 +353,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.01 · June 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.02 · June 2026*

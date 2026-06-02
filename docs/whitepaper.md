@@ -4,7 +4,7 @@
 
 **Taylor Wigton** · Founder, Holo Engine · hello@holoengine.ai
 
-Working Paper · Version 5.02 · June 2026  
+Working Paper · Version 5.03 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -57,6 +57,18 @@ You can watch this happen turn by turn. In one benchmarked case, a model found t
 This is the part the industry keeps getting wrong. The instinct is to add intelligence. But adding intelligence to a self-referential loop makes the loop more persuasive, not more correct. A smarter stick is still one stick.
 
 What you need is collision. Two surfaces, in opposition, generating something neither could produce alone.
+
+### What Holo Is
+
+Holo Engine is a governed adversarial judgment architecture. It operates as a controlled reactor that forces structurally different frontier models into collision to extract latent judgment.
+
+This architecture is deployed in two directions to enable trusted delegation:
+
+**At the action boundary:** It acts as a runtime shield (Holo Verify). It intercepts a proposed action, evaluates the packet through a structured adversarial cross-examination, and uses a constrained Governor to return a binary verdict: ALLOW or ESCALATE.
+
+**In the generative process:** It acts as a work-product forge (Holo Builder). It drops early drafts into a multi-turn adversarial furnace, forcing high-volatility structural teardowns to resolve hidden contradictions before an artifact is finalized.
+
+Whether intercepting a fraudulent wire or stress-testing a high-stakes M&A strategy, the underlying job is the same. Holo sits at the threshold of reliance and asks a simple question: This action or artifact appears ready. Has it actually survived enough hostile scrutiny to be safe?
 
 ---
 
@@ -353,4 +365,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.02 · June 2026*
+*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.03 · June 2026*

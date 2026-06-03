@@ -117,4 +117,4 @@ We are looking for one or two enterprise design partners in financial services, 
 If your team is approving hundreds of transactions a day using AI — or thinking about it — let's talk.
 
 **Taylor Wigton**
-twigton447@gmail.com
+taylorw@hologroup.io

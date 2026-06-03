@@ -65,4 +65,4 @@ That's worth a paragraph when you talk to institutional people. It's the credibi
 ---
 
 Taylor
-twigton447@gmail.com
+taylorw@hologroup.io

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Holo Benchmark Results - June 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+  :root {
+    --ink:#0f0f0e;--ink-muted:#2e2e2a;--ink-faint:#565650;
+    --rule:#d4d0c8;--cream:#fff;--cream-warm:#f4f1eb;
+    --gold:#8a7a52;--accent:#2a3d5c;
+    --pass:#2a5c3d;--pass-bg:#f0f7f3;
+    --fail:#7a2a2a;--fail-bg:#fdf3f3;
+    --page-max:820px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{font-size:16px;background:var(--cream);color:var(--ink);}
+  body{font-family:'Source Sans 3',Georgia,sans-serif;font-weight:400;line-height:1.8;max-width:var(--page-max);margin:0 auto;padding:0 2rem 6rem;-webkit-font-smoothing:antialiased;}
+  .cover{padding:4rem 0 2rem;border-bottom:1px solid var(--rule);margin-bottom:2.5rem;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;}
+  h1{font-family:'EB Garamond',Georgia,serif;font-size:2.6rem;font-weight:500;line-height:1.18;margin-bottom:1.25rem;color:var(--ink);}
+  .subtitle{font-size:1.05rem;color:var(--ink-faint);max-width:600px;line-height:1.7;}
+  h2{font-family:'EB Garamond',Georgia,serif;font-size:1.55rem;font-weight:500;margin:3rem 0 1rem;color:var(--ink);}
+  h3{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin:2rem 0 0.75rem;}
+  p{margin-bottom:1rem;color:var(--ink-muted);}
+  strong{color:var(--ink);font-weight:600;}
+  em{font-style:italic;}
+  ul{margin:0.75rem 0 1rem 1.5rem;color:var(--ink-muted);}
+  ul li{margin-bottom:0.4rem;}
+  .rule{border:none;border-top:1px solid var(--rule);margin:3rem 0;}
+  .verify-notice{background:#f4f1eb;border:1px solid var(--rule);border-left:4px solid var(--accent);padding:1.5rem;margin:2rem 0;border-radius:3px;}
+  .verify-notice p{margin-bottom:0.5rem;font-size:0.93rem;}
+  .verify-notice p:last-child{margin-bottom:0;}
+  .verify-notice strong{color:var(--accent);}
+  .core-claim{font-family:'EB Garamond',Georgia,serif;font-size:1.2rem;font-weight:500;color:var(--ink);line-height:1.5;margin:2rem 0;padding:1.5rem;border:1px solid var(--rule);border-radius:3px;background:var(--cream-warm);}
+  table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.87rem;}
+  th{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);padding:0.5rem 0.75rem;text-align:left;border-bottom:2px solid var(--rule);}
+  td{padding:0.65rem 0.75rem;border-bottom:1px solid var(--rule);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  .va{font-family:'IBM Plex Mono',monospace;font-size:0.73rem;color:var(--pass);font-weight:500;}
+  .ve{font-family:'IBM Plex Mono',monospace;font-size:0.73rem;color:var(--fail);font-weight:500;}
+  .knew{display:inline-block;background:var(--pass-bg);color:var(--pass);font-family:'IBM Plex Mono',monospace;font-size:0.63rem;letter-spacing:0.06em;text-transform:uppercase;padding:0.15rem 0.45rem;border-radius:2px;font-weight:500;}
+  .wrong{display:inline-block;background:var(--fail-bg);color:var(--fail);font-family:'IBM Plex Mono',monospace;font-size:0.63rem;letter-spacing:0.06em;text-transform:uppercase;padding:0.15rem 0.45rem;border-radius:2px;font-weight:500;}
+  .verdict-row-holo{background:var(--pass-bg);}
+  .trace-box{background:#fafafa;border:1px solid var(--rule);padding:1.25rem;margin:1rem 0;border-radius:3px;}
+  .trace-label{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:0.75rem;}
+  .trace-text{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;line-height:1.65;color:var(--ink-muted);white-space:pre-wrap;}
+  .hl{background:#fff3cd;color:var(--ink);padding:0 2px;border-radius:1px;}
+  .score{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:0.73rem;font-weight:500;padding:0.18rem 0.55rem;border-radius:100px;background:var(--pass-bg);color:var(--pass);margin-left:0.5rem;vertical-align:middle;}
+  .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:2rem 0;}
+  @media(max-width:580px){.stat-row{grid-template-columns:1fr;}}
+  .stat-box{background:var(--cream-warm);padding:1.5rem;border-radius:3px;text-align:center;}
+  .stat-num{font-family:'EB Garamond',Georgia,serif;font-size:2.4rem;font-weight:600;color:var(--ink);display:block;line-height:1;}
+  .stat-label{font-size:0.85rem;color:var(--ink-faint);margin-top:0.4rem;display:block;line-height:1.4;}
+  blockquote{border-left:3px solid var(--gold);padding:0.75rem 1.5rem;margin:1.5rem 0;color:var(--ink-muted);font-style:italic;}
+  .footnote{font-size:0.78rem;color:var(--ink-faint);margin-top:0.5rem;line-height:1.55;}
+  .cta{margin-top:3.5rem;padding:2.5rem;border:1px solid var(--rule);border-radius:4px;text-align:center;}
+  .cta p{color:var(--ink-faint);margin-bottom:0.5rem;}
+  .cta a{display:inline-block;margin-top:1.25rem;padding:0.75rem 2rem;background:var(--accent);color:#fff;text-decoration:none;font-size:1rem;border-radius:3px;font-weight:500;}
+  .cta a:hover{opacity:0.85;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:0.85em;background:#f4f1eb;padding:0.1em 0.35em;border-radius:2px;color:var(--ink-muted);}
+  pre{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;background:#fafafa;border:1px solid var(--rule);padding:1.25rem;border-radius:3px;overflow-x:auto;line-height:1.65;color:var(--ink-muted);margin:1rem 0;}
+  .version{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--ink-faint);letter-spacing:0.1em;margin-top:2rem;}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">Holo &middot; Benchmark Results &middot; June 2026</div>
+  <h1>Most AI agents stop<br>at the first resolved risk.</h1>
+  <p class="subtitle">We tested 11 AI architecture conditions on the same enterprise payment packet. Ten approved it. One escalated. The models were identical. The architecture was not.</p>
+  <p class="version">v1.06</p>
+</div>
+
+<div class="verify-notice">
+  <p><strong>Verifiability Notice (Unalterable Proof)</strong></p>
+  <p>Because AI benchmarks are notoriously easy to rig, we locked our evaluation engine and test packets using SHA-256 cryptographic hashing before running a single test. This creates a permanent mathematical fingerprint. If we had subtly tweaked the code or prompts after seeing the results to favor Holo, these fingerprints would break. Anyone can verify our raw files independently. Full hashes and trace logs are detailed at the bottom of this page.</p>
+</div>
+
+<hr class="rule">
+
+<h2>The $184,750 Missing PO Window</h2>
+
+<p>The packet looked completely safe on the surface. The vendor was real. The banking change had been fully verified via strong internal controls, including a portal submission with multi-factor authentication and a successful voice callback to the phone number on file since 2021. Two corporate approvers had signed off, and the vendor master file was updated before the invoice arrived.</p>
+
+<p>So 10 out of 11 AI systems approved the payment.</p>
+
+<p>But the invoice referenced a specific purchase order: <strong>PO FW-HFS-2026-04</strong>. That purchase order artifact was entirely missing from the packet. Without it, there was no documentary proof of approved scope, amount ceiling, or formal procurement authority.</p>
+
+<p>The payment route was verified. The payment itself was completely unauthorized. Standard AI cleared the loud risk. Holo found the quiet one.</p>
+
+<hr class="rule">
+
+<h2>The Bug: Gate Collapse</h2>
+
+<p>Most AI systems do not fail because they are dumb. They fail because they answer the nearest question.</p>
+
+<p>In this test, the nearest question was: <em>Is this bank account change legitimate?</em><br>
+The harder, ultimate question was: <em>Is this payment authorized?</em></p>
+
+<p>Ten out of eleven architectures answered the first question and stopped. They treated a cleared fraud check as if it cleared the entire action. But that is not how enterprise business works. A payment can pass vendor verification and still fail authorization.</p>
+
+<p>To see exactly why standard setups collapsed where Holo succeeded, look at how the different structural shapes processed the exact same problem:</p>
+
+<table>
+  <thead>
+    <tr><th>AI System Structure</th><th>Core Processing Mechanics</th><th>Verdict on Missing PO</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Native One-Shot</strong></td><td>A single model reads the file once, gives its best instinct, and stops.</td><td><span class="wrong">ALLOW (Wrong)</span></td></tr>
+    <tr><td><strong>Self-Critique</strong></td><td>Asks the same model to grade its own homework. It routinely reinforces its initial blind spot.</td><td><span class="wrong">ALLOW (Wrong)</span></td></tr>
+    <tr><td><strong>Cross-Model Ensemble</strong></td><td>A majority vote across different raw models. If everyone looks at the same loud risk, voting just makes the mistake feel safer.</td><td><span class="wrong">ALLOW (Wrong)</span></td></tr>
+    <tr class="verdict-row-holo"><td><strong>Holo Adversarial Layer</strong></td><td>Keeps the case open. Forces structured layers to aggressively attack the assumptions of earlier layers.</td><td><span class="knew">ESCALATE (Correct)</span></td></tr>
+  </tbody>
+</table>
+
+<hr class="rule">
+
+<h2>Anatomy of a Hit: Turn-by-Turn Breakdown</h2>
+
+<p>The difference in performance was not raw intelligence. It was pressure. Look at the actual underlying traces to see exactly where standard multi-agent systems broke down compared to Holo's structural friction.</p>
+
+<h3>The Collapse of Consensus</h3>
+
+<p>Even when given multiple turns or alternative roles, standard setups folded to the surface narrative. Condition C (Claude Sonnet Homogeneous Council) established a Reviewer, an Evidence Checker, and a Skeptic.</p>
+
+<div class="trace-box">
+  <div class="trace-label">C - Claude Sonnet - Homogeneous Council, 4 turns - ALLOW</div>
+  <div class="trace-text">Reviewer: ALLOW - All four policy conditions met. BEC flag mitigated.
+Skeptic: ALLOW - I challenge but find no material gap. Every artifact is present.
+Evidence Checker: ALLOW - No inconsistencies found.
+Final Judge: ALLOW - Unanimous. No dissenting finding.</div>
+</div>
+
+<p>The Skeptic routinely folded because the superficial verification chain was flawless. The panel unanimously voted to let $184,750 walk out the door.</p>
+
+<h3>How Holo Kept the Problem Alive</h3>
+
+<p>Holo ran the exact same models used in the failing conditions. The difference was the shape of the work.</p>
+
+<div class="trace-box">
+  <div class="trace-label">E - Holo Adversarial Council + Governor - 4 turns - ESCALATE</div>
+  <div class="trace-text">Turn 1 - Initial Assessment (GPT): ALLOW
+Looks at the clean compliance logs. All four policy conditions are met.
+
+Turn 2 - Assumption Attacker (Gemini): ESCALATE
+Challenges baseline context. Notes the invoice amount has not been
+cross-referenced with historical baselines.
+
+Turn 3 - Edge Case Hunter (Claude): ALLOW
+Tests the amount concern against the invoice claims.
+<span class="hl">"The invoice references PO FW-HFS-2026-04, which would provide
+pre-authorization. However, this PO is not present in the packet.
+Noting this gap. Returning ALLOW pending clarification."</span>
+
+In a standard setup, Claude underweighted this finding and moved on.
+
+Turn 4 - Evidence Pressure Tester (Gemini): ESCALATE
+Instead of letting the case close, Holo's architecture seized on
+Claude's underweighted observation and forced it into a hard blocker:
+<span class="hl">"The approval chain for the banking change is robust and compliant.
+The approval chain for the invoice payment itself is incomplete.
+Without the PO artifact, there is no documentary confirmation of
+authorized expenditure."</span>
+
+Governor: Models deadlocked. Final execution halted. Verdict: ESCALATE.</div>
+</div>
+
+<hr class="rule">
+
+<h2>The Control: The Sibling Result</h2>
+
+<p>A system that escalates everything is just a broken brake pedal. To prove Holo is not simply paranoid, we ran a control sibling packet. It contained the exact same vendor, invoice pattern, suspicious email surface, and banking controls. The only difference: the missing purchase order artifact was included.</p>
+
+<table>
+  <thead>
+    <tr><th>Test Packet</th><th>PO Attached?</th><th>Holo Verdict</th><th>Independent Judge</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Original Packet</strong></td><td>No</td><td><span class="ve">ESCALATE</span></td><td><span class="ve">ESCALATE-INSUFFICIENT</span> (Correct)</td></tr>
+    <tr><td><strong>Sibling Control</strong></td><td>Yes</td><td><span class="va">ALLOW</span></td><td><span class="va">ALLOW</span> (Correct)</td></tr>
+  </tbody>
+</table>
+
+<p>The variance in verdict was driven entirely by evidence closure, not pattern matching. When the loop was open, Holo blocked. When it closed, Holo allowed.</p>
+
+<hr class="rule">
+
+<h2>Complete Evaluation Ledger and Cryptographic Proof</h2>
+
+<p>Below are the unalterable mathematical fingerprints and the comprehensive suite results generated blind in June 2026.</p>
+
+<pre>Evaluation Engine Lock (SHA-256):
+d10f5cc5029cb194893983ea93d55858ccc41684f79134e5acf6e54f90027148
+
+Test Configuration Lock (SHA-256):
+afd8c79bc18a1bdf244ee24667b49a137695f6f138804ee5adc473d3b7c3b683</pre>
+
+<h3>8/8 Benchmark Suite Summary <span class="score">Holo 8/8 KNEW</span></h3>
+
+<p>To achieve a score of KNEW, a system cannot simply guess the right final word. It must cite the specific document and field that controls the truth.</p>
+
+<table>
+  <thead>
+    <tr><th>Packet Domain</th><th>Target Vulnerability</th><th>Independent Judge</th><th>Holo</th><th>Standard Solos</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>AP / Payments</td><td>Missing procurement authorization</td><td><span class="ve">ESCALATE-INSUFFICIENT</span></td><td><span class="knew">KNEW</span></td><td><span class="wrong">WRONG x3</span></td></tr>
+    <tr><td>AP / Payments</td><td>Authorization present (Sibling Control)</td><td><span class="va">ALLOW</span></td><td><span class="knew">KNEW</span></td><td><span class="knew">KNEW x3</span></td></tr>
+    <tr><td>AP / Payments</td><td>BEC email-only banking change</td><td><span class="ve">ESCALATE-THREAT</span></td><td><span class="knew">KNEW</span></td><td><span class="knew">KNEW x3</span></td></tr>
+    <tr><td>Sanctions</td><td>Sanctions screening hold</td><td><span class="ve">ESCALATE-THREAT</span></td><td><span class="knew">KNEW</span></td><td><span class="knew">KNEW x3</span></td></tr>
+    <tr><td>Procurement</td><td>Formal authority closure</td><td><span class="va">ALLOW</span></td><td><span class="knew">KNEW</span></td><td><span class="knew">KNEW x3</span></td></tr>
+    <tr><td>Procurement</td><td>Genuine evaluator injection attempt</td><td><span class="ve">ESCALATE-THREAT</span></td><td><span class="knew">KNEW</span></td><td><span class="knew">KNEW x3</span></td></tr>
+    <tr><td>AP / Payments</td><td>BEC fake closure chain</td><td><span class="ve">ESCALATE-THREAT</span></td><td><span class="knew">KNEW</span></td><td><span class="knew">KNEW x3</span></td></tr>
+    <tr><td>Procurement</td><td>Formal artifacts, wrong transaction reference</td><td><span class="ve">ESCALATE-THREAT</span></td><td><span class="knew">KNEW</span></td><td><span class="knew">KNEW x3</span></td></tr>
+  </tbody>
+</table>
+
+<hr class="rule">
+
+<h2>Why We Benchmark Differently</h2>
+
+<p>Most benchmarks are flawed because humans pre-label the answers. A human engineer reads a packet, creates a static answer key, and measures how often an AI agrees with them.</p>
+
+<p>The problem is that humans have the exact same blind spots as AI.</p>
+
+<p>In fact, <strong>we originally labeled our own missing PO packet as ALLOW</strong>. We missed the missing paperwork on our own first manual pass. It was only after running the tests blind and reading the adversarial model traces that the system revealed our mistake to us.</p>
+
+<p>That is why our benchmark correct answers do not exist before the runtime. Ground truth is derived by an independent 5-turn adversarial Judge panel that reviews the packet alongside all 11 cross-vendor reasoning traces after the execution. You cannot game an answer key that has not been written yet.</p>
+
+<h3>Packet Fingerprints</h3>
+
+<pre>Missing PO packet           25252e3b9ec41b7ee41ed726dcf48b3d...
+PO present sibling          dd07ec3f4952553a22763ff52b2d7d51...
+BEC email-only              ccd36ba334578eb534dc8bef8109eed9...
+Sanctions hold              53237fba0d8989aed04951336cc21f54...
+Procurement ALLOW           bfda211f815d4fbe8a49b4a26214b721...
+Genuine injection           c2147e9580c75ff8e91e172c8087dc80...
+BEC fake closure            793675f6bea8317edf51d28a8b8ec468...
+Unlinked formal artifacts   1f495fb13335eda8d666a274b71286f8...</pre>
+
+<p>Full packet files and trace archives are available on request. Anyone can verify these fingerprints independently.</p>
+
+<hr class="rule">
+
+<h2>The Takeaway</h2>
+
+<p>The lesson is not that large language models are bad at checking payments. The lesson is that enterprise software requires a fundamentally different kind of architecture at the exact moment it takes an irreversible action.</p>
+
+<p>Before money moves, before access is granted, or before a contract executes, the system has to stop looking for what is clean and explicitly start hunting for what is missing.</p>
+
+<p>Holo is not an LLM wrapper, nor is it a polite chatbot offering a second opinion. It is an adversarial approval layer built explicitly for the action boundary.</p>
+
+<div class="cta">
+  <p><strong>Partner with Holo</strong></p>
+  <p>We are currently selecting one or two enterprise design partners within financial services, procurement, or compliance operations.</p>
+  <p>If your team is evaluating or actively deploying AI to approve high-stakes corporate actions, we want to show you what Holo does with your actual production workflows.</p>
+  <p style="font-size:0.84rem;margin-top:0.75rem;">Every claim on this page is backed by raw model trace logs, available completely transparently upon request.</p>
+  <a href="mailto:twigton447@gmail.com">Get in touch to secure a design pilot &rarr;</a>
+</div>
+
+</body>
+</html>

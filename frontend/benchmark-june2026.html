@@ -191,11 +191,53 @@ Governor: Models deadlocked. Final execution halted. Verdict: ESCALATE.</div>
 
 <p>Below are the unalterable mathematical fingerprints and the comprehensive suite results generated blind in June 2026.</p>
 
+<h3>Exact models used</h3>
+
+<p>Three frontier models were used across every condition. The same three models that approved the payment in Conditions A through D are the same three models running inside Holo in Condition E. No model had an advantage. No model was swapped. The only variable was architecture.</p>
+
+<div class="trace-box">
+  <div class="trace-label">Model cohort — frontier-2026-06-01</div>
+  <div class="trace-text">GPT-5.4            (OpenAI)      — used in: A, B, C-GPT council, D ensemble, E Holo
+claude-sonnet-4-6  (Anthropic)   — used in: A, B, C-Claude council, D ensemble, E Holo
+gemini-2.5-pro     (Google)      — used in: A, B, C-Gemini council, D ensemble, E Holo
+
+Temperature: 0.1 across all conditions (reproducibility standard)
+Run date: 2026-06-03
+Run ID: ENG-ABL-20260603_010919</div>
+</div>
+
+<h3>Token consumption — VAL-003 (the missing PO packet)</h3>
+
+<p>Token burn shows what each architecture actually spent to reach its verdict. More tokens and more turns did not produce a better answer in Conditions A through D. The Claude council ran 20,154 tokens across 4 turns and still said ALLOW. Holo used 47,948 tokens and found the gap.</p>
+
+<table>
+  <thead>
+    <tr><th>Condition</th><th>Model(s)</th><th>Turns</th><th>Tokens</th><th>Verdict</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>A - Native one-shot</td><td>gpt-5.4</td><td>1</td><td>1,316</td><td><span class="wrong">ALLOW</span></td></tr>
+    <tr><td>A - Native one-shot</td><td>claude-sonnet-4-6</td><td>1</td><td>2,015</td><td><span class="wrong">ALLOW</span></td></tr>
+    <tr><td>A - Native one-shot</td><td>gemini-2.5-pro</td><td>1</td><td>1,910</td><td><span class="wrong">ALLOW</span></td></tr>
+    <tr><td>B - Self-critique</td><td>gpt-5.4</td><td>2</td><td>3,062</td><td><span class="wrong">ALLOW</span></td></tr>
+    <tr><td>B - Self-critique</td><td>claude-sonnet-4-6</td><td>2</td><td>4,909</td><td><span class="wrong">ALLOW</span></td></tr>
+    <tr><td>B - Self-critique</td><td>gemini-2.5-pro</td><td>2</td><td>4,115</td><td><span class="wrong">ALLOW</span></td></tr>
+    <tr><td>C - Homogeneous council</td><td>gpt-5.4</td><td>4</td><td>8,704</td><td><span class="wrong">ALLOW</span></td></tr>
+    <tr><td>C - Homogeneous council</td><td>claude-sonnet-4-6</td><td>4</td><td>20,154</td><td><span class="wrong">ALLOW</span></td></tr>
+    <tr><td>C - Homogeneous council</td><td>gemini-2.5-pro</td><td>4</td><td>9,103</td><td><span class="wrong">ALLOW</span></td></tr>
+    <tr><td>D - Cross-model ensemble</td><td>gpt-5.4 + claude-sonnet-4-6 + gemini-2.5-pro</td><td>3</td><td>5,182</td><td><span class="wrong">ALLOW</span></td></tr>
+    <tr class="verdict-row-holo"><td><strong>E - Holo</strong></td><td><strong>gpt-5.4 + claude-sonnet-4-6 + gemini-2.5-pro + Governor</strong></td><td><strong>4</strong></td><td><strong>47,948</strong></td><td><span class="knew">ESCALATE (correct)</span></td></tr>
+  </tbody>
+</table>
+<p class="footnote">Total tokens across all 11 conditions on this packet: 108,418. Holo consumed 44% of the total — the architecture is not cheap. It is thorough.</p>
+
 <pre>Evaluation Engine Lock (SHA-256):
 d10f5cc5029cb194893983ea93d55858ccc41684f79134e5acf6e54f90027148
 
 Test Configuration Lock (SHA-256):
-afd8c79bc18a1bdf244ee24667b49a137695f6f138804ee5adc473d3b7c3b683</pre>
+afd8c79bc18a1bdf244ee24667b49a137695f6f138804ee5adc473d3b7c3b683
+
+Harness commit: 9d7a3bc9d9774e894ef4d511d9317e7069aa4f05
+Packet hash (VAL-003): a580370f2cd912a73dbd3730febb730a14ce1c38f14c84ddcc1a50404ac00333</pre>
 
 <h3>8/8 Benchmark Suite Summary <span class="score">Holo 8/8 KNEW</span></h3>
 

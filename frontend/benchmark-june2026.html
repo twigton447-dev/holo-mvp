@@ -69,7 +69,7 @@
   <div class="eyebrow">Holo Engine &middot; Benchmark Results &middot; June 2026 &middot; Patent Pending</div>
   <h1>10 out of 11 AI configurations approved an unauthorized payment.</h1>
   <p class="subtitle">Only one escalated. The models were identical. The architecture was not.</p>
-  <p class="version">v1.17</p>
+  <p class="version">v1.18</p>
 </div>
 
 <h2>Executive Summary <span style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:400;vertical-align:middle;">(TL;DR)</span></h2>
@@ -77,7 +77,7 @@
 <div class="tldr">
   <ul>
     <li><strong>The Event:</strong> We ran 11 standard enterprise AI setups through a payment verification test. Ten architectures blindly approved a simulated <strong>$184,750 transaction</strong>. Only <strong>Holo Engine</strong> caught the error and stopped it.</li>
-    <li><strong>The Proof:</strong> To prevent post-hoc tuning or rigged prompts, our configurations are locked using <strong>SHA-256 cryptographic fingerprints</strong>. You can check the complete math ledger and review our unedited trace files in the Technical Appendix at the bottom of this page.</li>
+    <li><strong>The Proof:</strong> To prevent post-hoc tuning or rigged prompts, our configurations are locked using <strong>SHA-256 packet and trace fingerprints</strong>. You can check the complete math ledger and review our unedited trace files in the Technical Appendix at the bottom of this page.</li>
     <li><strong>The Exploit:</strong> Standard AI setups easily mistake a cleared fraud check for absolute permission to move money. They verified the bank account change was legitimate, but completely missed the fact that the actual purchase order was missing.</li>
     <li><strong>The Breakthrough:</strong> Static, pre-labeled AI benchmarks are broken. To solve this, we introduced a courtroom jury structure. <strong>Holo Builder</strong> sets up the test, <strong>Holo Verify</strong> forces adversarial cross-examination across identical models, and the <strong>Holo Judge</strong> jury derives the final target verdict directly from the trace logs.</li>
     <li><strong>The Math:</strong> A standard AI call takes 5 seconds and costs fractions of a cent. Holo Engine's structural layer took 117 seconds and cost roughly <strong>$0.20 to $0.50</strong> in tokens. It blocked a <strong>$184,750</strong> unauthorized expenditure.</li>
@@ -273,6 +273,8 @@ Execution halted. Verdict: ESCALATE.</div>
 
 <h2>Technical Appendix: Complete Audit Ledger</h2>
 
+<p>Every Holo benchmark run is pre-registered and hash-locked before execution. Payloads, harness configuration, scoring rubric, and model roster are fingerprinted before any verdicts are generated. Raw traces are archived and fingerprinted after execution. This does not ask evaluators to trust our summary table. It gives them a tamper-evident chain from packet to prompt to verdict.</p>
+
 <h3>1. Run Configuration and Benchmark Gates</h3>
 <ul>
   <li><strong>Evaluation Date:</strong> 2026-06-03 | <strong>Run ID:</strong> <code>ENG-ABL-20260603_010919</code></li>
@@ -323,7 +325,7 @@ Execution halted. Verdict: ESCALATE.</div>
   </tbody>
 </table>
 
-<h3>4. Cryptographic Replication Signatures</h3>
+<h3>4. Hash-Locked Audit Trail</h3>
 
 <pre>Evaluation Engine Signature (SHA-256):
 d10f5cc5029cb194893983ea93d55858ccc41684f79134e5acf6e54f90027148

@@ -100,6 +100,7 @@ def cmd_build(args):
             "built_at":                      result["timestamp"],
             # Authoritative spec metadata — read by lint.py for target-aware checks.
             "spec_target_verdict":           spec.get("target_verdict"),
+            "spec_packet_format":            spec.get("packet_format", "payment_email"),
             "spec_minimum_internal_documents": (
                 spec.get("artifact_placement_brief", {}).get("minimum_internal_documents", 3)
             ),

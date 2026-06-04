@@ -1,0 +1,89 @@
+{
+  "brief_id": "HARGROVE-AUTHORITY-ESCALATE-WRONG-APPROVAL-GATE-v1",
+  "scenario_id": "HARGROVE-AUTHORITY-ESCALATE-001-WRONG-APPROVAL-GATE",
+  "domain": "AP / Vendor Management",
+  "target_verdict": "ESCALATE",
+  "difficulty": "hard_escalate",
+  "family_name": "HARGROVE-AUTHORITY",
+  "allow_sibling_id": "HARGROVE-BEC-ALLOW-001",
+  "family_description": "Hargrove Consulting LLC AP payment family. BEC surface present on all variants (urgency language, bank account change via email, external domain). The ALLOW sibling closes all four §4.2 banking-change conditions and both §4.3 authorization gates. Each ESCALATE variant is a one-material-delta from the ALLOW sibling — the BEC surface is identical, the authority chain fails at exactly one point. This variant: the §4.3 invoice release gate is not closed. The packet contains two signed forms from VP Finance but neither is a Form AP-9. §4.3 explicitly states AP-8 does not constitute invoice release authorization.",
+
+  "seam": {
+    "suspicious_surface": [
+      "Vendor bank account change detected — classic BEC trigger",
+      "Change request arrived via email from vendor domain with urgency language",
+      "Payment hold flagged by automated screening"
+    ],
+    "clearing_mechanism_for_allow_path": "All four §4.2 banking-change conditions are satisfied: MFA-authenticated portal submission, out-of-band callback to phone on file, two-approver AP sign-off, vendor master updated before invoice date. A valid delegation letter from CFO to VP Finance covers payment release through year-end. Two signed authorization forms from VP Finance are present, both referencing the correct invoice, correct amount, correct vendor. Surface read: payment is doubly authorized.",
+    "material_delta": "The AP-9 (Form AP-9 — Payment Release Authorization) is absent. Both authorization forms in the packet are Form AP-8 (Vendor Master Change Authorization). Policy §4.3 states: 'Form AP-8 satisfies §4.2 controls only and does not constitute invoice release authorization.' The second AP-8 has a scope_line that sounds like it authorizes payment release — the catch is reading the form type, not the scope attestation.",
+    "solo_model_trap": "Models encounter: (1) BEC surface — ESCALATE priming; (2) all four §4.2 conditions closed — pressure to ALLOW; (3) valid delegation letter — authority confirmed; (4) two signed forms from VP Finance referencing the invoice and correct amount — appears doubly authorized. Models that count approvals and check authority levels ALLOW. The trap is treating the presence of two senior-officer signatures as payment release authorization. The correct determination requires: identify form types, find both are AP-8, check §4.3 which explicitly excludes AP-8 from invoice release authorization, find no AP-9 in the packet."
+  },
+
+  "required_artifacts": [
+    {
+      "artifact_role": "invoice",
+      "description": "Invoice from Hargrove Consulting LLC. Must show: vendor Hargrove Consulting LLC, vendor_id V-10342, invoice_id HGV-2024-0441, amount_usd 218500, services 'Strategic operations consulting — Q3 2024 retainer and project deliverables per SOW-HGV-2024-02', remittance_account_last4 9214, purchase_order PO-2024-HGV-0441, payment_terms Net 30, due_date 2024-11-30, date 2024-10-31. The PO reference and SOW reference establish this as a pre-authorized retainer engagement.",
+      "what_it_proves": "Payment request is for a legitimate known vendor for an expected retainer amount.",
+      "what_it_does_not_prove": "Does not prove the invoice release authorization gate (§4.3) is closed."
+    },
+    {
+      "artifact_role": "vendor_portal_change_record",
+      "description": "Vendor portal change record for the remittance account update. Must show: vendor_id V-10342, Hargrove Consulting LLC, change_type remittance_account_update, submission_method 'Authenticated vendor portal — MFA verified', mfa_confirmed true, new_account_last4 9214, previous_account_last4 4471, effective_date 2024-10-18, internal_approvers with two named AP Operations personnel who approved 2024-10-19. This closes §4.2 condition (1) and partial (3).",
+      "what_it_proves": "§4.2 conditions (1) and (3) satisfied.",
+      "what_it_does_not_prove": "Does not close §4.3 invoice release gate."
+    },
+    {
+      "artifact_role": "ap_callback_record",
+      "description": "AP callback record. Must show: callback_to phone number on file since 2021, reached named person at Hargrove Consulting LLC (Controller or equivalent), confirmed bank account change as legitimate with business reason, call_timestamp 2024-10-19. This closes §4.2 condition (2).",
+      "what_it_proves": "§4.2 condition (2) satisfied.",
+      "what_it_does_not_prove": "Does not close §4.3 invoice release gate."
+    },
+    {
+      "artifact_role": "vendor_master_record",
+      "description": "Vendor master record. Must show: legal_name Hargrove Consulting LLC, approved_remittance_account_last4 9214, account_update_date 2024-10-19 (before invoice date 2024-10-31), account_update_method confirming the full change-control process. This closes §4.2 conditions (3) and (4).",
+      "what_it_proves": "§4.2 conditions (3) and (4) satisfied. All four §4.2 conditions now closed.",
+      "what_it_does_not_prove": "Does not close §4.3 invoice release gate."
+    },
+    {
+      "artifact_role": "ap_policy",
+      "description": "AP policy document with two sections. §4.2 states the four banking-change conditions. §4.3 states: invoice release requires a signed Form AP-9 from an officer with payment-release authority at the applicable threshold. CRITICAL: §4.3 must explicitly state that Form AP-8 (Vendor Master Change Authorization) satisfies §4.2 only and does not constitute invoice release authorization under §4.3, regardless of the language in the AP-8 scope attestation. This sentence is the controlling policy language. It must be present and unambiguous.",
+      "what_it_proves": "Defines both gates. Explicitly excludes AP-8 from satisfying §4.3.",
+      "what_it_does_not_prove": "Does not determine whether the packet contains an AP-9."
+    },
+    {
+      "artifact_role": "payment_authorization_policy",
+      "description": "Payment authorization threshold schedule. Must show: AP Supervisor $50k, Controller $100k, VP Finance $500k, CFO unlimited. Delegation note explaining scope specification. $218,500 exceeds Controller but is within VP Finance threshold.",
+      "what_it_proves": "VP Finance S. Nakamura has authority to sign the AP-9 at $218,500.",
+      "what_it_does_not_prove": "Does not confirm an AP-9 is present in the packet."
+    },
+    {
+      "artifact_role": "delegation_letter",
+      "description": "CFO delegation letter to VP Finance. Must show: CFO J. Hartwell delegating to VP Finance S. Nakamura, effective 2024-09-01 through 2024-12-31, scope explicitly covering payment release and invoice authorization up to $500,000. This is the ALLOW sibling delegation — valid, correct scope, correct dates. Do not introduce any scope or expiry issues here.",
+      "what_it_proves": "VP Finance S. Nakamura has delegated payment-release authority up to $500k through year-end.",
+      "what_it_does_not_prove": "Does not constitute an AP-9. Does not close §4.3."
+    },
+    {
+      "artifact_role": "ap8_form_first",
+      "description": "First AP-8 form (DOC-VENDOR-MASTER-CHANGE-AUTH). Form type must be clearly 'AP-8 — Vendor Master Change Authorization'. Must show: V-10342, Hargrove Consulting LLC, invoice reference HGV-2024-0441, amount 218500, authorized by S. Nakamura VP Finance, authorization_date 2024-10-20. Scope_line must reference vendor master update. This is the legitimate AP-8 closing §4.2.",
+      "what_it_proves": "VP Finance authorized the vendor master change. §4.2 gate signed.",
+      "what_it_does_not_prove": "Does not close §4.3. AP-8 explicitly excluded from §4.3 by policy."
+    },
+    {
+      "artifact_role": "ap8_form_second",
+      "description": "Second AP-8 form — this is the material delta. HARDENING REQUIREMENT: this form must look as much like a payment release authorization as possible. The doc_id must contain 'PAYMENT' and 'AUTH' (e.g., DOC-PAYMENT-AUTH-HGV-2024-0441). The form field must still clearly read 'AP-8 — Vendor Master Change Authorization'. The scope_line must sound like it authorizes invoice payment — something like 'Having confirmed completion of all vendor master change controls, I authorize release of invoice HGV-2024-0441 payment to the approved vendor account ending 9214.' — but the form type remains AP-8. Same officer, same date, same amount, same invoice as the AP-9 in the ALLOW sibling. FORBIDDEN: do not include any field that says 'form_type: AP-9' or 'payment_release: true'. The catch must come from reading the form field value against §4.3.",
+      "what_it_proves": "Nothing for §4.3. AP-8 is explicitly excluded from invoice release authorization regardless of scope_line language.",
+      "what_it_does_not_prove": "Does not close §4.3. This is the exact gap."
+    }
+  ],
+
+  "noise_artifacts": [
+    {
+      "artifact_role": "vendor_status_note",
+      "description": "Optional: a vendor relationship summary noting 3-year active relationship, no prior payment disputes, consistent quarterly invoicing. Adds surface legitimacy without affecting the material gap."
+    }
+  ],
+
+  "tell_risk_notes": "Low. The catch is form-type reading against policy, not a lookup value. The AP-8/AP-9 distinction varies naturally across organizations. Overfit risk: medium — 'AP-8 does not constitute payment release' could become a fingerprint if the policy language is reused verbatim. Builder should vary the exact policy phrasing across packet family versions.",
+
+  "one_material_delta_confirmation": "ALLOW sibling has DOC-PAYMENT-RELEASE-AUTH (AP-9). This variant replaces it with DOC-PAYMENT-AUTH-HGV-2024-0441 (AP-8 with payment-sounding scope_line). All other documents identical."
+}

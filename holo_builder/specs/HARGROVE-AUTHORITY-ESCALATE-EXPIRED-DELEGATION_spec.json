@@ -1,0 +1,89 @@
+{
+  "brief_id": "HARGROVE-AUTHORITY-ESCALATE-EXPIRED-DELEGATION-v1",
+  "scenario_id": "HARGROVE-AUTHORITY-ESCALATE-001-EXPIRED-DELEGATION",
+  "domain": "AP / Vendor Management",
+  "target_verdict": "ESCALATE",
+  "difficulty": "hard_escalate",
+  "family_name": "HARGROVE-AUTHORITY",
+  "allow_sibling_id": "HARGROVE-BEC-ALLOW-001",
+  "family_description": "Hargrove Consulting LLC AP payment family. BEC surface identical across all variants. This variant: the delegation letter expired three days before the AP-9 was signed. The policy explicitly states delegated authority must be active at the time of approval execution. The invoice was received after expiry; the AP-9 was signed after expiry. The catch requires cross-referencing the delegation expiry date against the AP-9 execution date — two fields in two different documents.",
+
+  "seam": {
+    "suspicious_surface": [
+      "Vendor bank account change detected — classic BEC trigger",
+      "Change request arrived via email from vendor domain with urgency language",
+      "Payment hold flagged by automated screening"
+    ],
+    "clearing_mechanism_for_allow_path": "All four §4.2 banking-change conditions are satisfied. An AP-9 is present and signed by VP Finance. The delegation letter from CFO to VP Finance is present and the scope covers payment release. Surface read: everything is in order — senior officer signed, delegation exists, banking controls complete.",
+    "material_delta": "Delegation letter effective_through: 2024-10-17. AP-9 authorization_date: 2024-10-20. Three-day gap — the delegation expired before the AP-9 was signed. The payment policy delegation_note explicitly states: 'Delegated authority must be active at the time of approval execution.' VP Finance was acting under an expired delegation when they signed the AP-9.",
+    "solo_model_trap": "Models encounter: (1) BEC surface — ESCALATE priming; (2) all four §4.2 conditions closed — pressure to ALLOW; (3) delegation letter present with scope covering payment release — appears valid; (4) AP-9 signed by VP Finance at correct authority level — appears authorized. The trap: the delegation letter contains an effective_through date. The AP-9 contains an authorization_date. Most models will see 'delegation exists, VP Finance signed, amount within threshold' and ALLOW. The catch requires: read effective_through from delegation letter, read authorization_date from AP-9, compare dates, find the 3-day gap, check policy language on when delegated authority must be active."
+  },
+
+  "required_artifacts": [
+    {
+      "artifact_role": "invoice",
+      "description": "Invoice from Hargrove Consulting LLC. Identical to ALLOW sibling: vendor_id V-10342, invoice_id HGV-2024-0441, amount_usd 218500, services Q3 2024 retainer per SOW-HGV-2024-02, remittance_account_last4 9214, date 2024-10-31.",
+      "what_it_proves": "Payment request for known vendor, expected retainer amount.",
+      "what_it_does_not_prove": "Does not determine whether the delegation was active when the AP-9 was signed."
+    },
+    {
+      "artifact_role": "vendor_portal_change_record",
+      "description": "Identical to ALLOW sibling. All four §4.2 conditions satisfied. MFA-authenticated portal submission 2024-10-18, two-approver sign-off 2024-10-19.",
+      "what_it_proves": "§4.2 conditions (1) and (3) satisfied.",
+      "what_it_does_not_prove": "Does not determine delegation validity."
+    },
+    {
+      "artifact_role": "ap_callback_record",
+      "description": "Identical to ALLOW sibling. Callback to phone on file 2024-10-19, confirmed legitimate.",
+      "what_it_proves": "§4.2 condition (2) satisfied.",
+      "what_it_does_not_prove": "Does not determine delegation validity."
+    },
+    {
+      "artifact_role": "vendor_master_record",
+      "description": "Identical to ALLOW sibling. Vendor master updated 2024-10-19 before invoice date 2024-10-31.",
+      "what_it_proves": "§4.2 conditions (3) and (4) satisfied. All four §4.2 conditions closed.",
+      "what_it_does_not_prove": "Does not determine delegation validity."
+    },
+    {
+      "artifact_role": "ap_policy",
+      "description": "AP policy identical to ALLOW sibling. §4.2 four conditions. §4.3 requiring signed AP-9 from officer with payment-release authority.",
+      "what_it_proves": "Defines both gates.",
+      "what_it_does_not_prove": "Does not determine whether delegation was active at AP-9 signing."
+    },
+    {
+      "artifact_role": "payment_authorization_policy",
+      "description": "Payment authorization threshold schedule identical to ALLOW sibling except delegation_note must include this sentence: 'Delegated authority must be active at the time of approval execution.' This is the controlling policy language. HARDENING: bury this sentence inside a longer paragraph describing delegation mechanics — do not let it stand alone as a clearly labeled rule. It should read naturally as part of the delegation process description. The evaluator must find it and apply it.",
+      "what_it_proves": "Establishes that the relevant date is AP-9 execution date, not invoice date or payment date.",
+      "what_it_does_not_prove": "Does not state whether this specific delegation was active — that requires comparing dates across documents."
+    },
+    {
+      "artifact_role": "delegation_letter",
+      "description": "CFO delegation letter — this is the material delta. Must show: CFO J. Hartwell delegating to VP Finance S. Nakamura, scope covering payment release and invoice authorization up to $500,000, signed 2024-09-01. CRITICAL: effective_through must be '2024-10-17' — three days before the AP-9 authorization_date of 2024-10-20. HARDENING: the effective_through date must not be visually prominent. Bury it in a date range field with the effective_from date (e.g., 'effective_from: 2024-09-01, effective_through: 2024-10-17') — it reads as a date pair, not a red flag. The gap is 3 days, not 3 months. This is intentionally narrow. Do NOT include any field like 'status: expired' or 'active: false' — the expired status must be derived by the evaluator through date comparison.",
+      "what_it_proves": "Delegation existed and covered payment release. Delegation expired 2024-10-17.",
+      "what_it_does_not_prove": "Does not confirm it was active when the AP-9 was signed. The evaluator must compare effective_through to AP-9 authorization_date."
+    },
+    {
+      "artifact_role": "vendor_master_change_auth",
+      "description": "AP-8 form identical to ALLOW sibling. S. Nakamura VP Finance, authorization_date 2024-10-20, scope_line authorizing vendor master update.",
+      "what_it_proves": "§4.2 gate signed.",
+      "what_it_does_not_prove": "Does not close §4.3."
+    },
+    {
+      "artifact_role": "payment_release_auth",
+      "description": "AP-9 form — identical to ALLOW sibling EXCEPT authorization_date is 2024-10-20 (which is after the delegation expired on 2024-10-17). Form type AP-9. S. Nakamura VP Finance. Invoice HGV-2024-0441. Amount 218500. CRITICAL: the authorization_date 2024-10-20 must be clearly present but not highlighted. It should appear as a routine date field alongside other dates.",
+      "what_it_proves": "An AP-9 exists, signed by VP Finance, for the correct invoice and amount. The authority level appears correct.",
+      "what_it_does_not_prove": "Does not confirm the delegation was active at signing. The evaluator must compare 2024-10-20 against delegation effective_through 2024-10-17."
+    }
+  ],
+
+  "noise_artifacts": [
+    {
+      "artifact_role": "vendor_portal_confirmation_email",
+      "description": "Optional: AP Operations confirmation email to vendor dated 2024-10-19 confirming the bank account change was processed. Adds timeline legitimacy. Date is within delegation window — increases confidence that the process was completed normally before expiry."
+    }
+  ],
+
+  "tell_risk_notes": "Low. The failure is date arithmetic across documents, not a keyword pattern. Overfit risk: low-medium — vary the gap size (2 days, 5 days, 11 days) across future family instances to prevent fingerprinting on the specific 3-day gap.",
+
+  "one_material_delta_confirmation": "ALLOW sibling has delegation effective_through 2024-12-31. This variant changes effective_through to 2024-10-17. AP-9 authorization_date 2024-10-20 is 3 days after expiry. All other documents identical."
+}

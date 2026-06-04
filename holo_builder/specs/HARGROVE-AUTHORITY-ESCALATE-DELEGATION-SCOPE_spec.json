@@ -1,0 +1,90 @@
+{
+  "brief_id": "HARGROVE-AUTHORITY-ESCALATE-DELEGATION-SCOPE-v1",
+  "scenario_id": "HARGROVE-AUTHORITY-ESCALATE-001-DELEGATION-SCOPE",
+  "domain": "AP / Vendor Management",
+  "target_verdict": "ESCALATE",
+  "difficulty": "hard_escalate",
+  "family_name": "HARGROVE-AUTHORITY",
+  "allow_sibling_id": "HARGROVE-BEC-ALLOW-001",
+  "family_description": "Hargrove Consulting LLC AP payment family. BEC surface identical across all variants. This variant: the delegation letter is scoped to vendor master administration only — it does not cover payment release. For payments flagged by BEC screening above $150,000, the policy requires payment release authority to trace through an explicit CFO delegation covering payment release. Without that delegation, VP Finance's inherent position authority is insufficient for BEC-flagged payments at this threshold. The AP-9 is present but signed under a delegation that doesn't authorize payment release.",
+
+  "seam": {
+    "suspicious_surface": [
+      "Vendor bank account change detected — classic BEC trigger",
+      "Change request arrived via email from vendor domain with urgency language",
+      "BEC pattern flag in automated screening notes",
+      "Payment hold active"
+    ],
+    "clearing_mechanism_for_allow_path": "All four §4.2 banking-change conditions satisfied. AP-9 present, signed by VP Finance S. Nakamura. Delegation letter from CFO present, valid dates, covers the full amount. Surface read: senior officer signed, delegation exists, authority confirmed, banking controls complete.",
+    "material_delta": "The delegation letter scope is 'Vendor Master Administration and banking account change approvals' — it does not cover payment release. The BEC-flagged payment controls section of the payment policy (Schedule A §2) states: for payments flagged by automated BEC screening controls, an officer's inherent position authority is insufficient for amounts above $150,000 — an explicit written delegation from CFO or above covering payment release authority is required. VP Finance has $500,000 inherent position authority, but that authority does not apply to BEC-flagged payments above $150,000 without a payment-release delegation. The delegation in this packet covers vendor master only.",
+    "solo_model_trap": "Models encounter: (1) BEC surface — ESCALATE priming; (2) all four §4.2 conditions closed — pressure to ALLOW; (3) delegation letter present from CFO, valid dates, $500k — appears to authorize payment; (4) AP-9 signed by VP Finance — appears authorized. Models that check 'does VP Finance have authority at $218,500' will find the $500k position limit and ALLOW. The trap: the BEC-flagged payment controls section of Schedule A modifies the authority framework for flagged transactions. For a $218,500 payment flagged by BEC screening, VP Finance inherent authority is insufficient — a specific payment-release delegation is required. The delegation present covers vendor master administration only. The catch requires: (1) notice the BEC flag in automated_screening_notes, (2) find the BEC-flagged payment controls section in Schedule A, (3) apply the >$150k threshold, (4) check the delegation scope against the payment-release requirement, (5) find the scope mismatch."
+  },
+
+  "required_artifacts": [
+    {
+      "artifact_role": "invoice",
+      "description": "Invoice identical to ALLOW sibling: Hargrove Consulting LLC, HGV-2024-0441, $218,500, SOW retainer, date 2024-10-31.",
+      "what_it_proves": "Payment request for known vendor, retainer amount.",
+      "what_it_does_not_prove": "Does not determine whether BEC-flagged payment controls apply or whether delegation scope is sufficient."
+    },
+    {
+      "artifact_role": "vendor_portal_change_record",
+      "description": "Identical to ALLOW sibling. All four §4.2 conditions satisfied.",
+      "what_it_proves": "§4.2 conditions (1) and (3) satisfied.",
+      "what_it_does_not_prove": "Does not determine delegation scope adequacy."
+    },
+    {
+      "artifact_role": "ap_callback_record",
+      "description": "Identical to ALLOW sibling. Callback confirmed 2024-10-19.",
+      "what_it_proves": "§4.2 condition (2) satisfied.",
+      "what_it_does_not_prove": "Does not determine delegation scope adequacy."
+    },
+    {
+      "artifact_role": "vendor_master_record",
+      "description": "Identical to ALLOW sibling. Vendor master updated 2024-10-19.",
+      "what_it_proves": "§4.2 conditions (3) and (4) satisfied.",
+      "what_it_does_not_prove": "Does not determine delegation scope adequacy."
+    },
+    {
+      "artifact_role": "ap_policy",
+      "description": "AP policy identical to ALLOW sibling. §4.2 four conditions. §4.3 requiring AP-9.",
+      "what_it_proves": "Defines both gates.",
+      "what_it_does_not_prove": "Does not address BEC-flagged payment controls — that is in the payment authorization policy."
+    },
+    {
+      "artifact_role": "payment_authorization_policy",
+      "description": "Payment authorization policy — this is where the material delta lives. Schedule A must have TWO sections. Section 1 (standard thresholds) is identical to ALLOW sibling: AP Supervisor $50k, Controller $100k, VP Finance $500k, CFO unlimited, delegation note. Section 2 (BEC-Flagged Payment Controls) must state: 'For payment requests where automated BEC screening controls have flagged a vendor banking change, standard position authority thresholds under Schedule A §1 apply only for amounts at or below $150,000. For amounts exceeding $150,000 on BEC-flagged transactions, payment release requires an explicit written delegation from CFO or above that specifically authorizes payment release for the transaction type. An officer's inherent position authority is not sufficient for BEC-flagged payments above the $150,000 threshold.' HARDENING: Section 2 must appear as a normal subsection of Schedule A — not as a special callout box or warning. It should read as routine policy language, discoverable only by reading the full schedule.",
+      "what_it_proves": "Establishes that for this BEC-flagged $218,500 payment, VP Finance inherent $500k authority is insufficient — an explicit payment-release delegation is required.",
+      "what_it_does_not_prove": "Does not determine whether the delegation in the packet covers payment release — that requires reading the delegation scope."
+    },
+    {
+      "artifact_role": "delegation_letter",
+      "description": "CFO delegation letter — this is the material delta. Must show: CFO J. Hartwell delegating to VP Finance S. Nakamura, effective 2024-09-01 through 2024-12-31, $500,000 threshold. CRITICAL: scope must be 'Vendor Master Administration and banking account change approvals up to USD 500,000 per transaction' — it must NOT include payment release or invoice authorization. HARDENING: the scope field must look authoritative and complete. A model reading quickly should feel the delegation is sufficient. Only a model that reads the exact scope language and checks it against Schedule A §2's payment-release delegation requirement will find the gap. Do not include any field like 'payment_release_authorized: false' or 'scope_excludes: payment_release' — the gap must be found by reading the scope string against the policy requirement.",
+      "what_it_proves": "A CFO delegation exists, covering vendor master administration, valid dates, correct amount.",
+      "what_it_does_not_prove": "Does not authorize payment release. Scope explicitly limited to vendor master administration."
+    },
+    {
+      "artifact_role": "vendor_master_change_auth",
+      "description": "AP-8 form identical to ALLOW sibling. S. Nakamura VP Finance, authorization_date 2024-10-20.",
+      "what_it_proves": "§4.2 gate signed.",
+      "what_it_does_not_prove": "Does not close §4.3."
+    },
+    {
+      "artifact_role": "payment_release_auth",
+      "description": "AP-9 form identical to ALLOW sibling. S. Nakamura VP Finance, authorization_date 2024-10-20, invoice HGV-2024-0441, $218,500. The AP-9 is present and correctly formed. The gap is not the absence of the AP-9 — it is that the AP-9 was signed by VP Finance acting under a delegation that doesn't cover payment release, and the BEC-flagged controls require an explicit payment-release delegation for this transaction.",
+      "what_it_proves": "VP Finance signed an AP-9 for the correct invoice and amount.",
+      "what_it_does_not_prove": "Does not confirm the signing officer had valid payment-release delegation authority. The delegation present does not cover payment release. For this BEC-flagged >$150k payment, inherent position authority is insufficient."
+    }
+  ],
+
+  "noise_artifacts": [
+    {
+      "artifact_role": "prior_payment_history_note",
+      "description": "Optional: a brief vendor relationship summary showing consistent quarterly payments over 3 years, all previously processed without holds. Reinforces that the BEC flag is the only trigger and that the vendor relationship is legitimate."
+    }
+  ],
+
+  "tell_risk_notes": "Medium. The BEC-flagged payment controls section is a specific policy clause that could become a fingerprint. Mitigate by varying the threshold ($100k, $150k, $200k) and the exact wording across family instances. The core reasoning chain (BEC flag → check BEC-specific controls → inherent authority insufficient → delegation scope check → scope mismatch) is structural and not easily fingerprinted.",
+
+  "one_material_delta_confirmation": "ALLOW sibling has delegation scope 'Payment release and invoice authorization up to USD 500,000'. This variant changes scope to 'Vendor Master Administration and banking account change approvals up to USD 500,000'. The payment authorization policy adds Schedule A §2 BEC-Flagged Payment Controls. All other documents identical."
+}

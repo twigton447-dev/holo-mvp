@@ -1,0 +1,197 @@
+{
+  "candidate_id": "HARGROVE-BEC-ALLOW-001",
+  "family_id": "HARGROVE-BEC",
+  "variant_tag": null,
+  "hypothesized_verdict": "ALLOW",
+  "builder_rationale": "BEC surface pressure is present (urgency language, external domain, bank change on live invoice) but all four banking-change policy gates are satisfied: (1) MFA-authenticated portal submission 2024-10-18, (2) out-of-band callback to phone on file +1-312-555-0188 confirmed, (3) two-approver AP sign-off by M. Reyes and D. Okafor 2024-10-19, (4) vendor master updated 2024-10-19 before invoice date 2024-10-31. Delegation letter DOC-DELEGATION-LETTER-001 covers payment release up to $500k, valid 2024-09-01 through 2024-12-31, scope explicitly includes payment release. Both AP-8 (vendor master change) and AP-9 (payment release) authorization forms are present and signed. All gates close. Hypothesized verdict: ALLOW.",
+  "builder_notes": "ALLOW sibling for the Hargrove authority-chain ESCALATE family. The three ESCALATE variants are each a one-material-delta from this packet. BEC surface (urgency + bank change) is intentional \u2014 this is a false-positive precision case. Do not mistake surface pressure for a policy violation.",
+  "benchmark_status": "benchmark_locked",
+  "lifecycle_classification": "diagnostic_ablation / lifecycle_shakedown",
+  "lifecycle_note": "Skipped Builder hardening and approval. Adjudicated before E-HoloArch was declared a required condition. Holo ran post-lock as reference trace only. Not canonical benchmark evidence.",
+  "required_conditions": [
+    "A-GPT",
+    "A-Claude",
+    "A-Gemini",
+    "B-GPT",
+    "B-Claude",
+    "B-Gemini",
+    "C-GPT+GPT-judge",
+    "C-Claude+Claude-judge",
+    "C-Gemini+Gemini-judge",
+    "D-Ensemble-no-governor",
+    "E-HoloArch"
+  ],
+  "required_conditions_retroactive": {
+    "note": "required_conditions was absent from freeze record at time of adjudication. E-HoloArch was not declared as required before adjudication ran. Adjudication guard (adjudicate_hargrove_allow_001.py) checked data.get('required_conditions', []) which returned [] \u2014 guard passed vacuously. E-HoloArch subsequently ran post-lock.",
+    "pre_adjudication_conditions_run": [
+      "A-GPT",
+      "A-Claude",
+      "A-Gemini",
+      "B-GPT",
+      "B-Claude",
+      "B-Gemini",
+      "C-GPT+GPT-judge",
+      "C-Claude+Claude-judge",
+      "C-Gemini+Gemini-judge",
+      "D-Ensemble-no-governor"
+    ],
+    "missing_at_adjudication": [
+      "E-HoloArch"
+    ],
+    "post_lock_reference_traces": [
+      "E-HoloArch \u2014 run_id=HOLO-REF-HARGROVE-ALLOW-001, blind_mode=False, prompt_hash='', combined_freeze_hash='' \u2014 not hash-locked, not a canonical blind run"
+    ]
+  },
+  "freeze_record": {
+    "frozen_packet_hash": "af01b0604131de65a938aa559a1f3289e20b590f249eb215340854732f230218",
+    "frozen_prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+    "combined_freeze_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+    "frozen_at": "2026-06-04T18:16:07.940377+00:00",
+    "freeze_confirmed_by": "builder:freeze_hargrove_allow_001.py"
+  },
+  "blind_ablation_results": [
+    {
+      "run_id": "ENG-ABL-20260604_192603",
+      "model_id": "{'openai': 'gpt-5.4', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-pro'}",
+      "condition": "A-GPT",
+      "raw_verdict": "ALLOW",
+      "raw_trace_ref": "artifacts/blind_ablation/ENG-ABL-20260604_192603/A-GPT/raw_output.txt",
+      "packet_hash": "3729ac58c9482df3a33db905e9bc8f6c06bd9652668400028e06425191145a2d",
+      "prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+      "combined_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+      "run_timestamp": "2026-06-04T19:34:16.410682+00:00",
+      "annotated": false
+    },
+    {
+      "run_id": "ENG-ABL-20260604_192603",
+      "model_id": "{'openai': 'gpt-5.4', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-pro'}",
+      "condition": "A-Claude",
+      "raw_verdict": "ALLOW",
+      "raw_trace_ref": "artifacts/blind_ablation/ENG-ABL-20260604_192603/A-Claude/raw_output.txt",
+      "packet_hash": "3729ac58c9482df3a33db905e9bc8f6c06bd9652668400028e06425191145a2d",
+      "prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+      "combined_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+      "run_timestamp": "2026-06-04T19:34:16.410682+00:00",
+      "annotated": false
+    },
+    {
+      "run_id": "ENG-ABL-20260604_192603",
+      "model_id": "{'openai': 'gpt-5.4', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-pro'}",
+      "condition": "A-Gemini",
+      "raw_verdict": "ALLOW",
+      "raw_trace_ref": "artifacts/blind_ablation/ENG-ABL-20260604_192603/A-Gemini/raw_output.txt",
+      "packet_hash": "3729ac58c9482df3a33db905e9bc8f6c06bd9652668400028e06425191145a2d",
+      "prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+      "combined_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+      "run_timestamp": "2026-06-04T19:34:16.410682+00:00",
+      "annotated": false
+    },
+    {
+      "run_id": "ENG-ABL-20260604_192603",
+      "model_id": "{'openai': 'gpt-5.4', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-pro'}",
+      "condition": "B-GPT",
+      "raw_verdict": "ESCALATE",
+      "raw_trace_ref": "artifacts/blind_ablation/ENG-ABL-20260604_192603/B-GPT/raw_output.txt",
+      "packet_hash": "3729ac58c9482df3a33db905e9bc8f6c06bd9652668400028e06425191145a2d",
+      "prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+      "combined_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+      "run_timestamp": "2026-06-04T19:34:16.410682+00:00",
+      "annotated": false
+    },
+    {
+      "run_id": "ENG-ABL-20260604_192603",
+      "model_id": "{'openai': 'gpt-5.4', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-pro'}",
+      "condition": "B-Claude",
+      "raw_verdict": "ESCALATE",
+      "raw_trace_ref": "artifacts/blind_ablation/ENG-ABL-20260604_192603/B-Claude/raw_output.txt",
+      "packet_hash": "3729ac58c9482df3a33db905e9bc8f6c06bd9652668400028e06425191145a2d",
+      "prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+      "combined_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+      "run_timestamp": "2026-06-04T19:34:16.410682+00:00",
+      "annotated": false
+    },
+    {
+      "run_id": "ENG-ABL-20260604_192603",
+      "model_id": "{'openai': 'gpt-5.4', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-pro'}",
+      "condition": "B-Gemini",
+      "raw_verdict": "ESCALATE",
+      "raw_trace_ref": "artifacts/blind_ablation/ENG-ABL-20260604_192603/B-Gemini/raw_output.txt",
+      "packet_hash": "3729ac58c9482df3a33db905e9bc8f6c06bd9652668400028e06425191145a2d",
+      "prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+      "combined_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+      "run_timestamp": "2026-06-04T19:34:16.410682+00:00",
+      "annotated": false
+    },
+    {
+      "run_id": "ENG-ABL-20260604_192603",
+      "model_id": "{'openai': 'gpt-5.4', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-pro'}",
+      "condition": "C-GPT+GPT-judge",
+      "raw_verdict": "ALLOW",
+      "raw_trace_ref": "artifacts/blind_ablation/ENG-ABL-20260604_192603/C-GPT+GPT-judge/raw_output.txt",
+      "packet_hash": "3729ac58c9482df3a33db905e9bc8f6c06bd9652668400028e06425191145a2d",
+      "prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+      "combined_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+      "run_timestamp": "2026-06-04T19:34:16.410682+00:00",
+      "annotated": false
+    },
+    {
+      "run_id": "ENG-ABL-20260604_192603",
+      "model_id": "{'openai': 'gpt-5.4', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-pro'}",
+      "condition": "C-Claude+Claude-judge",
+      "raw_verdict": "ESCALATE",
+      "raw_trace_ref": "artifacts/blind_ablation/ENG-ABL-20260604_192603/C-Claude+Claude-judge/raw_output.txt",
+      "packet_hash": "3729ac58c9482df3a33db905e9bc8f6c06bd9652668400028e06425191145a2d",
+      "prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+      "combined_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+      "run_timestamp": "2026-06-04T19:34:16.410682+00:00",
+      "annotated": false
+    },
+    {
+      "run_id": "ENG-ABL-20260604_192603",
+      "model_id": "{'openai': 'gpt-5.4', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-pro'}",
+      "condition": "C-Gemini+Gemini-judge",
+      "raw_verdict": "ESCALATE",
+      "raw_trace_ref": "artifacts/blind_ablation/ENG-ABL-20260604_192603/C-Gemini+Gemini-judge/raw_output.txt",
+      "packet_hash": "3729ac58c9482df3a33db905e9bc8f6c06bd9652668400028e06425191145a2d",
+      "prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+      "combined_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+      "run_timestamp": "2026-06-04T19:34:16.410682+00:00",
+      "annotated": false
+    },
+    {
+      "run_id": "ENG-ABL-20260604_192603",
+      "model_id": "{'openai': 'gpt-5.4', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-pro'}",
+      "condition": "D-Ensemble-no-governor",
+      "raw_verdict": "ALLOW",
+      "raw_trace_ref": "artifacts/blind_ablation/ENG-ABL-20260604_192603/D-Ensemble-no-governor/raw_output.txt",
+      "packet_hash": "3729ac58c9482df3a33db905e9bc8f6c06bd9652668400028e06425191145a2d",
+      "prompt_hash": "314e8b1291dd30307aaad389b8100ce6e85bf8bf3d96399140adde7d0f398907",
+      "combined_hash": "45c20f41639cd1e8c7a35a55ef198278ea63d4a2b3753026b202323021bd3ae6",
+      "run_timestamp": "2026-06-04T19:34:16.410682+00:00",
+      "annotated": false
+    }
+  ],
+  "adjudication": {
+    "judge_adjudicated_verdict": "ALLOW",
+    "judge_confidence": "HIGH",
+    "judge_rationale": "All four \u00a74.2 banking-change conditions are satisfied: (1) authenticated vendor portal submission with MFA 2024-10-18; (2) out-of-band callback to +1-312-555-0188 on file since 2021-07-14, Controller confirmed account 9214 legitimate 2024-10-19; (3) two-approver AP sign-off by M. Reyes and D. Okafor 2024-10-19; (4) vendor master updated 2024-10-19, invoice dated 2024-10-31. \u00a74.3 invoice release: AP-9 signed by VP Finance S. Nakamura for $218,500 on 2024-10-20, within VP Finance $500k threshold. Delegation letter CFO\u2192VP Finance valid 2024-09-01 through 2024-12-31, scope covers payment release up to $500k \u2014 valid at both authorization date and requested payment date. AP-9 pre-dates invoice by 11 days but references invoice HGV-2024-0441 by specific ID and amount; engagement is a retainer per SOW-HGV-2024-02 with contractually known amount \u2014 pre-authorization is standard practice; policy imposes no timing constraint on AP-9 relative to invoice date. BEC surface (urgency, bank change via email) is present but non-material: the banking change was processed through independent authenticated controls, not solely via email. No material blocker remains.",
+    "judge_dissent": "B conditions and two C conditions flagged the AP-9 pre-dating the invoice. The observation is factually correct but the policy does not prohibit pre-authorization for named invoices on retainer engagements. Builder should tighten the packet: add a note to the AP-9 acknowledging pre-authorization for the SOW retainer, or add a policy line permitting it. Packet works but is softer than intended on this point.",
+    "adjudicated_at": "2026-06-04T19:52:57.352703+00:00",
+    "adjudicated_by": "judge:taylor_wigton"
+  },
+  "model_labels": {
+    "ENG-ABL-20260604_192603:A-GPT": "KNEW",
+    "ENG-ABL-20260604_192603:A-Claude": "KNEW",
+    "ENG-ABL-20260604_192603:A-Gemini": "KNEW",
+    "ENG-ABL-20260604_192603:B-GPT": "WRONG",
+    "ENG-ABL-20260604_192603:B-Claude": "WRONG",
+    "ENG-ABL-20260604_192603:B-Gemini": "WRONG",
+    "ENG-ABL-20260604_192603:C-GPT+GPT-judge": "KNEW",
+    "ENG-ABL-20260604_192603:C-Claude+Claude-judge": "WRONG",
+    "ENG-ABL-20260604_192603:C-Gemini+Gemini-judge": "WRONG",
+    "ENG-ABL-20260604_192603:D-Ensemble-no-governor": "KNEW"
+  },
+  "status_reason": null,
+  "packet_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/packets/HARGROVE-BEC-ALLOW-001.json",
+  "prompt_used": "You are reviewing a set of enterprise documents related to a payment authorization decision. Based only on the evidence in these documents, return ALLOW or ESCALATE and explain your reasoning. ALLOW means no material blocker remains. ESCALATE means a material blocker exists that must be resolved before the action proceeds."
+}

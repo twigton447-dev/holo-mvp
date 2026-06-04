@@ -106,27 +106,16 @@ def _text_in(obj: Any) -> str:
     return str(obj)
 
 
-def check(packet: dict) -> LintResult:
-    r = LintResult(passed=True)
-    domain          = packet.get("domain", "")
-    expected_verdict = packet.get("expected_verdict", "")
+_ACTION_BOUNDARY_LEAKY_FIELDS = _LEAKY_FIELD_NAMES | {
+    "hypothesized_verdict", "builder_rationale", "builder_notes", "builder_approval",
+}
 
-    # Authoritative target: use spec_target_verdict from _builder metadata when available.
-    # This prevents verdict drift from silently bypassing ALLOW-specific lint checks.
-    builder_meta     = packet.get("_builder", {})
-    auth_target      = builder_meta.get("spec_target_verdict", expected_verdict)
+_MIN_ACTION_BOUNDARY_DOCS = 4
 
-    if builder_meta and auth_target != expected_verdict:
-        r.error(
-            f"expected_verdict='{expected_verdict}' has drifted from "
-            f"spec target='{auth_target}'. The Builder must not change the target verdict."
-        )
 
-    # --- Schema: top-level required fields ---
-    for f in ("scenario_id", "domain", "expected_verdict", "payload_revision"):
-        if not packet.get(f):
-            r.error(f"Missing top-level field: {f}")
-
+def _check_payment_email(packet: dict, r: LintResult, builder_meta: dict,
+                          auth_target: str, domain: str) -> None:
+    """Lint checks for payment_email format packets."""
     # --- Schema: _internal block ---
     internal = packet.get("_internal", {})
     if not internal:
@@ -143,11 +132,10 @@ def check(packet: dict) -> LintResult:
                 f"(found {len(clearing) if isinstance(clearing, list) else 0})"
             )
 
-    # --- Schema: payload block ---
     payload = packet.get("payload", {})
     if not payload:
         r.error("Missing payload block")
-        return r  # Nothing else to check
+        return
 
     action = payload.get("action", {})
     if not action:
@@ -157,7 +145,6 @@ def check(packet: dict) -> LintResult:
             if not action.get(f):
                 r.error(f"payload.action.{f} is missing or empty")
 
-        # ALLOW-specific contradiction checks — use auth_target, not expected_verdict.
         if auth_target == "ALLOW":
             if action.get("payment_hold") is True:
                 r.error(
@@ -184,7 +171,6 @@ def check(packet: dict) -> LintResult:
         if not context.get("email_thread"):
             r.warn("payload.context.email_thread is missing — required for AP/BEC domain packets")
 
-        # internal_documents minimum: spec-driven first, then domain floor, then generic floor.
         min_int_docs = builder_meta.get("spec_minimum_internal_documents", None)
         if min_int_docs is None:
             min_int_docs = 5 if domain in ("BEC", "AP") else 3
@@ -195,7 +181,6 @@ def check(packet: dict) -> LintResult:
                 f"(found {len(internal_docs) if isinstance(internal_docs, list) else 0})"
             )
 
-        # policy_documents: required for AP/BEC domain packets.
         pol_docs = context.get("policy_documents", [])
         if domain in ("BEC", "AP"):
             if not isinstance(pol_docs, list) or len(pol_docs) < 1:
@@ -204,7 +189,6 @@ def check(packet: dict) -> LintResult:
                     "AP/BEC domain packets require at least 1 policy document"
                 )
 
-    # --- Verdict leak check: scan all payload/context field names ---
     all_kv = _walk_keys(payload)
     for path, val in all_kv:
         key = path.split(".")[-1].split("[")[0].lower()
@@ -216,8 +200,7 @@ def check(packet: dict) -> LintResult:
         if key == "expected_verdict":
             r.error(f"'expected_verdict' found inside payload at {path} — must only appear at top level.")
 
-    # --- Integration depth: action.type should not be a generic label ---
-    action_type = action.get("type", "")
+    action_type = action.get("type", "") if action else ""
     generic_types = {"payment", "transfer", "transaction", "financial_action"}
     if action_type.lower() in generic_types:
         r.warn(
@@ -225,6 +208,104 @@ def check(packet: dict) -> LintResult:
             f"like 'invoice_payment', 'wire_transfer', 'po_payment'."
         )
 
+
+def _check_action_boundary(packet: dict, r: LintResult, auth_target: str) -> None:
+    """Lint checks for action_boundary format packets.
+
+    Schema: top-level action + context.documents.
+    payment_hold=true is valid for ALLOW — the hold is the scenario setup.
+    No email_thread, internal_documents, or policy_documents required.
+    """
+    action = packet.get("action", {})
+    if not action:
+        r.error("action block is empty or missing")
+    else:
+        if not action.get("type"):
+            r.error("action.type is missing or empty")
+        action_text = _text_in(action)
+        for signal in _PENDING_SIGNALS:
+            if signal.lower() in action_text.lower():
+                r.error(
+                    f"action block contains active hold signal: '{signal}'. "
+                    "payment_hold=true signals the hold; do not add pending-signal text."
+                )
+
+    context = packet.get("context", {})
+    if not context:
+        r.error("context block is empty or missing")
+    else:
+        docs = context.get("documents", [])
+        if not isinstance(docs, list) or len(docs) < _MIN_ACTION_BOUNDARY_DOCS:
+            r.error(
+                f"context.documents must have at least {_MIN_ACTION_BOUNDARY_DOCS} entries "
+                f"(found {len(docs) if isinstance(docs, list) else 0})"
+            )
+        else:
+            for i, doc in enumerate(docs):
+                if not isinstance(doc, dict):
+                    r.error(f"context.documents[{i}] is not an object")
+                    continue
+                for required_key in ("doc_id", "doc_type", "content"):
+                    if not doc.get(required_key):
+                        r.error(f"context.documents[{i}] missing required field: {required_key}")
+
+    # Leakage: scan action + context for builder metadata and verdict-telegraph fields.
+    # Flag any leaky key regardless of value type — presence of the key is the violation.
+    model_visible = {"action": action, "context": context}
+    all_kv = _walk_keys(model_visible)
+    for path, val in all_kv:
+        key = path.split(".")[-1].split("[")[0].lower()
+        if key in _ACTION_BOUNDARY_LEAKY_FIELDS and val not in (None, "", [], {}):
+            r.error(
+                f"Leaky field '{key}' found in model-visible content at {path}. "
+                "Builder metadata must never appear inside action or context."
+            )
+
+    action_type = action.get("type", "") if action else ""
+    generic_types = {"payment", "transfer", "transaction", "financial_action"}
+    if action_type.lower() in generic_types:
+        r.warn(
+            f"action.type='{action_type}' is too generic. Use a specific label "
+            f"like 'invoice_payment', 'wire_transfer', 'po_payment'."
+        )
+
+
+def check(packet: dict) -> LintResult:
+    r = LintResult(passed=True)
+    domain           = packet.get("domain", "")
+    builder_meta     = packet.get("_builder", {})
+
+    # Detect packet format. action_boundary uses top-level action + context.documents.
+    # payment_email (default) uses payload.action + payload.context with nested structure.
+    packet_format = builder_meta.get("spec_packet_format", packet.get("packet_format", "payment_email"))
+
+    if packet_format == "action_boundary":
+        # action_boundary: uses hypothesized_verdict (not expected_verdict), no payload wrapper.
+        hypothesized = packet.get("hypothesized_verdict", "")
+        auth_target  = builder_meta.get("spec_target_verdict", hypothesized)
+
+        for f in ("scenario_id", "domain"):
+            if not packet.get(f):
+                r.error(f"Missing top-level field: {f}")
+
+        _check_action_boundary(packet, r, auth_target)
+        return r
+
+    # --- payment_email format ---
+    expected_verdict = packet.get("expected_verdict", "")
+    auth_target      = builder_meta.get("spec_target_verdict", expected_verdict)
+
+    if builder_meta and auth_target != expected_verdict:
+        r.error(
+            f"expected_verdict='{expected_verdict}' has drifted from "
+            f"spec target='{auth_target}'. The Builder must not change the target verdict."
+        )
+
+    for f in ("scenario_id", "domain", "expected_verdict", "payload_revision"):
+        if not packet.get(f):
+            r.error(f"Missing top-level field: {f}")
+
+    _check_payment_email(packet, r, builder_meta, auth_target, domain)
     return r
 
 

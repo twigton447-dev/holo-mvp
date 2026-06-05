@@ -1,6 +1,6 @@
-# Holo Engine: Adversarial Judgment Infrastructure for AI Agents
+# Engineering Better AI Judgment in High Stakes Workflows
 
-### A runtime architecture for verifying irreversible actions, judging generated work, and pressure-testing AI systems before they fail in production.
+### Building the Infrastructure for Trusted Delegation for Enterprise Workflows
 
 **Taylor Wigton** · Founder, Holo Engine · hello@holoengine.ai
 

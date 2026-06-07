@@ -49,6 +49,17 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
+# Lifecycle protocol — blind mode support
+_HOLO_MVP = Path(__file__).resolve().parent
+sys.path.insert(0, str(_HOLO_MVP))
+from hashlock import (
+    FreezeRecord as _FreezeRecord,
+    compute_packet_hash as _compute_packet_hash,
+    compute_prompt_hash as _compute_prompt_hash,
+    compute_combined_freeze_hash as _compute_combined_freeze_hash,
+    verify_freeze as _verify_freeze,
+)
+
 BASE = Path(__file__).parent
 sys.path.insert(0, str(BASE))
 sys.path.insert(0, str(BASE / "private_materials_not_for_public_release"))
@@ -344,9 +355,14 @@ def _call_provider(adapter, system: str, messages: list[dict],
 
 def build_context_text(scenario: dict) -> str:
     """Raw packet context — same bytes sent to every condition."""
+    # Support both harness-native schema (context key) and PE-schema (documents key).
+    ctx = scenario.get("context") or {
+        "documents": scenario.get("documents", []),
+        "domain":    scenario.get("domain", ""),
+    }
     return json.dumps({
         "action":  scenario["action"],
-        "context": scenario["context"],
+        "context": ctx,
     }, indent=2)
 
 
@@ -496,36 +512,62 @@ def _decisive_evidence(text: str, cfg: dict) -> str:
 def build_row(*, condition_id: str, condition_letter: str, provider_label: str,
               model_or_models: str, verdict: str, text_for_analysis: str,
               in_tok: int, out_tok: int, turns: int, cfg: dict,
-              run_meta: dict, raw_output_path: str = "") -> dict:
+              run_meta: dict, raw_output_path: str = "",
+              blind_mode: bool = False) -> dict:
 
     expected = cfg.get("expected_verdict", "")
+
+    # In blind mode: do not score against expected_verdict.
+    # correct_or_incorrect is determined by Judge adjudication, not here.
+    if blind_mode:
+        correctness       = "pending_judge_adjudication"
+        safe_to_exec      = None
+        wrong_reason      = None
+        hallucinated      = None
+        ignored_artifact  = None
+        overtrusted       = None
+        old_evidence      = None
+        delta_detected    = None
+    else:
+        correctness       = "correct" if verdict == expected else "incorrect"
+        safe_to_exec      = _safe_to_execute(verdict, expected)
+        wrong_reason      = _wrong_reason_correct(text_for_analysis, verdict, cfg)
+        hallucinated      = _hallucinated_missing_evidence(text_for_analysis, verdict, cfg)
+        ignored_artifact  = _ignored_required_artifact(text_for_analysis, cfg)
+        overtrusted       = _register_overtrust(text_for_analysis, verdict, cfg)
+        old_evidence      = _old_evidence_treated_as_current(text_for_analysis, verdict, cfg)
+        delta_detected    = _material_delta_detected(text_for_analysis, cfg)
+
     return {
         "run_id":                          run_meta["run_id"],
         "packet_id":                       run_meta["packet_id"],
         "packet_hash":                     run_meta["packet_hash"][:16] + "...",
         "packet_hash_full":                run_meta["packet_hash"],
+        "prompt_hash":                     run_meta.get("prompt_hash", ""),
+        "combined_freeze_hash":            run_meta.get("combined_freeze_hash", ""),
         "harness_commit_hash":             run_meta["harness_commit_hash"],
         "config_hash":                     run_meta["config_hash"],
         "model_cohort_id":                 run_meta["model_cohort_id"],
         "exact_model_versions":            run_meta["exact_model_versions"],
+        "blind_mode":                      blind_mode,
         "condition_id":                    condition_id,
         "architecture_family":             _ORCH_TYPE.get(condition_letter, "unknown"),
         "guidance_level":                  _GUIDANCE_LEVEL.get(condition_letter, "raw"),
         "orchestration_type":              _ORCH_TYPE.get(condition_letter, "unknown"),
         "model_or_models":                 model_or_models,
         "verdict":                         verdict,
-        "correct_or_incorrect":            "correct" if verdict == expected else "incorrect",
+        "correct_or_incorrect":            correctness,
         "confidence":                      _extract_confidence(text_for_analysis, verdict),
         "primary_reason":                  _extract_primary_reason(text_for_analysis),
         "decisive_evidence_cited":         _decisive_evidence(text_for_analysis, cfg),
         "evidence_path_used":              _evidence_path(text_for_analysis),
-        "material_delta_detected":         _material_delta_detected(text_for_analysis, cfg),
-        "overtrusted_exception_register":  _register_overtrust(text_for_analysis, verdict, cfg),
-        "old_evidence_treated_as_current": _old_evidence_treated_as_current(text_for_analysis, verdict, cfg),
-        "hallucinated_missing_evidence":   _hallucinated_missing_evidence(text_for_analysis, verdict, cfg),
-        "ignored_required_artifact":       _ignored_required_artifact(text_for_analysis, cfg),
-        "wrong_reason_correct":            _wrong_reason_correct(text_for_analysis, verdict, cfg),
-        "safe_to_execute":                 _safe_to_execute(verdict, expected),
+        "material_delta_detected":         delta_detected,
+        "overtrusted_exception_register":  overtrusted,
+        "old_evidence_treated_as_current": old_evidence,
+        "hallucinated_missing_evidence":   hallucinated,
+        "ignored_required_artifact":       ignored_artifact,
+        "wrong_reason_correct":            wrong_reason,
+        "safe_to_execute":                 safe_to_exec,
         "turn_count":                      turns,
         "token_estimate":                  in_tok + out_tok,
         "trace_path":                      _evidence_path(text_for_analysis),
@@ -538,10 +580,11 @@ def build_row(*, condition_id: str, condition_letter: str, provider_label: str,
 # ---------------------------------------------------------------------------
 
 def run_A(provider: str, adapters: dict, ctx_text: str,
-          cfg: dict, run_meta: dict, out_dir: Path) -> dict:
+          cfg: dict, run_meta: dict, out_dir: Path,
+          blind_mode: bool = False, system_prompt: str = UNIVERSAL_INSTRUCTION) -> dict:
     adapter = adapters[provider]
     label   = _LABEL[provider]
-    r = _call_provider(adapter, UNIVERSAL_INSTRUCTION,
+    r = _call_provider(adapter, system_prompt,
                        [{"role": "user", "content": ctx_text}])
     if r["error"]:
         raise RuntimeError(f"Adapter error: {r['error']}")
@@ -553,6 +596,7 @@ def run_A(provider: str, adapters: dict, ctx_text: str,
         text_for_analysis=r["text"],
         in_tok=r["in_tok"], out_tok=r["out_tok"], turns=1,
         cfg=cfg, run_meta=run_meta, raw_output_path=raw_path,
+        blind_mode=blind_mode,
     )
 
 
@@ -561,15 +605,16 @@ def run_A(provider: str, adapters: dict, ctx_text: str,
 # ---------------------------------------------------------------------------
 
 def run_B(provider: str, adapters: dict, ctx_text: str,
-          cfg: dict, run_meta: dict, out_dir: Path) -> dict:
+          cfg: dict, run_meta: dict, out_dir: Path,
+          blind_mode: bool = False, system_prompt: str = UNIVERSAL_INSTRUCTION) -> dict:
     adapter = adapters[provider]
     label   = _LABEL[provider]
 
-    r1 = _call_provider(adapter, UNIVERSAL_INSTRUCTION,
+    r1 = _call_provider(adapter, system_prompt,
                         [{"role": "user", "content": ctx_text}])
     v1 = _extract_verdict(r1["text"])
 
-    r2 = _call_provider(adapter, UNIVERSAL_INSTRUCTION, [
+    r2 = _call_provider(adapter, system_prompt, [
         {"role": "user",      "content": ctx_text},
         {"role": "assistant", "content": r1["text"]},
         {"role": "user",      "content": RECONSIDER_PROMPT},
@@ -585,6 +630,7 @@ def run_B(provider: str, adapters: dict, ctx_text: str,
         text_for_analysis=combined,
         in_tok=r1["in_tok"] + r2["in_tok"], out_tok=r1["out_tok"] + r2["out_tok"],
         turns=2, cfg=cfg, run_meta=run_meta, raw_output_path=raw_path,
+        blind_mode=blind_mode,
     )
 
 
@@ -593,7 +639,8 @@ def run_B(provider: str, adapters: dict, ctx_text: str,
 # ---------------------------------------------------------------------------
 
 def run_C(provider: str, adapters: dict, ctx_text: str,
-          cfg: dict, run_meta: dict, out_dir: Path) -> dict:
+          cfg: dict, run_meta: dict, out_dir: Path,
+          blind_mode: bool = False, system_prompt: str = UNIVERSAL_INSTRUCTION) -> dict:
     adapter = adapters[provider]
     label   = _LABEL[provider]
 
@@ -605,7 +652,7 @@ def run_C(provider: str, adapters: dict, ctx_text: str,
     role_names = list(_COUNCIL_ROLES.keys())  # reviewer, skeptic, evidence_checker, final_judge
     role_verdicts = []
     for idx, role_name in enumerate(role_names):
-        sys_msg = f"{UNIVERSAL_INSTRUCTION}\n\n{_COUNCIL_ROLES[role_name]}"
+        sys_msg = f"{system_prompt}\n\n{_COUNCIL_ROLES[role_name]}"
         r = _call_provider(adapter, sys_msg, conversation)
         if r["error"]:
             raise RuntimeError(f"Adapter error ({role_name}): {r['error']}")
@@ -632,6 +679,7 @@ def run_C(provider: str, adapters: dict, ctx_text: str,
         text_for_analysis=combined,
         in_tok=in_tok_tot, out_tok=out_tok_tot, turns=4,
         cfg=cfg, run_meta=run_meta, raw_output_path=raw_path,
+        blind_mode=blind_mode,
     )
 
 
@@ -641,13 +689,14 @@ def run_C(provider: str, adapters: dict, ctx_text: str,
 # ---------------------------------------------------------------------------
 
 def run_D(adapters: dict, ctx_text: str,
-          cfg: dict, run_meta: dict, out_dir: Path) -> dict:
+          cfg: dict, run_meta: dict, out_dir: Path,
+          blind_mode: bool = False, system_prompt: str = UNIVERSAL_INSTRUCTION) -> dict:
     verdicts   = {}
     full_texts = {}
     in_tok_tot = out_tok_tot = 0
 
     for provider in ("openai", "anthropic", "google"):
-        r = _call_provider(adapters[provider], UNIVERSAL_INSTRUCTION,
+        r = _call_provider(adapters[provider], system_prompt,
                            [{"role": "user", "content": ctx_text}])
         v = _extract_verdict(r["text"])
         verdicts[provider]   = v
@@ -678,6 +727,7 @@ def run_D(adapters: dict, ctx_text: str,
         text_for_analysis=combined,
         in_tok=in_tok_tot, out_tok=out_tok_tot, turns=3,
         cfg=cfg, run_meta=run_meta, raw_output_path=raw_path,
+        blind_mode=blind_mode,
     )
 
 
@@ -687,10 +737,28 @@ def run_D(adapters: dict, ctx_text: str,
 # No domain coaching. IAM template (native architecture) active.
 # ---------------------------------------------------------------------------
 
-def run_E(scenario: dict, cfg: dict, run_meta: dict, out_dir: Path) -> dict:
+def run_E(scenario: dict, cfg: dict, run_meta: dict, out_dir: Path,
+          blind_mode: bool = False) -> dict:
     from benchmark import run_holo_loop
 
-    result = run_holo_loop(scenario, force_max_turns=False, no_memory=True)
+    # benchmark.py expects action to be a dict. PE-schema packets carry action as a string.
+    # Also, _empty_state reads scenario["context"] for the Governor; PE packets carry
+    # documents at the top level. Both must be remapped without mutating the original.
+    loop_scenario = scenario
+    if isinstance(scenario.get("action"), str):
+        ctx = scenario.get("context") or {
+            "documents": scenario.get("documents", []),
+            "domain":    scenario.get("domain", ""),
+        }
+        loop_scenario = {**scenario,
+            "action": {
+                "type":             "enterprise_action",
+                "requested_action": scenario["action"],
+            },
+            "context": ctx,
+        }
+
+    result = run_holo_loop(loop_scenario, force_max_turns=False, no_memory=True)
 
     tl    = result.get("turn_log", [])
     turns = result.get("turns_run", len(tl))
@@ -723,6 +791,7 @@ def run_E(scenario: dict, cfg: dict, run_meta: dict, out_dir: Path) -> dict:
         text_for_analysis=full_text,
         in_tok=in_tok, out_tok=out_tok, turns=turns,
         cfg=cfg, run_meta=run_meta, raw_output_path=raw_path,
+        blind_mode=blind_mode,
     )
 
 
@@ -816,13 +885,15 @@ def write_run_manifest(out_dir: Path, run_meta: dict, cohort: dict,
 # ---------------------------------------------------------------------------
 
 def _error_row(condition_id: str, letter: str, models: str,
-               error: str, run_meta: dict, cfg: dict) -> dict:
+               error: str, run_meta: dict, cfg: dict,
+               blind_mode: bool = False) -> dict:
     base = build_row(
         condition_id=condition_id, condition_letter=letter,
         provider_label="error", model_or_models=models,
         verdict="ERROR", text_for_analysis="",
         in_tok=0, out_tok=0, turns=0,
         cfg=cfg, run_meta=run_meta,
+        blind_mode=blind_mode,
     )
     base["primary_reason"] = error[:120]
     return base
@@ -855,7 +926,26 @@ def main():
                         help="Run Condition E only")
     parser.add_argument("--verbose",      action="store_true",
                         help="Print full raw model responses")
+    # Lifecycle protocol — blind mode
+    parser.add_argument("--blind-mode",    action="store_true",
+                        help="Run under lifecycle protocol: no scoring, freeze-verified. "
+                             "Requires --freeze-record.")
+    parser.add_argument("--freeze-record", default=None,
+                        help="Path to freeze record JSON (required with --blind-mode)")
+    parser.add_argument("--skip-validity", action="store_true",
+                        help="Skip pre-run validity checks (for new-protocol packets "
+                             "that do not carry expected_verdict / gold_answer fields)")
+    parser.add_argument("--system-prompt", default=None,
+                        help="Override the active system prompt for all conditions "
+                             "(default: UNIVERSAL_INSTRUCTION, or frozen prompt in blind mode). "
+                             "Use this to pass a packet-specific test_instruction.")
     args = parser.parse_args()
+
+    blind_mode = args.blind_mode
+
+    if blind_mode and not args.freeze_record:
+        print("\n  ERROR: --blind-mode requires --freeze-record <path>")
+        sys.exit(1)
 
     # ---- Run ID ----
     ts     = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
@@ -864,7 +954,9 @@ def main():
     # ---- Output directory ----
     out_root = Path(args.output_dir) / run_id
     out_root.mkdir(parents=True, exist_ok=True)
+    mode_label = "BLIND (lifecycle protocol)" if blind_mode else "SCORING"
     print(f"\n  Run ID    : {run_id}")
+    print(f"  Mode      : {mode_label}")
     print(f"  Output    : {out_root}")
 
     # ---- Model cohort ----
@@ -906,43 +998,104 @@ def main():
     print(f"  Harness   : {harness_commit[:12]}...")
 
     # ---- Load packet ----
-    scenario    = json.loads(packet_path.read_text())
-    packet_id   = scenario.get("scenario_id", packet_path.stem)
-    expected    = scenario.get("expected_verdict", "UNKNOWN").upper()
+    scenario  = json.loads(packet_path.read_text())
+    packet_id = scenario.get("scenario_id", packet_path.stem)
 
-    # ---- Validity checks ----
-    print(f"\n{'='*55}")
-    print(f"  VALIDITY CHECKS — {packet_id}")
-    print(f"{'='*55}")
-    checks   = run_generic_validity_checks(scenario)
-    all_pass = True
-    for c in checks:
-        status = "PASS" if c["passed"] else "FAIL"
-        print(f"  [{status}] {c['name']}")
-        if c["detail"]:
-            print(f"         {c['detail']}")
-        if not c["passed"]:
-            all_pass = False
+    # ---- Lifecycle freeze verification (blind mode only) ----
+    freeze_rec_data = None
+    prompt_hash     = ""
+    combined_hash   = ""
 
-    if not all_pass:
-        print(f"\n  FATAL: validity checks failed. Aborting.")
-        sys.exit(1)
-    print(f"\n  All {len(checks)} checks passed.\n")
+    if blind_mode:
+        print(f"\n{'='*55}")
+        print(f"  LIFECYCLE FREEZE VERIFICATION — {packet_id}")
+        print(f"{'='*55}")
+
+        freeze_rec_path = Path(args.freeze_record)
+        if not freeze_rec_path.exists():
+            print(f"  FATAL: freeze record not found: {freeze_rec_path}")
+            sys.exit(1)
+
+        freeze_rec_data = json.loads(freeze_rec_path.read_text())
+        fr = freeze_rec_data["freeze_record"]
+
+        freeze_obj = _FreezeRecord(
+            frozen_packet_hash   = fr["frozen_packet_hash"],
+            frozen_prompt_hash   = fr["frozen_prompt_hash"],
+            combined_freeze_hash = fr["combined_freeze_hash"],
+            frozen_at            = fr["frozen_at"],
+            freeze_confirmed_by  = fr["freeze_confirmed_by"],
+        )
+
+        prompt_text = freeze_rec_data.get("prompt_used", UNIVERSAL_INSTRUCTION)
+        ok = _verify_freeze(scenario, prompt_text, freeze_obj)
+        if not ok:
+            print(f"  FATAL: combined_freeze_hash MISMATCH")
+            print(f"  The packet or prompt has changed since the freeze was recorded.")
+            print(f"  This run is BLOCKED. Re-freeze before proceeding.")
+            sys.exit(3)
+
+        prompt_hash   = fr["frozen_prompt_hash"]
+        combined_hash = fr["combined_freeze_hash"]
+        print(f"  freeze status     : {freeze_rec_data.get('benchmark_status')}")
+        print(f"  combined_freeze_hash : {fr['combined_freeze_hash'][:16]}... VERIFIED  ✓")
+
+        if freeze_rec_data.get("benchmark_status") != "frozen_pending_judge":
+            print(f"  FATAL: packet status is '{freeze_rec_data.get('benchmark_status')}', "
+                  f"not frozen_pending_judge. Blind runs only allowed at frozen_pending_judge.")
+            sys.exit(3)
+        print(f"  status gate       : frozen_pending_judge  ✓")
+        print()
+    else:
+        if args.skip_validity:
+            print(f"  Validity checks : SKIPPED (--skip-validity)")
+            checks = []
+        else:
+            print(f"\n{'='*55}")
+            print(f"  VALIDITY CHECKS — {packet_id}")
+            print(f"{'='*55}")
+            checks   = run_generic_validity_checks(scenario)
+            all_pass = True
+            for c in checks:
+                status = "PASS" if c["passed"] else "FAIL"
+                print(f"  [{status}] {c['name']}")
+                if c["detail"]:
+                    print(f"         {c['detail']}")
+                if not c["passed"]:
+                    all_pass = False
+            if not all_pass:
+                print(f"\n  FATAL: validity checks failed. Aborting.")
+                sys.exit(1)
+            print(f"\n  All {len(checks)} checks passed.\n")
+
+    expected = scenario.get("expected_verdict", "UNKNOWN").upper()
 
     # ---- Build shared inputs ----
-    cfg       = build_scoring_config(scenario)
-    ctx_text  = build_context_text(scenario)
-    run_meta  = {
-        "run_id":              run_id,
-        "packet_id":           packet_id,
-        "packet_hash":         actual_hash,
-        "harness_commit_hash": harness_commit,
-        "config_hash":         config_hash,
-        "model_cohort_id":     cohort["cohort_id"],
+    cfg      = build_scoring_config(scenario)
+    ctx_text = build_context_text(scenario)
+    run_meta = {
+        "run_id":               run_id,
+        "packet_id":            packet_id,
+        "packet_hash":          actual_hash,
+        "prompt_hash":          prompt_hash,
+        "combined_freeze_hash": combined_hash,
+        "harness_commit_hash":  harness_commit,
+        "config_hash":          config_hash,
+        "model_cohort_id":      cohort["cohort_id"],
         "exact_model_versions": model_versions,
     }
 
     rows: list[dict] = []
+    # In blind mode, use the exact prompt that was frozen — not UNIVERSAL_INSTRUCTION.
+    # This guarantees traces are created with the same prompt that was hash-locked.
+    # --system-prompt overrides in non-blind mode (e.g. PE packet test_instruction).
+    if blind_mode:
+        active_prompt = prompt_text
+    elif args.system_prompt:
+        active_prompt = args.system_prompt
+        print(f"  System prompt : custom (--system-prompt)")
+    else:
+        active_prompt = UNIVERSAL_INSTRUCTION
 
     # ---- Conditions A / B / C / D ----
     if not args.only_holo:
@@ -951,58 +1104,64 @@ def main():
 
             print(f"  [A-{label}] native one-shot...", end="", flush=True)
             try:
-                rows.append(run_A(provider, adapters, ctx_text, cfg, run_meta, out_root))
+                rows.append(run_A(provider, adapters, ctx_text, cfg, run_meta, out_root,
+                                  blind_mode=blind_mode, system_prompt=active_prompt))
                 print(f"  → {rows[-1]['verdict']}", flush=True)
             except Exception as e:
                 print(f"  ERROR: {e}", flush=True)
                 rows.append(_error_row(f"A-{label}", "A", adapters[provider].model_id,
-                                       str(e)[:80], run_meta, cfg))
+                                       str(e)[:80], run_meta, cfg, blind_mode=blind_mode))
 
         for provider in ("openai", "anthropic", "google"):
             label = _LABEL[provider]
             print(f"  [B-{label}] self-critique...", end="", flush=True)
             try:
-                rows.append(run_B(provider, adapters, ctx_text, cfg, run_meta, out_root))
+                rows.append(run_B(provider, adapters, ctx_text, cfg, run_meta, out_root,
+                                  blind_mode=blind_mode, system_prompt=active_prompt))
                 print(f"  → {rows[-1]['verdict']}", flush=True)
             except Exception as e:
                 print(f"  ERROR: {e}", flush=True)
                 rows.append(_error_row(f"B-{label}", "B", adapters[provider].model_id,
-                                       str(e)[:80], run_meta, cfg))
+                                       str(e)[:80], run_meta, cfg, blind_mode=blind_mode))
 
         for provider in ("openai", "anthropic", "google"):
             label = _LABEL[provider]
             print(f"  [C-{label}+{label}-judge] homogeneous council...", end="", flush=True)
             try:
-                rows.append(run_C(provider, adapters, ctx_text, cfg, run_meta, out_root))
+                rows.append(run_C(provider, adapters, ctx_text, cfg, run_meta, out_root,
+                                  blind_mode=blind_mode, system_prompt=active_prompt))
                 print(f"  → {rows[-1]['verdict']}", flush=True)
             except Exception as e:
                 print(f"  ERROR: {e}", flush=True)
                 rows.append(_error_row(f"C-{label}+{label}-judge", "C",
                                        f"{adapters[provider].model_id} (homogeneous)",
-                                       str(e)[:80], run_meta, cfg))
+                                       str(e)[:80], run_meta, cfg, blind_mode=blind_mode))
 
         print(f"  [D-Ensemble-no-governor] multi-model majority vote...", end="", flush=True)
         try:
-            rows.append(run_D(adapters, ctx_text, cfg, run_meta, out_root))
+            rows.append(run_D(adapters, ctx_text, cfg, run_meta, out_root,
+                              blind_mode=blind_mode, system_prompt=active_prompt))
             print(f"  → {rows[-1]['verdict']}", flush=True)
         except Exception as e:
             print(f"  ERROR: {e}", flush=True)
             rows.append(_error_row("D-Ensemble-no-governor", "D",
-                                   "GPT+Claude+Gemini", str(e)[:80], run_meta, cfg))
+                                   "GPT+Claude+Gemini", str(e)[:80], run_meta, cfg,
+                                   blind_mode=blind_mode))
 
     # ---- Condition E — Holo Architecture-Only ----
     if not args.skip_holo:
         print(f"  [E-HoloArch] full adversarial council + governor...", end="", flush=True)
         try:
-            rows.append(run_E(scenario, cfg, run_meta, out_root))
+            rows.append(run_E(scenario, cfg, run_meta, out_root, blind_mode=blind_mode))
             print(f"  → {rows[-1]['verdict']}", flush=True)
         except Exception as e:
             print(f"  ERROR: {e}", flush=True)
             rows.append(_error_row("E-HoloArch", "E",
-                                   "GPT+Claude+Gemini+Governor", str(e)[:80], run_meta, cfg))
+                                   "GPT+Claude+Gemini+Governor", str(e)[:80], run_meta, cfg,
+                                   blind_mode=blind_mode))
 
     # ---- Output ----
-    print_table(rows, expected)
+    print_table(rows, expected if not blind_mode else "PENDING_JUDGE")
 
     if args.verbose:
         print(f"\n\n{'='*80}")
@@ -1022,7 +1181,8 @@ def main():
         "run_meta":     run_meta,
         "packet_id":    packet_id,
         "packet_hash":  actual_hash,
-        "expected":     expected,
+        "blind_mode":   blind_mode,
+        "expected":     expected if not blind_mode else "PENDING_JUDGE_ADJUDICATION",
         "timestamp":    datetime.now(timezone.utc).isoformat(),
         "rows":         clean_rows,
     }, indent=2))
@@ -1032,8 +1192,35 @@ def main():
     write_csv(clean_rows, csv_path)
     print(f"  CSV results  : {csv_path}")
 
+    # ---- Blind mode: append results to freeze record ----
+    if blind_mode and freeze_rec_data and args.freeze_record:
+        ts_now = datetime.now(timezone.utc).isoformat()
+        new_entries = []
+        for r in clean_rows:
+            if r.get("verdict") == "ERROR":
+                continue
+            new_entries.append({
+                "run_id":        run_id,
+                "model_id":      str(r.get("exact_model_versions", r.get("model_or_models", ""))),
+                "condition":     r["condition_id"],
+                "raw_verdict":   r["verdict"],
+                "raw_trace_ref": r.get("raw_output_path", ""),
+                "packet_hash":   r.get("packet_hash_full", actual_hash),
+                "prompt_hash":   prompt_hash,
+                "combined_hash": combined_hash,
+                "run_timestamp": ts_now,
+                "annotated":     False,
+            })
+        freeze_rec_data["blind_ablation_results"].extend(new_entries)
+        Path(args.freeze_record).write_text(
+            json.dumps(freeze_rec_data, indent=2), encoding="utf-8"
+        )
+        print(f"  Freeze record updated : {args.freeze_record}  "
+              f"({len(new_entries)} blind result(s) appended)")
+
     write_run_manifest(out_root, run_meta, cohort,
-                       str(packet_path), actual_hash, checks, rows)
+                       str(packet_path), actual_hash,
+                       checks if not blind_mode else [], rows)
     print(f"  Run manifest : {out_root / 'run_manifest.json'}")
     print(f"\n  DONE — {len(rows)} conditions run\n")
 

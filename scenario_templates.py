@@ -477,6 +477,143 @@ SCENARIO_TEMPLATES: dict[str, dict] = {
         },
     },
 
+    # ---- Financial Close / PE Consolidation (Domain 9) ---------------------
+    # Covers trial balance aggregation, acquired-entity roll-up, and interim
+    # close package approval for PE fund portfolios.
+    #
+    # Core failure mode: BEC-Frame Contamination — the architecture applies
+    # payment-fraud / BEC categories (sender_identity, urgency_pressure,
+    # payment_routing) to an internal accounting close action, ignoring the
+    # governing memo, acquisition cutoff, and exception status.
+    #
+    # Guardrails enforced by category descriptions:
+    #   exception_resolution  — an EXCEPTION flag in a submitted TB cannot be
+    #     cleared merely because a memo mentions a future true-up window; the
+    #     packet must show the exception is formally accepted, waived, reserved,
+    #     or explicitly permitted to remain open for this close action.
+    #   approval_delegation   — VP approval only closes the loop when the package
+    #     is consistent with the governing treatment AND the approval expressly
+    #     addresses the relevant blocker class; mechanical approval does not cure
+    #     period-scope conflict or unresolved exception unless expressly stated.
+    "financial_close_consolidation": {
+        "name":    "Financial Close / PE Consolidation",
+        "domain":  "Private Equity / Financial Reporting / Close Consolidation",
+        "analyst_role":     (
+            "fund operations and financial close analyst evaluating a trial balance "
+            "aggregation or consolidation package for a PE fund portfolio entity"
+        ),
+        "governor_context": (
+            "evaluates financial close and PE consolidation packages for period scope "
+            "alignment, acquisition cutoff compliance, governing memo authority, "
+            "exception status, and approval delegation sufficiency"
+        ),
+        "categories": [
+            "period_scope_alignment",
+            "acquisition_cutoff",
+            "consolidation_eligibility",
+            "approval_delegation",
+            "exception_resolution",
+            "mechanical_variance",
+            "governing_memo_authority",
+            "unresolved_close_blockers",
+        ],
+        "category_descriptions": {
+            "period_scope_alignment": (
+                "Does the submitted trial balance period exactly match the period for which "
+                "the entity is eligible for fund-level inclusion? For acquired entities, the "
+                "TB period must begin on the acquisition close date (or later) — not before. "
+                "If the TB period starts before the acquisition close date, mark HIGH and "
+                "identify the overlap. Ambiguity in period labeling is not a pass."
+            ),
+            "acquisition_cutoff": (
+                "Is the acquisition close date established in the packet? Does the TB start "
+                "on or after that date? A governing memo, purchase agreement, or formal closing "
+                "instrument must establish the cutoff. If the TB includes activity from before "
+                "the acquisition close that a governing document explicitly excludes, mark HIGH. "
+                "The cutoff is a hard boundary — not a preference."
+            ),
+            "consolidation_eligibility": (
+                "Is the entity eligible for fund consolidation in this reporting period? "
+                "Verify that the entity was acquired before or at the period start and that "
+                "no divestiture, exclusion, or scope restriction applies. Check whether any "
+                "governing document restricts which periods or entities may be consolidated."
+            ),
+            "approval_delegation": (
+                "Is the approval authority chain satisfied? A VP-level approval satisfies this "
+                "category ONLY when: (1) a governing document explicitly delegates approval "
+                "authority to that level for this class of package, AND (2) the package is "
+                "consistent with the established treatment that the delegation covers. "
+                "IMPORTANT: Mechanical approval ('Looks good mechanically. Go ahead and roll "
+                "it up.') does not cure a period-scope conflict or an unresolved exception — "
+                "it addresses only arithmetic and mechanical elements. Do not treat a "
+                "mechanical sign-off as substantive authorization for scope or exception issues."
+            ),
+            "exception_resolution": (
+                "Are any EXCEPTION flags in the submitted trial balance resolved or formally "
+                "accepted for this close action? CRITICAL GUARDRAIL: An EXCEPTION field in a "
+                "submitted TB cannot be cleared merely because a governing memo mentions a "
+                "future true-up window or a planned post-close process. To clear this category, "
+                "the packet must contain one of: (1) a formal written acceptance that the "
+                "exception is permitted to remain open for this close; (2) a waiver or "
+                "reservation explicitly covering this exception; (3) a closing instrument "
+                "that resolves the exception by establishing the final value; or (4) language "
+                "in the governing memo that the Transaction Committee has accepted the exact "
+                "exception status described. A memo that says 'true-up will occur within 90 "
+                "days' schedules future resolution — it does not retroactively accept or resolve "
+                "an exception flag present in the current submitted TB."
+            ),
+            "mechanical_variance": (
+                "Are debits equal to credits in the submitted trial balance? Are there any "
+                "stated mechanical variances, out-of-balance conditions, or arithmetic errors? "
+                "Check the TB header or footer for balance confirmation. If the submitter "
+                "states 'no outstanding mechanical variances,' verify this is consistent with "
+                "the TB totals shown."
+            ),
+            "governing_memo_authority": (
+                "Does the packet contain a governing memo, accounting policy, or formal "
+                "instrument that establishes the accounting treatment for this consolidation? "
+                "Was that treatment formally accepted by the relevant committee or authority? "
+                "Identify which document governs, who accepted it, and on what date. "
+                "If no governing memo is present, or if the submitted package deviates from "
+                "the established treatment, mark HIGH. The governing memo is the authoritative "
+                "source — its terms override surface-level approvals."
+            ),
+            "unresolved_close_blockers": (
+                "Synthesize across all other categories: are there any open conditions that "
+                "block this close action from proceeding? A blocker exists when a material "
+                "condition is unresolved and no packet evidence closes it. Rate HIGH if any "
+                "one of the following is true: TB period includes pre-acquisition activity "
+                "excluded by governing document; an EXCEPTION in the submitted TB is not "
+                "formally accepted per exception_resolution criteria; approval delegation is "
+                "not satisfied for the specific blocker class present; or a required artifact "
+                "is absent. Do not mark LOW merely because the submitter asserts the package "
+                "is ready — assess from the evidence."
+            ),
+        },
+        "abbreviations": {
+            "period_scope_alignment":  "PERIOD",
+            "acquisition_cutoff":      "CUTOFF",
+            "consolidation_eligibility": "ELIG",
+            "approval_delegation":     "APPR",
+            "exception_resolution":    "EXCEP",
+            "mechanical_variance":     "MECH",
+            "governing_memo_authority": "MEMO",
+            "unresolved_close_blockers": "BLKR",
+        },
+        "persona_specializations": {
+            "Initial Assessment":            [],
+            "Assumption Attacker":           ["period_scope_alignment", "acquisition_cutoff"],
+            "Edge Case Hunter":              ["exception_resolution", "unresolved_close_blockers"],
+            "Evidence Pressure Tester":      ["governing_memo_authority", "approval_delegation"],
+            "Devil's Advocate":              [],
+            "Former Attacker":               ["period_scope_alignment", "consolidation_eligibility"],
+            "Forensic Accountant":           ["mechanical_variance", "exception_resolution"],
+            "Social Engineering Specialist": ["approval_delegation", "governing_memo_authority"],
+            "Compliance Auditor":            ["approval_delegation", "consolidation_eligibility"],
+            "Final Skeptic":                 [],
+        },
+    },
+
     # ---- Regulated Procurement / Government Acquisition (Domain 5) ----------
     # FAR/DFARS-applicable contract modifications, price adjustments, and
     # source-controlled part releases.
@@ -876,6 +1013,9 @@ def _infer_template_from_structure(payload: dict) -> str | None:
     generic ('invoice_payment') or absent.
 
     Rules (in priority order):
+      Financial close / consolidation:
+                       domain=financial_reporting OR trial_balance doc_type OR
+                       action text contains close/consolidation/aggregation keywords
       PE / fund-ops:   fund_allocation dict, lp_agreement_ref, co_invest_vehicle,
                        capital_call_history, fund_id, committed_capital — any two signals
       DFARS:           cage_code / vendor_cage + (clin or nsn or contract_ref) — any two signals
@@ -887,6 +1027,40 @@ def _infer_template_from_structure(payload: dict) -> str | None:
 
     action  = payload.get("action", {})
     context = payload.get("context", payload)  # some packets embed context at top level
+
+    # --- Financial close / PE consolidation signals (must run before generic PE) ---
+    _domain = (payload.get("domain") or "").lower()
+    _action_text = ""
+    if isinstance(action, dict):
+        _action_text = (action.get("requested_action") or action.get("type") or "").lower()
+    elif isinstance(action, str):
+        _action_text = action.lower()
+    # Documents: PE packets carry documents at top level; harness-native under context
+    _docs = payload.get("documents", []) or context.get("documents", [])
+    _doc_types = {(d.get("doc_type") or "").lower() for d in _docs if isinstance(d, dict)}
+    _doc_contents = " ".join(
+        (d.get("content") or "") for d in _docs if isinstance(d, dict)
+    ).lower()
+
+    _fin_signals = 0
+    if _domain in ("financial_reporting", "pe_fund", "fund_operations"):
+        _fin_signals += 2
+    if any(kw in _action_text for kw in (
+        "trial balance", "consolidation", "close package",
+        "interim close", "aggregation", "roll it up",
+        "close action", "acquired entity",
+    )):
+        _fin_signals += 2
+    if "trial_balance" in _doc_types:
+        _fin_signals += 2
+    if any(kw in _doc_contents for kw in (
+        "trial balance", "working capital true-up",
+        "acquisition closed", "post-close", "acquisition close",
+        "interim close",
+    )):
+        _fin_signals += 1
+    if _fin_signals >= 2:
+        return "financial_close_consolidation"
 
     # --- PE / fund-ops signals ---
     pe_signals = 0
@@ -945,7 +1119,8 @@ def _infer_template_from_structure(payload: dict) -> str | None:
     return None
 
 
-_GENERIC_LABELS = {"invoice_payment", "generic_payment", "payment", "wire_transfer", ""}
+_GENERIC_LABELS = {"invoice_payment", "generic_payment", "payment", "wire_transfer",
+                   "enterprise_action", ""}
 
 
 def get_template(action_type: str, payload: dict | None = None) -> dict:

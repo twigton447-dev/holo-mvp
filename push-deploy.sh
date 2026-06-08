@@ -93,9 +93,18 @@ fi
 # ── Smoke tests ────────────────────────────────────────────────────────────
 echo "→ Running smoke tests..."
 
-PYTHON=$(command -v python3 || command -v python || abort "No python3 or python found in PATH.")
+# Prefer venv Python (matches Railway runtime), fall back to system python3/python
+VENV_PYTHON="$(git rev-parse --show-toplevel)/venv/bin/python"
+if [ -x "$VENV_PYTHON" ]; then
+  PYTHON="$VENV_PYTHON"
+else
+  PYTHON=$(command -v python3 || command -v python || abort "No python3 or python found in PATH.")
+fi
+echo "  Using Python: $PYTHON ($($PYTHON --version))"
 
-"$PYTHON" -m compileall . -q 2>&1 || abort "python -m compileall failed — syntax error in deploy tree."
+# Compile only project source files — exclude venv and .git
+"$PYTHON" -m compileall . -x "venv|\.git|__pycache__" -q 2>&1 \
+  || abort "python -m compileall failed — syntax error in project source."
 
 "$PYTHON" -c "from context_governor import ContextGovernor; print('  ✓ ContextGovernor import ok:', ContextGovernor)" \
   || abort "from context_governor import ContextGovernor failed — deploy would crash on startup."

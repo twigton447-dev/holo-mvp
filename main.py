@@ -55,6 +55,16 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from auth import RateLimiter
+
+# Fail loudly if deployed from the wrong repo (context_governor is private/gitignored in holo-mvp).
+# All Railway deployments must come from holo-deploy, not holo-mvp.
+if not os.path.exists(os.path.join(os.path.dirname(__file__), "context_governor.py")):
+    raise RuntimeError(
+        "DEPLOYMENT ERROR: context_governor.py is missing. "
+        "This app must be deployed from holo-deploy, not holo-mvp. "
+        "Disable auto-deploy on holo-mvp in the Railway dashboard."
+    )
+
 from context_governor import ContextGovernor
 from chat_engine import HoloChatEngine
 from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain

@@ -7,28 +7,30 @@
 <meta name="description" content="Published scenario payloads for the Holo Engine open benchmark. Download and evaluate in your own system."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script data-goatcounter="https://holoengine.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style>
 :root {
-  --bg:       #0d0d0d;
-  --bg-card:  #161616;
-  --bg-hover: #1e1e1e;
-  --white:    #ffffff;
-  --muted:    rgba(255,255,255,.82);
-  --muted-2:  rgba(255,255,255,.5);
-  --border:   rgba(240,240,240,.1);
-  --border-2: rgba(240,240,240,.05);
-  --green:    #22c55e;
-  --green-bg: rgba(34,197,94,.14);
-  --red:      #ef4444;
-  --red-bg:   rgba(239,68,68,.14);
-  --mono:     'JetBrains Mono','Courier New',monospace;
+  --bg:       #fff;
+  --bg-card:  #f4f1eb;
+  --bg-hover: #ece8df;
+  --ink:      #0f0f0e;
+  --muted:    #2e2e2a;
+  --muted-2:  #565650;
+  --border:   #d4d0c8;
+  --border-2: #e4e0d8;
+  --gold:     #8a7a52;
+  --green:    #27645a;
+  --green-bg: rgba(39,100,90,.10);
+  --red:      #c0392b;
+  --red-bg:   rgba(192,57,43,.08);
+  --mono:     'IBM Plex Mono','Courier New',monospace;
   --serif:    'EB Garamond',Georgia,'Times New Roman',serif;
+  --sans:     'Source Sans 3',Georgia,sans-serif;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg);color:var(--white);font-family:var(--mono);-webkit-font-smoothing:antialiased;line-height:1.6}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.6}
 a{color:inherit;text-decoration:none}
 
 .w{max-width:700px;margin:0 auto;padding:0 24px}
@@ -38,28 +40,28 @@ nav{
   border-bottom:1px solid var(--border);
   padding:14px 0;
   position:sticky;top:0;
-  background:rgba(13,13,13,.95);
+  background:rgba(255,255,255,.95);
   backdrop-filter:blur(12px);
   z-index:20;
 }
 .nav-inner{display:flex;justify-content:space-between;align-items:center}
-.nav-logo{display:inline-block;text-decoration:none;color:var(--white);line-height:1}
-.nav-logo-name{display:block;font-family:var(--serif);font-size:22px;letter-spacing:.36em;text-indent:.36em;font-weight:400;color:var(--white);line-height:1}
-.nav-logo-sub{display:block;font-family:var(--mono);font-size:9px;font-weight:400;color:var(--muted-2);margin-top:5px;line-height:1}
-.nav-links{display:flex;gap:28px;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
-.nav-links a{color:var(--muted);transition:color .15s}
-.nav-links a:hover{color:var(--white)}
+.nav-logo{display:inline-block;text-decoration:none;color:var(--gold);line-height:1}
+.nav-logo-name{display:block;font-family:var(--serif);font-size:22px;letter-spacing:.36em;text-indent:.36em;font-weight:400;color:var(--gold);line-height:1}
+.nav-logo-sub{display:block;font-family:var(--mono);font-size:9px;font-weight:400;color:var(--gold);margin-top:5px;line-height:1}
+.nav-links{display:flex;gap:28px;font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+.nav-links a{color:var(--gold);transition:color .15s}
+.nav-links a:hover{color:var(--ink)}
 
 /* ── HERO ── */
 .hero{padding:64px 0 48px;border-bottom:1px solid var(--border)}
-.eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);margin-bottom:20px}
+.eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
 h1{
   font-family:var(--serif);
   font-size:clamp(24px,4.5vw,40px);
   font-weight:400;
   letter-spacing:.04em;
   line-height:1.2;
-  color:var(--white);
+  color:var(--ink);
   margin-bottom:16px;
 }
 .hero-lede{font-size:13px;color:var(--muted);line-height:1.8;max-width:520px;margin-bottom:8px}
@@ -72,15 +74,15 @@ h1{
   padding:9px 16px;text-decoration:none;
   transition:background .12s, border-color .12s;
 }
-.btn-primary{background:var(--white);color:#0d0d0d}
-.btn-primary:hover{background:rgba(240,240,240,.85)}
-.btn-secondary{border:1px solid var(--border);color:var(--muted)}
-.btn-secondary:hover{border-color:rgba(240,240,240,.25);color:var(--white)}
+.btn-primary{background:var(--ink);color:var(--bg)}
+.btn-primary:hover{background:var(--muted)}
+.btn-secondary{border:1px solid var(--border);color:var(--muted-2)}
+.btn-secondary:hover{border-color:var(--ink);color:var(--ink)}
 
 /* ── SECTION LABELS ── */
 .group-label{
   font-size:9px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--muted-2);padding:48px 0 16px;
+  color:var(--gold);padding:48px 0 16px;
   border-bottom:1px solid var(--border-2);
   margin-bottom:16px;
 }
@@ -94,11 +96,11 @@ h1{
   border-bottom:1px solid var(--border);
   display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
 }
-.card-id{font-size:12px;font-weight:500;color:var(--white);letter-spacing:.02em}
+.card-id{font-size:12px;font-weight:500;color:var(--ink);letter-spacing:.02em}
 .card-badge{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2)}
 .card-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
 .card-desc{font-size:12px;color:var(--muted);line-height:1.8}
-.card-desc em{font-style:normal;color:var(--white)}
+.card-desc em{font-style:normal;color:var(--ink)}
 .card-meta{display:flex;flex-wrap:wrap;gap:16px}
 .meta-item{font-size:11px;color:var(--muted-2)}
 .meta-item strong{color:var(--muted)}
@@ -125,7 +127,7 @@ h1{
   background:var(--bg-card);
   font-size:12px;color:var(--muted);line-height:1.8;
 }
-.method-note a{color:var(--white);text-decoration:underline;text-underline-offset:2px}
+.method-note a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
 
 /* ── FOOTER ── */
 footer{border-top:1px solid var(--border);padding:28px 0}
@@ -133,7 +135,7 @@ footer{border-top:1px solid var(--border);padding:28px 0}
 .footer-inner p{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2)}
 .footer-links{display:flex;gap:20px}
 .footer-links a{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);transition:color .15s}
-.footer-links a:hover{color:var(--muted)}
+.footer-links a:hover{color:var(--ink)}
 
 @media(max-width:500px){
   .card-header{flex-direction:column;align-items:flex-start}
@@ -164,7 +166,7 @@ footer{border-top:1px solid var(--border);padding:28px 0}
     <div class="eyebrow">Published Payloads · Open Benchmark v4.0</div>
     <h1>The exact inputs.<br>No answer key.</h1>
     <p class="hero-lede">Each file is the model-input artifact presented to every reviewer during evaluation. Action, context, vendor record, and supporting documents — nothing else.</p>
-    <p class="hero-note">Download any payload and evaluate it in your own system. Verdict labels on this page are post-hoc annotations. They were never in the model context. See <a href="BENCHMARK_PROTOCOL.md" style="color:var(--white);text-decoration:underline;text-underline-offset:2px">BENCHMARK_PROTOCOL.md</a> for the full turn structure and role prompts.</p>
+    <p class="hero-note">Download any payload and evaluate it in your own system. Verdict labels on this page are post-hoc annotations. They were never in the model context. See <a href="BENCHMARK_PROTOCOL.md" style="color:var(--ink);text-decoration:underline;text-underline-offset:2px">BENCHMARK_PROTOCOL.md</a> for the full turn structure and role prompts.</p>
     <div class="hero-actions">
       <a href="BENCHMARK_PROTOCOL.md" class="btn btn-secondary">Benchmark Protocol</a>
       <a href="https://github.com/twigton447-dev/holo-benchmark" target="_blank" class="btn btn-secondary">GitHub</a>
@@ -293,7 +295,7 @@ footer{border-top:1px solid var(--border);padding:28px 0}
 
   <!-- METHODOLOGY NOTE -->
   <div class="method-note">
-    <strong style="color:var(--white)">Methodology note.</strong> Each payload contains only <code style="font-family:var(--mono);font-size:11px;color:var(--muted)">action</code> and <code style="font-family:var(--mono);font-size:11px;color:var(--muted)">context</code> — the case facts and artifacts presented to each model. No expected verdicts, answer keys, fraud labels, or scoring rubrics are included. Verdict chips above are post-hoc display annotations; they were never part of any model prompt. <a href="BENCHMARK_PROTOCOL.md">BENCHMARK_PROTOCOL.md</a> describes the full evaluation methodology. Full adversarial role prompts, Governor logic, and reproducibility materials are available to qualified technical reviewers — contact <a href="mailto:hello@holoengine.ai">hello@holoengine.ai</a>.
+    <strong style="color:var(--ink)">Methodology note.</strong> Each payload contains only <code style="font-family:var(--mono);font-size:11px;color:var(--muted)">action</code> and <code style="font-family:var(--mono);font-size:11px;color:var(--muted)">context</code> — the case facts and artifacts presented to each model. No expected verdicts, answer keys, fraud labels, or scoring rubrics are included. Verdict chips above are post-hoc display annotations; they were never part of any model prompt. <a href="BENCHMARK_PROTOCOL.md">BENCHMARK_PROTOCOL.md</a> describes the full evaluation methodology. Full adversarial role prompts, Governor logic, and reproducibility materials are available to qualified technical reviewers — contact <a href="mailto:hello@holoengine.ai">hello@holoengine.ai</a>.
   </div>
 
 </div>

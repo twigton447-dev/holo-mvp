@@ -2,7 +2,7 @@
 
 ### Building the Infrastructure for Trusted Delegation for Enterprise Workflows
 
-**Taylor Wigton** · Founder, Holo Engine · hello@holoengine.ai
+**Taylor Wigton** · Founder, Holo Engine · taylorw@hologroup.io
 
 Working Paper · Version 5.11 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
@@ -411,4 +411,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*Holo Engine · holoengine.ai · hello@holoengine.ai · Working Paper · Version 5.11 · June 2026*
+*Holo Engine · holoengine.ai · taylorw@hologroup.io · Working Paper · Version 5.11 · June 2026*

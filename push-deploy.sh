@@ -93,12 +93,14 @@ fi
 # ── Smoke tests ────────────────────────────────────────────────────────────
 echo "→ Running smoke tests..."
 
-python -m compileall . -q 2>&1 || abort "python -m compileall failed — syntax error in deploy tree."
+PYTHON=$(command -v python3 || command -v python || abort "No python3 or python found in PATH.")
 
-python -c "from context_governor import ContextGovernor; print('  ✓ ContextGovernor import ok:', ContextGovernor)" \
+"$PYTHON" -m compileall . -q 2>&1 || abort "python -m compileall failed — syntax error in deploy tree."
+
+"$PYTHON" -c "from context_governor import ContextGovernor; print('  ✓ ContextGovernor import ok:', ContextGovernor)" \
   || abort "from context_governor import ContextGovernor failed — deploy would crash on startup."
 
-python -c "from main import app; print('  ✓ main import ok')" \
+"$PYTHON" -c "from main import app; print('  ✓ main import ok')" \
   || abort "from main import app failed — deploy would crash on startup."
 
 echo "  ✓ All smoke tests passed"

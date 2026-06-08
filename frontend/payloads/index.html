@@ -79,6 +79,24 @@ h1{
 .btn-secondary{border:1px solid var(--border);color:var(--muted-2)}
 .btn-secondary:hover{border-color:var(--ink);color:var(--ink)}
 
+/* ── DOMAIN COVERAGE GRID ── */
+.domain-grid-section{border-bottom:1px solid var(--border);padding:32px 0}
+.domain-grid-label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.domain-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border:0.5px solid var(--border)}
+.domain-tile{padding:14px 16px;background:var(--bg-card);border:none;position:relative}
+.domain-tile.active{background:var(--bg)}
+.domain-tile.dim{opacity:.35}
+.domain-n{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;color:var(--gold);margin-bottom:6px}
+.domain-tile.dim .domain-n{color:var(--muted-2)}
+.domain-name{font-family:var(--sans);font-size:11px;font-weight:500;color:var(--ink);line-height:1.4;margin-bottom:6px}
+.domain-status{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase}
+.domain-status.complete{color:var(--green)}
+.domain-status.signal{color:var(--gold)}
+.domain-status.pending{color:var(--gold);opacity:.75}
+.domain-status.design{color:var(--muted-2)}
+@media(max-width:600px){.domain-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:360px){.domain-grid{grid-template-columns:1fr}}
+
 /* ── SECTION LABELS ── */
 .group-label{
   font-size:9px;letter-spacing:.14em;text-transform:uppercase;
@@ -173,6 +191,55 @@ footer{border-top:1px solid var(--border);padding:28px 0}
     </div>
   </div>
 </section>
+
+<!-- DOMAIN COVERAGE GRID -->
+<div class="domain-grid-section">
+  <div class="w">
+    <div class="domain-grid-label">Domain Coverage</div>
+    <div class="domain-grid">
+      <div class="domain-tile active">
+        <div class="domain-n">01</div>
+        <div class="domain-name">Accounts Payable / BEC</div>
+        <div class="domain-status complete">Complete · Kit A locked</div>
+      </div>
+      <div class="domain-tile active">
+        <div class="domain-n">02</div>
+        <div class="domain-name">Agentic Commerce</div>
+        <div class="domain-status signal">Diagnostic · early signal</div>
+      </div>
+      <div class="domain-tile dim">
+        <div class="domain-n">03</div>
+        <div class="domain-name">IT Access Provisioning</div>
+        <div class="domain-status design">In Design</div>
+      </div>
+      <div class="domain-tile dim">
+        <div class="domain-n">04</div>
+        <div class="domain-name">Legal Contract Execution</div>
+        <div class="domain-status design">In Design</div>
+      </div>
+      <div class="domain-tile active">
+        <div class="domain-n">05</div>
+        <div class="domain-name">Regulated Procurement</div>
+        <div class="domain-status signal">Early Signal</div>
+      </div>
+      <div class="domain-tile dim">
+        <div class="domain-n">06</div>
+        <div class="domain-name">HR and Workforce Actions</div>
+        <div class="domain-status design">In Design</div>
+      </div>
+      <div class="domain-tile dim">
+        <div class="domain-n">07</div>
+        <div class="domain-name">Infrastructure and Configuration</div>
+        <div class="domain-status design">In Design</div>
+      </div>
+      <div class="domain-tile active">
+        <div class="domain-n">08</div>
+        <div class="domain-name">Financial Reporting and Compliance</div>
+        <div class="domain-status pending">Diagnostic complete · kit pending</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="w">
 

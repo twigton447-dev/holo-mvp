@@ -573,7 +573,7 @@
 
 <!-- COVER -->
 <div class="cover">
-  <div class="cover-eyebrow">Version 5.08 &nbsp;&middot;&nbsp; June 2026</div>
+  <div class="cover-eyebrow">Version 5.09 &nbsp;&middot;&nbsp; June 2026</div>
   <h1>Engineering Better AI Judgment in High Stakes Workflows</h1>
   <p class="cover-subtitle">Building the Infrastructure for Trusted Delegation for Enterprise Workflows</p>
   <div class="cover-meta">
@@ -599,40 +599,53 @@
 <div class="exec-summary">
   <div class="section-label">Executive Summary</div>
 
-  <p style="margin-top:0.75rem">AI systems are starting to do more than generate text. They are approving payments, granting access, executing workflows, and moving real operations forward without waiting for a human to step in. They are also generating the high-stakes documents people use to make decisions: contracts, deal memos, policy summaries, diligence reports, and procurement recommendations.</p>
+  <p style="margin-top:0.75rem">AI systems are starting to do more than generate text. They are approving payments, granting server access, executing workflows, and moving real operations forward without waiting for a human to step in. Organizations want the ultimate prize of automation. That prize is trusted delegation: the ability to hand off high-stakes work to an AI and know it will be handled safely without constant human oversight.</p>
 
-  <p>The result is not relief, but a new, more exhausting form of cognitive load. Professionals who were promised automation now spend their days hunting hallucinations, second-guessing subtle paradoxes, and cleaning up outputs that look clean but contain structural errors. The future organizations actually want is trusted delegation: the ability to hand high-consequence work to a system and know it has survived rigorous internal scrutiny.</p>
+  <p>But right now, the infrastructure does not support that level of trust. A March 2026 Ponemon Institute study found that only 21% of enterprises have reached full AI security maturity. Most strikingly, only 47% believe their AI models can make safe autonomous decisions. Furthermore, 43% cite a &#8220;lack of proper risk and security controls&#8221; as their primary reason not to adopt agentic AI.</p>
 
-  <p>The most dangerous failures are not the obvious ones: prompt injections, jailbreaks, or loud policy violations. The core risk is untested judgment at commitment points. It is the moment an agent takes the wrong irreversible action because the request looked mechanically clean, or the moment a system creates a polished artifact that carries hidden errors into a human or automated approval path.</p>
+  <p>The industry is hesitating because it recognizes a structural flaw. Today, most organizations have built strong Layer 1 policy layers, such as identity registration, access controls, and basic guardrails. On paper, the system looks protected.</p>
 
-  <p>Most AI security is not built for this. It monitors inputs and logs outputs, but it struggles when a data packet or generated artifact is procedurally clean but semantically unresolved.</p>
+  <p>But when an AI agent actually tries to take a real, irreversible action, it is like having a border crossing where guards only check passports at the gate. The agent registers, gets cleared at a high level, and passes through. That works fine for low-stakes movement. It becomes dangerous when the stakes are high. What is missing is the deep interrogation at the actual checkpoint. U.S. Customs and Border Patrol agents do not just glance at a passport. They ask deeper questions, examine the cargo, cross-reference the story against history, and actively look for hidden contradictions.</p>
 
-  <p>Holo Engine is an adversarial judgment architecture built for these exact moments.</p>
+  <p>We have the passport checks. We are missing the deep, evidence-based scrutiny at the action boundary. This is the final moment before an AI does something irreversible.</p>
 
-  <p>Instead of relying on a single frontier model, Holo Engine evaluates actions and artifacts through a structured, adversarial process using multiple models with distinct roles, managed by a constrained Governor. This core architecture powers a distinct ecosystem of product surfaces:</p>
+  <p>To understand how to close this gap, we built an ablation cage (a strict testing environment) to evaluate the market&#8217;s default architectural choices. Here is what we tested and why they fail:</p>
+
+  <p><strong>Solo Models (The Baseline):</strong> Relying on a single frontier model results in the Precision Paradox. A solo model cannot reconcile strict rules with messy operational reality. It fails in two opposite directions. It either blindly surrenders to authority (waving through a fraudulent invoice because it has an executive signature) or it becomes a rigid auditor (panicking over a minor date mismatch and freezing normal operations).</p>
+
+  <p><strong>Self-Critique Loops:</strong> Asking a single model to check its own work. Instead of finding the error, the model uses its second turn to justify its first turn. Confirmation bias solidifies the mistake.</p>
+
+  <p><strong>Ungoverned Councils &amp; Ensembles:</strong> Letting multiple AI agents debate or vote on the outcome. We found that under consensus pressure, ungoverned models will literally fabricate evidence just to agree with each other.</p>
+
+  <p>The data revealed a counter-intuitive truth. Adding more models, or asking a model to think longer, does not automatically make a system safer.</p>
+
+  <p>The only actual solution is evidentiary discipline: the strict rule that an AI cannot allow or block an action without citing a specific, physical line in a real document.</p>
+
+  <p><strong>Holo Engine is the missing Layer 2 checkpoint.</strong> It is an adversarial architecture built to enforce this discipline. Instead of a single model or an ungoverned vote, Holo forces multiple AI models to cross-examine the data, hunt for gaps, and argue their findings to a constrained rule-engine called the Governor.</p>
+
+  <p>This core architecture powers four distinct product surfaces:</p>
 
   <ul style="margin:0.75rem 0 1rem 1.5rem;font-size:1rem;color:var(--ink-muted);line-height:1.85">
-    <li style="margin-bottom:0.5rem"><strong>Holo Verify:</strong> The action-boundary runtime gate. It evaluates proposed irreversible actions and returns ALLOW or ESCALATE before execution.</li>
-    <li style="margin-bottom:0.5rem"><strong>Holo Builder:</strong> The generative surface. It creates judgment-grade artifacts through adversarial construction and review.</li>
+    <li style="margin-bottom:0.5rem"><strong>Holo Verify:</strong> The action-boundary runtime gate. It evaluates proposed actions and returns a binding ALLOW or ESCALATE verdict before execution.</li>
+    <li style="margin-bottom:0.5rem"><strong>Holo Builder:</strong> The generative surface. It drops early document drafts into a hostile reactor to find loopholes and rebuild them into judgment-grade artifacts.</li>
     <li style="margin-bottom:0.5rem"><strong>Holo Judge:</strong> The evaluation surface. It reviews artifacts and scores them for factual accuracy, hidden risk, and decision usefulness.</li>
     <li><strong>Holo Test:</strong> The pressure-testing cage. It runs locked scenarios against competing architectures to find where they break.</li>
   </ul>
 
-  <p>This paper details the core Holo Engine architecture and presents benchmark findings. While Holo Builder and Holo Judge are active product surfaces, the empirical benchmark evidence presented in this paper focuses entirely on validating the most critical operational checkpoint: Holo Verify at the action boundary.</p>
+  <p>While Holo Builder testing is underway, using our Scenario Packet Builder (a system that generates hyper-realistic, cryptographically locked corporate environments to push models to their breaking point), the empirical benchmark evidence in this paper focuses entirely on Holo Verify.</p>
 
-  <p>Across early Holo Test runs, the strongest signal is not that more models or more turns automatically improve judgment. In several cases, unstructured self-critique or ungoverned multi-model handoff degraded performance. Holo&#8217;s thesis is that architecture, not model count, is the control surface.</p>
-
-  <p>Since the first published runs, Holo Test has moved from single benchmark cases to frozen evidence kits. The first completed kit, Kit A, covers AP/BEC payment-release decisions. It contains three benchmark-locked packets: two ALLOW cases and one ESCALATE case. Each packet includes frozen payloads, prompt hashes, raw traces across 11 architecture conditions, blind adjudication labels, and integrity checks proving the packets were not modified after execution.</p>
+  <p>Holo is not designed to simply escalate more often. It is designed to make ALLOW harder to fake and ESCALATE harder to overuse. Our first completed benchmark kit (Kit A) covers Accounts Payable fraud. Across 11 different AI setups, Holo was the only architecture that consistently caught hidden structural errors without freezing valid payments.</p>
 
   <p style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-top:24px;margin-bottom:10px;font-weight:500">Eight-Domain Atlas</p>
+  <p style="margin-top:0;margin-bottom:14px">Holo maintains a Blindspot Atlas to map failure vectors across eight enterprise domains. Status reflects whether a domain has produced benchmark-locked evidence, diagnostic findings, or is currently in design.</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid var(--rule);border-radius:6px;overflow:hidden;margin-top:0;margin-bottom:20px">
     <div style="padding:10px 14px;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule);display:flex;align-items:flex-start;gap:8px">
       <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;background:var(--gold);color:#fff;padding:2px 5px;border-radius:2px;flex-shrink:0;margin-top:2px">1</span>
-      <div><div style="font-size:12px;font-weight:600;color:var(--ink)">Accounts Payable / BEC</div><div style="font-size:11px;color:var(--gold);font-family:'IBM Plex Mono',monospace;font-weight:500">Complete</div></div>
+      <div><div style="font-size:12px;font-weight:600;color:var(--ink)">Accounts Payable / BEC</div><div style="font-size:11px;color:var(--gold);font-family:'IBM Plex Mono',monospace;font-weight:500">Complete (Kit A locked)</div></div>
     </div>
     <div style="padding:10px 14px;border-bottom:1px solid var(--rule);display:flex;align-items:flex-start;gap:8px">
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;background:var(--gold);color:#fff;padding:2px 5px;border-radius:2px;flex-shrink:0;margin-top:2px">2</span>
-      <div><div style="font-size:12px;font-weight:600;color:var(--ink)">Agentic Commerce</div><div style="font-size:11px;color:var(--gold);font-family:'IBM Plex Mono',monospace;font-weight:500">Complete</div></div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;background:var(--rule-strong);color:#fff;padding:2px 5px;border-radius:2px;flex-shrink:0;margin-top:2px">2</span>
+      <div><div style="font-size:12px;font-weight:500;color:var(--ink-muted)">Agentic Commerce</div><div style="font-size:11px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace">Diagnostic / early signal</div></div>
     </div>
     <div style="padding:10px 14px;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule);display:flex;align-items:flex-start;gap:8px">
       <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;background:var(--rule-strong);color:#fff;padding:2px 5px;border-radius:2px;flex-shrink:0;margin-top:2px">3</span>
@@ -655,10 +668,16 @@
       <div><div style="font-size:12px;font-weight:500;color:var(--ink-muted)">Infrastructure and Configuration</div><div style="font-size:11px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace">In Design</div></div>
     </div>
     <div style="padding:10px 14px;display:flex;align-items:flex-start;gap:8px">
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;background:var(--gold);color:#fff;padding:2px 5px;border-radius:2px;flex-shrink:0;margin-top:2px">8</span>
-      <div><div style="font-size:12px;font-weight:600;color:var(--ink)">Financial Reporting and Compliance</div><div style="font-size:11px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;font-weight:500">Diagnostic complete / formal locked kit pending</div></div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;background:var(--rule-strong);color:#fff;padding:2px 5px;border-radius:2px;flex-shrink:0;margin-top:2px">8</span>
+      <div><div style="font-size:12px;font-weight:500;color:var(--ink-muted)">Financial Reporting and Compliance</div><div style="font-size:11px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace">Diagnostic complete / formal locked kit pending</div></div>
     </div>
   </div>
+
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-top:24px;margin-bottom:10px;font-weight:500">The Situation and What Comes Next</p>
+
+  <p>The situation at large is clear. The era of AI acting as a harmless chatbot is over. Agents are moving into the enterprise, and they are being handed the keys to real operations. But you cannot safely scale autonomous AI if you cannot trust the final point of execution.</p>
+
+  <p>The rest of this whitepaper breaks down the exact mechanics of the Holo Engine architecture. It details the hard data from our ablation tests, the unexpected failures we exposed in our own system, and the strict structural rules required to close the gap. We are not just pointing out a theoretical risk. We are providing the engineering blueprint for trusted delegation.</p>
 </div>
 
 <!-- TABLE OF CONTENTS -->
@@ -1336,7 +1355,7 @@
   <div class="footer-brand">Holo Engine</div>
   <div class="footer-meta">
     holoengine.ai &nbsp;&middot;&nbsp; hello@holoengine.ai<br>
-    Working Paper &nbsp;&middot;&nbsp; Version 5.08 &nbsp;&middot;&nbsp; June 2026
+    Working Paper &nbsp;&middot;&nbsp; Version 5.09 &nbsp;&middot;&nbsp; June 2026
   </div>
 </footer>
 

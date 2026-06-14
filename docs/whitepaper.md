@@ -1,10 +1,10 @@
-# Engineering Better AI Judgment in High Stakes Workflows
+# AI at the Action Boundary
 
-### Building the Infrastructure for Trusted Delegation for Enterprise Workflows
+### Why Smart Models Make Bad Decisions When the Stakes Are High
 
 **Taylor Wigton** · Founder, Holo Engine · taylorw@hologroup.io
 
-Working Paper · Version 5.11 · June 2026  
+Working Paper · Version 5.12 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -13,15 +13,19 @@ U.S. Provisional Patent Application No. 63/987,899
 
 ## Executive Summary
 
-AI systems are starting to do more than generate text. They are approving payments, granting access, executing workflows, and moving real operations forward without waiting for a human to step in. They are also generating the high-stakes documents people use to make decisions: contracts, deal memos, policy summaries, diligence reports, and procurement recommendations.
+AI is no longer just talking. It is acting. It is approving payments, executing contracts, and granting access. We want the ultimate prize: the ability to hand off high-stakes work to an AI and walk away.
 
-The result is not relief, but a new, more exhausting form of cognitive load. Professionals who were promised automation now spend their days hunting hallucinations, second-guessing subtle paradoxes, and cleaning up outputs that look clean but contain structural errors. The future organizations actually want is trusted delegation: the ability to hand high-consequence work to a system and know it has survived rigorous internal scrutiny.
+But we can't. Not yet. Because the infrastructure we built to keep AI safe was designed for chat windows, not irreversible operations.
 
-The most dangerous failures are not the obvious ones: prompt injections, jailbreaks, or loud policy violations. The core risk is untested judgment at commitment points. It is the moment an agent takes the wrong irreversible action because the request looked mechanically clean, or the moment a system creates a polished artifact that carries hidden errors into a human or automated approval path.
+Today's AI security is built like the TSA. It checks your ID at the door. It makes sure you are registered, verifies your permissions, and runs a basic scan. If you match the profile, you get waved through.
 
-Most AI security is not built for this. It monitors inputs and logs outputs, but it struggles when a data packet or generated artifact is procedurally clean but semantically unresolved.
+That works fine for low-stakes software. It is catastrophic for high-stakes execution.
 
-Holo Engine is an adversarial judgment architecture built for these exact moments.
+When an AI agent is about to wire $180,000, a TSA check isn't enough. You don't just need to know the agent is authorized to send money; you need to know if this specific payment is structurally sound. You need U.S. Customs.
+
+Customs agents don't just scan passports. They pull you aside. They look at your cargo. They ask why you are traveling today instead of yesterday. They cross-reference your story against your history, actively hunting for contradictions.
+
+We have the TSA for AI. We are missing U.S. Customs. Holo Engine is U.S. Customs at the action boundary.
 
 Instead of relying on a single frontier model, Holo Engine evaluates actions and artifacts through a structured, adversarial process using multiple models with distinct roles, managed by a constrained Governor. This core architecture powers a distinct ecosystem of product surfaces:
 
@@ -241,6 +245,19 @@ Running a packet through several adversarial turns is more compute-heavy than on
 
 ## 5. The Benchmark Factory
 
+### Payload Index
+
+We do not walk around claiming we have 260 benchmark packets. That invites trouble and blends diagnostic testing with formal proof.
+
+We operate with roughly 120 near-term, high-stakes testable packets:
+
+* The Frozen Pilot (20 Packets): 10 matched pairs of hard ALLOWs and ESCALATEs. These are cryptographically hash-verified, leakage-scanned, and actively used for our Governor patch regressions.
+* The Staged Projection Dart (100 Packets): 50 matched pairs across five distinct strata of corporate failure (like Exception Laundering and Summary-Source Conflict).
+
+Beyond that, we maintain a massive scout and diagnostic inventory—including 43 same-substrate Holo-rescue cases in Procedural Obedience alone, and 133 Atlas trace cards. That is our wind tunnel. But when we claim benchmark credit, we only use the locked, frozen sets.
+
+---
+
 A benchmark is a claim about reality, and it is only as good as the reality it is built on. This is the part of action-boundary testing that is easiest to get wrong, and the part that most quietly invalidates everything downstream.
 
 The trouble starts with how the industry builds test scenarios. The convenient way is to ask an LLM to write them. LLMs are superb writers and terrible owners of ground truth, and the gap between those two things is exactly where benchmarks go to die. Left to invent a scenario, a model produces something benchmark-shaped: a document with an explicit verdict hub, a logical shortcut, a tell. It looks like an enterprise problem and collapses under pressure into simple arithmetic or a single-document lookup. Worse, it teaches the system being tested to cheat: to pattern-match the tell instead of doing the synthesis the real world would demand.
@@ -283,11 +300,13 @@ While evaluating a binary ALLOW/ESCALATE is deterministic, judging the quality o
 
 ### 5.6 Holo Test: Ablation Methodology
 
-The three completed domains demonstrate that the Holo architecture changes the verdict where solo models fail. The next phase formalizes that comparison into a repeatable scoring cage across all architecture conditions.
+The HoloTest ablation cage evaluates 11 different AI configurations. These include solo models, self-critique loops, ungoverned AI councils, and debate teams.
 
-Each candidate packet or generation task is hash-locked, run against a declared model cohort, and evaluated across native solo models, same-model multi-turn systems, homogeneous councils, ungoverned multi-model ensembles, and Holo-powered systems. The purpose is not to prove that one model is smarter, but to isolate whether adversarial architecture improves judgment, stability, evidence integration, and readiness at high-stakes decision points.
+We do not patch the other 10 architectures when they fail. That is the point.
 
-Across early runs, the strongest signal is not that more models or more turns automatically improve judgment. In several cases, unstructured self-critique or ungoverned multi-model handoff degraded performance. Architecture, not model count, is the control surface.
+Without a Governor, an AI council is mostly just a conversation. You can prompt a council to debate longer, but that just produces more words, more caution, or more disagreement. It does not reliably produce disciplined action-boundary adjudication.
+
+The other architectures fail and stay failed because they have no structural memory. HoloGov fails and becomes smarter because Holo has a place to put the lesson. The adversarial roles create the pressure. The Governor converts that pressure into judgment.
 
 **Table X: Holo Test Ablation Results**
 *(Status: In progress. Final scores will be added after packet freeze, provenance capture, and repeatable cohort runs.)*
@@ -363,6 +382,20 @@ The discipline that makes the enterprise benchmark credible is exactly the disci
 
 ## 9. Why a Bigger Single Engine Does Not Fix This
 
+The default assumption in AI is that higher stakes require bigger, smarter models. If you want to protect an autonomous, high-dollar workflow, you buy the most expensive, compute-heavy frontier model available.
+
+Our data proved the exact opposite.
+
+A single, massive frontier model operating alone routinely fails at the action boundary. It is too eager to keep the workflow moving and too easy to persuade with surface-level authority.
+
+Holo does not rely on a single giant model. We built Holo Verify using an adversarial council of 'mini' models—cheap, fast, lightweight models from entirely different DNA families (combining the 'mini' or 'lite' tiers of Grok, GPT-4o, Gemini, and MiniMax).
+
+By themselves, these models are not the smartest in the world. But when you force them into a strict adversarial structure—where one attacks, one defends, and the Governor is forced to adjudicate the math—they reliably beat the solo giant.
+
+Architecture beats raw compute. A well-governed council of cheap models is vastly safer than an ungoverned genius.
+
+---
+
 The most common objection is that the problem is temporary: models keep getting smarter, so the gap will close on its own. It will not, for three reasons that are structural rather than incidental.
 
 First, the failure is not a knowledge gap. The solo models in the benchmark had every document. They failed because a single reasoning loop evaluated the narrow task without challenging the frame around it. A more capable model runs that same flawed frame more efficiently. It answers the wrong question with higher confidence, which is worse, not better, at a checkpoint where confidence is what you are trying to calibrate.
@@ -399,7 +432,37 @@ The restraint is the point. A trust layer that overclaims is just another thing 
 
 ---
 
-## 12. What Comes Next
+## 12. Engineering Integrity
+
+When our initial Governor overblocked valid workflows, we tried to fix it with a prompt patch. We told it to distinguish between a Closed Risk Indicator and an Open Blocker.
+
+It failed. The model still panicked at the scent of risk.
+
+That failure exposed a fundamental truth about AI infrastructure: A prompt patch is not a control layer patch. Models do not remember lessons between calls. You cannot fix the Precision Paradox by just telling a frontier model to be less cautious.
+
+To fix it, we had to stop asking the Governor for its opinion and start forcing it to do the math. We stripped its ability to act as a cautious fifth judge. Now, before it can issue an ESCALATE verdict, the architecture forces it to complete a strict blocker ledger. For every concern raised, it must:
+1. State the claimed concern.
+2. Quote the exact policy requirement.
+3. List the required source artifacts.
+4. Define the unresolved delta.
+
+If the Governor cannot name the exact policy requirement that remains unsatisfied after reading the closing artifacts, the system physically forces the concern to be classified as invalid or closed.
+
+That is how a final model becomes real control infrastructure.
+
+---
+
+## 12.5 Losses, Repairs, and Reruns
+
+The industry standard for AI benchmarks is dilution. If a system fails a test, the vendor runs 90 more easy tests to make the failure rate look like a rounding error.
+
+Holo does not dilute losses. We freeze them.
+
+When our v2 patch failed to clear our two false positives, we didn't quietly overwrite the run. We locked the v2 artifacts in our matrix, marked the precision fix as a failure, and recorded the status as superseded. We are running our v3 patch regression exclusively on that exact same frozen 20-packet set. We don't improve by burying losses. We improve by turning exact failures into structural Governor infrastructure, rerunning the frozen failure, and testing siblings to prove the judgment generalized.
+
+---
+
+## 13. What Comes Next
 
 The benchmark serves as the front end of a compounding corporate database tracking where standalone AI judgment fractures under operational pressure. We call this repository the Blindspot Atlas. Each new scenario helps harden the Governor's logic and map failure vectors before they are encountered in production.
 
@@ -411,4 +474,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*Holo Engine · holoengine.ai · taylorw@hologroup.io · Working Paper · Version 5.11 · June 2026*
+*Holo Engine · holoengine.ai · taylorw@hologroup.io · Working Paper · Version 5.12 · June 2026*

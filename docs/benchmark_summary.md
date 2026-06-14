@@ -1,5 +1,7 @@
-# Holo Benchmark Summary
-### June 2026
+# The Action Boundary Benchmark
+### Hardening AI for Autonomous Execution
+
+**Version 6.4 · June 2026**
 
 ---
 
@@ -20,6 +22,19 @@ Holo evaluates business actions using an adversarial council of AI models plus a
 The result: Holo doesn't just return a verdict. It returns a verified reasoning chain — the specific documents and fields that support the decision.
 
 That chain is what makes Holo's verdicts auditable, defensible, and trustworthy in regulated environments.
+
+---
+
+## Payload Scope
+
+We do not walk around claiming we have 260 benchmark packets. That invites trouble and blends diagnostic testing with formal proof.
+
+We operate with roughly 120 near-term, high-stakes testable packets:
+
+* **The Frozen Pilot (20 Packets):** 10 matched pairs of hard ALLOWs and ESCALATEs. These are cryptographically hash-verified, leakage-scanned, and actively used for our Governor patch regressions.
+* **The Staged Projection Dart (100 Packets):** 50 matched pairs across five distinct strata of corporate failure (like Exception Laundering and Summary-Source Conflict).
+
+Beyond that, we maintain a massive scout and diagnostic inventory—including 43 same-substrate Holo-rescue cases in Procedural Obedience alone, and 133 Atlas trace cards. That is our wind tunnel. But when we claim benchmark credit, we only use the locked, frozen sets.
 
 ---
 
@@ -107,6 +122,16 @@ The benchmark proves Holo can do something no other architecture tested here cou
 The solos stop when the surface signals are resolved. Holo keeps reading until every material condition is closed.
 
 That difference is the reason Holo's verdicts are defensible and solos' are not.
+
+---
+
+## Losses, Repairs, and Reruns
+
+The industry standard for AI benchmarks is dilution. If a system fails a test, the vendor runs 90 more easy tests to make the failure rate look like a rounding error.
+
+Holo does not dilute losses. We freeze them.
+
+When our v2 patch failed to clear our two false positives, we didn't quietly overwrite the run. We locked the v2 artifacts in our matrix, marked the precision fix as a failure, and recorded the status as superseded. We are running our v3 patch regression exclusively on that exact same frozen 20-packet set. We don't improve by burying losses. We improve by turning exact failures into structural Governor infrastructure, rerunning the frozen failure, and testing siblings to prove the judgment generalized.
 
 ---
 

@@ -4,7 +4,7 @@
 
 **Taylor Wigton** · Founder, Holo Engine · taylorw@hologroup.io
 
-Working Paper · Version 5.12 · June 2026  
+Working Paper · Version 5.13 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -474,4 +474,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*Holo Engine · holoengine.ai · taylorw@hologroup.io · Working Paper · Version 5.12 · June 2026*
+*Holo Engine · holoengine.ai · taylorw@hologroup.io · Working Paper · Version 5.13 · June 2026*

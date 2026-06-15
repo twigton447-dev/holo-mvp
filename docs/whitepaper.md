@@ -21,7 +21,7 @@ But we cannot do that yet.
 
 The reason is simple. Most AI safety infrastructure was built for chat. It checks prompts, permissions, policies, and user intent. That is useful, but it is not enough when an AI agent is about to take an irreversible action.
 
-The current default is closer to old airport security: basic checks, assumed normal traffic, and a system designed around the idea that most people passing through are fine.
+The current default is closer to pre-9/11 airport security: basic checks, assumed normal traffic, and a system designed around the idea that most people passing through are fine.
 
 High-stakes AI needs something closer to Customs and Border Protection.
 

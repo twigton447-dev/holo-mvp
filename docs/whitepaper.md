@@ -2,9 +2,9 @@
 
 ### Why Smart Models Make Bad Decisions When the Stakes Are High
 
-**Taylor Wigton** · Founder, Holo Engine · taylorw@hologroup.io
+**Taylor Wigton** · Founder, HoloEngine · twigton447@gmail.com
 
-Working Paper · Version 5.13 · June 2026  
+Working Paper · Version 5.14 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -13,30 +13,63 @@ U.S. Provisional Patent Application No. 63/987,899
 
 ## Executive Summary
 
-AI is no longer just talking. It is acting. It is approving payments, executing contracts, and granting access. We want the ultimate prize: the ability to hand off high-stakes work to an AI and walk away.
+AI is no longer just talking. It is acting.
 
-But we can't. Not yet. Because the infrastructure we built to keep AI safe was designed for chat windows, not irreversible operations.
+It is approving payments, drafting contracts, granting access, ordering materials, changing records, and triggering real-world operations. The prize is obvious: hand high-stakes work to an AI system and walk away.
 
-Today's AI security is built like the TSA. It checks your ID at the door. It makes sure you are registered, verifies your permissions, and runs a basic scan. If you match the profile, you get waved through.
+But we cannot do that yet.
 
-That works fine for low-stakes software. It is catastrophic for high-stakes execution.
+The reason is simple. Most AI safety infrastructure was built for chat. It checks prompts, permissions, policies, and user intent. That is useful, but it is not enough when an AI agent is about to take an irreversible action.
 
-When an AI agent is about to wire $180,000, a TSA check isn't enough. You don't just need to know the agent is authorized to send money; you need to know if this specific payment is structurally sound. You need U.S. Customs.
+The current default is closer to old airport security: basic checks, assumed normal traffic, and a system designed around the idea that most people passing through are fine.
 
-Customs agents don't just scan passports. They pull you aside. They look at your cargo. They ask why you are traveling today instead of yesterday. They cross-reference your story against your history, actively hunting for contradictions.
+High-stakes AI needs something closer to Customs and Border Protection.
 
-We have the TSA for AI. We are missing U.S. Customs. Holo Engine is U.S. Customs at the action boundary.
+At the border, the question is not just, "Do you have permission to enter?" The question is, "Does your story hold up?" What are you carrying? Why today? Does the paperwork match the cargo? Are there contradictions hiding inside something that looks routine?
 
-Instead of relying on a single frontier model, Holo Engine evaluates actions and artifacts through a structured, adversarial process using multiple models with distinct roles, managed by a constrained Governor. This core architecture powers a distinct ecosystem of product surfaces:
+That is the missing layer in AI execution.
 
-- **Holo Verify:** The action-boundary runtime gate. It evaluates proposed irreversible actions and returns ALLOW or ESCALATE before execution.
-- **Holo Builder:** The generative surface. It creates judgment-grade artifacts through adversarial construction and review.
-- **Holo Judge:** The evaluation surface. It reviews artifacts and scores them for factual accuracy, hidden risk, and decision usefulness.
-- **Holo Test:** The pressure-testing cage. It runs locked scenarios against competing architectures to find where they break.
+When an agent is about to release a $180,000 payment, the important question is not merely whether the agent has payment authority. The important question is whether this exact payment is supported by the source evidence right now.
 
-This paper details the core Holo Engine architecture and presents benchmark findings. While Holo Builder and Holo Judge are active product surfaces, the empirical benchmark evidence presented in this paper focuses entirely on validating the most critical operational checkpoint: Holo Verify at the action boundary.
+HoloEngine exists for that moment.
 
-Across early Holo Test runs, the strongest signal is not that more models or more turns automatically improve judgment. In several cases, unstructured self-critique or ungoverned multi-model handoff degraded performance. Holo's thesis is that architecture, not model count, is the control surface.
+HoloEngine 4DNA is an adversarial checkpoint architecture for high-stakes AI actions. Three model roles investigate the evidence, cross-check the record, and surface contradictions. HoloGov, the silent Governor, receives the structured case and issues the final ALLOW or ESCALATE ruling.
+
+The architecture is not designed to escalate everything. That would be easy and useless. HoloEngine is designed to make ALLOW harder to fake and ESCALATE harder to overuse.
+
+To test this, we built HoloTest: a locked pressure cage for comparing AI architectures at the action boundary. The benchmark does not ask whether a model can sound careful. It asks whether the system can make the right execution decision when the evidence is messy, incomplete, stale, over-scoped, or deceptively normal.
+
+The results exposed a structural problem.
+
+Solo models can fail in both directions. They can surrender to apparent authority and wave through a bad action, or they can become brittle and freeze a valid one.
+
+Self-critique loops do not reliably solve the problem. A model often uses its second pass to rationalize its first answer.
+
+Ungoverned councils and ensembles can also fail. More models do not automatically create better judgment. Without a Governor, consensus can become a way to launder mistakes.
+
+The lesson is blunt: adding more intelligence does not automatically create more safety.
+
+What matters is evidentiary discipline.
+
+A high-stakes AI system should not be able to allow or block an action unless it can tie that decision back to specific source evidence. Not vibes. Not summaries. Not upstream JSON. The actual record.
+
+That is the role of HoloVerify, the first runtime surface powered by HoloEngine 4DNA. HoloVerify sits between an AI agent and an irreversible action. Before execution, it asks one question:
+
+Does the source-grounded evidence authorize this exact action?
+
+If yes, ALLOW.
+
+If no, ESCALATE.
+
+HoloBuild uses the same architecture to create and harden adversarial test environments. HoloJudge reviews whether verdicts were actually supported by evidence. HoloTest pressure-tests competing architectures. HoloAtlas preserves the failure map so future Governors get smarter.
+
+The broader point is not that AI agents are too dangerous to use. It is the opposite.
+
+AI agents are too valuable to leave at the edge of execution with only passive policy checks.
+
+If we want trusted delegation, we need a checkpoint at the action boundary. One that inspects the cargo, not just the passport.
+
+That's HoloEngine.
 
 ---
 
@@ -64,13 +97,13 @@ What you need is collision. Two surfaces, in opposition, generating something ne
 
 ### What Holo Is
 
-Holo Engine is a governed adversarial judgment architecture. It operates as a controlled reactor that forces structurally different frontier models into collision to extract latent judgment.
+HoloEngine is a governed adversarial judgment architecture. It operates as a controlled reactor that forces structurally different frontier models into collision to extract latent judgment.
 
 This architecture is deployed in two directions to enable trusted delegation:
 
-**At the action boundary:** It acts as a runtime shield (Holo Verify). It intercepts a proposed action, evaluates the packet through a structured adversarial cross-examination, and uses a constrained Governor to return a binary verdict: ALLOW or ESCALATE.
+**At the action boundary:** It acts as a runtime shield (HoloVerify). It intercepts a proposed action, evaluates the packet through a structured adversarial cross-examination, and uses a constrained Governor to return a binary verdict: ALLOW or ESCALATE.
 
-**In the generative process:** It acts as a work-product forge (Holo Builder). It drops early drafts into a multi-turn adversarial reactor, forcing high-volatility structural teardowns to resolve hidden contradictions before an artifact is finalized.
+**In the generative process:** It acts as a work-product forge (HoloBuild). It drops early drafts into a multi-turn adversarial reactor, forcing high-volatility structural teardowns to resolve hidden contradictions before an artifact is finalized.
 
 Whether intercepting a fraudulent wire or stress-testing a high-stakes M&A strategy, the underlying job is the same. Holo sits at the threshold of reliance and asks a simple question: This action or artifact appears ready. Has it actually survived enough hostile scrutiny to be safe?
 
@@ -96,9 +129,9 @@ The rest of this paper does the proven half first, because evidence should come 
 
 When you build an environment that forces different models to challenge one another, the internal friction can be channeled in two distinct ways:
 
-**The Evaluative Harness (The Action Boundary Shield):** Used by Holo Verify. This configuration assumes the data packet or decision has already been generated. Holo sits silently at the final execution checkpoint and evaluates the payload against anchor constraints, returning a binary operational verdict: ALLOW or ESCALATE.
+**The Evaluative Harness (The Action Boundary Shield):** Used by HoloVerify. This configuration assumes the data packet or decision has already been generated. Holo sits silently at the final execution checkpoint and evaluates the payload against anchor constraints, returning a binary operational verdict: ALLOW or ESCALATE.
 
-**The Generative Harness (The Work-Product Forge):** Used by Holo Builder. This configuration assumes the starting material is a rough draft or incomplete strategy. It drops the draft into a constrained 10-turn adversarial reactor. Specialized critic agents, such as an Edge Case Scanner and Hostile Challenger, attack the document's logic from different angles. The loop forces high-volatility structural teardowns early, then rebuilds until unresolved issues converge to absolute zero.
+**The Generative Harness (The Work-Product Forge):** Used by HoloBuild. This configuration assumes the starting material is a rough draft or incomplete strategy. It drops the draft into a constrained 10-turn adversarial reactor. Specialized critic agents, such as an Edge Case Scanner and Hostile Challenger, attack the document's logic from different angles. The loop forces high-volatility structural teardowns early, then rebuilds until unresolved issues converge to absolute zero.
 
 ---
 
@@ -132,29 +165,29 @@ Holo does not enter a domain assuming it knows the rules. It enters to find out 
 
 A trust layer that flags everything is a bottleneck, not a safeguard. True viability at the action boundary requires an exceptionally low **false positive rate**: the ability to correctly clear complex, messy, but legitimate business exceptions. If a system escalates safe actions out of blind caution, it creates false friction and destroys the ROI of automation. A viable trust layer must catch hidden fraud without breaking the normal operational workflow.
 
-### Forging the Wind Tunnel with Holo Builder
+### Forging the Wind Tunnel with HoloBuild
 
-Standard AI benchmarks ask abstract questions. They do not test if an action should execute. To build a true wind tunnel, we use Holo Builder and Holo Test to actively forge the scenarios themselves. By running the adversarial reactor in reverse, agentic personas act as blindspot architects, intentionally burying subtle structural contradictions deep inside sub-ledgers, legal histories, and procurement packets. We push the payloads to their absolute limits to ensure we are testing the hardest possible realities before an agent acts in production.
+Standard AI benchmarks ask abstract questions. They do not test if an action should execute. To build a true wind tunnel, we use HoloBuild and HoloTest to actively forge the scenarios themselves. By running the adversarial reactor in reverse, agentic personas act as blindspot architects, intentionally burying subtle structural contradictions deep inside sub-ledgers, legal histories, and procurement packets. We push the payloads to their absolute limits to ensure we are testing the hardest possible realities before an agent acts in production.
 
 ### The Ablation Cage: Apples-to-Apples Testing
 
-We built this rigorous testing infrastructure because our true competitors are the default alternative architectures: native solo models, same-model self-critique loops, and ungoverned multi-model ensembles. To prove Holo Engine is superior, we require an apples-to-apples ablation cage. Each forged payload is locked and run across all competing architectures under identical conditions. This completely isolates the orchestration layer, proving empirically that adversarial architecture, not just raw model intelligence, is what actually survives the wind tunnel.
+We built this rigorous testing infrastructure because our true competitors are the default alternative architectures: native solo models, same-model self-critique loops, and ungoverned multi-model ensembles. To prove HoloEngine is superior, we require an apples-to-apples ablation cage. Each forged payload is locked and run across all competing architectures under identical conditions. This completely isolates the orchestration layer, proving empirically that adversarial architecture, not just raw model intelligence, is what actually survives the wind tunnel.
 
 ---
 
-## 3.5 Product Surfaces Built on Holo Engine
+## 3.5 Product Surfaces Built on HoloEngine
 
-Holo Engine is the core architecture. It powers a specific set of product surfaces, each designed to solve a different phase of the enterprise AI trust gap.
+HoloEngine is the core architecture. It powers a specific set of product surfaces, each designed to solve a different phase of the enterprise AI trust gap.
 
-**Holo Verify.** The action-boundary runtime gate. It sits before irreversible AI actions: payments, access grants, contract execution, procurement actions, or agentic purchases, and returns ALLOW or ESCALATE. This is the first validated deployment surface of the Holo Engine, and the subject of the empirical benchmark data in this paper.
+**HoloVerify.** The action-boundary runtime gate. It sits before irreversible AI actions: payments, access grants, contract execution, procurement actions, or agentic purchases, and returns ALLOW or ESCALATE. This is the first validated deployment surface of the HoloEngine, and the subject of the empirical benchmark data in this paper.
 
-**Holo Builder.** The generative product surface. It creates high-stakes artifacts and work products: benchmark packets, contracts, legal drafts, M&A memos, CFO memos, policy docs, diligence reports, and procurement packets. Holo Builder does not rely on single-shot generation; it uses the engine's adversarial architecture to construct and refine judgment-grade materials.
+**HoloBuild.** The generative product surface. It creates high-stakes artifacts and work products: benchmark packets, contracts, legal drafts, M&A memos, CFO memos, policy docs, diligence reports, and procurement packets. HoloBuild does not rely on single-shot generation; it uses the engine's adversarial architecture to construct and refine judgment-grade materials.
 
-**Holo Judge.** The evaluation surface. It reviews artifacts created by Holo Builder or external systems and scores them for factual accuracy, issue spotting, internal consistency, unresolved blockers, hallucination risk, and readiness.
+**HoloJudge.** The evaluation surface. It reviews artifacts created by HoloBuild or external systems and scores them for factual accuracy, issue spotting, internal consistency, unresolved blockers, hallucination risk, and readiness.
 
-**Holo Test.** The adversarial test cage. It runs locked packets and generation tasks against competing architectures: single-shot models, multi-turn same-model systems, homogeneous councils, ungoverned multi-model ensembles, and Holo-powered systems.
+**HoloTest.** The adversarial test cage. It runs locked packets and generation tasks against competing architectures: single-shot models, multi-turn same-model systems, homogeneous councils, ungoverned multi-model ensembles, and Holo-powered systems.
 
-**Holo Atlas.** The growing institutional record of where frontier models fail under operational pressure. It captures not just whether Holo catches what a solo model misses, but exactly how each model fails, under what conditions, and why. Every run produces a classified entry: the model, the domain, the failure class, the specific cognitive seam that broke, and the reproducibility status.
+**HoloAtlas.** The growing institutional record of where frontier models fail under operational pressure. It captures not just whether Holo catches what a solo model misses, but exactly how each model fails, under what conditions, and why. Every run produces a classified entry: the model, the domain, the failure class, the specific cognitive seam that broke, and the reproducibility status.
 
 Documented failure classes across tested models:
 
@@ -272,9 +305,9 @@ Standard AI benchmarks rely on static, text-based question-and-answer pairs. Act
 
 To ensure absolute reproducibility, all scenarios are engineered through the Holo Packet Factory. This is a deterministic Python backend designed to forge high-fidelity corporate environments.
 
-When an adversarial scenario is built, such as a PE consolidation with a hidden stub-period anomaly, the entire multi-document payload is programmatically generated. Every artifact, email timestamp, and sub-ledger entry is cryptographically hash-locked and committed to an immutable evaluation ledger. This ensures zero variance in the underlying data layer. When a solo frontier model and the Holo Engine are run against the exact same hash-locked payload, the test is strictly deterministic. The only variable being measured is the quality of the orchestration architecture.
+When an adversarial scenario is built, such as a PE consolidation with a hidden stub-period anomaly, the entire multi-document payload is programmatically generated. Every artifact, email timestamp, and sub-ledger entry is cryptographically hash-locked and committed to an immutable evaluation ledger. This ensures zero variance in the underlying data layer. When a solo frontier model and the HoloEngine are run against the exact same hash-locked payload, the test is strictly deterministic. The only variable being measured is the quality of the orchestration architecture.
 
-**The Fact Graph.** Ground truth in the Holo Builder factory is owned by a Python-driven Fact Graph, not a model. The Fact Graph holds the immutable realities of a scenario (entity IDs, execution timestamps, role hierarchies, cross-reference rules) and generates artifacts one at a time, enforcing exactly which facts are permitted and which are forbidden in each. The model's job is demoted to rendering: filling specific prose slots inside a rigid structure it does not control. We no longer ask a model to invent reality. We ask it to narrate a reality we constructed deterministically. A scenario built this way cannot hallucinate its own answer key, because the answer key was never the model's to write.
+**The Fact Graph.** Ground truth in the HoloBuild factory is owned by a Python-driven Fact Graph, not a model. The Fact Graph holds the immutable realities of a scenario (entity IDs, execution timestamps, role hierarchies, cross-reference rules) and generates artifacts one at a time, enforcing exactly which facts are permitted and which are forbidden in each. The model's job is demoted to rendering: filling specific prose slots inside a rigid structure it does not control. We no longer ask a model to invent reality. We ask it to narrate a reality we constructed deterministically. A scenario built this way cannot hallucinate its own answer key, because the answer key was never the model's to write.
 
 **The QA Attacker.** Deterministic construction is necessary but not sufficient; a packet can be perfectly consistent and still be solvable by a trick. So before any packet reaches the reactor, it goes through the Holo QA Attacker, a blind, destructive layer whose only mandate is to break it. HQA hunts for single-document reliance, overfitting, and tells: any path that lets a solver reach the right verdict without performing the multi-document synthesis the scenario is supposed to demand. If a shortcut exists, HQA finds it, and the factory retires or repairs the packet.
 
@@ -298,7 +331,7 @@ While evaluating a binary ALLOW/ESCALATE is deterministic, judging the quality o
 
 **Verdict:** Holo defeated the single-model baseline by a margin of 6 points (44/50 vs 38/50). More importantly, it delivered absolute convergence and a genuine strategic insight that only emerged because the system was forced to fight itself.
 
-### 5.6 Holo Test: Ablation Methodology
+### 5.6 HoloTest: Ablation Methodology
 
 The HoloTest ablation cage evaluates 11 different AI configurations. These include solo models, self-critique loops, ungoverned AI councils, and debate teams.
 
@@ -308,7 +341,7 @@ Without a Governor, an AI council is mostly just a conversation. You can prompt 
 
 The other architectures fail and stay failed because they have no structural memory. HoloGov fails and becomes smarter because Holo has a place to put the lesson. The adversarial roles create the pressure. The Governor converts that pressure into judgment.
 
-**Table X: Holo Test Ablation Results**
+**Table X: HoloTest Ablation Results**
 *(Status: In progress. Final scores will be added after packet freeze, provenance capture, and repeatable cohort runs.)*
 
 | Architecture Condition | Verdict / Score | Turn Count | Failure Mode / Note |
@@ -317,7 +350,7 @@ The other architectures fail and stay failed because they have no structural mem
 | Same-Model Self-Critique | *Pending* | — | — |
 | Homogeneous Council | *Pending* | — | — |
 | Ungoverned Multi-Model | *Pending* | — | — |
-| **Holo Engine (Full)** | ***Pending*** | — | — |
+| **HoloEngine (Full)** | ***Pending*** | — | — |
 
 Required provenance for every published score: packet ID, packet hash, model cohort, condition, verdict/score, correctness, turn count, token count, failure mode, trace path, judge model, and freeze status.
 
@@ -388,7 +421,7 @@ Our data proved the exact opposite.
 
 A single, massive frontier model operating alone routinely fails at the action boundary. It is too eager to keep the workflow moving and too easy to persuade with surface-level authority.
 
-Holo does not rely on a single giant model. We built Holo Verify using an adversarial council of 'mini' models—cheap, fast, lightweight models from entirely different DNA families (combining the 'mini' or 'lite' tiers of Grok, GPT-4o, Gemini, and MiniMax).
+Holo does not rely on a single giant model. We built HoloVerify using an adversarial council of 'mini' models—cheap, fast, lightweight models from entirely different DNA families (combining the 'mini' or 'lite' tiers of Grok, GPT-4o, Gemini, and MiniMax).
 
 By themselves, these models are not the smartest in the world. But when you force them into a strict adversarial structure—where one attacks, one defends, and the Governor is forced to adjudicate the math—they reliably beat the solo giant.
 
@@ -406,7 +439,7 @@ Third, and most fundamental: a model cannot be its own opposing force. This is t
 
 This also answers the narrower objections. *Is this just models voting?* No. A vote is only as good as its voters, so the Governor decides on evidence a model can point to, and discounts any escalation that cannot name its finding.
 
-**"Is this Mixture of Experts?"** No. Mixture of Experts is something that happens inside a single model: it routes work between internal subnetworks to generate a response. Holo Engine is separate from the model entirely. It is not a single model and not a generic content generator. The same adversarial architecture can be applied to different product surfaces. In Holo Verify, it adjudicates whether an action should proceed. In Holo Builder, it generates high-stakes artifacts through adversarial construction and review. In Holo Judge, it evaluates whether generated work is accurate, complete, and ready for use. The common layer is not generation itself. The common layer is adversarial judgment.
+**"Is this Mixture of Experts?"** No. Mixture of Experts is something that happens inside a single model: it routes work between internal subnetworks to generate a response. HoloEngine is separate from the model entirely. It is not a single model and not a generic content generator. The same adversarial architecture can be applied to different product surfaces. In HoloVerify, it adjudicates whether an action should proceed. In HoloBuild, it generates high-stakes artifacts through adversarial construction and review. In HoloJudge, it evaluates whether generated work is accurate, complete, and ready for use. The common layer is not generation itself. The common layer is adversarial judgment.
 
 ---
 
@@ -466,12 +499,12 @@ When our v2 patch failed to clear our two false positives, we didn't quietly ove
 
 The benchmark serves as the front end of a compounding corporate database tracking where standalone AI judgment fractures under operational pressure. We call this repository the Blindspot Atlas. Each new scenario helps harden the Governor's logic and map failure vectors before they are encountered in production.
 
-While our immediate development roadmap continues to expand the eight core enterprise action boundaries for Holo Verify (including active work in Regulated Procurement and IT Access Provisioning), our next phase of published research will expand into artifact generation and evaluation.
+While our immediate development roadmap continues to expand the eight core enterprise action boundaries for HoloVerify (including active work in Regulated Procurement and IT Access Provisioning), our next phase of published research will expand into artifact generation and evaluation.
 
-Upcoming releases will include adversarial benchmarks for Holo Builder and Holo Judge, detailing how single-shot frontier models fail when drafting or evaluating high-stakes legal and financial documents, and how the Holo Engine architecture resolves those blindspots.
+Upcoming releases will include adversarial benchmarks for HoloBuild and HoloJudge, detailing how single-shot frontier models fail when drafting or evaluating high-stakes legal and financial documents, and how the HoloEngine architecture resolves those blindspots.
 
 Independent validation of the solo baselines is encouraged. Payloads and validation scripts are public.
 
 ---
 
-*Holo Engine · holoengine.ai · taylorw@hologroup.io · Working Paper · Version 5.13 · June 2026*
+*HoloEngine · holoengine.ai · twigton447@gmail.com · Working Paper · Version 5.14 · June 2026*

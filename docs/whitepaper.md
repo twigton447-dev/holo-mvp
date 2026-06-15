@@ -4,7 +4,7 @@
 
 **Taylor Wigton** · Founder, HoloEngine · twigton447@gmail.com
 
-Working Paper · Version 5.14 · June 2026  
+Working Paper · Version 5.16 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -19,7 +19,7 @@ It is approving payments, drafting contracts, granting access, ordering material
 
 That is the prize: **trusted delegation**. Hand high-stakes work to an AI system and walk away.
 
-But we cannot do that yet.
+**But we cannot do that yet.**
 
 The reason is simple. Most AI safety infrastructure was built for chat. It checks prompts, permissions, policies, and user intent. That matters. But it is a low bar when the output is not a paragraph, but an irreversible action.
 
@@ -29,19 +29,19 @@ High-stakes AI needs something closer to Customs and Border Protection.
 
 At the border, the question is not just, "Are you allowed through?" The question is, "Does your story hold up?" What are you carrying? Why today? Does the paperwork match the cargo? Is there a contradiction hiding inside something that looks normal?
 
-That is the missing layer in AI execution.
+**That is the missing layer in AI execution.**
 
 When an AI agent is about to release a $180,000 payment, the important question is not merely whether the agent has permission to send money. The important question is whether this exact payment is supported by the source evidence right now.
 
 **HoloEngine exists for that moment.**
 
-HoloEngine 4DNA is an adversarial checkpoint architecture for high-stakes AI actions. Three model roles investigate the evidence, cross-check the record, and surface contradictions. HoloGov, the silent Governor, receives the structured case and issues the final ALLOW or ESCALATE ruling.
+HoloEngine 4DNA is an adversarial checkpoint architecture for high-stakes AI actions. Three model roles investigate the evidence, cross-check the record, and surface contradictions. **HoloGov**, the silent Governor, receives the structured case and issues the final ALLOW or ESCALATE ruling.
 
 The architecture is not designed to escalate everything. That would be easy and useless. HoloEngine is designed to make ALLOW harder to fake and ESCALATE harder to overuse.
 
 To test this, we built HoloTest: a locked pressure cage for comparing AI architectures at the action boundary. The benchmark does not ask whether a model can sound careful. It asks whether the system can make the right execution decision when the evidence is messy, incomplete, stale, over-scoped, or deceptively normal.
 
-The results exposed a structural problem.
+**The results exposed a structural problem.**
 
 Solo models can fail in both directions. They can surrender to apparent authority and wave through a bad action. Or they can become brittle and freeze a valid one.
 
@@ -53,9 +53,9 @@ Ungoverned councils and ensembles can also fail. More models do not automaticall
 
 What matters is **evidentiary discipline**.
 
-A high-stakes AI system should not be able to allow or block an action unless it can tie that decision back to specific source evidence. Not vibes. Not summaries. Not upstream JSON. The actual record.
+A high-stakes AI system should not be able to allow or block an action unless it can tie that decision back to specific source evidence. Not vibes. Not summaries. Not upstream JSON. **The actual record.**
 
-That is the role of HoloVerify, the first runtime surface powered by HoloEngine 4DNA. HoloVerify sits between an AI agent and an irreversible action. Before execution, it asks one question:
+That is the role of **HoloVerify**, the first runtime surface powered by HoloEngine 4DNA. HoloVerify sits between an AI agent and an irreversible action. Before execution, it asks one question:
 
 **Does the source-grounded evidence authorize this exact action?**
 
@@ -63,15 +63,15 @@ If yes, ALLOW.
 
 If no, ESCALATE.
 
-HoloBuild uses the same architecture to create and harden adversarial test environments. HoloJudge reviews whether verdicts were actually supported by evidence. HoloTest pressure-tests competing architectures. HoloAtlas preserves the failure map so future Governors get smarter.
+**HoloBuild** uses the same architecture to create and harden adversarial test environments. **HoloJudge** reviews whether verdicts were actually supported by evidence. **HoloTest** pressure-tests competing architectures. **HoloAtlas** preserves the failure map so future Governors get smarter.
 
-The broader point is not that AI agents are too dangerous to use. It is the opposite.
+The broader point is not that AI agents are too dangerous to use. **It is the opposite.**
 
 AI agents are too valuable to leave at the edge of execution with only passive policy checks.
 
 If we want trusted delegation, we need a new checkpoint at the action boundary.
 
-One that inspects the cargo, not just the passport.
+**One that inspects the cargo, not just the passport.**
 
 **That is HoloEngine.**
 
@@ -511,4 +511,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*HoloEngine · holoengine.ai · twigton447@gmail.com · Working Paper · Version 5.14 · June 2026*
+*HoloEngine · holoengine.ai · twigton447@gmail.com · Working Paper · Version 5.16 · June 2026*

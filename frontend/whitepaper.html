@@ -573,7 +573,7 @@
 
 <!-- COVER -->
 <div class="cover">
-  <div class="cover-eyebrow">Version 5.14 &nbsp;&middot;&nbsp; June 2026</div>
+  <div class="cover-eyebrow">Version 5.15 &nbsp;&middot;&nbsp; June 2026</div>
   <h1>AI at the Action Boundary</h1>
   <p class="cover-subtitle">Why Smart Models Make Bad Decisions When the Stakes Are High</p>
   <div class="cover-meta">
@@ -599,48 +599,63 @@
 <div class="exec-summary">
   <div class="section-label">Executive Summary</div>
 
-  <p style="margin-top:0.75rem">AI is no longer just talking. It is acting. It is approving payments, executing contracts, and granting access. We want the ultimate prize: the ability to hand off high-stakes work to an AI and walk away.</p>
+  <p style="margin-top:0.75rem">AI is no longer just talking. It is acting.</p>
 
-  <p>But we can&#8217;t. Not yet. Because the infrastructure we built to keep AI safe was designed for chat windows, not irreversible operations.</p>
+  <p>It is approving payments, drafting contracts, granting access, ordering materials, changing records, and triggering real-world operations. The prize is obvious: hand high-stakes work to an AI system and walk away.</p>
 
-  <p>Today&#8217;s AI security is built like the TSA. It checks your ID at the door. It makes sure you are registered, verifies your permissions, and runs a basic scan. If you match the profile, you get waved through.</p>
+  <p>But we cannot do that yet.</p>
 
-  <p>That works fine for low-stakes software. It is catastrophic for high-stakes execution.</p>
+  <p>The reason is simple. Most AI safety infrastructure was built for chat. It checks prompts, permissions, policies, and user intent. That is useful, but it is not enough when an AI agent is about to take an irreversible action.</p>
 
-  <p>When an AI agent is about to wire $180,000, a TSA check isn&#8217;t enough. You don&#8217;t just need to know the agent is authorized to send money; you need to know if this specific payment is structurally sound. You need U.S. Customs.</p>
+  <p>The current default is closer to old airport security: basic checks, assumed normal traffic, and a system designed around the idea that most people passing through are fine.</p>
 
-  <p>Customs agents don&#8217;t just scan passports. They pull you aside. They look at your cargo. They ask why you are traveling today instead of yesterday. They cross-reference your story against your history, actively hunting for contradictions.</p>
+  <p>High-stakes AI needs something closer to Customs and Border Protection.</p>
 
-  <p><strong>We have the TSA for AI. We are missing U.S. Customs. Holo Engine is U.S. Customs at the action boundary.</strong></p>
+  <p>At the border, the question is not just, &#8220;Do you have permission to enter?&#8221; The question is, &#8220;Does your story hold up?&#8221; What are you carrying? Why today? Does the paperwork match the cargo? Are there contradictions hiding inside something that looks routine?</p>
 
-  <p>To understand how to close this gap, we built an ablation cage (a strict testing environment) to evaluate the market&#8217;s default architectural choices. Here is what we tested and why they fail:</p>
+  <p>That is the missing layer in AI execution.</p>
 
-  <p><strong>Solo Models (The Baseline):</strong> Relying on a single frontier model results in the Precision Paradox. A solo model cannot reconcile strict rules with messy operational reality. It fails in two opposite directions. It either blindly surrenders to authority (waving through a fraudulent invoice because it has an executive signature) or it becomes a rigid auditor (panicking over a minor date mismatch and freezing normal operations).</p>
+  <p>When an agent is about to release a $180,000 payment, the important question is not merely whether the agent has payment authority. The important question is whether this exact payment is supported by the source evidence right now.</p>
 
-  <p><strong>Self-Critique Loops:</strong> Asking a single model to check its own work. Instead of finding the error, the model uses its second turn to justify its first turn. Confirmation bias solidifies the mistake.</p>
+  <p><strong>HoloEngine exists for that moment.</strong></p>
 
-  <p><strong>Ungoverned Councils &amp; Ensembles:</strong> Letting multiple AI agents debate or vote on the outcome. We found that under consensus pressure, ungoverned models will literally fabricate evidence just to agree with each other.</p>
+  <p>HoloEngine 4DNA is an adversarial checkpoint architecture for high-stakes AI actions. Three model roles investigate the evidence, cross-check the record, and surface contradictions. HoloGov, the silent Governor, receives the structured case and issues the final ALLOW or ESCALATE ruling.</p>
 
-  <p>The data revealed a counter-intuitive truth. <strong>Adding more models, or asking a model to think longer, does not automatically make a system safer.</strong></p>
+  <p>The architecture is not designed to escalate everything. That would be easy and useless. HoloEngine is designed to make ALLOW harder to fake and ESCALATE harder to overuse.</p>
 
-  <p style="margin-top:0.5rem"><a href="https://holoengine.ai/benchmark-june2026" style="font-family:'IBM Plex Mono',monospace;font-size:0.75rem;letter-spacing:0.08em;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold-light)">View the June 2026 Benchmark &rarr;</a></p>
+  <p>To test this, we built HoloTest: a locked pressure cage for comparing AI architectures at the action boundary. The benchmark does not ask whether a model can sound careful. It asks whether the system can make the right execution decision when the evidence is messy, incomplete, stale, over-scoped, or deceptively normal.</p>
 
-  <p>The only actual solution is <strong>evidentiary discipline</strong>: the strict rule that an AI cannot allow or block an action without citing a specific, physical line in a real document.</p>
+  <p>The results exposed a structural problem.</p>
 
-  <p><strong>Holo Engine is the missing Layer 2 checkpoint.</strong> It is an adversarial architecture built to enforce this discipline. Instead of a single model or an ungoverned vote, Holo forces multiple AI models to cross-examine the data, hunt for gaps, and argue their findings to a constrained rule-engine called the Governor.</p>
+  <p>Solo models can fail in both directions. They can surrender to apparent authority and wave through a bad action, or they can become brittle and freeze a valid one.</p>
 
-  <p>This core architecture powers four distinct product surfaces:</p>
+  <p>Self-critique loops do not reliably solve the problem. A model often uses its second pass to rationalize its first answer.</p>
 
-  <ul style="margin:0.75rem 0 1rem 1.5rem;font-size:1rem;color:var(--ink-muted);line-height:1.85">
-    <li style="margin-bottom:0.5rem"><strong>Holo Verify:</strong> The action-boundary runtime gate. It evaluates proposed actions and returns a binding ALLOW or ESCALATE verdict before execution.</li>
-    <li style="margin-bottom:0.5rem"><strong>Holo Builder:</strong> The generative surface. It drops early document drafts into a hostile reactor to find loopholes and rebuild them into judgment-grade artifacts.</li>
-    <li style="margin-bottom:0.5rem"><strong>Holo Judge:</strong> The evaluation surface. It reviews artifacts and scores them for factual accuracy, hidden risk, and decision usefulness.</li>
-    <li><strong>Holo Test:</strong> The pressure-testing cage. It runs locked scenarios against competing architectures to find where they break.</li>
-  </ul>
+  <p>Ungoverned councils and ensembles can also fail. More models do not automatically create better judgment. Without a Governor, consensus can become a way to launder mistakes.</p>
 
-  <p>While Holo Builder testing is underway, using our Scenario Packet Builder (a system that generates hyper-realistic, cryptographically locked corporate environments to push models to their breaking point), the empirical benchmark evidence in this paper focuses entirely on Holo Verify.</p>
+  <p>The lesson is blunt: adding more intelligence does not automatically create more safety.</p>
 
-  <p>Holo is not designed to simply escalate more often. It is designed to make ALLOW harder to fake and ESCALATE harder to overuse. Our first completed benchmark kit (Kit A) covers Accounts Payable fraud. Across 11 different AI setups, <strong>Holo was the only architecture that consistently caught hidden structural errors without freezing valid payments.</strong></p>
+  <p>What matters is <strong>evidentiary discipline</strong>.</p>
+
+  <p>A high-stakes AI system should not be able to allow or block an action unless it can tie that decision back to specific source evidence. Not vibes. Not summaries. Not upstream JSON. The actual record.</p>
+
+  <p>That is the role of HoloVerify, the first runtime surface powered by HoloEngine 4DNA. HoloVerify sits between an AI agent and an irreversible action. Before execution, it asks one question:</p>
+
+  <p><em>Does the source-grounded evidence authorize this exact action?</em></p>
+
+  <p>If yes, ALLOW.</p>
+
+  <p>If no, ESCALATE.</p>
+
+  <p>HoloBuild uses the same architecture to create and harden adversarial test environments. HoloJudge reviews whether verdicts were actually supported by evidence. HoloTest pressure-tests competing architectures. HoloAtlas preserves the failure map so future Governors get smarter.</p>
+
+  <p>The broader point is not that AI agents are too dangerous to use. It is the opposite.</p>
+
+  <p>AI agents are too valuable to leave at the edge of execution with only passive policy checks.</p>
+
+  <p>If we want trusted delegation, we need a new checkpoint at the action boundary. One that inspects the cargo, not just the passport.</p>
+
+  <p><strong>That is HoloEngine.</strong></p>
 
   <p style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-top:24px;margin-bottom:10px;font-weight:500">Eight-Domain Atlas</p>
   <p style="margin-top:0;margin-bottom:14px">Holo maintains a Blindspot Atlas to map failure vectors across eight enterprise domains. Status reflects whether a domain has produced benchmark-locked evidence, diagnostic findings, or is currently in design.</p>
@@ -1257,7 +1272,7 @@
   <div class="footer-brand">Holo Engine</div>
   <div class="footer-meta">
     holoengine.ai &nbsp;&middot;&nbsp; taylorw@hologroup.io<br>
-    Working Paper &nbsp;&middot;&nbsp; Version 5.14 &nbsp;&middot;&nbsp; June 2026
+    Working Paper &nbsp;&middot;&nbsp; Version 5.15 &nbsp;&middot;&nbsp; June 2026
   </div>
 </footer>
 

@@ -15,21 +15,23 @@ U.S. Provisional Patent Application No. 63/987,899
 
 AI is no longer just talking. It is acting.
 
-It is approving payments, drafting contracts, granting access, ordering materials, changing records, and triggering real-world operations. The prize is obvious: hand high-stakes work to an AI system and walk away.
+It is approving payments, drafting contracts, granting access, ordering materials, changing records, and triggering real-world operations.
+
+That is the prize: trusted delegation. Hand high-stakes work to an AI system and walk away.
 
 But we cannot do that yet.
 
-The reason is simple. Most AI safety infrastructure was built for chat. It checks prompts, permissions, policies, and user intent. That is useful, but it is not enough when an AI agent is about to take an irreversible action.
+The reason is simple. Most AI safety infrastructure was built for chat. It checks prompts, permissions, policies, and user intent. That matters. But it is a low bar when the output is not a paragraph, but an irreversible action.
 
-The current default is closer to pre-9/11 airport security: basic checks, assumed normal traffic, and a system designed around the idea that most people passing through are fine.
+The modern status quo for AI action security is closer to pre-9/11 airport security: basic checks, assumed normal traffic, and a system built around the idea that most things passing through are fine.
 
 High-stakes AI needs something closer to Customs and Border Protection.
 
-At the border, the question is not just, "Do you have permission to enter?" The question is, "Does your story hold up?" What are you carrying? Why today? Does the paperwork match the cargo? Are there contradictions hiding inside something that looks routine?
+At the border, the question is not just, "Are you allowed through?" The question is, "Does your story hold up?" What are you carrying? Why today? Does the paperwork match the cargo? Is there a contradiction hiding inside something that looks normal?
 
 That is the missing layer in AI execution.
 
-When an agent is about to release a $180,000 payment, the important question is not merely whether the agent has payment authority. The important question is whether this exact payment is supported by the source evidence right now.
+When an AI agent is about to release a $180,000 payment, the important question is not merely whether the agent has permission to send money. The important question is whether this exact payment is supported by the source evidence right now.
 
 HoloEngine exists for that moment.
 
@@ -41,9 +43,9 @@ To test this, we built HoloTest: a locked pressure cage for comparing AI archite
 
 The results exposed a structural problem.
 
-Solo models can fail in both directions. They can surrender to apparent authority and wave through a bad action, or they can become brittle and freeze a valid one.
+Solo models can fail in both directions. They can surrender to apparent authority and wave through a bad action. Or they can become brittle and freeze a valid one.
 
-Self-critique loops do not reliably solve the problem. A model often uses its second pass to rationalize its first answer.
+Self-critique loops do not reliably solve the problem. A model often uses its second pass to defend its first answer.
 
 Ungoverned councils and ensembles can also fail. More models do not automatically create better judgment. Without a Governor, consensus can become a way to launder mistakes.
 
@@ -67,9 +69,11 @@ The broader point is not that AI agents are too dangerous to use. It is the oppo
 
 AI agents are too valuable to leave at the edge of execution with only passive policy checks.
 
-If we want trusted delegation, we need a checkpoint at the action boundary. One that inspects the cargo, not just the passport.
+If we want trusted delegation, we need a new checkpoint at the action boundary.
 
-That's HoloEngine.
+One that inspects the cargo, not just the passport.
+
+That is HoloEngine.
 
 ---
 

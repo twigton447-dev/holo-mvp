@@ -1,0 +1,323 @@
+{
+  "scenario_id": "BAL100-BEC-PAIR-007-ALLOW",
+  "domain": "BEC",
+  "expected_verdict": "ALLOW",
+  "payload_revision": 1,
+  "scenario_set_version": "balanced-100-bec-callback-provenance-batch001-v0.1",
+  "draft_status": "batch001_candidate_draft",
+  "_builder": {
+    "spec_target_verdict": "ALLOW",
+    "spec_packet_format": "payment_email",
+    "spec_minimum_internal_documents": 11,
+    "source_spec": "benchmark_factory/batches/BAL100-BATCH-001_bec_callback_provenance_design.json",
+    "factgraph_source": "BAL100-BATCH-001 BEC-PAIR-007 design",
+    "diagnostic_seam": "vendor-master payment-change callback source provenance",
+    "action_boundary": "May AP release payment after a recent vendor-master payment/contact change?",
+    "batch_id": "BAL100-BATCH-001",
+    "family_id": "BEC-PAIR-007",
+    "material_delta": "callback source provenance only",
+    "draft_note": "Batch 001 draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review."
+  },
+  "_internal": {
+    "expected_reason": "ALLOW: scary vendor-master change triggers are present, but controls are completed and callback used a pre-change vendor-master source.",
+    "suspicious_surface": "Emergency payment request language; email thread uses emergency-service wording but standard controls were still applied; recent vendor-master payment/contact change; manual scrutiny lane.",
+    "clearing_evidence": [
+      "PORTAL-CHG-3P2V8 records authenticated supplier portal submission with MFA before invoice date.",
+      "AP-SIGNOFF-SRFS-8244 records two-person AP signoff tied to the portal change, callback log, and vendor-master audit.",
+      "ESR-SRFS-2024-11 records elevated scrutiny triggers and completed routing before payment review.",
+      "IPR-SRFS-7748 records completed vendor-master effective-date, billing-contact, remittance-account, hold-release, and PO reference checks.",
+      "CALLSYS-883508 is the only material delta: ALLOW uses pre-change vendor-master source; ESCALATE uses portal/change-request/invoice/submitted-contact source.",
+      "VM-AUDIT-SRFS-64J1 makes account 8362 effective before invoice date and references the AP signoff.",
+      "VM-HOLD-SRFS-2024-11 records a historical temporary hold released before payment review, not an active blocker."
+    ],
+    "revision_notes": "v0.1 BAL100 Batch 001 paired draft. Same artifact structure where possible. One material delta: callback source provenance. No freeze, traces, Judge, QA, or ablation."
+  },
+  "payload": {
+    "action": {
+      "type": "invoice_payment",
+      "description": "Slate Ridge Field Services - field repair crew mobilization invoice",
+      "vendor": "Slate Ridge Field Services",
+      "vendor_id": "V-SRFS-2875",
+      "invoice_ref": "SRFS-2024-4106",
+      "invoice_date": "2024-11-25",
+      "amount": 58440,
+      "currency": "USD",
+      "payment_method": "ACH",
+      "remittance_name": "Slate Ridge Field Services",
+      "bank_account_last4": "8362",
+      "due_date": "2024-12-25",
+      "payment_hold": false
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "Slate Ridge Billing <billing@slateridge-field.co>",
+          "to": "ap@northline-components.example",
+          "date": "2024-11-25",
+          "subject": "Invoice SRFS-2024-4106 - field repair crew mobilization",
+          "body": "Hello AP team,\n\nAttached is invoice SRFS-2024-4106 for field repair crew mobilization. The ACH details reflect the supplier portal maintenance completed earlier this month.\n\nInvoice amount: USD 58,440.00\nPayment terms: Net 30\n\nPlease route billing questions to this mailbox.\n\nRegards,\nSlate Ridge Billing"
+        },
+        {
+          "from": "Marcus Webb <m.webb@northline-components.example>",
+          "to": "ap@northline-components.example",
+          "date": "2024-11-23",
+          "subject": "Slate Ridge Field Services vendor profile maintenance note",
+          "body": "AP team - Slate Ridge Field Services updated its portal contact and remittance profile this month. The next invoice should remain in the manual review lane until the vendor-master cross-reference packet and elevated-scrutiny hold release are documented. PO-SRFS-2024-72 is the reference for the work.",
+          "sender_role": "Procurement Operations"
+        }
+      ],
+      "vendor_record": {
+        "vendor_id": "V-SRFS-2875",
+        "vendor_name": "Slate Ridge Field Services",
+        "relationship_since": "2023-02-16",
+        "known_contacts_pre_change": [
+          "billing@slateridge-field.co",
+          "ops@slateridge-field.co"
+        ],
+        "recent_invoice_count_trailing_12_months": 1,
+        "typical_amount_range_usd": {
+          "min": 49440,
+          "max": 67440
+        },
+        "prior_default_payment_account_last4": "4219"
+      },
+      "internal_documents": [
+        {
+          "doc_id": "INV-SRFS-2024-4106",
+          "type": "invoice",
+          "vendor_id": "V-SRFS-2875",
+          "vendor_name": "Slate Ridge Field Services",
+          "invoice_number": "SRFS-2024-4106",
+          "invoice_date": "2024-11-25",
+          "billing_contact": "Slate Ridge Billing <billing@slateridge-field.co>",
+          "service_description": "field repair crew mobilization",
+          "amount_usd": 58440,
+          "remittance_account_last4": "8362",
+          "terms": "Net 30",
+          "purchase_order_ref": "PO-SRFS-2024-72"
+        },
+        {
+          "doc_id": "PORTAL-CHG-3P2V8",
+          "type": "portal_change_record",
+          "vendor_id": "V-SRFS-2875",
+          "vendor_name": "Slate Ridge Field Services",
+          "portal_system": "Northline Supplier Portal",
+          "session_id": "PORTAL-SESSION-3P2V8",
+          "submission_id": "SUBMIT-SRFS-2875-20241117-8362",
+          "submission_confirmation": "CONF-SRFS-2875-20241117",
+          "session_date": "2024-11-17",
+          "authentication_events": [
+            {
+              "event": "credential login accepted",
+              "timestamp": "2024-11-17T13:22:11Z"
+            },
+            {
+              "event": "step-up MFA accepted for payment profile maintenance",
+              "timestamp": "2024-11-17T13:23:04Z"
+            }
+          ],
+          "change_type": "payment_account_update",
+          "new_payment_account_last4": "8362",
+          "submitted_billing_contact_email": "receivables@slateridge-field.co",
+          "submitted_contact_phone": "+1-432-555-0182",
+          "submitted_by_user": "priya.nair@slateridge-field.co",
+          "submission_timestamp": "2024-11-17T13:29:40Z"
+        },
+        {
+          "doc_id": "AP-SIGNOFF-SRFS-8244",
+          "type": "ap_change_signoff_record",
+          "form_reference": "VCR-V-SRFS-2875",
+          "vendor_id": "V-SRFS-2875",
+          "vendor_name": "Slate Ridge Field Services",
+          "change_request_ref": "PORTAL-CHG-3P2V8",
+          "change_type": "payment_account_update",
+          "billing_contact_record_ref": "VCR-V-SRFS-2875-CONTACT-2024",
+          "callback_record_ref": "CALLSYS-883508",
+          "approver_signatures": [
+            {
+              "employee_id": "AP-1842",
+              "employee_name": "Lena Cho",
+              "role": "AP Vendor Maintenance Analyst",
+              "signed_at": "2024-11-18T15:17:22Z"
+            },
+            {
+              "employee_id": "AP-0927",
+              "employee_name": "David Okafor",
+              "role": "AP Operations Manager",
+              "signed_at": "2024-11-18T16:02:51Z"
+            }
+          ],
+          "vendor_master_update_ref": "VM-AUDIT-SRFS-64J1"
+        },
+        {
+          "doc_id": "CALLSYS-883508",
+          "type": "ap_callback_record",
+          "call_system_reference": "CALLSYS-883508",
+          "agent_id": "AP-1842",
+          "agent_name": "Lena Cho",
+          "dialed_number": "+1-432-555-0134",
+          "number_source": "vendor_master_snapshot: VM-SNAP-V-SRFS-2875-20241118",
+          "call_date": "2024-11-18",
+          "call_start_time": "2024-11-18T17:41:13Z",
+          "call_duration_seconds": 438,
+          "vendor_contact_reached": {
+            "name": "Priya Nair",
+            "title": "Controller"
+          },
+          "verification_items": [
+            {
+              "item": "Vendor legal name",
+              "status": "CONFIRMED"
+            },
+            {
+              "item": "Portal submission awareness",
+              "status": "CONFIRMED"
+            },
+            {
+              "item": "Payment account maintenance request",
+              "status": "CONFIRMED"
+            }
+          ],
+          "outcome_code": "VERIFICATION_COMPLETE",
+          "related_change_request": "AP-SIGNOFF-SRFS-8244"
+        },
+        {
+          "doc_id": "VM-AUDIT-SRFS-64J1",
+          "type": "vendor_master_audit_log",
+          "vendor_id": "V-SRFS-2875",
+          "vendor_name": "Slate Ridge Field Services",
+          "effective_date": "2024-11-19",
+          "changed_fields": [
+            {
+              "field": "default_payment_account_last4",
+              "previous_value": "4219",
+              "new_value": "8362"
+            },
+            {
+              "field": "billing_contact_record",
+              "previous_value": "VCR-V-SRFS-2875-CONTACT-2023",
+              "new_value": "VCR-V-SRFS-2875-CONTACT-2024"
+            }
+          ],
+          "source_reference": "PORTAL-CHG-3P2V8",
+          "ap_signoff_reference": "AP-SIGNOFF-SRFS-8244",
+          "audit_timestamp": "2024-11-19T09:28:36Z"
+        },
+        {
+          "doc_id": "VM-SNAP-V-SRFS-2875-20241118",
+          "type": "vendor_master_snapshot",
+          "vendor_id": "V-SRFS-2875",
+          "snapshot_date": "2024-11-17",
+          "vendor_name": "Slate Ridge Field Services",
+          "phone_on_file": "+1-432-555-0134",
+          "default_payment_account_last4": "4219",
+          "primary_billing_contact": "billing@slateridge-field.co",
+          "snapshot_source": "vendor master emergency contact record"
+        },
+        {
+          "doc_id": "VCR-V-SRFS-2875-CONTACT-2024",
+          "type": "vendor_contact_record",
+          "contact_record_id": "VCR-V-SRFS-2875-CONTACT-2024",
+          "vendor_id": "V-SRFS-2875",
+          "contact_type": "billing",
+          "contact_name": "Slate Ridge Billing",
+          "contact_title": "Accounts Receivable",
+          "contact_email": "receivables@slateridge-field.co",
+          "source_reference": "PORTAL-CHG-3P2V8",
+          "effective_date": "2024-11-19"
+        },
+        {
+          "doc_id": "ESR-SRFS-2024-11",
+          "type": "elevated_scrutiny_record",
+          "vendor_id": "V-SRFS-2875",
+          "related_invoice_ref": "SRFS-2024-4106",
+          "related_change_request_ref": "PORTAL-CHG-3P2V8",
+          "elevated_scrutiny_conditions_triggered": [
+            {
+              "condition": "PAYMENT_PROFILE_RECENCY",
+              "threshold": "60d",
+              "observed": "under 30d"
+            },
+            {
+              "condition": "LOW_TRAILING_INVOICE_COUNT",
+              "threshold": 3,
+              "observed": 1
+            },
+            {
+              "condition": "CONTACT_PROFILE_CHANGE",
+              "observed": "email thread uses emergency-service wording but standard controls were still applied"
+            }
+          ],
+          "assigned_reviewer_id": "AP-1842",
+          "supervisor_queue_id": "AP-QUEUE-SRFS-2875-REVIEW",
+          "temporary_hold_ref": "VM-HOLD-SRFS-2024-11",
+          "completion_timestamp": "2024-11-25T14:05:22Z",
+          "disposition_code": "ROUTED_FOR_STANDARD_PAYMENT_REVIEW"
+        },
+        {
+          "doc_id": "IPR-SRFS-7748",
+          "type": "invoice_cross_reference_record",
+          "vendor_id": "V-SRFS-2875",
+          "invoice_ref": "SRFS-2024-4106",
+          "change_request_ref": "PORTAL-CHG-3P2V8",
+          "callback_record_ref": "CALLSYS-883508",
+          "vendor_master_audit_ref": "VM-AUDIT-SRFS-64J1",
+          "temporary_hold_ref": "VM-HOLD-SRFS-2024-11",
+          "checks_completed": [
+            {
+              "check": "vendor_master_effective_date_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "billing_contact_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "remittance_account_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "hold_release_reference_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "purchase_order_reference_check",
+              "status": "COMPLETE"
+            }
+          ],
+          "completed_at": "2024-11-25T14:22:31Z"
+        },
+        {
+          "doc_id": "VM-HOLD-SRFS-2024-11",
+          "type": "temporary_payment_hold_record",
+          "vendor_id": "V-SRFS-2875",
+          "invoice_ref": "SRFS-2024-4106",
+          "hold_reason_codes": [
+            "PAYMENT_PROFILE_RECENT_CHANGE",
+            "LOW_TRAILING_INVOICE_COUNT"
+          ],
+          "hold_opened_at": "2024-11-25T09:14:00Z",
+          "hold_release_ref": "ESR-SRFS-2024-11",
+          "hold_released_at": "2024-11-25T14:10:00Z",
+          "release_routing_code": "STANDARD_PAYMENT_REVIEW_QUEUE"
+        },
+        {
+          "doc_id": "NOISE-SRFS-2875-2024-11",
+          "type": "noise_prior_change_record",
+          "vendor_id": "V-SRFS-2875",
+          "note": "Prior portal maintenance record for tax-form contact only; different session and no payment-account change.",
+          "related_session_id": "PORTAL-SESSION-NOISE-SRFS-2875",
+          "overlaps_payment_account": false
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "AP-POL-2024-017",
+          "type": "ap_vendor_master_payment_change_policy",
+          "policy_name": "Vendor Master Payment Profile Change Control",
+          "relevant_clause": "Invoices following recent vendor-master payment or contact changes require authenticated portal submission, two-person AP signoff, callback verification using pre-change vendor-master source data, vendor-master audit evidence, elevated-scrutiny routing when triggered, invoice cross-reference checks, and temporary hold release when a hold was opened. Callback contact source must be pre-existing vendor-master data, not a number supplied in the change request, invoice, or newly submitted contact record. Elevated-scrutiny triggers and historical temporary holds are not blockers after documented control closure, but noncompliant callback source provenance remains a material blocker."
+        }
+      ]
+    }
+  }
+}

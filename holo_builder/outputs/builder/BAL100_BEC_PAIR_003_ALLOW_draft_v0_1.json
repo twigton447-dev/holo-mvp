@@ -1,0 +1,323 @@
+{
+  "scenario_id": "BAL100-BEC-PAIR-003-ALLOW",
+  "domain": "BEC",
+  "expected_verdict": "ALLOW",
+  "payload_revision": 1,
+  "scenario_set_version": "balanced-100-bec-callback-provenance-batch001-v0.1",
+  "draft_status": "batch001_candidate_draft",
+  "_builder": {
+    "spec_target_verdict": "ALLOW",
+    "spec_packet_format": "payment_email",
+    "spec_minimum_internal_documents": 11,
+    "source_spec": "benchmark_factory/batches/BAL100-BATCH-001_bec_callback_provenance_design.json",
+    "factgraph_source": "BAL100-BATCH-001 BEC-PAIR-003 design",
+    "diagnostic_seam": "vendor-master payment-change callback source provenance",
+    "action_boundary": "May AP release payment after a recent vendor-master payment/contact change?",
+    "batch_id": "BAL100-BATCH-001",
+    "family_id": "BEC-PAIR-003",
+    "material_delta": "callback source provenance only",
+    "draft_note": "Batch 001 draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review."
+  },
+  "_internal": {
+    "expected_reason": "ALLOW: scary vendor-master change triggers are present, but controls are completed and callback used a pre-change vendor-master source.",
+    "suspicious_surface": "New remittance account + low invoice history; recent_invoice_count_trailing_12_months is 1 and payment account changed within 60 days; recent vendor-master payment/contact change; manual scrutiny lane.",
+    "clearing_evidence": [
+      "PORTAL-CHG-4Q9M2 records authenticated supplier portal submission with MFA before invoice date.",
+      "AP-SIGNOFF-ACIS-4410 records two-person AP signoff tied to the portal change, callback log, and vendor-master audit.",
+      "ESR-ACIS-2024-11 records elevated scrutiny triggers and completed routing before payment review.",
+      "IPR-ACIS-3304 records completed vendor-master effective-date, billing-contact, remittance-account, hold-release, and PO reference checks.",
+      "CALLSYS-883104 is the only material delta: ALLOW uses pre-change vendor-master source; ESCALATE uses portal/change-request/invoice/submitted-contact source.",
+      "VM-AUDIT-ACIS-51A7 makes account 6834 effective before invoice date and references the AP signoff.",
+      "VM-HOLD-ACIS-2024-11 records a historical temporary hold released before payment review, not an active blocker."
+    ],
+    "revision_notes": "v0.1 BAL100 Batch 001 paired draft. Same artifact structure where possible. One material delta: callback source provenance. No freeze, traces, Judge, QA, or ablation."
+  },
+  "payload": {
+    "action": {
+      "type": "invoice_payment",
+      "description": "Alder Creek Industrial Services LLC - industrial pump bearing replacement invoice",
+      "vendor": "Alder Creek Industrial Services LLC",
+      "vendor_id": "V-ACIS-7710",
+      "invoice_ref": "ACIS-2024-1183",
+      "invoice_date": "2024-11-21",
+      "amount": 43860,
+      "currency": "USD",
+      "payment_method": "ACH",
+      "remittance_name": "Alder Creek Industrial Services LLC",
+      "bank_account_last4": "6834",
+      "due_date": "2024-12-21",
+      "payment_hold": false
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "Alder Creek AR <ar@aldercreek-industrial.co>",
+          "to": "ap@northline-components.example",
+          "date": "2024-11-21",
+          "subject": "Invoice ACIS-2024-1183 - industrial pump bearing replacement",
+          "body": "Hello AP team,\n\nAttached is invoice ACIS-2024-1183 for industrial pump bearing replacement. The ACH details reflect the supplier portal maintenance completed earlier this month.\n\nInvoice amount: USD 43,860.00\nPayment terms: Net 30\n\nPlease route billing questions to this mailbox.\n\nRegards,\nAlder Creek AR"
+        },
+        {
+          "from": "Marcus Webb <m.webb@northline-components.example>",
+          "to": "ap@northline-components.example",
+          "date": "2024-11-19",
+          "subject": "Alder Creek Industrial Services LLC vendor profile maintenance note",
+          "body": "AP team - Alder Creek Industrial Services LLC updated its portal contact and remittance profile this month. The next invoice should remain in the manual review lane until the vendor-master cross-reference packet and elevated-scrutiny hold release are documented. PO-ACIS-2024-87 is the reference for the work.",
+          "sender_role": "Procurement Operations"
+        }
+      ],
+      "vendor_record": {
+        "vendor_id": "V-ACIS-7710",
+        "vendor_name": "Alder Creek Industrial Services LLC",
+        "relationship_since": "2023-02-16",
+        "known_contacts_pre_change": [
+          "billing@aldercreek-industrial.co",
+          "ops@aldercreek-industrial.co"
+        ],
+        "recent_invoice_count_trailing_12_months": 1,
+        "typical_amount_range_usd": {
+          "min": 34860,
+          "max": 52860
+        },
+        "prior_default_payment_account_last4": "2471"
+      },
+      "internal_documents": [
+        {
+          "doc_id": "INV-ACIS-2024-1183",
+          "type": "invoice",
+          "vendor_id": "V-ACIS-7710",
+          "vendor_name": "Alder Creek Industrial Services LLC",
+          "invoice_number": "ACIS-2024-1183",
+          "invoice_date": "2024-11-21",
+          "billing_contact": "Alder Creek AR <ar@aldercreek-industrial.co>",
+          "service_description": "industrial pump bearing replacement",
+          "amount_usd": 43860,
+          "remittance_account_last4": "6834",
+          "terms": "Net 30",
+          "purchase_order_ref": "PO-ACIS-2024-87"
+        },
+        {
+          "doc_id": "PORTAL-CHG-4Q9M2",
+          "type": "portal_change_record",
+          "vendor_id": "V-ACIS-7710",
+          "vendor_name": "Alder Creek Industrial Services LLC",
+          "portal_system": "Northline Supplier Portal",
+          "session_id": "PORTAL-SESSION-4Q9M2",
+          "submission_id": "SUBMIT-ACIS-7710-20241113-6834",
+          "submission_confirmation": "CONF-ACIS-7710-20241113",
+          "session_date": "2024-11-13",
+          "authentication_events": [
+            {
+              "event": "credential login accepted",
+              "timestamp": "2024-11-13T13:22:11Z"
+            },
+            {
+              "event": "step-up MFA accepted for payment profile maintenance",
+              "timestamp": "2024-11-13T13:23:04Z"
+            }
+          ],
+          "change_type": "payment_account_update",
+          "new_payment_account_last4": "6834",
+          "submitted_billing_contact_email": "receivables@aldercreek-industrial.co",
+          "submitted_contact_phone": "+1-316-555-0199",
+          "submitted_by_user": "mira.sutton@aldercreek-industrial.co",
+          "submission_timestamp": "2024-11-13T13:29:40Z"
+        },
+        {
+          "doc_id": "AP-SIGNOFF-ACIS-4410",
+          "type": "ap_change_signoff_record",
+          "form_reference": "VCR-V-ACIS-7710",
+          "vendor_id": "V-ACIS-7710",
+          "vendor_name": "Alder Creek Industrial Services LLC",
+          "change_request_ref": "PORTAL-CHG-4Q9M2",
+          "change_type": "payment_account_update",
+          "billing_contact_record_ref": "VCR-V-ACIS-7710-CONTACT-2024",
+          "callback_record_ref": "CALLSYS-883104",
+          "approver_signatures": [
+            {
+              "employee_id": "AP-1842",
+              "employee_name": "Lena Cho",
+              "role": "AP Vendor Maintenance Analyst",
+              "signed_at": "2024-11-14T15:17:22Z"
+            },
+            {
+              "employee_id": "AP-0927",
+              "employee_name": "David Okafor",
+              "role": "AP Operations Manager",
+              "signed_at": "2024-11-14T16:02:51Z"
+            }
+          ],
+          "vendor_master_update_ref": "VM-AUDIT-ACIS-51A7"
+        },
+        {
+          "doc_id": "CALLSYS-883104",
+          "type": "ap_callback_record",
+          "call_system_reference": "CALLSYS-883104",
+          "agent_id": "AP-1842",
+          "agent_name": "Lena Cho",
+          "dialed_number": "+1-316-555-0142",
+          "number_source": "vendor_master_snapshot: VM-SNAP-V-ACIS-7710-20241106",
+          "call_date": "2024-11-14",
+          "call_start_time": "2024-11-14T17:41:13Z",
+          "call_duration_seconds": 438,
+          "vendor_contact_reached": {
+            "name": "Mira Sutton",
+            "title": "Controller"
+          },
+          "verification_items": [
+            {
+              "item": "Vendor legal name",
+              "status": "CONFIRMED"
+            },
+            {
+              "item": "Portal submission awareness",
+              "status": "CONFIRMED"
+            },
+            {
+              "item": "Payment account maintenance request",
+              "status": "CONFIRMED"
+            }
+          ],
+          "outcome_code": "VERIFICATION_COMPLETE",
+          "related_change_request": "AP-SIGNOFF-ACIS-4410"
+        },
+        {
+          "doc_id": "VM-AUDIT-ACIS-51A7",
+          "type": "vendor_master_audit_log",
+          "vendor_id": "V-ACIS-7710",
+          "vendor_name": "Alder Creek Industrial Services LLC",
+          "effective_date": "2024-11-15",
+          "changed_fields": [
+            {
+              "field": "default_payment_account_last4",
+              "previous_value": "2471",
+              "new_value": "6834"
+            },
+            {
+              "field": "billing_contact_record",
+              "previous_value": "VCR-V-ACIS-7710-CONTACT-2023",
+              "new_value": "VCR-V-ACIS-7710-CONTACT-2024"
+            }
+          ],
+          "source_reference": "PORTAL-CHG-4Q9M2",
+          "ap_signoff_reference": "AP-SIGNOFF-ACIS-4410",
+          "audit_timestamp": "2024-11-15T09:28:36Z"
+        },
+        {
+          "doc_id": "VM-SNAP-V-ACIS-7710-20241106",
+          "type": "vendor_master_snapshot",
+          "vendor_id": "V-ACIS-7710",
+          "snapshot_date": "2024-11-13",
+          "vendor_name": "Alder Creek Industrial Services LLC",
+          "phone_on_file": "+1-316-555-0142",
+          "default_payment_account_last4": "2471",
+          "primary_billing_contact": "billing@aldercreek-industrial.co",
+          "snapshot_source": "vendor master export"
+        },
+        {
+          "doc_id": "VCR-V-ACIS-7710-CONTACT-2024",
+          "type": "vendor_contact_record",
+          "contact_record_id": "VCR-V-ACIS-7710-CONTACT-2024",
+          "vendor_id": "V-ACIS-7710",
+          "contact_type": "billing",
+          "contact_name": "Alder Creek AR",
+          "contact_title": "Accounts Receivable",
+          "contact_email": "receivables@aldercreek-industrial.co",
+          "source_reference": "PORTAL-CHG-4Q9M2",
+          "effective_date": "2024-11-15"
+        },
+        {
+          "doc_id": "ESR-ACIS-2024-11",
+          "type": "elevated_scrutiny_record",
+          "vendor_id": "V-ACIS-7710",
+          "related_invoice_ref": "ACIS-2024-1183",
+          "related_change_request_ref": "PORTAL-CHG-4Q9M2",
+          "elevated_scrutiny_conditions_triggered": [
+            {
+              "condition": "PAYMENT_PROFILE_RECENCY",
+              "threshold": "60d",
+              "observed": "under 30d"
+            },
+            {
+              "condition": "LOW_TRAILING_INVOICE_COUNT",
+              "threshold": 3,
+              "observed": 1
+            },
+            {
+              "condition": "CONTACT_PROFILE_CHANGE",
+              "observed": "recent_invoice_count_trailing_12_months is 1 and payment account changed within 60 days"
+            }
+          ],
+          "assigned_reviewer_id": "AP-1842",
+          "supervisor_queue_id": "AP-QUEUE-ACIS-7710-REVIEW",
+          "temporary_hold_ref": "VM-HOLD-ACIS-2024-11",
+          "completion_timestamp": "2024-11-21T14:05:22Z",
+          "disposition_code": "ROUTED_FOR_STANDARD_PAYMENT_REVIEW"
+        },
+        {
+          "doc_id": "IPR-ACIS-3304",
+          "type": "invoice_cross_reference_record",
+          "vendor_id": "V-ACIS-7710",
+          "invoice_ref": "ACIS-2024-1183",
+          "change_request_ref": "PORTAL-CHG-4Q9M2",
+          "callback_record_ref": "CALLSYS-883104",
+          "vendor_master_audit_ref": "VM-AUDIT-ACIS-51A7",
+          "temporary_hold_ref": "VM-HOLD-ACIS-2024-11",
+          "checks_completed": [
+            {
+              "check": "vendor_master_effective_date_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "billing_contact_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "remittance_account_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "hold_release_reference_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "purchase_order_reference_check",
+              "status": "COMPLETE"
+            }
+          ],
+          "completed_at": "2024-11-21T14:22:31Z"
+        },
+        {
+          "doc_id": "VM-HOLD-ACIS-2024-11",
+          "type": "temporary_payment_hold_record",
+          "vendor_id": "V-ACIS-7710",
+          "invoice_ref": "ACIS-2024-1183",
+          "hold_reason_codes": [
+            "PAYMENT_PROFILE_RECENT_CHANGE",
+            "LOW_TRAILING_INVOICE_COUNT"
+          ],
+          "hold_opened_at": "2024-11-21T09:14:00Z",
+          "hold_release_ref": "ESR-ACIS-2024-11",
+          "hold_released_at": "2024-11-21T14:10:00Z",
+          "release_routing_code": "STANDARD_PAYMENT_REVIEW_QUEUE"
+        },
+        {
+          "doc_id": "NOISE-ACIS-7710-2024-11",
+          "type": "noise_prior_change_record",
+          "vendor_id": "V-ACIS-7710",
+          "note": "Prior portal maintenance record for tax-form contact only; different session and no payment-account change.",
+          "related_session_id": "PORTAL-SESSION-NOISE-ACIS-7710",
+          "overlaps_payment_account": false
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "AP-POL-2024-017",
+          "type": "ap_vendor_master_payment_change_policy",
+          "policy_name": "Vendor Master Payment Profile Change Control",
+          "relevant_clause": "Invoices following recent vendor-master payment or contact changes require authenticated portal submission, two-person AP signoff, callback verification using pre-change vendor-master source data, vendor-master audit evidence, elevated-scrutiny routing when triggered, invoice cross-reference checks, and temporary hold release when a hold was opened. Callback contact source must be pre-existing vendor-master data, not a number supplied in the change request, invoice, or newly submitted contact record. Elevated-scrutiny triggers and historical temporary holds are not blockers after documented control closure, but noncompliant callback source provenance remains a material blocker."
+        }
+      ]
+    }
+  }
+}

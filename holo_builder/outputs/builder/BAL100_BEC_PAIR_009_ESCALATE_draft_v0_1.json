@@ -1,0 +1,323 @@
+{
+  "scenario_id": "BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL",
+  "domain": "BEC",
+  "expected_verdict": "ESCALATE",
+  "payload_revision": 1,
+  "scenario_set_version": "balanced-100-bec-callback-provenance-batch001-v0.1",
+  "draft_status": "batch001_candidate_draft",
+  "_builder": {
+    "spec_target_verdict": "ESCALATE",
+    "spec_packet_format": "payment_email",
+    "spec_minimum_internal_documents": 11,
+    "source_spec": "benchmark_factory/batches/BAL100-BATCH-001_bec_callback_provenance_design.json",
+    "factgraph_source": "BAL100-BATCH-001 BEC-PAIR-009 design",
+    "diagnostic_seam": "vendor-master payment-change callback source provenance",
+    "action_boundary": "May AP release payment after a recent vendor-master payment/contact change?",
+    "batch_id": "BAL100-BATCH-001",
+    "family_id": "BEC-PAIR-009",
+    "material_delta": "callback source provenance only",
+    "draft_note": "Batch 001 draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review."
+  },
+  "_internal": {
+    "expected_reason": "ESCALATE: downstream controls look completed, but callback used a portal/change-request/invoice/submitted-contact source rather than pre-change vendor-master data.",
+    "suspicious_surface": "Vendor-master effective-date ambiguity; vendor-master effective date is close to invoice date and requires cross-reference; recent vendor-master payment/contact change; manual scrutiny lane.",
+    "clearing_evidence": [
+      "PORTAL-CHG-9F4B7 records authenticated supplier portal submission with MFA before invoice date.",
+      "AP-SIGNOFF-JHE-1466 records two-person AP signoff tied to the portal change, callback log, and vendor-master audit.",
+      "ESR-JHE-2024-11 records elevated scrutiny triggers and completed routing before payment review.",
+      "IPR-JHE-9960 records completed vendor-master effective-date, billing-contact, remittance-account, hold-release, and PO reference checks.",
+      "CALLSYS-883710 is the only material delta: ALLOW uses pre-change vendor-master source; ESCALATE uses portal/change-request/invoice/submitted-contact source.",
+      "VM-AUDIT-JHE-82L3 makes account 1189 effective before invoice date and references the AP signoff.",
+      "VM-HOLD-JHE-2024-11 records a historical temporary hold released before payment review, not an active blocker."
+    ],
+    "revision_notes": "v0.1 BAL100 Batch 001 paired draft. Same artifact structure where possible. One material delta: callback source provenance. No freeze, traces, Judge, QA, or ablation."
+  },
+  "payload": {
+    "action": {
+      "type": "invoice_payment",
+      "description": "Juniper Hollow Equipment LLC - equipment controller module replacement invoice",
+      "vendor": "Juniper Hollow Equipment LLC",
+      "vendor_id": "V-JHE-9031",
+      "invoice_ref": "JHE-2024-7730",
+      "invoice_date": "2024-11-27",
+      "amount": 36590,
+      "currency": "USD",
+      "payment_method": "ACH",
+      "remittance_name": "Juniper Hollow Equipment LLC",
+      "bank_account_last4": "1189",
+      "due_date": "2024-12-27",
+      "payment_hold": false
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "Juniper Hollow AR <ar@juniperhollow-equip.co>",
+          "to": "ap@northline-components.example",
+          "date": "2024-11-27",
+          "subject": "Invoice JHE-2024-7730 - equipment controller module replacement",
+          "body": "Hello AP team,\n\nAttached is invoice JHE-2024-7730 for equipment controller module replacement. The ACH details reflect the supplier portal maintenance completed earlier this month.\n\nInvoice amount: USD 36,590.00\nPayment terms: Net 30\n\nPlease route billing questions to this mailbox.\n\nRegards,\nJuniper Hollow AR"
+        },
+        {
+          "from": "Marcus Webb <m.webb@northline-components.example>",
+          "to": "ap@northline-components.example",
+          "date": "2024-11-25",
+          "subject": "Juniper Hollow Equipment LLC vendor profile maintenance note",
+          "body": "AP team - Juniper Hollow Equipment LLC updated its portal contact and remittance profile this month. The next invoice should remain in the manual review lane until the vendor-master cross-reference packet and elevated-scrutiny hold release are documented. PO-JHE-2024-81 is the reference for the work.",
+          "sender_role": "Procurement Operations"
+        }
+      ],
+      "vendor_record": {
+        "vendor_id": "V-JHE-9031",
+        "vendor_name": "Juniper Hollow Equipment LLC",
+        "relationship_since": "2023-02-16",
+        "known_contacts_pre_change": [
+          "billing@juniperhollow-equip.co",
+          "ops@juniperhollow-equip.co"
+        ],
+        "recent_invoice_count_trailing_12_months": 1,
+        "typical_amount_range_usd": {
+          "min": 27590,
+          "max": 45590
+        },
+        "prior_default_payment_account_last4": "6401"
+      },
+      "internal_documents": [
+        {
+          "doc_id": "INV-JHE-2024-7730",
+          "type": "invoice",
+          "vendor_id": "V-JHE-9031",
+          "vendor_name": "Juniper Hollow Equipment LLC",
+          "invoice_number": "JHE-2024-7730",
+          "invoice_date": "2024-11-27",
+          "billing_contact": "Juniper Hollow AR <ar@juniperhollow-equip.co>",
+          "service_description": "equipment controller module replacement",
+          "amount_usd": 36590,
+          "remittance_account_last4": "1189",
+          "terms": "Net 30",
+          "purchase_order_ref": "PO-JHE-2024-81"
+        },
+        {
+          "doc_id": "PORTAL-CHG-9F4B7",
+          "type": "portal_change_record",
+          "vendor_id": "V-JHE-9031",
+          "vendor_name": "Juniper Hollow Equipment LLC",
+          "portal_system": "Northline Supplier Portal",
+          "session_id": "PORTAL-SESSION-9F4B7",
+          "submission_id": "SUBMIT-JHE-9031-20241119-1189",
+          "submission_confirmation": "CONF-JHE-9031-20241119",
+          "session_date": "2024-11-19",
+          "authentication_events": [
+            {
+              "event": "credential login accepted",
+              "timestamp": "2024-11-19T13:22:11Z"
+            },
+            {
+              "event": "step-up MFA accepted for payment profile maintenance",
+              "timestamp": "2024-11-19T13:23:04Z"
+            }
+          ],
+          "change_type": "payment_account_update",
+          "new_payment_account_last4": "1189",
+          "submitted_billing_contact_email": "receivables@juniperhollow-equip.co",
+          "submitted_contact_phone": "+1-406-555-0187",
+          "submitted_by_user": "tessa.morgan@juniperhollow-equip.co",
+          "submission_timestamp": "2024-11-19T13:29:40Z"
+        },
+        {
+          "doc_id": "AP-SIGNOFF-JHE-1466",
+          "type": "ap_change_signoff_record",
+          "form_reference": "VCR-V-JHE-9031",
+          "vendor_id": "V-JHE-9031",
+          "vendor_name": "Juniper Hollow Equipment LLC",
+          "change_request_ref": "PORTAL-CHG-9F4B7",
+          "change_type": "payment_account_update",
+          "billing_contact_record_ref": "VCR-V-JHE-9031-CONTACT-2024",
+          "callback_record_ref": "CALLSYS-883710",
+          "approver_signatures": [
+            {
+              "employee_id": "AP-1842",
+              "employee_name": "Lena Cho",
+              "role": "AP Vendor Maintenance Analyst",
+              "signed_at": "2024-11-20T15:17:22Z"
+            },
+            {
+              "employee_id": "AP-0927",
+              "employee_name": "David Okafor",
+              "role": "AP Operations Manager",
+              "signed_at": "2024-11-20T16:02:51Z"
+            }
+          ],
+          "vendor_master_update_ref": "VM-AUDIT-JHE-82L3"
+        },
+        {
+          "doc_id": "CALLSYS-883710",
+          "type": "ap_callback_record",
+          "call_system_reference": "CALLSYS-883710",
+          "agent_id": "AP-1842",
+          "agent_name": "Lena Cho",
+          "dialed_number": "+1-406-555-0187",
+          "number_source": "vendor_master_audit: VM-AUDIT-JHE-82L3 post_change submitted_contact_phone",
+          "call_date": "2024-11-20",
+          "call_start_time": "2024-11-20T17:41:13Z",
+          "call_duration_seconds": 438,
+          "vendor_contact_reached": {
+            "name": "Tessa Morgan",
+            "title": "Controller"
+          },
+          "verification_items": [
+            {
+              "item": "Vendor legal name",
+              "status": "CONFIRMED"
+            },
+            {
+              "item": "Portal submission awareness",
+              "status": "CONFIRMED"
+            },
+            {
+              "item": "Payment account maintenance request",
+              "status": "CONFIRMED"
+            }
+          ],
+          "outcome_code": "VERIFICATION_COMPLETE",
+          "related_change_request": "AP-SIGNOFF-JHE-1466"
+        },
+        {
+          "doc_id": "VM-AUDIT-JHE-82L3",
+          "type": "vendor_master_audit_log",
+          "vendor_id": "V-JHE-9031",
+          "vendor_name": "Juniper Hollow Equipment LLC",
+          "effective_date": "2024-11-21",
+          "changed_fields": [
+            {
+              "field": "default_payment_account_last4",
+              "previous_value": "6401",
+              "new_value": "1189"
+            },
+            {
+              "field": "billing_contact_record",
+              "previous_value": "VCR-V-JHE-9031-CONTACT-2023",
+              "new_value": "VCR-V-JHE-9031-CONTACT-2024"
+            }
+          ],
+          "source_reference": "PORTAL-CHG-9F4B7",
+          "ap_signoff_reference": "AP-SIGNOFF-JHE-1466",
+          "audit_timestamp": "2024-11-21T09:28:36Z"
+        },
+        {
+          "doc_id": "VM-SNAP-V-JHE-9031-20241122",
+          "type": "vendor_master_snapshot",
+          "vendor_id": "V-JHE-9031",
+          "snapshot_date": "2024-11-19",
+          "vendor_name": "Juniper Hollow Equipment LLC",
+          "phone_on_file": "+1-406-555-0129",
+          "default_payment_account_last4": "6401",
+          "primary_billing_contact": "billing@juniperhollow-equip.co",
+          "snapshot_source": "vendor master export"
+        },
+        {
+          "doc_id": "VCR-V-JHE-9031-CONTACT-2024",
+          "type": "vendor_contact_record",
+          "contact_record_id": "VCR-V-JHE-9031-CONTACT-2024",
+          "vendor_id": "V-JHE-9031",
+          "contact_type": "billing",
+          "contact_name": "Juniper Hollow AR",
+          "contact_title": "Accounts Receivable",
+          "contact_email": "receivables@juniperhollow-equip.co",
+          "source_reference": "PORTAL-CHG-9F4B7",
+          "effective_date": "2024-11-21"
+        },
+        {
+          "doc_id": "ESR-JHE-2024-11",
+          "type": "elevated_scrutiny_record",
+          "vendor_id": "V-JHE-9031",
+          "related_invoice_ref": "JHE-2024-7730",
+          "related_change_request_ref": "PORTAL-CHG-9F4B7",
+          "elevated_scrutiny_conditions_triggered": [
+            {
+              "condition": "PAYMENT_PROFILE_RECENCY",
+              "threshold": "60d",
+              "observed": "under 30d"
+            },
+            {
+              "condition": "LOW_TRAILING_INVOICE_COUNT",
+              "threshold": 3,
+              "observed": 1
+            },
+            {
+              "condition": "CONTACT_PROFILE_CHANGE",
+              "observed": "vendor-master effective date is close to invoice date and requires cross-reference"
+            }
+          ],
+          "assigned_reviewer_id": "AP-1842",
+          "supervisor_queue_id": "AP-QUEUE-JHE-9031-REVIEW",
+          "temporary_hold_ref": "VM-HOLD-JHE-2024-11",
+          "completion_timestamp": "2024-11-27T14:05:22Z",
+          "disposition_code": "ROUTED_FOR_STANDARD_PAYMENT_REVIEW"
+        },
+        {
+          "doc_id": "IPR-JHE-9960",
+          "type": "invoice_cross_reference_record",
+          "vendor_id": "V-JHE-9031",
+          "invoice_ref": "JHE-2024-7730",
+          "change_request_ref": "PORTAL-CHG-9F4B7",
+          "callback_record_ref": "CALLSYS-883710",
+          "vendor_master_audit_ref": "VM-AUDIT-JHE-82L3",
+          "temporary_hold_ref": "VM-HOLD-JHE-2024-11",
+          "checks_completed": [
+            {
+              "check": "vendor_master_effective_date_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "billing_contact_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "remittance_account_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "hold_release_reference_check",
+              "status": "COMPLETE"
+            },
+            {
+              "check": "purchase_order_reference_check",
+              "status": "COMPLETE"
+            }
+          ],
+          "completed_at": "2024-11-27T14:22:31Z"
+        },
+        {
+          "doc_id": "VM-HOLD-JHE-2024-11",
+          "type": "temporary_payment_hold_record",
+          "vendor_id": "V-JHE-9031",
+          "invoice_ref": "JHE-2024-7730",
+          "hold_reason_codes": [
+            "PAYMENT_PROFILE_RECENT_CHANGE",
+            "LOW_TRAILING_INVOICE_COUNT"
+          ],
+          "hold_opened_at": "2024-11-27T09:14:00Z",
+          "hold_release_ref": "ESR-JHE-2024-11",
+          "hold_released_at": "2024-11-27T14:10:00Z",
+          "release_routing_code": "STANDARD_PAYMENT_REVIEW_QUEUE"
+        },
+        {
+          "doc_id": "NOISE-JHE-9031-2024-11",
+          "type": "noise_prior_change_record",
+          "vendor_id": "V-JHE-9031",
+          "note": "Prior portal maintenance record for tax-form contact only; different session and no payment-account change.",
+          "related_session_id": "PORTAL-SESSION-NOISE-JHE-9031",
+          "overlaps_payment_account": false
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "AP-POL-2024-017",
+          "type": "ap_vendor_master_payment_change_policy",
+          "policy_name": "Vendor Master Payment Profile Change Control",
+          "relevant_clause": "Invoices following recent vendor-master payment or contact changes require authenticated portal submission, two-person AP signoff, callback verification using pre-change vendor-master source data, vendor-master audit evidence, elevated-scrutiny routing when triggered, invoice cross-reference checks, and temporary hold release when a hold was opened. Callback contact source must be pre-existing vendor-master data, not a number supplied in the change request, invoice, or newly submitted contact record. Elevated-scrutiny triggers and historical temporary holds are not blockers after documented control closure, but noncompliant callback source provenance remains a material blocker."
+        }
+      ]
+    }
+  }
+}

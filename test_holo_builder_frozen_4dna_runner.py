@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import copy
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -11,6 +13,7 @@ from holo_builder.frozen_4dna_runner import (
     build_pair_dry_run_report,
     load_available_mini_pool,
     load_frozen_packet_for_dry_run,
+    main,
     select_4dna_roster,
 )
 
@@ -111,3 +114,88 @@ def test_forbidden_metadata_inside_payload_blocks_adapter(tmp_path: Path) -> Non
 
     with pytest.raises(ValueError, match="payload visibility errors"):
         load_frozen_packet_for_dry_run(path, new_hash)
+
+
+def test_unknown_provider_or_model_in_mini_cohort_fails_closed(tmp_path: Path) -> None:
+    cohort = json.loads(COHORT.read_text())
+    cohort["models"]["mystery"] = "tiny-but-unknown"
+    path = tmp_path / "unknown_provider.json"
+    path.write_text(json.dumps(cohort))
+
+    with pytest.raises(ValueError, match="approved five-mini"):
+        load_available_mini_pool(path)
+
+    cohort = json.loads(COHORT.read_text())
+    cohort["models"]["openai"] = "gpt-5.4"
+    path = tmp_path / "wrong_model.json"
+    path.write_text(json.dumps(cohort))
+
+    with pytest.raises(ValueError, match="approved five-mini"):
+        load_available_mini_pool(path)
+
+
+def test_malformed_mini_cohort_fails_closed(tmp_path: Path) -> None:
+    path = tmp_path / "malformed.json"
+    path.write_text(json.dumps({"cohort_id": "bad", "models": []}))
+
+    with pytest.raises(ValueError, match="non-empty models mapping"):
+        load_available_mini_pool(path)
+
+
+def test_cli_missing_required_hash_fails_closed() -> None:
+    with pytest.raises(SystemExit) as exc:
+        main([
+            "--seed", "447",
+            "--session-id", SESSION_ID,
+            "--allow-packet", str(ALLOW),
+            "--allow-hash", ALLOW_HASH,
+            "--escalate-packet", str(ESCALATE),
+        ])
+
+    assert exc.value.code != 0
+
+
+def test_dry_run_module_has_no_provider_adapter_imports_or_trace_writes() -> None:
+    source = Path("holo_builder/frozen_4dna_runner.py").read_text()
+
+    assert "llm_adapters" not in source
+    assert "OpenAIAdapter" not in source
+    assert "AnthropicAdapter" not in source
+    assert "GoogleAdapter" not in source
+    assert "write_text(" not in source
+    assert "open(" not in source
+
+
+def test_cli_dry_run_does_not_create_trace_files(tmp_path: Path) -> None:
+    before = {path.name for path in tmp_path.iterdir()}
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "holo_builder.frozen_4dna_runner",
+            "--seed",
+            "447",
+            "--session-id",
+            SESSION_ID,
+            "--allow-packet",
+            str(ALLOW),
+            "--allow-hash",
+            ALLOW_HASH,
+            "--escalate-packet",
+            str(ESCALATE),
+            "--escalate-hash",
+            ESCALATE_HASH,
+        ],
+        cwd=Path.cwd(),
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    after = {path.name for path in tmp_path.iterdir()}
+    report = json.loads(result.stdout)
+
+    assert before == after
+    assert report["dry_run"] is True
+    assert report["no_live_calls"] is True
+    assert report["no_traces_created"] is True
+    assert report["output_dirs"] == []

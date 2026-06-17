@@ -20,6 +20,13 @@ from holo_builder.freeze_manifest import compute_payload_hash, payload_visibilit
 
 REQUIRED_PAYLOAD_KEYS = {"action", "context"}
 FORBIDDEN_MODEL_VISIBLE_KEYS = {"_builder", "_internal", "_frozen", "expected_verdict"}
+EXPECTED_MINI_MODELS = {
+    "anthropic": "claude-haiku-4-5-20251001",
+    "google": "gemini-2.5-flash-lite",
+    "minimax": "MiniMax-Text-01",
+    "openai": "gpt-4o-mini",
+    "xai": "grok-3-mini",
+}
 
 
 @dataclass(frozen=True)
@@ -41,6 +48,8 @@ def load_available_mini_pool(cohort_path: str | Path) -> list[ModelRef]:
     labels = cohort.get("condition_labels", {}).get("solo", {})
     if not isinstance(models, dict) or not models:
         raise ValueError("mini cohort must contain non-empty models mapping")
+    if models != EXPECTED_MINI_MODELS:
+        raise ValueError("mini cohort must match the approved five-mini provider/model set")
 
     pool: list[ModelRef] = []
     for provider in sorted(models):

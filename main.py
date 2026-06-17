@@ -25,7 +25,7 @@ import hmac
 import logging
 import os
 import time
-from typing import Optional
+from typing import Any, Optional
 
 from dotenv import load_dotenv
 
@@ -1043,6 +1043,231 @@ async def get_artifact(artifact_id: str, request: Request):
 
 _summary_cache: dict = {}
 _surface_cache: dict = {}
+
+_SENSITIVE_HOLO_KEY_PARTS = (
+    "password",
+    "hash",
+    "secret",
+    "token",
+    "api_key",
+    "apikey",
+    "jwt",
+    "cookie",
+    "invite",
+    "provider_key",
+)
+
+
+def _mask_email(email: str) -> str:
+    email = (email or "").strip()
+    if "@" not in email:
+        return ""
+    local, domain = email.split("@", 1)
+    if not local:
+        return f"*@{domain}"
+    if len(local) <= 2:
+        return f"{local[0]}***@{domain}"
+    return f"{local[0]}***{local[-1]}@{domain}"
+
+
+def _prefix_suffix(value: str, prefix: int = 8, suffix: int = 4) -> str:
+    value = str(value or "")
+    if len(value) <= prefix + suffix + 3:
+        return value
+    return f"{value[:prefix]}...{value[-suffix:]}"
+
+
+def _is_sensitive_holo_key(key: str) -> bool:
+    normalized = (key or "").strip().lower()
+    if normalized.startswith("_"):
+        return True
+    return any(part in normalized for part in _SENSITIVE_HOLO_KEY_PARTS)
+
+
+def _redact_context_entries(context: dict[str, Any]) -> list[dict[str, Any]]:
+    entries = []
+    for key in sorted(context.keys()):
+        sensitive = _is_sensitive_holo_key(key)
+        entries.append({
+            "key": key,
+            "value": "[redacted]" if sensitive else str(context.get(key, "")),
+            "redacted": sensitive,
+        })
+    return entries
+
+
+def _safe_count_capsule_rows(brain, table_name: str, capsule_id: str) -> Optional[int]:
+    client = getattr(brain, "_client", None)
+    if client is None:
+        return None
+    try:
+        resp = (
+            client.table(table_name)
+            .select("capsule_id", count="exact")
+            .eq("capsule_id", capsule_id)
+            .execute()
+        )
+        return resp.count
+    except Exception:
+        return None
+
+
+def _safe_count_session_messages(brain, session_ids: list[str]) -> Optional[int]:
+    client = getattr(brain, "_client", None)
+    if client is None or not session_ids:
+        return 0
+    try:
+        resp = (
+            client.table("holo_chat_messages")
+            .select("session_id", count="exact")
+            .in_("session_id", session_ids[:200])
+            .execute()
+        )
+        return resp.count
+    except Exception:
+        return None
+
+
+def _safe_recent_messages(brain, session_ids: list[str], limit: int) -> list[dict[str, Any]]:
+    client = getattr(brain, "_client", None)
+    if client is None or not session_ids:
+        return []
+    try:
+        return (
+            client.table("holo_chat_messages")
+            .select("session_id, role, content, created_at, turn_number")
+            .in_("session_id", session_ids[:50])
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        ).data or []
+    except Exception:
+        return []
+
+
+def _safe_recent_consolidations(brain, capsule_id: str, limit: int) -> list[dict[str, Any]]:
+    client = getattr(brain, "_client", None)
+    if client is None:
+        last = brain.load_last_consolidation(capsule_id)
+        return [last] if last else []
+    try:
+        return (
+            client.table("holo_session_consolidations")
+            .select("session_id, created_at, what_changed, what_surfaced, open_threads, captain_note")
+            .eq("capsule_id", capsule_id)
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        ).data or []
+    except Exception:
+        last = brain.load_last_consolidation(capsule_id)
+        return [last] if last else []
+
+
+def _build_holo_brain_payload(
+    capsule: dict[str, Any],
+    brain,
+    session_limit: int = 25,
+    message_limit: int = 80,
+    consolidation_limit: int = 25,
+    artifact_limit: int = 50,
+) -> dict[str, Any]:
+    capsule_id = capsule["sub"]
+    capsule_row = brain.get_capsule(capsule_id) or {}
+    context = brain.get_capsule_context(capsule_id) or {}
+    context_entries = _redact_context_entries(context)
+    life_context = brain.load_life_context(capsule_id) or []
+    sessions = brain.list_sessions(capsule_id, limit=session_limit) or []
+    session_ids = [s.get("session_id") for s in sessions if s.get("session_id")]
+    recent_messages = _safe_recent_messages(brain, session_ids, message_limit)
+    consolidations = _safe_recent_consolidations(brain, capsule_id, consolidation_limit)
+    artifacts = brain.list_artifacts(capsule_id, limit=artifact_limit) or []
+
+    session_items = []
+    for session in sessions:
+        sid = session.get("session_id", "")
+        session_items.append({
+            "id": sid,
+            "id_short": _prefix_suffix(sid),
+            "created_at": session.get("created_at"),
+            "last_active": session.get("last_active"),
+            "turn_count": session.get("turn_count") or 0,
+            "title": session.get("title") or session.get("preview") or "",
+            "preview": session.get("preview") or "",
+        })
+
+    grouped_messages: dict[str, list[dict[str, Any]]] = {}
+    for row in recent_messages:
+        sid = row.get("session_id", "")
+        grouped_messages.setdefault(sid, []).append({
+            "session_id": sid,
+            "session_id_short": _prefix_suffix(sid),
+            "role": row.get("role"),
+            "content": row.get("content") or "",
+            "created_at": row.get("created_at"),
+            "turn_number": row.get("turn_number"),
+        })
+
+    email = capsule_row.get("email") or capsule.get("email", "")
+    message_count = _safe_count_session_messages(brain, session_ids)
+    return {
+        "capsule": {
+            "id": capsule_id,
+            "id_short": _prefix_suffix(capsule_id),
+            "email_masked": _mask_email(email),
+            "token_email_masked": _mask_email(capsule.get("email", "")),
+            "name": capsule_row.get("name") or "",
+            "mode": capsule_row.get("mode") or capsule.get("mode", ""),
+            "created_at": capsule_row.get("created_at"),
+            "last_active": capsule_row.get("last_active"),
+            "identity_type": "capsule_token",
+        },
+        "capsule_context": {
+            "count": _safe_count_capsule_rows(brain, "holo_capsule_context", capsule_id) or len(context_entries),
+            "redacted_count": sum(1 for item in context_entries if item["redacted"]),
+            "entries": context_entries,
+        },
+        "life_context": {
+            "count": _safe_count_capsule_rows(brain, "holo_life_context", capsule_id) or len(life_context),
+            "entries": life_context,
+        },
+        "sessions": {
+            "count": _safe_count_capsule_rows(brain, "holo_chat_sessions", capsule_id) or len(session_items),
+            "shown": len(session_items),
+            "items": session_items,
+        },
+        "recent_messages": {
+            "count": message_count if message_count is not None else len(recent_messages),
+            "shown": len(recent_messages),
+            "by_session": grouped_messages,
+        },
+        "consolidations": {
+            "count": _safe_count_capsule_rows(brain, "holo_session_consolidations", capsule_id) or len(consolidations),
+            "shown": len(consolidations),
+            "items": consolidations,
+        },
+        "artifacts": {
+            "count": _safe_count_capsule_rows(brain, "holo_artifacts", capsule_id) or len(artifacts),
+            "shown": len(artifacts),
+            "items": artifacts,
+        },
+        "limits": {
+            "sessions": session_limit,
+            "messages": message_limit,
+            "consolidations": consolidation_limit,
+            "artifacts": artifact_limit,
+        },
+    }
+
+
+@app.get("/v1/holo-brain")
+async def holo_brain_dashboard(request: Request):
+    """Return authenticated capsule memory/dashboard data for local browser inspection."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    return JSONResponse(content=_build_holo_brain_payload(capsule, _capsule_brain))
+
 
 @app.get("/v1/capsule/surface")
 async def capsule_surface(

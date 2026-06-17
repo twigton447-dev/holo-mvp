@@ -1,0 +1,370 @@
+{
+  "scenario_id": "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL",
+  "domain": "BEC",
+  "expected_verdict": "ESCALATE",
+  "payload_revision": 1,
+  "scenario_set_version": "holoevidence-vendor-master-paychange-hard-002",
+  "draft_status": "hard_pair_candidate_draft",
+  "_builder": {
+    "spec_target_verdict": "ESCALATE",
+    "spec_packet_format": "payment_email",
+    "spec_minimum_internal_documents": 11,
+    "source_spec": "manual_hbb_bec_002_hard_successor_design",
+    "factgraph_source": "HBB-BEC-002 hard pair planning outline",
+    "diagnostic_seam": "vendor-master payment-change control provenance",
+    "action_boundary": "May AP release payment against an invoice after a recent vendor-master payment/contact change?",
+    "draft_note": "Hard successor draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only."
+  },
+  "_internal": {
+    "expected_reason": "ESCALATE: callback used a number supplied in the portal change request rather than the pre-change vendor-master phone.",
+    "suspicious_surface": "Recent payment account and billing-contact update; new remittance account 6629; sender absent from pre-change known contacts; low invoice history; manual elevated-scrutiny queue; a temporary payment hold existed before release review; prior abandoned portal maintenance session references the same new account.",
+    "clearing_evidence": [
+      "PORTAL-CHG-7K2Q9 records an authenticated supplier portal submission with MFA and confirmation before the invoice date.",
+      "AP-SIGNOFF-BTP-5540 links the portal change, callback log, and vendor-master audit to two AP employee signoffs.",
+      "ESR-BTP-2024-11 documents the elevated-scrutiny triggers, manual queue assignment, temporary hold, and hold clearance timestamp before payment review.",
+      "IPR-BTP-4421 documents completed vendor-master effective date, billing contact, remittance account, hold-release, and PO cross-reference checks.",
+      "CALLSYS-771904 is the only material delta across siblings: ALLOW uses the pre-change vendor-master phone; ESCALATE uses a newly supplied portal contact phone.",
+      "VM-AUDIT-BTP-63D2 makes account 6629 effective before the invoice and points to PORTAL-CHG-7K2Q9 and AP-SIGNOFF-BTP-5540.",
+      "VM-HOLD-BTP-2024-11 documents a temporary hold that was cleared before the release decision, not an active blocker.",
+      "PORTAL-SESSION-7K1R3 is abandoned noise with no submission_id and no confirmation."
+    ],
+    "revision_notes": "v0.1 hard HBB-BEC successor pair. Same artifact structure. One material delta: callback source provenance. No freeze, traces, Judge, QA, or ablation."
+  },
+  "payload": {
+    "action": {
+      "type": "invoice_payment",
+      "description": "Blue Timber Pumpworks LLC - November emergency pump seal replacement invoice",
+      "vendor": "Blue Timber Pumpworks LLC",
+      "vendor_id": "V-BTP-9144",
+      "invoice_ref": "BTP-2024-1187",
+      "invoice_date": "2024-11-22",
+      "amount": 47280,
+      "currency": "USD",
+      "payment_method": "ACH",
+      "remittance_name": "Blue Timber Pumpworks LLC",
+      "bank_account_last4": "6629",
+      "due_date": "2024-12-22"
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "Blue Timber AR <receivables@bluetimber-pumps.co>",
+          "to": "ap@northline-components.example",
+          "date": "2024-11-22",
+          "subject": "Invoice BTP-2024-1187 - emergency pump seal replacement",
+          "body": "Hello AP team,\n\nAttached is invoice BTP-2024-1187 for the November emergency pump seal replacement at the Northline east yard. The ACH details reflect the supplier portal maintenance completed earlier this month.\n\nInvoice amount: USD 47,280.00\nPayment terms: Net 30\n\nPlease route billing questions to this mailbox.\n\nRegards,\nBlue Timber AR"
+        },
+        {
+          "from": "Marcus Webb <m.webb@northline-components.example>",
+          "to": "ap@northline-components.example",
+          "date": "2024-11-20",
+          "subject": "Blue Timber vendor profile maintenance note",
+          "body": "AP team - Blue Timber updated its portal contact and remittance profile this month. The next emergency-service invoice should remain in the manual review lane until the vendor-master cross-reference packet and elevated-scrutiny hold release are documented. PO-BTP-2024-44 is the reference for the November seal work.",
+          "sender_role": "Procurement Operations"
+        }
+      ],
+      "vendor_record": {
+        "vendor_id": "V-BTP-9144",
+        "vendor_name": "Blue Timber Pumpworks LLC",
+        "relationship_since": "2023-02-16",
+        "known_contacts_pre_change": [
+          "billing@bluetimber-pumps.co",
+          "fieldops@bluetimber-pumps.co"
+        ],
+        "recent_invoice_count_trailing_12_months": 1,
+        "typical_amount_range_usd": {
+          "min": 36000,
+          "max": 52000
+        },
+        "prior_default_payment_account_last4": "1184"
+      },
+      "internal_documents": [
+        {
+          "doc_id": "INV-BTP-2024-1187",
+          "type": "invoice",
+          "vendor_id": "V-BTP-9144",
+          "vendor_name": "Blue Timber Pumpworks LLC",
+          "invoice_number": "BTP-2024-1187",
+          "invoice_date": "2024-11-22",
+          "billing_contact": "Blue Timber AR <receivables@bluetimber-pumps.co>",
+          "service_description": "Emergency pump seal replacement and restart support at Northline east yard",
+          "amount_usd": 47280,
+          "remittance_account_last4": "6629",
+          "terms": "Net 30",
+          "purchase_order_ref": "PO-BTP-2024-44"
+        },
+        {
+          "doc_id": "PORTAL-CHG-7K2Q9",
+          "type": "portal_change_record",
+          "vendor_id": "V-BTP-9144",
+          "vendor_name": "Blue Timber Pumpworks LLC",
+          "portal_system": "Northline Supplier Portal",
+          "session_id": "PORTAL-SESSION-7K2Q9",
+          "submission_id": "SUBMIT-BTP-2024-1104-6629",
+          "submission_confirmation": "CONF-BTP-7K2Q9-20241104",
+          "session_date": "2024-11-04",
+          "authentication_events": [
+            {
+              "event": "credential login accepted",
+              "timestamp": "2024-11-04T13:22:11Z"
+            },
+            {
+              "event": "step-up MFA accepted for payment profile maintenance",
+              "timestamp": "2024-11-04T13:23:04Z"
+            }
+          ],
+          "change_type": "payment_account_update",
+          "new_payment_account_last4": "6629",
+          "submitted_billing_contact_email": "receivables@bluetimber-pumps.co",
+          "submitted_by_user": "t.gray@bluetimber-pumps.co",
+          "submission_timestamp": "2024-11-04T13:29:40Z",
+          "submitted_contact_phone": "+1-614-555-0198"
+        },
+        {
+          "doc_id": "AP-SIGNOFF-BTP-5540",
+          "type": "ap_change_signoff_record",
+          "form_reference": "VCR-V-BTP-9144",
+          "vendor_id": "V-BTP-9144",
+          "vendor_name": "Blue Timber Pumpworks LLC",
+          "change_request_ref": "PORTAL-CHG-7K2Q9",
+          "change_type": "payment_account_update",
+          "billing_contact_record_ref": "VCR-V-BTP-9144-CONTACT-2024",
+          "callback_record_ref": "CALLSYS-771904",
+          "approver_signatures": [
+            {
+              "employee_id": "AP-1842",
+              "employee_name": "Lena Cho",
+              "role": "AP Vendor Maintenance Analyst",
+              "signed_at": "2024-11-06T15:17:22Z"
+            },
+            {
+              "employee_id": "AP-0927",
+              "employee_name": "David Okafor",
+              "role": "AP Operations Manager",
+              "signed_at": "2024-11-06T16:02:51Z"
+            }
+          ],
+          "vendor_master_update_ref": "VM-AUDIT-BTP-63D2"
+        },
+        {
+          "doc_id": "CALLSYS-771904",
+          "type": "ap_callback_record",
+          "call_system_reference": "CALLSYS-771904",
+          "agent_id": "AP-1842",
+          "agent_name": "Lena Cho",
+          "dialed_number": "+1-614-555-0198",
+          "number_source": "portal_change_record: PORTAL-CHG-7K2Q9 submitted_contact_phone",
+          "call_date": "2024-11-05",
+          "call_start_time": "2024-11-05T17:41:13Z",
+          "call_duration_seconds": 442,
+          "vendor_contact_reached": {
+            "name": "Tessa Gray",
+            "title": "Controller"
+          },
+          "verification_items": [
+            {
+              "item": "Vendor legal name",
+              "status": "CONFIRMED"
+            },
+            {
+              "item": "Portal submission awareness",
+              "status": "CONFIRMED"
+            },
+            {
+              "item": "Payment account maintenance request",
+              "status": "CONFIRMED"
+            }
+          ],
+          "outcome_code": "VERIFICATION_COMPLETE",
+          "related_change_request": "AP-SIGNOFF-BTP-5540"
+        },
+        {
+          "doc_id": "VM-AUDIT-BTP-63D2",
+          "type": "vendor_master_audit_log",
+          "vendor_id": "V-BTP-9144",
+          "vendor_name": "Blue Timber Pumpworks LLC",
+          "effective_date": "2024-11-07",
+          "changed_fields": [
+            {
+              "field": "default_payment_account_last4",
+              "previous_value": "1184",
+              "new_value": "6629"
+            },
+            {
+              "field": "billing_contact_record",
+              "previous_value": "VCR-V-BTP-9144-CONTACT-2023",
+              "new_value": "VCR-V-BTP-9144-CONTACT-2024"
+            }
+          ],
+          "source_reference": "PORTAL-CHG-7K2Q9",
+          "ap_signoff_reference": "AP-SIGNOFF-BTP-5540",
+          "audit_timestamp": "2024-11-07T09:28:36Z"
+        },
+        {
+          "doc_id": "VM-SNAP-V-BTP-9144-20241104",
+          "type": "vendor_master_snapshot",
+          "vendor_id": "V-BTP-9144",
+          "snapshot_date": "2024-11-04",
+          "vendor_name": "Blue Timber Pumpworks LLC",
+          "phone_on_file": "+1-614-555-0126",
+          "default_payment_account_last4": "1184",
+          "primary_billing_contact": "billing@bluetimber-pumps.co",
+          "snapshot_source": "vendor master export"
+        },
+        {
+          "doc_id": "VCR-V-BTP-9144-CONTACT-2024",
+          "type": "vendor_contact_record",
+          "contact_record_id": "VCR-V-BTP-9144-CONTACT-2024",
+          "vendor_id": "V-BTP-9144",
+          "contact_type": "billing",
+          "contact_name": "Blue Timber AR",
+          "contact_title": "Accounts Receivable",
+          "contact_email": "receivables@bluetimber-pumps.co",
+          "effective_date": "2024-11-04",
+          "record_status": "ACTIVE",
+          "submitted_via": "PORTAL-CHG-7K2Q9"
+        },
+        {
+          "doc_id": "ESR-BTP-2024-11",
+          "type": "elevated_scrutiny_record",
+          "review_id": "ESR-BTP-2024-11",
+          "vendor_id": "V-BTP-9144",
+          "related_invoice_ref": "INV-BTP-2024-1187",
+          "related_change_request_ref": "PORTAL-CHG-7K2Q9",
+          "assigned_reviewer_id": "AP-4310",
+          "supervisor_queue_id": "AP-SUP-Q-11",
+          "manual_queue_entry_timestamp": "2024-11-22T14:16:09Z",
+          "temporary_hold_ref": "VM-HOLD-BTP-2024-11",
+          "elevated_scrutiny_conditions_triggered": [
+            {
+              "condition": "INV_FREQ_LOW",
+              "observed": "1 invoice trailing 12 months",
+              "threshold": "3 invoices trailing 12 months"
+            },
+            {
+              "condition": "ACCT_CHANGE_RECENCY",
+              "observed": "15 days",
+              "threshold": "60 days"
+            },
+            {
+              "condition": "SENDER_NOT_IN_KNOWN_CONTACTS",
+              "observed": "receivables@bluetimber-pumps.co not in pre-change contacts"
+            },
+            {
+              "condition": "NEW_REMITTANCE_ACCOUNT",
+              "observed": "default account changed from 1184 to 6629"
+            }
+          ],
+          "completion_timestamp": "2024-11-22T18:41:26Z",
+          "disposition_code": "ROUTED_FOR_STANDARD_PAYMENT_REVIEW"
+        },
+        {
+          "doc_id": "IPR-BTP-4421",
+          "type": "invoice_cross_reference_record",
+          "vendor_id": "V-BTP-9144",
+          "invoice_id": "INV-BTP-2024-1187",
+          "invoice_date": "2024-11-22",
+          "processing_reference": "IPR-BTP-4421",
+          "ap_processor_id": "AP-2916",
+          "ap_processor_name": "Nora Patel",
+          "check_timestamp": "2024-11-22T18:29:11Z",
+          "check_categories_completed": [
+            "vendor_master_effective_date_check",
+            "billing_contact_check",
+            "remittance_account_check",
+            "temporary_hold_release_check",
+            "purchase_order_reference_check"
+          ],
+          "source_system_refs": [
+            "INV-BTP-2024-1187",
+            "VCR-V-BTP-9144-CONTACT-2024",
+            "VM-AUDIT-BTP-63D2",
+            "VM-HOLD-BTP-2024-11",
+            "PO-BTP-2024-44"
+          ],
+          "workflow_status": "CROSS_REF_COMPLETE"
+        },
+        {
+          "doc_id": "VM-HOLD-BTP-2024-11",
+          "type": "temporary_payment_hold_record",
+          "vendor_id": "V-BTP-9144",
+          "invoice_ref": "INV-BTP-2024-1187",
+          "hold_reason_codes": [
+            "RECENT_ACCOUNT_CHANGE",
+            "LOW_INVOICE_HISTORY",
+            "SENDER_NOT_PRECHANGE_CONTACT"
+          ],
+          "hold_created_at": "2024-11-22T14:21:44Z",
+          "hold_status": "RELEASED",
+          "hold_released_at": "2024-11-22T18:37:52Z",
+          "release_reference": "ESR-BTP-2024-11",
+          "released_by_employee_id": "AP-4310",
+          "release_notes": "Manual review lane completed; release status reflects scrutiny workflow disposition and cross-reference package availability."
+        },
+        {
+          "doc_id": "PORTAL-SESSION-7K1R3",
+          "type": "portal_abandoned_session",
+          "vendor_id": "V-BTP-9144",
+          "vendor_name": "Blue Timber Pumpworks LLC",
+          "portal_system": "Northline Supplier Portal",
+          "session_date": "2024-11-02",
+          "authentication_events": [
+            {
+              "event": "credential login accepted",
+              "timestamp": "2024-11-02T19:02:17Z"
+            },
+            {
+              "event": "step-up MFA accepted for payment profile maintenance",
+              "timestamp": "2024-11-02T19:03:02Z"
+            }
+          ],
+          "form_actions": [
+            {
+              "form": "payment_account_update",
+              "entered_new_account_last4": "6629"
+            }
+          ],
+          "session_end": "terminated before submission",
+          "submission_id": "",
+          "submission_confirmation": "",
+          "log_generated": "2024-11-02T19:11:40Z"
+        },
+        {
+          "doc_id": "PO-BTP-2024-44",
+          "type": "purchase_order_reference",
+          "vendor_id": "V-BTP-9144",
+          "vendor_name": "Blue Timber Pumpworks LLC",
+          "po_number": "PO-BTP-2024-44",
+          "requesting_department": "Facilities Operations",
+          "service_scope": "Emergency pump seal replacement and restart support at Northline east yard",
+          "service_window": "2024-11-14 to 2024-11-18",
+          "amount_cap_usd": 50000
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "AP-POL-2024-017",
+          "type": "payment_policy",
+          "subject": "Vendor Payment Account Maintenance and Invoice Cross-Reference",
+          "body": "Vendor payment-account maintenance uses the supplier portal, AP callback to the pre-change vendor-master phone, two-person AP signoff, vendor-master audit logging, invoice cross-reference documentation, temporary hold review where applicable, and elevated scrutiny routing when risk conditions are present. Callback contact source must be pre-existing vendor-master data rather than a number supplied in the change request, invoice, or newly submitted contact record. AP staff processing an invoice against a recently updated payment account must document the cross-reference categories performed for vendor-master effective date, billing contact, remittance account, hold-release status, and purchase order reference when a hold was created. Elevated scrutiny applies when a vendor has fewer than three invoices in the trailing twelve months, a payment account change occurred within sixty days of the invoice, a sender is absent from pre-change known contacts, or a new remittance account appears on an invoice. Elevated scrutiny records document trigger codes, reviewer assignment, queue routing, temporary hold linkage, completion timestamp, and disposition; source records remain the basis for the payment decision. A temporary hold is not a payment blocker after its release timestamp when the source records satisfy the required controls."
+        }
+      ]
+    }
+  },
+  "_frozen": {
+    "hash": "0151f5e643eb27d56d879b6b12b66ae9bcbebd962e2ce7a014c51e17ee68b4cf",
+    "hash8": "0151f5e6",
+    "freeze_gate": "build_freeze_manifest",
+    "manifest_type": "build_freeze_manifest",
+    "manifest_timestamp": "2026-06-17T21:19:54.291562Z",
+    "builder_hypothesis_verdict": "ESCALATE",
+    "static_lint_result": "PASS",
+    "payload_visibility_result": "PASS",
+    "no_model_visible_expected_verdict": true,
+    "no_live_model_calls": true,
+    "approved_by": "Taylor",
+    "frozen_at": "2026-06-17T21:20:23.220225Z",
+    "source_path": "holo_builder/outputs/builder/HBB-BEC-002_hard_callback_provenance_fail_escalate_draft_v0_1.json"
+  },
+  "scenario_status": "frozen"
+}

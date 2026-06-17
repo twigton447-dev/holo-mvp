@@ -3524,8 +3524,14 @@ _MODEL_REGISTRY = [
     ("bench",  "xai",       "XAI_MODEL",       "grok-3",                "XAI_API_KEY",       "https://api.x.ai/v1"),
     ("bench",  "mistral",   "MISTRAL_MODEL",   "mistral-large-latest",  "MISTRAL_API_KEY",   "https://api.mistral.ai/v1"),
     ("bench",  "deepseek",  "DEEPSEEK_MODEL",  "deepseek-chat",         "DEEPSEEK_API_KEY",  "https://api.deepseek.com/v1"),
-    ("bench",  "minimax",   "MINIMAX_MODEL",   "MiniMax-Text-01",       "MINIMAX_API_KEY",   "https://api.minimax.chat/v1"),
+    ("bench",  "minimax",   "MINIMAX_MODEL",   "MiniMax-Text-01",       "MINIMAX_API_KEY",   "https://api.minimax.io/v1"),
 ]
+
+
+def _resolve_base_url(provider: str, default_base_url: str | None) -> str | None:
+    if provider == "minimax":
+        return os.getenv("MINIMAX_BASE_URL", default_base_url or "https://api.minimax.io/v1")
+    return default_base_url
 
 
 # ---------------------------------------------------------------------------
@@ -3554,9 +3560,10 @@ def load_adapters(skip_providers=None) -> tuple[list[BaseAdapter], list[BaseAdap
         if not api_key:
             logger.info(f"Skipping {provider} — {key_env} not set")
             continue
-        if base_url is not None:
+        resolved_base_url = _resolve_base_url(provider, base_url)
+        if resolved_base_url is not None:
             adapter = OpenAICompatibleAdapter(
-                provider, os.getenv(model_env, model_default), api_key, base_url
+                provider, os.getenv(model_env, model_default), api_key, resolved_base_url
             )
         else:
             adapter = _vendor_sdk[provider](key_env, model_env)

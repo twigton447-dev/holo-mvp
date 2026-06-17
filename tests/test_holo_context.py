@@ -104,6 +104,74 @@ def test_context_metadata_lists_included_blocks_and_size():
     assert len(packet.context_hash) == 64
 
 
+def test_runtime_identity_block_is_present_and_safe():
+    state = HoloState(session_id="s", capsule_id="raw-capsule-id")
+
+    packet = HoloContextBuilder().build(
+        base_system_prompt="base",
+        holo_state=state,
+        user_message="hello",
+        runtime_info={
+            "runtime_profile": "mini_only",
+            "active_pool": [{"provider": "openai", "model": "gpt-4o-mini"}],
+            "email": "taylor@example.com",
+            "capsule_id": "raw-capsule-id",
+        },
+        capsule_attached=True,
+    )
+
+    identity_block = packet.system_prompt.split("HOLOCHAT RUNTIME IDENTITY:", 1)[1].split("\n\n", 1)[0]
+    assert "HoloChat" in identity_block
+    assert "capsule_attached_via_token: true" in identity_block
+    assert "runtime_profile: mini_only" in identity_block
+    assert "openai:gpt-4o-mini" in identity_block
+    assert "HoloBrain" in identity_block
+    assert "HoloVerify" in identity_block
+    assert "raw-capsule-id" not in identity_block
+    assert "taylor@example.com" not in identity_block
+    assert "runtime_identity" in packet.metadata["included_blocks"]
+
+
+def test_context_memory_blocks_are_capped_and_do_not_include_sensitive_keys(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_LIFE_CONTEXT_CHARS", "900")
+    monkeypatch.setenv("HOLOCHAT_CAPSULE_CONTEXT_CHARS", "700")
+    state = HoloState(session_id="s")
+    life_context = [
+        {
+            "category": "work",
+            "key": f"project_{idx}",
+            "value": f"life-value-{idx} " + ("x" * 120),
+            "confidence": 0.95 - (idx * 0.01),
+            "reinforcement_count": idx,
+        }
+        for idx in range(20)
+    ]
+    capsule_context = {
+        "project_holochat": "high signal " + ("y" * 180),
+        **{f"noise_{idx}": "noisy " + ("z" * 160) for idx in range(20)},
+        "_password_hash": "must-not-appear",
+        "api_token_note": "must-not-appear-either",
+    }
+
+    packet = HoloContextBuilder().build(
+        base_system_prompt="base",
+        holo_state=state,
+        user_message="hello",
+        capsule_context=capsule_context,
+        life_context=life_context,
+    )
+
+    rows = {row["block_name"]: row for row in packet.metadata["context_budget"]["rows"]}
+    assert "project_holochat" in packet.system_prompt
+    assert "[context_budget] omitted" in packet.system_prompt
+    assert "must-not-appear" not in packet.system_prompt
+    assert "must-not-appear-either" not in packet.system_prompt
+    assert "life-value-19" not in packet.system_prompt
+    assert rows["life_context"]["token_estimate"] < 350
+    assert rows["capsule_context"]["token_estimate"] < 300
+    assert packet.metadata["context_budget"]["largest_blocks"]
+
+
 def test_context_budget_rows_do_not_expose_raw_memory_or_search_text():
     state = HoloState(session_id="s")
 

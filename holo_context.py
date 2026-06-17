@@ -12,6 +12,41 @@ from pydantic import BaseModel, Field
 from holo_router import RouteDecision
 from holo_state import HoloState
 
+DEFAULT_LIFE_CONTEXT_CHAR_BUDGET = 24_000
+DEFAULT_CAPSULE_CONTEXT_CHAR_BUDGET = 16_000
+DEFAULT_MEMORY_VALUE_CHAR_LIMIT = 700
+
+_SENSITIVE_CONTEXT_KEY_PARTS = (
+    "password",
+    "hash",
+    "secret",
+    "token",
+    "api_key",
+    "apikey",
+    "jwt",
+    "cookie",
+    "invite",
+    "provider_key",
+)
+
+_HIGH_SIGNAL_CONTEXT_KEY_PARTS = (
+    "about",
+    "bio",
+    "profile",
+    "project",
+    "holo",
+    "holochat",
+    "hologov",
+    "memory",
+    "goal",
+    "current",
+    "focus",
+    "work",
+    "identity",
+    "preference",
+    "style",
+)
+
 
 class ContextPacket(BaseModel):
     system_prompt: str
@@ -71,6 +106,163 @@ def _budget_status(total_token_estimate: int, budget_limit_tokens: int | None) -
     if total_token_estimate >= int(budget_limit_tokens * 0.8):
         return "near_budget"
     return "within_budget"
+
+
+def _positive_int_env(name: str, default: int) -> int:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        parsed = int(raw)
+    except ValueError:
+        return default
+    return parsed if parsed > 0 else default
+
+
+def _clip_text(value: Any, limit: int = DEFAULT_MEMORY_VALUE_CHAR_LIMIT) -> str:
+    text = " ".join(str(value or "").split())
+    if len(text) <= limit:
+        return text
+    return text[:limit].rstrip() + "..."
+
+
+def _is_sensitive_context_key(key: str) -> bool:
+    normalized = (key or "").strip().lower()
+    if normalized.startswith("_"):
+        return True
+    return any(part in normalized for part in _SENSITIVE_CONTEXT_KEY_PARTS)
+
+
+def _append_capped_line(lines: list[str], line: str, used_chars: int, char_budget: int) -> tuple[bool, int]:
+    if used_chars + len(line) + 1 > char_budget:
+        return False, used_chars
+    lines.append(line)
+    return True, used_chars + len(line) + 1
+
+
+def build_runtime_identity_block(
+    runtime_info: dict[str, Any] | None = None,
+    *,
+    capsule_attached: bool = False,
+) -> str:
+    """Small safe identity block. No capsule ids, emails, auth fields, or credentials."""
+    runtime_info = runtime_info or {}
+    active_pool = runtime_info.get("active_pool") or []
+    pool_labels = []
+    for adapter in active_pool:
+        provider = str(adapter.get("provider") or "").strip()
+        model = str(adapter.get("model") or adapter.get("model_id") or "").strip()
+        if provider or model:
+            pool_labels.append(f"{provider}:{model}" if model else provider)
+
+    lines = [
+        "HOLOCHAT RUNTIME IDENTITY:",
+        "  You are HoloChat, Taylor's local memory-attached chat surface.",
+        f"  capsule_attached_via_token: {str(bool(capsule_attached)).lower()}",
+        "  HoloBrain is the dashboard for the attached capsule's memory and context.",
+        "  Do not reveal, infer, or ask for capsule ids, emails, tokens, cookies, credentials, or auth fields.",
+        "  Do not claim ignorance of HoloChat as a product surface when this block identifies the app.",
+        "  Keep HC/HoloChat distinct from HV/HoloVerify/HoloEvidence.",
+    ]
+    if runtime_info.get("runtime_profile"):
+        lines.append(f"  runtime_profile: {runtime_info['runtime_profile']}")
+    if pool_labels:
+        lines.append(f"  active_pool: {', '.join(pool_labels)}")
+    return "\n".join(lines)
+
+
+def _rank_life_context_entries(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def sort_key(entry: dict[str, Any]) -> tuple[Any, ...]:
+        confidence = entry.get("confidence", 0)
+        try:
+            confidence_value = float(confidence)
+        except (TypeError, ValueError):
+            confidence_value = 0.0
+        reinforcement = entry.get("reinforcement_count", 0)
+        try:
+            reinforcement_value = int(reinforcement)
+        except (TypeError, ValueError):
+            reinforcement_value = 0
+        recency = str(
+            entry.get("last_reinforced")
+            or entry.get("updated_at")
+            or entry.get("created_at")
+            or ""
+        )
+        return (
+            -confidence_value,
+            -reinforcement_value,
+            recency,
+            str(entry.get("category", "")),
+            str(entry.get("key", "")),
+        )
+
+    return sorted(entries or [], key=sort_key)
+
+
+def _rank_capsule_context_items(context: dict[str, Any]) -> list[tuple[str, Any]]:
+    safe_items = [
+        (str(key), value)
+        for key, value in (context or {}).items()
+        if not _is_sensitive_context_key(str(key))
+    ]
+
+    def score_key(key: str) -> tuple[int, int, str]:
+        normalized = key.lower()
+        signal = sum(1 for part in _HIGH_SIGNAL_CONTEXT_KEY_PARTS if part in normalized)
+        return (-signal, len(str(context.get(key, ""))), normalized)
+
+    return sorted(safe_items, key=lambda item: score_key(item[0]))
+
+
+def build_life_context_block(entries: list[dict[str, Any]], header: str = "HOLOBRAIN LIFE CONTEXT:") -> str:
+    char_budget = _positive_int_env("HOLOCHAT_LIFE_CONTEXT_CHARS", DEFAULT_LIFE_CONTEXT_CHAR_BUDGET)
+    ranked = _rank_life_context_entries(entries)
+    lines = [header]
+    used_chars = len(header) + 1
+    included = 0
+
+    for entry in ranked:
+        category = entry.get("category", "patterns")
+        key = entry.get("key", "")
+        value = _clip_text(entry.get("value", ""))
+        confidence = entry.get("confidence", None)
+        conf = ""
+        try:
+            if confidence is not None and float(confidence) < 0.8:
+                conf = f" [{int(float(confidence) * 100)}% confidence]"
+        except (TypeError, ValueError):
+            conf = ""
+        line = f"  [{category}] {key}: {value}{conf}"
+        appended, used_chars = _append_capped_line(lines, line, used_chars, char_budget)
+        if not appended:
+            break
+        included += 1
+
+    omitted = max(0, len(ranked) - included)
+    if omitted:
+        lines.append(f"  [context_budget] omitted {omitted} additional life context row(s).")
+    return "\n".join(lines)
+
+
+def build_capsule_context_block(context: dict[str, Any], header: str = "HOLOBRAIN WORKING MEMORY:") -> str:
+    char_budget = _positive_int_env("HOLOCHAT_CAPSULE_CONTEXT_CHARS", DEFAULT_CAPSULE_CONTEXT_CHAR_BUDGET)
+    ranked = _rank_capsule_context_items(context)
+    lines = [header]
+    used_chars = len(header) + 1
+    included = 0
+
+    for key, value in ranked:
+        line = f"  {key}: {_clip_text(value)}"
+        appended, used_chars = _append_capped_line(lines, line, used_chars, char_budget)
+        if not appended:
+            break
+        included += 1
+
+    omitted = max(0, len(ranked) - included)
+    if omitted:
+        lines.append(f"  [context_budget] omitted {omitted} additional capsule context key(s).")
+    return "\n".join(lines)
 
 
 def build_context_budget_ledger(
@@ -147,14 +339,26 @@ class HoloContextBuilder:
         recent_history: list[dict[str, str]] | None = None,
         web_results: str | None = None,
         incognito: bool = False,
+        runtime_info: dict[str, Any] | None = None,
+        capsule_attached: bool = False,
     ) -> ContextPacket:
-        included: list[str] = ["base_system_prompt", "holo_state", "baton_pass"]
+        included: list[str] = ["base_system_prompt", "runtime_identity", "holo_state", "baton_pass"]
         omitted: list[str] = []
         state_block = self._state_block(holo_state)
+        runtime_identity_block = build_runtime_identity_block(
+            runtime_info,
+            capsule_attached=bool(capsule_attached and not incognito),
+        )
         block_entries: list[dict[str, Any]] = [
             {
                 "block_name": "base_system_prompt",
                 "content": base_system_prompt.rstrip(),
+                "included": True,
+                "source_type": "system",
+            },
+            {
+                "block_name": "runtime_identity",
+                "content": runtime_identity_block,
                 "included": True,
                 "source_type": "system",
             },
@@ -172,7 +376,7 @@ class HoloContextBuilder:
                 "reason": "represented inside HoloState metadata",
             },
         ]
-        blocks = [base_system_prompt.rstrip(), state_block]
+        blocks = [base_system_prompt.rstrip(), runtime_identity_block, state_block]
 
         if route_decision:
             route_block = self._route_block(route_decision)
@@ -414,13 +618,7 @@ class HoloContextBuilder:
 
     @staticmethod
     def _life_context_block(entries: list[dict[str, Any]]) -> str:
-        lines = ["HOLOBRAIN LIFE CONTEXT:"]
-        for entry in entries:
-            category = entry.get("category", "patterns")
-            key = entry.get("key", "")
-            value = entry.get("value", "")
-            lines.append(f"  [{category}] {key}: {value}")
-        return "\n".join(lines)
+        return build_life_context_block(entries, header="HOLOBRAIN LIFE CONTEXT:")
 
     @staticmethod
     def _latest_consolidation_block(note: dict[str, Any]) -> str:
@@ -432,9 +630,4 @@ class HoloContextBuilder:
 
     @staticmethod
     def _capsule_context_block(context: dict[str, str]) -> str:
-        lines = ["HOLOBRAIN WORKING MEMORY:"]
-        for key, value in sorted(context.items()):
-            if key.startswith("_"):
-                continue
-            lines.append(f"  {key}: {value}")
-        return "\n".join(lines)
+        return build_capsule_context_block(context, header="HOLOBRAIN WORKING MEMORY:")

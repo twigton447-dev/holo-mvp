@@ -19,7 +19,13 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
 
-from holo_context import HoloContextBuilder, build_context_budget_ledger
+from holo_context import (
+    HoloContextBuilder,
+    build_capsule_context_block,
+    build_context_budget_ledger,
+    build_life_context_block,
+    build_runtime_identity_block,
+)
 from holo_router import HoloRouter, PreviousRoute, RouteDecision
 from holo_state import HoloState, RequiredTools
 from holo_trace import HoloTraceRecord, log_trace
@@ -328,9 +334,14 @@ class HoloChatEngine:
             + (" | INCOGNITO" if incognito else "")
         )
 
-        # Inject thread-health context + portrait + working memory + Governor brief
-        # Incognito: only base system prompt — zero context leakage
-        system_prompt = HOLO_CHAT_SYSTEM_PROMPT
+        runtime_identity = build_runtime_identity_block(
+            getattr(self, "_runtime_info", {}),
+            capsule_attached=bool(capsule_id and not incognito),
+        )
+
+        # Inject runtime identity + thread-health context + portrait + working memory + Governor brief.
+        # Incognito: keeps runtime identity but strips memory context.
+        system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
         if not incognito:
             system_prompt += (
                 "\n\n" + _health_context(session)
@@ -350,6 +361,7 @@ class HoloChatEngine:
             search_results=search_results,
             images=images,
             incognito=incognito,
+            runtime_identity=runtime_identity,
         )
 
         holo4dna_shadow = None
@@ -371,6 +383,8 @@ class HoloChatEngine:
                     search_query=search_query,
                     search_results=search_results,
                     incognito=incognito,
+                    runtime_info=getattr(self, "_runtime_info", {}),
+                    capsule_attached=bool(capsule_id and not incognito),
                 )
                 session.holo4dna_previous_route = holo4dna_shadow.previous_route
             except Exception as exc:
@@ -592,7 +606,12 @@ class HoloChatEngine:
                 f"{search_results}"
             )
 
-        system_prompt = HOLO_CHAT_SYSTEM_PROMPT
+        runtime_identity = build_runtime_identity_block(
+            getattr(self, "_runtime_info", {}),
+            capsule_attached=bool(capsule_id and not incognito),
+        )
+
+        system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
         if not incognito:
             system_prompt += (
                 "\n\n" + _health_context(session)
@@ -612,6 +631,7 @@ class HoloChatEngine:
             search_results=search_results,
             images=images,
             incognito=incognito,
+            runtime_identity=runtime_identity,
         )
 
         holo4dna_shadow = None
@@ -633,6 +653,8 @@ class HoloChatEngine:
                     search_query=search_query,
                     search_results=search_results,
                     incognito=incognito,
+                    runtime_info=getattr(self, "_runtime_info", {}),
+                    capsule_attached=bool(capsule_id and not incognito),
                 )
                 session.holo4dna_previous_route = holo4dna_shadow.previous_route
             except Exception as exc:
@@ -808,11 +830,18 @@ def _runtime_context_budget(
     search_results: Optional[str],
     images: Optional[List[Dict[str, Any]]],
     incognito: bool,
+    runtime_identity: str,
 ) -> dict[str, Any]:
     blocks: list[dict[str, Any]] = [
         {
             "block_name": "base_holochat_prompt",
             "content": HOLO_CHAT_SYSTEM_PROMPT,
+            "included": True,
+            "source_type": "system",
+        },
+        {
+            "block_name": "runtime_identity",
+            "content": runtime_identity,
             "included": True,
             "source_type": "system",
         },
@@ -1018,6 +1047,8 @@ def _build_holo4dna_shadow_turn(
     search_query: Optional[str],
     search_results: Optional[str],
     incognito: bool,
+    runtime_info: dict[str, Any],
+    capsule_attached: bool,
 ) -> Holo4DnaShadowTurn:
     required_tools = _required_tools_for_turn(search_query, search_results)
     holo_state = HoloState.from_chat_turn(
@@ -1050,6 +1081,8 @@ def _build_holo4dna_shadow_turn(
         recent_history=session.history,
         web_results=search_results,
         incognito=incognito,
+        runtime_info=runtime_info,
+        capsule_attached=capsule_attached,
     )
 
     route_metadata = _route_decision_metadata(route, runtime_adapter=runtime_adapter, shadow_route=True)
@@ -1115,11 +1148,10 @@ def _life_context_block(entries: list) -> str:
     Format the Governor's permanent portrait for injection.
     This is the distilled, curated truth — highest priority context.
     """
-    lines = ["WHO THIS PERSON IS (Governor's permanent portrait — distilled across all sessions):"]
-    for e in entries:
-        conf = f" [{int(e.get('confidence', 1.0) * 100)}% confidence]" if e.get("confidence", 1.0) < 0.8 else ""
-        lines.append(f"  [{e.get('category', 'patterns')}] {e.get('key', '')}: {e.get('value', '')}{conf}")
-    return "\n".join(lines)
+    return build_life_context_block(
+        entries,
+        header="WHO THIS PERSON IS (Governor's permanent portrait — distilled across all sessions):",
+    )
 
 
 def _last_session_block(note: dict) -> str:
@@ -1139,10 +1171,10 @@ def _last_session_block(note: dict) -> str:
 
 def _capsule_context_block(context: dict) -> str:
     """Format capsule context (working memory) for injection into the system prompt."""
-    lines = ["WORKING MEMORY (facts extracted this and recent sessions — less refined than portrait):"]
-    for k, v in context.items():
-        lines.append(f"  {k}: {v}")
-    return "\n".join(lines)
+    return build_capsule_context_block(
+        context,
+        header="WORKING MEMORY (facts extracted this and recent sessions — less refined than portrait):",
+    )
 
 
 def _extract_and_save_artifacts(

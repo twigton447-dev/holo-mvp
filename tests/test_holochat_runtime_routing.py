@@ -72,6 +72,34 @@ class FakeBrain:
         pass
 
 
+class MemoryHeavyBrain(FakeBrain):
+    def get_capsule_context(self, capsule_id):
+        return {
+            "project_holochat": "attached old memory",
+            **{f"noise_{idx}": "x" * 1000 for idx in range(30)},
+            "_password_hash": "must-not-leak",
+        }
+
+    def load_life_context(self, capsule_id):
+        return [
+            {
+                "category": "work",
+                "key": f"memory_{idx}",
+                "value": f"life-memory-{idx} " + ("y" * 1000),
+                "confidence": 0.95,
+            }
+            for idx in range(30)
+        ]
+
+
+class CapturingAdapter(FakeAdapter):
+    last_system_prompt: str = ""
+
+    def chat_call(self, system_prompt, history, user_message, temperature, images=None):
+        self.last_system_prompt = system_prompt
+        return super().chat_call(system_prompt, history, user_message, temperature, images=images)
+
+
 def _mini_pool():
     return [
         FakeAdapter("openai", "gpt-4o-mini"),
@@ -176,3 +204,32 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["serial_call"] is True
     assert result["runtime"]["parallel_fanout"] is False
     assert result["runtime"]["frontier_enabled"] is False
+
+
+def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setenv("HOLOCHAT_LIFE_CONTEXT_CHARS", "1200")
+    monkeypatch.setenv("HOLOCHAT_CAPSULE_CONTEXT_CHARS", "900")
+    monkeypatch.setattr(chat_engine.random, "randrange", lambda size: 0)
+    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = MemoryHeavyBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    result = engine.send_message(str(uuid4()), "Stay attached.", capsule_id="raw-capsule-id")
+    budget_rows = {row["block_name"]: row for row in result["context_budget"]["rows"]}
+
+    assert "HOLOCHAT RUNTIME IDENTITY" in adapter.last_system_prompt
+    assert "capsule_attached_via_token: true" in adapter.last_system_prompt
+    assert "raw-capsule-id" not in adapter.last_system_prompt
+    assert "must-not-leak" not in adapter.last_system_prompt
+    assert "life-memory-29" not in adapter.last_system_prompt
+    assert "[context_budget] omitted" in adapter.last_system_prompt
+    assert budget_rows["runtime_identity"]["included"] is True
+    assert budget_rows["life_context"]["token_estimate"] < 500
+    assert budget_rows["capsule_context"]["token_estimate"] < 400
+    assert result["runtime"]["runtime_profile"] == "mini_only"

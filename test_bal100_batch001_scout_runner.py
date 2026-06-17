@@ -22,6 +22,38 @@ def _assert_non_benchmark_record(record: dict) -> None:
     assert record["freeze"] is False
 
 
+def _set_dummy_provider_keys(monkeypatch: pytest.MonkeyPatch) -> None:
+    for model in scout.MODELS:
+        monkeypatch.setenv(model["api_key_env"], "test-key")
+
+
+def _fake_execution(monkeypatch: pytest.MonkeyPatch) -> dict:
+    captured: dict = {}
+
+    def fake_execute_local_scout(timeout: int, out_dir: Path = scout.OUT_DIR, *, execution_mode: str, operator: str) -> dict:
+        captured.update(
+            {
+                "timeout": timeout,
+                "out_dir": out_dir,
+                "execution_mode": execution_mode,
+                "operator": operator,
+            }
+        )
+        return {
+            "run_id": "synthetic-run",
+            "batch_id": scout.BATCH_ID,
+            "benchmark_credit": False,
+            "official_trace": False,
+            "judge": False,
+            "freeze": False,
+            "execution_mode": execution_mode,
+            "operator": operator,
+        }
+
+    monkeypatch.setattr(scout, "execute_local_scout", fake_execute_local_scout)
+    return captured
+
+
 def test_default_scout_prepares_prompt_cards_without_provider_calls(tmp_path: Path) -> None:
     plan = scout.build_prompt_cards(out_dir=tmp_path)
 
@@ -30,6 +62,7 @@ def test_default_scout_prepares_prompt_cards_without_provider_calls(tmp_path: Pa
     assert plan["official_trace"] is False
     assert plan["judge"] is False
     assert plan["freeze"] is False
+    assert plan["execution_mode"] == "plan_only"
     assert plan["provider_calls_performed_by_script"] is False
     assert plan["packets"] == 16
     assert plan["prompt_cards"] == 80
@@ -65,6 +98,76 @@ def test_execute_mode_requires_taylor_local_approval(monkeypatch: pytest.MonkeyP
                 "--yes-send-draft-payloads-to-providers",
             ]
         )
+
+
+def test_taylor_local_mode_still_executes_with_local_gate(monkeypatch: pytest.MonkeyPatch) -> None:
+    for marker in scout.CO_ENV_MARKERS:
+        monkeypatch.delenv(marker, raising=False)
+    _set_dummy_provider_keys(monkeypatch)
+    monkeypatch.setenv(scout.APPROVAL_ENV, scout.APPROVAL_VALUE)
+    captured = _fake_execution(monkeypatch)
+
+    exit_code = scout.main(
+        [
+            "--execute-provider-calls",
+            "--operator",
+            "Taylor",
+            "--i-am-taylor-local",
+            "--yes-send-draft-payloads-to-providers",
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["execution_mode"] == "taylor_local"
+    assert captured["operator"] == "Taylor"
+
+
+def test_codex_execute_mode_refused_without_new_flag_or_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CODEX_SANDBOX", "1")
+    _set_dummy_provider_keys(monkeypatch)
+
+    with pytest.raises(SystemExit, match="--allow-codex-provider-calls"):
+        scout.main(
+            [
+                "--execute-provider-calls",
+                "--operator",
+                "Taylor",
+                "--yes-send-draft-payloads-to-providers",
+            ]
+        )
+
+    monkeypatch.delenv(scout.CODEX_APPROVAL_ENV, raising=False)
+    with pytest.raises(SystemExit, match=scout.CODEX_APPROVAL_ENV):
+        scout.main(
+            [
+                "--execute-provider-calls",
+                "--operator",
+                "Taylor",
+                "--allow-codex-provider-calls",
+                "--yes-send-draft-payloads-to-providers",
+            ]
+        )
+
+
+def test_codex_execute_mode_allowed_with_flag_and_exact_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CODEX_SANDBOX", "1")
+    monkeypatch.setenv(scout.CODEX_APPROVAL_ENV, scout.CODEX_APPROVAL_VALUE)
+    _set_dummy_provider_keys(monkeypatch)
+    captured = _fake_execution(monkeypatch)
+
+    exit_code = scout.main(
+        [
+            "--execute-provider-calls",
+            "--operator",
+            "Taylor",
+            "--allow-codex-provider-calls",
+            "--yes-send-draft-payloads-to-providers",
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["execution_mode"] == "codex_approved"
+    assert captured["operator"] == "Taylor"
 
 
 def test_http_payload_construction_does_not_require_provider_sdks() -> None:
@@ -176,9 +279,15 @@ def test_summary_error_verdicts_link_to_detailed_rows_without_repair_signal() ->
         scout._error_record(card, scout.MODELS[1], RuntimeError("network unavailable"), 13, "provider_call"),
     ]
 
-    summary = scout._summarize_results(records, "synthetic-failed-run")
+    summary = scout._summarize_results(records, "synthetic-failed-run", execution_mode="codex_approved", operator="Taylor")
     packet_summary = summary["packet_summaries"][0]
 
+    assert summary["benchmark_credit"] is False
+    assert summary["official_trace"] is False
+    assert summary["judge"] is False
+    assert summary["freeze"] is False
+    assert summary["execution_mode"] == "codex_approved"
+    assert summary["operator"] == "Taylor"
     assert summary["run_status"] == "operational_failure"
     assert summary["repair_candidates"] == []
     assert summary["discard_candidates"] == []
@@ -186,19 +295,3 @@ def test_summary_error_verdicts_link_to_detailed_rows_without_repair_signal() ->
     assert packet_summary["error_result_refs"] == [record["result_id"] for record in records]
     assert packet_summary["incomplete"] is True
     assert all(record["model_verdict"] == "ERROR" for record in records)
-
-
-def test_execute_mode_refuses_codex_environment(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("CODEX_SANDBOX", "1")
-    monkeypatch.setenv(scout.APPROVAL_ENV, scout.APPROVAL_VALUE)
-
-    with pytest.raises(SystemExit, match="Codex/Co"):
-        scout.main(
-            [
-                "--execute-provider-calls",
-                "--operator",
-                "Taylor",
-                "--i-am-taylor-local",
-                "--yes-send-draft-payloads-to-providers",
-            ]
-        )

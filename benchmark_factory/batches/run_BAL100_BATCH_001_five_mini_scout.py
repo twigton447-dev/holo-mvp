@@ -19,6 +19,8 @@ DRAFT_GLOB = "holo_builder/outputs/builder/BAL100_BEC_PAIR_*_draft_v0_1.json"
 OUT_DIR = Path("scout_runs/BAL100-BATCH-001_five_mini_solo_scout")
 APPROVAL_ENV = "BAL100_BATCH001_LOCAL_SCOUT_APPROVED"
 APPROVAL_VALUE = "I_APPROVE_PROVIDER_TRANSMISSION"
+CODEX_APPROVAL_ENV = "BAL100_BATCH001_CODEX_SCOUT_APPROVED"
+CODEX_APPROVAL_VALUE = "I_APPROVE_CODEX_PROVIDER_TRANSMISSION"
 CO_ENV_MARKERS = (
     "CODEX_SANDBOX",
     "CODEX_THREAD_ID",
@@ -112,6 +114,8 @@ def build_prompt_cards(out_dir: Path = OUT_DIR) -> dict[str, Any]:
         "official_trace": False,
         "judge": False,
         "freeze": False,
+        "execution_mode": "plan_only",
+        "operator": "",
         "provider_calls_performed_by_script": False,
         "packets": len(packets),
         "models": MODELS,
@@ -135,25 +139,34 @@ def build_prompt_cards(out_dir: Path = OUT_DIR) -> dict[str, Any]:
     return plan
 
 
-def _require_local_execution_approval(args: argparse.Namespace) -> None:
-    if any(os.getenv(marker) for marker in CO_ENV_MARKERS):
-        raise SystemExit(
-            "Refusing provider calls from Codex/Co environment. "
-            "Taylor must run this local-only scout in Mac Terminal."
-        )
+def _in_codex_environment() -> bool:
+    return any(os.getenv(marker) for marker in CO_ENV_MARKERS)
+
+
+def _require_execution_approval(args: argparse.Namespace) -> str:
     _load_dotenv_if_available()
     if args.operator != "Taylor":
-        raise SystemExit("--operator Taylor is required for local scout execution.")
-    if not args.i_am_taylor_local:
-        raise SystemExit("--i-am-taylor-local is required for local scout execution.")
+        raise SystemExit("--operator Taylor is required for scout execution.")
     if not args.yes_send_draft_payloads_to_providers:
         raise SystemExit("--yes-send-draft-payloads-to-providers is required.")
-    if os.getenv(APPROVAL_ENV) != APPROVAL_VALUE:
-        raise SystemExit(f"{APPROVAL_ENV}={APPROVAL_VALUE} is required.")
+
+    if _in_codex_environment():
+        if not args.allow_codex_provider_calls:
+            raise SystemExit("--allow-codex-provider-calls is required for Taylor-approved Codex/Co scout execution.")
+        if os.getenv(CODEX_APPROVAL_ENV) != CODEX_APPROVAL_VALUE:
+            raise SystemExit(f"{CODEX_APPROVAL_ENV}={CODEX_APPROVAL_VALUE} is required.")
+        execution_mode = "codex_approved"
+    else:
+        if not args.i_am_taylor_local:
+            raise SystemExit("--i-am-taylor-local is required for Taylor-local scout execution.")
+        if os.getenv(APPROVAL_ENV) != APPROVAL_VALUE:
+            raise SystemExit(f"{APPROVAL_ENV}={APPROVAL_VALUE} is required.")
+        execution_mode = "taylor_local"
 
     missing = [model["api_key_env"] for model in MODELS if not os.getenv(model["api_key_env"])]
     if missing:
         raise SystemExit("Missing API key environment variables: " + ", ".join(sorted(missing)))
+    return execution_mode
 
 
 def _new_run_dir(out_dir: Path) -> tuple[str, Path]:
@@ -380,7 +393,14 @@ def _result_id(card: dict[str, Any], model: dict[str, str]) -> str:
     return f"{card['packet_id']}::{model['provider']}::{model['model']}"
 
 
-def _base_record(card: dict[str, Any], model: dict[str, str], latency_ms: int) -> dict[str, Any]:
+def _base_record(
+    card: dict[str, Any],
+    model: dict[str, str],
+    latency_ms: int,
+    *,
+    execution_mode: str = "",
+    operator: str = "",
+) -> dict[str, Any]:
     return {
         "result_id": _result_id(card, model),
         "batch_id": BATCH_ID,
@@ -388,6 +408,8 @@ def _base_record(card: dict[str, Any], model: dict[str, str], latency_ms: int) -
         "official_trace": False,
         "judge": False,
         "freeze": False,
+        "execution_mode": execution_mode,
+        "operator": operator,
         "packet_id": card["packet_id"],
         "builder_hypothesis": card["builder_hypothesis"],
         "provider": model["provider"],
@@ -397,17 +419,32 @@ def _base_record(card: dict[str, Any], model: dict[str, str], latency_ms: int) -
     }
 
 
-def attempt_provider_call(card: dict[str, Any], model: dict[str, str], timeout: int) -> dict[str, Any]:
+def attempt_provider_call(
+    card: dict[str, Any],
+    model: dict[str, str],
+    timeout: int,
+    *,
+    execution_mode: str = "",
+    operator: str = "",
+) -> dict[str, Any]:
     start = time.time()
     try:
         call_result = _call_provider_raw(card, model, timeout)
     except Exception as exc:
-        return _error_record(card, model, exc, int((time.time() - start) * 1000), error_stage="provider_call")
+        return _error_record(
+            card,
+            model,
+            exc,
+            int((time.time() - start) * 1000),
+            error_stage="provider_call",
+            execution_mode=execution_mode,
+            operator=operator,
+        )
 
     latency_ms = int((time.time() - start) * 1000)
     raw_text = call_result["raw_text"]
     parsed = _parse_model_verdict(raw_text)
-    record = _base_record(card, model, latency_ms)
+    record = _base_record(card, model, latency_ms, execution_mode=execution_mode, operator=operator)
     record.update(
         {
             "provider_call_ok": True,
@@ -440,7 +477,16 @@ def _call_provider_raw(card: dict[str, Any], model: dict[str, str], timeout: int
     return _call_openai_compatible(card, model, timeout)
 
 
-def _error_record(card: dict[str, Any], model: dict[str, str], exc: Exception, latency_ms: int, error_stage: str) -> dict[str, Any]:
+def _error_record(
+    card: dict[str, Any],
+    model: dict[str, str],
+    exc: Exception,
+    latency_ms: int,
+    error_stage: str,
+    *,
+    execution_mode: str = "",
+    operator: str = "",
+) -> dict[str, Any]:
     if isinstance(exc, ProviderCallError):
         error_type = exc.error_type
         error_message = str(exc)
@@ -451,7 +497,7 @@ def _error_record(card: dict[str, Any], model: dict[str, str], exc: Exception, l
         error_message = str(exc)
         http_status = None
         raw_text = ""
-    record = _base_record(card, model, latency_ms)
+    record = _base_record(card, model, latency_ms, execution_mode=execution_mode, operator=operator)
     record.update(
         {
             "provider_call_ok": False,
@@ -471,7 +517,13 @@ def _error_record(card: dict[str, Any], model: dict[str, str], exc: Exception, l
     return record
 
 
-def _summarize_results(records: list[dict[str, Any]], run_id: str) -> dict[str, Any]:
+def _summarize_results(
+    records: list[dict[str, Any]],
+    run_id: str,
+    *,
+    execution_mode: str = "",
+    operator: str = "",
+) -> dict[str, Any]:
     by_packet: dict[str, list[dict[str, Any]]] = {}
     for record in records:
         by_packet.setdefault(record["packet_id"], []).append(record)
@@ -541,6 +593,8 @@ def _summarize_results(records: list[dict[str, Any]], run_id: str) -> dict[str, 
         "official_trace": False,
         "judge": False,
         "freeze": False,
+        "execution_mode": execution_mode or (records[0].get("execution_mode", "") if records else ""),
+        "operator": operator or (records[0].get("operator", "") if records else ""),
         "run_status": "operational_failure" if records and len(error_records) == len(records) else "complete",
         "packets": len(by_packet),
         "models": MODELS,
@@ -558,7 +612,13 @@ def _summarize_results(records: list[dict[str, Any]], run_id: str) -> dict[str, 
     }
 
 
-def execute_local_scout(timeout: int, out_dir: Path = OUT_DIR) -> dict[str, Any]:
+def execute_local_scout(
+    timeout: int,
+    out_dir: Path = OUT_DIR,
+    *,
+    execution_mode: str = "taylor_local",
+    operator: str = "Taylor",
+) -> dict[str, Any]:
     packets = _load_packets()
     run_id, run_dir = _new_run_dir(out_dir)
 
@@ -574,12 +634,12 @@ def execute_local_scout(timeout: int, out_dir: Path = OUT_DIR) -> dict[str, Any]
             (prompt_dir / f"{packet['scenario_id']}__{model['provider']}__{safe_model}.json").write_text(
                 json.dumps(card, indent=2, sort_keys=True) + "\n"
             )
-            record = attempt_provider_call(card, model, timeout)
+            record = attempt_provider_call(card, model, timeout, execution_mode=execution_mode, operator=operator)
             records.append(record)
             with results_path.open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(record, sort_keys=True) + "\n")
 
-    summary = _summarize_results(records, run_id)
+    summary = _summarize_results(records, run_id, execution_mode=execution_mode, operator=operator)
     summary["run_dir"] = str(run_dir)
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     return summary
@@ -590,10 +650,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--execute-provider-calls",
         action="store_true",
-        help="Taylor-local only. Sends the 16 draft payloads to five mini providers.",
+        help="Sends the 16 draft payloads to five mini providers when an explicit Taylor approval gate is satisfied.",
     )
-    parser.add_argument("--operator", default="", help="Must be Taylor for local provider execution.")
-    parser.add_argument("--i-am-taylor-local", action="store_true", help="Required local-only execution acknowledgement.")
+    parser.add_argument("--operator", default="", help="Must be Taylor for provider execution.")
+    parser.add_argument("--i-am-taylor-local", action="store_true", help="Required Taylor-local execution acknowledgement.")
+    parser.add_argument(
+        "--allow-codex-provider-calls",
+        action="store_true",
+        help="Required only for Taylor-approved Codex/Co provider execution.",
+    )
     parser.add_argument(
         "--yes-send-draft-payloads-to-providers",
         action="store_true",
@@ -608,8 +673,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.execute_provider_calls:
-        _require_local_execution_approval(args)
-        summary = execute_local_scout(timeout=args.timeout)
+        execution_mode = _require_execution_approval(args)
+        summary = execute_local_scout(timeout=args.timeout, execution_mode=execution_mode, operator=args.operator)
         print(json.dumps(summary, indent=2, sort_keys=True))
         return 0
 

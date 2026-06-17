@@ -145,7 +145,7 @@ def build_runtime_identity_block(
     *,
     capsule_attached: bool = False,
 ) -> str:
-    """Small safe identity block. No capsule ids, emails, auth fields, or credentials."""
+    """Small safe identity block. No capsule ids, emails, or credentials."""
     runtime_info = runtime_info or {}
     active_pool = runtime_info.get("active_pool") or []
     pool_labels = []
@@ -157,12 +157,14 @@ def build_runtime_identity_block(
 
     lines = [
         "HOLOCHAT RUNTIME IDENTITY:",
-        "  You are HoloChat, Taylor's local memory-attached chat surface.",
-        f"  capsule_attached_via_token: {str(bool(capsule_attached)).lower()}",
-        "  HoloBrain is the dashboard for the attached capsule's memory and context.",
-        "  Do not reveal, infer, or ask for capsule ids, emails, tokens, cookies, credentials, or auth fields.",
+        "  You are HoloChat, Taylor's local memory-attached workspace and chat surface.",
+        f"  capsule_attached: {str(bool(capsule_attached)).lower()}",
+        "  You are attached to the signed-in capsule and HoloBrain memory/dashboard.",
+        "  You help with conversation, memory, context, drafts, planning, project continuity, and workspace interactions.",
         "  Do not claim ignorance of HoloChat as a product surface when this block identifies the app.",
         "  Keep HC/HoloChat distinct from HV/HoloVerify/HoloEvidence.",
+        "  HoloVerify/Holo Engine is the runtime trust and action-boundary layer for irreversible-action adjudication and ALLOW/ESCALATE decisions.",
+        "  HoloChat may discuss or coordinate HoloVerify work, but HoloChat itself is not the irreversible-action adjudicator.",
     ]
     if runtime_info.get("runtime_profile"):
         lines.append(f"  runtime_profile: {runtime_info['runtime_profile']}")

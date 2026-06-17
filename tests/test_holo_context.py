@@ -122,13 +122,23 @@ def test_runtime_identity_block_is_present_and_safe():
 
     identity_block = packet.system_prompt.split("HOLOCHAT RUNTIME IDENTITY:", 1)[1].split("\n\n", 1)[0]
     assert "HoloChat" in identity_block
-    assert "capsule_attached_via_token: true" in identity_block
+    assert "local memory-attached workspace and chat surface" in identity_block
+    assert "capsule_attached: true" in identity_block
+    assert "signed-in capsule" in identity_block
+    assert "conversation, memory, context, drafts, planning, project continuity" in identity_block
     assert "runtime_profile: mini_only" in identity_block
     assert "openai:gpt-4o-mini" in identity_block
     assert "HoloBrain" in identity_block
     assert "HoloVerify" in identity_block
+    assert "HoloEvidence" in identity_block
+    assert "HoloVerify/Holo Engine" in identity_block
+    assert "ALLOW/ESCALATE" in identity_block
+    assert "HoloChat itself is not the irreversible-action adjudicator" in identity_block
+    assert "evaluates agent actions before execution" not in identity_block
     assert "raw-capsule-id" not in identity_block
     assert "taylor@example.com" not in identity_block
+    for unsafe_word in ("token", "cookie", "auth", "Supabase", "secret", "password"):
+        assert unsafe_word.lower() not in identity_block.lower()
     assert "runtime_identity" in packet.metadata["included_blocks"]
 
 

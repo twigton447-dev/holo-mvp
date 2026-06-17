@@ -224,7 +224,9 @@ def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeyp
     budget_rows = {row["block_name"]: row for row in result["context_budget"]["rows"]}
 
     assert "HOLOCHAT RUNTIME IDENTITY" in adapter.last_system_prompt
-    assert "capsule_attached_via_token: true" in adapter.last_system_prompt
+    assert "capsule_attached: true" in adapter.last_system_prompt
+    assert "local memory-attached workspace and chat surface" in adapter.last_system_prompt
+    assert "HoloChat itself is not the irreversible-action adjudicator" in adapter.last_system_prompt
     assert "raw-capsule-id" not in adapter.last_system_prompt
     assert "must-not-leak" not in adapter.last_system_prompt
     assert "life-memory-29" not in adapter.last_system_prompt

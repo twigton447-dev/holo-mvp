@@ -153,68 +153,70 @@ ESCALATE packets that rely on vague suspicion are not benchmark-grade. The evalu
 
 ---
 
-## Part 4: HQA Taxonomy (v0.1)
+## Part 4: Optional Diagnostic Review Taxonomy (v0.1)
 
-### 4.1 Freeze-Eligible States
+QA/HQA-style adversarial review is optional diagnostic packet review. It may find shortcuts, tells, construction errors, or retire-worthy specs, but it does not define benchmark truth and is not a freeze gate. HoloBuild may carry an `expected_verdict` as a builder hypothesis only. Judge defines benchmark truth after reviewing frozen packet traces.
+
+### 4.1 Diagnostic Clean States
 
 #### CLEAN_TO_FREEZE
 - **Meaning:** Packet is structurally sound with no residual ambiguity concerns. Verdict is clearly supported by multi-document evidence.
-- **Freeze:** Yes
-- **HEN:** Yes, after freeze
+- **Freeze:** No direct gate — freeze requires `build_freeze_manifest` and Taylor approval
+- **Benchmark testing:** Only after freeze
 - **Repair:** Not needed
 - **Retire:** No
 
 #### DEFENSIBLE_ALLOW_FREEZE
 - **Meaning:** Packet meets the Defensible ALLOW standard. Contains realistic enterprise messiness and valid residual ambiguity. No material blockers. No construction errors. No verdict shortcuts. Multi-document resolution required.
-- **Freeze:** Yes
-- **HEN:** Yes, after freeze
+- **Freeze:** No direct gate — freeze requires `build_freeze_manifest` and Taylor approval
+- **Benchmark testing:** Only after freeze
 - **Repair:** Not needed
 - **Retire:** No
-- **Note:** This is the primary freeze state for ALLOW packets going forward.
+- **Note:** This may support a freeze decision, but it is diagnostic evidence only.
 
 ### 4.2 Non-Freeze, Non-Retire States
 
 #### VALID_WITH_RESIDUAL_AMBIGUITY
-- **Meaning:** Packet is structurally valid and verdict is defensible. HQA has identified non-material ambiguity warranting acknowledgment.
-- **Freeze:** Conditional — only after confirming ambiguity is non-material
-- **HEN:** Only if freeze confirmed
+- **Meaning:** Packet is structurally valid and verdict is defensible. Optional diagnostic review has identified non-material ambiguity warranting acknowledgment.
+- **Freeze:** No direct gate — freeze requires `build_freeze_manifest` and Taylor approval
+- **Benchmark testing:** Only after freeze
 - **Repair:** Optional — may clarify without changing spec
 - **Retire:** No
 
 #### NEEDS_REPAIR
 - **Meaning:** One or more component-level construction errors present (invented facts, dangling refs, contradictory values). Errors are locatable and fixable without changing the benchmark thesis.
 - **Freeze:** No — only after repair clears
-- **HEN:** No
+- **Benchmark testing:** No
 - **Repair:** Yes — targeted component fixes
 - **Retire:** No (unless repair reveals a spec-level issue)
 
 ### 4.3 Diagnostic States
 
 #### OVERFIT_RISK
-- **Meaning:** HQA detected checklist-shaped policy mapping, verdict-direction language, or near-hub artifacts. May be repairable if a single artifact is the source; likely retire-worthy if the spec is the source.
+- **Meaning:** Optional diagnostic review detected checklist-shaped policy mapping, verdict-direction language, or near-hub artifacts. May be repairable if a single artifact is the source; likely retire-worthy if the spec is the source.
 - **Freeze:** No
-- **HEN:** No
+- **Benchmark testing:** No
 - **Repair:** Conditional — only if overfit source is a single artifact
 - **Retire:** Yes, if spec-level
 
 #### TOO_EASY
 - **Meaning:** Verdict is correct but reachable from fewer than 3 cross-document joins, or from a single artifact.
 - **Freeze:** No
-- **HEN:** No
+- **Benchmark testing:** No
 - **Repair:** Yes — add friction artifacts; raise minimum join count
 - **Retire:** No
 
 #### MATERIAL_GAP_PRESENT
 - **Meaning:** A material blocker is present that was not designed into the packet. For ALLOW packets: construction error. For ESCALATE packets: validate it is the intended blocker.
 - **Freeze:** No
-- **HEN:** No
+- **Benchmark testing:** No
 - **Repair:** Yes for ALLOW; validate for ESCALATE
 - **Retire:** No
 
 #### INVALID_CONSTRUCTION
 - **Meaning:** Multiple construction errors at a level that corrupts the evidence chain. Invented IDs, internal contradictions, missing facts, dangling cross-references.
 - **Freeze:** No
-- **HEN:** No
+- **Benchmark testing:** No
 - **Repair:** Only if errors are isolated to 1-2 artifacts
 - **Retire:** If errors are systemic
 
@@ -223,7 +225,7 @@ ESCALATE packets that rely on vague suspicion are not benchmark-grade. The evalu
 #### RETIRE_SPEC
 - **Meaning:** The spec is the problem. Generator behavior will reliably produce invalid packets regardless of component-level fixes. The benchmark thesis is not recoverable in the current slot/policy/artifact configuration.
 - **Freeze:** No
-- **HEN:** No
+- **Benchmark testing:** No
 - **Repair:** No
 - **Retire:** Yes — document factory lessons before retiring
 
@@ -291,23 +293,29 @@ These may appear in packets and are safe to leave unresolved:
 | No construction contradictions | No two artifacts contradict each other on material facts |
 | No open/pending workflow state | Unless target verdict is ESCALATE |
 | No checklist policy mapping | Policy is principle-level; artifacts do not map 1:1 to policy steps |
-| HQA freeze-eligible | Classification must be CLEAN_TO_FREEZE or DEFENSIBLE_ALLOW_FREEZE |
-| HEN has not seen the packet | HEN runs post-freeze only |
+| Static lint pass | `static_lint_result` must be PASS |
+| Payload visibility pass | `payload_visibility_result` must be PASS |
+| No model-visible expected verdict | `expected_verdict` may exist only as builder metadata, never in payload |
+| Hash-bound manifest | `payload_hash` must match the computed payload hash |
+| No live model calls | Freeze manifest must record `no_live_model_calls=true` |
+| Taylor approval | `taylor_approved_for_freeze=true` |
 
 ### 6.2 Additional Block Conditions
 
 Freeze is blocked even if all mandatory conditions pass if:
-- HQA has classified the packet OVERFIT_RISK at any prior run without a spec-level fix
 - The packet has already received a RETIRE_SPEC classification
 - Evidence shattering minimum (3 artifacts per suspicion) is not met
+- The `build_freeze_manifest` is missing, stale, unapproved, or not hash-bound to the packet payload
 
 ### 6.3 Freeze Procedure
 
-1. HQA returns CLEAN_TO_FREEZE or DEFENSIBLE_ALLOW_FREEZE
-2. Taylor reviews classification and approves freeze
-3. Packet is frozen — no further modification
-4. HEN runs on frozen packet only
-5. Ablation matrix runs
+1. Static lint passes.
+2. Payload visibility check confirms only `payload.action` and `payload.context` are model-visible, with no model-visible `expected_verdict`.
+3. `build_freeze_manifest` records packet path, scenario ID, payload hash, builder hypothesis verdict, static check results, no live model calls, and `taylor_approved_for_freeze=true`.
+4. Packet is frozen — no further modification.
+5. Benchmark testing starts only after freeze.
+6. Ablation matrix runs.
+7. Judge defines benchmark truth after reviewing frozen packet traces.
 
 ---
 
@@ -513,7 +521,7 @@ Every benchmark result should answer: Is this claim defensible, and does it gene
 
 **Day 1–2: Standard and Taxonomy**
 - Finalize this document
-- Review HQA taxonomy with Taylor
+- Review optional diagnostic taxonomy with Taylor
 - Confirm next family: IAM SoD
 - No packet generation
 
@@ -538,17 +546,20 @@ Every benchmark result should answer: Is this claim defensible, and does it gene
 
 ### Week 2
 
-**Day 8–10: ALLOW Sibling Generation and HQA**
+**Day 8–10: ALLOW Sibling Generation and Freeze Intake**
 - Generate HBB-IAM-SoD-001
-- Run HQA — classify under v0.1 taxonomy
-- If DEFENSIBLE_ALLOW_FREEZE: pause, report, await freeze approval
-- If NEEDS_REPAIR: repair and re-run HQA once
+- Run static lint and payload visibility checks
+- Generate `build_freeze_manifest` with Taylor approval defaulting to false
+- Optional diagnostic/adversarial review may be run, but it is not a freeze gate
+- If static checks pass: pause, report, await Taylor freeze approval
+- If static checks fail: repair and re-run static checks once
 - If RETIRE_SPEC: document lessons, stop; do not generate ESCALATE sibling
 
 **Day 11–12: ESCALATE Sibling**
 - If ALLOW sibling clears: generate HBB-IAM-SoD-002
-- Run HQA on ESCALATE sibling
-- Classify; confirm material blocker is identifiable from evidence
+- Run static lint and payload visibility checks
+- Generate `build_freeze_manifest` with Taylor approval defaulting to false
+- Confirm the builder hypothesis identifies a material blocker from evidence
 
 **Day 13–14: Freeze and Ablations (if both siblings clear)**
 - Freeze both siblings (pending Taylor approval)
@@ -560,10 +571,10 @@ Every benchmark result should answer: Is this claim defensible, and does it gene
 ### Stop Conditions
 
 Stop and review if any of the following occur:
-- HQA returns RETIRE_SPEC on any packet
-- HQA returns OVERFIT_RISK twice on the same packet without a spec-level fix
+- Optional diagnostic review returns RETIRE_SPEC on any packet
+- Optional diagnostic review returns OVERFIT_RISK twice on the same packet without a spec-level fix
 - Repair cycle exceeds 2 rounds without resolution
-- ALLOW sibling verdict drifts to ESCALATE in HQA
+- ALLOW sibling builder hypothesis drifts to ESCALATE during construction
 - ESCALATE sibling material blocker is not identifiable from the evidence
 
 ---
@@ -572,8 +583,8 @@ Stop and review if any of the following occur:
 
 Rules 1–5 locked from HBB-BEC-001 iteration history. Rules 6–15 added from HBB-BEC-001C RETIRE and this standard.
 
-1. No HEN until HQA returns a freeze-eligible classification.
-2. No freeze until HQA returns a freeze-eligible classification and Taylor approves.
+1. No benchmark testing until a packet is frozen through a hash-bound `build_freeze_manifest`.
+2. No freeze until static lint, payload visibility, no-live-model-call attestation, and Taylor approval are recorded in `build_freeze_manifest`.
 3. Hard ALLOW packets must not include unresolved control-routing artifacts.
 4. Fragile slots must use strict allowlists. Fragile slots include: policy documents, invoice/payment artifacts, portal/submission records, controller/reviewer notes, approval signature logs, reconciliation workpapers, accounting extracts, and any slot where generator elaboration can create new decisive facts.
 5. Policy documents must be principle-level. No mandatory sequences. No step-to-artifact mapping.

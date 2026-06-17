@@ -1,29 +1,24 @@
 """
 holo_builder/freeze.py
 
-Freeze a Builder candidate that has passed QA Attacker review.
+Freeze a Builder candidate with a static build_freeze_manifest gate.
 
-Precondition: QA Attacker final_classification == CLEAN_TO_FREEZE.
+Precondition: a build_freeze_manifest is hash-bound to the packet payload and
+explicitly approved by Taylor.
 
-Steps:
-  1. Extract payload (action + context) — the only thing Engine will see.
-  2. Compute SHA-256 of canonical payload JSON (sort_keys=True).
-  3. Stamp packet with _frozen metadata block (hash, qa_classification, frozen_at).
-  4. Write frozen packet to holo_builder/outputs/frozen/<scenario_id>_<hash8>.json.
-  5. Append ledger entry to holo_builder/outputs/ledger.jsonl.
-
-The frozen packet is the artifact that goes to Engine blind adjudication.
-Engine receives only the frozen packet payload — not the _frozen, _builder, or _internal blocks.
-
-Usage:
-  from holo_builder.freeze import freeze_packet
-  frozen_path, pkg_hash = freeze_packet(packet, qa_result, original_packet_path)
+The frozen packet is the artifact that goes to benchmark execution. Evaluation
+models receive only the frozen packet payload — not _frozen, _builder, _internal,
+or expected_verdict metadata.
 """
 
-import hashlib
+from __future__ import annotations
+
+import copy
 import json
 from datetime import datetime
 from pathlib import Path
+
+from holo_builder.freeze_manifest import compute_payload_hash, validate_build_freeze_manifest
 
 
 LEDGER_PATH = Path("holo_builder/outputs/ledger.jsonl")
@@ -32,54 +27,50 @@ FROZEN_DIR  = Path("holo_builder/outputs/frozen")
 
 def _payload_hash(packet: dict) -> str:
     """SHA-256 of canonical payload JSON (action + context only, sort_keys=True)."""
-    payload = packet.get("payload", {})
-    canonical = {
-        "action":  payload.get("action", {}),
-        "context": payload.get("context", {}),
-    }
-    canonical_json = json.dumps(canonical, sort_keys=True, ensure_ascii=True)
-    return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
+    return compute_payload_hash(packet)
 
 
-def freeze_packet(packet: dict, qa_result: dict,
+def freeze_packet(packet: dict, build_freeze_manifest: dict,
                   original_path: Path | None = None) -> tuple[Path, str]:
     """
-    Freeze a packet after QA Attacker approval.
+    Freeze a packet after static build manifest approval.
 
     Args:
       packet:        Full packet dict (including _builder, _internal, payload).
-      qa_result:     QA Attacker result dict (must have final_classification=CLEAN_TO_FREEZE).
+      build_freeze_manifest: Static manifest approving freeze for this payload hash.
       original_path: Original packet file path (used only for logging).
 
     Returns:
       (frozen_path, sha256_hash)
 
     Raises:
-      ValueError if QA classification is not CLEAN_TO_FREEZE.
+      ValueError if the manifest is missing, stale, or not approved.
     """
-    classification = qa_result.get("final_classification", "")
-    if classification != "CLEAN_TO_FREEZE":
-        raise ValueError(
-            f"Cannot freeze: QA classification is '{classification}', "
-            f"must be CLEAN_TO_FREEZE."
-        )
-
-    pkg_hash = _payload_hash(packet)
+    pkg_hash = validate_build_freeze_manifest(
+        packet,
+        build_freeze_manifest,
+        original_path or Path(build_freeze_manifest.get("packet_path", "")),
+    )
     hash8    = pkg_hash[:8]
     scenario_id = packet.get("scenario_id", "unknown")
     frozen_at   = datetime.utcnow().isoformat() + "Z"
 
     # Stamp packet with _frozen block
-    import copy
     frozen_packet = copy.deepcopy(packet)
     frozen_packet["_frozen"] = {
-        "hash":              pkg_hash,
-        "hash8":             hash8,
-        "qa_classification": classification,
-        "qa_id":             qa_result.get("qa_id", ""),
-        "qa_turns":          qa_result.get("turns_completed", 0),
-        "frozen_at":         frozen_at,
-        "source_path":       str(original_path) if original_path else "",
+        "hash":                              pkg_hash,
+        "hash8":                             hash8,
+        "freeze_gate":                       "build_freeze_manifest",
+        "manifest_type":                     build_freeze_manifest.get("manifest_type", ""),
+        "manifest_timestamp":                build_freeze_manifest.get("timestamp", ""),
+        "builder_hypothesis_verdict":        build_freeze_manifest.get("builder_hypothesis_verdict", ""),
+        "static_lint_result":                build_freeze_manifest.get("static_lint_result", ""),
+        "payload_visibility_result":         build_freeze_manifest.get("payload_visibility_result", ""),
+        "no_model_visible_expected_verdict": build_freeze_manifest.get("no_model_visible_expected_verdict", False),
+        "no_live_model_calls":               build_freeze_manifest.get("no_live_model_calls", False),
+        "approved_by":                       build_freeze_manifest.get("approved_by"),
+        "frozen_at":                         frozen_at,
+        "source_path":                       str(original_path) if original_path else "",
     }
     frozen_packet["scenario_status"] = "frozen"
 
@@ -91,14 +82,16 @@ def freeze_packet(packet: dict, qa_result: dict,
     # Append ledger entry
     LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
     ledger_entry = {
-        "scenario_id":       scenario_id,
-        "hash":              pkg_hash,
-        "hash8":             hash8,
-        "qa_classification": classification,
-        "qa_id":             qa_result.get("qa_id", ""),
-        "frozen_at":         frozen_at,
-        "frozen_path":       str(frozen_path),
-        "source_path":       str(original_path) if original_path else "",
+        "scenario_id":                scenario_id,
+        "hash":                       pkg_hash,
+        "hash8":                      hash8,
+        "freeze_gate":                "build_freeze_manifest",
+        "builder_hypothesis_verdict": build_freeze_manifest.get("builder_hypothesis_verdict", ""),
+        "manifest_timestamp":         build_freeze_manifest.get("timestamp", ""),
+        "approved_by":                build_freeze_manifest.get("approved_by"),
+        "frozen_at":                  frozen_at,
+        "frozen_path":                str(frozen_path),
+        "source_path":                str(original_path) if original_path else "",
     }
     with open(LEDGER_PATH, "a") as f:
         f.write(json.dumps(ledger_entry) + "\n")

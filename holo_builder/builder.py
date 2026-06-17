@@ -16,17 +16,20 @@ Commands:
       Print Builder run status from a saved result.
 
   qa-attack <packet.json> [--output <dir>]
-      Run the standalone QA Attacker on a finished packet candidate.
+      Optional diagnostic/adversarial packet review. Not a freeze gate.
       Blind: receives payload only. No target verdict. No Builder notes.
       Output: CLEAN_TO_FREEZE / NEEDS_REPAIR / DIRTY_PACKET / TOO_EASY /
               TOO_AMBIGUOUS / OVERFIT_RISK / RETIRE
 
-  freeze <packet.json> <qa_result.json>
-      Freeze a packet after QA Attacker returns CLEAN_TO_FREEZE.
+  freeze-manifest <packet.json> [--output <path>]
+      Generate a static build_freeze_manifest. Taylor approval defaults false.
+
+  freeze <packet.json> <build_freeze_manifest.json>
+      Freeze a packet after static manifest approval.
       Generates SHA-256 hash, writes ledger entry, stores frozen candidate.
 
   authorize-final <packet.json> --confirmed
-      Gate before Engine blind adjudication. Requires BUILDER_CONVERGED + QA CLEAN_TO_FREEZE.
+      Gate before Engine blind adjudication. Requires frozen build manifest.
       After this: python run_blind_adjudication.py <packet.json>
 
 Usage:
@@ -35,7 +38,8 @@ Usage:
   python holo_builder/builder.py lint docs/benchmark/payloads/HBB-BEC-001_v1.json
   python holo_builder/builder.py status builder_results/builder_20260530_HBB-BEC-001.json
   python holo_builder/builder.py qa-attack docs/benchmark/payloads/HBB-BEC-001_v1.json
-  python holo_builder/builder.py freeze docs/benchmark/payloads/HBB-BEC-001_v1.json qa_results/qa_20260530_HBB-BEC-001.json
+  python holo_builder/builder.py freeze-manifest docs/benchmark/payloads/HBB-BEC-001_v1.json
+  python holo_builder/builder.py freeze docs/benchmark/payloads/HBB-BEC-001_v1.json holo_builder/outputs/freeze_manifest/HBB-BEC-001_build_freeze_manifest.json
   python holo_builder/builder.py authorize-final docs/benchmark/payloads/HBB-BEC-001_v1.json --confirmed
 """
 
@@ -116,9 +120,9 @@ def cmd_build(args):
             lint_result.print_report(scenario_id)
             if lint_result.passed:
                 print("  Lint PASS.")
-                print("  Next: python holo_builder/builder.py qa-attack <packet>")
+                print("  Next: python holo_builder/builder.py freeze-manifest <packet>")
             else:
-                print("  Lint FAIL. Fix errors before QA Attacker review.")
+                print("  Lint FAIL. Fix errors before freeze manifest generation.")
         elif builder_status == "BUILDER_RETIRED":
             print(f"\n  BUILDER_RETIRED: structural flaw. Build a new spec.")
         elif builder_status == "BUILDER_PROVIDER_FALLBACK_USED":
@@ -199,7 +203,7 @@ def cmd_status(args):
     print(f"{'='*65}\n")
 
     if builder_status == "BUILDER_CONVERGED" and has_draft:
-        print("  Next: python holo_builder/builder.py qa-attack docs/benchmark/payloads/<scenario>_v1.json")
+        print("  Next: python holo_builder/builder.py freeze-manifest docs/benchmark/payloads/<scenario>_v1.json")
     elif builder_status == "BUILDER_RETIRED":
         print("  Retired: rebuild the spec, do not re-run this packet.")
     elif builder_status == "BUILDER_PROVIDER_FALLBACK_USED":
@@ -238,7 +242,7 @@ def cmd_qa_attack(args):
     print(f"\n  QA ATTACKER: {scenario_id}")
     print(f"  Classification: {classification}")
     if classification == "CLEAN_TO_FREEZE":
-        print("  Next: python holo_builder/builder.py freeze <packet> <qa_result>")
+        print("  Diagnostic only: QA Attacker is not a freeze gate.")
     elif classification == "RETIRE":
         print("  RETIRE: structural flaw. Rebuild the spec.")
     else:
@@ -247,27 +251,51 @@ def cmd_qa_attack(args):
     return result
 
 
+def cmd_freeze_manifest(args):
+    from holo_builder.freeze_manifest import build_freeze_manifest
+
+    packet_path = Path(args.packet)
+    if not packet_path.exists():
+        print(f"ERROR: packet not found: {packet_path}")
+        sys.exit(1)
+
+    packet = json.loads(packet_path.read_text())
+    scenario_id = packet.get("scenario_id", packet_path.stem)
+    manifest = build_freeze_manifest(packet, packet_path)
+
+    if args.output:
+        result_path = Path(args.output)
+    else:
+        out_dir = Path("holo_builder/outputs/freeze_manifest")
+        result_path = out_dir / f"{scenario_id}_build_freeze_manifest.json"
+
+    result_path.parent.mkdir(parents=True, exist_ok=True)
+    result_path.write_text(json.dumps(manifest, indent=2))
+    print(f"  Freeze manifest saved: {result_path}")
+    print(f"  Payload hash: {manifest['payload_hash']}")
+    print("  Taylor approval defaults false. Set taylor_approved_for_freeze=true only after explicit approval.")
+    return manifest
+
+
 def cmd_freeze(args):
     from holo_builder.freeze import freeze_packet
 
     packet_path = Path(args.packet)
-    qa_path     = Path(args.qa_result)
+    manifest_path = Path(args.build_freeze_manifest)
 
-    for p, label in ((packet_path, "packet"), (qa_path, "qa_result")):
+    for p, label in ((packet_path, "packet"), (manifest_path, "build_freeze_manifest")):
         if not p.exists():
             print(f"ERROR: {label} not found: {p}")
             sys.exit(1)
 
-    packet    = json.loads(packet_path.read_text())
-    qa_result = json.loads(qa_path.read_text())
+    packet = json.loads(packet_path.read_text())
+    manifest = json.loads(manifest_path.read_text())
 
-    classification = qa_result.get("final_classification", "")
-    if classification != "CLEAN_TO_FREEZE":
-        print(f"ERROR: QA Attacker classification is '{classification}', must be CLEAN_TO_FREEZE.")
-        print("  Freeze only happens after QA Attacker approves.")
+    try:
+        frozen_path, pkg_hash = freeze_packet(packet, manifest, packet_path)
+    except ValueError as exc:
+        print(f"ERROR: {exc}")
         sys.exit(1)
-
-    frozen_path, pkg_hash = freeze_packet(packet, qa_result, packet_path)
     print(f"  Frozen: {frozen_path}")
     print(f"  Hash:   {pkg_hash}")
     print(f"  Ledger updated.")
@@ -298,8 +326,8 @@ def cmd_authorize_final(args):
         print(f"  ERROR: packet is not frozen. Run 'freeze' first.")
         sys.exit(1)
 
-    if frozen.get("qa_classification") != "CLEAN_TO_FREEZE":
-        print(f"  ERROR: QA classification is '{frozen.get('qa_classification')}', must be CLEAN_TO_FREEZE.")
+    if frozen.get("freeze_gate") != "build_freeze_manifest":
+        print(f"  ERROR: freeze_gate is '{frozen.get('freeze_gate')}', must be build_freeze_manifest.")
         sys.exit(1)
 
     frozen["final_auth"] = {
@@ -335,7 +363,7 @@ def main():
     p_status.add_argument("result", help="Path to builder result JSON")
     p_status.set_defaults(func=cmd_status)
 
-    p_qa = sub.add_parser("qa-attack", help="Run standalone QA Attacker on a finished packet")
+    p_qa = sub.add_parser("qa-attack", help="Run optional diagnostic/adversarial packet review")
     p_qa.add_argument("packet", help="Path to packet JSON")
     p_qa.add_argument("--output", help="Output directory for QA result (default: qa_results/)")
     p_qa.add_argument("--seed", type=int, default=None)
@@ -343,9 +371,14 @@ def main():
                       metavar="PROVIDER", default=None)
     p_qa.set_defaults(func=cmd_qa_attack)
 
-    p_freeze = sub.add_parser("freeze", help="Freeze a packet after QA Attacker approval")
+    p_manifest = sub.add_parser("freeze-manifest", help="Generate a static build_freeze_manifest")
+    p_manifest.add_argument("packet", help="Path to packet JSON")
+    p_manifest.add_argument("--output", help="Output manifest path")
+    p_manifest.set_defaults(func=cmd_freeze_manifest)
+
+    p_freeze = sub.add_parser("freeze", help="Freeze a packet after static build manifest approval")
     p_freeze.add_argument("packet", help="Path to packet JSON")
-    p_freeze.add_argument("qa_result", help="Path to QA Attacker result JSON")
+    p_freeze.add_argument("build_freeze_manifest", help="Path to build_freeze_manifest JSON")
     p_freeze.add_argument("--authorize", action="store_true",
                           help="Print authorize-final command after freeze")
     p_freeze.set_defaults(func=cmd_freeze)

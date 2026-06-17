@@ -2149,6 +2149,18 @@
     const rows = Array.isArray(budget.rows) ? budget.rows : [];
     const includedRows = rows.filter(row => row && row.included !== false).length;
     const omittedRows = rows.filter(row => row && row.included === false).length;
+    const usage = runtime.usage || data.usage || {};
+    const fmtTokens = value => {
+      const n = Number(value);
+      return Number.isFinite(n) ? n.toLocaleString() : "unknown";
+    };
+    const costValue = usage.estimated_cost_usd;
+    const costLabel = costValue === null || costValue === undefined
+      ? "unknown"
+      : `$${Number(costValue).toFixed(6)}`;
+    const costSource = usage.cost_source === "static_pricing_estimate"
+      ? "pricing estimate"
+      : (usage.cost_source === "unknown_pricing" ? "unknown pricing" : (usage.cost_source || "unknown"));
     const chips = [];
     chips.push(`Runtime: ${runtimeProfile || "unknown"}`);
     if (provider || model) chips.push(`This turn: ${provider}${model ? ":" + model : ""}`);
@@ -2164,6 +2176,15 @@
     chips.push(`Baton Pass: ${batonMode}`);
     chips.push(`Holo4DNA: ${holo4dnaMode}`);
     chips.push(`AutoReseed: ${autoReseed}`);
+    if (Object.keys(usage).length) {
+      chips.push(`Estimated input tokens: ${fmtTokens(usage.input_token_estimate)}`);
+      chips.push(`Estimated output tokens: ${fmtTokens(usage.output_token_estimate)}`);
+      chips.push(`Estimated total tokens: ${fmtTokens(usage.total_token_estimate)}`);
+      chips.push(`Latency: ${fmtTokens(usage.latency_ms)} ms`);
+      chips.push(`Estimated cost: ${costLabel}`);
+      chips.push(`Cost source: ${costSource}`);
+      chips.push("Pricing estimate: exact provider billing may differ");
+    }
     if (budget.total_token_estimate !== undefined) chips.push(`Context: ${budget.total_token_estimate} est. tokens`);
     if (rows.length) chips.push(`Rows: ${includedRows}/${omittedRows}`);
     return `<div class="trust-row runtime-rail">${chips.map(label => `<span class="runtime-pill">${escHtml(label)}</span>`).join("")}</div>`;

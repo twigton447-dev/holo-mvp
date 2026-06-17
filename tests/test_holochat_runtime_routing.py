@@ -101,6 +101,11 @@ class CapturingAdapter(FakeAdapter):
         return super().chat_call(system_prompt, history, user_message, temperature, images=images)
 
 
+class NoUsageAdapter(FakeAdapter):
+    def chat_call(self, system_prompt, history, user_message, temperature, images=None):
+        return "estimated token answer", 0, 0
+
+
 def _mini_pool():
     return [
         FakeAdapter("openai", "gpt-4o-mini"),
@@ -232,6 +237,16 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["reseed_present"] is False
     assert result["runtime"]["reseed_mode"] == "off"
     assert result["runtime"]["autoreseed_enabled"] is False
+    assert result["usage"] == result["runtime"]["usage"]
+    usage = result["runtime"]["usage"]
+    assert usage["input_token_estimate"] == result["context_budget"]["total_token_estimate"]
+    assert usage["input_token_source"] == "context_budget_estimate"
+    assert usage["output_token_estimate"] == 2
+    assert usage["output_token_source"] == "provider_usage"
+    assert usage["total_token_estimate"] == usage["input_token_estimate"] + 2
+    assert usage["latency_ms"] >= 0
+    assert usage["cost_is_estimate"] is True
+    assert usage["pricing_note"] == "Exact provider billing may differ."
     runtime_text = json.dumps(result["runtime"])
     for forbidden in (
         "raw-capsule-id",
@@ -277,3 +292,34 @@ def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeyp
     assert result["runtime"]["governor_role"] == "controller_check_layer"
     assert result["runtime"]["context_delivery_mode"] == "capped_ranked_prompt_slice"
     assert result["runtime"]["analyst_receives_full_memory"] is False
+
+
+def test_usage_metadata_falls_back_to_estimates_when_provider_usage_unavailable(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setattr(chat_engine.random, "randrange", lambda size: 0)
+    adapter = NoUsageAdapter("unknown_provider", "unknown-model")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    result = engine.send_message(str(uuid4()), "Estimate this.")
+    usage = result["runtime"]["usage"]
+
+    assert usage["input_token_estimate"] == result["context_budget"]["total_token_estimate"]
+    assert usage["input_token_source"] == "context_budget_estimate"
+    assert usage["output_token_estimate"] > 0
+    assert usage["output_token_source"] == "estimated_chars"
+    assert usage["total_token_estimate"] == usage["input_token_estimate"] + usage["output_token_estimate"]
+    assert usage["latency_ms"] >= 0
+    assert usage["estimated_cost_usd"] is None
+    assert usage["cost_source"] == "unknown_pricing"
+    assert usage["cost_is_estimate"] is True
+
+    runtime_text = json.dumps(result["runtime"]).lower()
+    assert ("actual " + "billed cost") not in runtime_text
+    assert ("raw " + "prompt") not in runtime_text
+    assert ("raw " + "memory") not in runtime_text

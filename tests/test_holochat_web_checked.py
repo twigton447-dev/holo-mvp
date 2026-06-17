@@ -97,6 +97,15 @@ def test_streaming_done_metadata_includes_searched_without_raw_results(monkeypat
     assert any(isinstance(event, dict) and event.get("searching") for event in events)
     assert done["searched"] is True
     assert done["search_query"] == "weather in Seattle"
+    assert done["usage"] == done["runtime"]["usage"]
+    assert done["usage"]["input_token_estimate"] == done["context_budget"]["total_token_estimate"]
+    assert done["usage"]["input_token_source"] == "context_budget_estimate"
+    assert done["usage"]["output_token_estimate"] == 4
+    assert done["usage"]["output_token_source"] == "provider_usage"
+    assert done["usage"]["latency_ms"] >= 0
+    assert done["usage"]["estimated_cost_usd"] is None
+    assert done["usage"]["cost_source"] == "unknown_pricing"
+    assert done["usage"]["cost_is_estimate"] is True
     assert "compact search result" not in str(done)
     assert "holo4dna" not in done
 
@@ -167,6 +176,14 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
         "Baton Pass:",
         "Holo4DNA:",
         "AutoReseed:",
+        "Estimated input tokens:",
+        "Estimated output tokens:",
+        "Estimated total tokens:",
+        "Latency:",
+        "Estimated cost:",
+        "Cost source:",
+        "Pricing estimate:",
+        "exact provider billing may differ",
     ):
         assert label in html
 
@@ -179,3 +196,6 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     assert ("4DNA " + "active") not in html
     assert ("full lossless " + "memory") not in html.lower()
     assert ("AutoReseed: " + "active") not in html
+    assert ("actual " + "billed cost") not in html.lower()
+    assert ("raw " + "prompt") not in html.lower()
+    assert ("provider request " + "body") not in html.lower()

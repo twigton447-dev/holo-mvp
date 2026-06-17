@@ -25,6 +25,7 @@ from holo_context import (
     build_context_budget_ledger,
     build_life_context_block,
     build_runtime_identity_block,
+    estimate_context_tokens,
 )
 from holo_router import HoloRouter, PreviousRoute, RouteDecision
 from holo_state import HoloState, RequiredTools
@@ -112,6 +113,12 @@ class ChatSession:
 DEFAULT_RUNTIME_PROFILE = "mini_only"
 FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
 
+# Local, non-authoritative pricing estimates. Only include model prices when we
+# are comfortable showing a rough estimate; otherwise the UI reports unknown.
+_STATIC_CHAT_PRICING_USD_PER_M_TOKEN: dict[tuple[str, str], tuple[float, float]] = {
+    ("openai", "gpt-4o-mini"): (0.15, 0.60),
+}
+
 
 def _holochat_runtime_profile() -> str:
     return (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
@@ -136,12 +143,103 @@ def _governor_turn_metadata(governor: Any, *, checked_this_turn: bool) -> dict[s
     }
 
 
+def _safe_positive_int(value: Any) -> int:
+    try:
+        parsed = int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+    return max(0, parsed)
+
+
+def _context_budget_input_estimate(context_budget: Optional[dict[str, Any]]) -> int:
+    if not isinstance(context_budget, dict):
+        return 0
+    return _safe_positive_int(context_budget.get("total_token_estimate"))
+
+
+def _estimated_output_tokens(response_text: str, provider_output_tokens: Any) -> tuple[int, str]:
+    output_tokens = _safe_positive_int(provider_output_tokens)
+    if output_tokens:
+        return output_tokens, "provider_usage"
+    return estimate_context_tokens(response_text), "estimated_chars"
+
+
+def _estimated_input_tokens(
+    context_budget: Optional[dict[str, Any]],
+    provider_input_tokens: Any,
+) -> tuple[int, str]:
+    budget_tokens = _context_budget_input_estimate(context_budget)
+    if budget_tokens:
+        return budget_tokens, "context_budget_estimate"
+    input_tokens = _safe_positive_int(provider_input_tokens)
+    if input_tokens:
+        return input_tokens, "provider_usage"
+    return 0, "unavailable"
+
+
+def _estimate_turn_cost_usd(
+    provider: Optional[str],
+    model: Optional[str],
+    input_tokens: int,
+    output_tokens: int,
+) -> tuple[Optional[float], str]:
+    key = ((provider or "").strip().lower(), (model or "").strip())
+    pricing = _STATIC_CHAT_PRICING_USD_PER_M_TOKEN.get(key)
+    if not pricing:
+        return None, "unknown_pricing"
+    input_per_m, output_per_m = pricing
+    estimated = ((input_tokens / 1_000_000) * input_per_m) + (
+        (output_tokens / 1_000_000) * output_per_m
+    )
+    return round(estimated, 6), "static_pricing_estimate"
+
+
+def _turn_usage_metadata(
+    *,
+    analyst_adapter: Any,
+    context_budget: Optional[dict[str, Any]],
+    response_text: str,
+    provider_input_tokens: Any,
+    provider_output_tokens: Any,
+    latency_ms: Any,
+) -> dict[str, Any]:
+    input_estimate, input_source = _estimated_input_tokens(
+        context_budget,
+        provider_input_tokens,
+    )
+    output_estimate, output_source = _estimated_output_tokens(
+        response_text,
+        provider_output_tokens,
+    )
+    total_estimate = input_estimate + output_estimate
+    selected = _adapter_identity_dict(analyst_adapter)
+    estimated_cost, cost_source = _estimate_turn_cost_usd(
+        selected.get("provider"),
+        selected.get("model"),
+        input_estimate,
+        output_estimate,
+    )
+    return {
+        "input_token_estimate": input_estimate,
+        "output_token_estimate": output_estimate,
+        "total_token_estimate": total_estimate,
+        "input_token_source": input_source,
+        "output_token_source": output_source,
+        "latency_ms": _safe_positive_int(latency_ms),
+        "estimated_cost_usd": estimated_cost,
+        "cost_source": cost_source,
+        "cost_is_estimate": True,
+        "pricing_note": "Exact provider billing may differ.",
+    }
+
+
 def _turn_runtime_metadata(
     runtime_info: dict[str, Any],
     *,
     analyst_adapter: Any,
     governor: Any,
     governor_checked_this_turn: bool,
+    usage: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
@@ -167,6 +265,8 @@ def _turn_runtime_metadata(
             "autoreseed_enabled": False,
         }
     )
+    if usage is not None:
+        metadata["usage"] = usage
     metadata.update(
         _governor_turn_metadata(
             governor,
@@ -575,6 +675,26 @@ class HoloChatEngine:
                 "new_thread": "/chat",
             }
 
+        usage = _turn_usage_metadata(
+            analyst_adapter=adapter,
+            context_budget=context_budget,
+            response_text=response_text,
+            provider_input_tokens=in_tok,
+            provider_output_tokens=out_tok,
+            latency_ms=elapsed_ms,
+        )
+        runtime = _turn_runtime_metadata(
+            getattr(
+                self,
+                "_runtime_info",
+                _runtime_metadata("test_runtime", self._adapters, self._bench),
+            ),
+            analyst_adapter=adapter,
+            governor=self._governor,
+            governor_checked_this_turn=True,
+            usage=usage,
+        )
+
         return {
             "session_id":          session.session_id,
             "response":            response_text,
@@ -594,16 +714,8 @@ class HoloChatEngine:
             "_governor_turns_held": session.turn_count - session.governor_locked_since,
             "_temperature":        temperature,
             "artifacts":           artifacts_saved,
-            "runtime":             _turn_runtime_metadata(
-                getattr(
-                    self,
-                    "_runtime_info",
-                    _runtime_metadata("test_runtime", self._adapters, self._bench),
-                ),
-                analyst_adapter=adapter,
-                governor=self._governor,
-                governor_checked_this_turn=True,
-            ),
+            "usage":               usage,
+            "runtime":             runtime,
             **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }
 
@@ -727,6 +839,7 @@ class HoloChatEngine:
         # Stream analyst response token by token
         accumulated = []
         in_tok = out_tok = 0
+        start = time.time()
         for chunk in adapter.stream_chat_call(
             system_prompt, session.history, enriched_message, temperature, images=images or None
         ):
@@ -808,6 +921,27 @@ class HoloChatEngine:
                 "new_thread": "/chat",
             }
 
+        elapsed_ms = int((time.time() - start) * 1000)
+        usage = _turn_usage_metadata(
+            analyst_adapter=adapter,
+            context_budget=context_budget,
+            response_text=response_text,
+            provider_input_tokens=in_tok,
+            provider_output_tokens=out_tok,
+            latency_ms=elapsed_ms,
+        )
+        runtime = _turn_runtime_metadata(
+            getattr(
+                self,
+                "_runtime_info",
+                _runtime_metadata("test_runtime", self._adapters, self._bench),
+            ),
+            analyst_adapter=adapter,
+            governor=self._governor,
+            governor_checked_this_turn=True,
+            usage=usage,
+        )
+
         yield {
             "done":                True,
             "session_id":          session.session_id,
@@ -815,6 +949,8 @@ class HoloChatEngine:
             "turn_number":         session.turn_count,
             "thread_health_score": session.thread_health_score,
             "thread_health_level": session.thread_health_level,
+            "elapsed_ms":          elapsed_ms,
+            "tokens":              {"input": in_tok, "output": out_tok},
             "thought":             thought,
             "searched":            searched,
             "search_query":        search_query if searched else None,
@@ -824,16 +960,8 @@ class HoloChatEngine:
             "incognito":           incognito,
             "_provider":           adapter.provider,
             "_temperature":        temperature,
-            "runtime":             _turn_runtime_metadata(
-                getattr(
-                    self,
-                    "_runtime_info",
-                    _runtime_metadata("test_runtime", self._adapters, self._bench),
-                ),
-                analyst_adapter=adapter,
-                governor=self._governor,
-                governor_checked_this_turn=True,
-            ),
+            "usage":               usage,
+            "runtime":             runtime,
             **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }
 

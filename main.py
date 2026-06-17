@@ -869,6 +869,8 @@ async def chat(
         response_content["search_query"] = result.get("search_query")
     if result.get("context_budget") is not None:
         response_content["context_budget"] = result.get("context_budget")
+    if result.get("usage") is not None:
+        response_content["usage"] = result.get("usage")
     if result.get("runtime") is not None:
         response_content["runtime"] = result.get("runtime")
     if result.get("holo4dna") is not None:

@@ -867,6 +867,8 @@ async def chat(
     }
     if result.get("search_query") is not None:
         response_content["search_query"] = result.get("search_query")
+    if result.get("runtime") is not None:
+        response_content["runtime"] = result.get("runtime")
     if result.get("holo4dna") is not None:
         response_content["holo4dna"] = result.get("holo4dna")
     return JSONResponse(content=response_content)

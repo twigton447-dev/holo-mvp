@@ -27,6 +27,7 @@ from llm_adapters import (
     HOLO_CHAT_SYSTEM_PROMPT,
     GovernorAdapter,
     load_adapters,
+    load_fast_adapters,
 )
 from project_brain import ProjectBrain
 import web_search
@@ -102,6 +103,60 @@ class ChatSession:
 # Governor rotation helpers
 # ---------------------------------------------------------------------------
 
+DEFAULT_RUNTIME_PROFILE = "mini_only"
+FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
+
+
+def _holochat_runtime_profile() -> str:
+    return (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
+
+
+def _adapter_pool_metadata(adapters: list[Any]) -> list[dict[str, Optional[str]]]:
+    return [_adapter_identity_dict(adapter) for adapter in adapters]
+
+
+def _runtime_metadata(
+    runtime_profile: str,
+    active_pool: list[Any],
+    bench_pool: list[Any],
+) -> dict[str, Any]:
+    mini_only = runtime_profile == "mini_only"
+    return {
+        "runtime_profile": runtime_profile,
+        "active_pool": _adapter_pool_metadata(active_pool),
+        "bench_pool": _adapter_pool_metadata(bench_pool),
+        "frontier_enabled": not mini_only,
+        "fallback_policy": "no_frontier_fallback" if mini_only else "bench_failover_enabled",
+        "serial_call": True,
+        "parallel_fanout": False,
+    }
+
+
+def _select_runtime_pools(
+    profile: Optional[str] = None,
+    *,
+    fast_loader=None,
+    frontier_loader=None,
+) -> tuple[str, list[Any], list[Any]]:
+    fast_loader = fast_loader or load_fast_adapters
+    frontier_loader = frontier_loader or load_adapters
+    runtime_profile = (profile or _holochat_runtime_profile()).strip().lower()
+    if runtime_profile == "mini_only":
+        active_pool = fast_loader()
+        if not active_pool:
+            raise RuntimeError(
+                "HoloChat mini_only runtime has no mini adapters; "
+                "frontier fallback is disabled."
+            )
+        return runtime_profile, active_pool, []
+    if runtime_profile in FRONTIER_RUNTIME_PROFILES:
+        active_pool, bench_pool = frontier_loader()
+        if not active_pool:
+            raise RuntimeError("HoloChat frontier runtime has no active adapters.")
+        return runtime_profile, active_pool, bench_pool
+    raise RuntimeError(f"Unsupported HOLOCHAT_RUNTIME_PROFILE: {runtime_profile}")
+
+
 def _is_mid_resolution(last_assistant_message: str) -> bool:
     """
     Heuristic: return True if the last assistant message looks like it's in
@@ -162,13 +217,18 @@ class HoloChatEngine:
     """
 
     def __init__(self):
-        self._adapters, self._bench = load_adapters()   # active pool + bench pool
+        self._runtime_profile, self._adapters, self._bench = _select_runtime_pools()
+        self._runtime_info = _runtime_metadata(
+            self._runtime_profile,
+            self._adapters,
+            self._bench,
+        )
         self._governor = GovernorAdapter(self._adapters) # shares active pool, never same DNA as analyst
         self._brain    = ProjectBrain()
         self._holo_context_builder = HoloContextBuilder()
         self._holo_router = None
         logger.info(
-            "HoloChatEngine initialized. Active: "
+            f"HoloChatEngine initialized. Runtime profile: {self._runtime_profile} | Active: "
             + ", ".join(a.provider for a in self._adapters)
             + (" | Bench: " + ", ".join(a.provider for a in self._bench) if self._bench else "")
             + " | GovernorAdapter ready"
@@ -452,6 +512,11 @@ class HoloChatEngine:
             "_governor_turns_held": session.turn_count - session.governor_locked_since,
             "_temperature":        temperature,
             "artifacts":           artifacts_saved,
+            "runtime":             getattr(
+                self,
+                "_runtime_info",
+                _runtime_metadata("test_runtime", self._adapters, self._bench),
+            ),
             **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }
 
@@ -651,6 +716,11 @@ class HoloChatEngine:
             "incognito":           incognito,
             "_provider":           adapter.provider,
             "_temperature":        temperature,
+            "runtime":             getattr(
+                self,
+                "_runtime_info",
+                _runtime_metadata("test_runtime", self._adapters, self._bench),
+            ),
             **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }
 

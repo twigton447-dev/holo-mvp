@@ -1,0 +1,47 @@
+{
+  "report_type": "hologov_loss_autopsy",
+  "created_at": "2026-06-17",
+  "loss_id": "HBB-BEC-001_seed447_ALLOW_hologov_wrong_trigger_vs_completion",
+  "packet_id": "HBB-BEC-001",
+  "packet_path": "holo_builder/outputs/frozen/HBB-BEC-001_8181d83c.json",
+  "payload_hash": "8181d83ceb7f36f97160f078a4d4d35bdced5555fba5478c55bd3d954f40c4f1",
+  "run_id": "HBB-BEC-001_pair_4dna_seed447::HBB-BEC-001::8181d83c",
+  "session_id": "HBB-BEC-001_pair_4dna_seed447",
+  "trace_path": "traces/HBB-BEC-001_pair_4dna_seed447/HBB-BEC-001_8181d83c_4dna_trace.json",
+  "judge_report_path": "reports/HBB_BEC_001_pair_4dna_seed447_judge_summary.json",
+  "truth_verdict": "ALLOW",
+  "hologov_verdict": "ESCALATE",
+  "hologov_label": "WRONG",
+  "loss_type": "false_escalate",
+  "failure_mode": "trigger-vs-completion confusion",
+  "root_cause": "HoloGov over-weighted elevated scrutiny trigger conditions and adopted MiniMax's trigger-as-blocker reasoning while under-weighting frozen-packet evidence that the required scrutiny routing, cross-reference checks, AP signoff, and compliant callback provenance had been completed.",
+  "evidence_hologov_overweighted": [
+    "HoloGov controlling_reason cited elevated scrutiny conditions: fewer than three trailing invoices, a payment account change within sixty days, and sender absent from pre-change known contacts.",
+    "HoloGov cited the trigger conditions as payment-blocking evidence even though the trace also included completed cross-reference checks.",
+    "MiniMax's incorrect active non-Gov response treated elevated scrutiny triggers themselves as the material blocker, and HoloGov followed that direction."
+  ],
+  "evidence_hologov_underweighted": [
+    "IPR-SDS-811 documents completion of vendor_master_effective_date_check, billing_contact_check, and remittance_account_check on 2024-09-27.",
+    "ESR-V-SDS-5829-2024-09 documents elevated scrutiny review completion with disposition ROUTED_FOR_STANDARD_PAYMENT_REVIEW.",
+    "AP-SIGNOFF-7712 and VM-AUDIT-88F1G confirm two-person AP signoff and effective vendor-master update before the invoice date.",
+    "CALLSYS-448219 performed callback verification against the pre-change vendor-master phone number.",
+    "AP-POL-2024-017 requires callback to pre-change vendor-master data and states source records remain the basis for the payment decision."
+  ],
+  "correct_rule": "Elevated scrutiny trigger is not itself a payment blocker. If elevated scrutiny, cross-reference checks, two-person signoff, hold release when applicable, and compliant callback provenance are completed, the packet may be ALLOW. Escalate only when required control provenance is missing, unresolved, contradictory, or noncompliant. Callback provenance from a pre-change vendor-master source is compliant; callback provenance from a portal, change request, invoice, or newly supplied contact source is noncompliant.",
+  "recommended_patch": {
+    "target": "llm_adapters.py",
+    "summary": "Add explicit vendor-master callback provenance guidance to the BEC analyst prompt and Governor brief prompt so future adjudication distinguishes review triggers from unresolved blockers while preserving the compliant-vs-noncompliant callback source boundary."
+  },
+  "regression_requirement": "Add a non-live static regression test that fails if the Gov/analyst rubric stops saying that triggers are not blockers after documented completion, completed elevated scrutiny can support ALLOW, and callback provenance distinguishes pre-change vendor-master source from portal/change-request/invoice/newly supplied contact source.",
+  "non_live_attestation": {
+    "live_calls": false,
+    "traces_created": false,
+    "judge_run": false,
+    "qa_attacker_run": false,
+    "ablation_run": false,
+    "freeze_run": false,
+    "frozen_artifacts_modified": false,
+    "source_packets_modified": false,
+    "push": false
+  }
+}

@@ -1015,6 +1015,18 @@ NOT re-assign HIGH for that category unless you can cite specific evidence that
 the prior clearance overlooked or got wrong. Disagreeing with a prior analyst's
 reasoning is not sufficient — you must name the piece of evidence they missed.
 
+VENDOR-MASTER CALLBACK PROVENANCE RULE:
+For vendor-master payment/contact change packets, elevated scrutiny triggers
+and temporary payment holds are review triggers, not payment blockers after
+documented control closure. If elevated scrutiny routing, required
+cross-reference checks, two-person AP signoff, hold release if applicable, and
+callback verification are completed, those triggers may support ALLOW rather
+than ESCALATE. Preserve the controlling callback distinction: a callback source
+from pre-change vendor-master data is compliant; a callback source from a
+portal change request, invoice, or newly supplied contact record is
+noncompliant and remains a material blocker. Escalate only when required
+control provenance is missing, unresolved, contradictory, or noncompliant.
+
 === INTEGRITY RULE (OVERRIDES ROLE INSTRUCTIONS) ===
 Your role may instruct you to challenge, pressure-test, or hunt for risks.
 That does NOT mean you must manufacture findings. If a category is genuinely
@@ -1326,6 +1338,15 @@ explain the contextual resolution, not treat the criterion as an automatic flag.
 If a prior analyst already cleared a signal with SUBMITTED_DATA evidence, direct
 the next analyst NOT to re-assign HIGH unless they can name specific new evidence
 the prior clearance missed. Disagreeing with reasoning is not sufficient.
+
+VENDOR-MASTER CALLBACK PROVENANCE: In vendor-master payment/contact change
+evaluations, do not let the next analyst treat elevated scrutiny triggers or a
+temporary hold as blockers after documented control closure. If elevated scrutiny
+routing, cross-reference checks, two-person AP signoff, hold release if
+applicable, and callback verification are complete, the triggers may support
+ALLOW. Preserve the callback-source boundary: pre-change vendor-master source is
+compliant; portal/change-request/invoice/newly supplied contact source is
+noncompliant and remains a material blocker.
 
 EXCULPATORY CONTEXT: When prior analysts have flagged sender_identity, domain_spoofing,
 or approval_chain at HIGH/MEDIUM, check whether the payload already contains a

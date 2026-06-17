@@ -111,6 +111,8 @@
     .msg-action.copied { color: #22c55e; }
     .trust-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; min-height: 18px; }
     .web-checked { color: var(--text3); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3; }
+    .runtime-rail { flex-wrap: wrap; align-items: flex-start; gap: 6px; }
+    .runtime-pill { color: var(--text3); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3; }
 
     .label { font-size: 11px; color: var(--text2); padding: 0 4px; }
     .chips { display: flex; flex-direction: column; gap: 7px; margin-top: 18px; }
@@ -613,7 +615,7 @@
   <div id="header">
     <div id="header-brand">
       <h1>Holo <span id="brand-sub">Chat</span><span id="space-label"></span></h1>
-      <span id="brand-tagline">Three models · One mind</span>
+      <span id="brand-tagline">Memory-attached workspace</span>
     </div>
     <div id="header-right">
       <div id="incognito-badge">◉ Incognito</div>
@@ -1572,9 +1574,9 @@
           <p style="margin-bottom:14px;">That problem is not going away. Hallucination is a well-known, studied part of how these models work. Even the smartest models do it.</p>
           <p style="margin-bottom:22px;font-size:16px;font-weight:700;">I am built differently.</p>
 
-          <p style="margin-bottom:14px;">You interact with one consistent presence, me, that gets to know you over time. Under the hood, I rotate through the current top 3 frontier models: GPT, Claude, and Gemini, guided by a central system that keeps context intact and pushes each turn to challenge what came before.</p>
-          <p style="margin-bottom:14px;">When a new model version comes out, I update automatically.</p>
-          <p style="margin-bottom:24px;font-weight:600;">You are always working with the newest, fastest, smartest models available.</p>
+          <p style="margin-bottom:14px;">You interact with one consistent presence, me, that gets to know you over time. Under the hood, each turn is answered by one selected analyst model from the current runtime pool, while HoloBrain carries memory and context forward.</p>
+          <p style="margin-bottom:14px;">As the runtime pool evolves, the available models can change without changing the memory layer.</p>
+          <p style="margin-bottom:24px;font-weight:600;">One turn. One analyst. Your workspace context stays attached.</p>
 
           <hr style="border:none;border-top:1px solid var(--border);margin:0 0 22px;">
 
@@ -1905,11 +1907,13 @@
         ${suggestions.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}
       </div>` : "";
     const webCheckedHtml = renderWebCheckedIndicator(data);
+    const runtimeRailHtml = renderRuntimeRail(data);
     const body = msgEl.querySelector(".holo-body");
     body.innerHTML = `
       <div class="bubble" id="${responseId}">${renderMarkdown(mainText)}</div>
       ${chipsHtml}
       ${webCheckedHtml}
+      ${runtimeRailHtml}
       <div class="msg-actions">
         <button class="msg-action" title="Copy" onclick="copyMsg('${responseId}', this)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -1949,6 +1953,7 @@
         ${suggestions.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}
       </div>` : "";
     const webCheckedHtml = renderWebCheckedIndicator(data);
+    const runtimeRailHtml = renderRuntimeRail(data);
 
     msg.innerHTML = `
       <div class="holo-icon">✦</div>
@@ -1956,6 +1961,7 @@
         <div class="bubble" id="${responseId}">${renderMarkdown(mainText)}</div>
         ${chipsHtml}
         ${webCheckedHtml}
+        ${runtimeRailHtml}
         <div class="msg-actions">
           <button class="msg-action" title="Copy" onclick="copyMsg('${responseId}', this)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -2111,6 +2117,56 @@
       ? ` title="Search query: ${query}" data-search-query="${query}"`
       : ` title="Web checked"`;
     return `<div class="trust-row"><span class="web-checked"${attrs}>Web checked</span></div>`;
+  }
+
+  function renderRuntimeRail(data) {
+    const runtime = data && data.runtime;
+    if (!runtime) return "";
+    const budget = data.context_budget || {};
+    const selected = runtime.selected_analyst || {};
+    const provider = runtime.selected_provider || selected.provider || "";
+    const model = runtime.selected_model || selected.model || "";
+    const activePoolCount = runtime.active_pool_count || (runtime.active_pool || []).length || 0;
+    const runtimeProfile = runtime.runtime_profile || "";
+    const poolLabel = runtimeProfile === "mini_only" ? "mini models" : "models";
+    const modeLabel = runtime.serial_call === true && runtime.parallel_fanout !== true
+      ? "serial, one analyst per turn"
+      : "parallel or unavailable";
+    const govMode = runtime.governor_mode || (runtime.governor_present ? "configured" : "off");
+    const govChecked = runtime.governor_checked_this_turn === true;
+    const govLabel = govChecked
+      ? "checked this turn"
+      : (govMode === "shadow" ? "shadow" : (govMode === "off" ? "off" : "configured"));
+    const contextDelivery = runtime.context_delivery_mode === "capped_ranked_prompt_slice"
+      ? "capped memory slice"
+      : (runtime.context_delivery_mode || "unknown");
+    const fullMemory = runtime.analyst_receives_full_memory === false ? "no" : "unknown";
+    const holoBrain = runtime.lossless_memory_store ? "attached" : "unknown";
+    const stateMode = runtime.structured_state_object_mode || "off";
+    const batonMode = runtime.baton_pass_mode || "off";
+    const holo4dnaMode = runtime.holo4dna_mode || "off";
+    const autoReseed = runtime.autoreseed_enabled === true ? "automatic" : "off/not configured";
+    const rows = Array.isArray(budget.rows) ? budget.rows : [];
+    const includedRows = rows.filter(row => row && row.included !== false).length;
+    const omittedRows = rows.filter(row => row && row.included === false).length;
+    const chips = [];
+    chips.push(`Runtime: ${runtimeProfile || "unknown"}`);
+    if (provider || model) chips.push(`This turn: ${provider}${model ? ":" + model : ""}`);
+    chips.push(`Mode: ${modeLabel}`);
+    chips.push(`Selection: ${runtime.selection_mode || "unknown"}`);
+    if (activePoolCount) chips.push(`Active pool: ${activePoolCount} ${poolLabel}`);
+    chips.push(`Governor: ${govLabel}`);
+    chips.push(`Governor mode: ${govMode}`);
+    chips.push(`Context delivery: ${contextDelivery}`);
+    chips.push(`Full memory to analyst: ${fullMemory}`);
+    chips.push(`HoloBrain: ${holoBrain}`);
+    chips.push(`State object: ${stateMode}`);
+    chips.push(`Baton Pass: ${batonMode}`);
+    chips.push(`Holo4DNA: ${holo4dnaMode}`);
+    chips.push(`AutoReseed: ${autoReseed}`);
+    if (budget.total_token_estimate !== undefined) chips.push(`Context: ${budget.total_token_estimate} est. tokens`);
+    if (rows.length) chips.push(`Rows: ${includedRows}/${omittedRows}`);
+    return `<div class="trust-row runtime-rail">${chips.map(label => `<span class="runtime-pill">${escHtml(label)}</span>`).join("")}</div>`;
   }
 
   function copyCode(btn) {

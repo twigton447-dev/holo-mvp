@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from uuid import uuid4
 
@@ -204,6 +205,43 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["serial_call"] is True
     assert result["runtime"]["parallel_fanout"] is False
     assert result["runtime"]["frontier_enabled"] is False
+    assert result["runtime"]["analyst_pool_role"] == "analyst"
+    assert result["runtime"]["analyst_call_mode"] == "serial_one_per_turn"
+    assert result["runtime"]["selection_mode"] == "random"
+    assert result["runtime"]["active_pool_count"] == len(engine._adapters)
+    assert result["runtime"]["active_pool_count"] == len(result["runtime"]["active_pool"])
+    assert result["runtime"]["selected_analyst"] == {
+        "provider": "openai",
+        "model": "gpt-4o-mini",
+    }
+    assert result["runtime"]["selected_provider"] == "openai"
+    assert result["runtime"]["selected_model"] == "gpt-4o-mini"
+    assert result["runtime"]["governor_present"] is True
+    assert result["runtime"]["governor_checked_this_turn"] is True
+    assert result["runtime"]["governor_mode"] == "active"
+    assert result["runtime"]["governor_provider"] == "governor"
+    assert result["runtime"]["governor_model"] == "governor-mini"
+    assert result["runtime"]["governor_status"] == "checked_this_turn"
+    assert result["runtime"]["governor_role"] == "controller_check_layer"
+    assert result["runtime"]["context_delivery_mode"] == "capped_ranked_prompt_slice"
+    assert result["runtime"]["lossless_memory_store"] == "HoloBrain/capsule"
+    assert result["runtime"]["analyst_receives_full_memory"] is False
+    assert result["runtime"]["structured_state_object_mode"] == "shadow"
+    assert result["runtime"]["baton_pass_mode"] == "shadow"
+    assert result["runtime"]["holo4dna_mode"] == "off"
+    assert result["runtime"]["reseed_present"] is False
+    assert result["runtime"]["reseed_mode"] == "off"
+    assert result["runtime"]["autoreseed_enabled"] is False
+    runtime_text = json.dumps(result["runtime"])
+    for forbidden in (
+        "raw-capsule-id",
+        "capsule_token",
+        "cookie",
+        "password",
+        "supabase",
+        "secret",
+    ):
+        assert forbidden not in runtime_text.lower()
 
 
 def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeypatch):
@@ -235,3 +273,7 @@ def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeyp
     assert budget_rows["life_context"]["token_estimate"] < 500
     assert budget_rows["capsule_context"]["token_estimate"] < 400
     assert result["runtime"]["runtime_profile"] == "mini_only"
+    assert result["runtime"]["governor_checked_this_turn"] is True
+    assert result["runtime"]["governor_role"] == "controller_check_layer"
+    assert result["runtime"]["context_delivery_mode"] == "capped_ranked_prompt_slice"
+    assert result["runtime"]["analyst_receives_full_memory"] is False

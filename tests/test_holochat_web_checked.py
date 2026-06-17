@@ -145,3 +145,37 @@ def test_frontend_message_copy_has_fallback_and_targets_response_bubbles():
     assert "function copyTextFallback(text)" in html
     assert "document.execCommand(\"copy\")" in html
     assert "onclick=\"copyMsg('${responseId}', this)\"" in html
+
+
+def test_frontend_runtime_rail_uses_truthful_serial_labels():
+    html = Path("frontend/chat.html").read_text()
+
+    assert "renderRuntimeRail(data)" in html
+    for label in (
+        "Runtime:",
+        "This turn:",
+        "Mode: ${modeLabel}",
+        "serial, one analyst per turn",
+        "Selection:",
+        "Active pool:",
+        "Governor:",
+        "Governor mode:",
+        "Context delivery:",
+        "Full memory to analyst:",
+        "HoloBrain:",
+        "State object:",
+        "Baton Pass:",
+        "Holo4DNA:",
+        "AutoReseed:",
+    ):
+        assert label in html
+
+    assert "Memory-attached workspace" in html
+    assert "one selected analyst model" in html
+    assert ("top 3 " + "frontier models") not in html
+    assert ("Three " + "models") not in html
+    assert ("three models " + "one mind") not in html.lower()
+    assert ("rotating " + "analyst") not in html.lower()
+    assert ("4DNA " + "active") not in html
+    assert ("full lossless " + "memory") not in html.lower()
+    assert ("AutoReseed: " + "active") not in html

@@ -1,11 +1,11 @@
 """
 chat_engine.py
 
-Holo chat mode — randomized multi-model conversation engine.
+Holo chat mode — randomized serial analyst conversation engine.
 
-Every response comes from a randomly selected LLM provider.
-The Governor is also randomly selected, but never shares DNA
-with the analyst on the same turn. No predictable pattern exists.
+Every response comes from one randomly selected analyst provider.
+The Governor is a separate controller/check layer selected away from
+the analyst on the same turn; it does not produce a second visible answer.
 All providers speak as Holo using the unified persona prompt.
 """
 
@@ -121,6 +121,61 @@ def _adapter_pool_metadata(adapters: list[Any]) -> list[dict[str, Optional[str]]
     return [_adapter_identity_dict(adapter) for adapter in adapters]
 
 
+def _governor_turn_metadata(governor: Any, *, checked_this_turn: bool) -> dict[str, Any]:
+    provider = getattr(governor, "provider", None) if governor is not None else None
+    model = getattr(governor, "model_id", getattr(governor, "model", None)) if governor is not None else None
+    present = governor is not None
+    return {
+        "governor_present": present,
+        "governor_checked_this_turn": bool(present and checked_this_turn),
+        "governor_mode": "active" if present else "off",
+        "governor_provider": provider,
+        "governor_model": model,
+        "governor_status": "checked_this_turn" if present and checked_this_turn else "not_checked",
+        "governor_role": "controller_check_layer" if present else "off",
+    }
+
+
+def _turn_runtime_metadata(
+    runtime_info: dict[str, Any],
+    *,
+    analyst_adapter: Any,
+    governor: Any,
+    governor_checked_this_turn: bool,
+) -> dict[str, Any]:
+    metadata = dict(runtime_info or {})
+    selected = _adapter_identity_dict(analyst_adapter)
+    metadata.update(
+        {
+            "analyst_pool_role": "analyst",
+            "analyst_call_mode": "serial_one_per_turn",
+            "selection_mode": "random",
+            "selected_analyst": selected,
+            "selected_provider": selected.get("provider"),
+            "selected_model": selected.get("model"),
+            "active_pool_count": len(metadata.get("active_pool") or []),
+            "context_delivery_mode": "capped_ranked_prompt_slice",
+            "lossless_memory_store": "HoloBrain/capsule",
+            "analyst_receives_full_memory": False,
+            "structured_state_object_mode": "shadow",
+            "baton_pass_mode": "shadow",
+            "holo4dna_mode": "enabled"
+            if _holo4dna_enabled()
+            else ("shadow" if _holo4dna_shadow_enabled() else "off"),
+            "reseed_present": False,
+            "reseed_mode": "off",
+            "autoreseed_enabled": False,
+        }
+    )
+    metadata.update(
+        _governor_turn_metadata(
+            governor,
+            checked_this_turn=governor_checked_this_turn,
+        )
+    )
+    return metadata
+
+
 def _runtime_metadata(
     runtime_profile: str,
     active_pool: list[Any],
@@ -229,7 +284,7 @@ class HoloChatEngine:
             self._adapters,
             self._bench,
         )
-        self._governor = GovernorAdapter(self._adapters) # shares active pool, never same DNA as analyst
+        self._governor = GovernorAdapter(self._adapters) # separate controller; not another analyst answer
         self._brain    = ProjectBrain()
         self._holo_context_builder = HoloContextBuilder()
         self._holo_router = None
@@ -539,10 +594,15 @@ class HoloChatEngine:
             "_governor_turns_held": session.turn_count - session.governor_locked_since,
             "_temperature":        temperature,
             "artifacts":           artifacts_saved,
-            "runtime":             getattr(
-                self,
-                "_runtime_info",
-                _runtime_metadata("test_runtime", self._adapters, self._bench),
+            "runtime":             _turn_runtime_metadata(
+                getattr(
+                    self,
+                    "_runtime_info",
+                    _runtime_metadata("test_runtime", self._adapters, self._bench),
+                ),
+                analyst_adapter=adapter,
+                governor=self._governor,
+                governor_checked_this_turn=True,
             ),
             **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }
@@ -764,10 +824,15 @@ class HoloChatEngine:
             "incognito":           incognito,
             "_provider":           adapter.provider,
             "_temperature":        temperature,
-            "runtime":             getattr(
-                self,
-                "_runtime_info",
-                _runtime_metadata("test_runtime", self._adapters, self._bench),
+            "runtime":             _turn_runtime_metadata(
+                getattr(
+                    self,
+                    "_runtime_info",
+                    _runtime_metadata("test_runtime", self._adapters, self._bench),
+                ),
+                analyst_adapter=adapter,
+                governor=self._governor,
+                governor_checked_this_turn=True,
             ),
             **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }

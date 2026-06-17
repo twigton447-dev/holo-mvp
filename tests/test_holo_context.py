@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from holo_context import HoloContextBuilder
+from holo_context import HoloContextBuilder, build_context_budget_ledger
 from holo_router import RouteDecision
 from holo_state import HoloState, RequiredTools
 
@@ -102,3 +102,65 @@ def test_context_metadata_lists_included_blocks_and_size():
     assert packet.char_count == len(packet.system_prompt) + len(packet.user_message)
     assert packet.token_estimate >= 1
     assert len(packet.context_hash) == 64
+
+
+def test_context_budget_rows_do_not_expose_raw_memory_or_search_text():
+    state = HoloState(session_id="s")
+
+    packet = HoloContextBuilder().build(
+        base_system_prompt="base",
+        holo_state=state,
+        user_message="hello",
+        capsule_context={"project": "secret memory value"},
+        web_results="raw search result body",
+    )
+
+    budget_text = str(packet.metadata["context_budget"])
+    assert "secret memory value" not in budget_text
+    assert "raw search result body" not in budget_text
+    assert "capsule_context" in budget_text
+    assert "web_results" in budget_text
+
+
+def test_context_budget_estimates_are_stable_and_find_largest_blocks():
+    ledger = build_context_budget_ledger(
+        [
+            {"block_name": "small", "content": "abcd", "source_type": "system"},
+            {"block_name": "large", "content": "x" * 41, "source_type": "memory"},
+            {"block_name": "omitted", "content": "ignored", "included": False, "source_type": "search"},
+        ]
+    )
+
+    rows = {row.block_name: row for row in ledger.rows}
+    assert rows["small"].char_count == 4
+    assert rows["small"].token_estimate == 1
+    assert rows["large"].token_estimate == 11
+    assert rows["omitted"].char_count == 0
+    assert ledger.largest_blocks[0]["block_name"] == "large"
+
+
+def test_context_budget_status_uses_env_limit(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_CONTEXT_BUDGET_TOKENS", "2")
+
+    ledger = build_context_budget_ledger(
+        [{"block_name": "large", "content": "x" * 40, "source_type": "memory"}]
+    )
+
+    assert ledger.budget_limit_tokens == 2
+    assert ledger.budget_status == "over_budget"
+
+
+def test_context_budget_does_not_trim_prompt_content():
+    state = HoloState(session_id="s")
+
+    packet = HoloContextBuilder().build(
+        base_system_prompt="base",
+        holo_state=state,
+        user_message="hello",
+        capsule_context={"project": "keep this memory"},
+        web_results="keep this search result",
+    )
+
+    assert "keep this memory" in packet.system_prompt
+    assert "keep this search result" in packet.user_message
+    assert packet.metadata["context_budget"]["budget_status"] == "within_budget"

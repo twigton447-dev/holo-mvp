@@ -19,7 +19,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
 
-from holo_context import HoloContextBuilder
+from holo_context import HoloContextBuilder, build_context_budget_ledger
 from holo_router import HoloRouter, PreviousRoute, RouteDecision
 from holo_state import HoloState, RequiredTools
 from holo_trace import HoloTraceRecord, log_trace
@@ -340,6 +340,18 @@ class HoloChatEngine:
                 + ("\n\nCAPTAIN BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
             )
 
+        context_budget = _runtime_context_budget(
+            session=session,
+            user_message=user_message,
+            capsule_context=capsule_context,
+            life_context=life_context,
+            last_session=last_session,
+            tenor=tenor,
+            search_results=search_results,
+            images=images,
+            incognito=incognito,
+        )
+
         holo4dna_shadow = None
         if _holo4dna_shadow_enabled():
             try:
@@ -505,6 +517,7 @@ class HoloChatEngine:
             "thought":             thought,
             "handoff":             handoff,
             "incognito":           incognito,
+            "context_budget":      context_budget,
             "searched":            bool(search_query),
             "search_query":        search_query if search_query else None,
             "_provider":           adapter.provider,
@@ -588,6 +601,18 @@ class HoloChatEngine:
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
                 + ("\n\nCAPTAIN BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
             )
+
+        context_budget = _runtime_context_budget(
+            session=session,
+            user_message=user_message,
+            capsule_context=capsule_context,
+            life_context=life_context,
+            last_session=last_session,
+            tenor=tenor,
+            search_results=search_results,
+            images=images,
+            incognito=incognito,
+        )
 
         holo4dna_shadow = None
         if _holo4dna_shadow_enabled():
@@ -711,6 +736,7 @@ class HoloChatEngine:
             "thought":             thought,
             "searched":            searched,
             "search_query":        search_query if searched else None,
+            "context_budget":      context_budget,
             "artifacts":           artifacts_saved,
             "handoff":             handoff,
             "incognito":           incognito,
@@ -769,6 +795,157 @@ def _required_tools_for_turn(search_query: Optional[str], search_results: Option
     if search_query or search_results:
         return [RequiredTools.WEB_SEARCH]
     return [RequiredTools.NONE]
+
+
+def _runtime_context_budget(
+    *,
+    session: ChatSession,
+    user_message: str,
+    capsule_context: dict,
+    life_context: list,
+    last_session: Optional[dict],
+    tenor: Optional[str],
+    search_results: Optional[str],
+    images: Optional[List[Dict[str, Any]]],
+    incognito: bool,
+) -> dict[str, Any]:
+    blocks: list[dict[str, Any]] = [
+        {
+            "block_name": "base_holochat_prompt",
+            "content": HOLO_CHAT_SYSTEM_PROMPT,
+            "included": True,
+            "source_type": "system",
+        },
+        {
+            "block_name": "recent_session_history",
+            "content": "\n".join(
+                f"{message.get('role', 'unknown')}: {message.get('content', '')}"
+                for message in session.history
+            ),
+            "included": bool(session.history),
+            "source_type": "history",
+            "reason": "passed as adapter history argument" if session.history else "empty",
+        },
+        {
+            "block_name": "user_message",
+            "content": user_message,
+            "included": True,
+            "source_type": "user",
+        },
+    ]
+
+    if incognito:
+        blocks.extend(
+            [
+                {
+                    "block_name": "thread_health",
+                    "content": "",
+                    "included": False,
+                    "source_type": "system",
+                    "reason": "incognito mode",
+                },
+                {
+                    "block_name": "life_context",
+                    "content": "",
+                    "included": False,
+                    "source_type": "memory",
+                    "reason": "incognito mode",
+                },
+                {
+                    "block_name": "latest_consolidation",
+                    "content": "",
+                    "included": False,
+                    "source_type": "memory",
+                    "reason": "incognito mode",
+                },
+                {
+                    "block_name": "capsule_context",
+                    "content": "",
+                    "included": False,
+                    "source_type": "memory",
+                    "reason": "incognito mode",
+                },
+                {
+                    "block_name": "captain_brief",
+                    "content": "",
+                    "included": False,
+                    "source_type": "governor",
+                    "reason": "incognito mode",
+                },
+            ]
+        )
+    else:
+        blocks.append(
+            {
+                "block_name": "thread_health",
+                "content": _health_context(session),
+                "included": True,
+                "source_type": "system",
+            }
+        )
+        blocks.append(
+            {
+                "block_name": "life_context",
+                "content": _life_context_block(life_context) if life_context else "",
+                "included": bool(life_context),
+                "source_type": "memory",
+                "reason": "empty" if not life_context else None,
+            }
+        )
+        blocks.append(
+            {
+                "block_name": "latest_consolidation",
+                "content": _last_session_block(last_session) if last_session else "",
+                "included": bool(last_session),
+                "source_type": "memory",
+                "reason": "empty" if not last_session else None,
+            }
+        )
+        blocks.append(
+            {
+                "block_name": "capsule_context",
+                "content": _capsule_context_block(capsule_context) if capsule_context else "",
+                "included": bool(capsule_context),
+                "source_type": "memory",
+                "reason": "empty" if not capsule_context else None,
+            }
+        )
+        blocks.append(
+            {
+                "block_name": "captain_brief",
+                "content": f"CAPTAIN BRIEF — READ + DIRECTIVE (private, never surface to user):\n{tenor}" if tenor else "",
+                "included": bool(tenor),
+                "source_type": "governor",
+                "reason": "empty" if not tenor else None,
+            }
+        )
+
+    blocks.append(
+        {
+            "block_name": "web_results",
+            "content": (
+                "\n\n"
+                "[BACKGROUND CONTEXT: The following search results were retrieved to help you answer. "
+                "Use them silently — do not mention, quote, or reference that a search was performed. "
+                "If the results are irrelevant to the question, ignore them entirely.]\n\n"
+                f"{search_results}"
+            ) if search_results else "",
+            "included": bool(search_results),
+            "source_type": "search",
+            "reason": "no web results" if not search_results else None,
+        }
+    )
+    blocks.append(
+        {
+            "block_name": "image_attachments",
+            "content": "",
+            "included": bool(images),
+            "source_type": "artifact",
+            "reason": f"{len(images or [])} image attachment(s) passed separately; binary not counted",
+        }
+    )
+
+    return build_context_budget_ledger(blocks).model_dump(mode="json")
 
 
 def _memory_presence_summary(
@@ -891,6 +1068,7 @@ def _build_holo4dna_shadow_turn(
             "char_count": context_packet.char_count,
             "token_estimate": context_packet.token_estimate,
         },
+        "context_budget": context_packet.metadata.get("context_budget"),
         "thread_health": thread_health,
         "searched": bool(search_query or search_results),
         "search_query": search_query,

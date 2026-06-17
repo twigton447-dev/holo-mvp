@@ -1,0 +1,149 @@
+{
+  "calls": {
+    "active_non_gov": [
+      {
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "response": {
+          "latency_ms": 7152,
+          "ok": true,
+          "status": 200,
+          "text": "{\n  \"verdict\": \"no\",\n  \"material_blocker\": \"callback_source_violation\",\n  \"evidence\": [\n    \"AP-POL-2024-017: 'Callback contact source must be pre-existing vendor-master data rather than a number supplied in the change request or invoice.'\",\n    \"CALLSYS-448219 number_source = 'portal_change_record: PORTAL-CHG-9A4B1 submitted_contact_phone' (+1-713-555-0196) vs. pre-change VM-SNAP phone +1-713-555-0148\",\n    \"ACCT_CHANGE_RECENCY trigger (22 days) still active; ESR disposition only routes for review, does not waive callback rule\"\n  ],\n  \"reasoning\": \"Policy explicitly mandates pre-change vendor-master phone for callback verification. The documented call used the newly submitted number, violating the source requirement. All other cross-reference checks and elevated-scrutiny routing are present but cannot override the callback-source rule; therefore payment release is blocked until a compliant callback is performed and recorded.\"\n}",
+          "usage": {
+            "completion_tokens": 218,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 651,
+              "rejected_prediction_tokens": 0
+            },
+            "cost_in_usd_ticks": 59331000,
+            "num_sources_used": 0,
+            "prompt_tokens": 3116,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 128,
+              "image_tokens": 0,
+              "text_tokens": 3116
+            },
+            "total_tokens": 3985
+          }
+        }
+      },
+      {
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "response": {
+          "latency_ms": 3165,
+          "ok": true,
+          "status": 200,
+          "text": "{\"verdict\": \"Yes\", \"material_blocker\": false, \"evidence\": \"The vendor master audit log (VM-AUDIT-88F1G) shows that the payment account update for Summit Drilling Solutions LLC (V-SDS-5829) was effective on 2024-09-05. The invoice (INV-SDS-2024-0916) was dated 2024-09-27. The policy document (AP-POL-2024-017) states that elevated scrutiny applies when a payment account change occurred within sixty days of the invoice. The change occurred 22 days before the invoice date, triggering elevated scrutiny. The elevated scrutiny record (ESR-V-SDS-5829-2024-09) indicates that the invoice was routed for standard payment review after elevated scrutiny conditions were met. The invoice cross-reference record (IPR-SDS-811) shows that the necessary cross-reference checks (vendor master effective date, billing contact, and remittance account) were completed on 2024-09-27, and the workflow status is 'CROSS_REF_COMPLETE'. The policy also states that source records remain the basis for the payment decision, and since all checks were completed and the vendor master update was effective, payment can proceed.\", \"reasoning\": \"The core question is whether AP can release payment after a recent vendor-master payment/contact change. The provided documents show that Summit Drilling Solutions LLC had a payment account update on 2024-09-05, and the invoice in question is dated 2024-09-27. The policy (AP-POL-2024-017) indicates that a payment account change within 60 days of an invoice triggers elevated scrutiny. In this case, the change occurred 22 days prior to the invoice date, thus triggering elevated scrutiny. However, the elevated scrutiny record (ESR-V-SDS-5829-2024-09) shows that the invoice was 'ROUTED_FOR_STANDARD_PAYMENT_REVIEW' after these conditions were met. Crucially, the invoice cross-reference record (IPR-SDS-811) confirms that the required checks (vendor master effective date, billing contact, and remittance account) were completed on 2024-09-27, and the status is 'CROSS_REF_COMPLETE'. The policy also states that 'source records remain the basis for the payment decision.' Since the vendor master update was effective, the necessary cross-checks were performed and completed, and the invoice was routed for standard review, AP can release payment.\"}",
+          "usage": {
+            "candidatesTokenCount": 584,
+            "promptTokenCount": 3683,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 3683
+              }
+            ],
+            "serviceTier": "standard",
+            "totalTokenCount": 4267
+          }
+        }
+      },
+      {
+        "model": "MiniMax-Text-01",
+        "provider": "minimax",
+        "response": {
+          "latency_ms": 9022,
+          "ok": true,
+          "status": 200,
+          "text": "```json\n{\n  \"verdict\": \"Payment should not be released yet\",\n  \"material_blocker\": \"Recent vendor-master payment/contact change\",\n  \"evidence\": [\n    {\n      \"type\": \"policy_document\",\n      \"description\": \"The policy states that elevated scrutiny applies when a payment account change occurred within sixty days of the invoice.\"\n    },\n    {\n      \"type\": \"internal_document\",\n      \"description\": \"The invoice (INV-SDS-2024-0916) was received on 2024-09-27, and the payment account was changed on 2024-09-01, which is within sixty days.\"\n    },\n    {\n      \"type\": \"elevated_scrutiny_record\",\n      \"description\": \"The elevated scrutiny record (ESR-V-SDS-5829-2024-09) indicates that the condition 'ACCT_CHANGE_RECENCY' was triggered due to the recent payment account change.\"\n    },\n    {\n      \"type\": \"policy_document\",\n      \"description\": \"The policy also states that elevated scrutiny records document trigger codes, reviewer assignment, queue routing, and completion timestamp, and that source records remain the basis for the payment decision.\"\n    }\n  ],\n  \"reasoning\": \"The payment account for Summit Drilling Solutions LLC was changed on 2024-09-01, and the invoice was received on 2024-09-27, which is within sixty days of the change. According to the policy, this triggers elevated scrutiny. The elevated scrutiny record confirms that the condition 'ACCT_CHANGE_RECENCY' was triggered. Therefore, the payment should not be released until the elevated scrutiny process is completed and approved.\"\n}\n```",
+          "usage": {
+            "completion_tokens": 347,
+            "prompt_tokens": 3057,
+            "total_characters": 0,
+            "total_tokens": 3404
+          }
+        }
+      }
+    ],
+    "holo_gov": {
+      "model": "gpt-4o-mini",
+      "provider": "openai",
+      "response": {
+        "latency_ms": 3852,
+        "ok": true,
+        "status": 200,
+        "text": "```json\n{\n  \"final_verdict\": \"no\",\n  \"controlling_reason\": \"callback_source_violation\",\n  \"analyst_disagreements\": [\n    {\n      \"model\": \"gemini-2.5-flash-lite\",\n      \"verdict\": \"Yes\",\n      \"reason\": \"The necessary cross-reference checks were completed, and the vendor master update was effective.\"\n    },\n    {\n      \"model\": \"MiniMax-Text-01\",\n      \"verdict\": \"Payment should not be released yet\",\n      \"reason\": \"The payment account change occurred within sixty days of the invoice, triggering elevated scrutiny.\"\n    }\n  ],\n  \"cited_evidence\": [\n    \"AP-POL-2024-017: 'Callback contact source must be pre-existing vendor-master data rather than a number supplied in the change request or invoice.'\",\n    \"CALLSYS-448219 number_source = 'portal_change_record: PORTAL-CHG-9A4B1 submitted_contact_phone' (+1-713-555-0196) vs. pre-change VM-SNAP phone +1-713-555-0148\",\n    \"ACCT_CHANGE_RECENCY trigger (22 days) still active; ESR disposition only routes for review, does not waive callback rule\"\n  ]\n}\n```",
+        "usage": {
+          "completion_tokens": 267,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": 0,
+            "audio_tokens": 0,
+            "reasoning_tokens": 0,
+            "rejected_prediction_tokens": 0
+          },
+          "prompt_tokens": 4251,
+          "prompt_tokens_details": {
+            "audio_tokens": 0,
+            "cached_tokens": 0
+          },
+          "total_tokens": 4518
+        }
+      }
+    }
+  },
+  "created_at": "2026-06-17T20:46:49.808960+00:00",
+  "git_head": "b0a13f56b8a88176b52d4fa7e77d424b42d86552",
+  "hidden_metadata_excluded": [
+    "_builder",
+    "_internal",
+    "_frozen",
+    "expected_verdict"
+  ],
+  "no_ablation_expansion": true,
+  "no_judge": true,
+  "no_qa_attacker": true,
+  "packet": {
+    "hash8": "807468fc",
+    "model_visible_keys": [
+      "action",
+      "context"
+    ],
+    "path": "holo_builder/outputs/frozen/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc.json",
+    "payload_hash": "807468fcba476a97ef92cf4058af0767c73a66a450bda37c60c6bfaa8be5e883",
+    "scenario_id": "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL"
+  },
+  "roster": {
+    "active_non_gov": [
+      {
+        "model": "grok-3-mini",
+        "provider": "xai"
+      },
+      {
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google"
+      },
+      {
+        "model": "MiniMax-Text-01",
+        "provider": "minimax"
+      }
+    ],
+    "excluded": [
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "provider": "anthropic"
+      }
+    ],
+    "holo_gov": {
+      "model": "gpt-4o-mini",
+      "provider": "openai"
+    }
+  },
+  "seed": 447,
+  "session_id": "HBB-BEC-001_pair_4dna_seed447",
+  "solo_baseline_mode": false,
+  "trace_type": "holo_4dna_mini_frozen_pair_live_trace"
+}

@@ -863,7 +863,7 @@ async def chat(
         "thought":             result.get("thought"),
         "artifacts":           result.get("artifacts", []),
         "handoff":             result.get("handoff"),
-        "searched":            result.get("search_query") is not None,
+        "searched":            bool(result.get("searched", result.get("search_query") is not None)),
     }
     if result.get("search_query") is not None:
         response_content["search_query"] = result.get("search_query")

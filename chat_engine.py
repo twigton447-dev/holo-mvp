@@ -445,7 +445,8 @@ class HoloChatEngine:
             "thought":             thought,
             "handoff":             handoff,
             "incognito":           incognito,
-            "search_query":        search_query,
+            "searched":            bool(search_query),
+            "search_query":        search_query if search_query else None,
             "_provider":           adapter.provider,
             "_governor":           session.governor_provider,
             "_governor_turns_held": session.turn_count - session.governor_locked_since,
@@ -501,7 +502,7 @@ class HoloChatEngine:
         thought      = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
         tenor        = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
         search_results = web_search.search(search_query) if search_query else None
-        searched = search_results is not None
+        searched = bool(search_query)
 
         enriched_message = user_message
         if search_results:
@@ -522,6 +523,30 @@ class HoloChatEngine:
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
                 + ("\n\nCAPTAIN BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
             )
+
+        holo4dna_shadow = None
+        if _holo4dna_shadow_enabled():
+            try:
+                if self._holo_router is None:
+                    self._holo_router = HoloRouter(self._adapters)
+                holo4dna_shadow = _build_holo4dna_shadow_turn(
+                    session=session,
+                    capsule_id=capsule_id,
+                    user_message=user_message,
+                    runtime_adapter=adapter,
+                    router=self._holo_router,
+                    context_builder=self._holo_context_builder,
+                    previous_route=session.holo4dna_previous_route,
+                    capsule_context=capsule_context,
+                    life_context=life_context,
+                    last_session=last_session,
+                    search_query=search_query,
+                    search_results=search_results,
+                    incognito=incognito,
+                )
+                session.holo4dna_previous_route = holo4dna_shadow.previous_route
+            except Exception as exc:
+                logger.warning("HoloChat 4DNA stream shadow trace failed: %s", exc)
 
         # Signal search before tokens arrive so the UI can show the indicator
         if searched:
@@ -599,6 +624,10 @@ class HoloChatEngine:
 
         threading.Thread(target=_post_stream, daemon=True).start()
 
+        if holo4dna_shadow is not None:
+            holo4dna_shadow.trace.memory_extraction_attempted = bool(capsule_id and not incognito)
+            log_trace(holo4dna_shadow.trace, logger=logger)
+
         handoff = None
         if session.thread_health_level == "RED":
             handoff = {
@@ -616,11 +645,13 @@ class HoloChatEngine:
             "thread_health_level": session.thread_health_level,
             "thought":             thought,
             "searched":            searched,
+            "search_query":        search_query if searched else None,
             "artifacts":           artifacts_saved,
             "handoff":             handoff,
             "incognito":           incognito,
             "_provider":           adapter.provider,
             "_temperature":        temperature,
+            **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }
 
     def get_history(self, session_id: str) -> Optional[List[Dict[str, str]]]:

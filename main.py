@@ -852,7 +852,7 @@ async def chat(
         latency_ms    = elapsed,
     )
 
-    return JSONResponse(content={
+    response_content = {
         "session_id":          result["session_id"],
         "response":            result["response"],
         "turn_number":         result["turn_number"],
@@ -864,7 +864,12 @@ async def chat(
         "artifacts":           result.get("artifacts", []),
         "handoff":             result.get("handoff"),
         "searched":            result.get("search_query") is not None,
-    })
+    }
+    if result.get("search_query") is not None:
+        response_content["search_query"] = result.get("search_query")
+    if result.get("holo4dna") is not None:
+        response_content["holo4dna"] = result.get("holo4dna")
+    return JSONResponse(content=response_content)
 
 
 @app.post("/v1/chat/stream")

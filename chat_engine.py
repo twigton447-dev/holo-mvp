@@ -10,6 +10,7 @@ All providers speak as Holo using the unified persona prompt.
 """
 
 import logging
+import os
 import random
 import re as _re
 import threading
@@ -18,6 +19,10 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
 
+from holo_context import HoloContextBuilder
+from holo_router import HoloRouter, PreviousRoute, RouteDecision
+from holo_state import HoloState, RequiredTools
+from holo_trace import HoloTraceRecord, log_trace
 from llm_adapters import (
     HOLO_CHAT_SYSTEM_PROMPT,
     GovernorAdapter,
@@ -54,6 +59,7 @@ class ChatSession:
     governor_rotation_threshold: int = field(
         default_factory=lambda: random.randint(7, 11)
     )
+    holo4dna_previous_route: Optional[PreviousRoute] = None
 
     @property
     def thread_health_score(self) -> int:
@@ -159,6 +165,8 @@ class HoloChatEngine:
         self._adapters, self._bench = load_adapters()   # active pool + bench pool
         self._governor = GovernorAdapter(self._adapters) # shares active pool, never same DNA as analyst
         self._brain    = ProjectBrain()
+        self._holo_context_builder = HoloContextBuilder()
+        self._holo_router = None
         logger.info(
             "HoloChatEngine initialized. Active: "
             + ", ".join(a.provider for a in self._adapters)
@@ -272,6 +280,30 @@ class HoloChatEngine:
                 + ("\n\nCAPTAIN BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
             )
 
+        holo4dna_shadow = None
+        if _holo4dna_shadow_enabled():
+            try:
+                if self._holo_router is None:
+                    self._holo_router = HoloRouter(self._adapters)
+                holo4dna_shadow = _build_holo4dna_shadow_turn(
+                    session=session,
+                    capsule_id=capsule_id,
+                    user_message=user_message,
+                    runtime_adapter=adapter,
+                    router=self._holo_router,
+                    context_builder=self._holo_context_builder,
+                    previous_route=session.holo4dna_previous_route,
+                    capsule_context=capsule_context,
+                    life_context=life_context,
+                    last_session=last_session,
+                    search_query=search_query,
+                    search_results=search_results,
+                    incognito=incognito,
+                )
+                session.holo4dna_previous_route = holo4dna_shadow.previous_route
+            except Exception as exc:
+                logger.warning("HoloChat 4DNA shadow trace failed: %s", exc)
+
         # Call the adapter — enriched_message includes search results if any
         # On failure, transparently fail over to a bench model from a different vendor
         start = time.time()
@@ -293,6 +325,13 @@ class HoloChatEngine:
             )
             adapter = fallback  # reflect actual analyst in metadata
         elapsed_ms = int((time.time() - start) * 1000)
+
+        if holo4dna_shadow is not None:
+            actual_analyst = _adapter_identity_dict(adapter)
+            recorded_analyst = holo4dna_shadow.metadata["route"]["runtime_analyst"]
+            if actual_analyst != recorded_analyst:
+                holo4dna_shadow.metadata["route"]["runtime_analyst_after_failover"] = actual_analyst
+                holo4dna_shadow.trace.extra_metadata["runtime_analyst_after_failover"] = actual_analyst
 
         # Hallucination check — Governor scans for specific low-confidence claims
         # and verifies them against live search. Silent on clean responses.
@@ -324,10 +363,14 @@ class HoloChatEngine:
 
         # Governor learns — extract any new facts about the user and persist them
         # Skipped in incognito: blind sessions must not pollute the capsule portrait
+        memory_extraction_attempted = False
+        memory_writes_count = 0
         if capsule_id and not incognito:
+            memory_extraction_attempted = True
             updates = self._governor.extract_context_updates(session.history, capsule_context)
             for key, value in updates.items():
                 self._brain.set_capsule_context(capsule_id, key, value)
+            memory_writes_count = len(updates)
             if updates:
                 logger.info(f"Capsule context updated for {capsule_id[:8]}: {list(updates.keys())}")
 
@@ -377,6 +420,11 @@ class HoloChatEngine:
             capsule_id    = capsule_id,
         )
 
+        if holo4dna_shadow is not None:
+            holo4dna_shadow.trace.memory_extraction_attempted = memory_extraction_attempted
+            holo4dna_shadow.trace.memory_writes_count = memory_writes_count
+            log_trace(holo4dna_shadow.trace, logger=logger)
+
         # Signal a thread handoff when health is RED
         handoff = None
         if session.thread_health_level == "RED":
@@ -403,6 +451,7 @@ class HoloChatEngine:
             "_governor_turns_held": session.turn_count - session.governor_locked_since,
             "_temperature":        temperature,
             "artifacts":           artifacts_saved,
+            **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }
 
     def stream_message(self, session_id: str, user_message: str,
@@ -588,6 +637,199 @@ class HoloChatEngine:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class Holo4DnaShadowTurn:
+    metadata: dict[str, Any]
+    previous_route: PreviousRoute
+    trace: HoloTraceRecord
+
+
+def _env_flag(name: str) -> bool:
+    return str(os.getenv(name, "")).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _holo4dna_shadow_enabled() -> bool:
+    return _env_flag("HOLOCHAT_4DNA_SHADOW") or _env_flag("HOLOCHAT_4DNA_ENABLED")
+
+
+def _holo4dna_enabled() -> bool:
+    return _env_flag("HOLOCHAT_4DNA_ENABLED")
+
+
+def _adapter_identity_dict(adapter: Any) -> dict[str, Optional[str]]:
+    return {
+        "provider": getattr(adapter, "provider", None),
+        "model": getattr(adapter, "model_id", getattr(adapter, "model", None)),
+    }
+
+
+def _required_tools_for_turn(search_query: Optional[str], search_results: Optional[str]) -> List[RequiredTools]:
+    if search_query or search_results:
+        return [RequiredTools.WEB_SEARCH]
+    return [RequiredTools.NONE]
+
+
+def _memory_presence_summary(
+    *,
+    capsule_context: dict,
+    life_context: list,
+    last_session: Optional[dict],
+    incognito: bool,
+) -> dict[str, Any]:
+    if incognito:
+        return {"source": "HoloBrain", "incognito": True, "memory_in_prompt": False}
+    return {
+        "source": "HoloBrain",
+        "incognito": False,
+        "memory_in_prompt": bool(capsule_context or life_context or last_session),
+        "capsule_context_keys": len(capsule_context or {}),
+        "life_context_entries": len(life_context or []),
+        "latest_consolidation_loaded": bool(last_session),
+    }
+
+
+def _route_decision_metadata(
+    route: RouteDecision,
+    *,
+    runtime_adapter: Any,
+    shadow_route: bool,
+) -> dict[str, Any]:
+    return {
+        "shadow_route": shadow_route,
+        "runtime_analyst": _adapter_identity_dict(runtime_adapter),
+        "shadow_council": {
+            "provider": route.council_provider,
+            "model": route.council_model,
+        },
+        "hologov": {
+            "provider": route.hologov_provider,
+            "model": route.hologov_model,
+            "tenure_remaining": route.hologov_tenure_remaining,
+            "tenure_window": list(route.hologov_tenure_window),
+        },
+        "previous_council": {
+            "provider": route.previous_council_provider,
+            "model": route.previous_council_model,
+        },
+        "assigned_role": route.assigned_role,
+        "route_reason": route.route_reason,
+        "fallback_used": route.fallback_used,
+        "fallback_reason": route.fallback_reason,
+        "dna_degraded": route.dna_degraded,
+        "eligible_provider_count": route.eligible_provider_count,
+    }
+
+
+def _thread_health_metadata(holo_state: HoloState) -> dict[str, Any]:
+    return holo_state.thread_health.model_dump(mode="json")
+
+
+def _build_holo4dna_shadow_turn(
+    *,
+    session: ChatSession,
+    capsule_id: Optional[str],
+    user_message: str,
+    runtime_adapter: Any,
+    router: HoloRouter,
+    context_builder: HoloContextBuilder,
+    previous_route: Optional[PreviousRoute],
+    capsule_context: dict,
+    life_context: list,
+    last_session: Optional[dict],
+    search_query: Optional[str],
+    search_results: Optional[str],
+    incognito: bool,
+) -> Holo4DnaShadowTurn:
+    required_tools = _required_tools_for_turn(search_query, search_results)
+    holo_state = HoloState.from_chat_turn(
+        session_id=session.session_id,
+        capsule_id=capsule_id,
+        turn_number=session.turn_count,
+        user_message=user_message,
+        thread_health_score=session.thread_health_score,
+        thread_status=session.thread_status,
+        required_tools=required_tools,
+    )
+    holo_state.memory_candidates.append(
+        _memory_presence_summary(
+            capsule_context=capsule_context,
+            life_context=life_context,
+            last_session=last_session,
+            incognito=incognito,
+        )
+    )
+
+    route = router.select_route(holo_state, previous_route=previous_route)
+    context_packet = context_builder.build(
+        base_system_prompt=HOLO_CHAT_SYSTEM_PROMPT,
+        holo_state=holo_state,
+        user_message=user_message,
+        route_decision=route,
+        capsule_context=capsule_context,
+        life_context=life_context,
+        latest_consolidation=last_session,
+        recent_history=session.history,
+        web_results=search_results,
+        incognito=incognito,
+    )
+
+    route_metadata = _route_decision_metadata(route, runtime_adapter=runtime_adapter, shadow_route=True)
+    thread_health = _thread_health_metadata(holo_state)
+    metadata = {
+        "shadow": True,
+        "enabled": _holo4dna_enabled(),
+        "state_id": holo_state.state_id,
+        "state_schema_version": holo_state.schema_version,
+        "dna_profile": route.dna_profile,
+        "route": route_metadata,
+        "context_hash": context_packet.context_hash,
+        "context": {
+            "included_blocks": context_packet.metadata.get("included_blocks", []),
+            "omitted_blocks": context_packet.metadata.get("omitted_blocks", []),
+            "char_count": context_packet.char_count,
+            "token_estimate": context_packet.token_estimate,
+        },
+        "thread_health": thread_health,
+        "searched": bool(search_query or search_results),
+        "search_query": search_query,
+    }
+
+    trace = HoloTraceRecord(
+        session_id=session.session_id,
+        turn_number=session.turn_count,
+        holo_state_id=holo_state.state_id,
+        holo_state_schema_version=holo_state.schema_version,
+        dna_profile=route.dna_profile,
+        shadow_route=True,
+        runtime_analyst_provider=metadata["route"]["runtime_analyst"]["provider"],
+        runtime_analyst_model=metadata["route"]["runtime_analyst"]["model"],
+        selected_council_provider=route.council_provider,
+        selected_council_model=route.council_model,
+        selected_hologov_provider=route.hologov_provider,
+        selected_hologov_model=route.hologov_model,
+        assigned_role=route.assigned_role,
+        route_reason=route.route_reason,
+        searched=bool(search_query or search_results),
+        search_query=search_query,
+        thread_health=thread_health,
+        context_packet_hash=context_packet.context_hash,
+        context_blocks=context_packet.metadata.get("included_blocks", []),
+        fallback_used=route.fallback_used,
+        fallback_reason=route.fallback_reason,
+        dna_degraded=route.dna_degraded,
+        extra_metadata={
+            "context_char_count": context_packet.char_count,
+            "context_token_estimate": context_packet.token_estimate,
+            "omitted_blocks": context_packet.metadata.get("omitted_blocks", []),
+        },
+    )
+    return Holo4DnaShadowTurn(
+        metadata=metadata,
+        previous_route=route.as_previous_route(),
+        trace=trace,
+    )
+
 
 def _life_context_block(entries: list) -> str:
     """

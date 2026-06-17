@@ -46,6 +46,9 @@ class HoloTraceRecord(BaseModel):
     holo_state_id: str
     holo_state_schema_version: str
     dna_profile: str
+    shadow_route: bool = False
+    runtime_analyst_provider: str | None = None
+    runtime_analyst_model: str | None = None
     selected_council_provider: str
     selected_council_model: str
     selected_hologov_provider: str
@@ -58,8 +61,10 @@ class HoloTraceRecord(BaseModel):
     memory_extraction_attempted: bool = False
     memory_writes_count: int = 0
     context_packet_hash: str
+    context_blocks: list[str] = Field(default_factory=list)
     fallback_used: bool = False
     fallback_reason: str | None = None
+    dna_degraded: bool = False
     extra_metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

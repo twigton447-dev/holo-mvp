@@ -63,7 +63,66 @@ python3 -m py_compile benchmark_factory/batches/run_BAL100_BATCH_001_five_mini_s
 python3 benchmark_factory/batches/run_BAL100_BATCH_001_five_mini_scout.py
 ```
 
-The script above prepares payload-only prompt cards and a non-benchmark scout plan. It does not call providers.
+The default command above prepares payload-only prompt cards and a non-benchmark scout plan. It does not call providers.
+
+## Taylor-Local Execution Command
+
+Run this only from Taylor's local Mac Terminal, after explicitly approving provider transmission for the 16 draft payloads.
+
+```bash
+cd /Users/taylorwigton/CascadeProjects/holo-mvp
+pwd
+git branch --show-current
+git status --short
+cat docs/HOLO_ACTIVE_MANDATE.md
+
+set -a
+source .env
+set +a
+
+export BAL100_BATCH001_LOCAL_SCOUT_APPROVED=I_APPROVE_PROVIDER_TRANSMISSION
+
+python3 benchmark_factory/batches/run_BAL100_BATCH_001_five_mini_scout.py \
+  --execute-provider-calls \
+  --operator Taylor \
+  --i-am-taylor-local \
+  --yes-send-draft-payloads-to-providers
+```
+
+The execution mode refuses obvious Codex/Co environment markers and requires the approval env var plus the local-only flags above.
+
+Required provider key env vars:
+
+```text
+OPENAI_API_KEY
+ANTHROPIC_API_KEY
+GOOGLE_API_KEY
+XAI_API_KEY
+MINIMAX_API_KEY
+```
+
+Scout results are written under:
+
+```text
+scout_runs/BAL100-BATCH-001_five_mini_solo_scout/<run_id>/
+```
+
+Expected files:
+
+```text
+prompt_cards/
+results.jsonl
+summary.json
+```
+
+Every result and summary file records:
+
+```text
+benchmark_credit=false
+official_trace=false
+judge=false
+freeze=false
+```
 
 ## Manual Scout Result Schema
 

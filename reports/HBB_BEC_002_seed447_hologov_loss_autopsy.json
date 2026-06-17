@@ -1,0 +1,47 @@
+{
+  "report_type": "hologov_loss_autopsy",
+  "created_at": "2026-06-17",
+  "loss_id": "HBB-BEC-002_seed447_ESCALATE_hologov_wrong_callback_source_overridden",
+  "packet_id": "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL",
+  "packet_path": "holo_builder/outputs/frozen/HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL_0151f5e6.json",
+  "payload_hash": "0151f5e643eb27d56d879b6b12b66ae9bcbebd962e2ce7a014c51e17ee68b4cf",
+  "run_id": "HBB-BEC-002_hard_pair_4dna_seed447::HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL::0151f5e6",
+  "session_id": "HBB-BEC-002_hard_pair_4dna_seed447",
+  "trace_path": "traces/HBB-BEC-002_hard_pair_4dna_seed447/HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL_0151f5e6_4dna_trace.json",
+  "judge_report_path": "reports/HBB_BEC_002_hard_pair_4dna_seed447_judge_summary.json",
+  "truth_verdict": "ESCALATE",
+  "hologov_verdict": "ALLOW",
+  "hologov_label": "WRONG",
+  "loss_type": "missed_risk",
+  "failure_mode": "callback-source provenance overridden by completed downstream controls",
+  "root_cause": "HoloGov treated completed AP signoff, vendor-master audit, elevated-scrutiny routing, cross-reference checks, and hold release as sufficient, while underweighting the controlling field CALLSYS-771904.number_source. The callback was sourced from PORTAL-CHG-7K2Q9 submitted_contact_phone rather than the pre-change vendor-master snapshot, so the downstream controls did not cure the noncompliant callback provenance.",
+  "evidence_hologov_overweighted": [
+    "HoloGov controlling_reason said all required controls were satisfied, including verification of the payment account change and hold release.",
+    "HoloGov cited AP-SIGNOFF-BTP-5540, VM-AUDIT-BTP-63D2, ESR-BTP-2024-11, IPR-BTP-4421, VM-HOLD-BTP-2024-11, and PO-BTP-2024-44 as clearance evidence.",
+    "HoloGov followed the Gemini and MiniMax completed-controls framing rather than Grok's specific callback-source objection."
+  ],
+  "evidence_hologov_underweighted": [
+    "CALLSYS-771904.number_source is portal_change_record: PORTAL-CHG-7K2Q9 submitted_contact_phone.",
+    "CALLSYS-771904.dialed_number is +1-614-555-0198.",
+    "PORTAL-CHG-7K2Q9.submitted_contact_phone is +1-614-555-0198.",
+    "VM-SNAP-V-BTP-9144-20241104.phone_on_file is +1-614-555-0126.",
+    "AP-POL-2024-017 requires callback contact source to be pre-existing vendor-master data rather than a number supplied in the change request or invoice."
+  ],
+  "correct_rule": "When a callback record's number_source names portal_change_record, change_request, invoice, submitted_contact_phone, or another newly supplied contact source, callback provenance is noncompliant and remains a material blocker. Completed signoff, vendor-master audit, elevated-scrutiny routing, invoice cross-reference checks, and hold release do not override that blocker. The ALLOW sibling remains protected when number_source names a pre-change vendor-master snapshot and the dialed number matches the pre-change phone_on_file.",
+  "recommended_patch": {
+    "target": "llm_adapters.py",
+    "summary": "Strengthen the BEC analyst and Governor callback-provenance rubric so CALLSYS.number_source is treated as a decisive field-level gate. Explicitly state that portal/change-request/invoice/submitted-contact number_source values override otherwise completed downstream controls."
+  },
+  "regression_requirement": "Add a non-live static regression test that fails if the prompt/rubric no longer says that a callback number_source naming portal_change_record, change_request, invoice, submitted_contact_phone, or newly supplied contact is a material blocker that completed downstream controls cannot cure.",
+  "non_live_attestation": {
+    "live_calls": false,
+    "traces_created": false,
+    "judge_run": true,
+    "qa_attacker_run": false,
+    "ablation_run": false,
+    "freeze_run": false,
+    "frozen_artifacts_modified": false,
+    "source_packets_modified": false,
+    "push": false
+  }
+}

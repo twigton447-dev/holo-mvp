@@ -38,3 +38,19 @@ def test_callback_provenance_boundary_is_preserved() -> None:
     assert "newly supplied contact" in prompt
     assert "noncompliant" in prompt
     assert "material blocker" in prompt
+
+
+def test_portal_sourced_callback_overrides_completed_downstream_controls() -> None:
+    prompt = _combined_prompt_surface()
+
+    assert "number_source" in prompt
+    assert "portal_change_record" in prompt
+    assert "change_request" in prompt
+    assert "submitted_contact_phone" in prompt
+    assert "decisive" in prompt
+    assert "completed ap signoff" in prompt
+    assert "vendor-master audit" in prompt
+    assert "elevated scrutiny routing" in prompt
+    assert "cross-reference checks" in prompt
+    assert "hold release" in prompt
+    assert "cannot override" in prompt or "do not cure" in prompt

@@ -1026,6 +1026,11 @@ from pre-change vendor-master data is compliant; a callback source from a
 portal change request, invoice, or newly supplied contact record is
 noncompliant and remains a material blocker. Escalate only when required
 control provenance is missing, unresolved, contradictory, or noncompliant.
+Field-level gate: if a callback record's number_source names portal_change_record,
+change_request, invoice, submitted_contact_phone, or any newly supplied contact
+source, the callback is noncompliant even if AP signoff, vendor-master audit,
+elevated scrutiny routing, cross-reference checks, and hold release are complete.
+Those downstream controls do not cure a callback to a newly supplied source.
 
 === INTEGRITY RULE (OVERRIDES ROLE INSTRUCTIONS) ===
 Your role may instruct you to challenge, pressure-test, or hunt for risks.
@@ -1347,6 +1352,12 @@ applicable, and callback verification are complete, the triggers may support
 ALLOW. Preserve the callback-source boundary: pre-change vendor-master source is
 compliant; portal/change-request/invoice/newly supplied contact source is
 noncompliant and remains a material blocker.
+If a callback record's number_source field names portal_change_record,
+change_request, invoice, submitted_contact_phone, or another newly supplied
+contact source, direct the next analyst to treat that field as a decisive
+ESCALATE blocker. Completed AP signoff, vendor-master audit, elevated scrutiny
+routing, invoice cross-reference checks, and hold release cannot override that
+noncompliant source provenance.
 
 EXCULPATORY CONTEXT: When prior analysts have flagged sender_identity, domain_spoofing,
 or approval_chain at HIGH/MEDIUM, check whether the payload already contains a

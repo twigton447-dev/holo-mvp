@@ -1,0 +1,29 @@
+{
+  "cohort_id": "five-mini-2026-06-17",
+  "description": "Five-mini low-cost model cohort for Holo tests and benchmarks unless Taylor explicitly overrides.",
+  "doctrine": "mini_only_default",
+  "models": {
+    "openai": "gpt-4o-mini",
+    "anthropic": "claude-haiku-4-5-20251001",
+    "google": "gemini-2.5-flash-lite",
+    "xai": "grok-3-mini",
+    "minimax": "MiniMax-Text-01"
+  },
+  "condition_labels": {
+    "solo": {
+      "openai": "A-OpenAI-mini",
+      "anthropic": "A-Claude-Haiku",
+      "google": "A-Gemini-FlashLite",
+      "xai": "A-Grok-mini",
+      "minimax": "A-MiniMax"
+    },
+    "holo_architecture": {
+      "planned": "E-HoloArch-mini",
+      "status": "pending_adapter_support",
+      "limitation": "ablation_engine_harness.py currently builds OpenAI, Anthropic, and Google adapters only; the frozen-packet runner adapter must add xAI and MiniMax before running E-HoloArch-mini."
+    }
+  },
+  "temperature": {
+    "default": 0.1
+  }
+}

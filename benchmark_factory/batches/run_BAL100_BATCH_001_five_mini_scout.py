@@ -5,9 +5,13 @@ import json
 import os
 import re
 import time
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib import error as urllib_error
+from urllib import parse as urllib_parse
+from urllib import request as urllib_request
 
 
 BATCH_ID = "BAL100-BATCH-001"
@@ -22,9 +26,9 @@ CO_ENV_MARKERS = (
     "CODEX_INTERNAL_ORIGINATOR_OVERRIDE",
 )
 MODELS = [
-    {"provider": "openai", "model": "gpt-4o-mini", "api_key_env": "OPENAI_API_KEY"},
-    {"provider": "anthropic", "model": "claude-haiku-4-5-20251001", "api_key_env": "ANTHROPIC_API_KEY"},
-    {"provider": "gemini", "model": "gemini-2.5-flash-lite", "api_key_env": "GOOGLE_API_KEY"},
+    {"provider": "openai", "model": "gpt-4o-mini", "api_key_env": "OPENAI_API_KEY", "base_url": "https://api.openai.com/v1"},
+    {"provider": "anthropic", "model": "claude-haiku-4-5-20251001", "api_key_env": "ANTHROPIC_API_KEY", "base_url": "https://api.anthropic.com/v1"},
+    {"provider": "gemini", "model": "gemini-2.5-flash-lite", "api_key_env": "GOOGLE_API_KEY", "base_url": "https://generativelanguage.googleapis.com/v1beta"},
     {"provider": "xai", "model": "grok-3-mini", "api_key_env": "XAI_API_KEY", "base_url": "https://api.x.ai/v1"},
     {"provider": "minimax", "model": "MiniMax-Text-01", "api_key_env": "MINIMAX_API_KEY", "base_url_env": "MINIMAX_BASE_URL", "base_url": "https://api.minimax.io/v1"},
 ]
@@ -152,6 +156,11 @@ def _require_local_execution_approval(args: argparse.Namespace) -> None:
         raise SystemExit("Missing API key environment variables: " + ", ".join(sorted(missing)))
 
 
+def _new_run_dir(out_dir: Path) -> tuple[str, Path]:
+    run_id = f"{BATCH_ID}_five_mini_solo_scout_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+    return run_id, out_dir / run_id
+
+
 def _extract_json_object(text: str) -> dict[str, Any] | None:
     stripped = text.strip()
     candidates = [stripped]
@@ -186,80 +195,194 @@ def _extract_verdict(text: str) -> str:
     return "UNCLEAR"
 
 
-def _call_openai_compatible(card: dict[str, Any], model: dict[str, str], timeout: int) -> tuple[str, int, int]:
-    from openai import OpenAI
+def _excerpt(value: Any, limit: int = 1200) -> str:
+    text = "" if value is None else str(value)
+    return text[:limit]
 
-    base_url = model.get("base_url")
-    if model.get("base_url_env"):
-        base_url = os.getenv(model["base_url_env"], base_url)
-    client = OpenAI(api_key=os.getenv(model["api_key_env"]), base_url=base_url)
-    response = client.chat.completions.create(
-        model=model["model"],
-        temperature=0.1,
-        max_tokens=900,
-        messages=[
+
+class ProviderCallError(RuntimeError):
+    def __init__(
+        self,
+        error_type: str,
+        message: str,
+        *,
+        http_status: int | None = None,
+        raw_text: str = "",
+    ) -> None:
+        super().__init__(message)
+        self.error_type = error_type
+        self.http_status = http_status
+        self.raw_text = raw_text
+
+
+def _http_post_json(url: str, headers: dict[str, str], payload: dict[str, Any], timeout: int) -> dict[str, Any]:
+    body = json.dumps(payload).encode("utf-8")
+    request = urllib_request.Request(
+        url,
+        data=body,
+        headers={"Content-Type": "application/json", **headers},
+        method="POST",
+    )
+    try:
+        with urllib_request.urlopen(request, timeout=timeout) as response:
+            raw_text = response.read().decode("utf-8", errors="replace")
+            return {
+                "http_status": getattr(response, "status", None),
+                "raw_text": raw_text,
+                "json": json.loads(raw_text) if raw_text else {},
+            }
+    except urllib_error.HTTPError as exc:
+        raw_text = exc.read().decode("utf-8", errors="replace")
+        raise ProviderCallError(
+            "HTTPError",
+            _excerpt(raw_text or exc.reason),
+            http_status=exc.code,
+            raw_text=raw_text,
+        ) from exc
+    except urllib_error.URLError as exc:
+        raise ProviderCallError("URLError", _excerpt(exc.reason)) from exc
+    except TimeoutError as exc:
+        raise ProviderCallError("TimeoutError", str(exc)) from exc
+    except json.JSONDecodeError as exc:
+        raise ProviderCallError("ProviderResponseJSONDecodeError", str(exc)) from exc
+
+
+def _openai_compatible_payload(card: dict[str, Any], model: dict[str, str]) -> dict[str, Any]:
+    return {
+        "model": model["model"],
+        "temperature": 0.1,
+        "max_tokens": 900,
+        "messages": [
             {"role": "system", "content": card["system"]},
             {"role": "user", "content": card["user"]},
         ],
-        timeout=timeout,
+    }
+
+
+def _call_openai_compatible(card: dict[str, Any], model: dict[str, str], timeout: int) -> dict[str, Any]:
+    base_url = os.getenv(model["base_url_env"], model["base_url"]) if model.get("base_url_env") else model["base_url"]
+    url = base_url.rstrip("/") + "/chat/completions"
+    result = _http_post_json(
+        url,
+        {"Authorization": f"Bearer {os.getenv(model['api_key_env'], '')}"},
+        _openai_compatible_payload(card, model),
+        timeout,
     )
-    text = response.choices[0].message.content or ""
-    usage = response.usage
-    return text, int(getattr(usage, "prompt_tokens", 0) or 0), int(getattr(usage, "completion_tokens", 0) or 0)
-
-
-def _call_anthropic(card: dict[str, Any], model: dict[str, str], timeout: int) -> tuple[str, int, int]:
-    import anthropic
-
-    client = anthropic.Anthropic(api_key=os.getenv(model["api_key_env"]))
-    response = client.messages.create(
-        model=model["model"],
-        temperature=0.1,
-        max_tokens=900,
-        system=card["system"],
-        messages=[{"role": "user", "content": card["user"]}],
-        timeout=timeout,
-    )
-    text = response.content[0].text if response.content else ""
-    usage = response.usage
-    return text, int(getattr(usage, "input_tokens", 0) or 0), int(getattr(usage, "output_tokens", 0) or 0)
-
-
-def _call_gemini(card: dict[str, Any], model: dict[str, str], timeout: int) -> tuple[str, int, int]:
-    from google import genai
-    from google.genai import types
-
-    client = genai.Client(api_key=os.getenv(model["api_key_env"]), http_options={"timeout": timeout * 1000})
-    response = client.models.generate_content(
-        model=model["model"],
-        contents=f"{card['system']}\n\n---\n\n{card['user']}",
-        config=types.GenerateContentConfig(
-            temperature=0.1,
-            max_output_tokens=900,
-            response_mime_type="application/json",
-        ),
-    )
-    text = response.text or ""
-    usage = getattr(response, "usage_metadata", None)
-    return (
-        text,
-        int(getattr(usage, "prompt_token_count", 0) or 0),
-        int(getattr(usage, "candidates_token_count", 0) or 0),
-    )
-
-
-def _call_provider(card: dict[str, Any], model: dict[str, str], timeout: int) -> dict[str, Any]:
-    start = time.time()
-    provider = model["provider"]
-    if provider == "anthropic":
-        text, in_tok, out_tok = _call_anthropic(card, model, timeout)
-    elif provider == "gemini":
-        text, in_tok, out_tok = _call_gemini(card, model, timeout)
-    else:
-        text, in_tok, out_tok = _call_openai_compatible(card, model, timeout)
-
-    parsed = _extract_json_object(text) or {}
+    data = result["json"]
+    choices = data.get("choices") or []
+    message = (choices[0].get("message") or {}) if choices else {}
+    usage = data.get("usage") or {}
     return {
+        "raw_text": message.get("content") or "",
+        "input_tokens": int(usage.get("prompt_tokens") or 0),
+        "output_tokens": int(usage.get("completion_tokens") or 0),
+        "http_status": result["http_status"],
+    }
+
+
+def _anthropic_payload(card: dict[str, Any], model: dict[str, str]) -> dict[str, Any]:
+    return {
+        "model": model["model"],
+        "temperature": 0.1,
+        "max_tokens": 900,
+        "system": card["system"],
+        "messages": [{"role": "user", "content": card["user"]}],
+    }
+
+
+def _call_anthropic(card: dict[str, Any], model: dict[str, str], timeout: int) -> dict[str, Any]:
+    result = _http_post_json(
+        model["base_url"].rstrip("/") + "/messages",
+        {
+            "x-api-key": os.getenv(model["api_key_env"], ""),
+            "anthropic-version": "2023-06-01",
+        },
+        _anthropic_payload(card, model),
+        timeout,
+    )
+    data = result["json"]
+    content = data.get("content") or []
+    usage = data.get("usage") or {}
+    text_parts = [part.get("text", "") for part in content if isinstance(part, dict)]
+    return {
+        "raw_text": "\n".join(part for part in text_parts if part),
+        "input_tokens": int(usage.get("input_tokens") or 0),
+        "output_tokens": int(usage.get("output_tokens") or 0),
+        "http_status": result["http_status"],
+    }
+
+
+def _gemini_payload(card: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "contents": [
+            {
+                "role": "user",
+                "parts": [{"text": f"{card['system']}\n\n---\n\n{card['user']}"}],
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.1,
+            "maxOutputTokens": 900,
+            "responseMimeType": "application/json",
+        },
+    }
+
+
+def _call_gemini(card: dict[str, Any], model: dict[str, str], timeout: int) -> dict[str, Any]:
+    quoted_model = urllib_parse.quote(model["model"], safe="")
+    url = (
+        model["base_url"].rstrip("/")
+        + f"/models/{quoted_model}:generateContent?key="
+        + urllib_parse.quote(os.getenv(model["api_key_env"], ""), safe="")
+    )
+    result = _http_post_json(url, {}, _gemini_payload(card), timeout)
+    data = result["json"]
+    candidates = data.get("candidates") or []
+    parts = ((candidates[0].get("content") or {}).get("parts") or []) if candidates else []
+    usage = data.get("usageMetadata") or {}
+    return {
+        "raw_text": "\n".join(part.get("text", "") for part in parts if isinstance(part, dict)),
+        "input_tokens": int(usage.get("promptTokenCount") or 0),
+        "output_tokens": int(usage.get("candidatesTokenCount") or 0),
+        "http_status": result["http_status"],
+    }
+
+
+def _parse_model_verdict(raw_text: str) -> dict[str, Any]:
+    parsed = _extract_json_object(raw_text)
+    if not parsed:
+        return {
+            "parse_ok": False,
+            "verdict": "ERROR",
+            "model_verdict": "ERROR",
+            "parse_error": "No JSON object with verdict was found in provider response.",
+        }
+    verdict = str(parsed.get("verdict", "")).upper()
+    if verdict not in {"ALLOW", "ESCALATE"}:
+        return {
+            "parse_ok": False,
+            "verdict": "ERROR",
+            "model_verdict": "ERROR",
+            "parse_error": f"Parsed JSON did not contain ALLOW/ESCALATE verdict: {parsed.get('verdict')!r}",
+            "parsed_json": parsed,
+        }
+    return {
+        "parse_ok": True,
+        "verdict": verdict,
+        "model_verdict": verdict,
+        "rationale": str(parsed.get("rationale", "")).strip(),
+        "cited_artifacts": parsed.get("cited_artifacts", []),
+        "parsed_json": parsed,
+    }
+
+
+def _result_id(card: dict[str, Any], model: dict[str, str]) -> str:
+    return f"{card['packet_id']}::{model['provider']}::{model['model']}"
+
+
+def _base_record(card: dict[str, Any], model: dict[str, str], latency_ms: int) -> dict[str, Any]:
+    return {
+        "result_id": _result_id(card, model),
         "batch_id": BATCH_ID,
         "benchmark_credit": False,
         "official_trace": False,
@@ -267,17 +390,85 @@ def _call_provider(card: dict[str, Any], model: dict[str, str], timeout: int) ->
         "freeze": False,
         "packet_id": card["packet_id"],
         "builder_hypothesis": card["builder_hypothesis"],
-        "provider": provider,
+        "provider": model["provider"],
         "model": model["model"],
-        "model_verdict": _extract_verdict(text),
-        "rationale": str(parsed.get("rationale", "")).strip(),
-        "cited_artifacts": parsed.get("cited_artifacts", []),
-        "raw_text": text.strip(),
-        "input_tokens": in_tok,
-        "output_tokens": out_tok,
-        "latency_ms": int((time.time() - start) * 1000),
+        "latency_ms": latency_ms,
         "called_at": _utc_now(),
     }
+
+
+def attempt_provider_call(card: dict[str, Any], model: dict[str, str], timeout: int) -> dict[str, Any]:
+    start = time.time()
+    try:
+        call_result = _call_provider_raw(card, model, timeout)
+    except Exception as exc:
+        return _error_record(card, model, exc, int((time.time() - start) * 1000), error_stage="provider_call")
+
+    latency_ms = int((time.time() - start) * 1000)
+    raw_text = call_result["raw_text"]
+    parsed = _parse_model_verdict(raw_text)
+    record = _base_record(card, model, latency_ms)
+    record.update(
+        {
+            "provider_call_ok": True,
+            "parse_ok": parsed["parse_ok"],
+            "verdict": parsed["verdict"],
+            "model_verdict": parsed["model_verdict"],
+            "raw_text_excerpt": _excerpt(raw_text),
+            "http_status": call_result.get("http_status"),
+            "input_tokens": call_result.get("input_tokens", 0),
+            "output_tokens": call_result.get("output_tokens", 0),
+        }
+    )
+    if parsed["parse_ok"]:
+        record["rationale"] = parsed.get("rationale", "")
+        record["cited_artifacts"] = parsed.get("cited_artifacts", [])
+        record["parsed_json"] = parsed.get("parsed_json", {})
+    else:
+        record["parse_error"] = parsed.get("parse_error", "")
+        if "parsed_json" in parsed:
+            record["parsed_json"] = parsed["parsed_json"]
+    return record
+
+
+def _call_provider_raw(card: dict[str, Any], model: dict[str, str], timeout: int) -> dict[str, Any]:
+    provider = model["provider"]
+    if provider == "anthropic":
+        return _call_anthropic(card, model, timeout)
+    elif provider == "gemini":
+        return _call_gemini(card, model, timeout)
+    return _call_openai_compatible(card, model, timeout)
+
+
+def _error_record(card: dict[str, Any], model: dict[str, str], exc: Exception, latency_ms: int, error_stage: str) -> dict[str, Any]:
+    if isinstance(exc, ProviderCallError):
+        error_type = exc.error_type
+        error_message = str(exc)
+        http_status = exc.http_status
+        raw_text = exc.raw_text
+    else:
+        error_type = type(exc).__name__
+        error_message = str(exc)
+        http_status = None
+        raw_text = ""
+    record = _base_record(card, model, latency_ms)
+    record.update(
+        {
+            "provider_call_ok": False,
+            "parse_ok": False,
+            "verdict": "ERROR",
+            "model_verdict": "ERROR",
+            "raw_text_excerpt": _excerpt(raw_text),
+            "http_status": http_status,
+            "error_type": error_type,
+            "error_message_excerpt": _excerpt(error_message),
+            "provider_error": f"{error_type}: {error_message}",
+        }
+    )
+    record.update({
+        "error_stage": error_stage,
+    })
+    return record
 
 
 def _summarize_results(records: list[dict[str, Any]], run_id: str) -> dict[str, Any]:
@@ -290,6 +481,7 @@ def _summarize_results(records: list[dict[str, Any]], run_id: str) -> dict[str, 
     best_promote_candidates = []
     repair_candidates = []
     discard_candidates = []
+    incomplete_packets = []
 
     for packet_id, packet_records in sorted(by_packet.items()):
         hypothesis = packet_records[0]["builder_hypothesis"]
@@ -297,12 +489,18 @@ def _summarize_results(records: list[dict[str, Any]], run_id: str) -> dict[str, 
             f"{record['provider']}:{record['model']}": record.get("model_verdict", "ERROR")
             for record in packet_records
         }
+        error_result_refs = [
+            record["result_id"]
+            for record in packet_records
+            if record.get("model_verdict") == "ERROR"
+        ]
         non_error_verdicts = [verdict for verdict in verdicts.values() if verdict in {"ALLOW", "ESCALATE"}]
         wrong_allow_count = sum(1 for verdict in non_error_verdicts if hypothesis == "ESCALATE" and verdict == "ALLOW")
         wrong_escalate_count = sum(1 for verdict in non_error_verdicts if hypothesis == "ALLOW" and verdict == "ESCALATE")
         wrong_total = wrong_allow_count + wrong_escalate_count
         model_disagreement = len(set(non_error_verdicts)) > 1
         too_easy = len(non_error_verdicts) == len(MODELS) and wrong_total == 0
+        incomplete = len(non_error_verdicts) == 0
 
         packet_summary = {
             "packet_id": packet_id,
@@ -313,10 +511,14 @@ def _summarize_results(records: list[dict[str, Any]], run_id: str) -> dict[str, 
             "collapse_count": wrong_total,
             "model_disagreement": model_disagreement,
             "too_easy": too_easy,
+            "incomplete": incomplete,
+            "error_result_refs": error_result_refs,
         }
         packet_summaries.append(packet_summary)
 
-        if too_easy:
+        if incomplete:
+            incomplete_packets.append(packet_id)
+        elif too_easy:
             too_easy_packets.append(packet_id)
         elif wrong_total >= 4:
             discard_candidates.append(packet_id)
@@ -325,6 +527,13 @@ def _summarize_results(records: list[dict[str, Any]], run_id: str) -> dict[str, 
         else:
             best_promote_candidates.append(packet_id)
 
+    error_records = [record for record in records if record.get("model_verdict") == "ERROR"]
+    error_counts = Counter(
+        f"{record.get('error_stage', 'unknown')}:{record.get('error_type', record.get('provider_error', 'ERROR'))}"
+        for record in error_records
+    )
+    provider_error_counts = Counter(record.get("provider", "unknown") for record in error_records)
+
     return {
         "run_id": run_id,
         "batch_id": BATCH_ID,
@@ -332,22 +541,27 @@ def _summarize_results(records: list[dict[str, Any]], run_id: str) -> dict[str, 
         "official_trace": False,
         "judge": False,
         "freeze": False,
+        "run_status": "operational_failure" if records and len(error_records) == len(records) else "complete",
         "packets": len(by_packet),
         "models": MODELS,
         "results": len(records),
+        "error_results": len(error_records),
+        "error_counts": dict(error_counts),
+        "provider_error_counts": dict(provider_error_counts),
         "packet_summaries": packet_summaries,
         "too_easy_packets": too_easy_packets,
         "best_promote_candidates": best_promote_candidates,
         "repair_candidates": repair_candidates,
         "discard_candidates": discard_candidates,
+        "incomplete_packets": incomplete_packets,
         "created_at": _utc_now(),
     }
 
 
 def execute_local_scout(timeout: int, out_dir: Path = OUT_DIR) -> dict[str, Any]:
     packets = _load_packets()
-    run_id = f"{BATCH_ID}_five_mini_solo_scout_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
-    run_dir = out_dir / run_id
+    run_id, run_dir = _new_run_dir(out_dir)
+
     prompt_dir = run_dir / "prompt_cards"
     prompt_dir.mkdir(parents=True, exist_ok=True)
 
@@ -360,23 +574,7 @@ def execute_local_scout(timeout: int, out_dir: Path = OUT_DIR) -> dict[str, Any]
             (prompt_dir / f"{packet['scenario_id']}__{model['provider']}__{safe_model}.json").write_text(
                 json.dumps(card, indent=2, sort_keys=True) + "\n"
             )
-            try:
-                record = _call_provider(card, model, timeout)
-            except Exception as exc:
-                record = {
-                    "batch_id": BATCH_ID,
-                    "benchmark_credit": False,
-                    "official_trace": False,
-                    "judge": False,
-                    "freeze": False,
-                    "packet_id": card["packet_id"],
-                    "builder_hypothesis": card["builder_hypothesis"],
-                    "provider": model["provider"],
-                    "model": model["model"],
-                    "model_verdict": "ERROR",
-                    "provider_error": f"{type(exc).__name__}: {exc}",
-                    "called_at": _utc_now(),
-                }
+            record = attempt_provider_call(card, model, timeout)
             records.append(record)
             with results_path.open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(record, sort_keys=True) + "\n")

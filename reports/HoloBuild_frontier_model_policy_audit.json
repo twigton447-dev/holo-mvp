@@ -1,0 +1,161 @@
+{
+  "audit_id": "HoloBuild_frontier_model_policy_audit_2026-06-17",
+  "status": "CLEAN_REPORT_ONLY",
+  "repo": "/Users/taylorwigton/CascadeProjects/holo-mvp",
+  "branch": "holo-builder-freeze-manifest-gate-001",
+  "head_observed": "56c5522 freeze: lock HBB-BEC-002 hard callback pair",
+  "scope": {
+    "holo_build": "builder, artifact generation, packet refinement, QA attacker surfaces",
+    "benchmark_mini_lane": "HoloVerify/frozen_4dna_runner/ablation_cohort_mini dry-run and live trace infrastructure",
+    "excluded_actions": [
+      "live calls",
+      "traces",
+      "Judge",
+      "QA",
+      "ablation",
+      "freeze",
+      "packet edits",
+      "frozen artifact edits",
+      "push"
+    ]
+  },
+  "answers": {
+    "1_holobuild_has_mini_builder_generator_refiner_default": {
+      "answer": "No",
+      "details": "No active HoloBuild builder/generator/refiner/default path was found using gpt-4o-mini, claude-haiku-4-5-20251001, gemini-2.5-flash-lite, grok-3-mini, or MiniMax-Text-01."
+    },
+    "2_mini_models_isolated_to_4dna_benchmark_lane": {
+      "answer": "Yes for committed defaults and current code paths",
+      "details": "Mini models appear in the explicit five-mini cohort, the frozen 4DNA runner, related tests, and existing committed trace/report artifacts. HoloBuild loop and QA attacker paths do not consume that mini cohort."
+    },
+    "3_holobuild_defaults_explicitly_frontier_only": {
+      "answer": "Yes for HoloBuild adapter defaults",
+      "details": "HoloBuild constructs OpenAIAdapter, AnthropicAdapter, and GoogleAdapter directly. Their defaults are gpt-5.4, claude-sonnet-4-6, and gemini-2.5-pro. ablation_cohort_default.json uses the same frontier trio."
+    },
+    "4_ambiguous_shared_config_or_leak_paths": {
+      "answer": "No active leak; one operational caveat",
+      "details": "llm_adapters.py contains bench and fast registries with mini or low-cost models, but HoloBuild does not call load_adapters or load_fast_adapters. Adapter constructors allow env var overrides such as OPENAI_MODEL, ANTHROPIC_MODEL, and GOOGLE_MODEL, so runtime policy still depends on env hygiene."
+    },
+    "5_tests_docs_aligned": {
+      "answer": "Mostly aligned",
+      "details": "Mini tests explicitly fail closed for the five-mini runner. The default frontier cohort is present. No dedicated HoloBuild frontier-policy static test exists, but no code change was required in this clean audit."
+    },
+    "6_files_containing_model_names": {
+      "answer": "See model_name_files",
+      "details": "Files with relevant frontier or mini model strings are enumerated below."
+    },
+    "7_changes_required": {
+      "answer": "No required code/config changes",
+      "details": "The audit is report-only. Optional future hardening would add a HoloBuild-only frontier allowlist around env overrides."
+    }
+  },
+  "frontier_defaults_found": [
+    {
+      "file": "llm_adapters.py",
+      "surface": "OpenAIAdapter default",
+      "model": "gpt-5.4"
+    },
+    {
+      "file": "llm_adapters.py",
+      "surface": "AnthropicAdapter default",
+      "model": "claude-sonnet-4-6"
+    },
+    {
+      "file": "llm_adapters.py",
+      "surface": "GoogleAdapter default",
+      "model": "gemini-2.5-pro"
+    },
+    {
+      "file": "llm_adapters.py",
+      "surface": "_MODEL_REGISTRY active pool",
+      "models": [
+        "gpt-5.4",
+        "claude-sonnet-4-6",
+        "gemini-2.5-pro"
+      ]
+    },
+    {
+      "file": "ablation_cohort_default.json",
+      "surface": "default frontier cohort",
+      "models": [
+        "gpt-5.4",
+        "claude-sonnet-4-6",
+        "gemini-2.5-pro"
+      ]
+    }
+  ],
+  "holobuild_execution_paths_inspected": [
+    {
+      "file": "holo_builder/loop.py",
+      "finding": "run_builder constructs OpenAIAdapter, AnthropicAdapter, and GoogleAdapter directly."
+    },
+    {
+      "file": "holo_builder/qa_attacker.py",
+      "finding": "run_qa_attack constructs OpenAIAdapter, AnthropicAdapter, and GoogleAdapter directly."
+    },
+    {
+      "file": "holo_builder/builder.py",
+      "finding": "CLI orchestration surface does not define model IDs."
+    },
+    {
+      "file": "llm_adapters.py",
+      "finding": "Direct adapter defaults are frontier; shared bench/fast registries are separate and not used by current HoloBuild paths."
+    }
+  ],
+  "mini_lane_files": [
+    "ablation_cohort_mini.json",
+    "holo_builder/frozen_4dna_runner.py",
+    "test_ablation_cohort_mini_static.py",
+    "test_holo_builder_frozen_4dna_runner.py",
+    "traces/HBB-BEC-001_pair_4dna_seed447/HBB-BEC-001_8181d83c_4dna_trace.json",
+    "traces/HBB-BEC-001_pair_4dna_seed447/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc_4dna_trace.json"
+  ],
+  "shared_config_notes": [
+    {
+      "file": "llm_adapters.py",
+      "note": "_FAST_MODEL_REGISTRY includes gpt-4o-mini, claude-haiku-4-5-20251001, and grok-3-mini, but HoloBuild does not call load_fast_adapters."
+    },
+    {
+      "file": "llm_adapters.py",
+      "note": "_MODEL_REGISTRY bench pool includes MiniMax-Text-01. HoloBuild loop and QA attacker do not call load_adapters."
+    },
+    {
+      "file": "config.py",
+      "note": "Legacy app Settings defaults include gpt-4o and claude-sonnet-4-20250514. These are not mini models and were not found on the HoloBuild builder path."
+    },
+    {
+      "file": "environment variables",
+      "note": "OPENAI_MODEL, ANTHROPIC_MODEL, and GOOGLE_MODEL can override direct adapter defaults at runtime. No repository default sets these to mini."
+    }
+  ],
+  "model_name_files": [
+    "BENCHMARK_README.md",
+    "ablation_cohort_default.json",
+    "ablation_cohort_mini.json",
+    "bot.py",
+    "config.py",
+    "d5_native_solo_probe.py",
+    "docs/benchmark/FP_TRACES_2026-05-28.md",
+    "docs/benchmark/TRACE_REPORT_2026-05-28.md",
+    "holo_builder/frozen_4dna_runner.py",
+    "ledger/hargrove_bec_allow_001_freeze_record.json",
+    "llm_adapters.py",
+    "native_solo_probe.py",
+    "reports/HBB_BEC_001_pair_4dna_seed447_judge_summary.json",
+    "reports/HBB_BEC_001_pair_4dna_seed447_judge_summary.md",
+    "test_ablation_cohort_mini_static.py",
+    "test_holo_builder_frozen_4dna_runner.py",
+    "test_lifecycle.py",
+    "traces/HBB-BEC-001_pair_4dna_seed447/HBB-BEC-001_8181d83c_4dna_trace.json",
+    "traces/HBB-BEC-001_pair_4dna_seed447/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc_4dna_trace.json"
+  ],
+  "checks_planned_or_run": [
+    "repository state audit",
+    "model string search across holo_builder, docs, tests, JSON, and Python files",
+    "HoloBuild adapter path inspection",
+    "JSON report validation with python3 -m json.tool",
+    "git diff --stat",
+    "git status --short"
+  ],
+  "conclusion": "HoloBuild is clean under committed defaults: no mini model is configured as an active builder/generator/refiner/default. Mini models are isolated to the 4DNA mini benchmark lane and historical trace/report artifacts. No code patch is required."
+}

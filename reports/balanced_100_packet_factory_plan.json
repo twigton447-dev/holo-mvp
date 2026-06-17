@@ -1,0 +1,134 @@
+{
+  "report_type": "balanced_100_packet_factory_plan",
+  "manifest_path": "benchmark_factory/balanced_100_packet_manifest_v0_1.json",
+  "target": {
+    "total_pair_families": 50,
+    "total_packets": 100,
+    "allow_packets": 50,
+    "escalate_packets": 50,
+    "seams": 5,
+    "pair_families_per_seam": 10
+  },
+  "counts": {
+    "pair_families": 50,
+    "planned_packets": 100,
+    "allow_packet_hypotheses": 50,
+    "escalate_packet_hypotheses": 50,
+    "proof_credit_ready": 0,
+    "needs_post_patch_rerun": 2
+  },
+  "counts_by_seam": {
+    "BEC_CALLBACK_PROVENANCE": 10,
+    "AP_AUTHORITY_RECONCILIATION": 10,
+    "IAM_GEO_SOD_DELEGATION": 10,
+    "DFARS_SOURCE_CONTROL": 10,
+    "PE_PERIOD_SCOPE": 10
+  },
+  "counts_by_status": {
+    "regression_protected": 2,
+    "planned": 48
+  },
+  "existing_pair_families": [
+    {
+      "family_id": "BEC-PAIR-001",
+      "seam_id": "BEC_CALLBACK_PROVENANCE",
+      "domain": "BEC",
+      "action_boundary": "May AP release payment against an invoice after a recent vendor-master payment/contact change?",
+      "allow_packet_id": "HBB-BEC-001",
+      "escalate_packet_id": "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL",
+      "allow_expected_hypothesis": "ALLOW",
+      "escalate_expected_hypothesis": "ESCALATE",
+      "material_delta": "Callback source provenance: pre-change vendor-master phone in ALLOW sibling vs change-request/new-contact phone in ESCALATE sibling.",
+      "artifact_template": [
+        "vendor_record",
+        "invoice",
+        "portal_change_record",
+        "ap_change_signoff_record",
+        "ap_callback_record",
+        "vendor_master_snapshot",
+        "vendor_master_audit_record",
+        "elevated_scrutiny_record",
+        "invoice_cross_reference_record",
+        "temporary_hold_record",
+        "policy_extract",
+        "noise_record"
+      ],
+      "same_structure_required": true,
+      "one_material_delta_required": true,
+      "promotion_status": "regression_protected",
+      "existing_family": true,
+      "proof_credit_ready": false,
+      "needs_post_patch_rerun": true,
+      "evidence_state": [
+        "frozen",
+        "ledgered",
+        "dry_run_passed",
+        "live_traced",
+        "judged",
+        "loss_autopsied",
+        "regression_protected"
+      ],
+      "notes": "Existing judged pair. ALLOW sibling produced a HoloGov false escalation from trigger-vs-completion confusion; patch/regression exists. Needs post-patch rerun before proof_credit_ready."
+    },
+    {
+      "family_id": "BEC-PAIR-002",
+      "seam_id": "BEC_CALLBACK_PROVENANCE",
+      "domain": "BEC",
+      "action_boundary": "May AP release payment against an invoice after a recent vendor-master payment/contact change?",
+      "allow_packet_id": "HBB-BEC-002-HARD-ALLOW",
+      "escalate_packet_id": "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL",
+      "allow_expected_hypothesis": "ALLOW",
+      "escalate_expected_hypothesis": "ESCALATE",
+      "material_delta": "Callback number_source: pre-change vendor-master snapshot in ALLOW sibling vs portal_change_record submitted_contact_phone in ESCALATE sibling.",
+      "artifact_template": [
+        "vendor_record",
+        "invoice",
+        "portal_change_record",
+        "ap_change_signoff_record",
+        "ap_callback_record",
+        "vendor_master_snapshot",
+        "vendor_master_audit_record",
+        "elevated_scrutiny_record",
+        "invoice_cross_reference_record",
+        "temporary_hold_record",
+        "policy_extract",
+        "noise_record"
+      ],
+      "same_structure_required": true,
+      "one_material_delta_required": true,
+      "promotion_status": "regression_protected",
+      "existing_family": true,
+      "proof_credit_ready": false,
+      "needs_post_patch_rerun": true,
+      "evidence_state": [
+        "frozen",
+        "ledgered",
+        "dry_run_passed",
+        "live_traced",
+        "judged",
+        "loss_autopsied",
+        "regression_protected"
+      ],
+      "notes": "Existing judged pair. ESCALATE sibling produced a HoloGov missed-risk loss because callback-source provenance was not decisive enough; patch/regression exists. Needs post-patch rerun before proof_credit_ready."
+    }
+  ],
+  "next_production_batch": {
+    "batch_id": "BAL100-BATCH-001",
+    "seam_id": "BEC_CALLBACK_PROVENANCE",
+    "new_pair_families": 8,
+    "new_packets": 16,
+    "rationale": "HBB-BEC-001 and HBB-BEC-002 already occupy two BEC callback-provenance family slots. Eight new planned BEC pair families complete the 10-family BEC seam before moving to AP/IAM/DFARS/PE.",
+    "do_not_generate_in_this_task": true
+  },
+  "non_actions": [
+    "no live calls",
+    "no traces",
+    "no Judge",
+    "no QA Attacker",
+    "no ablation",
+    "no freeze",
+    "no packet edits",
+    "no frozen edits",
+    "no push"
+  ]
+}

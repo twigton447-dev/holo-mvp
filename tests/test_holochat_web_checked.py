@@ -134,3 +134,14 @@ def test_frontend_has_web_checked_render_path():
     assert "renderWebCheckedIndicator(data)" in html
     assert "finalizeStreamingBubble(holoEl, doneData.response || accumulated, doneData)" in html
     assert "data-search-query" in html
+
+
+def test_frontend_message_copy_has_fallback_and_targets_response_bubbles():
+    html = Path("frontend/chat.html").read_text()
+
+    assert "async function copyMsg(id, btn)" in html
+    assert "el.innerText || el.textContent" in html
+    assert "async function copyReadableText(text)" in html
+    assert "function copyTextFallback(text)" in html
+    assert "document.execCommand(\"copy\")" in html
+    assert "onclick=\"copyMsg('${responseId}', this)\"" in html

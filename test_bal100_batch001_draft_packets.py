@@ -38,7 +38,19 @@ ESCALATE_SOURCE_MARKERS = (
     "post_change",
     "newly supplied",
     "ap_queue_note",
+    "vendor_contact_record",
 )
+CALLBACK_DELTA_FIELDS = {
+    "number_source",
+    "dialed_number",
+    "provenance_basis",
+    "source_exclusion_note",
+    "control_closure_note",
+    "downstream_controls_boundary_note",
+    "unused_pre_change_vendor_master_source",
+    "source_defect_note",
+    "single_material_blocker_note",
+}
 INDEPENDENT_BLOCKER_MARKERS = (
     "missing po",
     "po missing",
@@ -84,6 +96,12 @@ def _snapshot(packet: dict[str, Any]) -> dict[str, Any]:
     return snapshots[0]
 
 
+def _doc(packet: dict[str, Any], doc_type: str) -> dict[str, Any]:
+    docs = [doc for doc in _internal_docs(packet) if doc.get("type") == doc_type]
+    assert len(docs) == 1
+    return docs[0]
+
+
 def _payload_text(packet: dict[str, Any]) -> str:
     return json.dumps(packet["payload"], sort_keys=True).lower()
 
@@ -104,8 +122,8 @@ def _normalized_payload_for_pair_compare(packet: dict[str, Any]) -> dict[str, An
     payload = copy.deepcopy(packet["payload"])
     for doc in payload["context"]["internal_documents"]:
         if doc.get("type") == "ap_callback_record":
-            doc["number_source"] = "<CALLBACK_SOURCE_DELTA>"
-            doc["dialed_number"] = "<CALLBACK_NUMBER_DELTA>"
+            for field in CALLBACK_DELTA_FIELDS:
+                doc[field] = "<CALLBACK_PROVENANCE_DELTA>"
     return payload
 
 
@@ -168,17 +186,65 @@ def test_allow_uses_prechange_vendor_master_callback_source() -> None:
         assert "vendor_master" in source
         assert "snapshot" in source or "pre-change" in source
         assert callback["dialed_number"] == snapshot["phone_on_file"]
+        assert callback["provenance_basis"] == "pre_change_vendor_master_record"
+        assert "not taken from portal_change_record" in callback["source_exclusion_note"].lower()
+        assert "submitted_contact_phone" in callback["source_exclusion_note"]
+        assert "no unresolved discrepancy remains" in callback["control_closure_note"].lower()
+        assert "compliant pre-change vendor-master data" in callback["downstream_controls_boundary_note"].lower()
 
 
 def test_escalate_uses_noncompliant_submitted_or_new_callback_source() -> None:
     for draft in _drafts():
         if draft["expected_verdict"] != "ESCALATE":
             continue
-        source = _callback(draft)["number_source"].lower()
+        callback = _callback(draft)
+        source = callback["number_source"].lower()
+        snapshot = _snapshot(draft)
 
         assert "vendor_master_snapshot" not in source
         assert "pre-change" not in source
         assert any(marker in source for marker in ESCALATE_SOURCE_MARKERS)
+        assert callback["provenance_basis"] == "noncompliant_callback_source"
+        assert callback["unused_pre_change_vendor_master_source"]["snapshot_id"] == snapshot["doc_id"]
+        assert callback["unused_pre_change_vendor_master_source"]["phone_on_file"] == snapshot["phone_on_file"]
+        assert callback["unused_pre_change_vendor_master_source"]["not_used_for_callback"] is True
+        assert "existed but was not used" in callback["source_defect_note"]
+        assert "downstream controls do not cure" in callback["downstream_controls_boundary_note"]
+        assert "only callback-source provenance remains" in callback["single_material_blocker_note"].lower()
+
+
+def test_repaired_control_closure_is_visible_without_second_blockers() -> None:
+    for draft in _drafts():
+        signoff = _doc(draft, "ap_change_signoff_record")
+        scrutiny = _doc(draft, "elevated_scrutiny_record")
+        xref = _doc(draft, "invoice_cross_reference_record")
+        hold = _doc(draft, "temporary_payment_hold_record")
+
+        assert "two-person ap signoff completed" in signoff["control_completion_note"].lower()
+        assert "not an open signoff item" in signoff["control_completion_note"].lower()
+        assert "completed before the payment release decision" in scrutiny["control_completion_note"].lower()
+        assert "not unresolved blockers" in scrutiny["control_completion_note"].lower()
+        assert "released before the payment release decision" in hold["release_decision_note"].lower()
+        assert "no active hold remained" in hold["release_decision_note"].lower()
+        assert "cross-reference checks completed" in xref["control_completion_note"].lower()
+        assert "no unresolved discrepancy" in xref["control_completion_note"].lower()
+
+
+def test_too_easy_escalate_variants_were_strengthened_without_second_blockers() -> None:
+    strengthened = {
+        "BAL100-BEC-PAIR-007-CALLBACK-PROVENANCE-FAIL",
+        "BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL",
+    }
+
+    for draft in _drafts():
+        if draft["scenario_id"] not in strengthened:
+            continue
+        source = _callback(draft)["number_source"].lower()
+
+        assert "vendor_contact_record" in source
+        assert "newly supplied" in source
+        assert "invoice:" not in source
+        assert "ap_queue_note" not in source
 
 
 def test_no_second_independent_blocker_is_visible_in_payload() -> None:

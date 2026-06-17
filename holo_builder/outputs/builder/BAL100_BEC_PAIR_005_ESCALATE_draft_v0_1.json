@@ -147,7 +147,8 @@
               "signed_at": "2024-11-16T16:02:51Z"
             }
           ],
-          "vendor_master_update_ref": "VM-AUDIT-PHC-77E2"
+          "vendor_master_update_ref": "VM-AUDIT-PHC-77E2",
+          "control_completion_note": "Two-person AP signoff completed before vendor-master update and before payment release review; the signoff record is closed evidence, not an open signoff item."
         },
         {
           "doc_id": "CALLSYS-883306",
@@ -156,7 +157,7 @@
           "agent_id": "AP-1842",
           "agent_name": "Lena Cho",
           "dialed_number": "+1-503-555-0174",
-          "number_source": "invoice: PHC-2024-3312 remittance_contact_phone",
+          "number_source": "invoice: PHC-2024-3312 remittance_contact_phone; noncompliant invoice supplied phone source",
           "call_date": "2024-11-16",
           "call_start_time": "2024-11-16T17:41:13Z",
           "call_duration_seconds": 438,
@@ -179,7 +180,16 @@
             }
           ],
           "outcome_code": "VERIFICATION_COMPLETE",
-          "related_change_request": "AP-SIGNOFF-PHC-6022"
+          "related_change_request": "AP-SIGNOFF-PHC-6022",
+          "provenance_basis": "noncompliant_callback_source",
+          "unused_pre_change_vendor_master_source": {
+            "snapshot_id": "VM-SNAP-V-PHC-1194-20241112",
+            "phone_on_file": "+1-503-555-0117",
+            "not_used_for_callback": true
+          },
+          "source_defect_note": "Callback dialed +1-503-555-0174 from invoice: PHC-2024-3312 remittance_contact_phone; noncompliant invoice supplied phone source; pre-change vendor-master phone +1-503-555-0117 in VM-SNAP-V-PHC-1194-20241112 existed but was not used.",
+          "downstream_controls_boundary_note": "Two-person signoff AP-SIGNOFF-PHC-6022, elevated scrutiny completion ESR-PHC-2024-11, temporary hold release VM-HOLD-PHC-2024-11, and cross-reference checks IPR-PHC-5526 are documented, but downstream controls do not cure noncompliant callback-source provenance.",
+          "single_material_blocker_note": "Only callback-source provenance remains as the material blocker; purchase order, AP signoff, hold release, remittance account, and cross-reference controls otherwise remain complete."
         },
         {
           "doc_id": "VM-AUDIT-PHC-77E2",
@@ -252,7 +262,8 @@
           "supervisor_queue_id": "AP-QUEUE-PHC-1194-REVIEW",
           "temporary_hold_ref": "VM-HOLD-PHC-2024-11",
           "completion_timestamp": "2024-11-23T14:05:22Z",
-          "disposition_code": "ROUTED_FOR_STANDARD_PAYMENT_REVIEW"
+          "disposition_code": "ROUTED_FOR_STANDARD_PAYMENT_REVIEW",
+          "control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure."
         },
         {
           "doc_id": "IPR-PHC-5526",
@@ -285,7 +296,8 @@
               "status": "COMPLETE"
             }
           ],
-          "completed_at": "2024-11-23T14:22:31Z"
+          "completed_at": "2024-11-23T14:22:31Z",
+          "control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
         },
         {
           "doc_id": "VM-HOLD-PHC-2024-11",
@@ -299,7 +311,8 @@
           "hold_opened_at": "2024-11-23T09:14:00Z",
           "hold_release_ref": "ESR-PHC-2024-11",
           "hold_released_at": "2024-11-23T14:10:00Z",
-          "release_routing_code": "STANDARD_PAYMENT_REVIEW_QUEUE"
+          "release_routing_code": "STANDARD_PAYMENT_REVIEW_QUEUE",
+          "release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review."
         },
         {
           "doc_id": "NOISE-PHC-1194-2024-11",

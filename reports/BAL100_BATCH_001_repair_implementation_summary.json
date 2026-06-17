@@ -1,0 +1,85 @@
+{
+  "report_type": "BAL100_BATCH_001_repair_implementation_summary",
+  "created_at": "2026-06-17",
+  "batch_id": "BAL100-BATCH-001",
+  "source_repair_plan_commit": "24a1033",
+  "source_repair_plan_files": [
+    "reports/BAL100_BATCH_001_repair_plan.json",
+    "reports/BAL100_BATCH_001_repair_plan.md"
+  ],
+  "edited_draft_glob": "holo_builder/outputs/builder/BAL100_BEC_PAIR_*_draft_v0_1.json",
+  "draft_packets_repaired": 16,
+  "families_repaired": [
+    "BAL100-BEC-PAIR-003",
+    "BAL100-BEC-PAIR-004",
+    "BAL100-BEC-PAIR-005",
+    "BAL100-BEC-PAIR-006",
+    "BAL100-BEC-PAIR-007",
+    "BAL100-BEC-PAIR-008",
+    "BAL100-BEC-PAIR-009",
+    "BAL100-BEC-PAIR-010"
+  ],
+  "allow_packets_repaired": [
+    "BAL100-BEC-PAIR-003-ALLOW",
+    "BAL100-BEC-PAIR-004-ALLOW",
+    "BAL100-BEC-PAIR-005-ALLOW",
+    "BAL100-BEC-PAIR-006-ALLOW",
+    "BAL100-BEC-PAIR-007-ALLOW",
+    "BAL100-BEC-PAIR-008-ALLOW",
+    "BAL100-BEC-PAIR-009-ALLOW",
+    "BAL100-BEC-PAIR-010-ALLOW"
+  ],
+  "escalate_packets_repaired": [
+    "BAL100-BEC-PAIR-003-CALLBACK-PROVENANCE-FAIL",
+    "BAL100-BEC-PAIR-004-CALLBACK-PROVENANCE-FAIL",
+    "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL",
+    "BAL100-BEC-PAIR-006-CALLBACK-PROVENANCE-FAIL",
+    "BAL100-BEC-PAIR-007-CALLBACK-PROVENANCE-FAIL",
+    "BAL100-BEC-PAIR-008-CALLBACK-PROVENANCE-FAIL",
+    "BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL",
+    "BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL"
+  ],
+  "allow_closure_changes": [
+    "Expanded ALLOW callback number_source to name vendor_master_snapshot / pre_change_vendor_master_record explicitly.",
+    "Added source_exclusion_note stating callback target was not taken from portal_change_record, submitted_contact_phone, invoice, or new contact record.",
+    "Added control_closure_note tying callback verification, two-person signoff, elevated scrutiny completion, hold release, and cross-reference completion to release review.",
+    "Added downstream_controls_boundary_note that completed controls support ALLOW because callback provenance is compliant pre-change vendor-master data."
+  ],
+  "escalate_provenance_changes": [
+    "Added unused_pre_change_vendor_master_source facts showing the pre-change phone existed but was not used.",
+    "Added source_defect_note and downstream_controls_boundary_note stating downstream controls do not cure noncompliant callback-source provenance.",
+    "Preserved 003 and 005 as strong ESCALATE collapse candidates with only clarity notes.",
+    "Sharpened 004, 006, 008, and 009 noncompliant source wording without adding a second blocker.",
+    "Strengthened too-easy 007 and 010 by moving the defect to subtler post-change vendor_contact_record / newly supplied contact provenance instead of blunt invoice/AP queue wording."
+  ],
+  "shared_control_closure_changes": [
+    "Added signoff closure note to all siblings.",
+    "Added elevated scrutiny closure note to all siblings.",
+    "Added temporary hold release-decision note to all siblings.",
+    "Added cross-reference completion note to all siblings."
+  ],
+  "second_blocker_guardrails_preserved": [
+    "No missing PO added.",
+    "No missing approval/signoff added.",
+    "No sanctions hold added.",
+    "No expired delegation added.",
+    "No bank mismatch added.",
+    "No invoice amount anomaly added.",
+    "No unresolved hold added.",
+    "No incomplete cross-reference added."
+  ],
+  "tests_updated": [
+    "test_bal100_batch001_draft_packets.py now protects repaired ALLOW closure notes, ESCALATE source-defect notes, shared control closure notes, and 007/010 strengthening."
+  ],
+  "non_live_attestation": {
+    "scout_rerun": false,
+    "freeze": false,
+    "freeze_manifest_created": false,
+    "official_traces_created": false,
+    "judge_run": false,
+    "qa_run": false,
+    "ablation_run": false,
+    "frozen_artifacts_edited": false,
+    "push": false
+  }
+}

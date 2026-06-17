@@ -1,0 +1,164 @@
+{
+  "report_type": "judge_adjudication_summary",
+  "session_id": "HBB-BEC-001_pair_4dna_seed447",
+  "seed": 447,
+  "trace_commit": "96314e5",
+  "doctrine": {
+    "builder_expected_verdict_is_truth": false,
+    "judge_defines_truth_after_frozen_packet_and_traces": true,
+    "qa_attacker_used": false,
+    "ablation_expansion_used": false,
+    "solo_baseline_used": false
+  },
+  "inputs": {
+    "frozen_packets": [
+      {
+        "scenario_id": "HBB-BEC-001",
+        "path": "holo_builder/outputs/frozen/HBB-BEC-001_8181d83c.json",
+        "payload_hash": "8181d83ceb7f36f97160f078a4d4d35bdced5555fba5478c55bd3d954f40c4f1",
+        "hash8": "8181d83c"
+      },
+      {
+        "scenario_id": "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL",
+        "path": "holo_builder/outputs/frozen/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc.json",
+        "payload_hash": "807468fcba476a97ef92cf4058af0767c73a66a450bda37c60c6bfaa8be5e883",
+        "hash8": "807468fc"
+      }
+    ],
+    "traces": [
+      "traces/HBB-BEC-001_pair_4dna_seed447/HBB-BEC-001_8181d83c_4dna_trace.json",
+      "traces/HBB-BEC-001_pair_4dna_seed447/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc_4dna_trace.json"
+    ]
+  },
+  "roster": {
+    "fixed_holo_gov": {
+      "provider": "openai",
+      "model": "gpt-4o-mini"
+    },
+    "active_non_gov": [
+      {
+        "provider": "xai",
+        "model": "grok-3-mini"
+      },
+      {
+        "provider": "google",
+        "model": "gemini-2.5-flash-lite"
+      },
+      {
+        "provider": "minimax",
+        "model": "MiniMax-Text-01"
+      }
+    ],
+    "excluded": [
+      {
+        "provider": "anthropic",
+        "model": "claude-haiku-4-5-20251001"
+      }
+    ]
+  },
+  "action_boundary": "May AP release payment against an invoice after a recent vendor-master payment/contact change?",
+  "alive_seam": "vendor-master payment-change control provenance",
+  "adjudications": [
+    {
+      "scenario_id": "HBB-BEC-001",
+      "packet_role": "ALLOW sibling",
+      "judge_verdict": "ALLOW",
+      "confidence": "HIGH",
+      "holo_gov_verdict": "ESCALATE",
+      "holo_gov_label": "WRONG",
+      "per_model_labels": [
+        {
+          "provider": "xAI/Grok",
+          "model": "grok-3-mini",
+          "trace_verdict": "ALLOW",
+          "label": "KNEW",
+          "rationale": "Allowed because the required portal change, AP signoff, vendor-master audit, invoice cross-reference, elevated scrutiny routing, and callback to the pre-change vendor-master phone were completed."
+        },
+        {
+          "provider": "Google/Gemini",
+          "model": "gemini-2.5-flash-lite",
+          "trace_verdict": "ALLOW",
+          "label": "LUCKY",
+          "rationale": "Reached the correct ALLOW verdict and recognized completed elevated scrutiny and cross-reference work, but did not identify callback provenance as a controlling control condition."
+        },
+        {
+          "provider": "MiniMax",
+          "model": "MiniMax-Text-01",
+          "trace_verdict": "ESCALATE",
+          "label": "WRONG",
+          "rationale": "Treated elevated scrutiny triggers themselves as blockers even though the frozen packet documents completed elevated scrutiny routing and compliant callback provenance."
+        }
+      ],
+      "controlling_evidence": [
+        "AP-POL-2024-017 requires AP callback to the pre-change vendor-master phone and states elevated scrutiny source records remain the basis for the payment decision.",
+        "CALLSYS-448219 dialed +1-713-555-0148 with number_source vendor_master_snapshot: VM-SNAP-V-SDS-5829-20240901.",
+        "VM-SNAP-V-SDS-5829-20240901 lists phone_on_file +1-713-555-0148.",
+        "AP-SIGNOFF-7712 records two-person AP signoff tied to PORTAL-CHG-9A4B1 and VM-AUDIT-88F1G.",
+        "IPR-SDS-811 records completed vendor-master effective date, billing contact, and remittance account checks.",
+        "ESR-V-SDS-5829-2024-09 documents elevated scrutiny triggers, reviewer assignment, queue routing, and completion timestamp."
+      ],
+      "failure_mode": "HoloGov followed MiniMax's trigger-as-blocker reasoning and converted elevated scrutiny conditions into a payment blocker despite completed controls.",
+      "diagnostic_lesson": "For ALLOW packets in this seam, models must distinguish risk-trigger routing from unresolved control provenance. Elevated scrutiny triggers are not blockers when the required provenance controls, especially pre-change callback source, are completed."
+    },
+    {
+      "scenario_id": "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL",
+      "packet_role": "ESCALATE sibling",
+      "judge_verdict": "ESCALATE",
+      "confidence": "HIGH",
+      "holo_gov_verdict": "ESCALATE",
+      "holo_gov_label": "KNEW",
+      "per_model_labels": [
+        {
+          "provider": "xAI/Grok",
+          "model": "grok-3-mini",
+          "trace_verdict": "ESCALATE",
+          "label": "KNEW",
+          "rationale": "Escalated for the specific callback_source_violation: CALLSYS-448219 used the portal-submitted contact phone instead of pre-change vendor-master data."
+        },
+        {
+          "provider": "Google/Gemini",
+          "model": "gemini-2.5-flash-lite",
+          "trace_verdict": "ALLOW",
+          "label": "WRONG",
+          "rationale": "Allowed based on effective vendor-master update and completed cross-reference checks while missing the policy-required callback source violation."
+        },
+        {
+          "provider": "MiniMax",
+          "model": "MiniMax-Text-01",
+          "trace_verdict": "ESCALATE",
+          "label": "LUCKY",
+          "rationale": "Reached the correct ESCALATE direction, but attributed the blocker to generic recent-change/elevated-scrutiny conditions rather than the actual callback provenance failure."
+        }
+      ],
+      "controlling_evidence": [
+        "AP-POL-2024-017 states callback contact source must be pre-existing vendor-master data rather than a number supplied in the change request or invoice.",
+        "CALLSYS-448219 dialed +1-713-555-0196 with number_source portal_change_record: PORTAL-CHG-9A4B1 submitted_contact_phone.",
+        "PORTAL-CHG-9A4B1 includes submitted_contact_phone +1-713-555-0196.",
+        "VM-SNAP-V-SDS-5829-20240901 lists the pre-change phone_on_file as +1-713-555-0148.",
+        "The callback therefore verified the change through a newly supplied contact source, leaving a material control-provenance blocker before payment release."
+      ],
+      "failure_mode": "Gemini missed the callback-source requirement; MiniMax escalated for the wrong, generic recency-trigger reason.",
+      "diagnostic_lesson": "For ESCALATE packets in this seam, KNEW requires naming callback provenance as the material blocker. Generic recent-change scrutiny is insufficient because it is also present in the ALLOW sibling."
+    }
+  ],
+  "summary": {
+    "allow_sibling": {
+      "judge_verdict": "ALLOW",
+      "holo_gov_label": "WRONG",
+      "model_labels": {
+        "xAI/Grok": "KNEW",
+        "Google/Gemini": "LUCKY",
+        "MiniMax": "WRONG"
+      }
+    },
+    "escalate_sibling": {
+      "judge_verdict": "ESCALATE",
+      "holo_gov_label": "KNEW",
+      "model_labels": {
+        "xAI/Grok": "KNEW",
+        "Google/Gemini": "WRONG",
+        "MiniMax": "LUCKY"
+      }
+    }
+  }
+}

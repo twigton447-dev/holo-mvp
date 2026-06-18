@@ -435,9 +435,10 @@
     #incognito-btn:hover { border-color: #a78bfa; color: #a78bfa; }
     #incognito-btn.active { border-color: #a78bfa; color: #a78bfa; background: #a78bfa11; }
     #mobile-action-bar { display: none; }
+    #mobile-composer-controls { display: none; }
 
     /* Mobile */
-    @media (max-width: 480px) {
+    @media (max-width: 700px) {
       #messages { padding: 20px 16px 12px; }
       #input-bar { padding: 8px 12px 16px; }
       #attachments-bar { padding: 0 12px 4px; }
@@ -482,6 +483,24 @@
         color: var(--text4);
         border-radius: 9px;
         padding: 7px 4px;
+        font: inherit;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      #mobile-composer-controls {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      #mobile-composer-controls button {
+        min-width: 0;
+        border: 1px solid var(--border);
+        background: var(--bg2);
+        color: var(--text4);
+        border-radius: 9px;
+        padding: 8px 4px;
         font: inherit;
         font-size: 11px;
         font-weight: 700;
@@ -712,6 +731,12 @@
 
   <div id="attachments-bar"></div>
   <div id="input-bar">
+    <div id="mobile-composer-controls" aria-label="Mobile composer controls">
+      <button onclick="toggleThreadPanel()">Threads</button>
+      <button onclick="newThread()">New</button>
+      <button onclick="openHoloBrainPanel()">Engine</button>
+      <button onclick="toggleIncognito()">Incognito</button>
+    </div>
     <input type="file" id="file-input" multiple onchange="handleFiles(this)" />
     <div id="input-wrap">
       <button id="attach" onclick="document.getElementById('file-input').click()" title="Attach file">
@@ -744,6 +769,8 @@
   let   turnCount    = 0;
   let   incognitoMode = false;
   const FREE_TURN_LIMIT = 8;
+  const STREAM_PACE_MS = 26;
+  const STREAM_CHARS_PER_TICK = 3;
 
   // ---- Attachments ---------------------------------------------------------
 
@@ -2035,6 +2062,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
         let   holoEl  = null;   // the streaming bubble element
         let   bubbleEl = null;
         let   accumulated = "";
+        let   pacedStream = null;
         let   doneData = null;
 
         while (true) {
@@ -2056,12 +2084,12 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
                 typingEl.remove();
                 holoEl   = createStreamingBubble();
                 bubbleEl = holoEl.querySelector(".bubble");
+                pacedStream = createPacedStreamRenderer(bubbleEl);
                 document.getElementById("messages").appendChild(holoEl);
                 holoEl.scrollIntoView({ behavior: "smooth", block: "start" });
               }
               accumulated += evt.text;
-              bubbleEl.innerHTML = renderMarkdown(accumulated);
-              scrollToBottom();
+              pacedStream.push(evt.text);
             } else if (evt.type === "done") {
               doneData = evt;
             } else if (evt.type === "error") {
@@ -2082,6 +2110,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
 
         // Finalize the streaming bubble with full rendering + actions
         if (doneData && holoEl) {
+          if (pacedStream) await pacedStream.drain();
           finalizeStreamingBubble(holoEl, doneData.response || accumulated, doneData);
           sessionId = doneData.session_id;
           if (doneData.turn_number === 1) {
@@ -2182,6 +2211,54 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     msg.className = "msg holo";
     msg.innerHTML = `<div class="holo-icon">✦</div><div class="holo-body"><div class="bubble"></div></div>`;
     return msg;
+  }
+
+  function createPacedStreamRenderer(bubbleEl) {
+    let visible = "";
+    let pending = "";
+    let timer = null;
+    const waiters = [];
+
+    function render() {
+      bubbleEl.innerHTML = renderMarkdown(visible);
+      scrollToBottom();
+    }
+
+    function resolveWaiters() {
+      while (waiters.length) waiters.shift()(visible);
+    }
+
+    function step() {
+      const take = Math.min(STREAM_CHARS_PER_TICK, pending.length);
+      if (take > 0) {
+        visible += pending.slice(0, take);
+        pending = pending.slice(take);
+        render();
+      }
+      if (pending.length > 0) {
+        timer = setTimeout(step, STREAM_PACE_MS);
+      } else {
+        timer = null;
+        resolveWaiters();
+      }
+    }
+
+    return {
+      push(text) {
+        pending += String(text || "");
+        if (!timer) timer = setTimeout(step, STREAM_PACE_MS);
+      },
+      drain() {
+        if (!pending.length) return Promise.resolve(visible);
+        return new Promise(resolve => {
+          waiters.push(resolve);
+          if (!timer) timer = setTimeout(step, 0);
+        });
+      },
+      currentText() {
+        return visible + pending;
+      }
+    };
   }
 
   function finalizeStreamingBubble(msgEl, fullText, data = {}) {

@@ -371,11 +371,13 @@ def test_mobile_header_keeps_core_controls_available():
     html = Path("frontend/chat.html").read_text()
 
     assert 'id="mobile-action-bar" aria-label="Mobile chat controls"' in html
+    assert 'id="mobile-composer-controls" aria-label="Mobile composer controls"' in html
     assert '<button onclick="toggleThreadPanel()">Threads</button>' in html
     assert '<button onclick="newThread()">New</button>' in html
     assert '<button onclick="openHoloBrainPanel()">Engine</button>' in html
     assert '<button onclick="toggleIncognito()">Incognito</button>' in html
     assert "#mobile-action-bar { display: none; }" in html
+    assert "#mobile-composer-controls { display: none; }" in html
     assert "grid-template-columns: repeat(4, minmax(0, 1fr));" in html
     assert "#thread-toggle { display: block; padding: 5px 8px;" in html
     assert "#holobrain-toggle { padding: 5px 8px;" in html
@@ -386,6 +388,18 @@ def test_mobile_header_keeps_core_controls_available():
     assert '<button class="mobile-only" onclick="closeAvatarMenu();openHoloBrainPanel()">Engine data</button>' in html
     assert '<button class="mobile-only" onclick="closeAvatarMenu();toggleIncognito()">Start incognito thread</button>' in html
     assert "#incognito-btn, #thread-toggle, #new-thread, #theme-toggle { display: none; }" not in html
+
+
+def test_frontend_streaming_uses_paced_text_reveal():
+    html = Path("frontend/chat.html").read_text()
+
+    assert "const STREAM_PACE_MS = 26;" in html
+    assert "const STREAM_CHARS_PER_TICK = 3;" in html
+    assert "function createPacedStreamRenderer(bubbleEl)" in html
+    assert "pacedStream = createPacedStreamRenderer(bubbleEl);" in html
+    assert "pacedStream.push(evt.text);" in html
+    assert "if (pacedStream) await pacedStream.drain();" in html
+    assert "bubbleEl.innerHTML = renderMarkdown(accumulated);" not in html
 
 
 def test_holochat_runtime_prompt_prefers_structured_human_answers():

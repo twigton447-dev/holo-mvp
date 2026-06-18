@@ -18,8 +18,10 @@ from benchmark_factory.batches import run_BAL100_BATCH_001_five_mini_scout as sc
 BATCH_ID = "BAL100-BATCH-003"
 SEAM_NAME = "subtle action-boundary defect"
 STATIC_GATE_PATH = Path("reports/BAL100_BATCH_003_static_kill_gate.json")
+TARGETED_STATIC_GATE_PATH = Path("reports/BAL100_BATCH_003_targeted_post_repair_static_gate.json")
 DRAFT_SUMMARY_PATH = Path("reports/BAL100_BATCH_003_draft_generation_summary.json")
 OUT_DIR = Path("scout_runs/BAL100-BATCH-003_bounded_scout")
+TARGETED_POST_REPAIR_OUT_DIR = Path("scout_runs/BAL100-BATCH-003_targeted_post_repair_rescout")
 APPROVAL_ENV = "BAL100_BATCH003_SCOUT_APPROVED"
 APPROVAL_VALUE = "I_APPROVE_PROVIDER_TRANSMISSION"
 CODEX_APPROVAL_ENV = "BAL100_BATCH003_CODEX_SCOUT_APPROVED"
@@ -45,6 +47,20 @@ EXPECTED_PACKET_IDS = [
     "BAL100-BEC-SUBTLE-CLOSEOUT-021-B",
     "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
     "BAL100-BEC-SUBTLE-CLOSEOUT-022-B",
+]
+TARGETED_POST_REPAIR_FAMILY_IDS = [
+    "BAL100-BEC-SUBTLE-CLOSEOUT-019",
+    "BAL100-BEC-SUBTLE-CLOSEOUT-020",
+]
+TARGETED_POST_REPAIR_PACKET_IDS = [
+    "BAL100-BEC-SUBTLE-CLOSEOUT-019-A",
+    "BAL100-BEC-SUBTLE-CLOSEOUT-019-B",
+    "BAL100-BEC-SUBTLE-CLOSEOUT-020-A",
+    "BAL100-BEC-SUBTLE-CLOSEOUT-020-B",
+]
+TARGETED_RETIRED_FAMILY_IDS = [
+    "BAL100-BEC-SUBTLE-CLOSEOUT-021",
+    "BAL100-BEC-SUBTLE-CLOSEOUT-022",
 ]
 MODELS = [dict(model) for model in scout_core.MODELS]
 
@@ -108,20 +124,71 @@ def scout_ready_family_ids(gate: dict[str, Any] | None = None) -> list[str]:
     return ready
 
 
-def validate_bounded_scope(packets: list[dict[str, Any]]) -> None:
+def targeted_post_repair_family_ids(gate: dict[str, Any] | None = None) -> list[str]:
+    gate = gate or _load_json(TARGETED_STATIC_GATE_PATH)
+    if gate.get("batch_id") != BATCH_ID:
+        raise SystemExit(f"{TARGETED_STATIC_GATE_PATH}: expected batch_id {BATCH_ID}")
+    scope = gate.get("scope", {})
+    repaired = [str(item) for item in scope.get("repaired_family_ids", [])]
+    retired = [str(item) for item in scope.get("retired_not_touched_family_ids", [])]
+    if repaired != TARGETED_POST_REPAIR_FAMILY_IDS:
+        raise SystemExit(f"Unexpected Batch 003 targeted repaired family set: {repaired}")
+    if retired != TARGETED_RETIRED_FAMILY_IDS:
+        raise SystemExit(f"Unexpected Batch 003 targeted retired family set: {retired}")
+    classes = [
+        (str(item.get("family_id", "")), str(item.get("post_repair_static_gate_class", "")))
+        for item in gate.get("family_static_gate", [])
+    ]
+    expected_classes = [(family_id, "targeted_rescout_ready") for family_id in TARGETED_POST_REPAIR_FAMILY_IDS]
+    if classes != expected_classes:
+        raise SystemExit(f"Unexpected Batch 003 targeted static gate classes: {classes}")
+    return repaired
+
+
+def _validate_scope(
+    packets: list[dict[str, Any]],
+    *,
+    expected_packet_ids: list[str],
+    expected_family_ids: list[str],
+    scope_label: str,
+) -> None:
     packet_ids = [str(packet.get("scenario_id", "")) for packet in packets]
     family_ids = [str(packet.get("_builder", {}).get("family_id", "")) for packet in packets]
-    if packet_ids != EXPECTED_PACKET_IDS:
-        raise SystemExit(f"Batch 003 bounded scout packet scope mismatch: {packet_ids}")
-    if sorted(set(family_ids)) != EXPECTED_FAMILY_IDS:
-        raise SystemExit(f"Batch 003 bounded scout family scope mismatch: {sorted(set(family_ids))}")
+    if packet_ids != expected_packet_ids:
+        raise SystemExit(f"Batch 003 {scope_label} packet scope mismatch: {packet_ids}")
+    if sorted(set(family_ids)) != expected_family_ids:
+        raise SystemExit(f"Batch 003 {scope_label} family scope mismatch: {sorted(set(family_ids))}")
 
 
-def load_bounded_packets() -> list[dict[str, Any]]:
-    scout_ready_family_ids()
+def validate_bounded_scope(packets: list[dict[str, Any]]) -> None:
+    _validate_scope(
+        packets,
+        expected_packet_ids=EXPECTED_PACKET_IDS,
+        expected_family_ids=EXPECTED_FAMILY_IDS,
+        scope_label="bounded scout",
+    )
+
+
+def validate_targeted_post_repair_scope(packets: list[dict[str, Any]]) -> None:
+    _validate_scope(
+        packets,
+        expected_packet_ids=TARGETED_POST_REPAIR_PACKET_IDS,
+        expected_family_ids=TARGETED_POST_REPAIR_FAMILY_IDS,
+        scope_label="targeted post-repair rescout",
+    )
+
+
+def load_bounded_packets(*, targeted_post_repair_rescout: bool = False) -> list[dict[str, Any]]:
+    if targeted_post_repair_rescout:
+        selected_families = targeted_post_repair_family_ids()
+        expected_packet_ids = TARGETED_POST_REPAIR_PACKET_IDS
+    else:
+        selected_families = scout_ready_family_ids()
+        expected_packet_ids = EXPECTED_PACKET_IDS
+
     summary = _load_draft_summary()
     packets = []
-    selected = set(EXPECTED_FAMILY_IDS)
+    selected = set(selected_families)
     for item in summary.get("draft_files", []):
         if item.get("family_id") not in selected:
             continue
@@ -134,15 +201,22 @@ def load_bounded_packets() -> list[dict[str, Any]]:
             raise SystemExit(f"{item['path']}: expected_verdict mismatch against draft summary.")
         packets.append(packet)
 
-    if [packet["scenario_id"] for packet in packets] != EXPECTED_PACKET_IDS:
+    if [packet["scenario_id"] for packet in packets] != expected_packet_ids:
         raise SystemExit(
-            "Batch 003 bounded scout expected packet ids "
-            f"{EXPECTED_PACKET_IDS}, found {[packet['scenario_id'] for packet in packets]}."
+            "Batch 003 scout expected packet ids "
+            f"{expected_packet_ids}, found {[packet['scenario_id'] for packet in packets]}."
         )
     hypotheses = [packet["expected_verdict"] for packet in packets]
-    if hypotheses.count("ALLOW") != 4 or hypotheses.count("ESCALATE") != 4:
-        raise SystemExit("Batch 003 bounded scout must contain 4 ALLOW and 4 ESCALATE hypotheses.")
-    validate_bounded_scope(packets)
+    expected_per_class = len(expected_packet_ids) // 2
+    if hypotheses.count("ALLOW") != expected_per_class or hypotheses.count("ESCALATE") != expected_per_class:
+        raise SystemExit(
+            "Batch 003 scout must contain balanced ALLOW and ESCALATE hypotheses "
+            f"for scope {expected_packet_ids}."
+        )
+    if targeted_post_repair_rescout:
+        validate_targeted_post_repair_scope(packets)
+    else:
+        validate_bounded_scope(packets)
     return packets
 
 
@@ -165,8 +239,38 @@ def _prompt_card(packet: dict[str, Any], model: dict[str, str]) -> dict[str, Any
     }
 
 
-def build_prompt_cards(out_dir: Path = OUT_DIR) -> dict[str, Any]:
-    packets = load_bounded_packets()
+def _scope_metadata(targeted_post_repair_rescout: bool) -> dict[str, Any]:
+    if targeted_post_repair_rescout:
+        return {
+            "scope_id": "targeted_batch003_post_repair_rescout",
+            "family_ids": TARGETED_POST_REPAIR_FAMILY_IDS,
+            "packet_ids": TARGETED_POST_REPAIR_PACKET_IDS,
+            "expected_rows": len(TARGETED_POST_REPAIR_PACKET_IDS) * len(MODELS),
+            "stop_conditions": [
+                "Any selected packet missing from draft summary.",
+                "Selected packet set differs from exact Batch 003 019-020 post-repair scope.",
+                "Any retired family 021 or 022 is included.",
+                "Expected row count differs from 4 packets x 5 providers = 20.",
+                "Any provider execution request without explicit Batch 003 approval gates.",
+            ],
+        }
+    return {
+        "scope_id": "bounded_batch003_subtle_escalate_scout",
+        "family_ids": EXPECTED_FAMILY_IDS,
+        "packet_ids": EXPECTED_PACKET_IDS,
+        "expected_rows": len(EXPECTED_PACKET_IDS) * len(MODELS),
+        "stop_conditions": [
+            "Any selected packet missing from draft summary.",
+            "Selected packet set differs from exact Batch 003 019-022 scope.",
+            "Expected row count differs from 8 packets x 5 providers = 40.",
+            "Any provider execution request without explicit Batch 003 approval gates.",
+        ],
+    }
+
+
+def build_prompt_cards(out_dir: Path = OUT_DIR, *, targeted_post_repair_rescout: bool = False) -> dict[str, Any]:
+    packets = load_bounded_packets(targeted_post_repair_rescout=targeted_post_repair_rescout)
+    scope = _scope_metadata(targeted_post_repair_rescout)
     prompt_dir = out_dir / "prompt_cards"
     prompt_dir.mkdir(parents=True, exist_ok=True)
 
@@ -190,25 +294,20 @@ def build_prompt_cards(out_dir: Path = OUT_DIR) -> dict[str, Any]:
     plan = {
         "batch_id": BATCH_ID,
         "seam_name": SEAM_NAME,
-        "scope_id": "bounded_batch003_subtle_escalate_scout",
+        "scope_id": scope["scope_id"],
         "benchmark_credit": False,
         "official_trace": False,
         "judge": False,
         "freeze": False,
         "execution_mode": "plan_only_no_live",
         "provider_calls_performed_by_script": False,
-        "scout_ready_family_ids": EXPECTED_FAMILY_IDS,
+        "scout_ready_family_ids": scope["family_ids"],
         "packets": len(packets),
         "packet_ids_to_scout": [packet["scenario_id"] for packet in packets],
         "models": MODELS,
         "expected_row_count": len(packets) * len(MODELS),
         "prompt_cards": len(cards),
-        "stop_conditions": [
-            "Any selected packet missing from draft summary.",
-            "Selected packet set differs from exact Batch 003 019-022 scope.",
-            "Expected row count differs from 8 packets x 5 providers = 40.",
-            "Any provider execution request without explicit Batch 003 approval gates.",
-        ],
+        "stop_conditions": scope["stop_conditions"],
         "proof_credit_remains_unchanged": True,
     }
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -370,7 +469,9 @@ def _summarize_results(
     execution_mode: str,
     operator: str,
     out_dir: Path,
+    targeted_post_repair_rescout: bool = False,
 ) -> dict[str, Any]:
+    scope = _scope_metadata(targeted_post_repair_rescout)
     by_packet: dict[str, list[dict[str, Any]]] = {}
     for record in records:
         by_packet.setdefault(record["packet_id"], []).append(record)
@@ -437,7 +538,7 @@ def _summarize_results(
     return {
         "batch_id": BATCH_ID,
         "seam_name": SEAM_NAME,
-        "scope_id": "bounded_batch003_subtle_escalate_scout",
+        "scope_id": scope["scope_id"],
         "benchmark_credit": False,
         "official_trace": False,
         "judge": False,
@@ -448,11 +549,11 @@ def _summarize_results(
         "operator": operator,
         "run_status": "operational_failure" if records and len(error_records) == len(records) else "complete",
         "out_dir": str(out_dir),
-        "scout_ready_family_ids": EXPECTED_FAMILY_IDS,
-        "packet_ids_to_scout": EXPECTED_PACKET_IDS,
+        "scout_ready_family_ids": scope["family_ids"],
+        "packet_ids_to_scout": scope["packet_ids"],
         "packets": len(by_packet),
         "models": MODELS,
-        "expected_row_count": len(EXPECTED_PACKET_IDS) * len(MODELS),
+        "expected_row_count": scope["expected_rows"],
         "results": len(records),
         "error_results": len(error_records),
         "error_counts": dict(error_counts),
@@ -474,9 +575,13 @@ def execute_local_scout(
     *,
     execution_mode: str,
     operator: str,
+    targeted_post_repair_rescout: bool = False,
 ) -> dict[str, Any]:
-    packets = load_bounded_packets()
-    validate_bounded_scope(packets)
+    packets = load_bounded_packets(targeted_post_repair_rescout=targeted_post_repair_rescout)
+    if targeted_post_repair_rescout:
+        validate_targeted_post_repair_scope(packets)
+    else:
+        validate_bounded_scope(packets)
     if out_dir.exists():
         raise SystemExit(f"{out_dir} already exists; refusing to overwrite Batch 003 scout output.")
 
@@ -503,7 +608,13 @@ def execute_local_scout(
             with results_path.open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(record, sort_keys=True) + "\n")
 
-    summary = _summarize_results(records, execution_mode=execution_mode, operator=operator, out_dir=out_dir)
+    summary = _summarize_results(
+        records,
+        execution_mode=execution_mode,
+        operator=operator,
+        out_dir=out_dir,
+        targeted_post_repair_rescout=targeted_post_repair_rescout,
+    )
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     return summary
 
@@ -511,9 +622,14 @@ def execute_local_scout(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Prepare or execute BAL100 Batch 003 bounded scout prompt cards.")
     parser.add_argument(
+        "--targeted-post-repair-rescout",
+        action="store_true",
+        help="Limits scope to repaired Batch 003 families 019 and 020 only.",
+    )
+    parser.add_argument(
         "--execute-provider-calls",
         action="store_true",
-        help="Sends the 8 bounded draft payloads to five mini providers when explicit approval gates pass.",
+        help="Sends the selected draft payloads to five mini providers when explicit approval gates pass.",
     )
     parser.add_argument("--operator", default="", help="Must be Taylor for provider execution.")
     parser.add_argument("--i-am-taylor-local", action="store_true", help="Required Taylor-local execution acknowledgement.")
@@ -536,23 +652,25 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--out-dir",
         type=Path,
-        default=OUT_DIR,
+        default=None,
         help="Directory for no-live prompt cards, scout results, and summary.",
     )
     args = parser.parse_args(argv)
+    out_dir = args.out_dir or (TARGETED_POST_REPAIR_OUT_DIR if args.targeted_post_repair_rescout else OUT_DIR)
 
     if args.execute_provider_calls:
         execution_mode = _require_execution_approval(args)
         summary = execute_local_scout(
             timeout=args.timeout,
-            out_dir=args.out_dir,
+            out_dir=out_dir,
             execution_mode=execution_mode,
             operator=args.operator,
+            targeted_post_repair_rescout=args.targeted_post_repair_rescout,
         )
         print(json.dumps(summary, indent=2, sort_keys=True))
         return 0
 
-    plan = build_prompt_cards(out_dir=args.out_dir)
+    plan = build_prompt_cards(out_dir=out_dir, targeted_post_repair_rescout=args.targeted_post_repair_rescout)
     print(json.dumps(plan, indent=2, sort_keys=True))
     return 0
 

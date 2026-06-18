@@ -3,7 +3,7 @@
   "created_at": "2026-06-18",
   "batch_id": "BAL100-BATCH-002",
   "seam_name": "explained anomaly",
-  "status": "bounded_scout_plan_prepared_no_live",
+  "status": "bounded_scout_plan_prepared_gated_live_support",
   "source_reports": {
     "static_kill_gate": "reports/BAL100_BATCH_002_static_kill_gate.json",
     "draft_generation_summary": "reports/BAL100_BATCH_002_draft_generation_summary.json"
@@ -63,14 +63,39 @@
     "existing_generic_scout_runner_found": false,
     "batch002_runner_needed": true,
     "batch002_runner_added": true,
-    "batch002_runner_scope": "no-live prompt-card and plan support only; provider execution is intentionally unsupported and fail-closed."
+    "batch002_runner_scope": "No-live prompt-card and plan support by default; provider execution is available only behind explicit Taylor approval gates and exact 12-packet bounded scope validation."
   },
   "runner_path": "benchmark_factory/batches/run_BAL100_BATCH_002_bounded_scout.py",
   "exact_no_live_dry_run_command_if_available": "python3 -B benchmark_factory/batches/run_BAL100_BATCH_002_bounded_scout.py --out-dir scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors",
-  "exact_taylor_approval_command_for_provider_transmission_if_available": "UNAVAILABLE: this commit intentionally adds only no-live Batch 002 bounded scout planning support. The runner refuses --execute-provider-calls. Provider transmission requires a future explicit approval plus a separate provider-enabled runner change.",
+  "exact_taylor_approval_command_for_provider_transmission_if_available": "BAL100_BATCH002_SCOUT_APPROVED=I_APPROVE_PROVIDER_TRANSMISSION python3 -B benchmark_factory/batches/run_BAL100_BATCH_002_bounded_scout.py --execute-provider-calls --operator Taylor --i-am-taylor-local --yes-send-draft-payloads-to-providers --timeout 90 --out-dir scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors",
+  "exact_codex_co_approval_command_for_provider_transmission_if_available": "BAL100_BATCH002_SCOUT_APPROVED=I_APPROVE_PROVIDER_TRANSMISSION BAL100_BATCH002_CODEX_SCOUT_APPROVED=I_APPROVE_CODEX_PROVIDER_TRANSMISSION python3 -B benchmark_factory/batches/run_BAL100_BATCH_002_bounded_scout.py --execute-provider-calls --operator Taylor --allow-codex-provider-calls --yes-send-draft-payloads-to-providers --timeout 90 --out-dir scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors",
+  "approval_gates": {
+    "default_behavior": "no-live prompt-card planning only",
+    "execute_flag": "--execute-provider-calls",
+    "taylor_local_required_flags": [
+      "--operator Taylor",
+      "--i-am-taylor-local",
+      "--yes-send-draft-payloads-to-providers"
+    ],
+    "taylor_local_env": "BAL100_BATCH002_SCOUT_APPROVED=I_APPROVE_PROVIDER_TRANSMISSION",
+    "codex_co_required_flags": [
+      "--operator Taylor",
+      "--allow-codex-provider-calls",
+      "--yes-send-draft-payloads-to-providers"
+    ],
+    "codex_co_env": [
+      "BAL100_BATCH002_SCOUT_APPROVED=I_APPROVE_PROVIDER_TRANSMISSION",
+      "BAL100_BATCH002_CODEX_SCOUT_APPROVED=I_APPROVE_CODEX_PROVIDER_TRANSMISSION"
+    ]
+  },
   "expected_output_directory": "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors",
   "expected_no_live_outputs": [
     "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/scout_plan.json",
+    "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/prompt_cards/"
+  ],
+  "expected_live_outputs_if_later_approved": [
+    "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/results.jsonl",
+    "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/summary.json",
     "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/prompt_cards/"
   ],
   "expected_row_count": 60,
@@ -109,7 +134,9 @@
     "Stop if any repair_before_scout family, including 014 or 016, is selected.",
     "Stop if expected rows differ from 12 packets x 5 providers = 60.",
     "Stop if any prompt card exposes expected_verdict, spec_target_verdict, _builder, _internal, or answer-key metadata in the model-visible user payload.",
-    "Stop if any future provider-enabled runner lacks an explicit Taylor-local approval gate.",
+    "Stop if --execute-provider-calls is used without BAL100_BATCH002_SCOUT_APPROVED=I_APPROVE_PROVIDER_TRANSMISSION.",
+    "Stop in Codex/Co if --allow-codex-provider-calls and BAL100_BATCH002_CODEX_SCOUT_APPROVED=I_APPROVE_CODEX_PROVIDER_TRANSMISSION are not both present.",
+    "Stop if live output directory already exists.",
     "Stop if any future run attempts Judge, QA, ablation, freeze, trace creation, HBB rerun work, or proof-credit changes."
   ],
   "proof_credit_remains_unchanged": true,

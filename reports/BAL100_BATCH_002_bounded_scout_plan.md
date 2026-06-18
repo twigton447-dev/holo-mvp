@@ -3,9 +3,9 @@
 Date: `2026-06-18`
 Batch: `BAL100-BATCH-002`
 Seam: explained anomaly
-Status: `bounded_scout_plan_prepared_no_live`
+Status: `bounded_scout_plan_prepared_gated_live_support`
 
-This is a plan and no-live runner support only. It did not run scout, live calls, Judge, QA, ablation, freeze, trace creation, HBB runner work, proof-credit changes, or push.
+This is a plan plus gated runner support only. It did not run scout, live calls, Judge, QA, ablation, freeze, trace creation, HBB runner work, proof-credit changes, or push.
 
 ## Survivor Set
 
@@ -61,11 +61,11 @@ Existing Batch 001 scout runner pattern is reusable, but `benchmark_factory/batc
 - Batch 001 family filters
 - Callback-provenance prompt language
 
-No generic scout runner was found. This commit adds a bounded Batch 002 no-live planner:
+No generic scout runner was found. This lane now uses a bounded Batch 002 scout runner:
 
 `benchmark_factory/batches/run_BAL100_BATCH_002_bounded_scout.py`
 
-The new runner only builds no-live prompt cards and a scout plan. It intentionally refuses `--execute-provider-calls`.
+Default behavior remains no-live prompt-card planning. Live provider execution is available only behind explicit Taylor approval gates, exact 12-packet scope validation, and output-directory nonexistence checks.
 
 ## Commands
 
@@ -86,9 +86,23 @@ Expected no-live outputs:
 
 Taylor provider-transmission command:
 
-`UNAVAILABLE`
+```bash
+BAL100_BATCH002_SCOUT_APPROVED=I_APPROVE_PROVIDER_TRANSMISSION python3 -B benchmark_factory/batches/run_BAL100_BATCH_002_bounded_scout.py --execute-provider-calls --operator Taylor --i-am-taylor-local --yes-send-draft-payloads-to-providers --timeout 90 --out-dir scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors
+```
 
-Reason: this task adds only no-live Batch 002 bounded scout support. The new runner has no provider transport code and refuses `--execute-provider-calls`. A future provider-enabled runner change plus explicit Taylor approval would be required before provider transmission.
+Codex/Co auditable provider-transmission command, if explicitly approved:
+
+```bash
+BAL100_BATCH002_SCOUT_APPROVED=I_APPROVE_PROVIDER_TRANSMISSION BAL100_BATCH002_CODEX_SCOUT_APPROVED=I_APPROVE_CODEX_PROVIDER_TRANSMISSION python3 -B benchmark_factory/batches/run_BAL100_BATCH_002_bounded_scout.py --execute-provider-calls --operator Taylor --allow-codex-provider-calls --yes-send-draft-payloads-to-providers --timeout 90 --out-dir scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors
+```
+
+Expected live outputs, if later approved:
+
+- `scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/results.jsonl`
+- `scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/summary.json`
+- `scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/prompt_cards/`
+
+The live path is scout/diagnostic-only: `benchmark_credit=false`, no official traces, no Judge, no QA/ablation, no freeze, and no scorecard or manifest proof-credit changes.
 
 ## Provider Roster
 
@@ -107,7 +121,9 @@ Reason: this task adds only no-live Batch 002 bounded scout support. The new run
 - Stop if any `repair_before_scout` family, including `014` or `016`, is selected.
 - Stop if expected rows differ from 12 packets x 5 providers = 60.
 - Stop if any prompt card exposes `expected_verdict`, `spec_target_verdict`, `_builder`, `_internal`, or answer-key metadata in the model-visible user payload.
-- Stop if any future provider-enabled runner lacks an explicit Taylor-local approval gate.
+- Stop if `--execute-provider-calls` is used without `BAL100_BATCH002_SCOUT_APPROVED=I_APPROVE_PROVIDER_TRANSMISSION`.
+- Stop in Codex/Co if `--allow-codex-provider-calls` and `BAL100_BATCH002_CODEX_SCOUT_APPROVED=I_APPROVE_CODEX_PROVIDER_TRANSMISSION` are not both present.
+- Stop if the live output directory already exists.
 - Stop if any future run attempts Judge, QA, ablation, freeze, trace creation, HBB rerun work, or proof-credit changes.
 
 ## Proof Credit

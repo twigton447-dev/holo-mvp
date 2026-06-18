@@ -242,6 +242,51 @@ def _frontier_assist_metadata(
     }
 
 
+def _timer_start() -> float:
+    return time.perf_counter()
+
+
+def _elapsed_timer_ms(start: float) -> int:
+    return max(0, int((time.perf_counter() - start) * 1000))
+
+
+def _add_timing(timings: dict[str, int], key: str, start: float) -> None:
+    timings[key] = int(timings.get(key, 0)) + _elapsed_timer_ms(start)
+
+
+def _timing_breakdown_metadata(
+    timings: dict[str, int],
+    *,
+    turn_started_at: float,
+) -> dict[str, Any]:
+    values = {
+        "memory_context_ms": int(timings.get("memory_context_ms", 0)),
+        "governor_pre_ms": int(timings.get("governor_pre_ms", 0)),
+        "web_search_ms": int(timings.get("web_search_ms", 0)),
+        "context_assembly_ms": int(timings.get("context_assembly_ms", 0)),
+        "analyst_ms": int(timings.get("analyst_ms", 0)),
+        "governor_post_ms": int(timings.get("governor_post_ms", 0)),
+        "persistence_ms": int(timings.get("persistence_ms", 0)),
+        "total_server_ms": _elapsed_timer_ms(turn_started_at),
+    }
+    owner_scores = {
+        "memory": values["memory_context_ms"] + values["context_assembly_ms"],
+        "governor": values["governor_pre_ms"] + values["governor_post_ms"],
+        "web": values["web_search_ms"],
+        "analyst": values["analyst_ms"],
+        "persistence": values["persistence_ms"],
+    }
+    primary_owner = max(owner_scores, key=owner_scores.get)
+    values.update(
+        {
+            "primary_time_owner": primary_owner,
+            "primary_time_owner_ms": owner_scores[primary_owner],
+            "note": "Safe stage timings only; browser pacing and network transit are not included.",
+        }
+    )
+    return values
+
+
 def _thread_handoff_min_turns() -> int:
     raw = os.getenv("HOLOCHAT_HANDOFF_MIN_TURNS", "").strip()
     if not raw:
@@ -671,6 +716,7 @@ def _turn_runtime_metadata(
     governor_trace: Optional[dict[str, Any]] = None,
     gov_arc_state: Optional[GovArcState] = None,
     frontier_assist: Optional[dict[str, Any]] = None,
+    timing_breakdown: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
@@ -707,6 +753,8 @@ def _turn_runtime_metadata(
         metadata["gov_arc_state"] = gov_arc_state.model_dump(mode="json")
     if frontier_assist is not None:
         metadata["frontier_assist"] = frontier_assist
+    if timing_breakdown is not None:
+        metadata["timing_breakdown"] = timing_breakdown
     metadata.update(
         _governor_turn_metadata(
             governor,
@@ -882,8 +930,11 @@ class HoloChatEngine:
         """
         session             = self.get_or_create_session(session_id)
         session.last_active = time.time()
+        turn_started_at = _timer_start()
+        timings: dict[str, int] = {}
 
         # Incognito: strip all memory — only base system prompt reaches the model
+        memory_timer = _timer_start()
         if incognito:
             capsule_context = {}
             life_context    = []
@@ -892,12 +943,14 @@ class HoloChatEngine:
             capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
+        _add_timing(timings, "memory_context_ms", memory_timer)
 
         # Rotate through the active mini pool so every configured analyst gets turns.
         adapter = _select_analyst_adapter(session, self._adapters)
         initial_adapter = adapter
         session.turn_count     += 1
 
+        gov_pre_timer = _timer_start()
         # Governor rotation policy:
         # Lock to one provider for 7–11 turns. Rotate only when the thread is
         # healthy and no active work is mid-resolution. The no-same-family rule
@@ -922,7 +975,11 @@ class HoloChatEngine:
         # Governor thinks about the human — skipped in incognito (would introduce bias)
         thought = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
         tenor   = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
+        _add_timing(timings, "governor_pre_ms", gov_pre_timer)
+
+        web_timer = _timer_start()
         search_query, search_results, web_trace = _run_web_search_for_turn(user_message, governor_search_query)
+        _add_timing(timings, "web_search_ms", web_timer)
         search_attempted = bool(search_query)
         search_succeeded = bool(search_results)
         web_status = web_trace["status"]
@@ -960,6 +1017,7 @@ class HoloChatEngine:
             selected_adapter=frontier_assist_adapter,
         )
 
+        context_timer = _timer_start()
         # Build enriched message — search results injected for the model only,
         # not stored in history (history stays clean with the original message)
         enriched_message = user_message
@@ -1035,10 +1093,11 @@ class HoloChatEngine:
                 session.holo4dna_previous_route = holo4dna_shadow.previous_route
             except Exception as exc:
                 logger.warning("HoloChat 4DNA shadow trace failed: %s", exc)
+        _add_timing(timings, "context_assembly_ms", context_timer)
 
         # Call the adapter. If the selected mini is down, skip forward through
         # the active pool before falling back to any bench pool in non-mini profiles.
-        start = time.time()
+        analyst_timer = _timer_start()
         failover_attempts: list[dict[str, Optional[str]]] = []
         last_err: Optional[Exception] = None
         response_text = ""
@@ -1076,7 +1135,8 @@ class HoloChatEngine:
             except Exception as exc:
                 failover_attempts.append(_safe_adapter_error(fallback, exc))
                 raise
-        elapsed_ms = int((time.time() - start) * 1000)
+        elapsed_ms = _elapsed_timer_ms(analyst_timer)
+        _add_timing(timings, "analyst_ms", analyst_timer)
         failover = _analyst_failover_metadata(
             initial_adapter=initial_adapter,
             final_adapter=adapter,
@@ -1095,6 +1155,7 @@ class HoloChatEngine:
                 holo4dna_shadow.metadata["route"]["runtime_analyst_after_failover"] = actual_analyst
                 holo4dna_shadow.trace.extra_metadata["runtime_analyst_after_failover"] = actual_analyst
 
+        gov_post_timer = _timer_start()
         # Hallucination check — Governor scans for specific low-confidence claims
         # and verifies them against live search. Silent on clean responses.
         response_text, flagged_claims = self._governor.verify_claims(
@@ -1119,6 +1180,7 @@ class HoloChatEngine:
                 thread_health_level=session.thread_health_level,
                 gov_arc_state=session.gov_arc_state.model_dump(mode="json"),
             )
+        _add_timing(timings, "governor_post_ms", gov_post_timer)
 
         # Extract and save any HTML artifacts — after claims check, before history commit
         artifacts_saved = []
@@ -1142,10 +1204,12 @@ class HoloChatEngine:
         memory_writes_count = 0
         if capsule_id and not incognito:
             memory_extraction_attempted = True
+            gov_post_timer = _timer_start()
             updates = self._governor.extract_context_updates(session.history, capsule_context)
             for key, value in updates.items():
                 self._brain.set_capsule_context(capsule_id, key, value)
             memory_writes_count = len(updates)
+            _add_timing(timings, "governor_post_ms", gov_post_timer)
             if updates:
                 logger.info(f"Capsule context updated for {capsule_id[:8]}: {list(updates.keys())}")
 
@@ -1195,6 +1259,7 @@ class HoloChatEngine:
             threading.Thread(target=_name_thread, daemon=True).start()
 
         # Persist to Supabase — capsule_id links session to user permanently
+        persistence_timer = _timer_start()
         self._brain.save_chat_turn(
             session_id    = session.session_id,
             turn_number   = session.turn_count,
@@ -1204,6 +1269,7 @@ class HoloChatEngine:
             temperature   = temperature,
             capsule_id    = capsule_id,
         )
+        _add_timing(timings, "persistence_ms", persistence_timer)
 
         if holo4dna_shadow is not None:
             holo4dna_shadow.trace.memory_extraction_attempted = memory_extraction_attempted
@@ -1252,6 +1318,10 @@ class HoloChatEngine:
             ),
             gov_arc_state=session.gov_arc_state,
             frontier_assist=frontier_assist,
+            timing_breakdown=_timing_breakdown_metadata(
+                timings,
+                turn_started_at=turn_started_at,
+            ),
         )
 
         return {
@@ -1300,7 +1370,10 @@ class HoloChatEngine:
         """
         session             = self.get_or_create_session(session_id)
         session.last_active = time.time()
+        turn_started_at = _timer_start()
+        timings: dict[str, int] = {}
 
+        memory_timer = _timer_start()
         if incognito:
             capsule_context = {}
             life_context    = []
@@ -1309,11 +1382,13 @@ class HoloChatEngine:
             capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
+        _add_timing(timings, "memory_context_ms", memory_timer)
 
         adapter = _select_analyst_adapter(session, self._adapters)
         initial_adapter = adapter
         session.turn_count     += 1
 
+        gov_pre_timer = _timer_start()
         if _should_rotate_governor(session):
             self._governor.prepare_for_turn(adapter)
             session.governor_provider             = self._governor.provider
@@ -1326,7 +1401,11 @@ class HoloChatEngine:
         governor_search_query = self._governor.should_search(user_message, session.history)
         thought      = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
         tenor        = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
+        _add_timing(timings, "governor_pre_ms", gov_pre_timer)
+
+        web_timer = _timer_start()
         search_query, search_results, web_trace = _run_web_search_for_turn(user_message, governor_search_query)
+        _add_timing(timings, "web_search_ms", web_timer)
         search_attempted = bool(search_query)
         searched = bool(search_results)
         web_status = web_trace["status"]
@@ -1364,6 +1443,7 @@ class HoloChatEngine:
             selected_adapter=frontier_assist_adapter,
         )
 
+        context_timer = _timer_start()
         enriched_message = user_message
         if search_results:
             enriched_message = (
@@ -1428,6 +1508,7 @@ class HoloChatEngine:
                 session.holo4dna_previous_route = holo4dna_shadow.previous_route
             except Exception as exc:
                 logger.warning("HoloChat 4DNA stream shadow trace failed: %s", exc)
+        _add_timing(timings, "context_assembly_ms", context_timer)
 
         # Signal search before tokens arrive so the UI can show the indicator
         if search_attempted:
@@ -1437,7 +1518,7 @@ class HoloChatEngine:
         # emits content, skip to the next active mini instead of ending the turn.
         accumulated = []
         in_tok = out_tok = 0
-        start = time.time()
+        analyst_timer = _timer_start()
         failover_attempts: list[dict[str, Optional[str]]] = []
         last_err: Optional[Exception] = None
         stream_completed = False
@@ -1476,6 +1557,8 @@ class HoloChatEngine:
             raise RuntimeError("HoloChat runtime has no available streaming analyst adapters.")
 
         response_text = "".join(accumulated)
+        elapsed_ms = _elapsed_timer_ms(analyst_timer)
+        _add_timing(timings, "analyst_ms", analyst_timer)
         failover = _analyst_failover_metadata(
             initial_adapter=initial_adapter,
             final_adapter=adapter,
@@ -1494,6 +1577,7 @@ class HoloChatEngine:
                 holo4dna_shadow.metadata["route"]["runtime_analyst_after_failover"] = actual_analyst
                 holo4dna_shadow.trace.extra_metadata["runtime_analyst_after_failover"] = actual_analyst
 
+        gov_post_timer = _timer_start()
         # Post-stream: claims check (may append a correction to response_text)
         response_text, flagged_claims = self._governor.verify_claims(response_text, web_search.search)
         if flagged_claims:
@@ -1516,6 +1600,7 @@ class HoloChatEngine:
                 thread_health_level=session.thread_health_level,
                 gov_arc_state=session.gov_arc_state.model_dump(mode="json"),
             )
+        _add_timing(timings, "governor_post_ms", gov_post_timer)
 
         # Commit history
         session.history.append({"role": "user",      "content": user_message})
@@ -1590,7 +1675,6 @@ class HoloChatEngine:
             handoff=handoff,
         )
 
-        elapsed_ms = int((time.time() - start) * 1000)
         usage = _turn_usage_metadata(
             analyst_adapter=adapter,
             context_budget=context_budget,
@@ -1620,6 +1704,10 @@ class HoloChatEngine:
             ),
             gov_arc_state=session.gov_arc_state,
             frontier_assist=frontier_assist,
+            timing_breakdown=_timing_breakdown_metadata(
+                timings,
+                turn_started_at=turn_started_at,
+            ),
         )
 
         yield {

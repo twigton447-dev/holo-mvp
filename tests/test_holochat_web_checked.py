@@ -123,6 +123,18 @@ def test_streaming_done_metadata_includes_searched_without_raw_results(monkeypat
     assert done["usage"]["estimated_cost_usd"] is None
     assert done["usage"]["cost_source"] == "unknown_pricing"
     assert done["usage"]["cost_is_estimate"] is True
+    timing = done["runtime"]["timing_breakdown"]
+    assert timing["total_server_ms"] >= 0
+    assert timing["governor_pre_ms"] >= 0
+    assert timing["analyst_ms"] >= 0
+    assert timing["governor_post_ms"] >= 0
+    assert timing["primary_time_owner"] in {
+        "memory",
+        "governor",
+        "web",
+        "analyst",
+        "persistence",
+    }
     assert done["conversation_paths"] == [
         "Trace the exact Gov calls that run before the answer",
         "Compare Gov-as-mind against deterministic Python control",
@@ -302,6 +314,16 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
         "Gov arc memory",
         "Gov next paths",
         "Gov arc confidence",
+        "Time owner",
+        "Turn total",
+        "Memory/context time",
+        "Gov pre-read time",
+        "Web/search time",
+        "Prompt assembly time",
+        "Analyst generation time",
+        "Gov post-check time",
+        "Persistence time",
+        "Timing note",
         "Estimated input tokens",
         "Estimated output tokens",
         "Estimated total tokens",

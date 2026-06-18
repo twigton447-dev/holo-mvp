@@ -2708,6 +2708,19 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       }
       if (govArc.confidence) rows.push(["Gov arc confidence", govArc.confidence]);
     }
+    const timing = runtime.timing_breakdown || {};
+    if (Object.keys(timing).length) {
+      rows.push(["Time owner", timing.primary_time_owner || "unknown"]);
+      rows.push(["Turn total", `${fmtTokens(timing.total_server_ms)} ms`]);
+      rows.push(["Memory/context time", `${fmtTokens(timing.memory_context_ms)} ms`]);
+      rows.push(["Gov pre-read time", `${fmtTokens(timing.governor_pre_ms)} ms`]);
+      rows.push(["Web/search time", `${fmtTokens(timing.web_search_ms)} ms`]);
+      rows.push(["Prompt assembly time", `${fmtTokens(timing.context_assembly_ms)} ms`]);
+      rows.push(["Analyst generation time", `${fmtTokens(timing.analyst_ms)} ms`]);
+      rows.push(["Gov post-check time", `${fmtTokens(timing.governor_post_ms)} ms`]);
+      rows.push(["Persistence time", `${fmtTokens(timing.persistence_ms)} ms`]);
+      if (timing.note) rows.push(["Timing note", timing.note]);
+    }
     if (Object.keys(usage).length) {
       rows.push(["Estimated input tokens", fmtTokens(usage.input_token_estimate)]);
       rows.push(["Estimated output tokens", fmtTokens(usage.output_token_estimate)]);

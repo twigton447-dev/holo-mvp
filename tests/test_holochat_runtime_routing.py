@@ -326,6 +326,27 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert usage["latency_ms"] >= 0
     assert usage["cost_is_estimate"] is True
     assert usage["pricing_note"] == "Exact provider billing may differ."
+    timing = result["runtime"]["timing_breakdown"]
+    for key in (
+        "memory_context_ms",
+        "governor_pre_ms",
+        "web_search_ms",
+        "context_assembly_ms",
+        "analyst_ms",
+        "governor_post_ms",
+        "persistence_ms",
+        "total_server_ms",
+    ):
+        assert timing[key] >= 0
+    assert timing["primary_time_owner"] in {
+        "memory",
+        "governor",
+        "web",
+        "analyst",
+        "persistence",
+    }
+    assert timing["primary_time_owner_ms"] >= 0
+    assert "Safe stage timings only" in timing["note"]
     runtime_text = json.dumps(result["runtime"])
     for forbidden in (
         "raw-capsule-id",

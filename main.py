@@ -867,6 +867,8 @@ async def chat(
     }
     if result.get("search_query") is not None:
         response_content["search_query"] = result.get("search_query")
+    if result.get("web_status") is not None:
+        response_content["web_status"] = result.get("web_status")
     if result.get("context_budget") is not None:
         response_content["context_budget"] = result.get("context_budget")
     if result.get("usage") is not None:

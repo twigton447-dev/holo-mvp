@@ -469,6 +469,9 @@ class HoloChatEngine:
         thought = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
         tenor   = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
         search_results = web_search.search(search_query) if search_query else None
+        search_attempted = bool(search_query)
+        search_succeeded = bool(search_results)
+        web_status = "checked" if search_succeeded else ("unavailable" if search_attempted else "off")
 
         # Build enriched message — search results injected for the model only,
         # not stored in history (history stays clean with the original message)
@@ -707,8 +710,9 @@ class HoloChatEngine:
             "handoff":             handoff,
             "incognito":           incognito,
             "context_budget":      context_budget,
-            "searched":            bool(search_query),
-            "search_query":        search_query if search_query else None,
+            "searched":            search_succeeded,
+            "search_query":        search_query if search_succeeded else None,
+            "web_status":          web_status,
             "_provider":           adapter.provider,
             "_governor":           session.governor_provider,
             "_governor_turns_held": session.turn_count - session.governor_locked_since,
@@ -766,7 +770,9 @@ class HoloChatEngine:
         thought      = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
         tenor        = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
         search_results = web_search.search(search_query) if search_query else None
-        searched = bool(search_query)
+        search_attempted = bool(search_query)
+        searched = bool(search_results)
+        web_status = "checked" if searched else ("unavailable" if search_attempted else "off")
 
         enriched_message = user_message
         if search_results:
@@ -833,7 +839,7 @@ class HoloChatEngine:
                 logger.warning("HoloChat 4DNA stream shadow trace failed: %s", exc)
 
         # Signal search before tokens arrive so the UI can show the indicator
-        if searched:
+        if search_attempted:
             yield {"searching": True}
 
         # Stream analyst response token by token
@@ -954,6 +960,7 @@ class HoloChatEngine:
             "thought":             thought,
             "searched":            searched,
             "search_query":        search_query if searched else None,
+            "web_status":          web_status,
             "context_budget":      context_budget,
             "artifacts":           artifacts_saved,
             "handoff":             handoff,

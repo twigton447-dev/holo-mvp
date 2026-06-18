@@ -2121,7 +2121,13 @@
   }
 
   function renderWebCheckedIndicator(data) {
-    if (!data || data.searched !== true) return "";
+    if (!data) return "";
+    if (data.searched !== true) {
+      if (data.web_status === "unavailable") {
+        return `<div class="trust-row"><span class="web-checked" title="Web search unavailable">Web: unavailable</span></div>`;
+      }
+      return "";
+    }
     const query = data.search_query ? escAttr(data.search_query) : "";
     const attrs = query
       ? ` title="Search query: ${query}" data-search-query="${query}"`

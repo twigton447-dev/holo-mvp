@@ -110,6 +110,20 @@ def test_streaming_done_metadata_includes_searched_without_raw_results(monkeypat
     assert "holo4dna" not in done
 
 
+def test_streaming_done_metadata_marks_web_unavailable_when_search_fails(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setattr(chat_engine.web_search, "search", lambda query: None)
+    engine = _engine()
+
+    events = list(engine.stream_message(str(uuid4()), "Should search?"))
+    done = next(event for event in events if isinstance(event, dict) and event.get("done"))
+
+    assert any(isinstance(event, dict) and event.get("searching") for event in events)
+    assert done["searched"] is False
+    assert done["search_query"] is None
+    assert done["web_status"] == "unavailable"
+
+
 def test_streaming_done_metadata_includes_shadow_holo4dna_when_enabled(monkeypatch):
     monkeypatch.setenv("HOLOCHAT_4DNA_SHADOW", "1")
     monkeypatch.setattr(chat_engine.web_search, "search", lambda query: "compact search result")
@@ -136,10 +150,23 @@ def test_non_stream_metadata_includes_searched(monkeypatch):
     assert "compact search result" not in str({k: v for k, v in result.items() if k != "response"})
 
 
+def test_non_stream_metadata_marks_web_unavailable_when_search_fails(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setattr(chat_engine.web_search, "search", lambda query: None)
+    engine = _engine()
+
+    result = engine.send_message(str(uuid4()), "Should search?")
+
+    assert result["searched"] is False
+    assert result["search_query"] is None
+    assert result["web_status"] == "unavailable"
+
+
 def test_frontend_has_web_checked_render_path():
     html = Path("frontend/chat.html").read_text()
 
     assert "Web checked" in html
+    assert "Web: unavailable" in html
     assert "renderWebCheckedIndicator(data)" in html
     assert "finalizeStreamingBubble(holoEl, doneData.response || accumulated, doneData)" in html
     assert "data-search-query" in html

@@ -3470,10 +3470,18 @@ class AnthropicAdapter(BaseAdapter):
             messages = list(history) + [{"role": "user", "content": user_content}]
         else:
             messages = list(history) + [{"role": "user", "content": user_message}]
-        with self._client.messages.stream(
-            model=self.model_id, temperature=temperature,
-            max_tokens=4096, system=system, messages=messages,
-        ) as stream:
+        has_pdf = images and any(i.get("mimeType") == "application/pdf" for i in images)
+        stream_factory = self._client.beta.messages.stream if has_pdf else self._client.messages.stream
+        stream_kwargs = {
+            "model": self.model_id,
+            "temperature": temperature,
+            "max_tokens": 4096,
+            "system": system,
+            "messages": messages,
+        }
+        if has_pdf:
+            stream_kwargs["betas"] = ["pdfs-2024-09-25"]
+        with stream_factory(**stream_kwargs) as stream:
             for text in stream.text_stream:
                 yield text
             final = stream.get_final_message()

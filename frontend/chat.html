@@ -875,10 +875,20 @@
         } catch { parts.push(`\n\n[Attached image: ${file.name} — could not read]`); }
       } else if (isPdfFile(file)) {
         // Send as native PDF — Anthropic and Google read it natively (including scanned pages).
-        // OpenAI gets a graceful fallback note injected by the backend.
+        // Text-layer extraction gives every provider a useful fallback.
         try {
           const data = await readFileAsBase64(file);
           images.push({ name: file.name, data, mimeType: "application/pdf" });
+          try {
+            const text = (await readFileAsText(file)).trim();
+            if (text) {
+              parts.push(`\n\n[Extracted text from PDF: ${file.name}]\n${text.slice(0, 12000)}`);
+            } else {
+              parts.push(`\n\n[PDF attached: ${file.name} — no selectable text was extracted; native PDF reading may still inspect the document.]`);
+            }
+          } catch {
+            parts.push(`\n\n[PDF attached: ${file.name} — text extraction failed; native PDF reading may still inspect the document.]`);
+          }
         } catch { parts.push(`\n\n[Attached PDF: ${file.name} — could not read]`); }
       } else {
         try {

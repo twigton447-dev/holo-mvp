@@ -190,6 +190,30 @@ def _contains_any(text: str, terms: tuple[str, ...]) -> bool:
     return any(term in lowered for term in terms)
 
 
+_NATIVE_PDF_PROVIDER_NAMES = {"anthropic", "google", "gemini"}
+
+
+def _has_pdf_attachments(images: Optional[List[Dict[str, Any]]]) -> bool:
+    return any(item.get("mimeType") == "application/pdf" for item in (images or []))
+
+
+def _adapter_accepts_native_pdf(adapter: Any) -> bool:
+    provider = str(getattr(adapter, "provider", "") or "").strip().lower()
+    return provider in _NATIVE_PDF_PROVIDER_NAMES
+
+
+def _adapter_candidate_order_for_attachments(
+    adapters: list[Any],
+    selected: Any,
+    images: Optional[List[Dict[str, Any]]],
+) -> list[Any]:
+    order = _adapter_candidate_order(adapters, selected)
+    if not _has_pdf_attachments(images):
+        return order
+    pdf_capable = [adapter for adapter in order if _adapter_accepts_native_pdf(adapter)]
+    return pdf_capable or order
+
+
 def _balanced_frontier_assist_reason(
     *,
     user_message: str,
@@ -1102,7 +1126,8 @@ class HoloChatEngine:
         last_err: Optional[Exception] = None
         response_text = ""
         in_tok = out_tok = 0
-        for candidate in _adapter_candidate_order(self._adapters, adapter):
+        candidate_order = _adapter_candidate_order_for_attachments(self._adapters, adapter, images)
+        for candidate in candidate_order:
             try:
                 response_text, in_tok, out_tok = candidate.chat_call(
                     system_prompt, session.history, enriched_message, temperature,
@@ -1121,6 +1146,9 @@ class HoloChatEngine:
                 )
         else:
             bench_candidates = [b for b in self._bench if b.provider != initial_adapter.provider]
+            if _has_pdf_attachments(images):
+                pdf_bench_candidates = [b for b in bench_candidates if _adapter_accepts_native_pdf(b)]
+                bench_candidates = pdf_bench_candidates or bench_candidates
             if not bench_candidates:
                 if last_err is not None:
                     raise last_err
@@ -1522,7 +1550,8 @@ class HoloChatEngine:
         failover_attempts: list[dict[str, Optional[str]]] = []
         last_err: Optional[Exception] = None
         stream_completed = False
-        for candidate in _adapter_candidate_order(self._adapters, adapter):
+        candidate_order = _adapter_candidate_order_for_attachments(self._adapters, adapter, images)
+        for candidate in candidate_order:
             candidate_chunks: list[str] = []
             emitted = False
             try:

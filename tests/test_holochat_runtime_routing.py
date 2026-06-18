@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -17,7 +18,7 @@ from chat_engine import (
     _select_runtime_pools,
 )
 from holo_state import GovArcState
-from llm_adapters import GOVERNOR_SYSTEM_PROMPT, HOLO_CHAT_SYSTEM_PROMPT
+from llm_adapters import AnthropicAdapter, GOVERNOR_SYSTEM_PROMPT, HOLO_CHAT_SYSTEM_PROMPT
 
 
 @dataclass
@@ -357,6 +358,89 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
         "secret",
     ):
         assert forbidden not in runtime_text.lower()
+
+
+def test_pdf_turn_prefers_native_pdf_capable_adapter(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [
+        FakeAdapter("openai", "gpt-4o-mini"),
+        FakeAdapter("anthropic", "claude-haiku-4-5-20251001"),
+        FakeAdapter("google", "gemini-2.5-flash-lite"),
+    ]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    result = engine.send_message(
+        str(uuid4()),
+        "Please read this PDF.",
+        images=[{"name": "brief.pdf", "mimeType": "application/pdf", "data": "JVBERi0x"}],
+    )
+
+    assert result["_provider"] == "anthropic"
+    assert result["response"] == "anthropic mini answer"
+    assert result["runtime"]["selected_provider"] == "anthropic"
+    assert result["runtime"]["selected_model"] == "claude-haiku-4-5-20251001"
+    assert result["runtime"]["failover"]["attempted"] is False
+    attachment_rows = [
+        row for row in result["context_budget"]["rows"]
+        if row["block_name"] == "image_attachments"
+    ]
+    assert attachment_rows and attachment_rows[0]["included"] is True
+
+
+class FakeAnthropicStream:
+    text_stream = ["streamed answer"]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def get_final_message(self):
+        return SimpleNamespace(
+            usage=SimpleNamespace(input_tokens=11, output_tokens=5)
+        )
+
+
+class FakeAnthropicMessages:
+    def __init__(self):
+        self.calls = []
+
+    def stream(self, **kwargs):
+        self.calls.append(kwargs)
+        return FakeAnthropicStream()
+
+
+def test_anthropic_pdf_stream_uses_pdf_beta_endpoint():
+    adapter = AnthropicAdapter.__new__(AnthropicAdapter)
+    adapter.provider = "anthropic"
+    adapter.model_id = "claude-haiku-4-5-20251001"
+    regular_messages = FakeAnthropicMessages()
+    beta_messages = FakeAnthropicMessages()
+    adapter._client = SimpleNamespace(
+        messages=regular_messages,
+        beta=SimpleNamespace(messages=beta_messages),
+    )
+
+    events = list(adapter.stream_chat_call(
+        "system",
+        [],
+        "Please read this.",
+        0.2,
+        images=[{"name": "brief.pdf", "mimeType": "application/pdf", "data": "JVBERi0x"}],
+    ))
+
+    assert events == ["streamed answer", {"done": True, "in_tok": 11, "out_tok": 5}]
+    assert regular_messages.calls == []
+    assert len(beta_messages.calls) == 1
+    call = beta_messages.calls[0]
+    assert call["betas"] == ["pdfs-2024-09-25"]
+    assert call["messages"][0]["content"][1]["source"]["media_type"] == "application/pdf"
 
 
 def test_balanced_runtime_uses_frontier_assist_for_complex_turn(monkeypatch):

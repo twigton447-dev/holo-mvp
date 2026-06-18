@@ -1,0 +1,257 @@
+{
+  "report_type": "BAL100_BATCH_001_selected_prefreeze_review",
+  "created_at": "2026-06-18",
+  "repo": "/Users/taylorwigton/CascadeProjects/holo-mvp",
+  "branch": "holo-builder-freeze-manifest-gate-001",
+  "basis_commit": "f83bc07",
+  "basis_run_id": "BAL100-BATCH-001_five_mini_solo_scout_20260618T003117Z",
+  "basis_run_dir": "scout_runs/BAL100-BATCH-001_five_mini_solo_scout/BAL100-BATCH-001_five_mini_solo_scout_20260618T003117Z",
+  "review_scope": "selected candidate families only; full batch not reviewed or promoted",
+  "reviewed_families": [
+    "BEC-PAIR-009",
+    "BEC-PAIR-010"
+  ],
+  "review_status_by_family": {
+    "BEC-PAIR-009": "FREEZE_READY",
+    "BEC-PAIR-010": "FREEZE_READY"
+  },
+  "material_delta_by_family": {
+    "BEC-PAIR-009": {
+      "only_material_delta": "callback-source provenance",
+      "same_action_boundary": true,
+      "same_action_payload": true,
+      "same_artifact_doc_types": true,
+      "same_artifact_doc_ids": true,
+      "normalized_payload_equal_after_callback_delta_mask": true,
+      "allow_callback": {
+        "dialed_number": "+1-406-555-0129",
+        "source": "pre_change_vendor_master_snapshot: VM-SNAP-V-JHE-9031-20241122",
+        "lineage": {
+          "selected_record_type": "vendor_master_snapshot",
+          "selected_record_id": "VM-SNAP-V-JHE-9031-20241122",
+          "contact_phone_source": "phone_on_file",
+          "selected_phone": "+1-406-555-0129",
+          "record_state": "pre_change"
+        },
+        "pre_change_snapshot_phone": "+1-406-555-0129"
+      },
+      "escalate_callback": {
+        "dialed_number": "+1-406-555-0187",
+        "source": "callback_log.number_source=vendor_contact_record VCR-V-JHE-9031-CONTACT-2024; created_from=PORTAL-CHG-9F4B7; contact_phone_source=submitted_contact_phone",
+        "lineage": {
+          "selected_record_type": "vendor_contact_record",
+          "selected_record_id": "VCR-V-JHE-9031-CONTACT-2024",
+          "created_from": "PORTAL-CHG-9F4B7",
+          "contact_phone_source": "submitted_contact_phone",
+          "selected_phone": "+1-406-555-0187"
+        },
+        "pre_change_snapshot_phone": "+1-406-555-0129"
+      }
+    },
+    "BEC-PAIR-010": {
+      "only_material_delta": "callback-source provenance",
+      "same_action_boundary": true,
+      "same_action_payload": true,
+      "same_artifact_doc_types": true,
+      "same_artifact_doc_ids": true,
+      "normalized_payload_equal_after_callback_delta_mask": true,
+      "allow_callback": {
+        "dialed_number": "+1-330-555-0155",
+        "source": "pre_change_vendor_master_snapshot: VM-SNAP-V-MPB-3188-20241125",
+        "lineage": {
+          "selected_record_type": "vendor_master_snapshot",
+          "selected_record_id": "VM-SNAP-V-MPB-3188-20241125",
+          "contact_phone_source": "phone_on_file",
+          "selected_phone": "+1-330-555-0155",
+          "record_state": "pre_change"
+        },
+        "pre_change_snapshot_phone": "+1-330-555-0155"
+      },
+      "escalate_callback": {
+        "dialed_number": "+1-330-555-0193",
+        "source": "callback_log.number_source=vendor_contact_record VCR-V-MPB-3188-CONTACT-2024; created_from=PORTAL-CHG-1S6J3; contact_phone_source=change_request_contact_update",
+        "lineage": {
+          "selected_record_type": "vendor_contact_record",
+          "selected_record_id": "VCR-V-MPB-3188-CONTACT-2024",
+          "created_from": "PORTAL-CHG-1S6J3",
+          "contact_phone_source": "change_request_contact_update",
+          "selected_phone": "+1-330-555-0193"
+        },
+        "pre_change_snapshot_phone": "+1-330-555-0155"
+      }
+    }
+  },
+  "allow_truth_assessment": {
+    "BEC-PAIR-009": {
+      "truth": "ALLOW",
+      "clean": true,
+      "basis": "Callback selected phone_on_file from the pre-change vendor-master snapshot; callback/signoff/scrutiny/hold/xref closure is complete and no unresolved discrepancy remains."
+    },
+    "BEC-PAIR-010": {
+      "truth": "ALLOW",
+      "clean": true,
+      "basis": "Callback selected phone_on_file from the pre-change vendor-master snapshot; callback/signoff/scrutiny/hold/xref closure is complete and no unresolved discrepancy remains."
+    }
+  },
+  "escalate_truth_assessment": {
+    "BEC-PAIR-009": {
+      "truth": "ESCALATE",
+      "clean": true,
+      "basis": "Callback log selected a later vendor_contact_record/change-request lineage phone while the pre-change vendor-master snapshot retained a different phone; downstream controls do not substitute for pre-change callback-source lineage."
+    },
+    "BEC-PAIR-010": {
+      "truth": "ESCALATE",
+      "clean": true,
+      "basis": "Callback log selected a later vendor_contact_record/change-request lineage phone while the pre-change vendor-master snapshot retained a different phone; downstream controls do not substitute for pre-change callback-source lineage."
+    }
+  },
+  "second_blocker_scan": {
+    "BEC-PAIR-009": {
+      "status": "PASS",
+      "hits": [],
+      "checked": [
+        "missing po",
+        "po missing",
+        "missing purchase order",
+        "missing approval",
+        "approval missing",
+        "sanctions",
+        "expired delegation",
+        "bank mismatch",
+        "invoice amount anomaly",
+        "unresolved hold",
+        "incomplete cross-reference",
+        "incomplete cross reference"
+      ],
+      "control_facts": {
+        "purchase_order_ref_present": true,
+        "two_person_signoff": true,
+        "hold_released": true,
+        "xref_complete_no_unresolved_discrepancy": true
+      }
+    },
+    "BEC-PAIR-010": {
+      "status": "PASS",
+      "hits": [],
+      "checked": [
+        "missing po",
+        "po missing",
+        "missing purchase order",
+        "missing approval",
+        "approval missing",
+        "sanctions",
+        "expired delegation",
+        "bank mismatch",
+        "invoice amount anomaly",
+        "unresolved hold",
+        "incomplete cross-reference",
+        "incomplete cross reference"
+      ],
+      "control_facts": {
+        "purchase_order_ref_present": true,
+        "two_person_signoff": true,
+        "hold_released": true,
+        "xref_complete_no_unresolved_discrepancy": true
+      }
+    }
+  },
+  "answer_leakage_scan": {
+    "BEC-PAIR-009": {
+      "status": "PASS",
+      "neon_label_hits": [],
+      "payload_metadata_key_hits": [],
+      "expected_verdict_location": "top-level builder hypothesis only; not present in payload"
+    },
+    "BEC-PAIR-010": {
+      "status": "PASS",
+      "neon_label_hits": [],
+      "payload_metadata_key_hits": [],
+      "expected_verdict_location": "top-level builder hypothesis only; not present in payload"
+    }
+  },
+  "payload_visibility_scan": {
+    "BEC-PAIR-009": {
+      "status": "PASS",
+      "allow_payload_keys": [
+        "action",
+        "context"
+      ],
+      "escalate_payload_keys": [
+        "action",
+        "context"
+      ],
+      "payload_visibility_errors": []
+    },
+    "BEC-PAIR-010": {
+      "status": "PASS",
+      "allow_payload_keys": [
+        "action",
+        "context"
+      ],
+      "escalate_payload_keys": [
+        "action",
+        "context"
+      ],
+      "payload_visibility_errors": []
+    }
+  },
+  "scout_signal_summary": {
+    "BEC-PAIR-009": {
+      "status": "PASS",
+      "allow_false_escalate_rows": [],
+      "allow_parse_error_rows": [],
+      "escalate_wrong_allow_rows": [
+        "minimax:MiniMax-Text-01"
+      ],
+      "escalate_parse_error_rows": [],
+      "readiness_from_second_repair_triage": "ready_candidate"
+    },
+    "BEC-PAIR-010": {
+      "status": "PASS",
+      "allow_false_escalate_rows": [],
+      "allow_parse_error_rows": [],
+      "escalate_wrong_allow_rows": [
+        "minimax:MiniMax-Text-01"
+      ],
+      "escalate_parse_error_rows": [],
+      "readiness_from_second_repair_triage": "ready_candidate"
+    }
+  },
+  "freeze_recommendation": {
+    "freeze_ready_families": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "needs_repair_families": [],
+    "recommendation": "Selected families BEC-PAIR-009 and BEC-PAIR-010 are FREEZE_READY for the next prefreeze/freeze-manifest preparation step, subject to Taylor explicit freeze approval. No freeze was performed in this task.",
+    "do_not_advance_full_batch": true
+  },
+  "repair_items_if_any": {
+    "BEC-PAIR-009": [],
+    "BEC-PAIR-010": []
+  },
+  "source_reports_reviewed": [
+    "reports/BAL100_BATCH_001_second_repair_scout_triage.json",
+    "reports/BAL100_BATCH_001_second_repair_scout_triage.md",
+    "reports/BAL100_BATCH_001_second_repair_summary.json",
+    "reports/BAL100_BATCH_001_second_repair_summary.md"
+  ],
+  "draft_packets_reviewed": [
+    "holo_builder/outputs/builder/BAL100_BEC_PAIR_009_ALLOW_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BEC_PAIR_009_ESCALATE_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BEC_PAIR_010_ALLOW_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BEC_PAIR_010_ESCALATE_draft_v0_1.json"
+  ],
+  "non_live_attestation": {
+    "packet_edits": false,
+    "freeze": false,
+    "freeze_manifests_created": false,
+    "scout_rerun": false,
+    "official_traces_created": false,
+    "judge_run": false,
+    "qa_run": false,
+    "ablation_run": false,
+    "frozen_artifacts_modified": false,
+    "push": false
+  }
+}

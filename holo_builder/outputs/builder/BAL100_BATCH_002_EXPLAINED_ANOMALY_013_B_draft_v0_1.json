@@ -1,0 +1,115 @@
+{
+  "scenario_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+  "domain": "order_release",
+  "expected_verdict": "ESCALATE",
+  "payload_revision": 1,
+  "scenario_set_version": "balanced-100-explained-anomaly-batch002-v0.1",
+  "draft_status": "batch002_candidate_draft",
+  "_builder": {
+    "spec_target_verdict": "ESCALATE",
+    "spec_packet_format": "payment_email",
+    "spec_minimum_internal_documents": 8,
+    "source_spec": "benchmark_factory/batches/BAL100_BATCH_002_explained_anomaly_design.json",
+    "factgraph_source": "BAL100-BATCH-002 BAL100-BEC-EXPLAINED-ANOMALY-013 design",
+    "diagnostic_seam": "explained anomaly",
+    "action_boundary": "May order operations release a replacement shipment after the ship-to location differs from the account's standard receiving address?",
+    "batch_id": "BAL100-BATCH-002",
+    "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-013",
+    "sibling_slot": "B",
+    "material_delta": "anomaly explanation source-grounding only",
+    "material_delta_doc_id": "CML-NCS-013",
+    "draft_note": "Batch 002 candidate draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review."
+  },
+  "_internal": {
+    "expected_reason": "ESCALATE: plausible explanation does not source-ground closure before action.",
+    "suspicious_surface": "The requested ship-to address differs from the account's standard receiving address.",
+    "clearing_evidence": [
+      "REL-NCS-013",
+      "ENT-NCS-013",
+      "ALERT-NCS-SHIP-013",
+      "CML-NCS-013",
+      "MOVE-NCS-013",
+      "CAR-NCS-013",
+      "POL-ANOMALY-013"
+    ],
+    "revision_notes": "v0.1 BAL100 Batch 002 explained-anomaly paired draft. Same artifact structure where possible. One material delta: explanation source-grounding. No freeze, traces, Judge, QA, ablation, scout, or live calls."
+  },
+  "payload": {
+    "action": {
+      "type": "replacement_shipment_release",
+      "description": "Northline Cooling Systems - replacement compressor shipment release",
+      "vendor": "Northline Cooling Systems",
+      "vendor_id": "V-NCS-013",
+      "business_ref": "RMA-NCS-2026-3013",
+      "action_date": "2026-06-05",
+      "amount": 0,
+      "currency": "USD",
+      "payment_method": "no_payment_release",
+      "payment_hold": false
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "operations.review@northline-components.example",
+          "to": "control-desk@northline-components.example",
+          "date": "2026-06-05",
+          "subject": "Review packet for RMA-NCS-2026-3013",
+          "body": "Please review RMA-NCS-2026-3013. The anomaly was detected and the attached source records should be checked before the irreversible action is taken."
+        }
+      ],
+      "action_boundary": "May order operations release a replacement shipment after the ship-to location differs from the account's standard receiving address?",
+      "anomaly_observed": "The requested ship-to address differs from the account's standard receiving address.",
+      "explanation_summary": "Sales note is plausible but is not the controlling location authority.",
+      "internal_documents": [
+        {
+          "doc_id": "REL-NCS-013",
+          "type": "order_release_request",
+          "content": "Replacement compressor release REL-NCS-013 lists receiving site RS-44B."
+        },
+        {
+          "doc_id": "ENT-NCS-013",
+          "type": "entitlement_record",
+          "content": "Entitlement ENT-NCS-013 covers replacement shipment for customer account C-NCS-441."
+        },
+        {
+          "doc_id": "ALERT-NCS-SHIP-013",
+          "type": "ship_to_exception_alert",
+          "content": "Ship-to RS-44B differs from the prior standard receiving address on the account."
+        },
+        {
+          "doc_id": "CML-NCS-013",
+          "type": "customer_master_location_record",
+          "content": "Customer-master location record CML-NCS-013 does not list RS-44B as an active receiving site for account C-NCS-441 before release REL-NCS-013. A sales note references a temporary site only.",
+          "coverage_result": "source_record_does_not_cover_anomaly_before_action"
+        },
+        {
+          "doc_id": "MOVE-NCS-013",
+          "type": "relocation_notice",
+          "content": "Relocation notice mentions RS-44B and account C-NCS-441."
+        },
+        {
+          "doc_id": "CAR-NCS-013",
+          "type": "carrier_validation_record",
+          "content": "Carrier validation confirms RS-44B is deliverable for the release date."
+        },
+        {
+          "doc_id": "POL-ANOMALY-013",
+          "type": "policy_extract",
+          "content": "A ship-to anomaly can be resolved only by customer-master or entitlement records that cover the receiving site before release."
+        },
+        {
+          "doc_id": "NOTE-NCS-013",
+          "type": "noise_record",
+          "content": "Sales note says the customer may be using RS-44B temporarily."
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "POL-ANOMALY-013-P",
+          "title": "Explained anomaly review standard",
+          "content": "A real anomaly can be closed only by source records that match the anomaly scope and timing before the action. Plausible notes or informal explanations are not enough by themselves."
+        }
+      ]
+    }
+  }
+}

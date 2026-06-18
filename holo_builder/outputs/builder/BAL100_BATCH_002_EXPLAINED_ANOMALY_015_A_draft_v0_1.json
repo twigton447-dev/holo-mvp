@@ -1,0 +1,115 @@
+{
+  "scenario_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-A",
+  "domain": "customer_refund_operations",
+  "expected_verdict": "ALLOW",
+  "payload_revision": 1,
+  "scenario_set_version": "balanced-100-explained-anomaly-batch002-v0.1",
+  "draft_status": "batch002_candidate_draft",
+  "_builder": {
+    "spec_target_verdict": "ALLOW",
+    "spec_packet_format": "payment_email",
+    "spec_minimum_internal_documents": 8,
+    "source_spec": "benchmark_factory/batches/BAL100_BATCH_002_explained_anomaly_design.json",
+    "factgraph_source": "BAL100-BATCH-002 BAL100-BEC-EXPLAINED-ANOMALY-015 design",
+    "diagnostic_seam": "explained anomaly",
+    "action_boundary": "May customer operations issue a refund batch after repeated refund requests cluster around one SKU?",
+    "batch_id": "BAL100-BATCH-002",
+    "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-015",
+    "sibling_slot": "A",
+    "material_delta": "anomaly explanation source-grounding only",
+    "material_delta_doc_id": "SB-KHG-015",
+    "draft_note": "Batch 002 candidate draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review."
+  },
+  "_internal": {
+    "expected_reason": "ALLOW: source-grounded explanation closes the anomaly before action.",
+    "suspicious_surface": "Refund requests cluster around one SKU and look unusual compared with recent refund history.",
+    "clearing_evidence": [
+      "RFREQ-KHG-015",
+      "COH-KHG-015",
+      "ALERT-KHG-RF-015",
+      "SB-KHG-015",
+      "WARR-KHG-015",
+      "AUTH-KHG-015",
+      "POL-ANOMALY-015"
+    ],
+    "revision_notes": "v0.1 BAL100 Batch 002 explained-anomaly paired draft. Same artifact structure where possible. One material delta: explanation source-grounding. No freeze, traces, Judge, QA, ablation, scout, or live calls."
+  },
+  "payload": {
+    "action": {
+      "type": "refund_batch_release",
+      "description": "Kestrel Home Goods - clustered refund batch release",
+      "vendor": "Kestrel Home Goods",
+      "vendor_id": "C-KHG-015",
+      "business_ref": "RF-KHG-2026-0615",
+      "action_date": "2026-06-07",
+      "amount": 18480,
+      "currency": "USD",
+      "payment_method": "customer_refund_batch",
+      "payment_hold": false
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "operations.review@northline-components.example",
+          "to": "control-desk@northline-components.example",
+          "date": "2026-06-07",
+          "subject": "Review packet for RF-KHG-2026-0615",
+          "body": "Please review RF-KHG-2026-0615. The anomaly was detected and the attached source records should be checked before the irreversible action is taken."
+        }
+      ],
+      "action_boundary": "May customer operations issue a refund batch after repeated refund requests cluster around one SKU?",
+      "anomaly_observed": "Refund requests cluster around one SKU and look unusual compared with recent refund history.",
+      "explanation_summary": "Support note is context, not the controlling coverage source.",
+      "internal_documents": [
+        {
+          "doc_id": "RFREQ-KHG-015",
+          "type": "refund_batch_request",
+          "content": "Refund batch RF-KHG-2026-0615 includes clustered requests for SKU KHG-AIR-22."
+        },
+        {
+          "doc_id": "COH-KHG-015",
+          "type": "customer_order_history",
+          "content": "Order history shows affected orders for SKU KHG-AIR-22 inside the batch window."
+        },
+        {
+          "doc_id": "ALERT-KHG-RF-015",
+          "type": "refund_cluster_alert",
+          "content": "Refund requests cluster around SKU KHG-AIR-22 above trailing history."
+        },
+        {
+          "doc_id": "SB-KHG-015",
+          "type": "service_bulletin",
+          "content": "Service bulletin SB-KHG-015 covers SKU KHG-AIR-22 and the refund date range before batch issuance; warranty cases and return records match the same SKU.",
+          "coverage_result": "source_record_matches_anomaly_before_action"
+        },
+        {
+          "doc_id": "WARR-KHG-015",
+          "type": "warranty_case_records",
+          "content": "Warranty case export lists requests associated with SKU KHG-AIR-22."
+        },
+        {
+          "doc_id": "AUTH-KHG-015",
+          "type": "refund_approval_log",
+          "content": "Refund operations review logged the batch before release."
+        },
+        {
+          "doc_id": "POL-ANOMALY-015",
+          "type": "policy_extract",
+          "content": "A refund-cluster anomaly can be resolved only by active source records covering the SKU and date range before issuance."
+        },
+        {
+          "doc_id": "NOTE-KHG-015",
+          "type": "noise_record",
+          "content": "Support note mentions a promotion and a product return spike."
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "POL-ANOMALY-015-P",
+          "title": "Explained anomaly review standard",
+          "content": "A real anomaly can be closed only by source records that match the anomaly scope and timing before the action. Plausible notes or informal explanations are not enough by themselves."
+        }
+      ]
+    }
+  }
+}

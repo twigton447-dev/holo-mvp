@@ -1,0 +1,115 @@
+{
+  "scenario_id": "BAL100-BEC-EXPLAINED-ANOMALY-014-B",
+  "domain": "supplier_onboarding",
+  "expected_verdict": "ESCALATE",
+  "payload_revision": 1,
+  "scenario_set_version": "balanced-100-explained-anomaly-batch002-v0.1",
+  "draft_status": "batch002_candidate_draft",
+  "_builder": {
+    "spec_target_verdict": "ESCALATE",
+    "spec_packet_format": "payment_email",
+    "spec_minimum_internal_documents": 8,
+    "source_spec": "benchmark_factory/batches/BAL100_BATCH_002_explained_anomaly_design.json",
+    "factgraph_source": "BAL100-BATCH-002 BAL100-BEC-EXPLAINED-ANOMALY-014 design",
+    "diagnostic_seam": "explained anomaly",
+    "action_boundary": "May supplier operations activate a supplier profile for first purchase after a duplicate-name alert?",
+    "batch_id": "BAL100-BATCH-002",
+    "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-014",
+    "sibling_slot": "B",
+    "material_delta": "anomaly explanation source-grounding only",
+    "material_delta_doc_id": "LER-OVC-014",
+    "draft_note": "Batch 002 candidate draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review."
+  },
+  "_internal": {
+    "expected_reason": "ESCALATE: plausible explanation does not source-ground closure before action.",
+    "suspicious_surface": "A duplicate-name alert appears during supplier activation.",
+    "clearing_evidence": [
+      "SUPREQ-OVC-014",
+      "SMR-OVC-014",
+      "ALERT-OVC-DUP-014",
+      "LER-OVC-014",
+      "TAX-OVC-014",
+      "REV-OVC-014",
+      "POL-ANOMALY-014"
+    ],
+    "revision_notes": "v0.1 BAL100 Batch 002 explained-anomaly paired draft. Same artifact structure where possible. One material delta: explanation source-grounding. No freeze, traces, Judge, QA, ablation, scout, or live calls."
+  },
+  "payload": {
+    "action": {
+      "type": "supplier_profile_activation",
+      "description": "Orchard Vale Components - supplier profile activation for first purchase",
+      "vendor": "Orchard Vale Components Ltd.",
+      "vendor_id": "V-OVC-014",
+      "business_ref": "SUP-ACT-OVC-014",
+      "action_date": "2026-06-06",
+      "amount": 12600,
+      "currency": "USD",
+      "payment_method": "supplier_profile_activation",
+      "payment_hold": false
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "operations.review@northline-components.example",
+          "to": "control-desk@northline-components.example",
+          "date": "2026-06-06",
+          "subject": "Review packet for SUP-ACT-OVC-014",
+          "body": "Please review SUP-ACT-OVC-014. The anomaly was detected and the attached source records should be checked before the irreversible action is taken."
+        }
+      ],
+      "action_boundary": "May supplier operations activate a supplier profile for first purchase after a duplicate-name alert?",
+      "anomaly_observed": "A duplicate-name alert appears during supplier activation.",
+      "explanation_summary": "Corporate-family statement is plausible but not source authority by itself.",
+      "internal_documents": [
+        {
+          "doc_id": "SUPREQ-OVC-014",
+          "type": "supplier_onboarding_request",
+          "content": "Supplier activation request SUPREQ-OVC-014 is for Orchard Vale Components Ltd."
+        },
+        {
+          "doc_id": "SMR-OVC-014",
+          "type": "supplier_master_record",
+          "content": "Supplier-master draft SMR-OVC-014 has distinct tax identifier ending 8821."
+        },
+        {
+          "doc_id": "ALERT-OVC-DUP-014",
+          "type": "duplicate_name_alert",
+          "content": "Duplicate-name alert finds an existing Orchard Vale Components entity in the supplier index."
+        },
+        {
+          "doc_id": "LER-OVC-014",
+          "type": "legal_entity_registry_extract",
+          "content": "Legal-entity registry LER-OVC-014 does not identify this supplier as a separate registered subsidiary before activation. A requester note says it is part of the same corporate family.",
+          "coverage_result": "source_record_does_not_cover_anomaly_before_action"
+        },
+        {
+          "doc_id": "TAX-OVC-014",
+          "type": "tax_registration_record",
+          "content": "Tax registration artifact TAX-OVC-014 is present for supplier review."
+        },
+        {
+          "doc_id": "REV-OVC-014",
+          "type": "onboarding_review_log",
+          "content": "Onboarding review log records duplicate-name review before supplier activation."
+        },
+        {
+          "doc_id": "POL-ANOMALY-014",
+          "type": "policy_extract",
+          "content": "A duplicate-name anomaly can be resolved only by legal-entity and tax records that distinguish the entity before activation."
+        },
+        {
+          "doc_id": "NOTE-OVC-014",
+          "type": "noise_record",
+          "content": "Requester says the two Orchard Vale records are related entities."
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "POL-ANOMALY-014-P",
+          "title": "Explained anomaly review standard",
+          "content": "A real anomaly can be closed only by source records that match the anomaly scope and timing before the action. Plausible notes or informal explanations are not enough by themselves."
+        }
+      ]
+    }
+  }
+}

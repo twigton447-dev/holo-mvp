@@ -1,0 +1,115 @@
+{
+  "scenario_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-A",
+  "domain": "cloud_services_invoice_approval",
+  "expected_verdict": "ALLOW",
+  "payload_revision": 1,
+  "scenario_set_version": "balanced-100-explained-anomaly-batch002-v0.1",
+  "draft_status": "batch002_candidate_draft",
+  "_builder": {
+    "spec_target_verdict": "ALLOW",
+    "spec_packet_format": "payment_email",
+    "spec_minimum_internal_documents": 8,
+    "source_spec": "benchmark_factory/batches/BAL100_BATCH_002_explained_anomaly_design.json",
+    "factgraph_source": "BAL100-BATCH-002 BAL100-BEC-EXPLAINED-ANOMALY-018 design",
+    "diagnostic_seam": "explained anomaly",
+    "action_boundary": "May finance approve a cloud services invoice after a metered usage spike appears?",
+    "batch_id": "BAL100-BATCH-002",
+    "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-018",
+    "sibling_slot": "A",
+    "material_delta": "anomaly explanation source-grounding only",
+    "material_delta_doc_id": "METER-ACS-018",
+    "draft_note": "Batch 002 candidate draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review."
+  },
+  "_internal": {
+    "expected_reason": "ALLOW: source-grounded explanation closes the anomaly before action.",
+    "suspicious_surface": "Metered usage spikes above the trailing account baseline.",
+    "clearing_evidence": [
+      "INV-ACS-2026-0618",
+      "BAR-ACS-018",
+      "ALERT-ACS-USAGE-018",
+      "METER-ACS-018",
+      "CUC-ACS-018",
+      "AUTH-ACS-018",
+      "POL-ANOMALY-018"
+    ],
+    "revision_notes": "v0.1 BAL100 Batch 002 explained-anomaly paired draft. Same artifact structure where possible. One material delta: explanation source-grounding. No freeze, traces, Judge, QA, ablation, scout, or live calls."
+  },
+  "payload": {
+    "action": {
+      "type": "cloud_services_invoice_approval",
+      "description": "Ardent Cloud Services - metered usage invoice approval",
+      "vendor": "Ardent Cloud Services",
+      "vendor_id": "V-ACS-018",
+      "business_ref": "ACS-2026-0618",
+      "action_date": "2026-06-10",
+      "amount": 73860,
+      "currency": "USD",
+      "payment_method": "ACH",
+      "payment_hold": false
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "operations.review@northline-components.example",
+          "to": "control-desk@northline-components.example",
+          "date": "2026-06-10",
+          "subject": "Review packet for ACS-2026-0618",
+          "body": "Please review ACS-2026-0618. The anomaly was detected and the attached source records should be checked before the irreversible action is taken."
+        }
+      ],
+      "action_boundary": "May finance approve a cloud services invoice after a metered usage spike appears?",
+      "anomaly_observed": "Metered usage spikes above the trailing account baseline.",
+      "explanation_summary": "Vendor memo is plausible but not the source meter or contract authority.",
+      "internal_documents": [
+        {
+          "doc_id": "INV-ACS-2026-0618",
+          "type": "cloud_invoice",
+          "content": "Invoice ACS-2026-0618 includes metered usage above the trailing account baseline."
+        },
+        {
+          "doc_id": "BAR-ACS-018",
+          "type": "billing_adjustment_record",
+          "content": "Billing adjustment record BAR-ACS-018 applies service credits already reflected in the invoice."
+        },
+        {
+          "doc_id": "ALERT-ACS-USAGE-018",
+          "type": "usage_spike_alert",
+          "content": "Metered usage spikes above the trailing account baseline for service cluster CL-9."
+        },
+        {
+          "doc_id": "METER-ACS-018",
+          "type": "meter_export",
+          "content": "Meter export METER-ACS-018, service ticket SVC-ACS-018, and contract usage clause CUC-ACS-018 tie the spike to authorized workload event WL-44 before invoice approval.",
+          "coverage_result": "source_record_matches_anomaly_before_action"
+        },
+        {
+          "doc_id": "CUC-ACS-018",
+          "type": "contract_usage_clause",
+          "content": "Contract usage clause CUC-ACS-018 defines covered metered workload events."
+        },
+        {
+          "doc_id": "AUTH-ACS-018",
+          "type": "approval_log",
+          "content": "Finance approval log records review of usage-spike artifacts before invoice decision."
+        },
+        {
+          "doc_id": "POL-ANOMALY-018",
+          "type": "policy_extract",
+          "content": "A usage-spike anomaly can be resolved only by meter and contract records that cover scope and timing before invoice approval."
+        },
+        {
+          "doc_id": "NOTE-ACS-018",
+          "type": "noise_record",
+          "content": "Vendor memo estimates increased usage for June."
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "POL-ANOMALY-018-P",
+          "title": "Explained anomaly review standard",
+          "content": "A real anomaly can be closed only by source records that match the anomaly scope and timing before the action. Plausible notes or informal explanations are not enough by themselves."
+        }
+      ]
+    }
+  }
+}

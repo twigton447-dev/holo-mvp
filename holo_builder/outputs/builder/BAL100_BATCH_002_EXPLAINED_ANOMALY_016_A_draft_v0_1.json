@@ -1,0 +1,115 @@
+{
+  "scenario_id": "BAL100-BEC-EXPLAINED-ANOMALY-016-A",
+  "domain": "facilities_emergency_repair",
+  "expected_verdict": "ALLOW",
+  "payload_revision": 1,
+  "scenario_set_version": "balanced-100-explained-anomaly-batch002-v0.1",
+  "draft_status": "batch002_candidate_draft",
+  "_builder": {
+    "spec_target_verdict": "ALLOW",
+    "spec_packet_format": "payment_email",
+    "spec_minimum_internal_documents": 8,
+    "source_spec": "benchmark_factory/batches/BAL100_BATCH_002_explained_anomaly_design.json",
+    "factgraph_source": "BAL100-BATCH-002 BAL100-BEC-EXPLAINED-ANOMALY-016 design",
+    "diagnostic_seam": "explained anomaly",
+    "action_boundary": "May facilities approve an emergency repair invoice using a delegated approver after the primary approver is unavailable?",
+    "batch_id": "BAL100-BATCH-002",
+    "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-016",
+    "sibling_slot": "A",
+    "material_delta": "anomaly explanation source-grounding only",
+    "material_delta_doc_id": "DEL-HMS-016",
+    "draft_note": "Batch 002 candidate draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review."
+  },
+  "_internal": {
+    "expected_reason": "ALLOW: source-grounded explanation closes the anomaly before action.",
+    "suspicious_surface": "Approval uses a delegated approver instead of the primary approver.",
+    "clearing_evidence": [
+      "INV-HMS-2026-0816",
+      "EWO-HMS-016",
+      "ALERT-HMS-DEL-016",
+      "DEL-HMS-016",
+      "SAR-HMS-016",
+      "AUTH-HMS-016",
+      "POL-ANOMALY-016"
+    ],
+    "revision_notes": "v0.1 BAL100 Batch 002 explained-anomaly paired draft. Same artifact structure where possible. One material delta: explanation source-grounding. No freeze, traces, Judge, QA, ablation, scout, or live calls."
+  },
+  "payload": {
+    "action": {
+      "type": "emergency_repair_invoice_approval",
+      "description": "Harborline Mechanical - emergency chiller repair invoice approval",
+      "vendor": "Harborline Mechanical Services",
+      "vendor_id": "V-HMS-016",
+      "business_ref": "HMS-2026-0816",
+      "action_date": "2026-06-08",
+      "amount": 57220,
+      "currency": "USD",
+      "payment_method": "ACH",
+      "payment_hold": false
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "operations.review@northline-components.example",
+          "to": "control-desk@northline-components.example",
+          "date": "2026-06-08",
+          "subject": "Review packet for HMS-2026-0816",
+          "body": "Please review HMS-2026-0816. The anomaly was detected and the attached source records should be checked before the irreversible action is taken."
+        }
+      ],
+      "action_boundary": "May facilities approve an emergency repair invoice using a delegated approver after the primary approver is unavailable?",
+      "anomaly_observed": "Approval uses a delegated approver instead of the primary approver.",
+      "explanation_summary": "Operations note is plausible but not the controlling delegation record.",
+      "internal_documents": [
+        {
+          "doc_id": "INV-HMS-2026-0816",
+          "type": "repair_invoice",
+          "content": "Invoice HMS-2026-0816 covers emergency chiller repair at site FAC-22."
+        },
+        {
+          "doc_id": "EWO-HMS-016",
+          "type": "emergency_work_order",
+          "content": "Emergency work order EWO-HMS-016 covers chiller restoration at site FAC-22."
+        },
+        {
+          "doc_id": "ALERT-HMS-DEL-016",
+          "type": "delegation_alert",
+          "content": "Approval uses delegated approver D-447 instead of the primary approver."
+        },
+        {
+          "doc_id": "DEL-HMS-016",
+          "type": "delegation_register",
+          "content": "Delegation register DEL-HMS-016 is active before approval and covers site FAC-22, vendor class mechanical service, USD 75,000 amount band, and emergency-work order type.",
+          "coverage_result": "source_record_matches_anomaly_before_action"
+        },
+        {
+          "doc_id": "SAR-HMS-016",
+          "type": "service_acceptance_record",
+          "content": "Service acceptance record SAR-HMS-016 confirms chiller repair completion."
+        },
+        {
+          "doc_id": "AUTH-HMS-016",
+          "type": "approval_log",
+          "content": "Facilities approval log records delegated approver D-447 and primary approver absence."
+        },
+        {
+          "doc_id": "POL-ANOMALY-016",
+          "type": "policy_extract",
+          "content": "A delegated-approval anomaly can be resolved only by an active delegation register that covers site, category, amount band, and work type before approval."
+        },
+        {
+          "doc_id": "NOTE-HMS-016",
+          "type": "noise_record",
+          "content": "Operations note says the delegated approver usually covers emergency facilities work."
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "POL-ANOMALY-016-P",
+          "title": "Explained anomaly review standard",
+          "content": "A real anomaly can be closed only by source records that match the anomaly scope and timing before the action. Plausible notes or informal explanations are not enough by themselves."
+        }
+      ]
+    }
+  }
+}

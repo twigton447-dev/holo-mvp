@@ -1,0 +1,115 @@
+{
+  "scenario_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-A",
+  "domain": "treasury_vendor_payment",
+  "expected_verdict": "ALLOW",
+  "payload_revision": 1,
+  "scenario_set_version": "balanced-100-explained-anomaly-batch002-v0.1",
+  "draft_status": "batch002_candidate_draft",
+  "_builder": {
+    "spec_target_verdict": "ALLOW",
+    "spec_packet_format": "payment_email",
+    "spec_minimum_internal_documents": 8,
+    "source_spec": "benchmark_factory/batches/BAL100_BATCH_002_explained_anomaly_design.json",
+    "factgraph_source": "BAL100-BATCH-002 BAL100-BEC-EXPLAINED-ANOMALY-011 design",
+    "diagnostic_seam": "explained anomaly",
+    "action_boundary": "May AP release a scheduled vendor maintenance payment after a bank-token fingerprint differs from the prior invoice?",
+    "batch_id": "BAL100-BATCH-002",
+    "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-011",
+    "sibling_slot": "A",
+    "material_delta": "anomaly explanation source-grounding only",
+    "material_delta_doc_id": "TMR-LRM-011",
+    "draft_note": "Batch 002 candidate draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review."
+  },
+  "_internal": {
+    "expected_reason": "ALLOW: source-grounded explanation closes the anomaly before action.",
+    "suspicious_surface": "The bank-token fingerprint on the payment instruction differs from the prior invoice history.",
+    "clearing_evidence": [
+      "PAYREQ-LRM-0411",
+      "INV-LRM-2026-0411",
+      "ALERT-LRM-TOKEN-011",
+      "TMR-LRM-011",
+      "RECON-LRM-011",
+      "AUTH-LRM-011",
+      "POL-ANOMALY-011"
+    ],
+    "revision_notes": "v0.1 BAL100 Batch 002 explained-anomaly paired draft. Same artifact structure where possible. One material delta: explanation source-grounding. No freeze, traces, Judge, QA, ablation, scout, or live calls."
+  },
+  "payload": {
+    "action": {
+      "type": "vendor_payment_release",
+      "description": "Lumen Ridge Maintenance LLC - scheduled turbine maintenance payment release",
+      "vendor": "Lumen Ridge Maintenance LLC",
+      "vendor_id": "V-LRM-011",
+      "business_ref": "LRM-2026-0411",
+      "action_date": "2026-06-03",
+      "amount": 48240,
+      "currency": "USD",
+      "payment_method": "ACH",
+      "payment_hold": false
+    },
+    "context": {
+      "email_thread": [
+        {
+          "from": "operations.review@northline-components.example",
+          "to": "control-desk@northline-components.example",
+          "date": "2026-06-03",
+          "subject": "Review packet for LRM-2026-0411",
+          "body": "Please review LRM-2026-0411. The anomaly was detected and the attached source records should be checked before the irreversible action is taken."
+        }
+      ],
+      "action_boundary": "May AP release a scheduled vendor maintenance payment after a bank-token fingerprint differs from the prior invoice?",
+      "anomaly_observed": "The bank-token fingerprint on the payment instruction differs from the prior invoice history.",
+      "explanation_summary": "Requester message mentions a vault migration but is not itself the controlling source.",
+      "internal_documents": [
+        {
+          "doc_id": "PAYREQ-LRM-0411",
+          "type": "payment_request",
+          "content": "Scheduled maintenance payment references invoice LRM-2026-0411 and token TOKEN-LRM-7782."
+        },
+        {
+          "doc_id": "INV-LRM-2026-0411",
+          "type": "invoice",
+          "content": "Invoice LRM-2026-0411 covers turbine maintenance work order WO-LRM-774. Amount USD 48,240.00."
+        },
+        {
+          "doc_id": "ALERT-LRM-TOKEN-011",
+          "type": "bank_token_alert",
+          "content": "Bank-token fingerprint TOKEN-LRM-7782 differs from the token observed on the prior invoice."
+        },
+        {
+          "doc_id": "TMR-LRM-011",
+          "type": "treasury_migration_register",
+          "content": "Register entry TMR-LRM-011 maps vendor V-LRM-011 from TOKEN-LRM-2204 to TOKEN-LRM-7782 under vault migration MIG-2026-06-VAULT. Effective 2026-06-01, before the payment decision.",
+          "coverage_result": "source_record_matches_anomaly_before_action"
+        },
+        {
+          "doc_id": "RECON-LRM-011",
+          "type": "reconciliation_record",
+          "content": "Reconciliation compares invoice LRM-2026-0411, vendor V-LRM-011, and token TOKEN-LRM-7782."
+        },
+        {
+          "doc_id": "AUTH-LRM-011",
+          "type": "approval_log",
+          "content": "Two finance reviewers recorded the release checklist before the scheduled payment batch."
+        },
+        {
+          "doc_id": "POL-ANOMALY-011",
+          "type": "policy_extract",
+          "content": "A token anomaly can be resolved only by a source register, vendor-master record, or reconciliation record that covers the token before release."
+        },
+        {
+          "doc_id": "NOTE-LRM-011",
+          "type": "noise_record",
+          "content": "Requester message: The vault migration should explain the token change."
+        }
+      ],
+      "policy_documents": [
+        {
+          "doc_id": "POL-ANOMALY-011-P",
+          "title": "Explained anomaly review standard",
+          "content": "A real anomaly can be closed only by source records that match the anomaly scope and timing before the action. Plausible notes or informal explanations are not enough by themselves."
+        }
+      ]
+    }
+  }
+}

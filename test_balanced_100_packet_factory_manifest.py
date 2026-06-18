@@ -17,6 +17,8 @@ APPROVED_STATUSES = {
     "judged",
     "loss_autopsied",
     "regression_protected",
+    "parse_autopsy_required",
+    "quarantined_after_repair_scout",
     "proof_credit_ready",
 }
 
@@ -118,6 +120,15 @@ def test_bal100_batch001_selected_pairs_are_only_current_proof_credit_ready_pair
     assert "proof_credit_ready" in bec_pair_010["evidence_state"]
     assert bec_pair_010["judge_report"] == "reports/BAL100_BATCH_001_selected_pairs_judge_summary.json"
 
-    for family_id in ("BEC-PAIR-003", "BEC-PAIR-004", "BEC-PAIR-005", "BEC-PAIR-006", "BEC-PAIR-007", "BEC-PAIR-008"):
+    residual_statuses = {
+        "BEC-PAIR-003": "quarantined_after_repair_scout",
+        "BEC-PAIR-004": "quarantined_after_repair_scout",
+        "BEC-PAIR-005": "parse_autopsy_required",
+        "BEC-PAIR-006": "quarantined_after_repair_scout",
+        "BEC-PAIR-007": "quarantined_after_repair_scout",
+        "BEC-PAIR-008": "quarantined_after_repair_scout",
+    }
+    for family_id, expected_status in residual_statuses.items():
         assert families[family_id]["proof_credit_ready"] is False
-        assert families[family_id]["promotion_status"] == "planned"
+        assert families[family_id]["promotion_status"] == expected_status
+        assert expected_status in families[family_id]["evidence_state"]

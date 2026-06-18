@@ -1,7 +1,7 @@
 {
   "scorecard_id": "BAL100_scorecard",
   "created_at": "2026-06-18",
-  "scope": "Balanced 100-packet benchmark factory accounting after BAL100 Batch 001 selected-pair Judge.",
+  "scope": "Balanced 100-packet benchmark factory accounting after BAL100 Batch 001 selected-pair Judge and residual post-repair scout closure.",
   "benchmark_credit_scope": "selected_pairs_only",
   "target": {
     "pair_families": 50,
@@ -29,7 +29,8 @@
     "proof_ready_pair_families_from_bal100_batch001_selected_set": 2,
     "proof_ready_packets_from_bal100_batch001_selected_set": 4,
     "hbb_bec_001_002_status": "needs_post_patch_rerun_before_proof_credit",
-    "bal100_batch001_non_selected_003_008_status": "draft_repair_candidates_not_proof_credit_ready"
+    "bal100_batch001_residual_003_008_status": "closed_without_new_prefreeze_candidates",
+    "bal100_batch001_bec_pair_005_status": "parse_autopsy_required"
   },
   "proof_credit_ready_families": [
     {
@@ -87,6 +88,8 @@
     "full_bal100_batch001_proof_ready": false,
     "bal100_batch001_all_16_drafts_passed": false,
     "bec_pair_003_through_008_proof_credit_ready": false,
+    "bec_pair_003_004_006_007_008_prefreeze_ready": false,
+    "bec_pair_005_prefreeze_ready_before_parse_autopsy": false,
     "hbb_bec_001_proof_credit_ready": false,
     "hbb_bec_002_proof_credit_ready": false
   },
@@ -99,5 +102,25 @@
     "packet_edits": false,
     "frozen_artifact_edits": false,
     "push": false
+  },
+  "bal100_batch001_residual_accounting": {
+    "source_report": "reports/BAL100_BATCH_001_bounded_post_repair_scout_triage.json",
+    "residual_repair_summary": "reports/BAL100_BATCH_001_residual_repair_summary.json",
+    "proof_credit_ready_families": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "parse_autopsy_required": [
+      "BEC-PAIR-005"
+    ],
+    "quarantined_after_repair_scout": [
+      "BEC-PAIR-003",
+      "BEC-PAIR-004",
+      "BEC-PAIR-006",
+      "BEC-PAIR-007",
+      "BEC-PAIR-008"
+    ],
+    "clean_prefreeze_candidates_after_repair_scout": [],
+    "proof_credit_count_changed": false
   }
 }

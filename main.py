@@ -1067,6 +1067,11 @@ _SENSITIVE_HOLO_KEY_PARTS = (
     "invite",
     "provider_key",
 )
+_HOLO_BUILD_SPECS_DIR = pathlib.Path(__file__).parent / "holo_builder" / "specs"
+_HOLO_BUILD_RESULT_DIRS = (
+    pathlib.Path(__file__).parent / "builder_results",
+    pathlib.Path(__file__).parent / "holo_builder" / "outputs" / "builder",
+)
 
 
 def _mask_email(email: str) -> str:
@@ -1093,6 +1098,166 @@ def _is_sensitive_holo_key(key: str) -> bool:
     if normalized.startswith("_"):
         return True
     return any(part in normalized for part in _SENSITIVE_HOLO_KEY_PARTS)
+
+
+def _safe_holo_text(value: Any, limit: int = 420) -> str:
+    text = str(value or "").replace("\x00", "").strip()
+    if len(text) <= limit:
+        return text
+    return text[:limit].rstrip() + "..."
+
+
+def _safe_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except Exception:
+        return default
+
+
+def _load_json_file(path: pathlib.Path) -> dict[str, Any] | None:
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return None
+
+
+def _safe_holobuild_specs(limit: int = 20) -> list[dict[str, Any]]:
+    if not _HOLO_BUILD_SPECS_DIR.exists():
+        return []
+    specs: list[dict[str, Any]] = []
+    for path in sorted(_HOLO_BUILD_SPECS_DIR.glob("*.json"))[:limit]:
+        raw = _load_json_file(path) or {}
+        placement = raw.get("artifact_placement_brief") or {}
+        specs.append({
+            "file": path.name,
+            "scenario_id": raw.get("scenario_id") or path.stem,
+            "domain": raw.get("domain") or "",
+            "target_verdict": raw.get("target_verdict") or "",
+            "packet_format": raw.get("packet_format") or "payment_email",
+            "minimum_internal_documents": placement.get("minimum_internal_documents"),
+        })
+    return specs
+
+
+def _iter_holobuild_result_files(limit: int = 12) -> list[pathlib.Path]:
+    found: list[pathlib.Path] = []
+    for directory in _HOLO_BUILD_RESULT_DIRS:
+        if directory.exists():
+            found.extend(path for path in directory.glob("*.json") if path.is_file())
+    found.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return found[:limit]
+
+
+def _safe_holobuild_event(event: dict[str, Any]) -> dict[str, Any]:
+    allowed = (
+        "turn_number",
+        "event",
+        "failed_provider",
+        "fallback_provider",
+        "provider",
+        "repair_provider",
+        "outcome",
+        "target_doc_title",
+        "attempt",
+        "attempts_used",
+        "resolved",
+    )
+    return {key: _safe_holo_text(event.get(key), 160) for key in allowed if event.get(key) is not None}
+
+
+def _safe_holobuild_turn(turn: dict[str, Any]) -> dict[str, Any]:
+    categories = turn.get("categories") if isinstance(turn.get("categories"), dict) else {}
+    high_categories = [
+        key for key, value in categories.items()
+        if isinstance(value, str) and value.upper() in {"HIGH", "CRITICAL"}
+    ]
+    return {
+        "turn_number": _safe_int(turn.get("turn_number")),
+        "turn_type": _safe_holo_text(turn.get("turn_type"), 80),
+        "provider": _safe_holo_text(turn.get("provider"), 80),
+        "model_id": _safe_holo_text(turn.get("model_id"), 120),
+        "elapsed_ms": _safe_int(turn.get("elapsed_ms")),
+        "input_tokens": _safe_int(turn.get("input_tokens")),
+        "output_tokens": _safe_int(turn.get("output_tokens")),
+        "assessment": _safe_holo_text(turn.get("assessment"), 80),
+        "verdict": _safe_holo_text(turn.get("verdict"), 80),
+        "critical_findings": _safe_holo_text(turn.get("critical_findings"), 420),
+        "high_categories": high_categories,
+        "error": "present" if turn.get("error") else "",
+    }
+
+
+def _safe_holobuild_governor_brief(brief: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "after_turn": _safe_int(brief.get("after_turn")),
+        "governor_provider": _safe_holo_text(brief.get("governor_provider"), 80),
+        "overall_trajectory": _safe_holo_text(brief.get("overall_trajectory"), 80),
+        "highest_risk_category": _safe_holo_text(brief.get("highest_risk_category"), 120),
+        "brief_for_builder": _safe_holo_text(brief.get("brief_for_builder"), 520),
+        "elapsed_ms": _safe_int(brief.get("elapsed_ms")),
+        "error": "present" if brief.get("error") else "",
+    }
+
+
+def _safe_holobuild_run(raw: dict[str, Any], path: pathlib.Path) -> dict[str, Any]:
+    event_keys = (
+        "fallback_events",
+        "verdict_drift_events",
+        "artifact_collapse_events",
+        "builder_json_fallback_events",
+        "assertion_violation_events",
+    )
+    events = {
+        key: [_safe_holobuild_event(item) for item in raw.get(key, [])[:8] if isinstance(item, dict)]
+        for key in event_keys
+    }
+    return {
+        "file": path.name,
+        "builder_id": _safe_holo_text(raw.get("builder_id"), 160),
+        "scenario_id": _safe_holo_text(raw.get("scenario_id"), 160),
+        "packet_format": _safe_holo_text(raw.get("packet_format"), 80),
+        "builder_status": _safe_holo_text(raw.get("builder_status"), 120),
+        "converged": bool(raw.get("converged")),
+        "retire_signal": bool(raw.get("retire_signal")),
+        "exit_reason": _safe_holo_text(raw.get("exit_reason"), 160),
+        "turns_completed": _safe_int(raw.get("turns_completed")),
+        "qa_turn_count": _safe_int(raw.get("qa_turn_count")),
+        "qa_deltas": raw.get("qa_deltas", [])[:10] if isinstance(raw.get("qa_deltas"), list) else [],
+        "provider_fallback_used": bool(raw.get("provider_fallback_used")),
+        "coverage": raw.get("coverage", {}) if isinstance(raw.get("coverage"), dict) else {},
+        "governor_briefs": [
+            _safe_holobuild_governor_brief(item)
+            for item in raw.get("governor_briefs", [])[:8]
+            if isinstance(item, dict)
+        ],
+        "turn_history": [
+            _safe_holobuild_turn(item)
+            for item in raw.get("turn_history", [])[:12]
+            if isinstance(item, dict)
+        ],
+        "events": events,
+        "total_tokens": {
+            "input": _safe_int((raw.get("total_tokens") or {}).get("input")),
+            "output": _safe_int((raw.get("total_tokens") or {}).get("output")),
+        },
+        "timestamp": _safe_holo_text(raw.get("timestamp"), 80),
+    }
+
+
+def _build_holobuild_dashboard_payload(limit: int = 6) -> dict[str, Any]:
+    runs: list[dict[str, Any]] = []
+    for path in _iter_holobuild_result_files(limit=limit):
+        raw = _load_json_file(path)
+        if isinstance(raw, dict):
+            runs.append(_safe_holobuild_run(raw, path))
+    return {
+        "mode": "read_only",
+        "live_runs_enabled": False,
+        "specs": _safe_holobuild_specs(),
+        "runs": runs,
+        "run_count": len(runs),
+        "result_locations": ["builder_results", "holo_builder/outputs/builder"],
+    }
 
 
 def _redact_context_entries(context: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1278,6 +1443,15 @@ async def holo_brain_dashboard(request: Request):
     if not capsule:
         raise HTTPException(status_code=401, detail="Sign in required.")
     return JSONResponse(content=_build_holo_brain_payload(capsule, _capsule_brain))
+
+
+@app.get("/v1/holo-build")
+async def holo_build_dashboard(request: Request):
+    """Return read-only HoloBuild specs and sanitized saved run traces."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    return JSONResponse(content=_build_holobuild_dashboard_payload())
 
 
 @app.get("/v1/capsule/surface")

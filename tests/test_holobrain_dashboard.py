@@ -92,6 +92,96 @@ def test_holobrain_endpoint_uses_token_capsule_and_redacts_sensitive_context(mon
     assert "do-not-return-either" not in str(payload)
 
 
+def test_holobuild_endpoint_requires_auth(monkeypatch):
+    monkeypatch.setattr(main, "get_capsule_from_request", lambda header: None)
+    client = TestClient(main.app)
+
+    response = client.get("/v1/holo-build")
+
+    assert response.status_code == 401
+
+
+def test_holobuild_endpoint_returns_sanitized_specs_and_trace(monkeypatch, tmp_path):
+    specs_dir = tmp_path / "specs"
+    results_dir = tmp_path / "builder_results"
+    specs_dir.mkdir()
+    results_dir.mkdir()
+    (specs_dir / "TEST_spec.json").write_text("""{
+      "scenario_id": "TEST-HB-001",
+      "domain": "AP",
+      "target_verdict": "ALLOW",
+      "packet_format": "payment_email",
+      "artifact_placement_brief": {"minimum_internal_documents": 4}
+    }""")
+    (results_dir / "builder_TEST-HB-001.json").write_text("""{
+      "builder_id": "builder_TEST-HB-001",
+      "scenario_id": "TEST-HB-001",
+      "packet_format": "payment_email",
+      "builder_status": "BUILDER_EXHAUSTED",
+      "converged": false,
+      "retire_signal": false,
+      "exit_reason": "max_turns",
+      "turns_completed": 2,
+      "qa_turn_count": 1,
+      "qa_deltas": [3],
+      "provider_fallback_used": false,
+      "governor_briefs": [{
+        "after_turn": 2,
+        "governor_provider": "anthropic",
+        "overall_trajectory": "IMPROVING",
+        "highest_risk_category": "overfit_risk",
+        "brief_for_builder": "Make the invoice evidence less answer-key shaped."
+      }],
+      "turn_history": [{
+        "turn_number": 1,
+        "turn_type": "BUILDER",
+        "provider": "openai",
+        "model_id": "gpt-4o-mini",
+        "elapsed_ms": 12,
+        "input_tokens": 100,
+        "output_tokens": 50,
+        "draft": {"raw": "must not leak"}
+      }, {
+        "turn_number": 2,
+        "turn_type": "INTERNAL_QA_ATTACKER",
+        "provider": "google",
+        "model_id": "gemini-2.5-flash-lite",
+        "elapsed_ms": 14,
+        "input_tokens": 80,
+        "output_tokens": 40,
+        "assessment": "NEEDS_REPAIR",
+        "verdict": "ESCALATE",
+        "critical_findings": "The callback record is too conclusory.",
+        "categories": {"overfit_risk": "HIGH"}
+      }],
+      "final_draft": {"raw": "must not leak"},
+      "total_tokens": {"input": 180, "output": 90},
+      "timestamp": "2026-06-17T00:00:00Z"
+    }""")
+    monkeypatch.setattr(main, "_HOLO_BUILD_SPECS_DIR", specs_dir)
+    monkeypatch.setattr(main, "_HOLO_BUILD_RESULT_DIRS", (results_dir,))
+    monkeypatch.setattr(
+        main,
+        "get_capsule_from_request",
+        lambda header: {"sub": "canonical-capsule", "email": "taylor@example.com"},
+    )
+    client = TestClient(main.app)
+
+    response = client.get("/v1/holo-build", headers={"Authorization": "Bearer test"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["mode"] == "read_only"
+    assert payload["live_runs_enabled"] is False
+    assert payload["specs"][0]["scenario_id"] == "TEST-HB-001"
+    assert payload["runs"][0]["builder_status"] == "BUILDER_EXHAUSTED"
+    assert payload["runs"][0]["turn_history"][1]["high_categories"] == ["overfit_risk"]
+    assert payload["runs"][0]["governor_briefs"][0]["highest_risk_category"] == "overfit_risk"
+    assert "must not leak" not in str(payload)
+    assert "draft" not in str(payload)
+    assert "final_draft" not in str(payload)
+
+
 def test_frontend_has_holobrain_button_and_render_path():
     html = Path("frontend/chat.html").read_text()
 
@@ -106,11 +196,16 @@ def test_frontend_has_holobrain_button_and_render_path():
     assert "holo_engine_panel_width" in html
     assert "Engine runtime" in html
     assert 'fetch("/v1/holo-brain"' in html
+    assert 'fetch("/v1/holo-build"' in html
     assert "renderHoloBrain(data)" in html
     assert "buildRuntimeRows(_latestRuntimeData)" in html
+    assert "renderHoloBuildDashboard(holoBuild)" in html
+    assert "HoloBuild turn timeline" in html
+    assert "HoloBuild Gov briefs" in html
     assert "Refresh engine data" in html
     assert "Attached capsule" not in html
     assert "capsule.id_short" not in html
+    assert "Start HoloBuild run" not in html
 
 
 def test_frontend_holobrain_hides_capsule_context_rows_by_default():

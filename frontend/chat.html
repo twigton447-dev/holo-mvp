@@ -299,6 +299,9 @@
     .brain-row-val { font-size: 13px; color: var(--text); line-height: 1.55; margin-top: 3px; white-space: pre-wrap; overflow-wrap: anywhere; }
     .brain-muted { color: var(--text3); font-size: 13px; line-height: 1.55; }
     .brain-pill { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; font-size: 11px; color: var(--text3); margin-top: 6px; }
+    .builder-turn { border-left: 2px solid var(--border); padding-left: 10px; }
+    .builder-turn.builder-gov { border-left-color: var(--accent); }
+    .builder-turn.builder-qa { border-left-color: var(--text3); }
 
     /* Sign-in overlay */
     #signin-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; z-index: 100; }
@@ -1341,6 +1344,12 @@
       });
       if (!res.ok) throw new Error("Engine data unavailable.");
       const data = await res.json();
+      try {
+        const buildRes = await fetch("/v1/holo-build", {
+          headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
+        });
+        if (buildRes.ok) data.holo_build = await buildRes.json();
+      } catch {}
       renderHoloBrain(data);
       _holoBrainLoaded = true;
     } catch {
@@ -1371,6 +1380,81 @@
     return items.map(renderRow).join("");
   }
 
+  function renderHoloBuildDashboard(build) {
+    const specs = (build && build.specs) || [];
+    const runs = (build && build.runs) || [];
+    const latest = runs[0] || null;
+    const specRows = brainRows(specs.slice(0, 6), "No HoloBuild specs found.", item => `
+      <div class="brain-row">
+        <div class="brain-row-key">${escHtml(item.scenario_id || item.file || "spec")}</div>
+        <div class="brain-row-val">${escHtml(item.domain || "domain unknown")} · target ${escHtml(item.target_verdict || "unknown")} · ${escHtml(item.packet_format || "packet")}</div>
+        ${item.minimum_internal_documents ? `<span class="brain-pill">min docs ${escHtml(String(item.minimum_internal_documents))}</span>` : ""}
+      </div>`);
+
+    if (!latest) {
+      return `
+        <div class="brain-row">
+          <div class="brain-row-key">HoloBuild trace</div>
+          <div class="brain-row-val">No saved HoloBuild traces yet.</div>
+          <span class="brain-pill">read-only</span>
+          <span class="brain-pill">${escHtml(String(specs.length))} specs</span>
+        </div>
+        ${brainSection("HoloBuild specs", `${specs.length} specs`, specRows)}`;
+    }
+
+    const turnRows = brainRows(latest.turn_history || [], "No turn timeline saved.", turn => {
+      const kind = (turn.turn_type || "").includes("QA") ? "builder-qa" : "";
+      return `
+        <div class="brain-row builder-turn ${kind}">
+          <div class="brain-row-key">Turn ${escHtml(String(turn.turn_number || "?"))} · ${escHtml(turn.turn_type || "turn")}</div>
+          <div class="brain-row-val">${escHtml(turn.provider || "provider unknown")}${turn.model_id ? `:${escHtml(turn.model_id)}` : ""}</div>
+          ${turn.assessment ? `<span class="brain-pill">${escHtml(turn.assessment)}</span>` : ""}
+          ${turn.verdict ? `<span class="brain-pill">verdict ${escHtml(turn.verdict)}</span>` : ""}
+          ${turn.high_categories && turn.high_categories.length ? `<div class="brain-row-val"><strong>risk:</strong> ${escHtml(turn.high_categories.join(", "))}</div>` : ""}
+          ${turn.critical_findings ? `<div class="brain-row-val"><strong>findings:</strong> ${escHtml(turn.critical_findings)}</div>` : ""}
+          <span class="brain-pill">${escHtml(String(turn.input_tokens || 0))} in</span>
+          <span class="brain-pill">${escHtml(String(turn.output_tokens || 0))} out</span>
+          <span class="brain-pill">${escHtml(String(turn.elapsed_ms || 0))} ms</span>
+          ${turn.error ? `<span class="brain-pill">error present</span>` : ""}
+        </div>`;
+    });
+
+    const govRows = brainRows(latest.governor_briefs || [], "No Governor briefs saved.", brief => `
+      <div class="brain-row builder-turn builder-gov">
+        <div class="brain-row-key">Gov after turn ${escHtml(String(brief.after_turn || "?"))}</div>
+        <div class="brain-row-val">${escHtml(brief.brief_for_builder || "No brief text saved.")}</div>
+        <span class="brain-pill">${escHtml(brief.governor_provider || "provider unknown")}</span>
+        <span class="brain-pill">${escHtml(brief.overall_trajectory || "trajectory unknown")}</span>
+        <span class="brain-pill">risk ${escHtml(brief.highest_risk_category || "unknown")}</span>
+      </div>`);
+
+    const events = latest.events || {};
+    const eventCounts = Object.entries(events)
+      .filter(([, rows]) => rows && rows.length)
+      .map(([key, rows]) => `${key.replaceAll("_", " ")}: ${rows.length}`)
+      .join(" · ");
+
+    return `
+      <div class="brain-row">
+        <div class="brain-row-key">Latest HoloBuild run</div>
+        <div class="brain-row-val">${escHtml(latest.scenario_id || latest.builder_id || "builder run")}</div>
+        <span class="brain-pill">${escHtml(latest.builder_status || "status unknown")}</span>
+        <span class="brain-pill">${escHtml(String(latest.turns_completed || 0))} turns</span>
+        <span class="brain-pill">${escHtml(String(latest.qa_turn_count || 0))} QA</span>
+        <span class="brain-pill">${latest.converged ? "converged" : "not converged"}</span>
+      </div>
+      <div class="brain-row">
+        <div class="brain-row-key">Run accounting</div>
+        <div class="brain-row-val">Exit: ${escHtml(latest.exit_reason || "unknown")}</div>
+        <span class="brain-pill">${escHtml(String((latest.total_tokens || {}).input || 0))} input tokens</span>
+        <span class="brain-pill">${escHtml(String((latest.total_tokens || {}).output || 0))} output tokens</span>
+        ${eventCounts ? `<div class="brain-row-val">${escHtml(eventCounts)}</div>` : ""}
+      </div>
+      ${brainSection("HoloBuild turn timeline", `${(latest.turn_history || []).length} turns`, turnRows, true)}
+      ${brainSection("HoloBuild Gov briefs", `${(latest.governor_briefs || []).length} briefs`, govRows, true)}
+      ${brainSection("HoloBuild specs", `${specs.length} specs`, specRows)}`;
+  }
+
   function renderHoloBrain(data) {
     const capsule = data.capsule || {};
     const ctx = data.capsule_context || {};
@@ -1379,6 +1463,7 @@
     const messages = data.recent_messages || {};
     const consolidations = data.consolidations || {};
     const artifacts = data.artifacts || {};
+    const holoBuild = data.holo_build || {};
     const runtimeRows = buildRuntimeRows(_latestRuntimeData);
     const runtimeRowsHtml = runtimeRows
       ? renderRuntimeRows(runtimeRows)
@@ -1432,6 +1517,7 @@
 
     document.getElementById("holobrain-body").innerHTML = `
       ${brainSection("Engine runtime", runtimeRows ? "latest turn" : "waiting", `<div id="engine-runtime-body">${runtimeRowsHtml}</div>`, true)}
+      ${brainSection("HoloBuild", holoBuild.run_count ? `${holoBuild.run_count} traces` : "read-only", renderHoloBuildDashboard(holoBuild), true)}
       <div class="brain-card">
         <div class="brain-row-key">Signed-in memory</div>
         <div class="brain-row-val">${escHtml(capsule.name || "")}${capsule.email_masked ? ` · ${escHtml(capsule.email_masked)}` : ""}</div>

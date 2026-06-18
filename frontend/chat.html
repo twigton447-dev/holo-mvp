@@ -454,12 +454,13 @@
   <h2>Holo</h2>
   <p>One workspace. Selected context that stays useful.</p>
 
-  <div id="g_signin_btn"></div>
-
-  <div style="display:flex;align-items:center;gap:12px;width:100%;max-width:280px;margin:4px 0;">
-    <div style="flex:1;height:1px;background:#222;"></div>
-    <span style="color:#333;font-size:12px;">or</span>
-    <div style="flex:1;height:1px;background:#222;"></div>
+  <div id="google-auth-block" style="display:none;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:280px;">
+    <div id="g_signin_btn"></div>
+    <div style="display:flex;align-items:center;gap:12px;width:100%;margin:4px 0;">
+      <div style="flex:1;height:1px;background:#222;"></div>
+      <span style="color:#333;font-size:12px;">or</span>
+      <div style="flex:1;height:1px;background:#222;"></div>
+    </div>
   </div>
 
   <!-- Tab toggle -->
@@ -844,9 +845,11 @@
   // We fetch the client ID at the same time and init only when both are done.
   let _gsiReady = false;
   let _googleClientId = null;
+  let _googleAuthEnabled = false;
 
   function _initGSI() {
-    if (!_gsiReady || !_googleClientId) return;  // wait for both
+    if (!_googleAuthEnabled || !_gsiReady || !_googleClientId || !window.google) return;
+    document.getElementById("google-auth-block").style.display = "flex";
     google.accounts.id.initialize({
       client_id: _googleClientId,
       callback:  onGoogleSignIn,
@@ -865,7 +868,8 @@
   fetch("/config")
     .then(r => r.json())
     .then(cfg => {
-      _googleClientId = cfg.google_client_id || null;
+      _googleAuthEnabled = cfg.google_auth_enabled === true;
+      _googleClientId = _googleAuthEnabled ? (cfg.google_client_id || null) : null;
       _initGSI();
     })
     .catch(() => {});  // silently ignore — email login always works

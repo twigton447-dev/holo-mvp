@@ -247,6 +247,24 @@ def test_frontend_header_avatar_has_safe_account_tooltip_and_hidden_count_badge(
     assert 'title="${name}"' not in html
 
 
+def test_frontend_google_auth_is_config_gated():
+    html = Path("frontend/chat.html").read_text()
+    main_py = Path("main.py").read_text()
+
+    assert '"google_auth_enabled"' in main_py
+    assert "HOLOCHAT_GOOGLE_AUTH_ENABLED" in main_py
+    assert 'id="google-auth-block" style="display:none;' in html
+    assert "_googleAuthEnabled = cfg.google_auth_enabled === true;" in html
+    assert "if (!_googleAuthEnabled || !_gsiReady || !_googleClientId || !window.google) return;" in html
+
+
+def test_password_reset_sender_uses_hologroup_domain():
+    auth_py = Path("auth_capsule.py").read_text()
+
+    assert "noreply@hologroup.io" in auth_py
+    assert "noreply@hololgroup.io" not in auth_py
+
+
 def test_frontend_onboarding_memory_seed_prompt_is_safe_and_specific():
     html = Path("frontend/chat.html").read_text()
 

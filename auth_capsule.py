@@ -355,7 +355,7 @@ def request_password_reset(email: str, base_url: str) -> bool:
         import resend
         resend.api_key = resend_key
         resend.Emails.send({
-            "from":    "Holo <noreply@hololgroup.io>",
+            "from":    "Holo <noreply@hologroup.io>",
             "to":      [email],
             "subject": "Reset your Holo password",
             "html":    f"""

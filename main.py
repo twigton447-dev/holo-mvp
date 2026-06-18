@@ -238,8 +238,13 @@ def health():
 @app.get("/config")
 def get_config():
     """Return public client-side configuration."""
+    google_auth_enabled = (
+        os.getenv("HOLOCHAT_GOOGLE_AUTH_ENABLED", "").strip().lower()
+        in {"1", "true", "yes", "on"}
+    )
     return {
         "google_client_id": os.getenv("GOOGLE_CLIENT_ID", ""),
+        "google_auth_enabled": google_auth_enabled and bool(os.getenv("GOOGLE_CLIENT_ID", "").strip()),
     }
 
 

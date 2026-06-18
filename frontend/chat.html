@@ -1531,7 +1531,23 @@
     scrollToBottom();
   }
 
-  const _BIO_PROMPT = `Write me a personal brief I can share with a new AI so it understands me from day one. Cover the following:\n\n1. Who I am and what I do\n2. What I'm actively working on right now\n3. How I think and communicate — my style, pace, what I value in a conversation\n4. What I care about most (personally and professionally)\n5. Based on our conversations, what you think my top 3–5 Clifton Strengths are and why — even if I haven't taken the assessment, give me your honest read\n6. Anything else that would help someone understand how I operate\n\nWrite it in plain, direct language — as if I wrote it myself. 200–300 words.`;
+  const _BIO_PROMPT = `Based on what you can infer from our conversations, write a detailed and nuanced operating profile that I can use to seed a personal AI memory system.
+
+Aim for about 1,000 words. Be specific, candid, and practical. Avoid generic praise.
+
+Cover:
+
+* how I think, decide, and solve problems
+* my communication style and preferred tone
+* my working style, creative style, and collaboration style
+* my strengths, patterns, and recurring blind spots
+* what motivates me and what tends to slow me down
+* current projects, priorities, and long-running goals
+* how I like an AI assistant to help me
+* what an AI assistant should avoid doing with me
+* any durable context that would help a new assistant work with me better
+
+Use clear headings. Ground the profile in evidence from our actual interactions when possible. Do not include passwords, account numbers, private addresses, medical details, financial secrets, legal secrets, or anything I would not want saved in a memory system.`;
 
   function copyBioPrompt() {
     navigator.clipboard.writeText(_BIO_PROMPT).then(() => {
@@ -1558,7 +1574,7 @@
       document.getElementById("empty")?.remove();
       refreshMemoryContext();
       // Send a special onboarding prompt — Holo sees the bio in context and gives a proper intro
-      const onboardingPrompt = `Here is my personal brief:\n\n${text}\n\nDo not give a generic introduction. Read this brief carefully and open your response with a specific observation, question, or reflection pulled directly from what I shared. Reference something real: a project I mentioned, a tension I described, a goal that caught your attention. Make it clear you actually read it. One sharp, specific opening. Then in two or three short lines, tell me what you are here for and invite me to start. The brief already handled the introduction. This message is the first moment I should feel known.`;
+      const onboardingPrompt = `Here is my memory seed profile:\n\n${text}\n\nDo not give a generic introduction. Read this profile carefully and open your response with a specific observation, question, or reflection pulled directly from what I shared. Reference something real: a project I mentioned, a tension I described, a goal that caught your attention. Make it clear you read it. One sharp, specific opening. Then in two or three short lines, tell me how you can help and invite me to start.`;
       document.getElementById("input").value = onboardingPrompt;
       sendMessage();
     } catch { btn.disabled = false; btn.textContent = "Seed to Holo"; }
@@ -1625,17 +1641,18 @@
 
           <hr style="border:none;border-top:1px solid var(--border);margin:0 0 22px;">
 
-          <p style="font-size:17px;font-weight:700;margin:0 0 10px;">Get me up to speed</p>
-          <p style="margin-bottom:6px;">Copy the prompt below, paste it into ChatGPT or whatever AI you currently use, and bring the result back here.</p>
-          <p style="margin-bottom:16px;color:var(--text3);font-size:12.5px;">It takes about 30 seconds.</p>
+          <p style="font-size:17px;font-weight:700;margin:0 0 10px;">Create a memory seed profile</p>
+          <p style="margin-bottom:6px;">Ask your favorite chatbot to create a memory seed profile for HoloChat.</p>
+          <p style="margin-bottom:6px;">Copy this prompt into the chatbot that knows you best, then paste the result here.</p>
+          <p style="margin-bottom:16px;color:var(--text3);font-size:12.5px;">You can edit or remove anything before saving. Do not include secrets or highly sensitive information.</p>
 
           <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin:0 0 8px;">Prompt to copy</p>
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:0 0 10px;font-family:'SF Mono','Fira Code',monospace;font-size:12.5px;line-height:1.7;color:var(--text2);">${escHtml(_BIO_PROMPT)}</div>
           <button id="copy-bio-btn" onclick="copyBioPrompt()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:16px;">Copy prompt</button>
 
-          <p style="margin-bottom:8px;">Once you paste that in, I will introduce myself properly and we can start anywhere.</p>
-          <p style="margin-bottom:10px;color:var(--text2);font-size:13px;">Paste what it gives you:</p>
-          <textarea id="bio-paste-area" rows="6" placeholder="Paste your AI bio here…" style="width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;line-height:1.65;resize:vertical;outline:none;"></textarea>
+          <p style="margin-bottom:8px;">Then paste the profile below. Edit anything you do not want saved.</p>
+          <p style="margin-bottom:10px;color:var(--text2);font-size:13px;">Paste your memory seed profile:</p>
+          <textarea id="bio-paste-area" rows="6" placeholder="Paste your memory seed profile here. You can edit it before saving." style="width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;line-height:1.65;resize:vertical;outline:none;"></textarea>
           <div style="display:flex;gap:10px;margin-top:10px;align-items:center;">
             <button id="seed-bio-btn" onclick="seedBio()" style="background:var(--accent);border:none;color:#fff;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;">Seed to Holo</button>
             <button onclick="document.getElementById('holo-onboarding').remove();document.getElementById('empty')?.remove();" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;">Skip, I'll just start chatting</button>

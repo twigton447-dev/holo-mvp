@@ -247,6 +247,26 @@ def test_frontend_header_avatar_has_safe_account_tooltip_and_hidden_count_badge(
     assert 'title="${name}"' not in html
 
 
+def test_frontend_onboarding_memory_seed_prompt_is_safe_and_specific():
+    html = Path("frontend/chat.html").read_text()
+
+    assert "Ask your favorite chatbot to create a memory seed profile for HoloChat." in html
+    assert "detailed and nuanced operating profile" in html
+    assert "Aim for about 1,000 words" in html
+    assert "Do not include passwords, account numbers" in html
+    assert "Do not include secrets or highly sensitive information." in html
+    assert "how I like an AI assistant to help me" in html
+    assert "what an AI assistant should avoid doing with me" in html
+    assert "Copy prompt" in html
+    assert "You can edit it before saving." in html
+
+    assert "everything you tell me" not in html
+    assert "full context" not in html
+    assert "emotional patterns" not in html
+    assert "analyze my soul" not in html
+    assert "everything you know" not in html
+
+
 def test_frontend_assistant_messages_do_not_render_runtime_metadata_inline():
     html = Path("frontend/chat.html").read_text()
 

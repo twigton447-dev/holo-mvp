@@ -124,3 +124,55 @@ def test_mapped_email_signin_fails_closed_when_target_missing(monkeypatch):
     assert result is None
     assert brain.created == []
     assert brain.google_id_lookups == []
+
+
+def test_mapped_google_signin_issues_token_for_canonical_capsule(monkeypatch):
+    brain = FakeBrain(
+        capsules={
+            "canonical-capsule": {
+                "capsule_id": "canonical-capsule",
+                "email": "canonical@example.com",
+                "name": "Canonical Taylor",
+                "mode": "personal",
+            }
+        }
+    )
+    monkeypatch.setattr(auth_capsule, "_brain", brain)
+    monkeypatch.setenv("HOLOCHAT_ACCOUNT_ALIASES", "alias@example.com:canonical-capsule")
+    monkeypatch.setattr(
+        auth_capsule,
+        "verify_google_token",
+        lambda credential: {
+            "sub": "google-id",
+            "email": "alias@example.com",
+            "name": "Alias User",
+            "picture": "https://example.com/avatar.png",
+        },
+    )
+
+    result = auth_capsule.handle_google_signin("verified-token")
+
+    assert result["capsule_id"] == "canonical-capsule"
+    assert result["email"] == "alias@example.com"
+    assert auth_capsule.decode_capsule_token(result["capsule_token"])["sub"] == "canonical-capsule"
+    assert brain.created == []
+
+
+def test_mapped_password_reset_updates_canonical_capsule(monkeypatch):
+    brain = FakeBrain(
+        capsules={"canonical-capsule": {"capsule_id": "canonical-capsule"}},
+        contexts={"canonical-capsule": {}},
+    )
+    monkeypatch.setattr(auth_capsule, "_brain", brain)
+    monkeypatch.setenv("HOLOCHAT_ACCOUNT_ALIASES", "alias@example.com:canonical-capsule")
+    monkeypatch.delenv("RESEND_API_KEY", raising=False)
+
+    assert auth_capsule.request_password_reset("alias@example.com", "https://hologroup.io")
+    reset_token = brain.contexts["canonical-capsule"]["_reset_token"]
+
+    assert auth_capsule.reset_password("alias@example.com", reset_token, "new-password-123")
+
+    ctx = brain.contexts["canonical-capsule"]
+    assert bcrypt.checkpw("new-password-123".encode(), ctx["_password_hash"].encode())
+    assert ctx["_reset_token"] == ""
+    assert ctx["_reset_expiry"] == "0"

@@ -79,6 +79,11 @@ def _account_alias_target(email: str) -> Optional[str]:
     return _account_aliases().get(email.strip().lower())
 
 
+def _email_auth_capsule_id(email: str) -> str:
+    """Return the capsule id used for email password/reset state."""
+    return _account_alias_target(email) or _email_google_id(email.strip().lower())
+
+
 # ---------------------------------------------------------------------------
 # Google token verification
 # ---------------------------------------------------------------------------
@@ -152,6 +157,25 @@ def handle_google_signin(credential: str) -> Optional[dict]:
     email      = user_info.get("email", "")
     name       = user_info.get("name", "")
     avatar_url = user_info.get("picture", "")
+
+    alias_capsule_id = _account_alias_target(email)
+    if alias_capsule_id:
+        if not _brain._client:
+            logger.warning("Mapped Google alias sign-in attempted without Supabase.")
+            return None
+        capsule = _brain.get_capsule(alias_capsule_id)
+        if not capsule:
+            logger.warning("Mapped Google alias target capsule was not found.")
+            return None
+        token = issue_capsule_token(capsule["capsule_id"], email, capsule.get("mode", "personal"))
+        return {
+            "capsule_token": token,
+            "capsule_id":    capsule["capsule_id"],
+            "email":         email,
+            "name":          name or capsule.get("name", ""),
+            "avatar_url":    avatar_url,
+            "mode":          capsule.get("mode", "personal"),
+        }
 
     try:
         capsule = _brain.get_or_create_capsule(google_id, email, name, avatar_url)
@@ -301,21 +325,24 @@ def request_password_reset(email: str, base_url: str) -> bool:
     Returns True if email was sent, False if account not found or email failed.
     """
     email = email.strip().lower()
-    synthetic_id = _email_google_id(email)
+    capsule_id = _email_auth_capsule_id(email)
 
     # Only allow reset for existing email-auth accounts
     if not _brain._client:
         return False
-    ctx = _brain.get_capsule_context(synthetic_id)
-    if not ctx.get("_password_hash"):
+    if _account_alias_target(email) and not _brain.get_capsule(capsule_id):
+        logger.info("Password reset requested for unknown mapped email target.")
+        return True
+    ctx = _brain.get_capsule_context(capsule_id)
+    if not ctx.get("_password_hash") and not _account_alias_target(email):
         # Don't reveal whether the account exists — just return True silently
         logger.info(f"Password reset requested for unknown email: {email}")
         return True
 
     token   = secrets.token_urlsafe(32)
     expiry  = int(time.time()) + RESET_TOKEN_TTL
-    _brain.set_capsule_context(synthetic_id, "_reset_token",  token)
-    _brain.set_capsule_context(synthetic_id, "_reset_expiry", str(expiry))
+    _brain.set_capsule_context(capsule_id, "_reset_token",  token)
+    _brain.set_capsule_context(capsule_id, "_reset_expiry", str(expiry))
 
     reset_url = f"{base_url.rstrip('/')}/chat?reset={token}&email={email}"
 
@@ -357,8 +384,11 @@ def reset_password(email: str, token: str, new_password: str) -> bool:
     if not new_password or len(new_password) < 8:
         return False
 
-    synthetic_id = _email_google_id(email)
-    ctx = _brain.get_capsule_context(synthetic_id)
+    capsule_id = _email_auth_capsule_id(email)
+    if _account_alias_target(email) and not _brain.get_capsule(capsule_id):
+        logger.warning("Password reset attempted for missing mapped email target.")
+        return False
+    ctx = _brain.get_capsule_context(capsule_id)
 
     stored_token  = ctx.get("_reset_token", "")
     stored_expiry = int(ctx.get("_reset_expiry", "0"))
@@ -372,9 +402,9 @@ def reset_password(email: str, token: str, new_password: str) -> bool:
 
     # Token valid — update password and clear token
     hashed = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
-    _brain.set_capsule_context(synthetic_id, "_password_hash", hashed)
-    _brain.set_capsule_context(synthetic_id, "_reset_token",   "")
-    _brain.set_capsule_context(synthetic_id, "_reset_expiry",  "0")
+    _brain.set_capsule_context(capsule_id, "_password_hash", hashed)
+    _brain.set_capsule_context(capsule_id, "_reset_token",   "")
+    _brain.set_capsule_context(capsule_id, "_reset_expiry",  "0")
     logger.info(f"Password reset successful for {email}")
     return True
 

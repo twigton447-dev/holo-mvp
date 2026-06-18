@@ -351,6 +351,7 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
 def test_frontend_thread_meter_uses_thread_health_score():
     html = Path("frontend/chat.html").read_text()
     chat_engine_py = Path("chat_engine.py").read_text()
+    main_py = Path("main.py").read_text()
 
     assert 'id="thread-meter"' in html
     assert 'id="thread-meter-fill"' in html
@@ -366,6 +367,12 @@ def test_frontend_thread_meter_uses_thread_health_score():
     assert "startHandoffThread()" in html
     assert 'const HANDOFF_TRANSITION_KEY = "holo_handoff_transition";' in html
     assert "safeHandoffTransition(handoff)" in html
+    assert "let _activeHandoffTransition = null;" in html
+    assert "function clearActiveHandoffTransition()" in html
+    assert "reqBody.handoff_transition = handoffTransitionForTurn" in html
+    assert "clearActiveHandoffTransition();" in html
+    assert '_safe_handoff_transition(body.get("handoff_transition"))' in main_py
+    assert "handoff_transition=handoff_transition" in main_py
     assert "Continuing: ${escHtml(topic)}" in html
     assert "You were working through ${escHtml(topic)}." in html
     assert "A useful next move:" in html
@@ -410,9 +417,9 @@ def test_mobile_header_keeps_core_controls_available():
     assert '#user-avatar .avatar-placeholder::before' in html
     assert 'content: "•••";' in html
     assert '#avatar-menu .mobile-only { display: block; }' in html
-    assert '<button class="mobile-only" onclick="closeAvatarMenu();toggleThreadPanel()">See my threads</button>' in html
-    assert '<button class="mobile-only" onclick="closeAvatarMenu();newThread()">Start new thread</button>' in html
+    assert '<button class="mobile-only" onclick="closeAvatarMenu();openMemoryPanel()">Memory</button>' in html
     assert '<button class="mobile-only" onclick="closeAvatarMenu();openHoloBrainPanel()">Engine data</button>' in html
+    assert '<button class="mobile-only" onclick="closeAvatarMenu();toggleTheme()">Switch theme</button>' in html
     assert '<button class="mobile-only" onclick="closeAvatarMenu();toggleIncognito()">Start incognito thread</button>' in html
     assert "#incognito-btn, #thread-toggle, #new-thread, #theme-toggle { display: none; }" not in html
 

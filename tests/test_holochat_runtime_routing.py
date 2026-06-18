@@ -13,6 +13,7 @@ from chat_engine import (
     _claim_autocompact_for_context_window,
     _handoff_for_context_window,
     _save_thread_handoff_artifact,
+    _safe_handoff_transition,
     _thread_handoff_markdown,
     _runtime_metadata,
     _select_runtime_pools,
@@ -122,6 +123,13 @@ class CapturingAdapter(FakeAdapter):
     def chat_call(self, system_prompt, history, user_message, temperature, images=None):
         self.last_system_prompt = system_prompt
         return super().chat_call(system_prompt, history, user_message, temperature, images=images)
+
+
+class CapturingStreamAdapter(CapturingAdapter):
+    def stream_chat_call(self, system_prompt, history, user_message, temperature, images=None):
+        self.last_system_prompt = system_prompt
+        yield f"{self.provider} stream answer"
+        yield {"done": True, "in_tok": 4, "out_tok": 3}
 
 
 class NoUsageAdapter(FakeAdapter):
@@ -358,6 +366,122 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
         "secret",
     ):
         assert forbidden not in runtime_text.lower()
+
+
+def test_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    transition = {
+        "source": "thread_handoff",
+        "topic": "mobile continuity controls",
+        "goal": "repair the fresh-thread reseed so the next thread remembers the arc",
+        "tension": "the welcome note appeared, but the new model turn had no seed",
+        "next_paths": [
+            "Prove the seed reaches the private prompt",
+            "Keep raw transcript out of the request",
+            "Show the handoff block in Engine data",
+            "Drop this extra path",
+        ],
+        "raw_prompt": "SHOULD NOT APPEAR",
+        "raw_memory": "SHOULD NOT APPEAR",
+    }
+
+    result = engine.send_message(
+        str(uuid4()),
+        "Continue from there.",
+        capsule_id="test-capsule",
+        handoff_transition=transition,
+    )
+
+    assert "THREAD HANDOFF SEED" in adapter.last_system_prompt
+    assert "prior_topic: mobile continuity controls" in adapter.last_system_prompt
+    assert "prior_goal: repair the fresh-thread reseed" in adapter.last_system_prompt
+    assert "unresolved_tension: the welcome note appeared" in adapter.last_system_prompt
+    assert "Prove the seed reaches the private prompt" in adapter.last_system_prompt
+    assert "Drop this extra path" not in adapter.last_system_prompt
+    assert "SHOULD NOT APPEAR" not in adapter.last_system_prompt
+    assert "raw_prompt" not in adapter.last_system_prompt
+    assert result["runtime"]["reseed_present"] is True
+    assert result["runtime"]["reseed_mode"] == "thread_handoff_seed"
+    assert result["runtime"]["thread_handoff_seed_present"] is True
+    assert result["runtime"]["autoreseed_enabled"] is False
+    assert result["runtime"]["gov_arc_state"]["current_tension"] == transition["tension"]
+    assert result["runtime"]["gov_arc_state"]["user_goal"] == transition["goal"]
+    handoff_rows = [
+        row for row in result["context_budget"]["rows"]
+        if row["block_name"] == "thread_handoff_seed"
+    ]
+    assert handoff_rows and handoff_rows[0]["included"] is True
+
+
+def test_streaming_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingStreamAdapter("openai", "gpt-4o-mini")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    events = list(engine.stream_message(
+        str(uuid4()),
+        "Pick up the thread.",
+        capsule_id="test-capsule",
+        handoff_transition={
+            "source": "thread_handoff",
+            "topic": "Gov doctrine",
+            "goal": "make continuity explicit enough to survive a fresh thread",
+            "tension": "visual reseed without runtime context is not enough",
+            "next_paths": ["Wire prompt context", "Verify Engine data", "Keep it bounded"],
+        },
+    ))
+
+    assert events[0] == "openai stream answer"
+    done = events[-1]
+    assert done["done"] is True
+    assert "THREAD HANDOFF SEED" in adapter.last_system_prompt
+    assert "prior_topic: Gov doctrine" in adapter.last_system_prompt
+    assert "visual reseed without runtime context is not enough" in adapter.last_system_prompt
+    assert done["runtime"]["reseed_present"] is True
+    assert done["runtime"]["reseed_mode"] == "thread_handoff_seed"
+    assert done["runtime"]["thread_handoff_seed_present"] is True
+    handoff_rows = [
+        row for row in done["context_budget"]["rows"]
+        if row["block_name"] == "thread_handoff_seed"
+    ]
+    assert handoff_rows and handoff_rows[0]["included"] is True
+
+
+def test_handoff_transition_sanitizer_keeps_only_synthesized_fields():
+    safe = _safe_handoff_transition({
+        "source": "wrong",
+        "topic": "topic",
+        "goal": "goal",
+        "tension": "tension",
+        "next_paths": ["one", "two", "three", "four"],
+        "raw_prompt": "no",
+        "provider_request_body": "no",
+    })
+
+    assert safe == {
+        "source": "thread_handoff",
+        "topic": "topic",
+        "goal": "goal",
+        "tension": "tension",
+        "next_paths": ["one", "two", "three"],
+        "at": "",
+    }
+    assert _safe_handoff_transition({"raw_prompt": "no"}) is None
 
 
 def test_pdf_turn_prefers_native_pdf_capable_adapter(monkeypatch):

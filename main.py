@@ -68,7 +68,7 @@ if not os.path.exists(os.path.join(os.path.dirname(__file__), "context_governor.
     )
 
 from context_governor import ContextGovernor
-from chat_engine import HoloChatEngine
+from chat_engine import HoloChatEngine, _safe_handoff_transition
 from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
 from db import Database
 from billing import create_checkout_session, create_customer_portal_session, construct_webhook_event, PLANS
@@ -835,6 +835,7 @@ async def chat(
     session_id = body.get("session_id")
     images     = body.get("images") or None  # list of {name, data, mimeType} or None
     incognito  = bool(body.get("incognito", False))  # blind mode — no memory injected
+    handoff_transition = None if incognito else _safe_handoff_transition(body.get("handoff_transition"))
 
     # Attach capsule identity if a capsule token is provided
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
@@ -844,7 +845,8 @@ async def chat(
     t0 = time.time()
     try:
         result = _chat_engine.send_message(session_id, message, capsule_id=capsule_id,
-                                           images=images, incognito=incognito)
+                                           images=images, incognito=incognito,
+                                           handoff_transition=handoff_transition)
     except Exception as e:
         logger.error(f"Chat engine error: {type(e).__name__}: {e}", exc_info=True)
         _track_usage(_key, "/v1/chat", 500)
@@ -917,6 +919,7 @@ async def chat_stream(
     session_id = body.get("session_id")
     images     = body.get("images") or None
     incognito  = bool(body.get("incognito", False))
+    handoff_transition = None if incognito else _safe_handoff_transition(body.get("handoff_transition"))
     capsule    = get_capsule_from_request(request.headers.get("Authorization"))
     capsule_id = (capsule["sub"] if capsule else None) if not incognito else None
 
@@ -926,7 +929,8 @@ async def chat_stream(
     def _generate():
         try:
             for chunk in _chat_engine.stream_message(
-                session_id, message, capsule_id=capsule_id, images=images, incognito=incognito
+                session_id, message, capsule_id=capsule_id, images=images,
+                incognito=incognito, handoff_transition=handoff_transition
             ):
                 if isinstance(chunk, dict) and chunk.get("done"):
                     yield _sse({"type": "done", **{k: v for k, v in chunk.items() if k != "done"}})

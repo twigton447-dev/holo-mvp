@@ -720,7 +720,7 @@
 <div id="app">
   <div id="header">
     <div id="header-brand">
-      <h1><span>Holo</span> <span id="brand-sub">Chat</span><span id="space-label"></span></h1>
+      <h1><span>HoloChat</span> <span id="brand-sub">4DNA</span><span id="space-label"></span></h1>
     </div>
     <div id="header-right">
       <div id="incognito-badge">◉ Incognito</div>
@@ -2081,9 +2081,13 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     scrollToBottom();
     startAmbientBubbles();
 
+    const handoffTransitionForTurn = (!incognitoMode && !sessionId && _activeHandoffTransition)
+      ? _activeHandoffTransition
+      : null;
     const reqBody = { message: fullMessage, session_id: sessionId };
     if (images && images.length > 0) reqBody.images = images;
     if (incognitoMode) reqBody.incognito = true;
+    if (handoffTransitionForTurn) reqBody.handoff_transition = handoffTransitionForTurn;
 
     // Attempt streaming first; fall back to non-streaming on failure
     let streamOk = false;
@@ -2150,6 +2154,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
           if (pacedStream) await pacedStream.drain();
           finalizeStreamingBubble(holoEl, doneData.response || accumulated, doneData);
           sessionId = doneData.session_id;
+          clearActiveHandoffTransition();
           if (doneData.turn_number === 1) {
             const firstMsg = document.querySelectorAll(".msg.user .bubble")[0]?.innerText || "";
             prependSession(doneData.session_id, firstMsg);
@@ -2202,6 +2207,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
         }
         const data = await res.json();
         sessionId = data.session_id;
+        clearActiveHandoffTransition();
         appendHoloMessage(data);
         if (data.turn_number === 1) {
           const firstMsg = document.querySelectorAll(".msg.user .bubble")[0]?.innerText || "";
@@ -2524,6 +2530,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
 
   const HANDOFF_TRANSITION_KEY = "holo_handoff_transition";
   let _pendingHandoffTransition = null;
+  let _activeHandoffTransition = null;
 
   function safeHandoffTransition(handoff) {
     const arc = (handoff && handoff.arc) || {};
@@ -2544,6 +2551,11 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     } catch {
       return null;
     }
+  }
+
+  function clearActiveHandoffTransition() {
+    _activeHandoffTransition = null;
+    try { sessionStorage.removeItem(HANDOFF_TRANSITION_KEY); } catch {}
   }
 
   function startHandoffThread() {
@@ -2576,11 +2588,14 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
         fromHandoff = handoffTransition !== null;
       } catch {}
     }
-	    document.getElementById("messages").innerHTML =
+    _activeHandoffTransition = fromHandoff ? (handoffTransition || null) : null;
+    document.getElementById("messages").innerHTML =
       fromHandoff
         ? handoffWelcomeHtml(handoffTransition || {})
         : `<div id="empty"><h2>What's on your mind?</h2><p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p></div>`;
-    try { sessionStorage.removeItem(HANDOFF_TRANSITION_KEY); } catch {}
+    if (!fromHandoff) {
+      try { sessionStorage.removeItem(HANDOFF_TRANSITION_KEY); } catch {}
+    }
     document.getElementById("input").focus();
   }
 

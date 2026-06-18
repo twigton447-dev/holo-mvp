@@ -349,6 +349,85 @@ def _handoff_for_context_window(session: "ChatSession") -> Optional[dict[str, An
     }
 
 
+def _safe_handoff_transition(value: Any) -> Optional[dict[str, Any]]:
+    """Keep fresh-thread continuity to synthesized, bounded handoff fields."""
+    if not isinstance(value, dict):
+        return None
+    next_paths = value.get("next_paths")
+    safe_paths = []
+    if isinstance(next_paths, list):
+        safe_paths = [
+            _compact_text(path, limit=200)
+            for path in next_paths[:3]
+            if _compact_text(path, limit=200)
+        ]
+    safe = {
+        "source": "thread_handoff",
+        "topic": _compact_text(value.get("topic"), limit=180),
+        "goal": _compact_text(value.get("goal"), limit=240),
+        "tension": _compact_text(value.get("tension"), limit=240),
+        "next_paths": safe_paths,
+        "at": _compact_text(value.get("at"), limit=40),
+    }
+    if not any((safe["topic"], safe["goal"], safe["tension"], safe["next_paths"])):
+        return None
+    return safe
+
+
+def _thread_handoff_transition_block(transition: Optional[dict[str, Any]]) -> str:
+    safe = _safe_handoff_transition(transition)
+    if not safe:
+        return ""
+    lines = [
+        "THREAD HANDOFF SEED (private continuity context for this fresh thread):",
+        "  source: thread_handoff",
+    ]
+    if safe.get("topic"):
+        lines.append(f"  prior_topic: {safe['topic']}")
+    if safe.get("goal"):
+        lines.append(f"  prior_goal: {safe['goal']}")
+    if safe.get("tension"):
+        lines.append(f"  unresolved_tension: {safe['tension']}")
+    if safe.get("next_paths"):
+        lines.append("  useful_next_paths:")
+        for path in safe["next_paths"][:3]:
+            lines.append(f"    - {path}")
+    lines.append(
+        "  instruction: Use this as a compact synthesis from the previous thread. "
+        "Do not claim full memory or perfect continuity; orient the next answer to this arc."
+    )
+    return "\n".join(lines)
+
+
+def _apply_handoff_transition_to_session(
+    session: "ChatSession",
+    transition: Optional[dict[str, Any]],
+) -> Optional[dict[str, Any]]:
+    safe = _safe_handoff_transition(transition)
+    if not safe or session.turn_count != 0:
+        return None
+    previous = session.gov_arc_state or GovArcState()
+    session.gov_arc_state = GovArcState(
+        current_topic=safe.get("topic") or previous.current_topic,
+        topic_shift_reason="fresh_thread_handoff",
+        user_goal=safe.get("goal") or previous.user_goal or safe.get("topic") or None,
+        current_tension=safe.get("tension") or previous.current_tension,
+        unresolved_questions=previous.unresolved_questions[:5],
+        settled_decisions=previous.settled_decisions[:5],
+        last_gov_read=(
+            "Gov is starting a fresh thread from a compact handoff seed, "
+            "selected memory, and current user input."
+        ),
+        current_directive=previous.current_directive,
+        next_paths=(safe.get("next_paths") or previous.next_paths)[:3],
+        web_decision=previous.web_decision,
+        memory_write_summary=previous.memory_write_summary,
+        handoff_recommendation="accepted",
+        confidence="medium",
+    )
+    return safe
+
+
 def _claim_autocompact_for_context_window(
     session: "ChatSession",
     *,
@@ -741,9 +820,11 @@ def _turn_runtime_metadata(
     gov_arc_state: Optional[GovArcState] = None,
     frontier_assist: Optional[dict[str, Any]] = None,
     timing_breakdown: Optional[dict[str, Any]] = None,
+    handoff_transition: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
+    handoff_seed_present = bool(_safe_handoff_transition(handoff_transition))
     metadata.update(
         {
             "analyst_pool_role": "analyst",
@@ -762,8 +843,9 @@ def _turn_runtime_metadata(
             "holo4dna_mode": "enabled"
             if _holo4dna_enabled()
             else ("shadow" if _holo4dna_shadow_enabled() else "off"),
-            "reseed_present": False,
-            "reseed_mode": "off",
+            "reseed_present": handoff_seed_present,
+            "reseed_mode": "thread_handoff_seed" if handoff_seed_present else "off",
+            "thread_handoff_seed_present": handoff_seed_present,
             "autoreseed_enabled": False,
         }
     )
@@ -944,7 +1026,8 @@ class HoloChatEngine:
     def send_message(self, session_id: str, user_message: str,
                      capsule_id: Optional[str] = None,
                      images: Optional[List[Dict[str, Any]]] = None,
-                     incognito: bool = False) -> Dict[str, Any]:
+                     incognito: bool = False,
+                     handoff_transition: Optional[dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Process one user message. Returns Holo's response + metadata.
         The caller should use session_id from the returned dict for follow-up turns.
@@ -968,6 +1051,11 @@ class HoloChatEngine:
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
         _add_timing(timings, "memory_context_ms", memory_timer)
+
+        active_handoff_transition = None if incognito else _apply_handoff_transition_to_session(
+            session,
+            handoff_transition,
+        )
 
         # Rotate through the active mini pool so every configured analyst gets turns.
         adapter = _select_analyst_adapter(session, self._adapters)
@@ -1073,6 +1161,7 @@ class HoloChatEngine:
             system_prompt += (
                 "\n\n" + _health_context(session)
                 + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
+                + ("\n\n" + _thread_handoff_transition_block(active_handoff_transition) if active_handoff_transition else "")
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
@@ -1090,6 +1179,7 @@ class HoloChatEngine:
             images=images,
             incognito=incognito,
             runtime_identity=runtime_identity,
+            handoff_transition=active_handoff_transition,
         )
 
         holo4dna_shadow = None
@@ -1350,6 +1440,7 @@ class HoloChatEngine:
                 timings,
                 turn_started_at=turn_started_at,
             ),
+            handoff_transition=active_handoff_transition,
         )
 
         return {
@@ -1381,7 +1472,8 @@ class HoloChatEngine:
     def stream_message(self, session_id: str, user_message: str,
                        capsule_id: Optional[str] = None,
                        images: Optional[List[Dict[str, Any]]] = None,
-                       incognito: bool = False):
+                       incognito: bool = False,
+                       handoff_transition: Optional[dict[str, Any]] = None):
         """
         Generator variant of send_message.
 
@@ -1411,6 +1503,11 @@ class HoloChatEngine:
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
         _add_timing(timings, "memory_context_ms", memory_timer)
+
+        active_handoff_transition = None if incognito else _apply_handoff_transition_to_session(
+            session,
+            handoff_transition,
+        )
 
         adapter = _select_analyst_adapter(session, self._adapters)
         initial_adapter = adapter
@@ -1492,6 +1589,7 @@ class HoloChatEngine:
             system_prompt += (
                 "\n\n" + _health_context(session)
                 + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
+                + ("\n\n" + _thread_handoff_transition_block(active_handoff_transition) if active_handoff_transition else "")
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
@@ -1509,6 +1607,7 @@ class HoloChatEngine:
             images=images,
             incognito=incognito,
             runtime_identity=runtime_identity,
+            handoff_transition=active_handoff_transition,
         )
 
         holo4dna_shadow = None
@@ -1737,6 +1836,7 @@ class HoloChatEngine:
                 timings,
                 turn_started_at=turn_started_at,
             ),
+            handoff_transition=active_handoff_transition,
         )
 
         yield {
@@ -1866,6 +1966,7 @@ def _runtime_context_budget(
     images: Optional[List[Dict[str, Any]]],
     incognito: bool,
     runtime_identity: str,
+    handoff_transition: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     blocks: list[dict[str, Any]] = [
         {
@@ -1909,6 +2010,13 @@ def _runtime_context_budget(
                     "reason": "incognito mode",
                 },
                 {
+                    "block_name": "thread_handoff_seed",
+                    "content": "",
+                    "included": False,
+                    "source_type": "system",
+                    "reason": "incognito mode",
+                },
+                {
                     "block_name": "life_context",
                     "content": "",
                     "included": False,
@@ -1945,6 +2053,15 @@ def _runtime_context_budget(
                 "content": _health_context(session),
                 "included": True,
                 "source_type": "system",
+            }
+        )
+        blocks.append(
+            {
+                "block_name": "thread_handoff_seed",
+                "content": _thread_handoff_transition_block(handoff_transition),
+                "included": bool(handoff_transition),
+                "source_type": "system",
+                "reason": "empty" if not handoff_transition else None,
             }
         )
         blocks.append(

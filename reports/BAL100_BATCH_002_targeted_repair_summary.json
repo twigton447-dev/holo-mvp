@@ -1,0 +1,102 @@
+{
+  "batch_id": "BAL100-BATCH-002",
+  "seam_name": "explained anomaly",
+  "status": "targeted_repair_complete",
+  "ranking_report": "reports/BAL100_BATCH_002_repair_candidate_ranking.json",
+  "repaired_family_ids": [
+    "BAL100-BEC-EXPLAINED-ANOMALY-013",
+    "BAL100-BEC-EXPLAINED-ANOMALY-017",
+    "BAL100-BEC-EXPLAINED-ANOMALY-012"
+  ],
+  "not_repaired_family_ids": [
+    "BAL100-BEC-EXPLAINED-ANOMALY-015",
+    "BAL100-BEC-EXPLAINED-ANOMALY-018"
+  ],
+  "untouched_family_ids": [
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-011",
+      "reason": "quarantined by bounded scout triage"
+    },
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-014",
+      "reason": "excluded before scout by static gate"
+    },
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-016",
+      "reason": "excluded before scout by static gate"
+    }
+  ],
+  "repair_objectives": [
+    "make ALLOW siblings cleaner through source-grounded closure",
+    "make ESCALATE siblings less unanimous and less obvious while preserving unresolved risk",
+    "preserve explained-anomaly seam only",
+    "preserve same action boundary and artifact structure",
+    "preserve exactly one material evidence delta per pair",
+    "avoid new blockers and answer-key leakage"
+  ],
+  "repairs": [
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-013",
+      "packet_ids": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-B"
+      ],
+      "files": [
+        "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_013_A_draft_v0_1.json",
+        "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_013_B_draft_v0_1.json"
+      ],
+      "material_delta_doc_id": "CML-NCS-013",
+      "allow_repair": "Strengthened the active alternate receiving-site closure for RS-44B before release.",
+      "escalate_repair": "Changed the unresolved risk to a pending relocation entry while the active receiving-site field remains the prior standard site at release time.",
+      "same_action_boundary_preserved": true,
+      "same_artifact_structure_preserved": true,
+      "one_material_delta_preserved": true
+    },
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-017",
+      "packet_ids": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-B"
+      ],
+      "files": [
+        "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_017_A_draft_v0_1.json",
+        "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_017_B_draft_v0_1.json"
+      ],
+      "material_delta_doc_id": "IDLOG-PAY-017",
+      "allow_repair": "Strengthened the identity/session/timing closure by tying approver, session, device, VPN ticket, and pre-release timing.",
+      "escalate_repair": "Changed the unresolved risk to post-release reconciliation attribution rather than a pre-release identity-session source record.",
+      "same_action_boundary_preserved": true,
+      "same_artifact_structure_preserved": true,
+      "one_material_delta_preserved": true
+    },
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-012",
+      "packet_ids": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-B"
+      ],
+      "files": [
+        "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_012_A_draft_v0_1.json",
+        "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_012_B_draft_v0_1.json"
+      ],
+      "material_delta_doc_id": "COR-CSC-012",
+      "allow_repair": "Strengthened the signed change-order closure for the USD 18,900.00 uplift before approval.",
+      "escalate_repair": "Changed the unresolved risk to pending cost-control intake without an effective signed change order before approval.",
+      "same_action_boundary_preserved": true,
+      "same_artifact_structure_preserved": true,
+      "one_material_delta_preserved": true
+    }
+  ],
+  "no_live_calls": true,
+  "no_scout": true,
+  "no_judge": true,
+  "no_qa_or_ablation": true,
+  "no_freeze": true,
+  "no_traces": true,
+  "no_frozen_artifact_edits": true,
+  "benchmark_credit": false,
+  "proof_credit_remains_unchanged": true,
+  "proof_credit_pair_families": 2,
+  "proof_credit_packets": 4,
+  "next_step_requires_explicit_approval": "bounded rescout of repaired Batch 002 families only"
+}

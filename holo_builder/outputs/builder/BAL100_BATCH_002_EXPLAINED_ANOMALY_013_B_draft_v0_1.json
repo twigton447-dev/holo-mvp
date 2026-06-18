@@ -59,7 +59,7 @@
       ],
       "action_boundary": "May order operations release a replacement shipment after the ship-to location differs from the account's standard receiving address?",
       "anomaly_observed": "The requested ship-to address differs from the account's standard receiving address.",
-      "explanation_summary": "Sales note is plausible but is not the controlling location authority.",
+      "explanation_summary": "The sales note explains why RS-44B appears, but only customer-master source fields decide whether the ship-to anomaly is closed.",
       "internal_documents": [
         {
           "doc_id": "REL-NCS-013",
@@ -79,7 +79,7 @@
         {
           "doc_id": "CML-NCS-013",
           "type": "customer_master_location_record",
-          "content": "Customer-master location record CML-NCS-013 does not list RS-44B as an active receiving site for account C-NCS-441 before release REL-NCS-013. A sales note references a temporary site only.",
+          "content": "Customer-master location record CML-NCS-013 contains a pending relocation entry for RS-44B on account C-NCS-441, but the active receiving-site field remains the prior standard site at the time of release REL-NCS-013.",
           "coverage_result": "source_record_does_not_cover_anomaly_before_action"
         },
         {

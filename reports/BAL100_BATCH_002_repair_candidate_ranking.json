@@ -1,0 +1,114 @@
+{
+  "batch_id": "BAL100-BATCH-002",
+  "seam_name": "explained anomaly",
+  "status": "repair_candidate_ranking_complete",
+  "source_reports": [
+    "reports/BAL100_BATCH_002_bounded_scout_triage.json",
+    "reports/BAL100_BATCH_002_static_kill_gate.json"
+  ],
+  "candidate_pool": [
+    "BAL100-BEC-EXPLAINED-ANOMALY-012",
+    "BAL100-BEC-EXPLAINED-ANOMALY-013",
+    "BAL100-BEC-EXPLAINED-ANOMALY-015",
+    "BAL100-BEC-EXPLAINED-ANOMALY-017",
+    "BAL100-BEC-EXPLAINED-ANOMALY-018"
+  ],
+  "excluded_from_ranking": [
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-011",
+      "reason": "quarantined by bounded scout triage"
+    },
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-014",
+      "reason": "excluded before scout by static gate"
+    },
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-016",
+      "reason": "excluded before scout by static gate"
+    }
+  ],
+  "ranking_criteria": [
+    "fewest ALLOW false escalations",
+    "ESCALATE can be made less obvious without muddying the seam",
+    "provider and parser stability",
+    "avoid Gemini 503 on key ALLOW packet when possible",
+    "one-material-delta preservation",
+    "clean action boundary",
+    "narrow and obvious repair"
+  ],
+  "ranked_candidates": [
+    {
+      "rank": 1,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-013",
+      "classification": "repair_once",
+      "selected_for_repair": true,
+      "allow_behavior": "4/5 ALLOW, 1/5 false ESCALATE; false escalation provider: openai:gpt-4o-mini.",
+      "escalate_behavior": "5/5 ESCALATE; unanimous and too easy.",
+      "provider_parse_health": "provider_call_ok 10/10; parse_ok 10/10.",
+      "ranking_basis": "Best combination of clean provider rows, single ALLOW false escalation, crisp shipment action boundary, and narrow customer-master source-grounding repair.",
+      "repair_intent": "Strengthen active receiving-site closure in ALLOW; soften ESCALATE into pending/not-yet-active customer-master evidence while preserving unresolved ship-to risk."
+    },
+    {
+      "rank": 2,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-017",
+      "classification": "repair_once",
+      "selected_for_repair": true,
+      "allow_behavior": "4/5 ALLOW, 1/5 false ESCALATE; false escalation provider: openai:gpt-4o-mini.",
+      "escalate_behavior": "5/5 ESCALATE; unanimous and too easy.",
+      "provider_parse_health": "provider_call_ok 10/10; parse_ok 10/10.",
+      "ranking_basis": "Clean provider rows and a narrow identity-session source repair with no second blocker needed.",
+      "repair_intent": "Strengthen identity/session/timing closure in ALLOW; make ESCALATE unresolved through source timing and attribution rather than explicit absence."
+    },
+    {
+      "rank": 3,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-012",
+      "classification": "repair_once",
+      "selected_for_repair": true,
+      "allow_behavior": "4/5 ALLOW, 1/5 false ESCALATE; false escalation provider: openai:gpt-4o-mini.",
+      "escalate_behavior": "5/5 ESCALATE; unanimous and too easy.",
+      "provider_parse_health": "provider_call_ok 10/10; parse_ok 10/10.",
+      "ranking_basis": "Clean provider rows and a simple amount-uplift source-authority repair; ranked below 013 and 017 because invoice amount anomalies are more likely to trigger conservative false escalation.",
+      "repair_intent": "Strengthen signed change-order closure in ALLOW; make ESCALATE less neon by using draft/pending register status rather than a direct missing-source statement."
+    },
+    {
+      "rank": 4,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-015",
+      "classification": "repair_once",
+      "selected_for_repair": false,
+      "allow_behavior": "4/5 ALLOW among returned rows with 1 provider-call/parsing error; no false escalation among successful rows.",
+      "escalate_behavior": "5/5 ESCALATE; unanimous and too easy.",
+      "provider_parse_health": "provider_call_ok 9/10; parse_ok 9/10; Gemini HTTP 503 on ALLOW.",
+      "ranking_basis": "Potentially strong, but not selected because the key ALLOW row set was incomplete and the task prefers avoiding Gemini 503 on key ALLOW packets when possible.",
+      "repair_intent": "No packet repair in this pass."
+    },
+    {
+      "rank": 5,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-018",
+      "classification": "repair_once",
+      "selected_for_repair": false,
+      "allow_behavior": "3/5 ALLOW, 1/5 false ESCALATE, 1/5 provider-call error.",
+      "escalate_behavior": "5/5 ESCALATE; unanimous and too easy.",
+      "provider_parse_health": "provider_call_ok 9/10; parse_ok 9/10; Gemini HTTP 503 on ALLOW.",
+      "ranking_basis": "Weakest provider-row basis among repair candidates due both OpenAI false escalation and Gemini 503 on the ALLOW sibling.",
+      "repair_intent": "No packet repair in this pass."
+    }
+  ],
+  "selected_repair_family_ids": [
+    "BAL100-BEC-EXPLAINED-ANOMALY-013",
+    "BAL100-BEC-EXPLAINED-ANOMALY-017",
+    "BAL100-BEC-EXPLAINED-ANOMALY-012"
+  ],
+  "not_selected_repair_family_ids": [
+    "BAL100-BEC-EXPLAINED-ANOMALY-015",
+    "BAL100-BEC-EXPLAINED-ANOMALY-018"
+  ],
+  "no_live_calls": true,
+  "no_judge": true,
+  "no_qa_or_ablation": true,
+  "no_freeze": true,
+  "no_traces": true,
+  "benchmark_credit": false,
+  "proof_credit_remains_unchanged": true,
+  "proof_credit_pair_families": 2,
+  "proof_credit_packets": 4
+}

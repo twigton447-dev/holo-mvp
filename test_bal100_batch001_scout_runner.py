@@ -83,6 +83,17 @@ def test_prompt_cards_are_payload_only_and_non_benchmark(tmp_path: Path) -> None
     assert "expected_verdict" not in card["user"]
 
 
+def test_prompt_requires_compact_json_to_reduce_truncation_risk() -> None:
+    card = _sample_card()
+    system_prompt = card["system"]
+
+    assert "Return only a compact JSON object" in system_prompt
+    assert "rationale must be 1-3 concise sentences" in system_prompt
+    assert "no numbered lists" in system_prompt
+    assert "at most 5 artifact IDs" in system_prompt
+    assert "Do not include prose, code fences, or text outside the JSON object." in system_prompt
+
+
 def test_execute_mode_requires_taylor_local_approval(monkeypatch: pytest.MonkeyPatch) -> None:
     for marker in scout.CO_ENV_MARKERS:
         monkeypatch.delenv(marker, raising=False)
@@ -185,8 +196,35 @@ def test_http_payload_construction_does_not_require_provider_sdks() -> None:
 
     assert openai_payload["messages"][0]["role"] == "system"
     assert openai_payload["messages"][1]["role"] == "user"
+    assert openai_payload["max_tokens"] == scout.DEFAULT_MAX_OUTPUT_TOKENS
     assert anthropic_payload["messages"][0]["role"] == "user"
+    assert anthropic_payload["max_tokens"] == scout.ANTHROPIC_MAX_OUTPUT_TOKENS
+    assert anthropic_payload["max_tokens"] > scout.DEFAULT_MAX_OUTPUT_TOKENS
     assert gemini_payload["contents"][0]["parts"][0]["text"]
+    assert gemini_payload["generationConfig"]["maxOutputTokens"] == scout.DEFAULT_MAX_OUTPUT_TOKENS
+
+
+def test_complete_fenced_json_parses_successfully() -> None:
+    parsed = scout._parse_model_verdict(
+        """```json
+{"verdict":"ALLOW","rationale":"Callback source is compliant.","cited_artifacts":["CALLSYS-883306"]}
+```"""
+    )
+
+    assert parsed["parse_ok"] is True
+    assert parsed["model_verdict"] == "ALLOW"
+    assert parsed["cited_artifacts"] == ["CALLSYS-883306"]
+
+
+def test_unterminated_fenced_json_with_verdict_prefix_fails_closed() -> None:
+    parsed = scout._parse_model_verdict(
+        """```json
+{"verdict":"ALLOW","rationale":"This starts as JSON but never closes."""
+    )
+
+    assert parsed["parse_ok"] is False
+    assert parsed["model_verdict"] == "ERROR"
+    assert "No JSON object with verdict" in parsed["parse_error"]
 
 
 def test_provider_failure_preserves_error_cause(monkeypatch: pytest.MonkeyPatch) -> None:

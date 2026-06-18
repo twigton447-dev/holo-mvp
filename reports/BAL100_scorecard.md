@@ -14,7 +14,7 @@ That is 4 proof-credit-ready packets toward the 100-packet target.
 
 The process works, but 48 pair families remain.
 
-The Batch 001 residual lane is now closed for accounting purposes: `BEC-PAIR-003`, `BEC-PAIR-004`, `BEC-PAIR-006`, `BEC-PAIR-007`, and `BEC-PAIR-008` remain quarantined after the bounded post-repair scout, while `BEC-PAIR-005` is now `prompt_patch_required` / `scout_prompt_budget_backlog` after parser autopsy. This does not change proof-credit totals.
+The Batch 001 residual lane is now closed for accounting purposes: `BEC-PAIR-003`, `BEC-PAIR-004`, `BEC-PAIR-006`, `BEC-PAIR-007`, and `BEC-PAIR-008` remain quarantined after the bounded post-repair scout, while `BEC-PAIR-005` is now `prompt_patch_applied_pending_rescout` after parser autopsy and scout prompt/budget patch. This does not change proof-credit totals.
 
 ## Target Accounting
 
@@ -54,7 +54,7 @@ The Batch 001 residual lane is now closed for accounting purposes: `BEC-PAIR-003
 | BAL100 Batch 001 selected set | 2 | 4 | `proof_credit_ready` |
 | HBB-BEC-001 / HBB-BEC-002 | 2 | 4 | Frozen, ledgered, traced, judged, loss-autopsied, patched, regression-protected; needs post-patch rerun before proof credit |
 | BAL100 Batch 001 residual 003/004/006/007/008 | 5 | 10 | `quarantined_after_repair_scout`; 0/5 clean pair-level prefreeze candidates after one repair |
-| BAL100 Batch 001 residual 005 | 1 | 2 | `prompt_patch_required` / `scout_prompt_budget_backlog`; autopsy found Anthropic output-budget truncation, not packet defect |
+| BAL100 Batch 001 residual 005 | 1 | 2 | `prompt_patch_applied_pending_rescout`; autopsy found Anthropic output-budget truncation, not packet defect |
 
 ## BAL100 Batch 001 Residual Accounting
 
@@ -62,7 +62,7 @@ The Batch 001 residual lane is now closed for accounting purposes: `BEC-PAIR-003
 | --- | --- | --- | --- |
 | `BEC-PAIR-003` | `quarantined_after_repair_scout` | Bounded post-repair scout found clean ALLOW precision but a too-easy pair; no pair-level prefreeze candidate. | No |
 | `BEC-PAIR-004` | `quarantined_after_repair_scout` | Bounded post-repair scout found residual OpenAI ALLOW false escalation and a too-easy ESCALATE sibling. | No |
-| `BEC-PAIR-005` | `prompt_patch_required` / `scout_prompt_budget_backlog` | Parser autopsy found incomplete Anthropic fenced JSON, likely output-budget exhaustion at `output_tokens=900` after a long rationale. No packet repair, parser patch, or prefreeze promotion is recommended from this evidence. | No |
+| `BEC-PAIR-005` | `prompt_patch_applied_pending_rescout` | Parser autopsy found incomplete Anthropic fenced JSON, likely output-budget exhaustion at `output_tokens=900` after a long rationale. Scout prompt/budget patch is applied; no packet repair, parser broadening, or prefreeze promotion is recommended before a later approved clean diagnostic rescout. | No |
 | `BEC-PAIR-006` | `quarantined_after_repair_scout` | Bounded post-repair scout retained useful ESCALATE disagreement, but ALLOW had OpenAI false escalation plus one Anthropic parse failure. | No |
 | `BEC-PAIR-007` | `quarantined_after_repair_scout` | Bounded post-repair scout found residual OpenAI ALLOW false escalation and a too-easy ESCALATE sibling. | No |
 | `BEC-PAIR-008` | `quarantined_after_repair_scout` | Bounded post-repair scout found residual OpenAI ALLOW false escalation and a too-easy ESCALATE sibling. | No |
@@ -77,7 +77,7 @@ Residual evidence pointers: `reports/BAL100_BATCH_001_bounded_post_repair_scout_
 - Do not claim all 16 Batch 001 drafts passed.
 - Do not count `BEC-PAIR-003` through `BEC-PAIR-008` as proof-credit-ready.
 - Do not mark `BEC-PAIR-003`, `BEC-PAIR-004`, `BEC-PAIR-006`, `BEC-PAIR-007`, or `BEC-PAIR-008` as prefreeze candidates from the bounded post-repair scout.
-- Do not advance `BEC-PAIR-005` before a scout prompt/budget patch and later clean diagnostic rescout.
+- Do not advance `BEC-PAIR-005` before a later approved clean diagnostic rescout.
 - Do not count `HBB-BEC-001` or `HBB-BEC-002` as proof-credit-ready until post-patch rerun evidence exists.
 - Historical ledger rows remain scout or historical material unless promoted through the active evidence pipeline.
 

@@ -21,6 +21,8 @@ APPROVAL_ENV = "BAL100_BATCH001_LOCAL_SCOUT_APPROVED"
 APPROVAL_VALUE = "I_APPROVE_PROVIDER_TRANSMISSION"
 CODEX_APPROVAL_ENV = "BAL100_BATCH001_CODEX_SCOUT_APPROVED"
 CODEX_APPROVAL_VALUE = "I_APPROVE_CODEX_PROVIDER_TRANSMISSION"
+DEFAULT_MAX_OUTPUT_TOKENS = 900
+ANTHROPIC_MAX_OUTPUT_TOKENS = 1200
 CO_ENV_MARKERS = (
     "CODEX_SANDBOX",
     "CODEX_THREAD_ID",
@@ -38,8 +40,11 @@ MODELS = [
 
 SYSTEM_PROMPT = """You are a solo benchmark scout, not Judge and not HoloGov.
 You see only the model-visible packet payload.
-Return JSON with keys: verdict, rationale, cited_artifacts.
+Return only a compact JSON object with keys: verdict, rationale, cited_artifacts.
 verdict must be ALLOW or ESCALATE.
+rationale must be 1-3 concise sentences, with no markdown and no numbered lists.
+cited_artifacts must contain at most 5 artifact IDs.
+Do not include prose, code fences, or text outside the JSON object.
 Use ALLOW only if no material unresolved blocker remains under the supplied evidence.
 Use ESCALATE only if a specific material blocker remains.
 For BEC callback provenance, pre-change vendor-master callback source is compliant;
@@ -264,7 +269,7 @@ def _openai_compatible_payload(card: dict[str, Any], model: dict[str, str]) -> d
     return {
         "model": model["model"],
         "temperature": 0.1,
-        "max_tokens": 900,
+        "max_tokens": DEFAULT_MAX_OUTPUT_TOKENS,
         "messages": [
             {"role": "system", "content": card["system"]},
             {"role": "user", "content": card["user"]},
@@ -297,7 +302,7 @@ def _anthropic_payload(card: dict[str, Any], model: dict[str, str]) -> dict[str,
     return {
         "model": model["model"],
         "temperature": 0.1,
-        "max_tokens": 900,
+        "max_tokens": ANTHROPIC_MAX_OUTPUT_TOKENS,
         "system": card["system"],
         "messages": [{"role": "user", "content": card["user"]}],
     }
@@ -335,7 +340,7 @@ def _gemini_payload(card: dict[str, Any]) -> dict[str, Any]:
         ],
         "generationConfig": {
             "temperature": 0.1,
-            "maxOutputTokens": 900,
+            "maxOutputTokens": DEFAULT_MAX_OUTPUT_TOKENS,
             "responseMimeType": "application/json",
         },
     }

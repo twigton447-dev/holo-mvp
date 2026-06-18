@@ -1,0 +1,149 @@
+{
+  "report_type": "BAL100_BEC_PAIR_005_diagnostic_rescout_triage",
+  "created_at": "2026-06-18",
+  "family_id": "BEC-PAIR-005",
+  "batch_id": "BAL100-BATCH-001",
+  "run": {
+    "run_id": "BAL100-BATCH-001_five_mini_solo_scout_20260618T153412Z",
+    "run_dir": "scout_runs/BAL100-BATCH-001_BEC-PAIR-005_diagnostic_rescout/BAL100-BATCH-001_five_mini_solo_scout_20260618T153412Z",
+    "run_status": "complete",
+    "execution_mode": "codex_approved",
+    "operator": "Taylor",
+    "benchmark_credit": false,
+    "official_trace": false,
+    "judge": false,
+    "freeze": false
+  },
+  "scope_confirmation": {
+    "bec005_only": true,
+    "full_batch001_run": false,
+    "expected_packet_ids": [
+      "BAL100-BEC-PAIR-005-ALLOW",
+      "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL"
+    ],
+    "observed_packet_ids": [
+      "BAL100-BEC-PAIR-005-ALLOW",
+      "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL"
+    ],
+    "expected_result_rows": 10,
+    "observed_result_rows": 10
+  },
+  "run_counts": {
+    "packets": 2,
+    "result_rows": 10,
+    "provider_call_ok": 9,
+    "provider_call_failed": 1,
+    "parse_ok": 9,
+    "parse_failed": 1,
+    "provider_operational_errors": 1,
+    "too_easy_packets": 0
+  },
+  "answers": {
+    "anthropic_parse_clean_after_prompt_budget_patch": true,
+    "both_siblings_valid_rows_across_all_providers": false,
+    "allow_sibling_avoided_false_escalation": false,
+    "escalate_sibling_preserved_useful_disagreement": true,
+    "escalate_sibling_too_easy": false,
+    "bec005_prefreeze_ready": false,
+    "proof_credit_unchanged": true
+  },
+  "classification": {
+    "status_after_rescout": "diagnostic_non_credit_hold",
+    "anthropic_prompt_budget_issue": "resolved_in_this_run",
+    "provider_operational_contamination": true,
+    "remaining_provider_operational_issue": "gemini 503 on ESCALATE sibling",
+    "remaining_semantic_issue": "OpenAI false ESCALATE on ALLOW sibling",
+    "prefreeze_recommendation": "do_not_promote_from_this_run",
+    "proof_credit_impact": "none"
+  },
+  "provider_error": {
+    "packet_id": "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL",
+    "provider": "gemini",
+    "model": "gemini-2.5-flash-lite",
+    "provider_call_ok": false,
+    "parse_ok": false,
+    "http_status": 503,
+    "error_type": "HTTPError",
+    "error_summary": "provider high demand / unavailable"
+  },
+  "packet_summaries": [
+    {
+      "packet_id": "BAL100-BEC-PAIR-005-ALLOW",
+      "truth": "ALLOW",
+      "provider_call_ok_count": 5,
+      "parse_ok_count": 5,
+      "wrong_allow_count": 0,
+      "wrong_escalate_count": 1,
+      "model_disagreement": true,
+      "too_easy": false,
+      "verdicts": {
+        "openai:gpt-4o-mini": "ESCALATE",
+        "anthropic:claude-haiku-4-5-20251001": "ALLOW",
+        "gemini:gemini-2.5-flash-lite": "ALLOW",
+        "xai:grok-3-mini": "ALLOW",
+        "minimax:MiniMax-Text-01": "ALLOW"
+      }
+    },
+    {
+      "packet_id": "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL",
+      "truth": "ESCALATE",
+      "provider_call_ok_count": 4,
+      "parse_ok_count": 4,
+      "wrong_allow_count": 1,
+      "wrong_escalate_count": 0,
+      "model_disagreement": true,
+      "too_easy": false,
+      "verdicts": {
+        "openai:gpt-4o-mini": "ESCALATE",
+        "anthropic:claude-haiku-4-5-20251001": "ESCALATE",
+        "gemini:gemini-2.5-flash-lite": "ERROR",
+        "xai:grok-3-mini": "ESCALATE",
+        "minimax:MiniMax-Text-01": "ALLOW"
+      }
+    }
+  ],
+  "anthropic_rows": [
+    {
+      "packet_id": "BAL100-BEC-PAIR-005-ALLOW",
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "http_status": 200,
+      "provider_call_ok": true,
+      "parse_ok": true,
+      "verdict": "ALLOW"
+    },
+    {
+      "packet_id": "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL",
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "http_status": 200,
+      "provider_call_ok": true,
+      "parse_ok": true,
+      "verdict": "ESCALATE"
+    }
+  ],
+  "proof_credit": {
+    "changed": false,
+    "proof_credit_ready_families_remain": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "bec_pair_005_proof_credit_ready": false
+  },
+  "attestation": {
+    "diagnostic_provider_calls_for_bec005_only": true,
+    "full_batch001_run": false,
+    "judge_run": false,
+    "qa_or_ablation_run": false,
+    "official_traces_created": false,
+    "freeze_run": false,
+    "packet_drafts_edited": false,
+    "frozen_artifacts_edited": false,
+    "scorecard_or_proof_credit_changed": false,
+    "push": false
+  },
+  "source_artifacts": {
+    "summary_json": "scout_runs/BAL100-BATCH-001_BEC-PAIR-005_diagnostic_rescout/BAL100-BATCH-001_five_mini_solo_scout_20260618T153412Z/summary.json",
+    "results_jsonl": "scout_runs/BAL100-BATCH-001_BEC-PAIR-005_diagnostic_rescout/BAL100-BATCH-001_five_mini_solo_scout_20260618T153412Z/results.jsonl"
+  }
+}

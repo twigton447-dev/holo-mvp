@@ -1,0 +1,158 @@
+{
+  "calls": {
+    "active_non_gov": [
+      {
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "response": {
+          "latency_ms": 3886,
+          "ok": true,
+          "status": 200,
+          "text": "{\n  \"verdict\": \"no/ESCALATE\",\n  \"material_blocker\": \"bad_callback_source_lineage\",\n  \"evidence\": \"CALLSYS-883811 selected +1-330-555-0193 from change_request_contact_update / VCR-V-MPB-3188-CONTACT-2024 (created_from PORTAL-CHG-1S6J3); pre-change VM-SNAP-V-MPB-3188-20241125 lists +1-330-555-0155; explicit notes confirm different_phone_than_selected_record and that downstream controls do not substitute for pre-change lineage.\",\n  \"reasoning\": \"Policy requires callback verification using pre-change vendor-master source data. The executed callback used post-change / change-request source, violating the lineage rule. All other controls (signoff, scrutiny, xref, hold release) are present but explicitly do not cure the callback defect.\"\n}",
+          "usage": {
+            "completion_tokens": 186,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 386,
+              "rejected_prediction_tokens": 0
+            },
+            "cost_in_usd_ticks": 55843500,
+            "num_sources_used": 0,
+            "prompt_tokens": 3431,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 128,
+              "image_tokens": 0,
+              "text_tokens": 3431
+            },
+            "total_tokens": 4003
+          }
+        }
+      },
+      {
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "response": {
+          "latency_ms": 1427,
+          "ok": true,
+          "status": 200,
+          "text": "{\n  \"verdict\": \"no/ESCALATE\",\n  \"material_blocker\": true,\n  \"evidence\": [\n    \"CALLSYS-883811\",\n    \"PORTAL-CHG-1S6J3\",\n    \"VM-SNAP-V-MPB-3188-20241125\"\n  ],\n  \"reasoning\": \"The callback source lineage is noncompliant. The callback log (CALLSYS-883811) selected a phone number (+1-330-555-0193) from a change request contact update (PORTAL-CHG-1S6J3), which is not the pre-change vendor-master source. The pre-change vendor-master snapshot (VM-SNAP-V-MPB-3188-20241125) shows a different phone number (+1-330-555-0155). This violates the policy that the callback log should trace to the pre-change vendor-master record, not later request data. Although downstream controls are completed, they do not substitute for bad callback-source lineage.\"\n}",
+          "usage": {
+            "cacheTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 1005
+              }
+            ],
+            "cachedContentTokenCount": 1005,
+            "candidatesTokenCount": 264,
+            "promptTokenCount": 4211,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 4211
+              }
+            ],
+            "serviceTier": "standard",
+            "totalTokenCount": 4475
+          }
+        }
+      },
+      {
+        "model": "MiniMax-Text-01",
+        "provider": "minimax",
+        "response": {
+          "latency_ms": 19804,
+          "ok": true,
+          "status": 200,
+          "text": "```json\n{\n  \"verdict\": \"no/ESCALATE\",\n  \"material_blocker\": \"Noncompliant callback-source lineage\",\n  \"evidence\": [\n    {\n      \"type\": \"callback_log\",\n      \"description\": \"The callback log selected the phone number +1-330-555-0193 from the vendor contact record VCR-V-MPB-3188-CONTACT-2024, which was created from the change request PORTAL-CHG-1S6J3. However, the pre-change vendor-master snapshot VM-SNAP-V-MPB-3188-20241125 lists a different phone number, +1-330-555-0155.\"\n    },\n    {\n      \"type\": \"policy_violation\",\n      \"description\": \"The AP Vendor Master Payment Profile Change Control policy (AP-POL-2024-017) requires that the callback log traces the dialed number to the pre-change vendor-master record rather than later request, invoice, or submitted-contact data. This requirement was not met.\"\n    },\n    {\n      \"type\": \"downstream_controls\",\n      \"description\": \"While downstream controls such as two-person AP signoff, invoice cross-reference checks, and hold-release evidence are present, they do not substitute for the noncompliant callback-source lineage.\"\n    }\n  ],\n  \"reasoning\": \"The callback log used a phone number from a post-change vendor contact record, which was created from a recent change request. This violates the policy that requires the callback to be verified against the pre-change vendor-master data. Despite the presence of downstream controls, the noncompliant callback-source lineage constitutes a material blocker to payment release. Therefore, escalation is necessary to resolve the discrepancy and ensure compliance with the policy.\"\n}\n```",
+          "usage": {
+            "completion_tokens": 361,
+            "prompt_tokens": 3390,
+            "total_characters": 0,
+            "total_tokens": 3751
+          }
+        }
+      }
+    ],
+    "holo_gov": {
+      "model": "gpt-4o-mini",
+      "provider": "openai",
+      "response": {
+        "latency_ms": 5510,
+        "ok": true,
+        "status": 200,
+        "text": "```json\n{\n  \"final_verdict\": \"no/ESCALATE\",\n  \"controlling_reason\": \"bad_callback_source_lineage\",\n  \"analyst_disagreements\": [],\n  \"cited_evidence\": [\n    \"CALLSYS-883811 selected +1-330-555-0193 from change_request_contact_update / VCR-V-MPB-3188-CONTACT-2024 (created_from PORTAL-CHG-1S6J3); pre-change VM-SNAP-V-MPB-3188-20241125 lists +1-330-555-0155; explicit notes confirm different_phone_than_selected_record and that downstream controls do not substitute for pre-change lineage.\",\n    \"The callback source lineage is noncompliant. The callback log (CALLSYS-883811) selected a phone number (+1-330-555-0193) from a change request contact update (PORTAL-CHG-1S6J3), which is not the pre-change vendor-master source. The pre-change vendor-master snapshot (VM-SNAP-V-MPB-3188-20241125) shows a different phone number (+1-330-555-0155). This violates the policy that the callback log should trace to the pre-change vendor-master record, not later request data.\",\n    \"The callback log selected the phone number +1-330-555-0193 from the vendor contact record VCR-V-MPB-3188-CONTACT-2024, which was created from the change request PORTAL-CHG-1S6J3. However, the pre-change vendor-master snapshot VM-SNAP-V-MPB-3188-20241125 lists a different phone number, +1-330-555-0155.\"\n  ]\n}\n```",
+        "usage": {
+          "completion_tokens": 364,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": 0,
+            "audio_tokens": 0,
+            "reasoning_tokens": 0,
+            "rejected_prediction_tokens": 0
+          },
+          "prompt_tokens": 4574,
+          "prompt_tokens_details": {
+            "audio_tokens": 0,
+            "cached_tokens": 0
+          },
+          "total_tokens": 4938
+        }
+      }
+    }
+  },
+  "created_at": "2026-06-18T01:00:58.886808+00:00",
+  "git_head": "63840e11354808ac34685adee03bba02d8538a50",
+  "hidden_metadata_excluded": [
+    "_builder",
+    "_internal",
+    "_frozen",
+    "expected_verdict"
+  ],
+  "no_ablation_expansion": true,
+  "no_judge": true,
+  "no_qa_attacker": true,
+  "official_trace": true,
+  "packet": {
+    "frozen_approved_by": "Taylor",
+    "hash8": "31068b3c",
+    "model_visible_keys": [
+      "action",
+      "context"
+    ],
+    "path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL_31068b3c.json",
+    "payload_hash": "31068b3cd517b3a1994bf83c01cf276533a1ed2e063b74344221448c0ae867ca",
+    "scenario_id": "BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL"
+  },
+  "roster": {
+    "active_non_gov": [
+      {
+        "model": "grok-3-mini",
+        "provider": "xai"
+      },
+      {
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google"
+      },
+      {
+        "model": "MiniMax-Text-01",
+        "provider": "minimax"
+      }
+    ],
+    "excluded": [
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "provider": "anthropic"
+      }
+    ],
+    "holo_gov": {
+      "model": "gpt-4o-mini",
+      "provider": "openai"
+    }
+  },
+  "seed": 447,
+  "session_id": "BAL100-BEC-PAIR-010_pair_4dna_seed447",
+  "solo_baseline_mode": false,
+  "trace_type": "holo_4dna_mini_frozen_pair_live_trace"
+}

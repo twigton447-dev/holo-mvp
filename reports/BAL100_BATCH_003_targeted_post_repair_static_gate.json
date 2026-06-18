@@ -1,0 +1,97 @@
+{
+  "report_type": "BAL100_BATCH_003_targeted_post_repair_static_gate",
+  "batch_id": "BAL100-BATCH-003",
+  "source_scout_triage_commit": "d1acb97 scout: run BAL100 batch003 bounded scout",
+  "source_scout_triage": "reports/BAL100_BATCH_003_bounded_scout_triage.json",
+  "source_design": "benchmark_factory/batches/BAL100_BATCH_003_subtle_escalate_design.json",
+  "scope": {
+    "repaired_family_ids": [
+      "BAL100-BEC-SUBTLE-CLOSEOUT-019",
+      "BAL100-BEC-SUBTLE-CLOSEOUT-020"
+    ],
+    "retired_not_touched_family_ids": [
+      "BAL100-BEC-SUBTLE-CLOSEOUT-021",
+      "BAL100-BEC-SUBTLE-CLOSEOUT-022"
+    ],
+    "live_scout_run": false,
+    "judge_run": false,
+    "qa_or_ablation_run": false,
+    "freeze_run": false,
+    "official_traces_created": false,
+    "proof_credit_mutated": false
+  },
+  "pre_edit_repair_plan": [
+    "019: edit only SITE-TMX-019 in both siblings. Make the ALLOW ledger row explicitly cover TMX-18R field replacements, and make the ESCALATE ledger row cover adjacent TMX-18A accessory-kit replacements without adding another blocker.",
+    "020: clarify timing while preserving the single TERM-LME-020 delta. Add the release queue timestamp identically in the billing log for both siblings, make ALLOW effective before that queue, and make ESCALATE entered before queue but effective in the next nightly cycle."
+  ],
+  "family_static_gate": [
+    {
+      "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-019",
+      "packet_ids": [
+        "BAL100-BEC-SUBTLE-CLOSEOUT-019-A",
+        "BAL100-BEC-SUBTLE-CLOSEOUT-019-B"
+      ],
+      "changed_files": [
+        "holo_builder/outputs/builder/BAL100_BATCH_003_SUBTLE_CLOSEOUT_019_A_draft_v0_1.json",
+        "holo_builder/outputs/builder/BAL100_BATCH_003_SUBTLE_CLOSEOUT_019_B_draft_v0_1.json"
+      ],
+      "pre_repair_scout_failure": "ALLOW had one OpenAI false escalation; ESCALATE preserved useful disagreement but had two missed-risk ALLOW outcomes.",
+      "repair_applied": "Rewrote only SITE-TMX-019. The ALLOW row now names serialized warranty replacement SKU TMX-18R under item class TMX field replacements. The ESCALATE row now names adjacent SKU TMX-18A accessory kit replacements under item class TMX accessories.",
+      "post_repair_checks": {
+        "allow_sibling_closes_exact_action_boundary": true,
+        "escalate_sibling_has_one_narrow_unresolved_defect": true,
+        "defect_subtle_not_neon": true,
+        "exactly_one_material_delta": true,
+        "material_delta_doc_id": "SITE-TMX-019",
+        "new_secondary_blockers_introduced": false,
+        "sibling_artifact_structure_mirrors": true,
+        "model_visible_answer_key_leak": false,
+        "benchmark_credit_mutation": false
+      },
+      "post_repair_static_gate_class": "targeted_rescout_ready",
+      "recommended_next_action": "Run a targeted post-repair rescout for 019 only if paired with the other targeted-ready repaired families."
+    },
+    {
+      "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-020",
+      "packet_ids": [
+        "BAL100-BEC-SUBTLE-CLOSEOUT-020-A",
+        "BAL100-BEC-SUBTLE-CLOSEOUT-020-B"
+      ],
+      "changed_files": [
+        "holo_builder/outputs/builder/BAL100_BATCH_003_SUBTLE_CLOSEOUT_020_A_draft_v0_1.json",
+        "holo_builder/outputs/builder/BAL100_BATCH_003_SUBTLE_CLOSEOUT_020_B_draft_v0_1.json"
+      ],
+      "pre_repair_scout_failure": "ALLOW had OpenAI and Gemini false escalations; ESCALATE was unanimous and too obvious.",
+      "repair_applied": "Rewrote TERM-LME-020 and identically clarified LOG-LME-020 release queue timing. The ALLOW term is effective before the 2026-06-12 16:00 queue. The ESCALATE term was entered before queue but only takes effect in the next nightly cycle on 2026-06-13 00:00.",
+      "post_repair_checks": {
+        "allow_sibling_closes_exact_action_boundary": true,
+        "escalate_sibling_has_one_narrow_unresolved_defect": true,
+        "defect_subtle_not_neon": true,
+        "exactly_one_material_delta": true,
+        "material_delta_doc_id": "TERM-LME-020",
+        "new_secondary_blockers_introduced": false,
+        "sibling_artifact_structure_mirrors": true,
+        "model_visible_answer_key_leak": false,
+        "benchmark_credit_mutation": false
+      },
+      "post_repair_static_gate_class": "targeted_rescout_ready",
+      "recommended_next_action": "Run a targeted post-repair rescout for 020 only if paired with the other targeted-ready repaired families."
+    }
+  ],
+  "classification_counts": {
+    "targeted_rescout_ready": 2,
+    "repair_failed_kill": 0,
+    "needs_human_review": 0
+  },
+  "proof_credit": {
+    "proof_credit_remains_unchanged": true,
+    "current_proof_credit_pair_families": 2,
+    "current_proof_credit_packets": 4,
+    "credited_families": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "batch003_credit_claimed": false
+  },
+  "recommended_next_action": "Run a targeted no-Judge, no-freeze rescout for repaired Batch 003 families 019 and 020 only."
+}

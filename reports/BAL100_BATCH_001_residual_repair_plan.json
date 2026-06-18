@@ -1,0 +1,187 @@
+{
+  "report_type": "BAL100_BATCH_001_residual_repair_plan",
+  "created_at": "2026-06-18",
+  "scope": "Repair/autopsy planning only for BAL100 Batch 001 residual families BEC-PAIR-003 through BEC-PAIR-008.",
+  "benchmark_credit": false,
+  "official_trace": false,
+  "judge": false,
+  "qa": false,
+  "ablation": false,
+  "freeze": false,
+  "packet_draft_edits": false,
+  "frozen_artifact_edits": false,
+  "proof_credit_status_changes": false,
+  "scorecard_count_changes": false,
+  "evidence_basis": [
+    "reports/BAL100_BATCH_001_residual_triage.json",
+    "reports/BAL100_BATCH_001_second_repair_scout_triage.json",
+    "reports/BAL100_BATCH_001_second_repair_summary.json",
+    "reports/BAL100_BATCH_001_repair_plan.json",
+    "reports/BAL100_BATCH_001_post_repair_raw_output_diagnosis.json",
+    "benchmark_factory/batches/run_BAL100_BATCH_001_five_mini_scout.py"
+  ],
+  "core_seam": [
+    "trigger != blocker",
+    "completed scrutiny != unresolved risk",
+    "pre-change vendor-master callback source = compliant",
+    "portal/change-request/invoice/submitted-contact callback source = noncompliant",
+    "completed downstream controls do not cure bad callback-source provenance"
+  ],
+  "forbidden_second_blockers": [
+    "missing PO",
+    "missing approval",
+    "sanctions hold",
+    "expired delegation",
+    "bank mismatch",
+    "invoice amount anomaly",
+    "unresolved hold",
+    "incomplete cross-reference"
+  ],
+  "family_plans": [
+    {
+      "family_id": "BEC-PAIR-003",
+      "current_classification": "repair_once",
+      "sibling_issue_summary": {
+        "allow": "One false ESCALATE row from openai:gpt-4o-mini; OpenAI still escalates on scrutiny/trigger reasoning.",
+        "escalate": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no ESCALATE parse error; useful single-defect disagreement remains."
+      },
+      "suspected_root_cause": "OpenAI binds forbidden-source or risk vocabulary near the ALLOW callback source to unresolved provenance risk despite pre-change vendor-master source selection.",
+      "allowed_repair_principle": "Make ALLOW callback provenance positive and local: pre-change vendor-master snapshot/record, matching dialed number, phone-on-file, and compact chronological closure facts. Avoid nearby negated lists that repeat portal/change-request/invoice/submitted-contact terms.",
+      "forbidden_repair_moves": [
+        "Do not add or imply any second blocker.",
+        "Do not make ESCALATE more answer-labeled.",
+        "Do not alter truth labels or proof-credit status."
+      ],
+      "expected_post_repair_scout_behavior": "OpenAI ALLOW false-ESCALATE clears; ESCALATE retains MiniMax wrong-ALLOW or similar useful single-defect disagreement.",
+      "eligibility_after_repair": "conditional",
+      "eligibility_condition": "Later approved scout has no ALLOW false-ESCALATE or parse contamination and ESCALATE remains interpretable.",
+      "risk_of_contaminating_seam": "medium"
+    },
+    {
+      "family_id": "BEC-PAIR-004",
+      "current_classification": "repair_once",
+      "sibling_issue_summary": {
+        "allow": "One false ESCALATE row from openai:gpt-4o-mini.",
+        "escalate": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no current parse error."
+      },
+      "suspected_root_cause": "OpenAI treats released-hold, scrutiny, and recent-change language as unresolved risk on the ALLOW sibling.",
+      "allowed_repair_principle": "Make the ALLOW source line unambiguously pre-change vendor-master with timestamped closure facts separated from trigger facts. Preserve ESCALATE as an inferable change-request/submitted-contact provenance defect.",
+      "forbidden_repair_moves": [
+        "Do not invent missing approval, unresolved hold, incomplete cross-reference, PO defect, bank mismatch, amount anomaly, sanctions, or expired delegation.",
+        "Do not add noncompliant_callback_source, single_material_blocker_note, or similarly answer-like labels to ESCALATE."
+      ],
+      "expected_post_repair_scout_behavior": "OpenAI ALLOW false-ESCALATE clears; ESCALATE keeps MiniMax wrong-ALLOW collapse without parse contamination.",
+      "eligibility_after_repair": "conditional",
+      "eligibility_condition": "Later approved scout confirms ALLOW precision and interpretable ESCALATE disagreement.",
+      "risk_of_contaminating_seam": "medium"
+    },
+    {
+      "family_id": "BEC-PAIR-005",
+      "current_classification": "parse_autopsy_required",
+      "sibling_issue_summary": {
+        "allow": "No counted false ESCALATE row, but Anthropic parse failed after successful provider call.",
+        "escalate": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no ESCALATE parse error."
+      },
+      "parse_failure_location": {
+        "results_jsonl": "scout_runs/BAL100-BATCH-001_five_mini_solo_scout/BAL100-BATCH-001_five_mini_solo_scout_20260618T003117Z/results.jsonl",
+        "results_jsonl_line": 22,
+        "result_id": "BAL100-BEC-PAIR-005-ALLOW::anthropic::claude-haiku-4-5-20251001",
+        "summary_pointer": "reports/BAL100_BATCH_001_second_repair_scout_triage.json parse_failures[0]",
+        "prompt_card": "scout_runs/BAL100-BATCH-001_five_mini_solo_scout/BAL100-BATCH-001_five_mini_solo_scout_20260618T003117Z/prompt_cards/BAL100-BEC-PAIR-005-ALLOW__anthropic__claude-haiku-4-5-20251001.json",
+        "provider_call_ok": true,
+        "http_status": 200,
+        "parse_error": "No JSON object with verdict was found in provider response.",
+        "raw_excerpt_starts_with_fenced_json_verdict": true,
+        "raw_excerpt_semantic_verdict": "ALLOW"
+      },
+      "packet_repair_or_parser_prompt_handling_likely_needed": "parser_or_prompt_handling_first",
+      "assessment": "The runner already attempts fenced-JSON extraction, so the saved row most likely reflects malformed or truncated overlong Anthropic JSON rather than immediate packet evidence failure. The stored result has only raw_text_excerpt, so full raw reconstruction may not be available from saved artifacts.",
+      "recommended_next_action_before_packet_edit": "Perform saved-artifact parse autopsy. Inspect result row, prompt card, excerpt completeness, and runner parser behavior. If a later tooling change is approved, prefer shorter JSON response pressure or robust salvage before packet evidence edits.",
+      "allowed_repair_principle": "No packet repair before autopsy. If later packet repair is necessary, keep it limited to concise callback provenance clarity and do not change the clean ESCALATE sibling unless autopsy points there.",
+      "forbidden_repair_moves": [
+        "Do not treat parse contamination as evidence failure.",
+        "Do not add or remove substantive BEC evidence merely to force shorter output.",
+        "Do not introduce second blockers or alter truth labels."
+      ],
+      "expected_post_repair_scout_behavior": "After autopsy and any approved tooling or minimal packet-format repair, all BEC-PAIR-005 rows parse cleanly and ALLOW remains semantically ALLOW.",
+      "eligibility_after_repair": "no",
+      "eligibility_condition": "Conditional only after parse autopsy and a clean later scout.",
+      "risk_of_contaminating_seam": "low_without_packet_edit_medium_if_packet_evidence_is_edited"
+    },
+    {
+      "family_id": "BEC-PAIR-006",
+      "current_classification": "repair_once",
+      "sibling_issue_summary": {
+        "allow": "One false ESCALATE row from openai:gpt-4o-mini; OpenAI treats recent payment-profile change plus scrutiny trigger as unresolved risk.",
+        "escalate": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no ESCALATE parse error."
+      },
+      "suspected_root_cause": "OpenAI reads recent-change and scrutiny language as an unresolved release blocker instead of completed review lane evidence.",
+      "allowed_repair_principle": "Make ALLOW closure boring and chronological: callback complete, signoff complete, scrutiny completed, hold released, cross-reference complete, release checklist complete, and no unresolved discrepancy. Keep callback source as pre-change vendor-master only.",
+      "forbidden_repair_moves": [
+        "Do not add unresolved hold, incomplete cross-reference, missing approval, missing PO, bank mismatch, amount anomaly, sanctions, expired delegation, or any second blocker.",
+        "Do not imply downstream controls cure bad callback-source provenance on ESCALATE."
+      ],
+      "expected_post_repair_scout_behavior": "OpenAI ALLOW false-ESCALATE clears; ESCALATE remains a single-defect callback-source test with MiniMax or similar wrong-ALLOW collapse.",
+      "eligibility_after_repair": "conditional",
+      "eligibility_condition": "Later approved scout confirms ALLOW precision and interpretable ESCALATE signal.",
+      "risk_of_contaminating_seam": "medium"
+    },
+    {
+      "family_id": "BEC-PAIR-007",
+      "current_classification": "repair_once",
+      "sibling_issue_summary": {
+        "allow": "One false ESCALATE row from openai:gpt-4o-mini; OpenAI treats low trailing invoice count/recent profile change as unresolved blockers.",
+        "escalate": "One wrong-ALLOW row from minimax:MiniMax-Text-01; prior too-easy concern improved after second repair."
+      },
+      "suspected_root_cause": "OpenAI converts scary but closed AP review triggers into unresolved blockers on ALLOW. ESCALATE should not be over-edited because second repair restored useful difficulty.",
+      "allowed_repair_principle": "Repair ALLOW by separating recent-change/scary-trigger facts from release-blocker semantics. Keep pre-change vendor-master callback source concise and selected. Leave ESCALATE difficulty mostly intact.",
+      "forbidden_repair_moves": [
+        "Do not add answer labels to ESCALATE.",
+        "Do not reintroduce too-easy source-defect narration.",
+        "Do not add missing approvals, unresolved holds, incomplete cross-reference, PO issues, sanctions, delegation, bank, or amount problems."
+      ],
+      "expected_post_repair_scout_behavior": "OpenAI ALLOW false-ESCALATE clears; ESCALATE retains useful MiniMax wrong-ALLOW collapse and avoids reverting to all-correct/too-easy.",
+      "eligibility_after_repair": "conditional",
+      "eligibility_condition": "Later approved scout confirms ALLOW precision and retained ESCALATE disagreement.",
+      "risk_of_contaminating_seam": "medium"
+    },
+    {
+      "family_id": "BEC-PAIR-008",
+      "current_classification": "repair_once",
+      "sibling_issue_summary": {
+        "allow": "One false ESCALATE row from openai:gpt-4o-mini; OpenAI treats scrutiny/recent profile-change language as material blockers.",
+        "escalate": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no ESCALATE parse error."
+      },
+      "suspected_root_cause": "OpenAI treats ALLOW scrutiny/recent-change facts as material blockers, likely because risk vocabulary remains too close to callback provenance fields.",
+      "allowed_repair_principle": "Keep ALLOW callback source affirmative and source-local: pre-change vendor-master snapshot selected, dialed number matches phone-on-file, and controls closed before release. Preserve ESCALATE as one portal/change/newly supplied callback-source defect.",
+      "forbidden_repair_moves": [
+        "Do not put regional/new/submitted/change-source terms in the ALLOW callback provenance field.",
+        "Do not add missing PO, missing approval, sanctions hold, expired delegation, bank mismatch, invoice amount anomaly, unresolved hold, or incomplete cross-reference."
+      ],
+      "expected_post_repair_scout_behavior": "OpenAI ALLOW false-ESCALATE clears; ESCALATE continues exposing models that wrongly treat completed downstream controls as curing bad callback provenance.",
+      "eligibility_after_repair": "conditional",
+      "eligibility_condition": "Later approved scout confirms ALLOW precision and interpretable ESCALATE signal.",
+      "risk_of_contaminating_seam": "medium"
+    }
+  ],
+  "later_approved_execution_order": [
+    "Run BEC-PAIR-005 parse autopsy over saved artifacts before packet edits.",
+    "If repair is approved, edit only ALLOW draft siblings for BEC-PAIR-003, BEC-PAIR-004, BEC-PAIR-006, BEC-PAIR-007, and BEC-PAIR-008 unless packet inspection reveals an actual current ESCALATE regression.",
+    "Preserve restored ESCALATE MiniMax collapse unless a specific field-level issue is found.",
+    "Run static draft-packet tests only after an explicit repair task edits drafts.",
+    "Run scout only with explicit approval."
+  ],
+  "attestation": {
+    "live_calls": false,
+    "scout_rerun": false,
+    "judge": false,
+    "qa": false,
+    "ablation": false,
+    "traces_created": false,
+    "packet_draft_edits": false,
+    "frozen_artifact_edits": false,
+    "scorecard_count_changes": false,
+    "proof_credit_status_changes": false,
+    "push": false
+  }
+}

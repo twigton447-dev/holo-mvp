@@ -1,0 +1,69 @@
+{
+  "report_type": "BAL100_BEC_PAIR_005_parse_autopsy",
+  "created_at": "2026-06-18",
+  "scope": "Parser autopsy only for BAL100 BEC-PAIR-005 saved scout artifacts.",
+  "family_id": "BEC-PAIR-005",
+  "failing_run_path": "scout_runs/BAL100-BATCH-001_five_mini_solo_scout/BAL100-BATCH-001_five_mini_solo_scout_20260618T003117Z",
+  "failing_results_jsonl": "scout_runs/BAL100-BATCH-001_five_mini_solo_scout/BAL100-BATCH-001_five_mini_solo_scout_20260618T003117Z/results.jsonl",
+  "failing_line_number": 22,
+  "result_id": "BAL100-BEC-PAIR-005-ALLOW::anthropic::claude-haiku-4-5-20251001",
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "packet_id": "BAL100-BEC-PAIR-005-ALLOW",
+  "builder_hypothesis": "ALLOW",
+  "http_status": 200,
+  "provider_call_ok": true,
+  "parse_ok": false,
+  "input_tokens": 3844,
+  "output_tokens": 900,
+  "raw_output_excerpt_or_pointer": {
+    "storage_note": "The runner persisted raw_text_excerpt only, capped at 1200 characters, not the full provider text.",
+    "excerpt_prefix": "```json\n{\n  \"verdict\": \"ALLOW\",\n  \"rationale\": \"All material control requirements under AP-POL-2024-017 for post-payment-profile-change invoices are satisfied with compliant evidence:",
+    "excerpt_tail": "VM-AUDIT-PHC-77E2 (2024-11-17) documents the change from account last4 \\\"3320\\\" to \\\"9095\\\" and billing cont",
+    "prompt_card": "scout_runs/BAL100-BATCH-001_five_mini_solo_scout/BAL100-BATCH-001_five_mini_solo_scout_20260618T003117Z/prompt_cards/BAL100-BEC-PAIR-005-ALLOW__anthropic__claude-haiku-4-5-20251001.json"
+  },
+  "parser_expected_shape": "A complete JSON object, optionally inside a ```json fenced block, containing verdict with value ALLOW or ESCALATE. The parser requires the JSON object to parse cleanly before accepting a verdict.",
+  "observed_shape": {
+    "starts_with_fenced_json": true,
+    "contains_verdict_allow_prefix": true,
+    "excerpt_length": 1200,
+    "excerpt_open_brace_count": 1,
+    "excerpt_close_brace_count": 0,
+    "excerpt_has_closing_fence": false,
+    "max_output_token_hit": true,
+    "summary": "The saved excerpt is an unterminated fenced JSON object. It contains a verdict prefix but no complete JSON object in the persisted excerpt; output_tokens equals the Anthropic max_tokens value of 900."
+  },
+  "cause_classification": {
+    "provider_malformed_response": "partial",
+    "prompt_schema_ambiguity": "primary",
+    "parser_brittleness": "no",
+    "result_line_corruption": "no",
+    "packet_content_causing_output_confusion": "no",
+    "another_cause": "Anthropic likely exhausted the 900-token output budget while writing a long numbered rationale before closing the JSON object."
+  },
+  "suspected_root_cause": "Prompt/output-budget mismatch for Anthropic on BEC-PAIR-005-ALLOW: the prompt requested JSON but did not constrain rationale length, and the model produced a long fenced JSON rationale that appears to have hit the 900-token output cap before emitting a complete JSON object. The parser correctly rejected the incomplete object.",
+  "recommended_fix_type": "prompt_patch",
+  "recommended_fix_detail": "For future scouts, constrain rationale length and/or raise Anthropic max_tokens enough to finish the required compact JSON. Keep the parser fail-closed for incomplete JSON; do not infer verdicts from unterminated JSON prefixes.",
+  "whether_packet_repair_is_recommended": "no",
+  "whether_this_affects_future_scout_reliability": "yes",
+  "regression_test_recommendation": "Add a focused scout-runner unit test if prompt handling is patched: an unterminated fenced JSON response with a verdict prefix must remain parse_ok=false, while a compact complete fenced JSON object should parse. Optionally add a prompt/card test that the scout prompt asks for concise JSON rationale to reduce Anthropic max-token truncation.",
+  "bec_pair_005_status_after_autopsy": "parse_autopsy_complete_not_prefreeze_ready",
+  "proof_credit_impact": {
+    "proof_credit_count_changed": false,
+    "proof_credit_ready_families_remain": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ]
+  },
+  "attestation": {
+    "packet_drafts_edited": false,
+    "frozen_artifacts_edited": false,
+    "live_calls": false,
+    "scout_run": false,
+    "judge_run": false,
+    "qa_or_ablation_run": false,
+    "traces_created": false,
+    "proof_credit_counts_changed": false,
+    "reopened_quarantined_families": false
+  }
+}

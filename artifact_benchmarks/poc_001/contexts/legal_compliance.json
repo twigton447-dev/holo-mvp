@@ -1,0 +1,47 @@
+{
+  "domain_id": "legal_compliance",
+  "domain_label": "Legal / Compliance",
+  "brief": "Advise how to launch an AI customer-support summarization feature while reducing privacy, retention, and misrepresentation risk.",
+  "deliverable": {
+    "artifact_type": "compliance risk memo",
+    "audience": "general counsel and product leadership",
+    "word_count_target": {
+      "min": 1200,
+      "max": 1700
+    },
+    "must_include": [
+      "clear recommendation",
+      "explicit assumptions",
+      "risk register",
+      "decision criteria",
+      "near-term action plan"
+    ]
+  },
+  "source_context": {
+    "facts": [
+      "Summaries create CRM notes from support calls.",
+      "Inputs may include names, contract terms, support tickets, and volunteered health/payment details.",
+      "Vendor model contract retains prompts for abuse monitoring unless zero-retention is enabled.",
+      "Sales wants to advertise automatic renewal-risk detection.",
+      "Product logs raw transcripts for 180 days.",
+      "Customers are in the US, Canada, and EU.",
+      "Agents can edit summaries but edits are not separately audited.",
+      "DPA template has not been updated for AI processing disclosures."
+    ],
+    "constraints": [
+      "No final legal opinion.",
+      "Use only provided facts.",
+      "Separate blockers from launch conditions."
+    ],
+    "conflicting_signals": [
+      "Feature may improve account management but retention and marketing create risk.",
+      "Human editing helps but auditability is incomplete."
+    ],
+    "hidden_traps": [
+      "Ignoring cross-border processing.",
+      "Treating summaries as harmless metadata.",
+      "Marketing outruns validated capability."
+    ]
+  },
+  "grounding_rule": "Use only this context pack. Do not invent facts. Label uncertainty when context is incomplete."
+}

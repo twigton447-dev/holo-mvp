@@ -1,0 +1,47 @@
+{
+  "domain_id": "cyber_crisis_response",
+  "domain_label": "Cyber / Crisis Response",
+  "brief": "Create a 24-hour response plan for suspected token compromise in a B2B API platform.",
+  "deliverable": {
+    "artifact_type": "incident response commander brief",
+    "audience": "CISO, CEO, and incident response lead",
+    "word_count_target": {
+      "min": 1200,
+      "max": 1700
+    },
+    "must_include": [
+      "clear recommendation",
+      "explicit assumptions",
+      "risk register",
+      "decision criteria",
+      "near-term action plan"
+    ]
+  },
+  "source_context": {
+    "facts": [
+      "Customer reported unexpected API calls from unfamiliar ASN using a valid token.",
+      "Logs show 19 tokens used from new geographies in 36 hours.",
+      "No privilege escalation is confirmed.",
+      "Platform supports revocation, forced rotation, IP allowlisting, and scoped tokens; 41 percent use scoped tokens.",
+      "Audit logs are retained for 30 days and exportable per customer.",
+      "Six security engineers and one communications lead are available today.",
+      "Largest enterprise customer requires notice within 24 hours for confirmed incidents.",
+      "Revoking all tokens would interrupt production integrations for most customers."
+    ],
+    "constraints": [
+      "Do not declare breach without evidence.",
+      "Balance containment and customer impact.",
+      "Include comms thresholds and evidence collection."
+    ],
+    "conflicting_signals": [
+      "Broad revocation reduces risk but creates outages.",
+      "Waiting preserves continuity but may allow misuse."
+    ],
+    "hidden_traps": [
+      "Skipping customer segmentation.",
+      "Confusing suspicious with confirmed.",
+      "Failing to preserve evidence."
+    ]
+  },
+  "grounding_rule": "Use only this context pack. Do not invent facts. Label uncertainty when context is incomplete."
+}

@@ -1,0 +1,28 @@
+{
+  "registry_id": "artifact_benchmark_registry_v1",
+  "mandate_id": "ARTIFACT_BENCHMARK_MANDATE_V1",
+  "default_turn_budget": 6,
+  "default_judge_count": 3,
+  "diagnostic_google_model": "gemini-2.5-flash-lite",
+  "blocked_models": [
+    {
+      "provider": "google",
+      "model": "gemini-2.5-pro",
+      "reason": "zero visible text on diagnostic probe"
+    }
+  ],
+  "required_instance_files": [
+    "README.md",
+    "benchmark_manifest.json",
+    "contexts/finance_board_strategy.json",
+    "contexts/healthcare_operations.json",
+    "contexts/legal_compliance.json",
+    "contexts/cyber_crisis_response.json",
+    "contexts/product_technical_architecture.json",
+    "prompts/role_prompts.json",
+    "prompts/gov_orchestration_prompt.json",
+    "prompts/judge_prompt.json",
+    "prompts/pairwise_judge_prompt.json",
+    "prompts/scoring_rubric_8criteria.json"
+  ]
+}

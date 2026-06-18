@@ -1,0 +1,47 @@
+{
+  "domain_id": "product_technical_architecture",
+  "domain_label": "Product / Technical Architecture",
+  "brief": "Recommend an architecture for adding document-grounded AI answers to an existing enterprise knowledge product.",
+  "deliverable": {
+    "artifact_type": "architecture decision record",
+    "audience": "CTO and engineering leads",
+    "word_count_target": {
+      "min": 1200,
+      "max": 1700
+    },
+    "must_include": [
+      "clear recommendation",
+      "explicit assumptions",
+      "risk register",
+      "decision criteria",
+      "near-term action plan"
+    ]
+  },
+  "source_context": {
+    "facts": [
+      "Documents are in tenant-isolated object storage and metadata in Postgres.",
+      "Search uses keyword search with per-tenant ACL filters.",
+      "Customers want answers with citations to exact passages.",
+      "Team has six backend and two frontend engineers next quarter.",
+      "Vector pilot improved recall but had cross-tenant retrieval bugs because metadata filters were applied after retrieval.",
+      "Legal requires deletion propagation within 30 days.",
+      "Sales wants a demo in six weeks.",
+      "No evaluation set exists for answer quality or citation faithfulness."
+    ],
+    "constraints": [
+      "Do not weaken tenant isolation.",
+      "Include evaluation and deletion handling.",
+      "Separate demo path from production hardening."
+    ],
+    "conflicting_signals": [
+      "Fast demo helps sales but unsafe retrieval creates trust/privacy failures.",
+      "Vector retrieval improves recall but changes security boundary if filters are wrong."
+    ],
+    "hidden_traps": [
+      "ACL filters after retrieval.",
+      "Ignoring embedding deletion.",
+      "No citation faithfulness eval."
+    ]
+  },
+  "grounding_rule": "Use only this context pack. Do not invent facts. Label uncertainty when context is incomplete."
+}

@@ -26,8 +26,9 @@ def history(outputs: list[dict[str, str]], max_chars: int = 8500) -> str:
     text = '\n\n---\n\n'.join(f"Turn {item['turn']} {item['role']} {item['kind']}\n{item['text'][:1600]}" for item in outputs); return text[-max_chars:]
 def system_prompt(context: dict[str, Any], max_words: int) -> str: return f"Diagnostic artifact benchmark. Use only provided context. Do not invent facts. Output Markdown only. Keep under about {max_words} words. Domain: {context['domain_label']}."
 def turn_prompt(context: dict[str, Any], role_item: dict[str, Any], turn: int, outputs: list[dict[str, str]], mission: str | None) -> str:
-    final = 'FINAL TURN: produce the best possible final artifact, not another critique.\n' if turn == 6 else ''; mission_block = f'GOVERNOR MISSION PACKET:\n{mission}\n' if mission else ''
-    return f"BRIEF:
+    final = 'FINAL TURN: produce the best possible final artifact, not another critique.\n' if turn == 6 else ''
+    mission_block = f'GOVERNOR MISSION PACKET:\n{mission}\n' if mission else ''
+    return f"""BRIEF:
 {context['brief']}
 
 DELIVERABLE:
@@ -52,10 +53,11 @@ LATEST CRITIQUE:
 HISTORY:
 {history(outputs) or '[none]'}
 
-Execute this turn now."
+Execute this turn now."""
 def gov_prompt(context: dict[str, Any], gov: dict[str, Any], role_item: dict[str, Any], turn: int, outputs: list[dict[str, str]]) -> str:
-    fields = '\n'.join('- ' + field for field in gov['mission_packet_required_fields']); final = 'This mission is for Turn 6, the final document. Pressure synthesis.\n' if turn == 6 else ''
-    return f"You are HoloGov. Create a focused mission packet for the next model. Do not write the artifact and do not judge the benchmark.
+    fields = '\n'.join('- ' + field for field in gov['mission_packet_required_fields'])
+    final = 'This mission is for Turn 6, the final document. Pressure synthesis.\n' if turn == 6 else ''
+    return f"""You are HoloGov. Create a focused mission packet for the next model. Do not write the artifact and do not judge the benchmark.
 
 Required fields:
 {fields}
@@ -77,7 +79,7 @@ LATEST CRITIQUE:
 {latest_critique(outputs) or '[none]'}
 
 HISTORY:
-{history(outputs) or '[none]'}"
+{history(outputs) or '[none]'}"""
 def google_text(response: Any) -> str:
     text = getattr(response, 'text', None) or ''
     if text.strip(): return text

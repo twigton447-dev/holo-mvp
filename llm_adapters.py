@@ -3579,7 +3579,7 @@ _FAST_MODEL_REGISTRY = [
     # Override via env vars if you want dedicated fast-tier keys.
     ("openai",    "OPENAI_FAST_MODEL",    "gpt-4o-mini",               "OPENAI_API_KEY"),
     ("anthropic", "ANTHROPIC_FAST_MODEL", "claude-haiku-4-5-20251001", "ANTHROPIC_API_KEY"),
-    ("google",    "GOOGLE_FAST_MODEL",    "gemini-2.0-flash",          "GOOGLE_API_KEY"),
+    ("google",    "GOOGLE_FAST_MODEL",    "gemini-2.5-flash-lite",     "GOOGLE_API_KEY"),
     # Backup 1 — independent DNA (xAI)
     ("xai",       "XAI_FAST_MODEL",       "grok-3-mini",               "XAI_API_KEY"),
     # Backup 2 — independent DNA (Mistral)

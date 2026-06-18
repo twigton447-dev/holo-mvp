@@ -110,7 +110,7 @@ def _mini_pool():
     return [
         FakeAdapter("openai", "gpt-4o-mini"),
         FakeAdapter("anthropic", "claude-haiku-4-5-20251001"),
-        FakeAdapter("google", "gemini-2.0-flash"),
+        FakeAdapter("google", "gemini-2.5-flash-lite"),
         FakeAdapter("xai", "grok-3-mini"),
     ]
 
@@ -127,7 +127,7 @@ def test_default_runtime_profile_is_mini_only(monkeypatch):
     assert [adapter.model_id for adapter in active] == [
         "gpt-4o-mini",
         "claude-haiku-4-5-20251001",
-        "gemini-2.0-flash",
+        "gemini-2.5-flash-lite",
         "grok-3-mini",
     ]
     assert bench == []
@@ -185,7 +185,7 @@ def test_holochat_engine_init_uses_mini_loader(monkeypatch):
     assert [adapter.model_id for adapter in engine._adapters] == [
         "gpt-4o-mini",
         "claude-haiku-4-5-20251001",
-        "gemini-2.0-flash",
+        "gemini-2.5-flash-lite",
         "grok-3-mini",
     ]
     assert engine._bench == []

@@ -25,7 +25,8 @@
     "parse_autopsy_required",
     "prompt_patch_required",
     "scout_prompt_budget_backlog",
-    "prompt_patch_applied_pending_rescout",
+    "diagnostic_rescout_completed_not_prefreeze_ready",
+    "quarantined_after_diagnostic_rescout",
     "quarantined_after_repair_scout",
     "proof_credit_ready"
   ],
@@ -333,23 +334,22 @@
       ],
       "same_structure_required": true,
       "one_material_delta_required": true,
-      "promotion_status": "prompt_patch_applied_pending_rescout",
+      "promotion_status": "diagnostic_rescout_completed_not_prefreeze_ready",
       "existing_family": false,
       "proof_credit_ready": false,
       "needs_post_patch_rerun": false,
       "evidence_state": [
         "drafted",
-        "parse_autopsy_required",
-        "prompt_patch_required",
-        "scout_prompt_budget_backlog",
-        "prompt_patch_applied_pending_rescout"
+        "diagnostic_rescout_completed_not_prefreeze_ready",
+        "quarantined_after_diagnostic_rescout"
       ],
-      "notes": "BAL100 Batch 001 residual accounting: parse autopsy found incomplete Anthropic fenced JSON, likely output-budget exhaustion at output_tokens=900 after a long rationale. Scout prompt/budget patch has been applied; current status is prompt_patch_applied_pending_rescout. No packet repair, prefreeze, or proof credit is recommended before a later approved clean diagnostic rescout.",
+      "notes": "BAL100 Batch 001 residual accounting: diagnostic rescout stayed narrow at 2 packets / 10 rows and showed Anthropic parsing cleanly after the prompt/budget patch, resolving the prior Anthropic parse-failure shape. BEC-PAIR-005 remains non-credit and not prefreeze-ready because the ALLOW sibling still had one OpenAI false escalation and the ESCALATE sibling had an incomplete clean provider row set from a Gemini 503.",
       "batch_id": "BAL100-BATCH-001",
       "residual_triage_report": "reports/BAL100_BATCH_001_residual_triage.json",
       "residual_repair_plan_report": "reports/BAL100_BATCH_001_residual_repair_plan.json",
       "residual_repair_summary_report": "reports/BAL100_BATCH_001_residual_repair_summary.json",
-      "parse_autopsy_report": "reports/BAL100_BEC_PAIR_005_parse_autopsy.json"
+      "parse_autopsy_report": "reports/BAL100_BEC_PAIR_005_parse_autopsy.json",
+      "diagnostic_rescout_triage_report": "reports/BAL100_BEC_PAIR_005_diagnostic_rescout_triage.json"
     },
     {
       "family_id": "BEC-PAIR-006",

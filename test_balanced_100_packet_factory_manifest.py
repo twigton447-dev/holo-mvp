@@ -20,7 +20,8 @@ APPROVED_STATUSES = {
     "parse_autopsy_required",
     "prompt_patch_required",
     "scout_prompt_budget_backlog",
-    "prompt_patch_applied_pending_rescout",
+    "diagnostic_rescout_completed_not_prefreeze_ready",
+    "quarantined_after_diagnostic_rescout",
     "quarantined_after_repair_scout",
     "proof_credit_ready",
 }
@@ -126,7 +127,7 @@ def test_bal100_batch001_selected_pairs_are_only_current_proof_credit_ready_pair
     residual_statuses = {
         "BEC-PAIR-003": "quarantined_after_repair_scout",
         "BEC-PAIR-004": "quarantined_after_repair_scout",
-        "BEC-PAIR-005": "prompt_patch_applied_pending_rescout",
+        "BEC-PAIR-005": "diagnostic_rescout_completed_not_prefreeze_ready",
         "BEC-PAIR-006": "quarantined_after_repair_scout",
         "BEC-PAIR-007": "quarantined_after_repair_scout",
         "BEC-PAIR-008": "quarantined_after_repair_scout",
@@ -136,6 +137,10 @@ def test_bal100_batch001_selected_pairs_are_only_current_proof_credit_ready_pair
         assert families[family_id]["promotion_status"] == expected_status
         assert expected_status in families[family_id]["evidence_state"]
 
-    assert "scout_prompt_budget_backlog" in families["BEC-PAIR-005"]["evidence_state"]
-    assert "prompt_patch_required" in families["BEC-PAIR-005"]["evidence_state"]
+    assert "quarantined_after_diagnostic_rescout" in families["BEC-PAIR-005"]["evidence_state"]
+    assert "prompt_patch_applied_pending_rescout" not in families["BEC-PAIR-005"]["evidence_state"]
     assert families["BEC-PAIR-005"]["parse_autopsy_report"] == "reports/BAL100_BEC_PAIR_005_parse_autopsy.json"
+    assert families["BEC-PAIR-005"]["diagnostic_rescout_triage_report"] == "reports/BAL100_BEC_PAIR_005_diagnostic_rescout_triage.json"
+    assert "anthropic parsing cleanly" in families["BEC-PAIR-005"]["notes"].lower()
+    assert "openai false escalation" in families["BEC-PAIR-005"]["notes"].lower()
+    assert "gemini 503" in families["BEC-PAIR-005"]["notes"].lower()

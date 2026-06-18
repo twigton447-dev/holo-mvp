@@ -1,7 +1,7 @@
 {
   "scorecard_id": "BAL100_scorecard",
   "created_at": "2026-06-18",
-  "scope": "Balanced 100-packet benchmark factory accounting after BAL100 Batch 001 selected-pair Judge and residual post-repair scout closure.",
+  "scope": "Balanced 100-packet benchmark factory accounting after BAL100 Batch 001 selected-pair Judge, residual post-repair scout closure, and BEC-PAIR-005 diagnostic rescout closure.",
   "benchmark_credit_scope": "selected_pairs_only",
   "target": {
     "pair_families": 50,
@@ -30,8 +30,8 @@
     "proof_ready_packets_from_bal100_batch001_selected_set": 4,
     "hbb_bec_001_002_status": "needs_post_patch_rerun_before_proof_credit",
     "bal100_batch001_residual_003_008_status": "closed_without_new_prefreeze_candidates",
-    "bal100_batch001_bec_pair_005_status": "prompt_patch_applied_pending_rescout",
-    "bal100_batch001_bec_pair_005_backlog": "clean_diagnostic_rescout_required"
+    "bal100_batch001_bec_pair_005_status": "diagnostic_rescout_completed_not_prefreeze_ready",
+    "bal100_batch001_bec_pair_005_non_credit_reason": "Anthropic parsed cleanly after the prompt/budget patch, but BEC-005 remains non-credit because the ALLOW sibling still had an OpenAI false escalation and the ESCALATE sibling had an incomplete clean provider row set from a Gemini 503."
   },
   "proof_credit_ready_families": [
     {
@@ -90,7 +90,7 @@
     "bal100_batch001_all_16_drafts_passed": false,
     "bec_pair_003_through_008_proof_credit_ready": false,
     "bec_pair_003_004_006_007_008_prefreeze_ready": false,
-    "bec_pair_005_prefreeze_ready_before_clean_rescout": false,
+    "bec_pair_005_prefreeze_ready_after_diagnostic_rescout": false,
     "hbb_bec_001_proof_credit_ready": false,
     "hbb_bec_002_proof_credit_ready": false
   },
@@ -111,17 +111,24 @@
       "BEC-PAIR-009",
       "BEC-PAIR-010"
     ],
-    "prompt_patch_applied_pending_rescout": [
+    "diagnostic_rescout_completed_not_prefreeze_ready": [
       "BEC-PAIR-005"
     ],
-    "clean_diagnostic_rescout_required": [
+    "quarantined_after_diagnostic_rescout": [
       "BEC-PAIR-005"
     ],
     "parse_autopsy_complete": [
       "BEC-PAIR-005"
     ],
     "parse_autopsy_report": "reports/BAL100_BEC_PAIR_005_parse_autopsy.json",
-    "bec_pair_005_recommended_fix_type": "prompt_patch",
+    "diagnostic_rescout_report": "reports/BAL100_BEC_PAIR_005_diagnostic_rescout_triage.json",
+    "bec_pair_005_prompt_budget_fix_resolved_anthropic_parse_failure_shape": true,
+    "bec_pair_005_non_credit_reasons": [
+      "ALLOW sibling retained one OpenAI false escalation.",
+      "ESCALATE sibling had an incomplete clean provider row set because Gemini returned HTTP 503.",
+      "Diagnostic rescout is scout evidence only, not Judge, freeze, trace, or proof credit."
+    ],
+    "bec_pair_005_recommended_fix_type": "none_from_diagnostic_rescout_accounting",
     "bec_pair_005_packet_repair_recommended": false,
     "quarantined_after_repair_scout": [
       "BEC-PAIR-003",

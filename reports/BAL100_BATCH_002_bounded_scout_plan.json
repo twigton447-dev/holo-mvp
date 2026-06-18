@@ -1,0 +1,133 @@
+{
+  "report_type": "BAL100_BATCH_002_bounded_scout_plan",
+  "created_at": "2026-06-18",
+  "batch_id": "BAL100-BATCH-002",
+  "seam_name": "explained anomaly",
+  "status": "bounded_scout_plan_prepared_no_live",
+  "source_reports": {
+    "static_kill_gate": "reports/BAL100_BATCH_002_static_kill_gate.json",
+    "draft_generation_summary": "reports/BAL100_BATCH_002_draft_generation_summary.json"
+  },
+  "scout_ready_family_ids": [
+    "BAL100-BEC-EXPLAINED-ANOMALY-011",
+    "BAL100-BEC-EXPLAINED-ANOMALY-012",
+    "BAL100-BEC-EXPLAINED-ANOMALY-013",
+    "BAL100-BEC-EXPLAINED-ANOMALY-015",
+    "BAL100-BEC-EXPLAINED-ANOMALY-017",
+    "BAL100-BEC-EXPLAINED-ANOMALY-018"
+  ],
+  "packet_ids_to_scout": [
+    "BAL100-BEC-EXPLAINED-ANOMALY-011-A",
+    "BAL100-BEC-EXPLAINED-ANOMALY-011-B",
+    "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+    "BAL100-BEC-EXPLAINED-ANOMALY-012-B",
+    "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+    "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+    "BAL100-BEC-EXPLAINED-ANOMALY-015-A",
+    "BAL100-BEC-EXPLAINED-ANOMALY-015-B",
+    "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+    "BAL100-BEC-EXPLAINED-ANOMALY-017-B",
+    "BAL100-BEC-EXPLAINED-ANOMALY-018-A",
+    "BAL100-BEC-EXPLAINED-ANOMALY-018-B"
+  ],
+  "packet_paths_to_scout": [
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_011_A_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_011_B_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_012_A_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_012_B_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_013_A_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_013_B_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_015_A_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_015_B_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_017_A_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_017_B_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_018_A_draft_v0_1.json",
+    "holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_018_B_draft_v0_1.json"
+  ],
+  "excluded_family_ids": [
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-014",
+      "classification": "repair_before_scout",
+      "reason": "repair wording/source contrast before scout"
+    },
+    {
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-016",
+      "classification": "repair_before_scout",
+      "reason": "repair wording/source contrast before scout"
+    }
+  ],
+  "runner_support_assessment": {
+    "batch001_runner_pattern_reusable": true,
+    "batch001_runner_directly_reusable": false,
+    "batch001_runner_direct_reuse_blocker": "benchmark_factory/batches/run_BAL100_BATCH_001_five_mini_scout.py is hardwired to BAL100-BATCH-001, the Batch 001 packet glob, Batch 001 family filters, and callback-provenance prompt language.",
+    "existing_generic_scout_runner_found": false,
+    "batch002_runner_needed": true,
+    "batch002_runner_added": true,
+    "batch002_runner_scope": "no-live prompt-card and plan support only; provider execution is intentionally unsupported and fail-closed."
+  },
+  "runner_path": "benchmark_factory/batches/run_BAL100_BATCH_002_bounded_scout.py",
+  "exact_no_live_dry_run_command_if_available": "python3 -B benchmark_factory/batches/run_BAL100_BATCH_002_bounded_scout.py --out-dir scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors",
+  "exact_taylor_approval_command_for_provider_transmission_if_available": "UNAVAILABLE: this commit intentionally adds only no-live Batch 002 bounded scout planning support. The runner refuses --execute-provider-calls. Provider transmission requires a future explicit approval plus a separate provider-enabled runner change.",
+  "expected_output_directory": "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors",
+  "expected_no_live_outputs": [
+    "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/scout_plan.json",
+    "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/prompt_cards/"
+  ],
+  "expected_row_count": 60,
+  "expected_packet_count": 12,
+  "expected_family_count": 6,
+  "provider_roster": [
+    {
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "api_key_env": "OPENAI_API_KEY"
+    },
+    {
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "api_key_env": "ANTHROPIC_API_KEY"
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini-2.5-flash-lite",
+      "api_key_env": "GOOGLE_API_KEY"
+    },
+    {
+      "provider": "xai",
+      "model": "grok-3-mini",
+      "api_key_env": "XAI_API_KEY"
+    },
+    {
+      "provider": "minimax",
+      "model": "MiniMax-Text-01",
+      "api_key_env": "MINIMAX_API_KEY"
+    }
+  ],
+  "stop_conditions": [
+    "Stop if git branch is not holo-builder-freeze-manifest-gate-001 or git status is not clean before any future live scout.",
+    "Stop if the static-gate survivor set is not exactly families 011, 012, 013, 015, 017, and 018.",
+    "Stop if any repair_before_scout family, including 014 or 016, is selected.",
+    "Stop if expected rows differ from 12 packets x 5 providers = 60.",
+    "Stop if any prompt card exposes expected_verdict, spec_target_verdict, _builder, _internal, or answer-key metadata in the model-visible user payload.",
+    "Stop if any future provider-enabled runner lacks an explicit Taylor-local approval gate.",
+    "Stop if any future run attempts Judge, QA, ablation, freeze, trace creation, HBB rerun work, or proof-credit changes."
+  ],
+  "proof_credit_remains_unchanged": true,
+  "proof_credit_ready_families_remain": [
+    "BEC-PAIR-009",
+    "BEC-PAIR-010"
+  ],
+  "proof_credit_ready_pair_families": 2,
+  "proof_credit_ready_packets": 4,
+  "attestation": {
+    "scout_run": false,
+    "live_calls": false,
+    "judge_run": false,
+    "qa_or_ablation_run": false,
+    "freeze_run": false,
+    "official_traces_created": false,
+    "hbb_runner_work": false,
+    "proof_credit_changed": false,
+    "push": false
+  }
+}

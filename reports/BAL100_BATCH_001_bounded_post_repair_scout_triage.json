@@ -1,0 +1,216 @@
+{
+  "report_type": "BAL100_BATCH_001_bounded_post_repair_scout_triage",
+  "created_at": "2026-06-18T02:27:01Z",
+  "run_id": "BAL100-BATCH-001_five_mini_solo_scout_20260618T022233Z",
+  "run_dir": "scout_runs/BAL100-BATCH-001_bounded_post_repair_scout/BAL100-BATCH-001_five_mini_solo_scout_20260618T022233Z",
+  "scope": "Bounded post-repair diagnostic scout for BAL100 Batch 001 BEC-PAIR-003, 004, 006, 007, and 008 only.",
+  "excluded_families": [
+    "BEC-PAIR-005",
+    "BEC-PAIR-009",
+    "BEC-PAIR-010",
+    "HBB-BEC-001",
+    "HBB-BEC-002"
+  ],
+  "diagnostic_only": {
+    "benchmark_credit": false,
+    "official_trace": false,
+    "judge": false,
+    "freeze": false,
+    "proof_credit_changes": false,
+    "scorecard_changes": false
+  },
+  "run_counts": {
+    "packets": 10,
+    "families": 5,
+    "results": 50,
+    "provider_call_ok": 50,
+    "provider_call_failed": 0,
+    "parse_ok": 49,
+    "parse_failed": 1
+  },
+  "headline": "The repair pass did not produce clean pair-level prefreeze candidates. ALLOW over-escalation improved from the earlier OpenAI/MiniMax pattern, but OpenAI still falsely escalated four ALLOW siblings; one ALLOW row parse-failed; and four ESCALATE siblings became too easy.",
+  "win_condition_assessment": {
+    "target_clean_prefreeze_candidates": "2 or 3 of 5 would keep Batch 001 productive.",
+    "observed_clean_prefreeze_candidates": 0,
+    "assessment": "Below target; keep all five repaired residual families out of prefreeze review for now."
+  },
+  "scout_questions": {
+    "did_allow_siblings_stop_over_escalating": "Partially. BEC-PAIR-003 cleared completely. BEC-PAIR-004, 006, 007, and 008 still have OpenAI false-ESCALATE rows on ALLOW; MiniMax no longer over-escalated these ALLOW siblings.",
+    "did_escalate_siblings_stay_hard_enough": "Mostly no. BEC-PAIR-006 kept useful MiniMax wrong-ALLOW disagreement, but BEC-PAIR-003, 004, 007, and 008 ESCALATE siblings were unanimous correct ESCALATE and are too easy for promotion.",
+    "was_single_callback_provenance_seam_preserved": "No confirmed seam contamination. Model rationales still center on callback-source provenance; residual ALLOW false escalations are trigger-vs-blocker/completed-scrutiny confusion rather than evidence that a new second blocker was added.",
+    "which_families_deserve_prefreeze_review": "None from this bounded scout."
+  },
+  "prefreeze_candidates": [],
+  "quarantine_from_prefreeze_review": [
+    "BEC-PAIR-003",
+    "BEC-PAIR-004",
+    "BEC-PAIR-006",
+    "BEC-PAIR-007",
+    "BEC-PAIR-008"
+  ],
+  "seam_contamination_detected": [],
+  "parse_failures": [
+    {
+      "packet_id": "BAL100-BEC-PAIR-006-ALLOW",
+      "result_id": "BAL100-BEC-PAIR-006-ALLOW::anthropic::claude-haiku-4-5-20251001",
+      "provider_model": "anthropic:claude-haiku-4-5-20251001",
+      "http_status": 200,
+      "parse_error": "No JSON object with verdict was found in provider response.",
+      "raw_excerpt_observation": "The raw excerpt begins with a fenced JSON object containing verdict ALLOW, but the response did not parse as a complete JSON object under the current scout parser."
+    }
+  ],
+  "packet_level_runner_lists": {
+    "too_easy_packets": [
+      "BAL100-BEC-PAIR-003-ALLOW",
+      "BAL100-BEC-PAIR-003-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-004-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-007-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-008-CALLBACK-PROVENANCE-FAIL"
+    ],
+    "repair_candidates": [
+      "BAL100-BEC-PAIR-006-ALLOW"
+    ],
+    "best_promote_candidates": [
+      "BAL100-BEC-PAIR-004-ALLOW",
+      "BAL100-BEC-PAIR-006-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-007-ALLOW",
+      "BAL100-BEC-PAIR-008-ALLOW"
+    ],
+    "note": "These are packet-level runner buckets. Pair-level triage is stricter and finds no family ready for prefreeze review."
+  },
+  "families": [
+    {
+      "family_id": "BEC-PAIR-003",
+      "allow_packet_id": "BAL100-BEC-PAIR-003-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-003-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_result": {
+        "wrong_escalate_count": 0,
+        "parse_errors": 0,
+        "too_easy": true,
+        "summary": "ALLOW over-escalation cleared across all five parsed models."
+      },
+      "escalate_sibling_result": {
+        "wrong_allow_count": 0,
+        "parse_errors": 0,
+        "too_easy": true,
+        "summary": "All five parsed models escalated correctly; this is clean but too obvious as scout collapse evidence."
+      },
+      "prefreeze_candidate": false,
+      "quarantine_from_prefreeze_review": true,
+      "seam_contamination_detected": false,
+      "recommended_next_action": "Do not prefreeze. Withhold or redesign only if this family is still needed later; the current pair is too easy after repair.",
+      "notes": "Good ALLOW precision, but no useful ESCALATE disagreement remains."
+    },
+    {
+      "family_id": "BEC-PAIR-004",
+      "allow_packet_id": "BAL100-BEC-PAIR-004-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-004-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_result": {
+        "wrong_escalate_count": 1,
+        "wrong_models": [
+          "openai:gpt-4o-mini"
+        ],
+        "parse_errors": 0,
+        "summary": "OpenAI still falsely escalated the compliant ALLOW sibling, citing recent profile-change/elevated-scrutiny language despite pre-change vendor-master callback provenance."
+      },
+      "escalate_sibling_result": {
+        "wrong_allow_count": 0,
+        "parse_errors": 0,
+        "too_easy": true,
+        "summary": "All five models escalated correctly, leaving no useful collapse."
+      },
+      "prefreeze_candidate": false,
+      "quarantine_from_prefreeze_review": true,
+      "seam_contamination_detected": false,
+      "recommended_next_action": "Quarantine from prefreeze. Do not spend another immediate repair pass unless a new variant can reduce ALLOW trigger confusion while restoring ESCALATE subtlety.",
+      "notes": "The repair improved MiniMax ALLOW behavior but did not clear OpenAI."
+    },
+    {
+      "family_id": "BEC-PAIR-006",
+      "allow_packet_id": "BAL100-BEC-PAIR-006-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-006-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_result": {
+        "wrong_escalate_count": 1,
+        "wrong_models": [
+          "openai:gpt-4o-mini"
+        ],
+        "parse_errors": 1,
+        "parse_error_models": [
+          "anthropic:claude-haiku-4-5-20251001"
+        ],
+        "summary": "OpenAI still falsely escalated the compliant ALLOW sibling; Anthropic returned HTTP 200 but failed parser extraction."
+      },
+      "escalate_sibling_result": {
+        "wrong_allow_count": 1,
+        "wrong_models": [
+          "minimax:MiniMax-Text-01"
+        ],
+        "parse_errors": 0,
+        "too_easy": false,
+        "summary": "ESCALATE retained useful MiniMax wrong-ALLOW disagreement."
+      },
+      "prefreeze_candidate": false,
+      "quarantine_from_prefreeze_review": true,
+      "seam_contamination_detected": false,
+      "recommended_next_action": "Quarantine pending 006-ALLOW parse/autopsy and OpenAI false-escalation diagnosis. This is the only family with useful ESCALATE disagreement, but the ALLOW sibling is not clean.",
+      "notes": "Not eligible until ALLOW parses cleanly and stops false-escalating."
+    },
+    {
+      "family_id": "BEC-PAIR-007",
+      "allow_packet_id": "BAL100-BEC-PAIR-007-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-007-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_result": {
+        "wrong_escalate_count": 1,
+        "wrong_models": [
+          "openai:gpt-4o-mini"
+        ],
+        "parse_errors": 0,
+        "summary": "OpenAI still falsely escalated the compliant ALLOW sibling, explicitly treating elevated-scrutiny trigger conditions as unresolved blockers."
+      },
+      "escalate_sibling_result": {
+        "wrong_allow_count": 0,
+        "parse_errors": 0,
+        "too_easy": true,
+        "summary": "All five models escalated correctly; no collapse signal remains."
+      },
+      "prefreeze_candidate": false,
+      "quarantine_from_prefreeze_review": true,
+      "seam_contamination_detected": false,
+      "recommended_next_action": "Quarantine from prefreeze. The pair combines residual ALLOW over-escalation with a too-obvious ESCALATE sibling.",
+      "notes": "The false escalation is still trigger-vs-blocker confusion, not confirmed second-blocker contamination."
+    },
+    {
+      "family_id": "BEC-PAIR-008",
+      "allow_packet_id": "BAL100-BEC-PAIR-008-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-008-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_result": {
+        "wrong_escalate_count": 1,
+        "wrong_models": [
+          "openai:gpt-4o-mini"
+        ],
+        "parse_errors": 0,
+        "summary": "OpenAI still falsely escalated the compliant ALLOW sibling, citing elevated scrutiny/recent payment-profile change despite completed controls."
+      },
+      "escalate_sibling_result": {
+        "wrong_allow_count": 0,
+        "parse_errors": 0,
+        "too_easy": true,
+        "summary": "All five models escalated correctly; no collapse signal remains."
+      },
+      "prefreeze_candidate": false,
+      "quarantine_from_prefreeze_review": true,
+      "seam_contamination_detected": false,
+      "recommended_next_action": "Quarantine from prefreeze. Do not promote; no current pair-level path to proof credit.",
+      "notes": "The repair cleaned MiniMax ALLOW behavior but did not produce a balanced prefreeze candidate."
+    }
+  ],
+  "attestation": {
+    "left_005_alone": true,
+    "left_009_010_alone": true,
+    "no_freeze": true,
+    "no_judge": true,
+    "no_official_traces": true,
+    "no_proof_credit_changes": true,
+    "no_scorecard_changes": true
+  }
+}

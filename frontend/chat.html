@@ -39,16 +39,16 @@
       --accent:   #5b7ae5;
     }
     body.light {
-      --bg:       #fafaf8;
-      --bg2:      #f0eeeb;
-      --bg3:      #e8e5e0;
-      --border:   #d8d5cf;
-      --border2:  #e8e5e0;
-      --text:     #1a1a1a;
-      --text2:    #777;
-      --text3:    #aaa;
-      --text4:    #666;
-      --text5:    #444;
+      --bg:       #f6f8fb;
+      --bg2:      #ffffff;
+      --bg3:      #eef2f7;
+      --border:   #d9dee7;
+      --border2:  #e6eaf0;
+      --text:     #111827;
+      --text2:    #4b5563;
+      --text3:    #9ca3af;
+      --text4:    #6b7280;
+      --text5:    #374151;
       --input-bg: #ffffff;
       --accent:   #5b7ae5;
     }
@@ -111,9 +111,6 @@
     .msg-action.copied { color: #22c55e; }
     .trust-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; min-height: 18px; }
     .web-checked { color: var(--text3); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3; }
-    .runtime-rail { flex-wrap: wrap; align-items: flex-start; gap: 6px; }
-    .runtime-pill { color: var(--text3); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3; }
-
     .label { font-size: 11px; color: var(--text2); padding: 0 4px; }
     .chips { display: flex; flex-direction: column; gap: 7px; margin-top: 18px; }
     .chip { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border); background: none; color: var(--text2); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 500; cursor: pointer; text-align: left; transition: all 0.15s; width: 100%; }
@@ -217,8 +214,8 @@
     /* Header */
     #header { padding: 10px 20px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     #header-brand { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
-    #header h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; margin: 0; display: flex; align-items: baseline; gap: 5px; }
-    #brand-sub { font-size: 15px; font-weight: 300; color: var(--text2); opacity: 0.55; letter-spacing: -0.1px; }
+    #header h1 { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; margin: 0; display: flex; align-items: baseline; gap: 6px; }
+    #brand-sub { font-size: 15px; font-weight: 400; color: var(--text2); opacity: 0.65; letter-spacing: 0; }
     #brand-tagline { font-size: 10px; font-weight: 500; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.5; }
     #header-right { display: flex; align-items: center; gap: 8px; }
     #new-thread { background: none; border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.15s; }
@@ -259,8 +256,17 @@
     #seed-btn { margin-top: 6px; width: 100%; background: var(--accent); border: none; color: #fff; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
 
     /* HoloBrain panel */
-    #holobrain-toggle { display: none; background: var(--bg2); border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; }
-    #holobrain-toggle:hover { border-color: var(--text2); color: var(--text5); }
+    #runtime-toggle, #holobrain-toggle { display: none; background: var(--bg2); border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    #runtime-toggle:hover, #holobrain-toggle:hover { border-color: var(--text2); color: var(--text5); }
+    #runtime-panel { position: fixed; top: 0; right: 0; height: 100vh; width: min(420px, 100vw); background: var(--bg); border-left: 1px solid var(--border); z-index: 91; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.24s ease; }
+    #runtime-panel.open { transform: translateX(0); }
+    #runtime-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    #runtime-panel-header h3 { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: -0.2px; }
+    #runtime-panel-close { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 4px; }
+    #runtime-body { flex: 1; overflow-y: auto; padding: 16px 18px 28px; display: flex; flex-direction: column; gap: 10px; }
+    .runtime-panel-row { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .runtime-panel-key { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+    .runtime-panel-val { font-size: 13px; color: var(--text); line-height: 1.45; margin-top: 3px; overflow-wrap: anywhere; }
     #holobrain-panel { position: fixed; top: 0; right: 0; height: 100vh; width: min(520px, 100vw); background: var(--bg); border-left: 1px solid var(--border); z-index: 92; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.24s ease; }
     #holobrain-panel.open { transform: translateX(0); }
     #holobrain-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
@@ -424,7 +430,7 @@
       .holo-body h2 { font-size: 20px; }
       .msg.user .bubble { max-width: 90%; }
       #memory-panel { width: 100%; }
-      #holobrain-panel { width: 100%; }
+      #runtime-panel, #holobrain-panel { width: 100%; }
       #thread-panel { width: 85%; max-width: 320px; }
       #thread-panel-close { font-size: 26px; padding: 8px 10px; color: var(--text); }
       #thread-panel-header { padding: 16px 16px 12px; }
@@ -446,7 +452,7 @@
 <!-- Sign-in overlay -->
 <div id="signin-overlay">
   <h2>Holo</h2>
-  <p>Three AI minds. One voice. A memory that builds with you.</p>
+  <p>One workspace. Selected context that stays useful.</p>
 
   <div id="g_signin_btn"></div>
 
@@ -601,6 +607,17 @@
   </div>
 </div>
 
+<!-- Runtime/System dashboard — safe per-turn metadata only -->
+<div id="runtime-panel">
+  <div id="runtime-panel-header">
+    <h3>Runtime/System</h3>
+    <button id="runtime-panel-close" onclick="closeRuntimePanel()">×</button>
+  </div>
+  <div id="runtime-body">
+    <div class="brain-muted">Ask Holo something to inspect the latest runtime turn.</div>
+  </div>
+</div>
+
 <div id="surface-panel">
   <div id="surface-panel-header">
     <span class="surface-title">On my mind</span>
@@ -614,12 +631,13 @@
 <div id="app">
   <div id="header">
     <div id="header-brand">
-      <h1>Holo <span id="brand-sub">Chat</span><span id="space-label"></span></h1>
+      <h1><span>HoloChat</span> <span id="brand-sub">4DNA</span><span id="space-label"></span></h1>
       <span id="brand-tagline">Memory-attached workspace</span>
     </div>
     <div id="header-right">
       <div id="incognito-badge">◉ Incognito</div>
       <button id="thread-toggle" onclick="toggleThreadPanel()" title="See my threads">See my threads</button>
+      <button id="runtime-toggle" onclick="openRuntimePanel()" title="Open Runtime/System">Runtime</button>
       <button id="holobrain-toggle" onclick="openHoloBrainPanel()" title="Open HoloBrain">HoloBrain</button>
       <button id="incognito-btn" onclick="toggleIncognito()" title="Start incognito thread">Start incognito thread</button>
       <button id="new-thread" onclick="newThread()">Start new thread</button>
@@ -810,12 +828,12 @@
 
   // ---- Rotating greeting ---------------------------------------------------
   const GREETINGS = [
-    { h: "Welcome to Holo.",           sub: "One brain. Every part of your life." },
+    { h: "Welcome to Holo.",           sub: "A focused workspace with selected context." },
     { h: "Good to have you here.",     sub: "What's on your mind?" },
     { h: "Everything in one place.",   sub: "Holo is ready." },
     { h: "Your world, all in one.",    sub: "Start anywhere." },
     { h: "Holo is here.",             sub: "Same voice. Every context." },
-    { h: "One brain. Everywhere.",     sub: "What do you want to work on?" },
+    { h: "Context, kept useful.",      sub: "What do you want to work on?" },
   ];
   const _g = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
   document.getElementById("greeting").textContent     = _g.h;
@@ -1125,10 +1143,10 @@
     const name = data.name || data.email || "?";
     const avatarClick = `toggleAvatarMenu()`;
     if (data.avatar_url) {
-      avatarEl.innerHTML = `<img class="avatar" src="${data.avatar_url}" title="${name}" onclick="${avatarClick}" /><div id="memory-badge" style="display:none"></div>`;
+      avatarEl.innerHTML = `<img class="avatar" src="${data.avatar_url}" title="Signed-in capsule" aria-label="Signed-in capsule" onclick="${avatarClick}" /><div id="memory-badge" style="display:none"></div>`;
     } else {
       const initial = name[0].toUpperCase();
-      avatarEl.innerHTML = `<div class="avatar-placeholder" title="${name}" onclick="${avatarClick}">${initial}</div><div id="memory-badge" style="display:none"></div>`;
+      avatarEl.innerHTML = `<div class="avatar-placeholder" title="Signed-in capsule" aria-label="Signed-in capsule" onclick="${avatarClick}">${initial}</div><div id="memory-badge" style="display:none"></div>`;
     }
     updateModeUI(capsuleMode);
     fetchCapsuleContext(name);
@@ -1215,13 +1233,8 @@
   function updateMemoryBadge() {
     const badge = document.getElementById("memory-badge");
     if (!badge) return;
-    const count = Object.keys(_memoryContext).length;
-    if (count > 0) {
-      badge.textContent = count;
-      badge.style.display = "flex";
-    } else {
-      badge.style.display = "none";
-    }
+    badge.textContent = "";
+    badge.style.display = "none";
   }
 
   function renderMemoryList() {
@@ -1304,11 +1317,10 @@
     const consolidations = data.consolidations || {};
     const artifacts = data.artifacts || {};
 
-    const contextRows = brainRows(ctx.entries || [], "No capsule context rows.", item => `
-      <div class="brain-row">
-        <div class="brain-row-key">${escHtml(item.key)}${item.redacted ? ` <span class="brain-pill">redacted</span>` : ""}</div>
-        <div class="brain-row-val">${escHtml(item.value)}</div>
-      </div>`);
+    const contextRows = `
+      <div class="brain-muted">
+        Memory details hidden by default. Capsule context counts stay visible without showing stored rows.
+      </div>`;
 
     const lifeRows = brainRows(life.entries || [], "No active life context rows.", item => `
       <div class="brain-row">
@@ -1367,8 +1379,8 @@
         <div class="brain-stat"><div class="brain-stat-num">${consolidations.count || 0}</div><div class="brain-stat-label">Notes</div></div>
         <div class="brain-stat"><div class="brain-stat-num">${artifacts.count || 0}</div><div class="brain-stat-label">Artifacts</div></div>
       </div>
-      ${brainSection("Capsule context", `${ctx.count || 0} rows`, contextRows, true)}
-      ${brainSection("Life context", `${life.count || 0} rows`, lifeRows, true)}
+      ${brainSection("Capsule context", `${ctx.count || 0} rows`, contextRows)}
+      ${brainSection("Life context", `${life.count || 0} rows`, lifeRows)}
       ${brainSection("Sessions", `${sessions.shown || 0} shown`, sessionRows)}
       ${brainSection("Recent messages", `${messages.shown || 0} shown`, messageRows)}
       ${brainSection("Consolidations", `${consolidations.shown || 0} shown`, consolidationRows)}
@@ -1907,13 +1919,11 @@
         ${suggestions.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}
       </div>` : "";
     const webCheckedHtml = renderWebCheckedIndicator(data);
-    const runtimeRailHtml = renderRuntimeRail(data);
     const body = msgEl.querySelector(".holo-body");
     body.innerHTML = `
       <div class="bubble" id="${responseId}">${renderMarkdown(mainText)}</div>
       ${chipsHtml}
       ${webCheckedHtml}
-      ${runtimeRailHtml}
       <div class="msg-actions">
         <button class="msg-action" title="Copy" onclick="copyMsg('${responseId}', this)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -1925,6 +1935,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
         </button>
       </div>`;
+    updateRuntimePanel(data);
     msgEl.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -1953,7 +1964,6 @@
         ${suggestions.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}
       </div>` : "";
     const webCheckedHtml = renderWebCheckedIndicator(data);
-    const runtimeRailHtml = renderRuntimeRail(data);
 
     msg.innerHTML = `
       <div class="holo-icon">✦</div>
@@ -1961,7 +1971,6 @@
         <div class="bubble" id="${responseId}">${renderMarkdown(mainText)}</div>
         ${chipsHtml}
         ${webCheckedHtml}
-        ${runtimeRailHtml}
         <div class="msg-actions">
           <button class="msg-action" title="Copy" onclick="copyMsg('${responseId}', this)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -1976,6 +1985,7 @@
       </div>`;
 
     container.appendChild(msg);
+    updateRuntimePanel(data);
 
     // Stagger each block element in so it doesn't land as one big blast
     const bubble = msg.querySelector(".bubble");
@@ -2119,10 +2129,25 @@
     return `<div class="trust-row"><span class="web-checked"${attrs}>Web checked</span></div>`;
   }
 
-  function renderRuntimeRail(data) {
+  function openRuntimePanel() {
+    document.getElementById("runtime-panel").classList.add("open");
+  }
+
+  function closeRuntimePanel() {
+    document.getElementById("runtime-panel").classList.remove("open");
+  }
+
+  function runtimeRow(label, value) {
+    return `
+      <div class="runtime-panel-row">
+        <div class="runtime-panel-key">${escHtml(label)}</div>
+        <div class="runtime-panel-val">${escHtml(value)}</div>
+      </div>`;
+  }
+
+  function updateRuntimePanel(data) {
     const runtime = data && data.runtime;
-    if (!runtime) return "";
-    const budget = data.context_budget || {};
+    if (!runtime) return;
     const selected = runtime.selected_analyst || {};
     const provider = runtime.selected_provider || selected.provider || "";
     const model = runtime.selected_model || selected.model || "";
@@ -2146,9 +2171,6 @@
     const batonMode = runtime.baton_pass_mode || "off";
     const holo4dnaMode = runtime.holo4dna_mode || "off";
     const autoReseed = runtime.autoreseed_enabled === true ? "automatic" : "off/not configured";
-    const rows = Array.isArray(budget.rows) ? budget.rows : [];
-    const includedRows = rows.filter(row => row && row.included !== false).length;
-    const omittedRows = rows.filter(row => row && row.included === false).length;
     const usage = runtime.usage || data.usage || {};
     const fmtTokens = value => {
       const n = Number(value);
@@ -2161,33 +2183,36 @@
     const costSource = usage.cost_source === "static_pricing_estimate"
       ? "pricing estimate"
       : (usage.cost_source === "unknown_pricing" ? "unknown pricing" : (usage.cost_source || "unknown"));
-    const chips = [];
-    chips.push(`Runtime: ${runtimeProfile || "unknown"}`);
-    if (provider || model) chips.push(`This turn: ${provider}${model ? ":" + model : ""}`);
-    chips.push(`Mode: ${modeLabel}`);
-    chips.push(`Selection: ${runtime.selection_mode || "unknown"}`);
-    if (activePoolCount) chips.push(`Active pool: ${activePoolCount} ${poolLabel}`);
-    chips.push(`Governor: ${govLabel}`);
-    chips.push(`Governor mode: ${govMode}`);
-    chips.push(`Context delivery: ${contextDelivery}`);
-    chips.push(`Full memory to analyst: ${fullMemory}`);
-    chips.push(`HoloBrain: ${holoBrain}`);
-    chips.push(`State object: ${stateMode}`);
-    chips.push(`Baton Pass: ${batonMode}`);
-    chips.push(`Holo4DNA: ${holo4dnaMode}`);
-    chips.push(`AutoReseed: ${autoReseed}`);
+
+    const rows = [];
+    rows.push(["Runtime", runtimeProfile || "unknown"]);
+    if (provider || model) rows.push(["This turn", `${provider}${model ? ":" + model : ""}`]);
+    rows.push(["Mode", modeLabel]);
+    rows.push(["Selection", runtime.selection_mode || "unknown"]);
+    if (activePoolCount) rows.push(["Active pool", `${activePoolCount} ${poolLabel}`]);
+    rows.push(["Governor", govLabel]);
+    rows.push(["Governor mode", govMode]);
+    rows.push(["Context delivery", contextDelivery]);
+    rows.push(["Full memory to analyst", fullMemory]);
+    rows.push(["HoloBrain", holoBrain]);
+    rows.push(["State object", stateMode]);
+    rows.push(["Baton Pass", batonMode]);
+    rows.push(["Holo4DNA", holo4dnaMode]);
+    rows.push(["AutoReseed", autoReseed]);
     if (Object.keys(usage).length) {
-      chips.push(`Estimated input tokens: ${fmtTokens(usage.input_token_estimate)}`);
-      chips.push(`Estimated output tokens: ${fmtTokens(usage.output_token_estimate)}`);
-      chips.push(`Estimated total tokens: ${fmtTokens(usage.total_token_estimate)}`);
-      chips.push(`Latency: ${fmtTokens(usage.latency_ms)} ms`);
-      chips.push(`Estimated cost: ${costLabel}`);
-      chips.push(`Cost source: ${costSource}`);
-      chips.push("Pricing estimate: exact provider billing may differ");
+      rows.push(["Estimated input tokens", fmtTokens(usage.input_token_estimate)]);
+      rows.push(["Estimated output tokens", fmtTokens(usage.output_token_estimate)]);
+      rows.push(["Estimated total tokens", fmtTokens(usage.total_token_estimate)]);
+      rows.push(["Latency", `${fmtTokens(usage.latency_ms)} ms`]);
+      rows.push(["Estimated cost", costLabel]);
+      rows.push(["Cost source", costSource]);
+      rows.push(["Pricing estimate", "exact provider billing may differ"]);
     }
-    if (budget.total_token_estimate !== undefined) chips.push(`Context: ${budget.total_token_estimate} est. tokens`);
-    if (rows.length) chips.push(`Rows: ${includedRows}/${omittedRows}`);
-    return `<div class="trust-row runtime-rail">${chips.map(label => `<span class="runtime-pill">${escHtml(label)}</span>`).join("")}</div>`;
+
+    document.getElementById("runtime-toggle").style.display = "block";
+    document.getElementById("runtime-body").innerHTML = rows
+      .map(([label, value]) => runtimeRow(label, value))
+      .join("");
   }
 
   function copyCode(btn) {

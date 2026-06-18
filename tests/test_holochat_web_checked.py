@@ -159,35 +159,43 @@ def test_frontend_message_copy_has_fallback_and_targets_response_bubbles():
 def test_frontend_runtime_rail_uses_truthful_serial_labels():
     html = Path("frontend/chat.html").read_text()
 
-    assert "renderRuntimeRail(data)" in html
+    assert "<span>HoloChat</span>" in html
+    assert '<span id="brand-sub">4DNA</span>' in html
+    assert "Memory-attached workspace" in html
+    assert "updateRuntimePanel(data)" in html
+    assert 'id="runtime-toggle"' in html
+    assert 'id="runtime-panel"' in html
+    assert "Runtime/System" in html
+    assert "renderRuntimeRail(data)" not in html
+    assert "runtimeRailHtml" not in html
+    assert "runtime-pill" not in html
     for label in (
-        "Runtime:",
-        "This turn:",
-        "Mode: ${modeLabel}",
+        "Runtime",
+        "This turn",
+        "Mode",
         "serial, one analyst per turn",
-        "Selection:",
-        "Active pool:",
-        "Governor:",
-        "Governor mode:",
-        "Context delivery:",
-        "Full memory to analyst:",
-        "HoloBrain:",
-        "State object:",
-        "Baton Pass:",
-        "Holo4DNA:",
-        "AutoReseed:",
-        "Estimated input tokens:",
-        "Estimated output tokens:",
-        "Estimated total tokens:",
-        "Latency:",
-        "Estimated cost:",
-        "Cost source:",
-        "Pricing estimate:",
+        "Selection",
+        "Active pool",
+        "Governor",
+        "Governor mode",
+        "Context delivery",
+        "Full memory to analyst",
+        "HoloBrain",
+        "State object",
+        "Baton Pass",
+        "Holo4DNA",
+        "AutoReseed",
+        "Estimated input tokens",
+        "Estimated output tokens",
+        "Estimated total tokens",
+        "Latency",
+        "Estimated cost",
+        "Cost source",
+        "Pricing estimate",
         "exact provider billing may differ",
     ):
         assert label in html
 
-    assert "Memory-attached workspace" in html
     assert "one selected analyst model" in html
     assert ("top 3 " + "frontier models") not in html
     assert ("Three " + "models") not in html
@@ -199,3 +207,23 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     assert ("actual " + "billed cost") not in html.lower()
     assert ("raw " + "prompt") not in html.lower()
     assert ("provider request " + "body") not in html.lower()
+
+
+def test_frontend_header_avatar_has_safe_account_tooltip_and_hidden_count_badge():
+    html = Path("frontend/chat.html").read_text()
+
+    assert 'title="Signed-in capsule"' in html
+    assert 'aria-label="Signed-in capsule"' in html
+    assert 'id="memory-badge" style="display:none"' in html
+    assert 'badge.style.display = "none";' in html
+    assert "badge.textContent = count" not in html
+    assert 'title="${name}"' not in html
+
+
+def test_frontend_assistant_messages_do_not_render_runtime_metadata_inline():
+    html = Path("frontend/chat.html").read_text()
+
+    assert "${webCheckedHtml}" in html
+    assert "${runtimeRailHtml}" not in html
+    assert "trust-row runtime-rail" not in html
+    assert "updateRuntimePanel(data);" in html

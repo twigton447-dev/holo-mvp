@@ -99,3 +99,13 @@ def test_frontend_has_holobrain_button_and_render_path():
     assert 'id="holobrain-panel"' in html
     assert 'fetch("/v1/holo-brain"' in html
     assert "renderHoloBrain(data)" in html
+
+
+def test_frontend_holobrain_hides_capsule_context_rows_by_default():
+    html = Path("frontend/chat.html").read_text()
+
+    assert "Memory details hidden by default" in html
+    assert "Capsule context counts stay visible without showing stored rows." in html
+    assert "const contextRows = brainRows(ctx.entries" not in html
+    assert 'brainSection("Capsule context", `${ctx.count || 0} rows`, contextRows, true)' not in html
+    assert 'brainSection("Life context", `${life.count || 0} rows`, lifeRows, true)' not in html

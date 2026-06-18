@@ -1,0 +1,156 @@
+{
+  "report_type": "BAL100_BATCH_003_targeted_post_repair_rescout_triage",
+  "batch_id": "BAL100-BATCH-003",
+  "seam_name": "subtle action-boundary defect",
+  "source_repair_commit": "fa332c2 repair: apply targeted BAL100 batch003 scout repairs",
+  "runner_support_commit": "f3057c8 scout: add targeted batch003 post-repair rescout mode",
+  "source_static_gate": "reports/BAL100_BATCH_003_targeted_post_repair_static_gate.json",
+  "source_run_dir": "scout_runs/BAL100-BATCH-003_targeted_post_repair_rescout",
+  "source_summary_path": "scout_runs/BAL100-BATCH-003_targeted_post_repair_rescout/summary.json",
+  "source_results_path": "scout_runs/BAL100-BATCH-003_targeted_post_repair_rescout/results.jsonl",
+  "scope": {
+    "family_ids": [
+      "BAL100-BEC-SUBTLE-CLOSEOUT-019",
+      "BAL100-BEC-SUBTLE-CLOSEOUT-020"
+    ],
+    "retired_not_touched_family_ids": [
+      "BAL100-BEC-SUBTLE-CLOSEOUT-021",
+      "BAL100-BEC-SUBTLE-CLOSEOUT-022"
+    ],
+    "packet_count": 4,
+    "allow_packets": 2,
+    "escalate_packets": 2,
+    "provider_roster": [
+      "openai:gpt-4o-mini",
+      "anthropic:claude-haiku-4-5-20251001",
+      "gemini:gemini-2.5-flash-lite",
+      "xai:grok-3-mini",
+      "minimax:MiniMax-Text-01"
+    ],
+    "expected_row_count": 20,
+    "benchmark_credit": false,
+    "targeted_rescout_only": true,
+    "official_trace": false,
+    "judge": false,
+    "freeze": false,
+    "qa": false,
+    "ablation": false
+  },
+  "run_health": {
+    "run_status": "complete",
+    "rows_attempted": 20,
+    "rows_completed": 20,
+    "provider_calls_succeeded": 20,
+    "provider_calls_failed": 0,
+    "parse_ok": 20,
+    "parse_failed": 0,
+    "provider_error_counts": {},
+    "incomplete_packets": []
+  },
+  "proof_credit": {
+    "proof_credit_remains_unchanged": true,
+    "current_proof_credit_pair_families": 2,
+    "current_proof_credit_packets": 4,
+    "credited_families": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "batch003_credit_claimed": false
+  },
+  "family_triage": [
+    {
+      "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-019",
+      "packet_ids": [
+        "BAL100-BEC-SUBTLE-CLOSEOUT-019-A",
+        "BAL100-BEC-SUBTLE-CLOSEOUT-019-B"
+      ],
+      "rows_attempted": 10,
+      "provider_calls_succeeded": 10,
+      "provider_calls_failed": 0,
+      "parse_health": {
+        "parse_ok": 10,
+        "parse_failed": 0
+      },
+      "allow_sibling_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-019-A",
+        "verdict_counts": {
+          "ALLOW": 4,
+          "ESCALATE": 1
+        },
+        "false_escalation": true,
+        "false_escalation_providers": [
+          "openai:gpt-4o-mini"
+        ],
+        "observed_behavior": "The ALLOW sibling improved enough for four providers to accept exact site/SKU closure, but OpenAI still treated the alternate site as an unresolved source-record defect."
+      },
+      "escalate_sibling_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-019-B",
+        "verdict_counts": {
+          "ESCALATE": 5
+        },
+        "too_easy_or_neon": true,
+        "observed_behavior": "All five providers caught the accessory-kit versus serialized-module mismatch; the ESCALATE sibling no longer preserved useful disagreement."
+      },
+      "single_material_delta_appears_preserved": true,
+      "secondary_blocker_observed": false,
+      "evidence_chain_contamination": false,
+      "triage_class": "repair_exhausted_kill",
+      "promotion_blockers": [
+        "ALLOW still has a false escalation.",
+        "ESCALATE is unanimous and too easy after repair."
+      ],
+      "recommended_next_action": "Do not spend another repair cycle on this family. Retire it from the current proof-credit path."
+    },
+    {
+      "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-020",
+      "packet_ids": [
+        "BAL100-BEC-SUBTLE-CLOSEOUT-020-A",
+        "BAL100-BEC-SUBTLE-CLOSEOUT-020-B"
+      ],
+      "rows_attempted": 10,
+      "provider_calls_succeeded": 10,
+      "provider_calls_failed": 0,
+      "parse_health": {
+        "parse_ok": 10,
+        "parse_failed": 0
+      },
+      "allow_sibling_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-020-A",
+        "verdict_counts": {
+          "ALLOW": 2,
+          "ESCALATE": 3
+        },
+        "false_escalation": true,
+        "false_escalation_providers": [
+          "openai:gpt-4o-mini",
+          "gemini:gemini-2.5-flash-lite",
+          "minimax:MiniMax-Text-01"
+        ],
+        "observed_behavior": "The ALLOW sibling still reads as timing-risky to a majority of providers despite the pre-release effective timestamp."
+      },
+      "escalate_sibling_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-020-B",
+        "verdict_counts": {
+          "ESCALATE": 5
+        },
+        "too_easy_or_neon": true,
+        "observed_behavior": "All five providers caught the post-queue effective-cycle defect; the ESCALATE sibling remained unanimous."
+      },
+      "single_material_delta_appears_preserved": true,
+      "secondary_blocker_observed": false,
+      "evidence_chain_contamination": false,
+      "triage_class": "repair_exhausted_kill",
+      "promotion_blockers": [
+        "ALLOW materially false-escalated after repair.",
+        "ESCALATE remains unanimous and too easy."
+      ],
+      "recommended_next_action": "Do not spend another repair cycle on this family. Retire it from the current proof-credit path."
+    }
+  ],
+  "triage_counts": {
+    "promote_to_prefreeze_review": 0,
+    "repair_exhausted_kill": 2,
+    "quarantine": 0
+  },
+  "recommended_next_action": "Do not move Batch 003 to prefreeze review. Retire 019 and 020 with 021 and 022 for the current proof-credit path, and reseed the subtle-ESCALATE seam if more candidates are needed."
+}

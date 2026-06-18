@@ -1,0 +1,250 @@
+{
+  "run_id": "tiny_live_finance_board_strategy_20260618T195627Z",
+  "benchmark_id": "poc_001",
+  "status": "diagnostic_tiny_live_smoke",
+  "benchmark_credit": false,
+  "public_claim": false,
+  "domain_id": "finance_board_strategy",
+  "turn_limit": 2,
+  "conditions": [
+    "solo_openai",
+    "solo_anthropic",
+    "solo_xai",
+    "holo_3substrate_gov"
+  ],
+  "third_provider": "xai",
+  "started_at_utc": "2026-06-18T19:56:27.827284+00:00",
+  "completed_at_utc": "2026-06-18T19:59:20.254716+00:00",
+  "provider_env": {
+    "OPENAI_API_KEY": "PRESENT",
+    "ANTHROPIC_API_KEY": "PRESENT",
+    "XAI_API_KEY": "PRESENT"
+  },
+  "model_lineup": {
+    "openai": "gpt-5.4",
+    "anthropic": "claude-sonnet-4-6",
+    "xai": "grok-3-mini"
+  },
+  "holo_analyst_sequence": [
+    "openai",
+    "anthropic"
+  ],
+  "holo_governor_sequence": [
+    null,
+    "xai"
+  ],
+  "call_count": 9,
+  "expected_call_count": 9,
+  "total_input_tokens": 14668,
+  "total_output_tokens": 10791,
+  "total_latency_ms": 172400,
+  "condition_results": [
+    {
+      "condition": "solo_openai",
+      "turns_completed": 2,
+      "calls": [
+        {
+          "call_type": "analyst_turn",
+          "condition": "solo_openai",
+          "domain_id": "finance_board_strategy",
+          "turn": 1,
+          "turn_limit": 2,
+          "role": "Initial Builder",
+          "artifact_kind": "draft",
+          "provider": "openai",
+          "model": "gpt-5.4",
+          "input_tokens": 495,
+          "output_tokens": 1500,
+          "latency_ms": 15954,
+          "system_sha256": "a73b1d1d0aa3138834ddb2e188eed76c6b660dc8538fed73956ae278bf7dd19d",
+          "user_sha256": "4f03f3870ca6fdff01de0f72c289e7fe0c199a4d58b3f226d4677d08ccc73581",
+          "output_sha256": "6f3fd1b809188158a40600c0828d4dead5eb4af3d0f526a077874fde2e78b2d1",
+          "artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/solo_openai/turn_1.md",
+          "governor_trace": null
+        },
+        {
+          "call_type": "analyst_turn",
+          "condition": "solo_openai",
+          "domain_id": "finance_board_strategy",
+          "turn": 2,
+          "turn_limit": 2,
+          "role": "Evidence and Risk Critic",
+          "artifact_kind": "critique",
+          "provider": "openai",
+          "model": "gpt-5.4",
+          "input_tokens": 2311,
+          "output_tokens": 1146,
+          "latency_ms": 11208,
+          "system_sha256": "a73b1d1d0aa3138834ddb2e188eed76c6b660dc8538fed73956ae278bf7dd19d",
+          "user_sha256": "279755f20f3d5ed0528fbffe0b2147c382ba20fb23a6ee153259f587d0187847",
+          "output_sha256": "b63de33c88c1f212c392f574741d1fd65f3c65a403d23481c70d7fffc20d3a86",
+          "artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/solo_openai/turn_2.md",
+          "governor_trace": null
+        }
+      ],
+      "final_artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/solo_openai/turn_2.md"
+    },
+    {
+      "condition": "solo_anthropic",
+      "turns_completed": 2,
+      "calls": [
+        {
+          "call_type": "analyst_turn",
+          "condition": "solo_anthropic",
+          "domain_id": "finance_board_strategy",
+          "turn": 1,
+          "turn_limit": 2,
+          "role": "Initial Builder",
+          "artifact_kind": "draft",
+          "provider": "anthropic",
+          "model": "claude-sonnet-4-6",
+          "input_tokens": 599,
+          "output_tokens": 1500,
+          "latency_ms": 36244,
+          "system_sha256": "a73b1d1d0aa3138834ddb2e188eed76c6b660dc8538fed73956ae278bf7dd19d",
+          "user_sha256": "4f03f3870ca6fdff01de0f72c289e7fe0c199a4d58b3f226d4677d08ccc73581",
+          "output_sha256": "6bee1034a3e3831d3a5b112c8ecb52ae0892aaa8ce02ae8928ca0193ce24ab22",
+          "artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/solo_anthropic/turn_1.md",
+          "governor_trace": null
+        },
+        {
+          "call_type": "analyst_turn",
+          "condition": "solo_anthropic",
+          "domain_id": "finance_board_strategy",
+          "turn": 2,
+          "turn_limit": 2,
+          "role": "Evidence and Risk Critic",
+          "artifact_kind": "critique",
+          "provider": "anthropic",
+          "model": "claude-sonnet-4-6",
+          "input_tokens": 2445,
+          "output_tokens": 1500,
+          "latency_ms": 36769,
+          "system_sha256": "a73b1d1d0aa3138834ddb2e188eed76c6b660dc8538fed73956ae278bf7dd19d",
+          "user_sha256": "a84025056bac99818111748f13b37c6e23f6b67ecd9ea6d249bbd14a06e82928",
+          "output_sha256": "98f57a5c6b99f8ec05a6537a7b6a9c04aaf545adf430b879a475d2f916fff9b9",
+          "artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/solo_anthropic/turn_2.md",
+          "governor_trace": null
+        }
+      ],
+      "final_artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/solo_anthropic/turn_2.md"
+    },
+    {
+      "condition": "solo_xai",
+      "turns_completed": 2,
+      "calls": [
+        {
+          "call_type": "analyst_turn",
+          "condition": "solo_xai",
+          "domain_id": "finance_board_strategy",
+          "turn": 1,
+          "turn_limit": 2,
+          "role": "Initial Builder",
+          "artifact_kind": "draft",
+          "provider": "xai",
+          "model": "grok-3-mini",
+          "input_tokens": 615,
+          "output_tokens": 637,
+          "latency_ms": 7934,
+          "system_sha256": "a73b1d1d0aa3138834ddb2e188eed76c6b660dc8538fed73956ae278bf7dd19d",
+          "user_sha256": "4f03f3870ca6fdff01de0f72c289e7fe0c199a4d58b3f226d4677d08ccc73581",
+          "output_sha256": "3e1d7c56711b4a15e9cd1dd8d048d4f21d24789546c3828c7fb4839b23fb4f7d",
+          "artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/solo_xai/turn_1.md",
+          "governor_trace": null
+        },
+        {
+          "call_type": "analyst_turn",
+          "condition": "solo_xai",
+          "domain_id": "finance_board_strategy",
+          "turn": 2,
+          "turn_limit": 2,
+          "role": "Evidence and Risk Critic",
+          "artifact_kind": "critique",
+          "provider": "xai",
+          "model": "grok-3-mini",
+          "input_tokens": 1601,
+          "output_tokens": 508,
+          "latency_ms": 6628,
+          "system_sha256": "a73b1d1d0aa3138834ddb2e188eed76c6b660dc8538fed73956ae278bf7dd19d",
+          "user_sha256": "75b0c1435ae9e43763214150b20b8372523441a8736721817615f1641c1c79d6",
+          "output_sha256": "729803aac5dc85ab9752bb0c30628ea08e27c18fe106f28e42138cc2a721bc4d",
+          "artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/solo_xai/turn_2.md",
+          "governor_trace": null
+        }
+      ],
+      "final_artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/solo_xai/turn_2.md"
+    },
+    {
+      "condition": "holo_3substrate_gov",
+      "turns_completed": 2,
+      "calls": [
+        {
+          "call_type": "analyst_turn",
+          "condition": "holo_3substrate_gov",
+          "domain_id": "finance_board_strategy",
+          "turn": 1,
+          "turn_limit": 2,
+          "role": "Initial Builder",
+          "artifact_kind": "draft",
+          "provider": "openai",
+          "model": "gpt-5.4",
+          "input_tokens": 495,
+          "output_tokens": 1500,
+          "latency_ms": 16349,
+          "system_sha256": "a73b1d1d0aa3138834ddb2e188eed76c6b660dc8538fed73956ae278bf7dd19d",
+          "user_sha256": "4f03f3870ca6fdff01de0f72c289e7fe0c199a4d58b3f226d4677d08ccc73581",
+          "output_sha256": "7defcb0891e62be06e4512dec4d913fd380153a2590a519fe505dacab1ed6933",
+          "artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/holo_3substrate_gov/turn_1.md",
+          "governor_trace": null
+        },
+        {
+          "call_type": "governor_mission_packet",
+          "turn": 2,
+          "provider": "xai",
+          "model": "grok-3-mini",
+          "input_tokens": 2345,
+          "output_tokens": 1000,
+          "latency_ms": 5982,
+          "system_sha256": "131555ae4c8cc4b8ac5cd4d47c62da656d2c16b325fa09b7e7a5a436f6dec345",
+          "user_sha256": "7068c52b6ab4647025083fa700b9a1f0323a2bb85ebfb799f98f015b15011618",
+          "output_sha256": "d1ea47442638142a9c17031285ca0347ccf7e66bc80547b4e49efe827eb47b85",
+          "mission_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/mission_packets/finance_board_strategy/holo_3substrate_gov/turn_2_mission.md"
+        },
+        {
+          "call_type": "analyst_turn",
+          "condition": "holo_3substrate_gov",
+          "domain_id": "finance_board_strategy",
+          "turn": 2,
+          "turn_limit": 2,
+          "role": "Evidence and Risk Critic",
+          "artifact_kind": "critique",
+          "provider": "anthropic",
+          "model": "claude-sonnet-4-6",
+          "input_tokens": 3762,
+          "output_tokens": 1500,
+          "latency_ms": 35332,
+          "system_sha256": "a73b1d1d0aa3138834ddb2e188eed76c6b660dc8538fed73956ae278bf7dd19d",
+          "user_sha256": "f11d726a9e0d3a13bfdd769c9f84378bbe4622fcbd2363d9a00373d7f85859d3",
+          "output_sha256": "c4403ea24bb76c5092ace9fa889549ae1b53c62c7de9c129caf9330fa380aba9",
+          "artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/holo_3substrate_gov/turn_2.md",
+          "governor_trace": {
+            "call_type": "governor_mission_packet",
+            "turn": 2,
+            "provider": "xai",
+            "model": "grok-3-mini",
+            "input_tokens": 2345,
+            "output_tokens": 1000,
+            "latency_ms": 5982,
+            "system_sha256": "131555ae4c8cc4b8ac5cd4d47c62da656d2c16b325fa09b7e7a5a436f6dec345",
+            "user_sha256": "7068c52b6ab4647025083fa700b9a1f0323a2bb85ebfb799f98f015b15011618",
+            "output_sha256": "d1ea47442638142a9c17031285ca0347ccf7e66bc80547b4e49efe827eb47b85",
+            "mission_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/mission_packets/finance_board_strategy/holo_3substrate_gov/turn_2_mission.md"
+          }
+        }
+      ],
+      "final_artifact_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/poc_001/runs/tiny_live_finance_board_strategy_20260618T195627Z/artifacts/finance_board_strategy/holo_3substrate_gov/turn_2.md"
+    }
+  ],
+  "notes": "Tiny live smoke only. Not benchmark evidence.",
+  "backup_path": "/Users/taylorwigton/CascadeProjects/holo-mvp/artifact_benchmarks/backups/tiny_live_finance_board_strategy_20260618T195627Z"
+}

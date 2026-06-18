@@ -8,6 +8,9 @@ import chat_engine
 from chat_engine import (
     ChatSession,
     HoloChatEngine,
+    THREAD_HANDOFF_MESSAGE,
+    _claim_autocompact_for_context_window,
+    _handoff_for_context_window,
     _save_thread_handoff_artifact,
     _thread_handoff_markdown,
     _runtime_metadata,
@@ -495,6 +498,50 @@ def test_thread_handoff_artifact_is_tethered_to_source_session():
     )
     assert second is None
     assert len(brain.saved_artifacts) == 1
+
+
+def test_handoff_prompt_is_once_per_context_window():
+    session = ChatSession(session_id="session-1")
+    session.turn_count = 16
+
+    first = _handoff_for_context_window(session)
+    second = _handoff_for_context_window(session)
+
+    assert first == {
+        "suggested": True,
+        "message": THREAD_HANDOFF_MESSAGE,
+        "new_thread": "/chat",
+    }
+    assert second is None
+    assert session.handoff_suggested is True
+
+
+def test_autocompact_is_claimed_once_per_context_window():
+    session = ChatSession(session_id="session-1")
+    session.turn_count = 16
+
+    first = _claim_autocompact_for_context_window(
+        session,
+        capsule_id="capsule-1",
+        incognito=False,
+    )
+    second = _claim_autocompact_for_context_window(
+        session,
+        capsule_id="capsule-1",
+        incognito=False,
+    )
+
+    assert first is True
+    assert second is False
+    assert session.autocompact_attempted is True
+
+    incognito_session = ChatSession(session_id="session-2")
+    incognito_session.turn_count = 16
+    assert _claim_autocompact_for_context_window(
+        incognito_session,
+        capsule_id="capsule-1",
+        incognito=True,
+    ) is False
 
 
 def test_usage_metadata_falls_back_to_estimates_when_provider_usage_unavailable(monkeypatch):

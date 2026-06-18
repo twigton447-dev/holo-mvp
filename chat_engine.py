@@ -70,6 +70,8 @@ class ChatSession:
     holo4dna_previous_route: Optional[PreviousRoute] = None
     gov_arc_state: GovArcState = field(default_factory=GovArcState)
     handoff_artifact_saved: bool = False
+    handoff_suggested: bool = False
+    autocompact_attempted: bool = False
 
     @property
     def thread_health_score(self) -> int:
@@ -126,6 +128,33 @@ THREAD_HANDOFF_MESSAGE = "This thread is getting long. Start a fresh thread to k
 
 def _holochat_runtime_profile() -> str:
     return (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
+
+
+def _handoff_for_context_window(session: "ChatSession") -> Optional[dict[str, Any]]:
+    """Return one visible fresh-thread prompt per session/context window."""
+    if session.thread_health_level != "RED" or session.handoff_suggested:
+        return None
+    session.handoff_suggested = True
+    return {
+        "suggested": True,
+        "message": THREAD_HANDOFF_MESSAGE,
+        "new_thread": "/chat",
+    }
+
+
+def _claim_autocompact_for_context_window(
+    session: "ChatSession",
+    *,
+    capsule_id: Optional[str],
+    incognito: bool,
+) -> bool:
+    """Allow one consolidation/reseed attempt per session/context window."""
+    if not capsule_id or incognito or session.thread_health_level != "RED":
+        return False
+    if session.autocompact_attempted:
+        return False
+    session.autocompact_attempted = True
+    return True
 
 
 def _adapter_pool_metadata(adapters: list[Any]) -> list[dict[str, Optional[str]]]:
@@ -935,7 +964,11 @@ class HoloChatEngine:
                 logger.info(f"Capsule context updated for {capsule_id[:8]}: {list(updates.keys())}")
 
         # Governor consolidates — skipped in incognito
-        if capsule_id and not incognito and session.thread_health_level == "RED":
+        if _claim_autocompact_for_context_window(
+            session,
+            capsule_id=capsule_id,
+            incognito=incognito,
+        ):
             def _consolidate():
                 try:
                     result = self._governor.consolidate_session(
@@ -992,13 +1025,7 @@ class HoloChatEngine:
             log_trace(holo4dna_shadow.trace, logger=logger)
 
         # Signal a thread handoff when health is RED
-        handoff = None
-        if session.thread_health_level == "RED":
-            handoff = {
-                "suggested":  True,
-                "message":    THREAD_HANDOFF_MESSAGE,
-                "new_thread": "/chat",
-            }
+        handoff = _handoff_for_context_window(session)
 
         _update_gov_arc_state(
             session,
@@ -1295,7 +1322,11 @@ class HoloChatEngine:
                     updates = self._governor.extract_context_updates(session.history, capsule_context)
                     for key, value in updates.items():
                         self._brain.set_capsule_context(capsule_id, key, value)
-                    if session.thread_health_level == "RED":
+                    if _claim_autocompact_for_context_window(
+                        session,
+                        capsule_id=capsule_id,
+                        incognito=incognito,
+                    ):
                         result = self._governor.consolidate_session(session.history, capsule_context, session.session_id)
                         if result.get("session_note"):
                             self._brain.save_consolidation(capsule_id, session.session_id, result["session_note"])
@@ -1329,13 +1360,7 @@ class HoloChatEngine:
             holo4dna_shadow.trace.memory_extraction_attempted = bool(capsule_id and not incognito)
             log_trace(holo4dna_shadow.trace, logger=logger)
 
-        handoff = None
-        if session.thread_health_level == "RED":
-            handoff = {
-                "suggested":  True,
-                "message":    THREAD_HANDOFF_MESSAGE,
-                "new_thread": "/chat",
-            }
+        handoff = _handoff_for_context_window(session)
 
         _update_gov_arc_state(
             session,

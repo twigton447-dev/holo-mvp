@@ -22,6 +22,12 @@ class FakeAdapter:
         yield {"done": True, "in_tok": 10, "out_tok": 4}
 
 
+class FailingStreamAdapter(FakeAdapter):
+    def stream_chat_call(self, system_prompt, history, user_message, temperature, images=None):
+        raise RuntimeError("provider body should not surface")
+        yield
+
+
 class SearchGovernor:
     provider = "governor"
     model_id = "governor-model"
@@ -49,6 +55,13 @@ class SearchGovernor:
 
     def extract_context_updates(self, history, capsule_context):
         return {}
+
+    def generate_conversation_paths(self, **kwargs):
+        return [
+            "Trace the exact Gov calls that run before the answer",
+            "Compare Gov-as-mind against deterministic Python control",
+            "Design the dashboard view for topic transitions",
+        ]
 
 
 class FakeBrain:
@@ -97,6 +110,10 @@ def test_streaming_done_metadata_includes_searched_without_raw_results(monkeypat
     assert any(isinstance(event, dict) and event.get("searching") for event in events)
     assert done["searched"] is True
     assert done["search_query"] == "weather in Seattle"
+    assert done["runtime"]["governor_trace"]["web_search"]["source"] == "governor"
+    assert done["runtime"]["governor_trace"]["web_search"]["status"] == "checked"
+    assert done["runtime"]["governor_trace"]["web_search"]["result_count"] == 1
+    assert done["runtime"]["gov_arc_state"]["web_decision"] == "checked via governor"
     assert done["usage"] == done["runtime"]["usage"]
     assert done["usage"]["input_token_estimate"] == done["context_budget"]["total_token_estimate"]
     assert done["usage"]["input_token_source"] == "context_budget_estimate"
@@ -106,6 +123,11 @@ def test_streaming_done_metadata_includes_searched_without_raw_results(monkeypat
     assert done["usage"]["estimated_cost_usd"] is None
     assert done["usage"]["cost_source"] == "unknown_pricing"
     assert done["usage"]["cost_is_estimate"] is True
+    assert done["conversation_paths"] == [
+        "Trace the exact Gov calls that run before the answer",
+        "Compare Gov-as-mind against deterministic Python control",
+        "Design the dashboard view for topic transitions",
+    ]
     assert "compact search result" not in str(done)
     assert "holo4dna" not in done
 
@@ -122,6 +144,40 @@ def test_streaming_done_metadata_marks_web_unavailable_when_search_fails(monkeyp
     assert done["searched"] is False
     assert done["search_query"] is None
     assert done["web_status"] == "unavailable"
+    assert done["runtime"]["governor_trace"]["web_search"]["status"] == "unavailable"
+    assert done["runtime"]["governor_trace"]["web_search"]["unavailable_reason"] in {
+        "missing_config",
+        "no_results_or_search_failed",
+    }
+
+
+def test_streaming_skips_failed_mini_before_output(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setattr(chat_engine.web_search, "search", lambda query: None)
+    engine = _engine()
+    engine._adapters = [
+        FailingStreamAdapter("google", "gemini-2.5-flash-lite"),
+        FakeAdapter("openai", "gpt-4o-mini"),
+    ]
+
+    events = list(engine.stream_message(str(uuid4()), "Should skip outage?"))
+    done = next(event for event in events if isinstance(event, dict) and event.get("done"))
+
+    assert "checked " in events
+    assert done["_provider"] == "openai"
+    failover = done["runtime"]["failover"]
+    assert failover["attempted"] is True
+    assert failover["count"] == 1
+    assert failover["skipped"] == [
+        {
+            "provider": "google",
+            "model": "gemini-2.5-flash-lite",
+            "error_type": "RuntimeError",
+        }
+    ]
+    runtime_text = str(done["runtime"]).lower()
+    assert "provider body should not surface" not in runtime_text
+    assert ("raw " + "prompt") not in runtime_text
 
 
 def test_streaming_done_metadata_includes_shadow_holo4dna_when_enabled(monkeypatch):
@@ -147,6 +203,8 @@ def test_non_stream_metadata_includes_searched(monkeypatch):
 
     assert result["searched"] is True
     assert result["search_query"] == "weather in Seattle"
+    assert result["runtime"]["governor_trace"]["web_search"]["attempted"] is True
+    assert result["runtime"]["governor_trace"]["web_search"]["source"] == "governor"
     assert "compact search result" not in str({k: v for k, v in result.items() if k != "response"})
 
 
@@ -160,6 +218,7 @@ def test_non_stream_metadata_marks_web_unavailable_when_search_fails(monkeypatch
     assert result["searched"] is False
     assert result["search_query"] is None
     assert result["web_status"] == "unavailable"
+    assert result["runtime"]["governor_trace"]["web_search"]["status"] == "unavailable"
 
 
 def test_frontend_has_web_checked_render_path():
@@ -190,7 +249,9 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     assert '<span id="brand-sub">4DNA</span>' in html
     assert "Memory-attached workspace" not in html
     assert "updateRuntimePanel(data)" in html
-    assert 'id="runtime-toggle"' in html
+    assert 'id="runtime-toggle"' not in html
+    assert 'id="holobrain-toggle"' in html
+    assert "Engine data" in html
     assert 'id="runtime-panel"' in html
     assert "Runtime/System" in html
     assert "renderRuntimeRail(data)" not in html
@@ -209,9 +270,33 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
         "Full memory to analyst",
         "Memory store",
         "State object",
+        "Gov Arc State",
         "Baton Pass",
         "Holo4DNA",
         "AutoReseed",
+        "Analyst failover",
+        "Failover policy",
+        "Final analyst",
+        "Gov temperature",
+        "Gov web decision",
+        "Web decision source",
+        "Web attempted",
+        "Web provider",
+        "Web result count",
+        "Web status",
+        "Web unavailable reason",
+        "Gov claim check",
+        "Gov memory extraction",
+        "Gov memory writes",
+        "Gov paths",
+        "Gov thread health",
+        "Gov current topic",
+        "Gov topic shift",
+        "Gov directive",
+        "Gov arc web",
+        "Gov arc memory",
+        "Gov next paths",
+        "Gov arc confidence",
         "Estimated input tokens",
         "Estimated output tokens",
         "Estimated total tokens",
@@ -234,6 +319,26 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     assert ("actual " + "billed cost") not in html.lower()
     assert ("raw " + "prompt") not in html.lower()
     assert ("provider request " + "body") not in html.lower()
+
+
+def test_frontend_thread_meter_uses_thread_health_score():
+    html = Path("frontend/chat.html").read_text()
+    chat_engine_py = Path("chat_engine.py").read_text()
+
+    assert 'id="thread-meter"' in html
+    assert 'id="thread-meter-fill"' in html
+    assert 'id="thread-meter-label"' in html
+    assert "function updateThreadMeter(score)" in html
+    assert "updateThreadMeter(doneData.thread_health_score)" in html
+    assert "updateThreadMeter(data.thread_health_score)" in html
+    assert "updateThreadMeter(100)" in html
+    assert "Thread health ${pct}%" in html
+    assert "pct <= 40" in html
+    assert "pct <= 20" in html
+    assert "Start fresh thread" in html
+    assert ("Start a " + "fresh one") not in html
+    assert ("how much context " + "do you want carried") not in chat_engine_py
+    assert ("Full detail, " + "key points only") not in chat_engine_py
 
 
 def test_frontend_header_avatar_has_safe_account_tooltip_and_hidden_count_badge():
@@ -282,9 +387,9 @@ def test_frontend_onboarding_memory_seed_prompt_is_safe_and_specific():
     assert "What is Holo Chat?" not in html
     assert "Coming next:" not in html
 
-    assert "everything you tell me" not in html
-    assert "full context" not in html
-    assert "emotional patterns" not in html
+    assert ("everything " + "you tell me") not in html
+    assert ("full " + "context") not in html
+    assert ("emotional " + "patterns") not in html
     assert "analyze my soul" not in html
     assert "everything you know" not in html
 
@@ -302,6 +407,7 @@ def test_frontend_assistant_messages_render_three_conversation_paths():
     html = Path("frontend/chat.html").read_text()
 
     assert 'aria-label="Conversation paths"' in html
+    assert "data.conversation_paths || suggestions" in html
     assert "function normalizeConversationPaths(suggestions)" in html
     assert "suggestions: suggestions.slice(0, 3)" in html
     assert "Go deeper on this" in html

@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from holo_state import BatonPass, CouncilRole, HoloState, RequiredTools, ThreadHealth
+from holo_state import BatonPass, CouncilRole, GovArcState, HoloState, RequiredTools, ThreadHealth
 
 
 def test_holo_state_serializes_and_deserializes_cleanly():
@@ -20,6 +20,30 @@ def test_holo_state_serializes_and_deserializes_cleanly():
     assert restored.capsule_id == "capsule-1"
     assert restored.turn_number == 3
     assert restored.thread_health.level == "GREEN"
+    assert restored.gov_arc_state.current_topic == "Decide what to do next."
+
+
+def test_gov_arc_state_is_owned_structured_state():
+    state = HoloState(
+        session_id="s",
+        gov_arc_state=GovArcState(
+            current_topic="web search repair",
+            current_directive="show the exact decision trace",
+            next_paths=["Inspect the web trace", "Separate Gov from Python", "Test the UI"],
+            web_decision="checked via deterministic",
+            confidence="medium",
+        ),
+    )
+
+    restored = HoloState.model_validate_json(state.model_dump_json())
+
+    assert restored.gov_arc_state.current_topic == "web search repair"
+    assert restored.gov_arc_state.next_paths == [
+        "Inspect the web trace",
+        "Separate Gov from Python",
+        "Test the UI",
+    ]
+    assert restored.gov_arc_state.web_decision == "checked via deterministic"
 
 
 def test_required_tools_validation_rejects_unknown_tool():

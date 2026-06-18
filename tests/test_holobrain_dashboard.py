@@ -99,6 +99,11 @@ def test_frontend_has_holobrain_button_and_render_path():
     assert 'title="Open engine data"' in html
     assert ">Engine data</button>" in html
     assert 'id="holobrain-panel"' in html
+    assert 'id="holobrain-resize-handle"' in html
+    assert 'title="Drag to resize engine data"' in html
+    assert "initEnginePanelResize()" in html
+    assert "setEnginePanelWidth(window.innerWidth - moveEvent.clientX)" in html
+    assert "holo_engine_panel_width" in html
     assert "Engine runtime" in html
     assert 'fetch("/v1/holo-brain"' in html
     assert "renderHoloBrain(data)" in html

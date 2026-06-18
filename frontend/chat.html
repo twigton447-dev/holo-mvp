@@ -121,8 +121,14 @@
     @keyframes holoPulse { 0%,100%{opacity:0.3;transform:scale(0.85)} 50%{opacity:1;transform:scale(1.05)} }
     .holo-thinking { animation: holoPulse 1.4s ease-in-out infinite; }
 
-    /* Battery (hidden) */
-    .thread-power { display: none; }
+    /* Thread meter */
+    #thread-meter { display: inline-flex; align-items: center; gap: 5px; height: 32px; padding: 0 2px 0 4px; color: var(--text3); font-size: 10px; font-weight: 700; letter-spacing: 0.02em; flex-shrink: 0; user-select: none; }
+    #thread-meter-shell { width: 24px; height: 12px; border: 1px solid var(--border); border-radius: 4px; padding: 2px; position: relative; background: var(--bg); }
+    #thread-meter-shell::after { content: ""; position: absolute; right: -4px; top: 3px; width: 3px; height: 6px; border-radius: 0 2px 2px 0; background: var(--border); }
+    #thread-meter-fill { display: block; width: 100%; height: 100%; border-radius: 2px; background: var(--text3); transition: width 0.2s ease, background 0.2s ease; }
+    #thread-meter-label { min-width: 28px; text-align: right; }
+    #thread-meter.low #thread-meter-fill { background: #d97706; }
+    #thread-meter.critical #thread-meter-fill { background: #dc2626; }
 
     /* Input bar */
     #input-bar { padding: 10px 20px 24px; border-top: 1px solid var(--border2); background: var(--bg); }
@@ -267,8 +273,11 @@
     .runtime-panel-row { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
     .runtime-panel-key { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
     .runtime-panel-val { font-size: 13px; color: var(--text); line-height: 1.45; margin-top: 3px; overflow-wrap: anywhere; }
-    #holobrain-panel { position: fixed; top: 0; right: 0; height: 100vh; width: min(520px, 100vw); background: var(--bg); border-left: 1px solid var(--border); z-index: 92; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.24s ease; }
+    #holobrain-panel { position: fixed; top: 0; right: 0; height: 100vh; width: min(var(--engine-panel-width, 520px), 100vw); background: var(--bg); border-left: 1px solid var(--border); z-index: 92; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.24s ease; }
     #holobrain-panel.open { transform: translateX(0); }
+    #holobrain-resize-handle { position: absolute; top: 0; left: -6px; width: 12px; height: 100%; cursor: ew-resize; touch-action: none; z-index: 2; }
+    #holobrain-resize-handle::after { content: ""; position: absolute; top: 0; bottom: 0; left: 5px; width: 1px; background: transparent; transition: background 0.12s; }
+    #holobrain-resize-handle:hover::after, #holobrain-panel.resizing #holobrain-resize-handle::after { background: var(--border); }
     #holobrain-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     #holobrain-panel-header h3 { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: -0.2px; }
     #holobrain-panel-close { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 4px; }
@@ -431,7 +440,10 @@
       .msg.user .bubble { max-width: 90%; }
       #memory-panel { width: 100%; }
       #runtime-panel, #holobrain-panel { width: 100%; }
+      #holobrain-resize-handle { display: none; }
       #thread-panel { width: 85%; max-width: 320px; }
+      #thread-meter-label { display: none; }
+      #thread-meter { padding-left: 0; }
       #thread-panel-close { font-size: 26px; padding: 8px 10px; color: var(--text); }
       #thread-panel-header { padding: 16px 16px 12px; }
       #thread-new-btn button { font-size: 15px; padding: 13px 16px; }
@@ -599,6 +611,7 @@
 
 <!-- Engine data dashboard — runtime plus authenticated saved-memory status -->
 <div id="holobrain-panel">
+  <div id="holobrain-resize-handle" role="separator" aria-orientation="vertical" title="Drag to resize engine data"></div>
   <div id="holobrain-panel-header">
     <h3>Engine data</h3>
     <button id="holobrain-panel-close" onclick="closeHoloBrainPanel()">×</button>
@@ -637,7 +650,6 @@
     <div id="header-right">
       <div id="incognito-badge">◉ Incognito</div>
       <button id="thread-toggle" onclick="toggleThreadPanel()" title="See my threads">See my threads</button>
-      <button id="runtime-toggle" onclick="openRuntimePanel()" title="Open Runtime/System">Runtime</button>
       <button id="holobrain-toggle" onclick="openHoloBrainPanel()" title="Open engine data">Engine data</button>
       <button id="incognito-btn" onclick="toggleIncognito()" title="Start incognito thread">Start incognito thread</button>
       <button id="new-thread" onclick="newThread()">Start new thread</button>
@@ -664,6 +676,10 @@
       </button>
       <textarea id="input" placeholder="Chat with Holo…" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
       <div id="input-actions">
+        <div id="thread-meter" title="Thread health 100%" aria-label="Thread health 100%">
+          <span id="thread-meter-shell"><span id="thread-meter-fill"></span></span>
+          <span id="thread-meter-label">100%</span>
+        </div>
         <button id="mic" onclick="toggleVoice()" title="Voice input" style="display:none">
           <svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zm-1 3a1 1 0 0 1 2 0v8a1 1 0 0 1-2 0V4zm-4 7a5 5 0 0 0 10 0h2a7 7 0 0 1-6 6.93V21h2v2H9v-2h2v-2.07A7 7 0 0 1 5 11H7z"/></svg>
         </button>
@@ -787,15 +803,16 @@
 
   // ---- Incognito mode ------------------------------------------------------
 
-  function toggleIncognito() {
-    incognitoMode = !incognitoMode;
-    document.body.classList.toggle("incognito", incognitoMode);
-    document.getElementById("incognito-btn").classList.toggle("active", incognitoMode);
-    document.getElementById("incognito-badge").classList.toggle("visible", incognitoMode);
-    // Start a fresh session so incognito state is clean
-    sessionId = null;
-    turnCount = 0;
-    const container = document.getElementById("messages");
+	  function toggleIncognito() {
+	    incognitoMode = !incognitoMode;
+	    document.body.classList.toggle("incognito", incognitoMode);
+	    document.getElementById("incognito-btn").classList.toggle("active", incognitoMode);
+	    document.getElementById("incognito-badge").classList.toggle("visible", incognitoMode);
+	    // Start a fresh session so incognito state is clean
+	    sessionId = null;
+	    turnCount = 0;
+	    updateThreadMeter(100);
+	    const container = document.getElementById("messages");
     container.innerHTML = incognitoMode
       ? `<div id="empty"><h2>Incognito</h2><p>No memory, no context, no Captain brief. Pure baseline. Nothing from this thread touches your capsule.</p></div>`
       : `<div id="empty"><h2>What's on your mind?</h2><p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p></div>`;
@@ -1258,6 +1275,9 @@
 
   let _holoBrainLoaded = false;
   let _latestRuntimeData = null;
+  const ENGINE_PANEL_DEFAULT_WIDTH = 520;
+  const ENGINE_PANEL_MIN_WIDTH = 360;
+  const ENGINE_PANEL_MAX_WIDTH = 920;
 
   function openHoloBrainPanel() {
     const panel = document.getElementById("holobrain-panel");
@@ -1267,6 +1287,45 @@
 
   function closeHoloBrainPanel() {
     document.getElementById("holobrain-panel").classList.remove("open");
+  }
+
+  function setEnginePanelWidth(width) {
+    const panel = document.getElementById("holobrain-panel");
+    if (!panel || window.innerWidth <= 480) return;
+    const maxWidth = Math.min(ENGINE_PANEL_MAX_WIDTH, Math.max(ENGINE_PANEL_MIN_WIDTH, window.innerWidth - 80));
+    const nextWidth = Math.max(ENGINE_PANEL_MIN_WIDTH, Math.min(maxWidth, Math.round(width)));
+    panel.style.setProperty("--engine-panel-width", `${nextWidth}px`);
+    try { localStorage.setItem("holo_engine_panel_width", String(nextWidth)); } catch {}
+  }
+
+  function initEnginePanelResize() {
+    const panel = document.getElementById("holobrain-panel");
+    const handle = document.getElementById("holobrain-resize-handle");
+    if (!panel || !handle) return;
+    try {
+      const savedWidth = Number(localStorage.getItem("holo_engine_panel_width"));
+      if (Number.isFinite(savedWidth)) setEnginePanelWidth(savedWidth);
+    } catch {}
+    handle.addEventListener("pointerdown", e => {
+      if (window.innerWidth <= 480) return;
+      e.preventDefault();
+      panel.classList.add("resizing");
+      handle.setPointerCapture(e.pointerId);
+      const onPointerMove = moveEvent => {
+        setEnginePanelWidth(window.innerWidth - moveEvent.clientX);
+      };
+      const onPointerUp = upEvent => {
+        panel.classList.remove("resizing");
+        handle.releasePointerCapture(upEvent.pointerId);
+        handle.removeEventListener("pointermove", onPointerMove);
+        handle.removeEventListener("pointerup", onPointerUp);
+        handle.removeEventListener("pointercancel", onPointerUp);
+      };
+      handle.addEventListener("pointermove", onPointerMove);
+      handle.addEventListener("pointerup", onPointerUp);
+      handle.addEventListener("pointercancel", onPointerUp);
+    });
+    handle.addEventListener("dblclick", () => setEnginePanelWidth(ENGINE_PANEL_DEFAULT_WIDTH));
   }
 
   async function loadHoloBrain() {
@@ -1802,19 +1861,20 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
             document.getElementById("free-limit-banner").classList.remove("hidden");
           }
           if (doneData.thought) setTimeout(() => spawnThought(doneData.thought), 1800);
-          if (doneData.artifacts && doneData.artifacts.length > 0) {
-            for (const a of doneData.artifacts) {
-              _artifactRegistry.unshift({ artifact_id: a.artifact_id, title: a.title, created_at: new Date().toISOString() });
-            }
-            if (_activePanelTab === "artifacts") renderArtifactList();
-          }
-          setTimeout(() => refreshMemoryContext(), 2000);
+	          if (doneData.artifacts && doneData.artifacts.length > 0) {
+	            for (const a of doneData.artifacts) {
+	              _artifactRegistry.unshift({ artifact_id: a.artifact_id, title: a.title, created_at: new Date().toISOString() });
+	            }
+	            if (_activePanelTab === "artifacts") renderArtifactList();
+	          }
+	          updateThreadMeter(doneData.thread_health_score);
+	          setTimeout(() => refreshMemoryContext(), 2000);
           if (doneData.handoff && doneData.handoff.suggested) setTimeout(() => showHandoff(doneData.handoff), 1200);
           if (doneData.thread_health_level === "YELLOW" && doneData.turn_number >= 14 && !document.getElementById("thread-nudge")) {
             const nudge = document.createElement("div");
             nudge.id = "thread-nudge";
             nudge.style.cssText = "text-align:center;padding:8px 16px;font-size:12px;color:var(--text4);";
-            nudge.innerHTML = `This thread is getting long. <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;">Start a fresh one</a> to keep Holo sharp.`;
+            nudge.innerHTML = `This thread is getting long. <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;">Start fresh thread →</a>`;
             document.getElementById("messages").appendChild(nudge);
             scrollToBottom();
           }
@@ -1854,19 +1914,20 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
           document.getElementById("free-limit-banner").classList.remove("hidden");
         }
         if (data.thought) setTimeout(() => spawnThought(data.thought), 1800);
-        if (data.artifacts && data.artifacts.length > 0) {
-          for (const a of data.artifacts) {
-            _artifactRegistry.unshift({ artifact_id: a.artifact_id, title: a.title, created_at: new Date().toISOString() });
-          }
-          if (_activePanelTab === "artifacts") renderArtifactList();
-        }
-        setTimeout(() => refreshMemoryContext(), 2000);
+	        if (data.artifacts && data.artifacts.length > 0) {
+	          for (const a of data.artifacts) {
+	            _artifactRegistry.unshift({ artifact_id: a.artifact_id, title: a.title, created_at: new Date().toISOString() });
+	          }
+	          if (_activePanelTab === "artifacts") renderArtifactList();
+	        }
+	        updateThreadMeter(data.thread_health_score);
+	        setTimeout(() => refreshMemoryContext(), 2000);
         if (data.handoff && data.handoff.suggested) setTimeout(() => showHandoff(data.handoff), 1200);
         if (data.thread_health_level === "YELLOW" && data.turn_number >= 14 && !document.getElementById("thread-nudge")) {
           const nudge = document.createElement("div");
           nudge.id = "thread-nudge";
           nudge.style.cssText = "text-align:center;padding:8px 16px;font-size:12px;color:var(--text4);";
-          nudge.innerHTML = `This thread is getting long. <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;">Start a fresh one</a> to keep Holo sharp.`;
+          nudge.innerHTML = `This thread is getting long. <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;">Start fresh thread →</a>`;
           document.getElementById("messages").appendChild(nudge);
           scrollToBottom();
         }
@@ -1891,7 +1952,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
   function finalizeStreamingBubble(msgEl, fullText, data = {}) {
     const { mainText, suggestions } = parseResponse(fullText);
     const responseId = "r" + Date.now();
-    const chipsHtml = renderConversationPaths(suggestions);
+    const chipsHtml = renderConversationPaths(data.conversation_paths || suggestions);
     const webCheckedHtml = renderWebCheckedIndicator(data);
     const body = msgEl.querySelector(".holo-body");
     body.innerHTML = `
@@ -1933,7 +1994,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     const { mainText, battery, suggestions } = parseResponse(data.response);
     const responseId = "r" + Date.now();
 
-    const chipsHtml = renderConversationPaths(suggestions);
+    const chipsHtml = renderConversationPaths(data.conversation_paths || suggestions);
     const webCheckedHtml = renderWebCheckedIndicator(data);
 
     msg.innerHTML = `
@@ -2035,7 +2096,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     return "";
   }
 
-  function parseResponse(text) {
+	  function parseResponse(text) {
     // Extract thread power line
     const batteryMatch = text.match(/Thread power:[^\n]+/);
     const battery      = batteryMatch ? batteryMatch[0] : null;
@@ -2088,19 +2149,35 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       </div>`;
   }
 
-  function useChip(el) {
+	  function useChip(el) {
     const input = document.getElementById("input");
     // Strip the number prefix from chip text
     const text = el.innerText.replace(/^\d+\s*/, "").trim();
     input.value = text;
     autoResize(input);
-    sendMessage();
-  }
+	    sendMessage();
+	  }
 
-  function newThread() {
-    sessionId = null;
-    turnCount = 0;
-    document.getElementById("messages").innerHTML =
+	  function updateThreadMeter(score) {
+	    const meter = document.getElementById("thread-meter");
+	    const fill = document.getElementById("thread-meter-fill");
+	    const label = document.getElementById("thread-meter-label");
+	    if (!meter || !fill || !label) return;
+	    const parsed = Number(score);
+	    const pct = Number.isFinite(parsed) ? Math.max(0, Math.min(100, Math.round(parsed))) : 100;
+	    fill.style.width = `${pct}%`;
+	    label.textContent = `${pct}%`;
+	    meter.title = `Thread health ${pct}%`;
+	    meter.setAttribute("aria-label", `Thread health ${pct}%`);
+	    meter.classList.toggle("low", pct <= 40 && pct > 20);
+	    meter.classList.toggle("critical", pct <= 20);
+	  }
+
+	  function newThread() {
+	    sessionId = null;
+	    turnCount = 0;
+	    updateThreadMeter(100);
+	    document.getElementById("messages").innerHTML =
       `<div id="empty"><h2>What's on your mind?</h2><p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p></div>`;
     document.getElementById("input").focus();
   }
@@ -2173,6 +2250,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     const fullMemory = runtime.analyst_receives_full_memory === false ? "no" : "unknown";
     const memoryStore = runtime.lossless_memory_store ? "attached" : "unknown";
     const stateMode = runtime.structured_state_object_mode || "off";
+    const govArcMode = runtime.gov_arc_state_mode || "off";
     const batonMode = runtime.baton_pass_mode || "off";
     const holo4dnaMode = runtime.holo4dna_mode || "off";
     const autoReseed = runtime.autoreseed_enabled === true ? "automatic" : "off/not configured";
@@ -2193,7 +2271,10 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     rows.push(["Runtime", runtimeProfile || "unknown"]);
     if (provider || model) rows.push(["This turn", `${provider}${model ? ":" + model : ""}`]);
     rows.push(["Mode", modeLabel]);
-    rows.push(["Selection", runtime.selection_mode || "unknown"]);
+    const selectionLabel = runtime.selection_mode === "round_robin"
+      ? "rotating mini pool"
+      : (runtime.selection_mode || "unknown");
+    rows.push(["Selection", selectionLabel]);
     if (activePoolCount) rows.push(["Active pool", `${activePoolCount} ${poolLabel}`]);
     rows.push(["Governor", govLabel]);
     rows.push(["Governor mode", govMode]);
@@ -2201,9 +2282,51 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     rows.push(["Full memory to analyst", fullMemory]);
     rows.push(["Memory store", memoryStore]);
     rows.push(["State object", stateMode]);
+    rows.push(["Gov Arc State", govArcMode]);
     rows.push(["Baton Pass", batonMode]);
     rows.push(["Holo4DNA", holo4dnaMode]);
     rows.push(["AutoReseed", autoReseed]);
+    const failover = runtime.failover || {};
+    if (Object.keys(failover).length) {
+      const skipped = Number(failover.count || 0);
+      rows.push(["Analyst failover", skipped ? `${skipped} skipped` : "none"]);
+      if (failover.policy) rows.push(["Failover policy", failover.policy]);
+      const final = failover.final || {};
+      if (skipped && (final.provider || final.model)) {
+        rows.push(["Final analyst", `${final.provider || "unknown"}${final.model ? ":" + final.model : ""}`]);
+      }
+    }
+    const govTrace = runtime.governor_trace || {};
+    if (Object.keys(govTrace).length) {
+      rows.push(["Gov temperature", govTrace.temperature || "unknown"]);
+      rows.push(["Gov web decision", govTrace.web_decision || "unknown"]);
+      const webSearch = govTrace.web_search || {};
+      if (Object.keys(webSearch).length) {
+        rows.push(["Web decision source", webSearch.source || "unknown"]);
+        rows.push(["Web attempted", webSearch.attempted === true ? "yes" : "no"]);
+        rows.push(["Web provider", webSearch.provider || "unknown"]);
+        rows.push(["Web result count", fmtTokens(webSearch.result_count)]);
+        rows.push(["Web status", webSearch.status || "unknown"]);
+        if (webSearch.unavailable_reason) rows.push(["Web unavailable reason", webSearch.unavailable_reason]);
+      }
+      rows.push(["Gov claim check", govTrace.claim_check || "unknown"]);
+      rows.push(["Gov memory extraction", govTrace.memory_extraction || "unknown"]);
+      rows.push(["Gov memory writes", fmtTokens(govTrace.memory_writes_count)]);
+      rows.push(["Gov paths", govTrace.conversation_paths || "unknown"]);
+      rows.push(["Gov thread health", govTrace.thread_health || "unknown"]);
+    }
+    const govArc = runtime.gov_arc_state || {};
+    if (Object.keys(govArc).length) {
+      if (govArc.current_topic) rows.push(["Gov current topic", govArc.current_topic]);
+      if (govArc.topic_shift_reason) rows.push(["Gov topic shift", govArc.topic_shift_reason]);
+      if (govArc.current_directive) rows.push(["Gov directive", govArc.current_directive]);
+      if (govArc.web_decision) rows.push(["Gov arc web", govArc.web_decision]);
+      if (govArc.memory_write_summary) rows.push(["Gov arc memory", govArc.memory_write_summary]);
+      if (Array.isArray(govArc.next_paths) && govArc.next_paths.length) {
+        rows.push(["Gov next paths", govArc.next_paths.join(" | ")]);
+      }
+      if (govArc.confidence) rows.push(["Gov arc confidence", govArc.confidence]);
+    }
     if (Object.keys(usage).length) {
       rows.push(["Estimated input tokens", fmtTokens(usage.input_token_estimate)]);
       rows.push(["Estimated output tokens", fmtTokens(usage.output_token_estimate)]);
@@ -2224,7 +2347,8 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     const rows = buildRuntimeRows(data);
     if (!rows) return;
     _latestRuntimeData = data;
-    document.getElementById("runtime-toggle").style.display = "block";
+    const runtimeToggle = document.getElementById("runtime-toggle");
+    if (runtimeToggle) runtimeToggle.style.display = "block";
     document.getElementById("runtime-body").innerHTML = renderRuntimeRows(rows);
     const engineRuntimeBody = document.getElementById("engine-runtime-body");
     if (engineRuntimeBody) engineRuntimeBody.innerHTML = renderRuntimeRows(rows);
@@ -2658,9 +2782,10 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       });
       if (!res.ok) throw new Error("Delete failed.");
       _sessionList = _sessionList.filter(s => s.id !== sid);
-      if (sid === sessionId) {
-        sessionId = null;
-        document.getElementById("messages").innerHTML = "";
+	      if (sid === sessionId) {
+	        sessionId = null;
+	        updateThreadMeter(100);
+	        document.getElementById("messages").innerHTML = "";
         document.getElementById("empty")?.remove();
       }
       renderThreadList();
@@ -2723,6 +2848,8 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     if (d < 7)   return `${d}d ago`;
     return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
+
+  initEnginePanelResize();
 
   // ---- Service worker registration -----------------------------------------
   if ("serviceWorker" in navigator) {

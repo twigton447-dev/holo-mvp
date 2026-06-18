@@ -1,9 +1,9 @@
 """
 chat_engine.py
 
-Holo chat mode — randomized serial analyst conversation engine.
+Holo chat mode — rotating serial analyst conversation engine.
 
-Every response comes from one randomly selected analyst provider.
+Every response comes from one selected analyst provider.
 The Governor is a separate controller/check layer selected away from
 the analyst on the same turn; it does not produce a second visible answer.
 All providers speak as Holo using the unified persona prompt.
@@ -28,7 +28,7 @@ from holo_context import (
     estimate_context_tokens,
 )
 from holo_router import HoloRouter, PreviousRoute, RouteDecision
-from holo_state import HoloState, RequiredTools
+from holo_state import GovArcState, HoloState, RequiredTools
 from holo_trace import HoloTraceRecord, log_trace
 from llm_adapters import (
     HOLO_CHAT_SYSTEM_PROMPT,
@@ -54,7 +54,7 @@ _sessions: Dict[str, "ChatSession"] = {}
 class ChatSession:
     session_id: str
     history: List[Dict[str, str]] = field(default_factory=list)
-    rotation_index: int = 0      # kept for turn counting only; adapter selection is randomized
+    rotation_index: int = 0      # round-robin analyst cursor
     turn_count: int = 0
     created_at: float = field(default_factory=time.time)
     last_active: float = field(default_factory=time.time)
@@ -68,6 +68,8 @@ class ChatSession:
         default_factory=lambda: random.randint(7, 11)
     )
     holo4dna_previous_route: Optional[PreviousRoute] = None
+    gov_arc_state: GovArcState = field(default_factory=GovArcState)
+    handoff_artifact_saved: bool = False
 
     @property
     def thread_health_score(self) -> int:
@@ -119,6 +121,8 @@ _STATIC_CHAT_PRICING_USD_PER_M_TOKEN: dict[tuple[str, str], tuple[float, float]]
     ("openai", "gpt-4o-mini"): (0.15, 0.60),
 }
 
+THREAD_HANDOFF_MESSAGE = "This thread is getting long. Start a fresh thread to keep Holo sharp."
+
 
 def _holochat_runtime_profile() -> str:
     return (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
@@ -143,12 +147,268 @@ def _governor_turn_metadata(governor: Any, *, checked_this_turn: bool) -> dict[s
     }
 
 
+def _governor_trace_metadata(
+    *,
+    web_trace: Optional[dict[str, Any]],
+    incognito: bool,
+    memory_extraction_attempted: bool,
+    memory_writes_count: int,
+    thread_health_level: str,
+    conversation_paths_count: int = 0,
+) -> dict[str, Any]:
+    web_status = (web_trace or {}).get("status") or "off"
+    memory_status = "skipped_incognito" if incognito else (
+        "checked" if memory_extraction_attempted else "not_available"
+    )
+    return {
+        "temperature": "checked",
+        "web_decision": web_status,
+        "web_search": web_trace or _web_trace(None, source="none", results=None),
+        "claim_check": "checked",
+        "memory_extraction": memory_status,
+        "memory_writes_count": _safe_positive_int(memory_writes_count),
+        "conversation_paths": "generated" if conversation_paths_count else "skipped",
+        "conversation_paths_count": _safe_positive_int(conversation_paths_count),
+        "thread_health": thread_health_level,
+    }
+
+
 def _safe_positive_int(value: Any) -> int:
     try:
         parsed = int(value or 0)
     except (TypeError, ValueError):
         return 0
     return max(0, parsed)
+
+
+_CURRENT_INFO_RE = _re.compile(
+    r"\b("
+    r"today|tonight|currently|current|latest|recent|right now|now|new|news|"
+    r"price|prices|stock|stocks|weather|forecast|score|scores|schedule|"
+    r"ceo|president|released|available|outage|down|online|updated"
+    r")\b",
+    _re.IGNORECASE,
+)
+
+
+def _compact_text(value: Any, *, limit: int = 160) -> str:
+    text = " ".join(str(value or "").strip().split())
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 3)].rstrip() + "..."
+
+
+def _deterministic_search_query(user_message: str) -> Optional[str]:
+    text = (user_message or "").strip()
+    if not text or not _CURRENT_INFO_RE.search(text):
+        return None
+    return _compact_text(text, limit=180)
+
+
+def _resolve_search_query(user_message: str, governor_query: Optional[str]) -> tuple[Optional[str], str, str]:
+    gov_query = _compact_text(governor_query, limit=180) if governor_query else ""
+    if gov_query:
+        return gov_query, "governor", "search_requested_by_governor"
+    forced = _deterministic_search_query(user_message)
+    if forced:
+        return forced, "deterministic", "forced_currentness_trigger"
+    return None, "none", "not_needed"
+
+
+def _web_result_count(results: Optional[str]) -> int:
+    if not results:
+        return 0
+    count = len(_re.findall(r"(?m)^Source:\s+", results))
+    return count or 1
+
+
+def _web_trace(
+    query: Optional[str],
+    *,
+    source: str,
+    results: Optional[str],
+) -> dict[str, Any]:
+    attempted = bool(query)
+    result_count = _web_result_count(results)
+    configured = bool(os.getenv("TAVILY_API_KEY"))
+    if not attempted:
+        status = "off"
+        unavailable_reason = None
+    elif results:
+        status = "checked"
+        unavailable_reason = None
+    elif not configured:
+        status = "unavailable"
+        unavailable_reason = "missing_config"
+    else:
+        status = "unavailable"
+        unavailable_reason = "no_results_or_search_failed"
+    return {
+        "decision": "search_requested" if attempted else "not_needed",
+        "source": source,
+        "attempted": attempted,
+        "provider": "tavily",
+        "status": status,
+        "result_count": result_count,
+        "unavailable_reason": unavailable_reason,
+    }
+
+
+def _run_web_search_for_turn(user_message: str, governor_query: Optional[str]) -> tuple[Optional[str], Optional[str], dict[str, Any]]:
+    search_query, source, decision = _resolve_search_query(user_message, governor_query)
+    results = web_search.search(search_query) if search_query else None
+    trace = _web_trace(search_query, source=source, results=results)
+    trace["decision"] = decision
+    return search_query, results, trace
+
+
+def _gov_arc_state_block(arc_state: GovArcState) -> str:
+    data = arc_state.model_dump(mode="json")
+    lines = ["GOV ARC STATE (Holo-owned continuity object; private, do not surface):"]
+    for key in (
+        "current_topic",
+        "topic_shift_reason",
+        "user_goal",
+        "current_tension",
+        "last_gov_read",
+        "current_directive",
+        "web_decision",
+        "memory_write_summary",
+        "handoff_recommendation",
+        "confidence",
+    ):
+        value = data.get(key)
+        if value:
+            lines.append(f"  {key}: {_compact_text(value, limit=220)}")
+    for key in ("unresolved_questions", "settled_decisions", "next_paths"):
+        values = data.get(key) or []
+        if values:
+            lines.append(f"  {key}:")
+            for item in values[:5]:
+                lines.append(f"    - {_compact_text(item, limit=180)}")
+    return "\n".join(lines)
+
+
+def _update_gov_arc_state(
+    session: "ChatSession",
+    *,
+    user_message: str,
+    tenor: Optional[str],
+    web_trace: dict[str, Any],
+    conversation_paths: Optional[list[str]] = None,
+    memory_writes_count: int = 0,
+    handoff: Optional[dict[str, Any]] = None,
+) -> GovArcState:
+    previous = session.gov_arc_state or GovArcState()
+    topic = _compact_text(user_message, limit=90) or previous.current_topic
+    topic_shift_reason = previous.topic_shift_reason
+    if previous.current_topic and topic and topic != previous.current_topic:
+        topic_shift_reason = "latest_user_turn_shifted_focus"
+    directive = _compact_text(tenor, limit=220) if tenor else previous.current_directive
+    web_status = (web_trace or {}).get("status") or "off"
+    web_source = (web_trace or {}).get("source") or "none"
+    next_paths = [
+        _compact_text(path, limit=120)
+        for path in (conversation_paths or previous.next_paths or [])
+        if _compact_text(path, limit=120)
+    ][:3]
+    arc = GovArcState(
+        current_topic=topic,
+        topic_shift_reason=topic_shift_reason,
+        user_goal=previous.user_goal or topic,
+        current_tension=previous.current_tension,
+        unresolved_questions=previous.unresolved_questions[:5],
+        settled_decisions=previous.settled_decisions[:5],
+        last_gov_read=(
+            f"Gov reconstructed the turn from Holo-owned state, recent history, "
+            f"selected context, and a {web_status} web decision."
+        ),
+        current_directive=directive,
+        next_paths=next_paths,
+        web_decision=f"{web_status} via {web_source}",
+        memory_write_summary=f"{_safe_positive_int(memory_writes_count)} writes this turn",
+        handoff_recommendation="suggested" if handoff else None,
+        confidence="medium" if session.thread_health_level == "GREEN" else "low",
+    )
+    session.gov_arc_state = arc
+    return arc
+
+
+def _thread_handoff_markdown(
+    *,
+    session: "ChatSession",
+    consolidation: dict[str, Any],
+    gov_arc_state: GovArcState,
+) -> str:
+    session_note = (consolidation or {}).get("session_note") or {}
+    life_context = (consolidation or {}).get("life_context") or []
+    open_threads = session_note.get("open_threads") or gov_arc_state.unresolved_questions or []
+    next_paths = gov_arc_state.next_paths or []
+    lines = [
+        "# Thread Handoff",
+        "",
+        "This is a synthesized reseed artifact for the next HoloChat thread. "
+        "It is tethered to the source chat session, while the raw chat remains available separately.",
+        "",
+        "## What Changed",
+        _compact_text(session_note.get("what_changed") or "No durable change captured.", limit=600),
+        "",
+        "## What Surfaced",
+        _compact_text(session_note.get("what_surfaced") or "No surfaced insight captured.", limit=600),
+        "",
+        "## Open Threads",
+    ]
+    if open_threads:
+        lines.extend(f"- {_compact_text(item, limit=240)}" for item in open_threads[:8])
+    else:
+        lines.append("- None captured.")
+    lines.extend(["", "## Gov Read", _compact_text(session_note.get("captain_note") or gov_arc_state.last_gov_read or "", limit=700)])
+    if life_context:
+        lines.extend(["", "## Memory Nutrients"])
+        for entry in life_context[:8]:
+            key = _compact_text(entry.get("key", "memory"), limit=80)
+            value = _compact_text(entry.get("value", ""), limit=260)
+            if value:
+                lines.append(f"- {key}: {value}")
+    if next_paths:
+        lines.extend(["", "## Suggested Next Paths"])
+        lines.extend(f"- {_compact_text(path, limit=180)}" for path in next_paths[:3])
+    lines.extend(
+        [
+            "",
+            "## Source",
+            "Raw chat remains the source record. This artifact is a clean synthesis for retrieval and carry-forward.",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _save_thread_handoff_artifact(
+    brain: Any,
+    *,
+    capsule_id: Optional[str],
+    session: "ChatSession",
+    consolidation: dict[str, Any],
+) -> Optional[str]:
+    if not capsule_id or session.handoff_artifact_saved:
+        return None
+    markdown = _thread_handoff_markdown(
+        session=session,
+        consolidation=consolidation,
+        gov_arc_state=session.gov_arc_state,
+    )
+    artifact_id = brain.save_artifact(
+        capsule_id=capsule_id,
+        session_id=session.session_id,
+        turn_number=session.turn_count,
+        title="Thread handoff reseed",
+        content=markdown,
+        artifact_type="thread_handoff_md",
+    )
+    if artifact_id:
+        session.handoff_artifact_saved = True
+    return artifact_id
 
 
 def _context_budget_input_estimate(context_budget: Optional[dict[str, Any]]) -> int:
@@ -240,6 +500,9 @@ def _turn_runtime_metadata(
     governor: Any,
     governor_checked_this_turn: bool,
     usage: Optional[dict[str, Any]] = None,
+    failover: Optional[dict[str, Any]] = None,
+    governor_trace: Optional[dict[str, Any]] = None,
+    gov_arc_state: Optional[GovArcState] = None,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
@@ -247,7 +510,7 @@ def _turn_runtime_metadata(
         {
             "analyst_pool_role": "analyst",
             "analyst_call_mode": "serial_one_per_turn",
-            "selection_mode": "random",
+            "selection_mode": "round_robin",
             "selected_analyst": selected,
             "selected_provider": selected.get("provider"),
             "selected_model": selected.get("model"),
@@ -256,6 +519,7 @@ def _turn_runtime_metadata(
             "lossless_memory_store": "HoloBrain/capsule",
             "analyst_receives_full_memory": False,
             "structured_state_object_mode": "shadow",
+            "gov_arc_state_mode": "explicit_shadow",
             "baton_pass_mode": "shadow",
             "holo4dna_mode": "enabled"
             if _holo4dna_enabled()
@@ -267,6 +531,12 @@ def _turn_runtime_metadata(
     )
     if usage is not None:
         metadata["usage"] = usage
+    if failover is not None:
+        metadata["failover"] = failover
+    if governor_trace is not None:
+        metadata["governor_trace"] = governor_trace
+    if gov_arc_state is not None:
+        metadata["gov_arc_state"] = gov_arc_state.model_dump(mode="json")
     metadata.update(
         _governor_turn_metadata(
             governor,
@@ -439,9 +709,9 @@ class HoloChatEngine:
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
 
-        # Randomly select analyst for this turn — no predictable pattern
-        adapter = self._adapters[random.randrange(len(self._adapters))]
-        session.rotation_index += 1
+        # Rotate through the active mini pool so every configured analyst gets turns.
+        adapter = _select_analyst_adapter(session, self._adapters)
+        initial_adapter = adapter
         session.turn_count     += 1
 
         # Governor rotation policy:
@@ -463,15 +733,21 @@ class HoloChatEngine:
 
         # Governor runs the instruments: temperature + search decision
         temperature  = self._governor.assess_chat_temperature(user_message, session.history)
-        search_query = self._governor.should_search(user_message, session.history)
+        governor_search_query = self._governor.should_search(user_message, session.history)
 
         # Governor thinks about the human — skipped in incognito (would introduce bias)
         thought = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
         tenor   = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
-        search_results = web_search.search(search_query) if search_query else None
+        search_query, search_results, web_trace = _run_web_search_for_turn(user_message, governor_search_query)
         search_attempted = bool(search_query)
         search_succeeded = bool(search_results)
-        web_status = "checked" if search_succeeded else ("unavailable" if search_attempted else "off")
+        web_status = web_trace["status"]
+        _update_gov_arc_state(
+            session,
+            user_message=user_message,
+            tenor=tenor,
+            web_trace=web_trace,
+        )
 
         # Build enriched message — search results injected for the model only,
         # not stored in history (history stays clean with the original message)
@@ -503,6 +779,7 @@ class HoloChatEngine:
         if not incognito:
             system_prompt += (
                 "\n\n" + _health_context(session)
+                + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
@@ -548,27 +825,53 @@ class HoloChatEngine:
             except Exception as exc:
                 logger.warning("HoloChat 4DNA shadow trace failed: %s", exc)
 
-        # Call the adapter — enriched_message includes search results if any
-        # On failure, transparently fail over to a bench model from a different vendor
+        # Call the adapter. If the selected mini is down, skip forward through
+        # the active pool before falling back to any bench pool in non-mini profiles.
         start = time.time()
-        try:
-            response_text, in_tok, out_tok = adapter.chat_call(
-                system_prompt, session.history, enriched_message, temperature,
-                images=images or None,
-            )
-        except Exception as primary_err:
-            logger.warning(f"Analyst {adapter.provider} failed: {primary_err} — attempting bench failover")
-            bench_candidates = [b for b in self._bench if b.provider != adapter.provider]
+        failover_attempts: list[dict[str, Optional[str]]] = []
+        last_err: Optional[Exception] = None
+        response_text = ""
+        in_tok = out_tok = 0
+        for candidate in _adapter_candidate_order(self._adapters, adapter):
+            try:
+                response_text, in_tok, out_tok = candidate.chat_call(
+                    system_prompt, session.history, enriched_message, temperature,
+                    images=images or None,
+                )
+                adapter = candidate
+                break
+            except Exception as exc:
+                failover_attempts.append(_safe_adapter_error(candidate, exc))
+                last_err = exc
+                logger.warning(
+                    "Analyst %s/%s failed with %s; trying next available analyst",
+                    getattr(candidate, "provider", "unknown"),
+                    getattr(candidate, "model_id", getattr(candidate, "model", "unknown")),
+                    exc.__class__.__name__,
+                )
+        else:
+            bench_candidates = [b for b in self._bench if b.provider != initial_adapter.provider]
             if not bench_candidates:
-                raise
+                if last_err is not None:
+                    raise last_err
+                raise RuntimeError("HoloChat runtime has no available analyst adapters.")
             fallback = random.choice(bench_candidates)
-            logger.info(f"Bench failover: {fallback.provider}/{fallback.model_id}")
-            response_text, in_tok, out_tok = fallback.chat_call(
-                system_prompt, session.history, enriched_message, temperature,
-                images=images or None,
-            )
-            adapter = fallback  # reflect actual analyst in metadata
+            try:
+                response_text, in_tok, out_tok = fallback.chat_call(
+                    system_prompt, session.history, enriched_message, temperature,
+                    images=images or None,
+                )
+                adapter = fallback
+            except Exception as exc:
+                failover_attempts.append(_safe_adapter_error(fallback, exc))
+                raise
         elapsed_ms = int((time.time() - start) * 1000)
+        failover = _analyst_failover_metadata(
+            initial_adapter=initial_adapter,
+            final_adapter=adapter,
+            attempts=failover_attempts,
+            policy="try_next_active_mini_then_bench",
+        )
 
         if holo4dna_shadow is not None:
             actual_analyst = _adapter_identity_dict(adapter)
@@ -588,6 +891,19 @@ class HoloChatEngine:
                 # Quietly inline the correction so the user gets accurate information
                 note = " · ".join(corrections)
                 response_text += f"\n\n*One thing worth correcting: {note}*"
+
+        path_generator = getattr(self._governor, "generate_conversation_paths", None)
+        conversation_paths = []
+        if path_generator and not incognito:
+            conversation_paths = path_generator(
+                history=session.history,
+                capsule_context=capsule_context,
+                user_message=user_message,
+                response_text=response_text,
+                tenor=tenor or "",
+                thread_health_level=session.thread_health_level,
+                gov_arc_state=session.gov_arc_state.model_dump(mode="json"),
+            )
 
         # Extract and save any HTML artifacts — after claims check, before history commit
         artifacts_saved = []
@@ -631,6 +947,12 @@ class HoloChatEngine:
                         )
                     if result.get("life_context"):
                         self._brain.upsert_life_context(capsule_id, result["life_context"])
+                    _save_thread_handoff_artifact(
+                        self._brain,
+                        capsule_id=capsule_id,
+                        session=session,
+                        consolidation=result,
+                    )
                     logger.info(
                         f"Consolidation complete for {capsule_id[:8]}: "
                         f"{len(result.get('life_context', []))} life_context entries written."
@@ -674,9 +996,19 @@ class HoloChatEngine:
         if session.thread_health_level == "RED":
             handoff = {
                 "suggested":  True,
-                "message":    "This thread is getting long. Everything important has been saved: your portrait, open threads, what shifted this session. Before you continue, tell me: how much context do you want carried into the next thread? (Full detail, key points only, or just pick up where we left off and I'll calibrate.)",
+                "message":    THREAD_HANDOFF_MESSAGE,
                 "new_thread": "/chat",
             }
+
+        _update_gov_arc_state(
+            session,
+            user_message=user_message,
+            tenor=tenor,
+            web_trace=web_trace,
+            conversation_paths=conversation_paths,
+            memory_writes_count=memory_writes_count,
+            handoff=handoff,
+        )
 
         usage = _turn_usage_metadata(
             analyst_adapter=adapter,
@@ -696,6 +1028,16 @@ class HoloChatEngine:
             governor=self._governor,
             governor_checked_this_turn=True,
             usage=usage,
+            failover=failover,
+            governor_trace=_governor_trace_metadata(
+                web_trace=web_trace,
+                incognito=incognito,
+                memory_extraction_attempted=memory_extraction_attempted,
+                memory_writes_count=memory_writes_count,
+                conversation_paths_count=len(conversation_paths),
+                thread_health_level=session.thread_health_level,
+            ),
+            gov_arc_state=session.gov_arc_state,
         )
 
         return {
@@ -720,6 +1062,7 @@ class HoloChatEngine:
             "artifacts":           artifacts_saved,
             "usage":               usage,
             "runtime":             runtime,
+            "conversation_paths":   conversation_paths,
             **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }
 
@@ -753,8 +1096,8 @@ class HoloChatEngine:
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
 
-        adapter = self._adapters[random.randrange(len(self._adapters))]
-        session.rotation_index += 1
+        adapter = _select_analyst_adapter(session, self._adapters)
+        initial_adapter = adapter
         session.turn_count     += 1
 
         if _should_rotate_governor(session):
@@ -766,13 +1109,19 @@ class HoloChatEngine:
             self._governor.lock_to_provider(session.governor_provider)
 
         temperature  = self._governor.assess_chat_temperature(user_message, session.history)
-        search_query = self._governor.should_search(user_message, session.history)
+        governor_search_query = self._governor.should_search(user_message, session.history)
         thought      = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
         tenor        = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
-        search_results = web_search.search(search_query) if search_query else None
+        search_query, search_results, web_trace = _run_web_search_for_turn(user_message, governor_search_query)
         search_attempted = bool(search_query)
         searched = bool(search_results)
-        web_status = "checked" if searched else ("unavailable" if search_attempted else "off")
+        web_status = web_trace["status"]
+        _update_gov_arc_state(
+            session,
+            user_message=user_message,
+            tenor=tenor,
+            web_trace=web_trace,
+        )
 
         enriched_message = user_message
         if search_results:
@@ -793,6 +1142,7 @@ class HoloChatEngine:
         if not incognito:
             system_prompt += (
                 "\n\n" + _health_context(session)
+                + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
@@ -842,21 +1192,62 @@ class HoloChatEngine:
         if search_attempted:
             yield {"searching": True}
 
-        # Stream analyst response token by token
+        # Stream analyst response token by token. If a provider fails before it
+        # emits content, skip to the next active mini instead of ending the turn.
         accumulated = []
         in_tok = out_tok = 0
         start = time.time()
-        for chunk in adapter.stream_chat_call(
-            system_prompt, session.history, enriched_message, temperature, images=images or None
-        ):
-            if isinstance(chunk, dict) and chunk.get("done"):
-                in_tok  = chunk.get("in_tok", 0)
-                out_tok = chunk.get("out_tok", 0)
-            else:
-                accumulated.append(chunk)
-                yield chunk
+        failover_attempts: list[dict[str, Optional[str]]] = []
+        last_err: Optional[Exception] = None
+        stream_completed = False
+        for candidate in _adapter_candidate_order(self._adapters, adapter):
+            candidate_chunks: list[str] = []
+            emitted = False
+            try:
+                for chunk in candidate.stream_chat_call(
+                    system_prompt, session.history, enriched_message, temperature, images=images or None
+                ):
+                    if isinstance(chunk, dict) and chunk.get("done"):
+                        in_tok  = chunk.get("in_tok", 0)
+                        out_tok = chunk.get("out_tok", 0)
+                    else:
+                        emitted = True
+                        candidate_chunks.append(chunk)
+                        yield chunk
+                accumulated.extend(candidate_chunks)
+                adapter = candidate
+                stream_completed = True
+                break
+            except Exception as exc:
+                if emitted:
+                    raise
+                failover_attempts.append(_safe_adapter_error(candidate, exc))
+                last_err = exc
+                logger.warning(
+                    "Streaming analyst %s/%s failed with %s before output; trying next available analyst",
+                    getattr(candidate, "provider", "unknown"),
+                    getattr(candidate, "model_id", getattr(candidate, "model", "unknown")),
+                    exc.__class__.__name__,
+                )
+        if not stream_completed:
+            if last_err is not None:
+                raise last_err
+            raise RuntimeError("HoloChat runtime has no available streaming analyst adapters.")
 
         response_text = "".join(accumulated)
+        failover = _analyst_failover_metadata(
+            initial_adapter=initial_adapter,
+            final_adapter=adapter,
+            attempts=failover_attempts,
+            policy="try_next_active_mini",
+        )
+
+        if holo4dna_shadow is not None:
+            actual_analyst = _adapter_identity_dict(adapter)
+            recorded_analyst = holo4dna_shadow.metadata["route"]["runtime_analyst"]
+            if actual_analyst != recorded_analyst:
+                holo4dna_shadow.metadata["route"]["runtime_analyst_after_failover"] = actual_analyst
+                holo4dna_shadow.trace.extra_metadata["runtime_analyst_after_failover"] = actual_analyst
 
         # Post-stream: claims check (may append a correction to response_text)
         response_text, flagged_claims = self._governor.verify_claims(response_text, web_search.search)
@@ -867,6 +1258,19 @@ class HoloChatEngine:
                 correction_text = f"\n\n*One thing worth correcting: {note}*"
                 response_text  += correction_text
                 yield correction_text
+
+        path_generator = getattr(self._governor, "generate_conversation_paths", None)
+        conversation_paths = []
+        if path_generator and not incognito:
+            conversation_paths = path_generator(
+                history=session.history,
+                capsule_context=capsule_context,
+                user_message=user_message,
+                response_text=response_text,
+                tenor=tenor or "",
+                thread_health_level=session.thread_health_level,
+                gov_arc_state=session.gov_arc_state.model_dump(mode="json"),
+            )
 
         # Commit history
         session.history.append({"role": "user",      "content": user_message})
@@ -897,6 +1301,12 @@ class HoloChatEngine:
                             self._brain.save_consolidation(capsule_id, session.session_id, result["session_note"])
                         if result.get("life_context"):
                             self._brain.upsert_life_context(capsule_id, result["life_context"])
+                        _save_thread_handoff_artifact(
+                            self._brain,
+                            capsule_id=capsule_id,
+                            session=session,
+                            consolidation=result,
+                        )
                     if session.turn_count == 2:
                         name = self._governor.name_session(list(session.history))
                         if name:
@@ -923,9 +1333,19 @@ class HoloChatEngine:
         if session.thread_health_level == "RED":
             handoff = {
                 "suggested":  True,
-                "message":    "This thread is getting long. Everything important has been saved: your portrait, open threads, what shifted this session. Before you continue, tell me: how much context do you want carried into the next thread? (Full detail, key points only, or just pick up where we left off and I'll calibrate.)",
+                "message":    THREAD_HANDOFF_MESSAGE,
                 "new_thread": "/chat",
             }
+
+        _update_gov_arc_state(
+            session,
+            user_message=user_message,
+            tenor=tenor,
+            web_trace=web_trace,
+            conversation_paths=conversation_paths,
+            memory_writes_count=0,
+            handoff=handoff,
+        )
 
         elapsed_ms = int((time.time() - start) * 1000)
         usage = _turn_usage_metadata(
@@ -946,6 +1366,16 @@ class HoloChatEngine:
             governor=self._governor,
             governor_checked_this_turn=True,
             usage=usage,
+            failover=failover,
+            governor_trace=_governor_trace_metadata(
+                web_trace=web_trace,
+                incognito=incognito,
+                memory_extraction_attempted=bool(capsule_id and not incognito),
+                memory_writes_count=0,
+                conversation_paths_count=len(conversation_paths),
+                thread_health_level=session.thread_health_level,
+            ),
+            gov_arc_state=session.gov_arc_state,
         )
 
         yield {
@@ -969,6 +1399,7 @@ class HoloChatEngine:
             "_temperature":        temperature,
             "usage":               usage,
             "runtime":             runtime,
+            "conversation_paths":   conversation_paths,
             **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }
 
@@ -1010,6 +1441,49 @@ def _adapter_identity_dict(adapter: Any) -> dict[str, Optional[str]]:
     return {
         "provider": getattr(adapter, "provider", None),
         "model": getattr(adapter, "model_id", getattr(adapter, "model", None)),
+    }
+
+
+def _select_analyst_adapter(session: ChatSession, adapters: list[Any]) -> Any:
+    if not adapters:
+        raise RuntimeError("HoloChat runtime has no analyst adapters.")
+    adapter = adapters[session.rotation_index % len(adapters)]
+    session.rotation_index += 1
+    return adapter
+
+
+def _adapter_candidate_order(adapters: list[Any], selected: Any) -> list[Any]:
+    if not adapters:
+        return []
+    try:
+        selected_index = next(
+            idx for idx, adapter in enumerate(adapters) if adapter is selected
+        )
+    except StopIteration:
+        return [selected, *[adapter for adapter in adapters if adapter is not selected]]
+    return adapters[selected_index:] + adapters[:selected_index]
+
+
+def _safe_adapter_error(adapter: Any, exc: Exception) -> dict[str, Optional[str]]:
+    details = _adapter_identity_dict(adapter)
+    details["error_type"] = exc.__class__.__name__
+    return details
+
+
+def _analyst_failover_metadata(
+    *,
+    initial_adapter: Any,
+    final_adapter: Any,
+    attempts: list[dict[str, Optional[str]]],
+    policy: str,
+) -> dict[str, Any]:
+    return {
+        "policy": policy,
+        "attempted": bool(attempts),
+        "count": len(attempts),
+        "initial": _adapter_identity_dict(initial_adapter),
+        "final": _adapter_identity_dict(final_adapter),
+        "skipped": attempts,
     }
 
 
@@ -1259,6 +1733,7 @@ def _build_holo4dna_shadow_turn(
         thread_health_score=session.thread_health_score,
         thread_status=session.thread_status,
         required_tools=required_tools,
+        gov_arc_state=session.gov_arc_state,
     )
     holo_state.memory_candidates.append(
         _memory_presence_summary(
@@ -1303,6 +1778,7 @@ def _build_holo4dna_shadow_turn(
         },
         "context_budget": context_packet.metadata.get("context_budget"),
         "thread_health": thread_health,
+        "gov_arc_state": holo_state.gov_arc_state.model_dump(mode="json"),
         "searched": bool(search_query or search_results),
         "search_query": search_query,
     }

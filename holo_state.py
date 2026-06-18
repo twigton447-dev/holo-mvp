@@ -91,6 +91,24 @@ class StateAudit(BaseModel):
     notes: list[str] = Field(default_factory=list)
 
 
+class GovArcState(BaseModel):
+    """Holo-owned continuity object for the chat Governor."""
+
+    current_topic: str | None = None
+    topic_shift_reason: str | None = None
+    user_goal: str | None = None
+    current_tension: str | None = None
+    unresolved_questions: list[str] = Field(default_factory=list)
+    settled_decisions: list[str] = Field(default_factory=list)
+    last_gov_read: str | None = None
+    current_directive: str | None = None
+    next_paths: list[str] = Field(default_factory=list)
+    web_decision: str | None = None
+    memory_write_summary: str | None = None
+    handoff_recommendation: str | None = None
+    confidence: str = "medium"
+
+
 class HoloState(BaseModel):
     schema_version: str = SCHEMA_VERSION
     state_id: str = Field(default_factory=lambda: f"hstate_{uuid4().hex}")
@@ -105,6 +123,7 @@ class HoloState(BaseModel):
     artifact_registry: list[dict[str, Any]] = Field(default_factory=list)
     required_tools: list[RequiredTools] = Field(default_factory=lambda: [RequiredTools.NONE])
     baton_pass: BatonPass = Field(default_factory=BatonPass)
+    gov_arc_state: GovArcState = Field(default_factory=GovArcState)
     thread_health: ThreadHealth = Field(default_factory=ThreadHealth)
     memory_candidates: list[dict[str, Any]] = Field(default_factory=list)
     state_audit: StateAudit = Field(default_factory=StateAudit)
@@ -131,6 +150,7 @@ class HoloState(BaseModel):
         thread_status: str | None = None,
         required_tools: list[RequiredTools] | None = None,
         baton_pass: BatonPass | None = None,
+        gov_arc_state: GovArcState | None = None,
     ) -> "HoloState":
         summary = " ".join(user_message.strip().split())
         if len(summary) > 240:
@@ -144,6 +164,7 @@ class HoloState(BaseModel):
             latest_input_summary=summary or None,
             required_tools=tools,
             baton_pass=baton,
+            gov_arc_state=gov_arc_state or GovArcState(current_topic=summary or None),
             thread_health=ThreadHealth.from_score(
                 thread_health_score,
                 status=thread_status,

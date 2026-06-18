@@ -1,0 +1,180 @@
+{
+  "report_type": "HBB_BEC_post_patch_rerun_preflight",
+  "created_at": "2026-06-18",
+  "scope": [
+    "HBB-BEC-001",
+    "HBB-BEC-002-HARD"
+  ],
+  "preflight_status": "completed_rerun_blocked_by_missing_sanctioned_live_runner",
+  "branch_gate": {
+    "expected_branch": "holo-builder-freeze-manifest-gate-001",
+    "observed_branch": "holo-builder-freeze-manifest-gate-001",
+    "git_status_at_start": "clean",
+    "status": "PASS"
+  },
+  "families": [
+    {
+      "family_id": "HBB-BEC-001",
+      "factory_family_id": "BEC-PAIR-001",
+      "frozen_packet_ids": [
+        "HBB-BEC-001",
+        "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL"
+      ],
+      "frozen_artifact_paths": [
+        "holo_builder/outputs/frozen/HBB-BEC-001_8181d83c.json",
+        "holo_builder/outputs/frozen/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc.json"
+      ],
+      "frozen_hashes": {
+        "HBB-BEC-001": "8181d83ceb7f36f97160f078a4d4d35bdced5555fba5478c55bd3d954f40c4f1",
+        "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL": "807468fcba476a97ef92cf4058af0767c73a66a450bda37c60c6bfaa8be5e883"
+      },
+      "hash_verification_status": "PASS: computed payload hashes match _frozen.hash and holo_builder/outputs/ledger.jsonl rows for both siblings.",
+      "freeze_manifest_pointer": [
+        "holo_builder/outputs/freeze_manifest/HBB-BEC-001_build_freeze_manifest.json",
+        "holo_builder/outputs/freeze_manifest/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_build_freeze_manifest.json"
+      ],
+      "original_trace_pointer": {
+        "directory": "traces/HBB-BEC-001_pair_4dna_seed447/",
+        "files": [
+          "traces/HBB-BEC-001_pair_4dna_seed447/HBB-BEC-001_8181d83c_4dna_trace.json",
+          "traces/HBB-BEC-001_pair_4dna_seed447/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc_4dna_trace.json"
+        ]
+      },
+      "judge_pointer": [
+        "reports/HBB_BEC_001_pair_4dna_seed447_judge_summary.json",
+        "reports/HBB_BEC_001_pair_4dna_seed447_judge_summary.md"
+      ],
+      "autopsy_pointer": [
+        "reports/HBB_BEC_001_seed447_hologov_loss_autopsy.json",
+        "reports/HBB_BEC_001_seed447_hologov_loss_autopsy.md"
+      ],
+      "patch_pointer": [
+        "llm_adapters.py",
+        "reports/HBB_BEC_001_seed447_hologov_loss_autopsy.json"
+      ],
+      "regression_test_pointer": [
+        "test_hbb_bec_hologov_trigger_completion_regression.py",
+        "test_holo_builder_frozen_4dna_runner.py",
+        "test_holo_builder_freeze_ledger_accounting.py",
+        "test_balanced_100_packet_factory_manifest.py"
+      ],
+      "regression_test_result": "PASS: python3 -m pytest test_hbb_bec_hologov_trigger_completion_regression.py test_holo_builder_frozen_4dna_runner.py test_holo_builder_freeze_ledger_accounting.py test_balanced_100_packet_factory_manifest.py -> 23 passed.",
+      "rerun_needed": "yes",
+      "rerun_blocked": "yes",
+      "blocker_reason": "The repo contains the no-live dry-run contract runner at holo_builder/frozen_4dna_runner.py, but no committed live frozen-pair provider runner or Taylor-local provider-transmission command was found. The active mandate forbids live provider calls from Codex/Co and requires a local Taylor runbook for provider transmission.",
+      "exact_rerun_command_if_unblocked": "BLOCKED: no exact live provider-transmission command is available from the current repo. A sanctioned live frozen-pair runner must exist before this can be filled.",
+      "available_no_live_contract_command": "python3 -m holo_builder.frozen_4dna_runner --seed 447 --session-id HBB-BEC-001_pair_4dna_seed447_post_patch --allow-packet holo_builder/outputs/frozen/HBB-BEC-001_8181d83c.json --allow-hash 8181d83ceb7f36f97160f078a4d4d35bdced5555fba5478c55bd3d954f40c4f1 --escalate-packet holo_builder/outputs/frozen/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc.json --escalate-hash 807468fcba476a97ef92cf4058af0767c73a66a450bda37c60c6bfaa8be5e883",
+      "expected_output_paths": [
+        "traces/HBB-BEC-001_pair_4dna_seed447_post_patch/HBB-BEC-001_8181d83c_4dna_trace.json",
+        "traces/HBB-BEC-001_pair_4dna_seed447_post_patch/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc_4dna_trace.json",
+        "reports/HBB_BEC_001_pair_4dna_seed447_post_patch_judge_summary.json",
+        "reports/HBB_BEC_001_pair_4dna_seed447_post_patch_judge_summary.md"
+      ],
+      "proof_credit_possible_if_clean": "yes"
+    },
+    {
+      "family_id": "HBB-BEC-002-HARD",
+      "factory_family_id": "BEC-PAIR-002",
+      "frozen_packet_ids": [
+        "HBB-BEC-002-HARD-ALLOW",
+        "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL"
+      ],
+      "frozen_artifact_paths": [
+        "holo_builder/outputs/frozen/HBB-BEC-002-HARD-ALLOW_f7986fa2.json",
+        "holo_builder/outputs/frozen/HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL_0151f5e6.json"
+      ],
+      "frozen_hashes": {
+        "HBB-BEC-002-HARD-ALLOW": "f7986fa2d852183033f1596780f9a763da803f61490af0b18d439d73ba5810d5",
+        "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL": "0151f5e643eb27d56d879b6b12b66ae9bcbebd962e2ce7a014c51e17ee68b4cf"
+      },
+      "hash_verification_status": "PASS: computed payload hashes match _frozen.hash and holo_builder/outputs/ledger.jsonl rows for both siblings.",
+      "freeze_manifest_pointer": [
+        "holo_builder/outputs/freeze_manifest/HBB-BEC-002-HARD-ALLOW_build_freeze_manifest.json",
+        "holo_builder/outputs/freeze_manifest/HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL_build_freeze_manifest.json"
+      ],
+      "original_trace_pointer": {
+        "directory": "traces/HBB-BEC-002_hard_pair_4dna_seed447/",
+        "files": [
+          "traces/HBB-BEC-002_hard_pair_4dna_seed447/HBB-BEC-002-HARD-ALLOW_f7986fa2_4dna_trace.json",
+          "traces/HBB-BEC-002_hard_pair_4dna_seed447/HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL_0151f5e6_4dna_trace.json"
+        ]
+      },
+      "judge_pointer": [
+        "reports/HBB_BEC_002_hard_pair_4dna_seed447_judge_summary.json",
+        "reports/HBB_BEC_002_hard_pair_4dna_seed447_judge_summary.md"
+      ],
+      "autopsy_pointer": [
+        "reports/HBB_BEC_002_seed447_hologov_loss_autopsy.json",
+        "reports/HBB_BEC_002_seed447_hologov_loss_autopsy.md"
+      ],
+      "patch_pointer": [
+        "llm_adapters.py",
+        "reports/HBB_BEC_002_seed447_hologov_loss_autopsy.json"
+      ],
+      "regression_test_pointer": [
+        "test_hbb_bec_hologov_trigger_completion_regression.py",
+        "test_holo_builder_frozen_4dna_runner.py",
+        "test_holo_builder_freeze_ledger_accounting.py",
+        "test_balanced_100_packet_factory_manifest.py"
+      ],
+      "regression_test_result": "PASS: python3 -m pytest test_hbb_bec_hologov_trigger_completion_regression.py test_holo_builder_frozen_4dna_runner.py test_holo_builder_freeze_ledger_accounting.py test_balanced_100_packet_factory_manifest.py -> 23 passed.",
+      "rerun_needed": "yes",
+      "rerun_blocked": "yes",
+      "blocker_reason": "The repo contains the no-live dry-run contract runner at holo_builder/frozen_4dna_runner.py, but no committed live frozen-pair provider runner or Taylor-local provider-transmission command was found. The active mandate forbids live provider calls from Codex/Co and requires a local Taylor runbook for provider transmission.",
+      "exact_rerun_command_if_unblocked": "BLOCKED: no exact live provider-transmission command is available from the current repo. A sanctioned live frozen-pair runner must exist before this can be filled.",
+      "available_no_live_contract_command": "python3 -m holo_builder.frozen_4dna_runner --seed 447 --session-id HBB-BEC-002_hard_pair_4dna_seed447_post_patch --allow-packet holo_builder/outputs/frozen/HBB-BEC-002-HARD-ALLOW_f7986fa2.json --allow-hash f7986fa2d852183033f1596780f9a763da803f61490af0b18d439d73ba5810d5 --escalate-packet holo_builder/outputs/frozen/HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL_0151f5e6.json --escalate-hash 0151f5e643eb27d56d879b6b12b66ae9bcbebd962e2ce7a014c51e17ee68b4cf",
+      "expected_output_paths": [
+        "traces/HBB-BEC-002_hard_pair_4dna_seed447_post_patch/HBB-BEC-002-HARD-ALLOW_f7986fa2_4dna_trace.json",
+        "traces/HBB-BEC-002_hard_pair_4dna_seed447_post_patch/HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL_0151f5e6_4dna_trace.json",
+        "reports/HBB_BEC_002_hard_pair_4dna_seed447_post_patch_judge_summary.json",
+        "reports/HBB_BEC_002_hard_pair_4dna_seed447_post_patch_judge_summary.md"
+      ],
+      "proof_credit_possible_if_clean": "yes"
+    }
+  ],
+  "runner_preflight": {
+    "dry_run_runner_path": "holo_builder/frozen_4dna_runner.py",
+    "dry_run_runner_exists": true,
+    "dry_run_runner_status": "PASS: existing runner validates fixed seed447 4DNA roster, frozen hash contract, model-visible payload keys, and no trace writes.",
+    "live_rerun_runner_path": null,
+    "live_rerun_runner_exists": false,
+    "rerun_command_or_runner_path_exists": false,
+    "codex_co_provider_call_guard": {
+      "status": "BLOCKED_BY_ACTIVE_MANDATE",
+      "requires_env_vars_or_flags": "No HBB-specific Codex/Co live-call guard was found. The active mandate says not to run live provider calls from Codex/Co. The BAL100 scout-specific --allow-codex-provider-calls and BAL100_BATCH001_CODEX_SCOUT_APPROVED gate is not an HBB frozen-pair rerun guard.",
+      "taylor_local_requirement": "Provider transmission needs a Taylor-local terminal runbook and explicit Taylor approval for the exact frozen payload action/context scope."
+    }
+  },
+  "proof_credit": {
+    "before_preflight_pair_families": 2,
+    "before_preflight_packets": 4,
+    "unchanged_by_preflight": true,
+    "current_ready_families": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "possible_if_clean_post_patch_rerun_and_judge": {
+      "pair_families": 4,
+      "packets": 8,
+      "candidate_families_to_add": [
+        "BEC-PAIR-001",
+        "BEC-PAIR-002"
+      ]
+    }
+  },
+  "validation": {
+    "json_loads_cleanly": true,
+    "regression_tests_pass": true,
+    "test_command": "python3 -m pytest test_hbb_bec_hologov_trigger_completion_regression.py test_holo_builder_frozen_4dna_runner.py test_holo_builder_freeze_ledger_accounting.py test_balanced_100_packet_factory_manifest.py",
+    "test_result": "23 passed",
+    "live_calls": false,
+    "new_traces_created": false,
+    "judge_run": false,
+    "qa_or_ablation_run": false,
+    "freeze_run": false,
+    "packet_edits": false,
+    "frozen_artifact_edits": false,
+    "proof_credit_changed": false,
+    "push": false
+  }
+}

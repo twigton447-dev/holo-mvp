@@ -188,7 +188,7 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
 
     assert "<span>HoloChat</span>" in html
     assert '<span id="brand-sub">4DNA</span>' in html
-    assert "Memory-attached workspace" in html
+    assert "Memory-attached workspace" not in html
     assert "updateRuntimePanel(data)" in html
     assert 'id="runtime-toggle"' in html
     assert 'id="runtime-panel"' in html
@@ -207,7 +207,7 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
         "Governor mode",
         "Context delivery",
         "Full memory to analyst",
-        "HoloBrain",
+        "Memory store",
         "State object",
         "Baton Pass",
         "Holo4DNA",
@@ -223,7 +223,7 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     ):
         assert label in html
 
-    assert "one selected analyst model" in html
+    assert "Meet Holo Chat 1.1" not in html
     assert ("top 3 " + "frontier models") not in html
     assert ("Three " + "models") not in html
     assert ("three models " + "one mind") not in html.lower()
@@ -259,6 +259,10 @@ def test_frontend_onboarding_memory_seed_prompt_is_safe_and_specific():
     assert "what an AI assistant should avoid doing with me" in html
     assert "Copy prompt" in html
     assert "You can edit it before saving." in html
+    assert "Meet Holo Chat 1.1" not in html
+    assert "Why Holo?" not in html
+    assert "What is Holo Chat?" not in html
+    assert "Coming next:" not in html
 
     assert "everything you tell me" not in html
     assert "full context" not in html
@@ -274,3 +278,15 @@ def test_frontend_assistant_messages_do_not_render_runtime_metadata_inline():
     assert "${runtimeRailHtml}" not in html
     assert "trust-row runtime-rail" not in html
     assert "updateRuntimePanel(data);" in html
+
+
+def test_frontend_assistant_messages_render_three_conversation_paths():
+    html = Path("frontend/chat.html").read_text()
+
+    assert 'aria-label="Conversation paths"' in html
+    assert "function normalizeConversationPaths(suggestions)" in html
+    assert "suggestions: suggestions.slice(0, 3)" in html
+    assert "Go deeper on this" in html
+    assert "Turn this into a concrete plan" in html
+    assert "Explore a different angle" in html
+    assert "renderConversationPaths(suggestions)" in html

@@ -596,14 +596,14 @@
   </div>
 </div>
 
-<!-- HoloBrain dashboard — authenticated capsule data -->
+<!-- Engine data dashboard — runtime plus authenticated saved-memory status -->
 <div id="holobrain-panel">
   <div id="holobrain-panel-header">
-    <h3>HoloBrain</h3>
+    <h3>Engine data</h3>
     <button id="holobrain-panel-close" onclick="closeHoloBrainPanel()">×</button>
   </div>
   <div id="holobrain-body">
-    <div class="brain-muted">Sign in to inspect HoloBrain.</div>
+    <div class="brain-muted">Sign in to view engine data.</div>
   </div>
 </div>
 
@@ -632,13 +632,12 @@
   <div id="header">
     <div id="header-brand">
       <h1><span>HoloChat</span> <span id="brand-sub">4DNA</span><span id="space-label"></span></h1>
-      <span id="brand-tagline">Memory-attached workspace</span>
     </div>
     <div id="header-right">
       <div id="incognito-badge">◉ Incognito</div>
       <button id="thread-toggle" onclick="toggleThreadPanel()" title="See my threads">See my threads</button>
       <button id="runtime-toggle" onclick="openRuntimePanel()" title="Open Runtime/System">Runtime</button>
-      <button id="holobrain-toggle" onclick="openHoloBrainPanel()" title="Open HoloBrain">HoloBrain</button>
+      <button id="holobrain-toggle" onclick="openHoloBrainPanel()" title="Open engine data">Engine data</button>
       <button id="incognito-btn" onclick="toggleIncognito()" title="Start incognito thread">Start incognito thread</button>
       <button id="new-thread" onclick="newThread()">Start new thread</button>
       <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀</button>
@@ -1251,9 +1250,10 @@
       </div>`).join("");
   }
 
-  // ── HoloBrain dashboard ─────────────────────────────────────────────────────
+  // ── Engine data dashboard ───────────────────────────────────────────────────
 
   let _holoBrainLoaded = false;
+  let _latestRuntimeData = null;
 
   function openHoloBrainPanel() {
     const panel = document.getElementById("holobrain-panel");
@@ -1268,20 +1268,20 @@
   async function loadHoloBrain() {
     const body = document.getElementById("holobrain-body");
     if (!capsuleToken) {
-      body.innerHTML = `<div class="brain-muted">Sign in to inspect HoloBrain.</div>`;
+      body.innerHTML = `<div class="brain-muted">Sign in to view engine data.</div>`;
       return;
     }
-    body.innerHTML = `<div class="brain-muted">Loading HoloBrain...</div>`;
+    body.innerHTML = `<div class="brain-muted">Loading engine data...</div>`;
     try {
       const res = await fetch("/v1/holo-brain", {
         headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
       });
-      if (!res.ok) throw new Error("HoloBrain unavailable.");
+      if (!res.ok) throw new Error("Engine data unavailable.");
       const data = await res.json();
       renderHoloBrain(data);
       _holoBrainLoaded = true;
     } catch {
-      body.innerHTML = `<div class="brain-muted">HoloBrain is unavailable right now.</div>`;
+      body.innerHTML = `<div class="brain-muted">Engine data is unavailable right now.</div>`;
     }
   }
 
@@ -1316,10 +1316,14 @@
     const messages = data.recent_messages || {};
     const consolidations = data.consolidations || {};
     const artifacts = data.artifacts || {};
+    const runtimeRows = buildRuntimeRows(_latestRuntimeData);
+    const runtimeRowsHtml = runtimeRows
+      ? renderRuntimeRows(runtimeRows)
+      : `<div class="brain-muted">Ask Holo something to inspect the latest engine turn.</div>`;
 
     const contextRows = `
       <div class="brain-muted">
-        Memory details hidden by default. Capsule context counts stay visible without showing stored rows.
+        Memory details hidden by default. Context counts stay visible without showing stored rows.
       </div>`;
 
     const lifeRows = brainRows(life.entries || [], "No active life context rows.", item => `
@@ -1364,11 +1368,10 @@
       </div>`);
 
     document.getElementById("holobrain-body").innerHTML = `
+      ${brainSection("Engine runtime", runtimeRows ? "latest turn" : "waiting", `<div id="engine-runtime-body">${runtimeRowsHtml}</div>`, true)}
       <div class="brain-card">
-        <div class="brain-row-key">Attached capsule</div>
-        <div class="brain-row-val">${escHtml(capsule.id_short || "")}</div>
+        <div class="brain-row-key">Signed-in memory</div>
         <div class="brain-row-val">${escHtml(capsule.name || "")}${capsule.email_masked ? ` · ${escHtml(capsule.email_masked)}` : ""}</div>
-        <span class="brain-pill">${escHtml(capsule.identity_type || "capsule")}</span>
         ${capsule.last_active ? `<span class="brain-pill">active ${escHtml(brainDate(capsule.last_active))}</span>` : ""}
       </div>
       <div class="brain-grid">
@@ -1379,13 +1382,13 @@
         <div class="brain-stat"><div class="brain-stat-num">${consolidations.count || 0}</div><div class="brain-stat-label">Notes</div></div>
         <div class="brain-stat"><div class="brain-stat-num">${artifacts.count || 0}</div><div class="brain-stat-label">Artifacts</div></div>
       </div>
-      ${brainSection("Capsule context", `${ctx.count || 0} rows`, contextRows)}
+      ${brainSection("Saved memory", `${ctx.count || 0} rows`, contextRows)}
       ${brainSection("Life context", `${life.count || 0} rows`, lifeRows)}
       ${brainSection("Sessions", `${sessions.shown || 0} shown`, sessionRows)}
       ${brainSection("Recent messages", `${messages.shown || 0} shown`, messageRows)}
       ${brainSection("Consolidations", `${consolidations.shown || 0} shown`, consolidationRows)}
       ${brainSection("Artifacts", `${artifacts.shown || 0} shown`, artifactRows)}
-      <button id="seed-btn" onclick="refreshHoloBrain()">Refresh HoloBrain</button>`;
+      <button id="seed-btn" onclick="refreshHoloBrain()">Refresh engine data</button>`;
   }
 
   // ── Avatar menu ───────────────────────────────────────────────────────────────
@@ -1593,53 +1596,6 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       <div class="holo-icon">✦</div>
       <div class="holo-body">
         <div class="bubble">
-
-          <p style="font-size:24px;font-weight:800;letter-spacing:-0.4px;line-height:1.2;margin:0 0 10px;">Meet Holo Chat 1.1</p>
-          <p style="font-size:18px;font-weight:600;margin:0 0 20px;">Hello${firstName && firstName !== 'hey' ? ', ' + firstName : ''}!</p>
-
-          <p style="margin-bottom:14px;">As you might already know, most AI tools are brilliant right up until they're not.</p>
-          <p style="margin-bottom:14px;">One moment they feel extraordinary. The next, they miss something obvious, lose the thread, or say something wrong with way too much confidence.</p>
-          <p style="margin-bottom:14px;">That problem is not going away. Hallucination is a well-known, studied part of how these models work. Even the smartest models do it.</p>
-          <p style="margin-bottom:22px;font-size:16px;font-weight:700;">I am built differently.</p>
-
-          <p style="margin-bottom:14px;">You interact with one consistent presence, me, that gets to know you over time. Under the hood, each turn is answered by one selected analyst model from the current runtime pool, while HoloBrain carries memory and context forward.</p>
-          <p style="margin-bottom:14px;">As the runtime pool evolves, the available models can change without changing the memory layer.</p>
-          <p style="margin-bottom:24px;font-weight:600;">One turn. One analyst. Your workspace context stays attached.</p>
-
-          <hr style="border:none;border-top:1px solid var(--border);margin:0 0 22px;">
-
-          <p style="font-size:17px;font-weight:700;margin:0 0 10px;">Why Holo?</p>
-          <p style="margin-bottom:14px;">My name comes from the ancient Greek <em>holos</em> meaning whole, entire, complete.</p>
-          <p style="margin-bottom:14px;">It is also rooted in <em>holoptism</em>, the idea of seeing the entire system rather than one isolated slice. That is the philosophy I operate from. Most people handle work, health, relationships, money, and strategy as separate categories, even when they are clearly affecting each other.</p>
-          <p style="margin-bottom:24px;font-weight:600;">I am built to see the whole picture.</p>
-
-          <hr style="border:none;border-top:1px solid var(--border);margin:0 0 22px;">
-
-          <p style="font-size:17px;font-weight:700;margin:0 0 10px;">What is Holo Chat?</p>
-          <p style="margin-bottom:14px;">This is Holo Chat, version 1.1. The first application in a broader family being built on one core idea: better decisions through clearer thinking.</p>
-          <p style="margin-bottom:10px;color:var(--text2);font-size:13px;font-weight:600;">Coming next:</p>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
-              <span style="font-weight:700;font-size:13px;">Holo Protect</span>
-              <span style="color:var(--text2);font-size:13px;">: securing high-value financial transactions and AI agents operating in sensitive environments</span>
-            </div>
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
-              <span style="font-weight:700;font-size:13px;">Holo Legal</span>
-              <span style="color:var(--text2);font-size:13px;">: bringing the same rigor to contracts, risk, and legal decisions</span>
-            </div>
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
-              <span style="font-weight:700;font-size:13px;">Holo Enterprise</span>
-              <span style="color:var(--text2);font-size:13px;">: decision intelligence at the organizational level</span>
-            </div>
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
-              <span style="font-weight:700;font-size:13px;">Holo Learn</span>
-              <span style="color:var(--text2);font-size:13px;">: and more to come</span>
-            </div>
-          </div>
-          <p style="margin-bottom:6px;color:var(--text2);font-size:13px;">Different domains. Same core philosophy: seeking truth and harmony in every area of life.</p>
-          <p style="margin-bottom:24px;font-weight:600;">But it all starts here, with you.</p>
-
-          <hr style="border:none;border-top:1px solid var(--border);margin:0 0 22px;">
 
           <p style="font-size:17px;font-weight:700;margin:0 0 10px;">Create a memory seed profile</p>
           <p style="margin-bottom:6px;">Ask your favorite chatbot to create a memory seed profile for HoloChat.</p>
@@ -1931,10 +1887,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
   function finalizeStreamingBubble(msgEl, fullText, data = {}) {
     const { mainText, suggestions } = parseResponse(fullText);
     const responseId = "r" + Date.now();
-    const chipsHtml = suggestions.length ? `
-      <div class="chips">
-        ${suggestions.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}
-      </div>` : "";
+    const chipsHtml = renderConversationPaths(suggestions);
     const webCheckedHtml = renderWebCheckedIndicator(data);
     const body = msgEl.querySelector(".holo-body");
     body.innerHTML = `
@@ -1976,10 +1929,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     const { mainText, battery, suggestions } = parseResponse(data.response);
     const responseId = "r" + Date.now();
 
-    const chipsHtml = suggestions.length ? `
-      <div class="chips">
-        ${suggestions.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}
-      </div>` : "";
+    const chipsHtml = renderConversationPaths(suggestions);
     const webCheckedHtml = renderWebCheckedIndicator(data);
 
     msg.innerHTML = `
@@ -2104,7 +2054,34 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       .replace(/\s*\[(GREEN|YELLOW|RED)\]\s*[█░]+/g, "")
       .trim();
 
-    return { mainText, battery, suggestions };
+    return { mainText, battery, suggestions: suggestions.slice(0, 3) };
+  }
+
+  function normalizeConversationPaths(suggestions) {
+    const fallback = [
+      "Go deeper on this",
+      "Turn this into a concrete plan",
+      "Explore a different angle"
+    ];
+    const seen = new Set();
+    const paths = [];
+    for (const item of [...(suggestions || []), ...fallback]) {
+      const text = String(item || "").trim();
+      const key = text.toLowerCase();
+      if (!text || seen.has(key)) continue;
+      seen.add(key);
+      paths.push(text);
+      if (paths.length === 3) break;
+    }
+    return paths;
+  }
+
+  function renderConversationPaths(suggestions) {
+    const paths = normalizeConversationPaths(suggestions);
+    return `
+      <div class="chips" aria-label="Conversation paths">
+        ${paths.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}
+      </div>`;
   }
 
   function useChip(el) {
@@ -2168,9 +2145,10 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       </div>`;
   }
 
-  function updateRuntimePanel(data) {
+
+  function buildRuntimeRows(data) {
     const runtime = data && data.runtime;
-    if (!runtime) return;
+    if (!runtime) return null;
     const selected = runtime.selected_analyst || {};
     const provider = runtime.selected_provider || selected.provider || "";
     const model = runtime.selected_model || selected.model || "";
@@ -2189,7 +2167,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       ? "capped memory slice"
       : (runtime.context_delivery_mode || "unknown");
     const fullMemory = runtime.analyst_receives_full_memory === false ? "no" : "unknown";
-    const holoBrain = runtime.lossless_memory_store ? "attached" : "unknown";
+    const memoryStore = runtime.lossless_memory_store ? "attached" : "unknown";
     const stateMode = runtime.structured_state_object_mode || "off";
     const batonMode = runtime.baton_pass_mode || "off";
     const holo4dnaMode = runtime.holo4dna_mode || "off";
@@ -2217,7 +2195,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     rows.push(["Governor mode", govMode]);
     rows.push(["Context delivery", contextDelivery]);
     rows.push(["Full memory to analyst", fullMemory]);
-    rows.push(["HoloBrain", holoBrain]);
+    rows.push(["Memory store", memoryStore]);
     rows.push(["State object", stateMode]);
     rows.push(["Baton Pass", batonMode]);
     rows.push(["Holo4DNA", holo4dnaMode]);
@@ -2231,11 +2209,21 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       rows.push(["Cost source", costSource]);
       rows.push(["Pricing estimate", "exact provider billing may differ"]);
     }
+    return rows;
+  }
 
+  function renderRuntimeRows(rows) {
+    return (rows || []).map(([label, value]) => runtimeRow(label, value)).join("");
+  }
+
+  function updateRuntimePanel(data) {
+    const rows = buildRuntimeRows(data);
+    if (!rows) return;
+    _latestRuntimeData = data;
     document.getElementById("runtime-toggle").style.display = "block";
-    document.getElementById("runtime-body").innerHTML = rows
-      .map(([label, value]) => runtimeRow(label, value))
-      .join("");
+    document.getElementById("runtime-body").innerHTML = renderRuntimeRows(rows);
+    const engineRuntimeBody = document.getElementById("engine-runtime-body");
+    if (engineRuntimeBody) engineRuntimeBody.innerHTML = renderRuntimeRows(rows);
   }
 
   function copyCode(btn) {

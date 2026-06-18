@@ -182,6 +182,101 @@ def test_holobuild_endpoint_returns_sanitized_specs_and_trace(monkeypatch, tmp_p
     assert "final_draft" not in str(payload)
 
 
+def test_holobuild_live_run_endpoint_is_disabled_by_default(monkeypatch):
+    monkeypatch.delenv("HOLOBUILD_LIVE_RUNS", raising=False)
+    monkeypatch.setattr(
+        main,
+        "get_capsule_from_request",
+        lambda header: {"sub": "canonical-capsule", "email": "taylor@example.com"},
+    )
+    client = TestClient(main.app)
+
+    response = client.post(
+        "/v1/holo-build/runs",
+        headers={"Authorization": "Bearer test"},
+        json={"spec_file": "TEST_spec.json"},
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "HoloBuild live runs are disabled."
+
+
+def test_holobuild_job_runner_captures_live_events_and_sanitized_result(monkeypatch, tmp_path):
+    specs_dir = tmp_path / "specs"
+    results_dir = tmp_path / "builder_results"
+    specs_dir.mkdir()
+    results_dir.mkdir()
+    (specs_dir / "TEST_spec.json").write_text("""{
+      "scenario_id": "TEST-HB-LIVE",
+      "domain": "AP",
+      "target_verdict": "ALLOW"
+    }""")
+    monkeypatch.setattr(main, "_HOLO_BUILD_SPECS_DIR", specs_dir)
+    monkeypatch.setattr(main, "_HOLO_BUILD_RESULT_DIRS", (results_dir,))
+    with main._holo_build_jobs_lock:
+        main._holo_build_jobs.clear()
+
+    job = main._create_holobuild_job("TEST_spec.json", 11, False, [])
+
+    def fake_runner(spec, seed=None, force_max_turns=False, skip_providers=None):
+        print("Turn 1 | openai | BUILDER -> draft rev=1")
+        print("Turn 2 | anthropic | INTERNAL_QA -> NEEDS_REPAIR")
+        print("Governor (google): IMPROVING risk_cat=overfit_risk")
+        return {
+            "builder_id": "builder_TEST-HB-LIVE",
+            "scenario_id": spec["scenario_id"],
+            "packet_format": "payment_email",
+            "builder_status": "BUILDER_CONVERGED",
+            "converged": True,
+            "retire_signal": False,
+            "exit_reason": "convergence",
+            "turns_completed": 2,
+            "qa_turn_count": 1,
+            "qa_deltas": [0],
+            "provider_fallback_used": False,
+            "governor_briefs": [{
+                "after_turn": 2,
+                "governor_provider": "google",
+                "overall_trajectory": "IMPROVING",
+                "highest_risk_category": "overfit_risk",
+                "brief_for_builder": "Tighten the clearing artifact.",
+            }],
+            "turn_history": [{
+                "turn_number": 1,
+                "turn_type": "BUILDER",
+                "provider": "openai",
+                "model_id": "gpt-4o-mini",
+                "elapsed_ms": 5,
+                "input_tokens": 10,
+                "output_tokens": 20,
+                "draft": {"raw": "must not leak"},
+            }],
+            "final_draft": {"raw": "must not leak"},
+            "total_tokens": {"input": 10, "output": 20},
+            "timestamp": "2026-06-17T00:00:00Z",
+        }
+
+    main._run_holobuild_job(
+        job["job_id"],
+        "TEST_spec.json",
+        11,
+        False,
+        [],
+        runner=fake_runner,
+    )
+
+    snapshot = main._snapshot_holobuild_job(job["job_id"])
+    assert snapshot["status"] == "completed"
+    assert snapshot["result"]["builder_status"] == "BUILDER_CONVERGED"
+    assert snapshot["result_file"] == "builder_TEST-HB-LIVE.json"
+    assert (results_dir / "builder_TEST-HB-LIVE.json").exists()
+    event_text = str(snapshot["events"])
+    assert "Turn 1 | openai | BUILDER" in event_text
+    assert "Governor (google): IMPROVING" in event_text
+    assert "must not leak" not in str(snapshot)
+    assert "final_draft" not in str(snapshot["result"])
+
+
 def test_frontend_has_holobrain_button_and_render_path():
     html = Path("frontend/chat.html").read_text()
 
@@ -202,6 +297,10 @@ def test_frontend_has_holobrain_button_and_render_path():
     assert "renderHoloBuildDashboard(holoBuild)" in html
     assert "HoloBuild turn timeline" in html
     assert "HoloBuild Gov briefs" in html
+    assert "Watch live run" in html
+    assert "startHoloBuildRun()" in html
+    assert "pollHoloBuildRun" in html
+    assert "HOLOBUILD_LIVE_RUNS=true" in html
     assert "Refresh engine data" in html
     assert "Attached capsule" not in html
     assert "capsule.id_short" not in html

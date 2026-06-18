@@ -302,6 +302,10 @@
     .builder-turn { border-left: 2px solid var(--border); padding-left: 10px; }
     .builder-turn.builder-gov { border-left-color: var(--accent); }
     .builder-turn.builder-qa { border-left-color: var(--text3); }
+    .builder-controls { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 8px; align-items: center; }
+    .builder-controls select, .builder-controls input { min-width: 0; background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 9px; font: inherit; font-size: 12px; }
+    .builder-controls button { grid-column: 1 / -1; background: var(--accent); border: none; color: #fff; border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .builder-controls button:disabled { opacity: 0.55; cursor: not-allowed; }
 
     /* Sign-in overlay */
     #signin-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; z-index: 100; }
@@ -1278,6 +1282,8 @@
 
   let _holoBrainLoaded = false;
   let _latestRuntimeData = null;
+  let _holoBuildPollTimer = null;
+  let _activeHoloBuildJobId = null;
   const ENGINE_PANEL_DEFAULT_WIDTH = 520;
   const ENGINE_PANEL_MIN_WIDTH = 360;
   const ENGINE_PANEL_MAX_WIDTH = 920;
@@ -1380,10 +1386,47 @@
     return items.map(renderRow).join("");
   }
 
+  function renderHoloBuildJobStatus(job) {
+    if (!job || !job.job_id) return `<div id="holobuild-live-status"></div>`;
+    const events = (job.events || []).slice(-14).map(event => `
+      <div class="brain-row">
+        <div class="brain-row-key">${escHtml(event.kind || "event")}</div>
+        <div class="brain-row-val">${escHtml(event.message || "")}</div>
+      </div>`).join("") || `<div class="brain-muted">Waiting for live Builder events...</div>`;
+    return `
+      <div id="holobuild-live-status">
+        <div class="brain-row">
+          <div class="brain-row-key">Watched run</div>
+          <div class="brain-row-val">${escHtml(job.spec_file || job.job_id)} · ${escHtml(job.status || "unknown")}</div>
+          ${job.result ? `<span class="brain-pill">${escHtml(job.result.builder_status || "builder done")}</span>` : ""}
+          ${job.error ? `<div class="brain-row-val"><strong>error:</strong> ${escHtml(job.error)}</div>` : ""}
+        </div>
+        ${events}
+      </div>`;
+  }
+
+  function renderHoloBuildLiveControls(build, specs) {
+    const jobs = (build && build.jobs) || [];
+    const activeJob = jobs.find(job => ["queued", "running"].includes(job.status)) || jobs[0] || null;
+    const options = specs.map(item =>
+      `<option value="${escAttr(item.file || "")}">${escHtml(item.scenario_id || item.file || "spec")}</option>`
+    ).join("");
+    const controls = build && build.live_runs_enabled ? `
+      <div class="builder-controls">
+        <select id="holobuild-spec-select" title="HoloBuild spec" ${specs.length ? "" : "disabled"}>${options}</select>
+        <input id="holobuild-seed" title="Seed" placeholder="seed" inputmode="numeric" />
+        <button id="holobuild-run-btn" onclick="startHoloBuildRun()" ${specs.length ? "" : "disabled"}>Watch live run</button>
+      </div>
+      <div class="brain-muted">Live provider calls are enabled for watched Builder runs.</div>`
+      : `<div class="brain-muted">Live Builder watching is off. Set HOLOBUILD_LIVE_RUNS=true to start watched runs.</div>`;
+    return `${controls}${renderHoloBuildJobStatus(activeJob)}`;
+  }
+
   function renderHoloBuildDashboard(build) {
     const specs = (build && build.specs) || [];
     const runs = (build && build.runs) || [];
     const latest = runs[0] || null;
+    const liveControls = renderHoloBuildLiveControls(build, specs);
     const specRows = brainRows(specs.slice(0, 6), "No HoloBuild specs found.", item => `
       <div class="brain-row">
         <div class="brain-row-key">${escHtml(item.scenario_id || item.file || "spec")}</div>
@@ -1399,6 +1442,7 @@
           <span class="brain-pill">read-only</span>
           <span class="brain-pill">${escHtml(String(specs.length))} specs</span>
         </div>
+        ${liveControls}
         ${brainSection("HoloBuild specs", `${specs.length} specs`, specRows)}`;
     }
 
@@ -1452,7 +1496,65 @@
       </div>
       ${brainSection("HoloBuild turn timeline", `${(latest.turn_history || []).length} turns`, turnRows, true)}
       ${brainSection("HoloBuild Gov briefs", `${(latest.governor_briefs || []).length} briefs`, govRows, true)}
+      ${liveControls}
       ${brainSection("HoloBuild specs", `${specs.length} specs`, specRows)}`;
+  }
+
+  async function startHoloBuildRun() {
+    const btn = document.getElementById("holobuild-run-btn");
+    const status = document.getElementById("holobuild-live-status");
+    const spec = document.getElementById("holobuild-spec-select")?.value || "";
+    const seed = document.getElementById("holobuild-seed")?.value || "";
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Starting...";
+    }
+    try {
+      const res = await fetch("/v1/holo-build/runs", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ spec_file: spec, seed }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || "HoloBuild run could not start.");
+      _activeHoloBuildJobId = data.job_id;
+      if (status) status.outerHTML = renderHoloBuildJobStatus(data);
+      pollHoloBuildRun(data.job_id);
+    } catch (err) {
+      if (status) {
+        status.innerHTML = `<div class="brain-row"><div class="brain-row-key">HoloBuild</div><div class="brain-row-val">${escHtml(err.message || "Run failed to start.")}</div></div>`;
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Watch live run";
+      }
+    }
+  }
+
+  async function pollHoloBuildRun(jobId) {
+    clearTimeout(_holoBuildPollTimer);
+    if (!jobId) return;
+    try {
+      const res = await fetch(`/v1/holo-build/runs/${encodeURIComponent(jobId)}`, {
+        headers: authHeaders(),
+      });
+      if (!res.ok) throw new Error("HoloBuild watch unavailable.");
+      const job = await res.json();
+      const status = document.getElementById("holobuild-live-status");
+      if (status) status.outerHTML = renderHoloBuildJobStatus(job);
+      if (["completed", "failed"].includes(job.status)) {
+        const btn = document.getElementById("holobuild-run-btn");
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Watch live run";
+        }
+        if (job.status === "completed") setTimeout(refreshHoloBrain, 700);
+        return;
+      }
+      _holoBuildPollTimer = setTimeout(() => pollHoloBuildRun(jobId), 1500);
+    } catch {
+      _holoBuildPollTimer = setTimeout(() => pollHoloBuildRun(jobId), 3000);
+    }
   }
 
   function renderHoloBrain(data) {

@@ -24,7 +24,9 @@ import hashlib
 import hmac
 import logging
 import os
+import threading
 import time
+import uuid
 from typing import Any, Optional
 
 from dotenv import load_dotenv
@@ -46,7 +48,7 @@ logger = logging.getLogger("holo.main")
 # FastAPI app
 # ---------------------------------------------------------------------------
 
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, redirect_stdout
 import json
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -1072,6 +1074,8 @@ _HOLO_BUILD_RESULT_DIRS = (
     pathlib.Path(__file__).parent / "builder_results",
     pathlib.Path(__file__).parent / "holo_builder" / "outputs" / "builder",
 )
+_holo_build_jobs_lock = threading.RLock()
+_holo_build_jobs: dict[str, dict[str, Any]] = {}
 
 
 def _mask_email(email: str) -> str:
@@ -1119,6 +1123,43 @@ def _load_json_file(path: pathlib.Path) -> dict[str, Any] | None:
         return json.loads(path.read_text())
     except Exception:
         return None
+
+
+def _holo_build_live_runs_enabled() -> bool:
+    return os.getenv("HOLOBUILD_LIVE_RUNS", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _utc_iso() -> str:
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _sanitize_holobuild_log_line(value: Any, limit: int = 520) -> str:
+    import re
+    text = _safe_holo_text(value, limit)
+    text = re.sub(r"sk-[A-Za-z0-9_\-]{12,}", "[redacted-key]", text)
+    text = re.sub(r"AIza[0-9A-Za-z_\-]{16,}", "[redacted-key]", text)
+    text = re.sub(
+        r"eyJ[A-Za-z0-9_\-]{12,}\.[A-Za-z0-9_\-]{12,}\.[A-Za-z0-9_\-]{12,}",
+        "[redacted-token]",
+        text,
+    )
+    return text
+
+
+def _select_holobuild_spec(spec_file: str | None = None) -> pathlib.Path:
+    if not _HOLO_BUILD_SPECS_DIR.exists():
+        raise ValueError("HoloBuild specs directory not found.")
+    if spec_file:
+        safe_name = pathlib.Path(str(spec_file)).name
+        path = _HOLO_BUILD_SPECS_DIR / safe_name
+        if not path.exists() or path.suffix != ".json":
+            raise ValueError("HoloBuild spec not found.")
+        return path
+    specs = sorted(_HOLO_BUILD_SPECS_DIR.glob("*.json"))
+    if not specs:
+        raise ValueError("No HoloBuild specs found.")
+    return specs[0]
 
 
 def _safe_holobuild_specs(limit: int = 20) -> list[dict[str, Any]]:
@@ -1244,6 +1285,163 @@ def _safe_holobuild_run(raw: dict[str, Any], path: pathlib.Path) -> dict[str, An
     }
 
 
+def _record_holobuild_job_event(job_id: str, kind: str, message: str = "",
+                                fields: dict[str, Any] | None = None) -> None:
+    event = {
+        "at": _utc_iso(),
+        "kind": _safe_holo_text(kind, 80),
+        "message": _sanitize_holobuild_log_line(message),
+    }
+    for key, value in (fields or {}).items():
+        event[key] = _safe_holo_text(value, 180)
+    with _holo_build_jobs_lock:
+        job = _holo_build_jobs.get(job_id)
+        if not job:
+            return
+        job.setdefault("events", []).append(event)
+        job["events"] = job["events"][-240:]
+        job["updated_at"] = event["at"]
+
+
+class _HoloBuildJobWriter:
+    def __init__(self, job_id: str):
+        self.job_id = job_id
+        self._buffer = ""
+
+    def write(self, text: str) -> int:
+        self._buffer += str(text)
+        while "\n" in self._buffer:
+            line, self._buffer = self._buffer.split("\n", 1)
+            line = line.strip()
+            if line:
+                _record_holobuild_job_event(self.job_id, "log", line)
+        return len(text)
+
+    def flush(self) -> None:
+        line = self._buffer.strip()
+        if line:
+            _record_holobuild_job_event(self.job_id, "log", line)
+        self._buffer = ""
+
+
+def _has_active_holobuild_job() -> bool:
+    with _holo_build_jobs_lock:
+        return any(job.get("status") in {"queued", "running"} for job in _holo_build_jobs.values())
+
+
+def _create_holobuild_job(spec_file: str | None, seed: int | None,
+                          force_max_turns: bool, skip_providers: list[str]) -> dict[str, Any]:
+    job_id = f"hb_{uuid.uuid4().hex[:12]}"
+    now = _utc_iso()
+    job = {
+        "job_id": job_id,
+        "status": "queued",
+        "spec_file": _safe_holo_text(spec_file or "", 180),
+        "seed": seed,
+        "force_max_turns": bool(force_max_turns),
+        "skip_providers": [_safe_holo_text(item, 80) for item in skip_providers],
+        "created_at": now,
+        "updated_at": now,
+        "events": [],
+        "result": None,
+        "result_file": "",
+        "error": "",
+    }
+    with _holo_build_jobs_lock:
+        _holo_build_jobs[job_id] = job
+    _record_holobuild_job_event(job_id, "queued", "HoloBuild job queued.")
+    return _snapshot_holobuild_job(job_id) or job
+
+
+def _snapshot_holobuild_job(job_id: str) -> dict[str, Any] | None:
+    with _holo_build_jobs_lock:
+        job = _holo_build_jobs.get(job_id)
+        if not job:
+            return None
+        return {
+            "job_id": job.get("job_id"),
+            "status": job.get("status"),
+            "spec_file": job.get("spec_file", ""),
+            "seed": job.get("seed"),
+            "force_max_turns": bool(job.get("force_max_turns")),
+            "skip_providers": list(job.get("skip_providers") or []),
+            "created_at": job.get("created_at"),
+            "updated_at": job.get("updated_at"),
+            "events": list(job.get("events") or []),
+            "result": job.get("result"),
+            "result_file": job.get("result_file", ""),
+            "error": job.get("error", ""),
+        }
+
+
+def _recent_holobuild_jobs(limit: int = 4) -> list[dict[str, Any]]:
+    with _holo_build_jobs_lock:
+        job_ids = sorted(
+            _holo_build_jobs,
+            key=lambda jid: _holo_build_jobs[jid].get("created_at", ""),
+            reverse=True,
+        )[:limit]
+    return [job for jid in job_ids if (job := _snapshot_holobuild_job(jid))]
+
+
+def _run_holobuild_job(job_id: str, spec_file: str | None, seed: int | None,
+                       force_max_turns: bool, skip_providers: list[str],
+                       runner: Any | None = None) -> None:
+    with _holo_build_jobs_lock:
+        if job_id in _holo_build_jobs:
+            _holo_build_jobs[job_id]["status"] = "running"
+            _holo_build_jobs[job_id]["updated_at"] = _utc_iso()
+    try:
+        spec_path = _select_holobuild_spec(spec_file)
+        spec = _load_json_file(spec_path)
+        if not isinstance(spec, dict):
+            raise ValueError("HoloBuild spec must be valid JSON.")
+        with _holo_build_jobs_lock:
+            if job_id in _holo_build_jobs:
+                _holo_build_jobs[job_id]["spec_file"] = spec_path.name
+        _record_holobuild_job_event(job_id, "start", "Starting HoloBuild live run.", {
+            "spec_file": spec_path.name,
+            "seed": "" if seed is None else seed,
+        })
+        if runner is None:
+            from holo_builder.loop import run_builder as runner
+        writer = _HoloBuildJobWriter(job_id)
+        with redirect_stdout(writer):
+            result = runner(
+                spec,
+                seed=seed,
+                force_max_turns=force_max_turns,
+                skip_providers=skip_providers,
+            )
+        writer.flush()
+        if not isinstance(result, dict):
+            raise RuntimeError("HoloBuild runner returned an invalid result.")
+        out_dir = _HOLO_BUILD_RESULT_DIRS[0]
+        out_dir.mkdir(parents=True, exist_ok=True)
+        builder_id = result.get("builder_id") or f"builder_{uuid.uuid4().hex[:12]}"
+        result_path = out_dir / f"{pathlib.Path(str(builder_id)).name}.json"
+        result_path.write_text(json.dumps(result, indent=2))
+        safe_result = _safe_holobuild_run(result, result_path)
+        with _holo_build_jobs_lock:
+            if job_id in _holo_build_jobs:
+                _holo_build_jobs[job_id]["status"] = "completed"
+                _holo_build_jobs[job_id]["result"] = safe_result
+                _holo_build_jobs[job_id]["result_file"] = result_path.name
+                _holo_build_jobs[job_id]["updated_at"] = _utc_iso()
+        _record_holobuild_job_event(job_id, "complete", "HoloBuild run completed.", {
+            "builder_status": safe_result.get("builder_status", ""),
+            "turns_completed": safe_result.get("turns_completed", 0),
+        })
+    except Exception as exc:
+        message = _sanitize_holobuild_log_line(f"{type(exc).__name__}: {exc}", 320)
+        with _holo_build_jobs_lock:
+            if job_id in _holo_build_jobs:
+                _holo_build_jobs[job_id]["status"] = "failed"
+                _holo_build_jobs[job_id]["error"] = message
+                _holo_build_jobs[job_id]["updated_at"] = _utc_iso()
+        _record_holobuild_job_event(job_id, "failed", message)
+
+
 def _build_holobuild_dashboard_payload(limit: int = 6) -> dict[str, Any]:
     runs: list[dict[str, Any]] = []
     for path in _iter_holobuild_result_files(limit=limit):
@@ -1251,11 +1449,12 @@ def _build_holobuild_dashboard_payload(limit: int = 6) -> dict[str, Any]:
         if isinstance(raw, dict):
             runs.append(_safe_holobuild_run(raw, path))
     return {
-        "mode": "read_only",
-        "live_runs_enabled": False,
+        "mode": "live_watch" if _holo_build_live_runs_enabled() else "read_only",
+        "live_runs_enabled": _holo_build_live_runs_enabled(),
         "specs": _safe_holobuild_specs(),
         "runs": runs,
         "run_count": len(runs),
+        "jobs": _recent_holobuild_jobs(),
         "result_locations": ["builder_results", "holo_builder/outputs/builder"],
     }
 
@@ -1452,6 +1651,59 @@ async def holo_build_dashboard(request: Request):
     if not capsule:
         raise HTTPException(status_code=401, detail="Sign in required.")
     return JSONResponse(content=_build_holobuild_dashboard_payload())
+
+
+@app.post("/v1/holo-build/runs")
+async def start_holo_build_run(request: Request):
+    """Start a watched HoloBuild run when explicitly enabled."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    if not _holo_build_live_runs_enabled():
+        raise HTTPException(status_code=403, detail="HoloBuild live runs are disabled.")
+    if _has_active_holobuild_job():
+        raise HTTPException(status_code=409, detail="A HoloBuild run is already active.")
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+    spec_file = body.get("spec_file") or None
+    seed_raw = body.get("seed")
+    seed = None
+    if seed_raw not in (None, ""):
+        try:
+            seed = int(seed_raw)
+        except Exception:
+            raise HTTPException(status_code=400, detail="seed must be an integer.")
+    force_max_turns = bool(body.get("force_max_turns", False))
+    skip_raw = body.get("skip_providers") or []
+    if not isinstance(skip_raw, list):
+        raise HTTPException(status_code=400, detail="skip_providers must be a list.")
+    skip_providers = [str(item) for item in skip_raw if str(item).strip()]
+    try:
+        _select_holobuild_spec(spec_file)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    job = _create_holobuild_job(spec_file, seed, force_max_turns, skip_providers)
+    thread = threading.Thread(
+        target=_run_holobuild_job,
+        args=(job["job_id"], spec_file, seed, force_max_turns, skip_providers),
+        daemon=True,
+    )
+    thread.start()
+    return JSONResponse(content=_snapshot_holobuild_job(job["job_id"]) or job)
+
+
+@app.get("/v1/holo-build/runs/{job_id}")
+async def get_holo_build_run(job_id: str, request: Request):
+    """Return a sanitized watched HoloBuild job snapshot."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    job = _snapshot_holobuild_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="HoloBuild job not found.")
+    return JSONResponse(content=job)
 
 
 @app.get("/v1/capsule/surface")

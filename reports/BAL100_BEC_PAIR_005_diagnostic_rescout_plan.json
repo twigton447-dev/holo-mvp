@@ -1,0 +1,138 @@
+{
+  "attestation": {
+    "frozen_artifacts_edited": false,
+    "judge_run": false,
+    "live_calls": false,
+    "packet_drafts_edited": false,
+    "proof_credit_counts_changed": false,
+    "qa_or_ablation_run": false,
+    "reopened_quarantined_families": false,
+    "scout_run": false,
+    "traces_created": false
+  },
+  "bec005_only_confirmation": {
+    "confirmed_bec005_only_after_required_patch": true,
+    "confirmed_bec005_only_with_current_runner": false,
+    "exact_required_packet_ids": [
+      "BAL100-BEC-PAIR-005-ALLOW",
+      "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL"
+    ],
+    "reason_current_runner_not_confirmed": "Current execute path loads all 16 draft packets from DRAFT_GLOB and sends all packets to all configured models. No family or packet filter is exposed by the CLI."
+  },
+  "code_or_config_patch_needed_before_valid_rescout": true,
+  "created_at": "2026-06-18",
+  "current_runner_support": {
+    "dry_run_or_command_preview_mode": false,
+    "higher_output_token_budget": {
+      "anthropic_max_output_tokens": 1200,
+      "default_max_output_tokens": 900,
+      "supported": "partial_hardcoded_no_cli_override"
+    },
+    "pair_or_packet_filter": false,
+    "provider_subset_selection": false,
+    "rationale_suppression": false,
+    "shorter_json_only_response_prompt": true
+  },
+  "expected_output": {
+    "expected_output_directory": "scout_runs/BAL100-BATCH-001_BEC-PAIR-005_diagnostic_rescout/<timestamped_run_dir>/",
+    "expected_output_files": [
+      "prompt_cards/BAL100-BEC-PAIR-005-ALLOW__openai__gpt-4o-mini.json",
+      "prompt_cards/BAL100-BEC-PAIR-005-ALLOW__anthropic__claude-haiku-4-5-20251001.json",
+      "prompt_cards/BAL100-BEC-PAIR-005-ALLOW__gemini__gemini-2.5-flash-lite.json",
+      "prompt_cards/BAL100-BEC-PAIR-005-ALLOW__xai__grok-3-mini.json",
+      "prompt_cards/BAL100-BEC-PAIR-005-ALLOW__minimax__MiniMax-Text-01.json",
+      "prompt_cards/BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL__openai__gpt-4o-mini.json",
+      "prompt_cards/BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL__anthropic__claude-haiku-4-5-20251001.json",
+      "prompt_cards/BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL__gemini__gemini-2.5-flash-lite.json",
+      "prompt_cards/BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL__xai__grok-3-mini.json",
+      "prompt_cards/BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL__minimax__MiniMax-Text-01.json",
+      "results.jsonl",
+      "summary.json"
+    ],
+    "expected_result_rows": 10
+  },
+  "family_id": "BEC-PAIR-005",
+  "old_900_token_failure_risk": {
+    "repeats_old_900_token_failure_risk": false,
+    "residual_risk": "Residual malformed-output risk remains if a provider ignores compact JSON instructions, but the old Anthropic 900-token cap/rationale-length mismatch is directly mitigated by compact prompt constraints and a 1200-token Anthropic cap."
+  },
+  "output_token_budget": {
+    "anthropic": 1200,
+    "gemini": 900,
+    "minimax": 900,
+    "openai": 900,
+    "xai": 900
+  },
+  "prompt_config_patch_recommended_before_running": {
+    "packet_or_frozen_artifact_patch": false,
+    "parser_broadening": false,
+    "prompt_budget_patch": false,
+    "runner_filter_patch": true,
+    "summary": "Prompt/budget patch is already applied. A minimal runner patch is still required for a valid BEC-PAIR-005-only diagnostic rescout command."
+  },
+  "prompt_response_format_behavior": {
+    "cited_artifacts_limit": 5,
+    "compact_json_only": true,
+    "no_code_fences_or_prose_outside_json": true,
+    "no_markdown": true,
+    "no_numbered_lists": true,
+    "rationale": "1-3 concise sentences",
+    "required_keys": [
+      "verdict",
+      "rationale",
+      "cited_artifacts"
+    ],
+    "verdict_values": [
+      "ALLOW",
+      "ESCALATE"
+    ]
+  },
+  "proof_credit_impact": {
+    "impact": "none",
+    "proof_credit_count_changed": false,
+    "proof_credit_ready_families_remain": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ]
+  },
+  "proposed_command": "BAL100_BATCH001_LOCAL_SCOUT_APPROVED=I_APPROVE_PROVIDER_TRANSMISSION python3 -B benchmark_factory/batches/run_BAL100_BATCH_001_five_mini_scout.py --execute-provider-calls --operator Taylor --i-am-taylor-local --yes-send-draft-payloads-to-providers --timeout 90 --family-id BEC-PAIR-005 --out-dir scout_runs/BAL100-BATCH-001_BEC-PAIR-005_diagnostic_rescout",
+  "proposed_command_validity": "Valid only after a minimal runner patch adds --family-id and --out-dir support. Current committed runner would reject these flags and its existing execute path would run all 16 packets.",
+  "provider_roster": [
+    {
+      "model": "gpt-4o-mini",
+      "provider": "openai"
+    },
+    {
+      "model": "claude-haiku-4-5-20251001",
+      "provider": "anthropic"
+    },
+    {
+      "model": "gemini-2.5-flash-lite",
+      "provider": "gemini"
+    },
+    {
+      "model": "grok-3-mini",
+      "provider": "xai"
+    },
+    {
+      "model": "MiniMax-Text-01",
+      "provider": "minimax"
+    }
+  ],
+  "report_type": "BAL100_BEC_PAIR_005_diagnostic_rescout_plan",
+  "runner": "benchmark_factory/batches/run_BAL100_BATCH_001_five_mini_scout.py",
+  "scope": "Plan-only preparation for a future BEC-PAIR-005 diagnostic rescout. No live calls were made.",
+  "stop_rules": [
+    "Stop before running if branch is not holo-builder-freeze-manifest-gate-001.",
+    "Stop before running if git status --short is not clean.",
+    "Stop before running if active mandate no longer allows this preparation path.",
+    "Stop before running unless Taylor explicitly approves the diagnostic rescout.",
+    "Stop before running if the runner still lacks confirmed BEC-PAIR-005-only filtering.",
+    "Stop before running unless selected packet IDs are exactly BAL100-BEC-PAIR-005-ALLOW and BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL.",
+    "Stop before running if provider roster differs from the five configured mini providers unless Taylor explicitly scopes a provider subset.",
+    "Stop before running if required provider API keys are missing in Taylor-local environment.",
+    "Stop before running if output directory already exists and would overwrite prior artifacts.",
+    "Stop after running if any result is a provider operational failure or parser failure.",
+    "Stop if any command attempts to create traces, Judge artifacts, QA/ablation artifacts, packet edits, frozen artifact edits, or proof-credit changes."
+  ]
+}

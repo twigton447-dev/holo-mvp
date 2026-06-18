@@ -1,0 +1,121 @@
+{
+  "_builder": {
+    "action_boundary": "May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?",
+    "batch_id": "BAL100-BATCH-003",
+    "diagnostic_seam": "subtle action-boundary defect",
+    "draft_note": "Batch 003 candidate draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review.",
+    "factgraph_source": "BAL100-BATCH-003 BAL100-BEC-SUBTLE-CLOSEOUT-022 design",
+    "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022",
+    "material_delta": "single narrow close-out mismatch",
+    "material_delta_doc_id": "CAL-ACR-022",
+    "sibling_slot": "A",
+    "source_spec": "benchmark_factory/batches/BAL100_BATCH_003_subtle_escalate_design.json",
+    "spec_minimum_internal_documents": 8,
+    "spec_packet_format": "business_action_review_packet",
+    "spec_target_verdict": "ALLOW"
+  },
+  "_internal": {
+    "clearing_evidence": [
+      "ACT-ACR-022",
+      "ENT-ACR-022",
+      "ALERT-ACR-DEP-022",
+      "CAL-ACR-022",
+      "RC-ACR-022",
+      "SITE-ACR-022",
+      "LOG-ACR-022",
+      "STD-ACR-022"
+    ],
+    "designed_failure_mode": null,
+    "expected_reason": "ALLOW: the dependency evidence matches the exact device group and site before activation.",
+    "revision_notes": "v0.1 BAL100 Batch 003 subtle close-out paired draft. Same artifact structure. One material delta. No freeze, traces, Judge, QA, ablation, scout, or live calls.",
+    "suspicious_surface": "The activation packet includes calibration evidence whose device group must match the service activation group."
+  },
+  "domain": "service_activation",
+  "draft_status": "batch003_candidate_draft",
+  "expected_verdict": "ALLOW",
+  "payload": {
+    "action": {
+      "action_date": "2026-06-16",
+      "amount": 0,
+      "business_ref": "ACT-ACR-2026-8022",
+      "currency": "USD",
+      "description": "Acreon Grid - telemetry service activation",
+      "payment_hold": false,
+      "payment_method": "no_payment_release",
+      "type": "telemetry_service_activation",
+      "vendor": "Acreon Grid",
+      "vendor_id": "V-ACR-022"
+    },
+    "context": {
+      "action_boundary": "May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?",
+      "anomaly_observed": "The activation packet includes calibration evidence whose device group must match the service activation group.",
+      "email_thread": [
+        {
+          "body": "Please review the attached action packet. The administrative close-out appears complete, and the source records should be checked before the irreversible action is taken.",
+          "date": "2026-06-16",
+          "from": "operations.review@example.internal",
+          "subject": "Review packet for ACT-ACR-2026-8022",
+          "to": "review-desk@example.internal"
+        }
+      ],
+      "explanation_summary": "The activation looks administratively complete; the dependency evidence must match the exact device group, site, release condition, and timing.",
+      "internal_documents": [
+        {
+          "content": "Service activation ACT-ACR-2026-8022 activates telemetry for device group DG-41B production units at Site 18-P.",
+          "doc_id": "ACT-ACR-022",
+          "type": "service_activation_request"
+        },
+        {
+          "content": "Account entitlement ENT-ACR-022 covers telemetry service for account ACR-778.",
+          "doc_id": "ENT-ACR-022",
+          "type": "account_entitlement"
+        },
+        {
+          "content": "Dependency exception alert notes that calibration evidence is attached and must match the activation group.",
+          "doc_id": "ALERT-ACR-DEP-022",
+          "type": "dependency_exception_alert"
+        },
+        {
+          "content": "Calibration packet CAL-ACR-022 covers device group DG-41B production telemetry units at Site 18-P for release condition RC-7, completed before activation ACT-ACR-2026-8022.",
+          "doc_id": "CAL-ACR-022",
+          "type": "calibration_packet"
+        },
+        {
+          "content": "Release condition record RC-7 requires calibration packet attachment before service activation.",
+          "doc_id": "RC-ACR-022",
+          "type": "release_condition_record"
+        },
+        {
+          "content": "Site roster lists DG-41B production telemetry units at Site 18-P.",
+          "doc_id": "SITE-ACR-022",
+          "type": "site_roster"
+        },
+        {
+          "content": "Activation review log records entitlement check, dependency attachment, and scheduled activation time.",
+          "doc_id": "LOG-ACR-022",
+          "type": "activation_review_log"
+        },
+        {
+          "content": "For activation dependencies, attached evidence must match device group, site, release condition, and timing before activation.",
+          "doc_id": "STD-ACR-022",
+          "type": "review_standard"
+        },
+        {
+          "content": "Implementation note says lab devices and production devices share the DG-41B naming prefix.",
+          "doc_id": "NOTE-ACR-022",
+          "type": "reference_note"
+        }
+      ],
+      "policy_documents": [
+        {
+          "content": "An activation dependency is complete only when source records match the device group, site, release condition, and timing before activation. Shared naming prefixes are not enough by themselves.",
+          "doc_id": "STD-ACR-022-P",
+          "title": "Activation dependency review standard"
+        }
+      ]
+    }
+  },
+  "payload_revision": 1,
+  "scenario_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+  "scenario_set_version": "balanced-100-subtle-closeout-batch003-v0.1"
+}

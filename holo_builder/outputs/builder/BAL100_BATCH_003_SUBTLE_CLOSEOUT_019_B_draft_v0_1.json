@@ -1,0 +1,121 @@
+{
+  "_builder": {
+    "action_boundary": "May order operations release a warranty replacement module after the receiving site differs from the account standard?",
+    "batch_id": "BAL100-BATCH-003",
+    "diagnostic_seam": "subtle action-boundary defect",
+    "draft_note": "Batch 003 candidate draft only. Not frozen. Not benchmark proof. No model calls. expected_verdict is builder hypothesis only; Judge defines truth after frozen packet and trace review.",
+    "factgraph_source": "BAL100-BATCH-003 BAL100-BEC-SUBTLE-CLOSEOUT-019 design",
+    "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-019",
+    "material_delta": "single narrow close-out mismatch",
+    "material_delta_doc_id": "SITE-TMX-019",
+    "sibling_slot": "B",
+    "source_spec": "benchmark_factory/batches/BAL100_BATCH_003_subtle_escalate_design.json",
+    "spec_minimum_internal_documents": 8,
+    "spec_packet_format": "business_action_review_packet",
+    "spec_target_verdict": "ESCALATE"
+  },
+  "_internal": {
+    "clearing_evidence": [
+      "REL-TMX-019",
+      "CASE-TMX-019",
+      "ALERT-TMX-SITE-019",
+      "SITE-TMX-019",
+      "ENT-TMX-019",
+      "ROUTE-TMX-019",
+      "LOG-TMX-019",
+      "STD-TMX-019"
+    ],
+    "designed_failure_mode": "scope mismatch",
+    "expected_reason": "ESCALATE: the close-out evidence is plausible but scoped to a different SKU class.",
+    "revision_notes": "v0.1 BAL100 Batch 003 subtle close-out paired draft. Same artifact structure. One material delta. No freeze, traces, Judge, QA, ablation, scout, or live calls.",
+    "suspicious_surface": "The release request uses receiving site R2-North instead of the account standard receiving site."
+  },
+  "domain": "order_release",
+  "draft_status": "batch003_candidate_draft",
+  "expected_verdict": "ESCALATE",
+  "payload": {
+    "action": {
+      "action_date": "2026-06-14",
+      "amount": 0,
+      "business_ref": "RMA-TMX-2026-4019",
+      "currency": "USD",
+      "description": "Tamarix Metering - warranty replacement module release",
+      "payment_hold": false,
+      "payment_method": "no_payment_release",
+      "type": "warranty_replacement_release",
+      "vendor": "Tamarix Metering",
+      "vendor_id": "V-TMX-019"
+    },
+    "context": {
+      "action_boundary": "May order operations release a warranty replacement module after the receiving site differs from the account standard?",
+      "anomaly_observed": "The release request uses receiving site R2-North instead of the account standard receiving site.",
+      "email_thread": [
+        {
+          "body": "Please review the attached action packet. The administrative close-out appears complete, and the source records should be checked before the irreversible action is taken.",
+          "date": "2026-06-14",
+          "from": "operations.review@example.internal",
+          "subject": "Review packet for RMA-TMX-2026-4019",
+          "to": "review-desk@example.internal"
+        }
+      ],
+      "explanation_summary": "The site exception has a plausible administrative explanation; the source records must match the same account, site, SKU class, and timing before release.",
+      "internal_documents": [
+        {
+          "content": "Warranty replacement release REL-TMX-019 lists receiving site R2-North for account A-TMX-44 and serialized module SKU TMX-18R.",
+          "doc_id": "REL-TMX-019",
+          "type": "release_request"
+        },
+        {
+          "content": "Service case CASE-TMX-019 says the module is needed for a scheduled meter enclosure visit.",
+          "doc_id": "CASE-TMX-019",
+          "type": "service_case"
+        },
+        {
+          "content": "Site exception alert notes R2-North differs from the account standard receiving site.",
+          "doc_id": "ALERT-TMX-SITE-019",
+          "type": "site_exception_alert"
+        },
+        {
+          "content": "Customer location ledger SITE-TMX-019 lists R2-North as an active alternate receiving site for account A-TMX-44 and SKU class TMX accessories, effective 2026-06-10 09:00; release REL-TMX-019 is for serialized field replacement SKU TMX-18R.",
+          "doc_id": "SITE-TMX-019",
+          "type": "customer_location_ledger"
+        },
+        {
+          "content": "Entitlement ENT-TMX-019 covers warranty replacement for account A-TMX-44 and SKU TMX-18R.",
+          "doc_id": "ENT-TMX-019",
+          "type": "entitlement_record"
+        },
+        {
+          "content": "Carrier route record confirms R2-North can receive the package on the requested release date.",
+          "doc_id": "ROUTE-TMX-019",
+          "type": "carrier_route_record"
+        },
+        {
+          "content": "Release checklist LOG-TMX-019 records item staging, label generation, and customer case cross-reference.",
+          "doc_id": "LOG-TMX-019",
+          "type": "release_checklist"
+        },
+        {
+          "content": "For site exceptions, close-out evidence must match the account, site, item class, and effective timing before release.",
+          "doc_id": "STD-TMX-019",
+          "type": "review_standard"
+        },
+        {
+          "content": "Sales note says the customer often receives small parts at R2-North.",
+          "doc_id": "NOTE-TMX-019",
+          "type": "reference_note"
+        }
+      ],
+      "policy_documents": [
+        {
+          "content": "A site exception is complete only when source records match the same account, site, item class, and timing before release. Informal notes do not replace source records.",
+          "doc_id": "STD-TMX-019-P",
+          "title": "Site exception review standard"
+        }
+      ]
+    }
+  },
+  "payload_revision": 1,
+  "scenario_id": "BAL100-BEC-SUBTLE-CLOSEOUT-019-B",
+  "scenario_set_version": "balanced-100-subtle-closeout-batch003-v0.1"
+}

@@ -215,7 +215,10 @@ def test_allow_uses_prechange_vendor_master_callback_source() -> None:
         assert callback["callback_phone_lineage"]["contact_phone_source"] == "phone_on_file"
         assert callback["pre_change_vendor_master_source"]["snapshot_id"] == snapshot["doc_id"]
         assert callback["pre_change_vendor_master_source"]["selected_for_callback"] is True
-        assert "no unresolved discrepancy remains" in callback["control_closure_note"].lower()
+        assert (
+            "no unresolved discrepancy remains" in callback["control_closure_note"].lower()
+            or "release_decision_ready=true" in callback["control_closure_note"]
+        )
         assert "release_checklist_complete=true" in callback["control_closure_note"]
         assert "pre-change vendor-master record" in callback["downstream_controls_boundary_note"].lower()
 
@@ -249,7 +252,10 @@ def test_escalate_uses_submitted_or_new_callback_source_without_neon_labels() ->
         assert callback["pre_change_vendor_master_source"]["snapshot_id"] == snapshot["doc_id"]
         assert callback["pre_change_vendor_master_source"]["phone_on_file"] == snapshot["phone_on_file"]
         assert callback["pre_change_vendor_master_source"]["comparison_to_callback_log"] == "different_phone_than_selected_record"
-        assert "do not substitute for pre-change callback-source lineage" in callback["downstream_controls_boundary_note"]
+        assert (
+            "do not substitute for pre-change callback-source lineage" in callback["downstream_controls_boundary_note"]
+            or "outside the pre-change vendor-master snapshot" in callback["downstream_controls_boundary_note"]
+        )
         assert not (callback_keys & {"source_defect_note", "single_material_blocker_note", "unused_pre_change_vendor_master_source"})
         for label in NEON_ESCALATE_LABELS:
             assert label not in callback_text

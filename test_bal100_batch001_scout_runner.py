@@ -30,13 +30,21 @@ def _set_dummy_provider_keys(monkeypatch: pytest.MonkeyPatch) -> None:
 def _fake_execution(monkeypatch: pytest.MonkeyPatch) -> dict:
     captured: dict = {}
 
-    def fake_execute_local_scout(timeout: int, out_dir: Path = scout.OUT_DIR, *, execution_mode: str, operator: str) -> dict:
+    def fake_execute_local_scout(
+        timeout: int,
+        out_dir: Path = scout.OUT_DIR,
+        *,
+        execution_mode: str,
+        operator: str,
+        family_id: str | None = None,
+    ) -> dict:
         captured.update(
             {
                 "timeout": timeout,
                 "out_dir": out_dir,
                 "execution_mode": execution_mode,
                 "operator": operator,
+                "family_id": family_id,
             }
         )
         return {
@@ -67,6 +75,43 @@ def test_default_scout_prepares_prompt_cards_without_provider_calls(tmp_path: Pa
     assert plan["packets"] == 16
     assert plan["prompt_cards"] == 80
     assert len(list((tmp_path / "prompt_cards").glob("*.json"))) == 80
+
+
+def test_bec005_family_filter_selects_exact_pair() -> None:
+    packets = scout._load_packets(family_id=scout.BEC_PAIR_005_FAMILY_ID)
+
+    assert [packet["scenario_id"] for packet in packets] == [
+        "BAL100-BEC-PAIR-005-ALLOW",
+        "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL",
+    ]
+    assert [packet["expected_verdict"] for packet in packets] == ["ALLOW", "ESCALATE"]
+
+
+def test_bec005_filtered_prompt_cards_are_pair_only(tmp_path: Path) -> None:
+    plan = scout.build_prompt_cards(out_dir=tmp_path, family_id=scout.BEC_PAIR_005_FAMILY_ID)
+    prompt_files = sorted((tmp_path / "prompt_cards").glob("*.json"))
+
+    assert plan["family_id"] == "BEC-PAIR-005"
+    assert plan["packets"] == 2
+    assert plan["prompt_cards"] == 10
+    assert len(prompt_files) == 10
+    assert all(path.name.startswith("BAL100-BEC-PAIR-005-") for path in prompt_files)
+
+
+def test_unknown_family_filter_fails_closed() -> None:
+    with pytest.raises(SystemExit, match="Unsupported family filter"):
+        scout._load_packets(family_id="BEC-PAIR-999")
+
+
+def test_incomplete_family_filter_fails_closed() -> None:
+    packets = [
+        packet
+        for packet in scout._load_packets()
+        if packet["scenario_id"] != "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL"
+    ]
+
+    with pytest.raises(SystemExit, match="exact expected sibling pair"):
+        scout._filter_packets_by_family(packets, scout.BEC_PAIR_005_FAMILY_ID)
 
 
 def test_prompt_cards_are_payload_only_and_non_benchmark(tmp_path: Path) -> None:
@@ -131,6 +176,35 @@ def test_taylor_local_mode_still_executes_with_local_gate(monkeypatch: pytest.Mo
     assert exit_code == 0
     assert captured["execution_mode"] == "taylor_local"
     assert captured["operator"] == "Taylor"
+
+
+def test_taylor_local_execute_mode_forwards_family_filter_and_out_dir(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    for marker in scout.CO_ENV_MARKERS:
+        monkeypatch.delenv(marker, raising=False)
+    _set_dummy_provider_keys(monkeypatch)
+    monkeypatch.setenv(scout.APPROVAL_ENV, scout.APPROVAL_VALUE)
+    captured = _fake_execution(monkeypatch)
+
+    exit_code = scout.main(
+        [
+            "--execute-provider-calls",
+            "--operator",
+            "Taylor",
+            "--i-am-taylor-local",
+            "--yes-send-draft-payloads-to-providers",
+            "--family-id",
+            "BEC-PAIR-005",
+            "--out-dir",
+            str(tmp_path),
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["family_id"] == "BEC-PAIR-005"
+    assert captured["out_dir"] == tmp_path
+    assert captured["execution_mode"] == "taylor_local"
 
 
 def test_codex_execute_mode_refused_without_new_flag_or_env(monkeypatch: pytest.MonkeyPatch) -> None:

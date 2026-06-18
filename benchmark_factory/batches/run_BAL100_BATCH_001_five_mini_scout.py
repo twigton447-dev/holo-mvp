@@ -23,6 +23,13 @@ CODEX_APPROVAL_ENV = "BAL100_BATCH001_CODEX_SCOUT_APPROVED"
 CODEX_APPROVAL_VALUE = "I_APPROVE_CODEX_PROVIDER_TRANSMISSION"
 DEFAULT_MAX_OUTPUT_TOKENS = 900
 ANTHROPIC_MAX_OUTPUT_TOKENS = 1200
+BEC_PAIR_005_FAMILY_ID = "BEC-PAIR-005"
+SUPPORTED_FAMILY_FILTERS = {
+    BEC_PAIR_005_FAMILY_ID: (
+        "BAL100-BEC-PAIR-005-ALLOW",
+        "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL",
+    ),
+}
 CO_ENV_MARKERS = (
     "CODEX_SANDBOX",
     "CODEX_THREAD_ID",
@@ -68,11 +75,39 @@ def _load_packet(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text())
 
 
-def _load_packets() -> list[dict[str, Any]]:
+def _filter_packets_by_family(packets: list[dict[str, Any]], family_id: str | None) -> list[dict[str, Any]]:
+    if not family_id:
+        return packets
+    expected_packet_ids = SUPPORTED_FAMILY_FILTERS.get(family_id)
+    if expected_packet_ids is None:
+        supported = ", ".join(sorted(SUPPORTED_FAMILY_FILTERS))
+        raise SystemExit(f"Unsupported family filter {family_id!r}. Supported family filters: {supported}.")
+
+    selected_by_id: dict[str, dict[str, Any]] = {}
+    duplicate_ids = []
+    for packet in packets:
+        packet_id = str(packet.get("scenario_id", ""))
+        if packet_id in expected_packet_ids:
+            if packet_id in selected_by_id:
+                duplicate_ids.append(packet_id)
+            selected_by_id[packet_id] = packet
+
+    missing_ids = [packet_id for packet_id in expected_packet_ids if packet_id not in selected_by_id]
+    if missing_ids or duplicate_ids or len(selected_by_id) != len(expected_packet_ids):
+        selected_ids = sorted(selected_by_id)
+        raise SystemExit(
+            f"Family filter {family_id!r} did not select the exact expected sibling pair. "
+            f"Expected: {list(expected_packet_ids)}. Selected: {selected_ids}. "
+            f"Missing: {missing_ids}. Duplicates: {duplicate_ids}."
+        )
+    return [selected_by_id[packet_id] for packet_id in expected_packet_ids]
+
+
+def _load_packets(family_id: str | None = None) -> list[dict[str, Any]]:
     packets = [_load_packet(path) for path in sorted(Path(".").glob(DRAFT_GLOB))]
     if len(packets) != 16:
         raise SystemExit(f"Expected 16 draft packets, found {len(packets)}")
-    return packets
+    return _filter_packets_by_family(packets, family_id)
 
 
 def _prompt_card(packet: dict[str, Any], provider: str, model: str) -> dict[str, Any]:
@@ -92,8 +127,8 @@ def _prompt_card(packet: dict[str, Any], provider: str, model: str) -> dict[str,
     }
 
 
-def build_prompt_cards(out_dir: Path = OUT_DIR) -> dict[str, Any]:
-    packets = _load_packets()
+def build_prompt_cards(out_dir: Path = OUT_DIR, family_id: str | None = None) -> dict[str, Any]:
+    packets = _load_packets(family_id=family_id)
     prompt_dir = out_dir / "prompt_cards"
     prompt_dir.mkdir(parents=True, exist_ok=True)
 
@@ -121,6 +156,7 @@ def build_prompt_cards(out_dir: Path = OUT_DIR) -> dict[str, Any]:
         "freeze": False,
         "execution_mode": "plan_only",
         "operator": "",
+        "family_id": family_id or "",
         "provider_calls_performed_by_script": False,
         "packets": len(packets),
         "models": MODELS,
@@ -623,8 +659,9 @@ def execute_local_scout(
     *,
     execution_mode: str = "taylor_local",
     operator: str = "Taylor",
+    family_id: str | None = None,
 ) -> dict[str, Any]:
-    packets = _load_packets()
+    packets = _load_packets(family_id=family_id)
     run_id, run_dir = _new_run_dir(out_dir)
 
     prompt_dir = run_dir / "prompt_cards"
@@ -646,6 +683,7 @@ def execute_local_scout(
 
     summary = _summarize_results(records, run_id, execution_mode=execution_mode, operator=operator)
     summary["run_dir"] = str(run_dir)
+    summary["family_id"] = family_id or ""
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     return summary
 
@@ -675,15 +713,33 @@ def main(argv: list[str] | None = None) -> int:
         default=90,
         help="Per-provider call timeout in seconds for local execution.",
     )
+    parser.add_argument(
+        "--family-id",
+        default="",
+        help="Optional fail-closed diagnostic family filter. Currently supports BEC-PAIR-005.",
+    )
+    parser.add_argument(
+        "--out-dir",
+        type=Path,
+        default=OUT_DIR,
+        help="Directory for prompt cards, scout plans, and execution run output.",
+    )
     args = parser.parse_args(argv)
+    family_id = args.family_id or None
 
     if args.execute_provider_calls:
         execution_mode = _require_execution_approval(args)
-        summary = execute_local_scout(timeout=args.timeout, execution_mode=execution_mode, operator=args.operator)
+        summary = execute_local_scout(
+            timeout=args.timeout,
+            out_dir=args.out_dir,
+            execution_mode=execution_mode,
+            operator=args.operator,
+            family_id=family_id,
+        )
         print(json.dumps(summary, indent=2, sort_keys=True))
         return 0
 
-    plan = build_prompt_cards()
+    plan = build_prompt_cards(out_dir=args.out_dir, family_id=family_id)
     print(json.dumps(plan, indent=2, sort_keys=True))
     return 0
 

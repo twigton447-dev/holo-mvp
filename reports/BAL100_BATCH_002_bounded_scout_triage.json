@@ -1,0 +1,933 @@
+{
+  "batch_id": "BAL100-BATCH-002",
+  "benchmark_credit": false,
+  "classification_counts": {
+    "quarantine": 1,
+    "repair_once": 5
+  },
+  "created_at": "2026-06-18",
+  "diagnostic_only": true,
+  "execution_mode": "codex_approved",
+  "family_triage": [
+    {
+      "allow_avoided_false_escalation": true,
+      "allow_false_escalation_providers": [],
+      "allow_sibling_behavior": "5/5 ALLOW; no false escalation.",
+      "classification": "quarantine",
+      "escalate_sibling_behavior": "5/5 ESCALATE; unanimous and marked too easy.",
+      "escalate_too_easy": true,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-011",
+      "incomplete_clean_provider_row_set": false,
+      "packet_ids": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-011-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-011-B"
+      ],
+      "preserved_useful_disagreement": false,
+      "preserved_useful_disagreement_note": "No useful disagreement: both siblings were unanimous and both packet summaries were marked too easy.",
+      "provider_parse_health": "provider_call_ok 10/10; parse_ok 10/10; successful response parse_ok 10/10.",
+      "provider_results": [
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-A",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-A",
+          "parse_ok": true,
+          "provider": "gemini",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-A",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-A",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-A",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-B",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-B",
+          "parse_ok": true,
+          "provider": "gemini",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-B",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-B",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-011-B",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        }
+      ],
+      "recommended_next_action": "Quarantine this family rather than promote; only reseed/repair later if a harder bank-token anomaly variant is worth pursuing.",
+      "seam_contamination": false,
+      "seam_contamination_note": "No second blocker, generic BEC shortcut, answer-key leak, or out-of-scope family inclusion surfaced in scout triage.",
+      "too_easy_packets": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-011-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-011-B"
+      ]
+    },
+    {
+      "allow_avoided_false_escalation": false,
+      "allow_false_escalation_providers": [
+        "openai:gpt-4o-mini"
+      ],
+      "allow_sibling_behavior": "4/5 ALLOW, 1/5 false ESCALATE; false escalation provider(s): openai:gpt-4o-mini.",
+      "classification": "repair_once",
+      "escalate_sibling_behavior": "5/5 ESCALATE; unanimous and marked too easy.",
+      "escalate_too_easy": true,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-012",
+      "incomplete_clean_provider_row_set": false,
+      "packet_ids": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-B"
+      ],
+      "preserved_useful_disagreement": false,
+      "preserved_useful_disagreement_note": "No useful promotion-grade disagreement: the only disagreement was an OpenAI false escalation on the ALLOW sibling, while ESCALATE was unanimous.",
+      "provider_parse_health": "provider_call_ok 10/10; parse_ok 10/10; successful response parse_ok 10/10.",
+      "provider_results": [
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+          "parse_ok": true,
+          "provider": "gemini",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-012-B",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-012-B",
+          "parse_ok": true,
+          "provider": "gemini",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-012-B",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-012-B",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-012-B",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        }
+      ],
+      "recommended_next_action": "Repair once by making the ALLOW source authority closure harder to misread while making the ESCALATE sibling less visibly decisive.",
+      "seam_contamination": false,
+      "seam_contamination_note": "No second blocker, generic BEC shortcut, answer-key leak, or out-of-scope family inclusion surfaced in scout triage.",
+      "too_easy_packets": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-B"
+      ]
+    },
+    {
+      "allow_avoided_false_escalation": false,
+      "allow_false_escalation_providers": [
+        "openai:gpt-4o-mini"
+      ],
+      "allow_sibling_behavior": "4/5 ALLOW, 1/5 false ESCALATE; false escalation provider(s): openai:gpt-4o-mini.",
+      "classification": "repair_once",
+      "escalate_sibling_behavior": "5/5 ESCALATE; unanimous and marked too easy.",
+      "escalate_too_easy": true,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-013",
+      "incomplete_clean_provider_row_set": false,
+      "packet_ids": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-B"
+      ],
+      "preserved_useful_disagreement": false,
+      "preserved_useful_disagreement_note": "No useful promotion-grade disagreement: the only disagreement was an OpenAI false escalation on the ALLOW sibling, while ESCALATE was unanimous.",
+      "provider_parse_health": "provider_call_ok 10/10; parse_ok 10/10; successful response parse_ok 10/10.",
+      "provider_results": [
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+          "parse_ok": true,
+          "provider": "gemini",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+          "parse_ok": true,
+          "provider": "gemini",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        }
+      ],
+      "recommended_next_action": "Repair once by strengthening the ALLOW source-grounded ship-to closure and softening the ESCALATE tell.",
+      "seam_contamination": false,
+      "seam_contamination_note": "No second blocker, generic BEC shortcut, answer-key leak, or out-of-scope family inclusion surfaced in scout triage.",
+      "too_easy_packets": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-B"
+      ]
+    },
+    {
+      "allow_avoided_false_escalation": true,
+      "allow_false_escalation_providers": [],
+      "allow_sibling_behavior": "4/5 ALLOW among returned rows with 1 provider-call/parsing error(s); no false escalation among successful rows.",
+      "classification": "repair_once",
+      "escalate_sibling_behavior": "5/5 ESCALATE; unanimous and marked too easy.",
+      "escalate_too_easy": true,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-015",
+      "incomplete_clean_provider_row_set": true,
+      "packet_ids": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-015-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-015-B"
+      ],
+      "preserved_useful_disagreement": false,
+      "preserved_useful_disagreement_note": "No useful disagreement: ALLOW had one Gemini 503 provider-call failure and the returned valid rows aligned; ESCALATE was unanimous.",
+      "provider_parse_health": "provider_call_ok 9/10; parse_ok 9/10; successful response parse_ok 9/9. Error rows: BAL100-BEC-EXPLAINED-ANOMALY-015-A gemini:gemini-2.5-flash-lite HTTP 503 HTTPError.",
+      "provider_results": [
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-A",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": "HTTPError",
+          "http_status": 503,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-A",
+          "parse_ok": false,
+          "provider": "gemini",
+          "provider_call_ok": false,
+          "verdict": "ERROR"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-A",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-A",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-A",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-B",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-B",
+          "parse_ok": true,
+          "provider": "gemini",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-B",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-B",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-B",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        }
+      ],
+      "recommended_next_action": "Repair once or rerun after a small wording pass; do not promote while the provider row set is incomplete and ESCALATE is too easy.",
+      "seam_contamination": false,
+      "seam_contamination_note": "No second blocker, generic BEC shortcut, answer-key leak, or out-of-scope family inclusion surfaced in scout triage.",
+      "too_easy_packets": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-015-B"
+      ]
+    },
+    {
+      "allow_avoided_false_escalation": false,
+      "allow_false_escalation_providers": [
+        "openai:gpt-4o-mini"
+      ],
+      "allow_sibling_behavior": "4/5 ALLOW, 1/5 false ESCALATE; false escalation provider(s): openai:gpt-4o-mini.",
+      "classification": "repair_once",
+      "escalate_sibling_behavior": "5/5 ESCALATE; unanimous and marked too easy.",
+      "escalate_too_easy": true,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-017",
+      "incomplete_clean_provider_row_set": false,
+      "packet_ids": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-B"
+      ],
+      "preserved_useful_disagreement": false,
+      "preserved_useful_disagreement_note": "No useful promotion-grade disagreement: the only disagreement was an OpenAI false escalation on the ALLOW sibling, while ESCALATE was unanimous.",
+      "provider_parse_health": "provider_call_ok 10/10; parse_ok 10/10; successful response parse_ok 10/10.",
+      "provider_results": [
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+          "parse_ok": true,
+          "provider": "gemini",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-017-B",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-017-B",
+          "parse_ok": true,
+          "provider": "gemini",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-017-B",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-017-B",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-017-B",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        }
+      ],
+      "recommended_next_action": "Repair once by making the ALLOW identity/source closure more explicit without adding a second blocker, and reduce ESCALATE obviousness.",
+      "seam_contamination": false,
+      "seam_contamination_note": "No second blocker, generic BEC shortcut, answer-key leak, or out-of-scope family inclusion surfaced in scout triage.",
+      "too_easy_packets": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-B"
+      ]
+    },
+    {
+      "allow_avoided_false_escalation": false,
+      "allow_false_escalation_providers": [
+        "openai:gpt-4o-mini"
+      ],
+      "allow_sibling_behavior": "3/5 ALLOW, 1/5 false ESCALATE, 1/5 provider-call error; false escalation provider(s): openai:gpt-4o-mini; error provider: gemini:gemini-2.5-flash-lite HTTP 503.",
+      "classification": "repair_once",
+      "escalate_sibling_behavior": "5/5 ESCALATE; unanimous and marked too easy.",
+      "escalate_too_easy": true,
+      "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-018",
+      "incomplete_clean_provider_row_set": true,
+      "packet_ids": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-018-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-018-B"
+      ],
+      "preserved_useful_disagreement": false,
+      "preserved_useful_disagreement_note": "No useful promotion-grade disagreement: ALLOW had both an OpenAI false escalation and a Gemini 503 provider-call failure; ESCALATE was unanimous.",
+      "provider_parse_health": "provider_call_ok 9/10; parse_ok 9/10; successful response parse_ok 9/9. Error rows: BAL100-BEC-EXPLAINED-ANOMALY-018-A gemini:gemini-2.5-flash-lite HTTP 503 HTTPError.",
+      "provider_results": [
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-A",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": "HTTPError",
+          "http_status": 503,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-A",
+          "parse_ok": false,
+          "provider": "gemini",
+          "provider_call_ok": false,
+          "verdict": "ERROR"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-A",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-A",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ALLOW",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-A",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ALLOW"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "claude-haiku-4-5-20251001",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-B",
+          "parse_ok": true,
+          "provider": "anthropic",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-B",
+          "parse_ok": true,
+          "provider": "gemini",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "MiniMax-Text-01",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-B",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "gpt-4o-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-B",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        },
+        {
+          "builder_hypothesis": "ESCALATE",
+          "error_type": null,
+          "http_status": 200,
+          "model": "grok-3-mini",
+          "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-B",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "verdict": "ESCALATE"
+        }
+      ],
+      "recommended_next_action": "Repair once by clarifying source-grounded meter/contract closure in ALLOW and making ESCALATE less obviously unresolved; then consider a narrow rescout.",
+      "seam_contamination": false,
+      "seam_contamination_note": "No second blocker, generic BEC shortcut, answer-key leak, or out-of-scope family inclusion surfaced in scout triage.",
+      "too_easy_packets": [
+        "BAL100-BEC-EXPLAINED-ANOMALY-018-B"
+      ]
+    }
+  ],
+  "freeze_run": false,
+  "frozen_artifacts_edited": false,
+  "judge_run": false,
+  "official_trace": false,
+  "operator": "Taylor",
+  "overall_decision": "no_family_promoted_to_prefreeze_review",
+  "overall_reason": "All ESCALATE siblings were unanimous and marked too easy; several ALLOW siblings had OpenAI false escalations and two ALLOW rows had Gemini 503 provider-call failures. The scout was operationally complete but did not produce a promotion-grade family.",
+  "packet_drafts_edited": false,
+  "proof_credit": {
+    "batch002_credit_awarded": false,
+    "proof_credit_ready_families": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "proof_credit_ready_packets": 4,
+    "proof_credit_ready_pair_families": 2,
+    "proof_credit_remains_unchanged": true
+  },
+  "proof_credit_changed": false,
+  "provider_parse_health": {
+    "error_counts": {
+      "provider_call:HTTPError": 2
+    },
+    "error_rows": [
+      {
+        "error_summary": "Gemini 503 unavailable/high demand provider-call failure",
+        "error_type": "HTTPError",
+        "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-015",
+        "http_status": 503,
+        "model": "gemini-2.5-flash-lite",
+        "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-A",
+        "provider": "gemini",
+        "result_id": "BAL100-BEC-EXPLAINED-ANOMALY-015-A::gemini::gemini-2.5-flash-lite"
+      },
+      {
+        "error_summary": "Gemini 503 unavailable/high demand provider-call failure",
+        "error_type": "HTTPError",
+        "family_id": "BAL100-BEC-EXPLAINED-ANOMALY-018",
+        "http_status": 503,
+        "model": "gemini-2.5-flash-lite",
+        "packet_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-A",
+        "provider": "gemini",
+        "result_id": "BAL100-BEC-EXPLAINED-ANOMALY-018-A::gemini::gemini-2.5-flash-lite"
+      }
+    ],
+    "parse_ok": 58,
+    "parse_total": 60,
+    "provider_call_ok": 58,
+    "provider_call_total": 60,
+    "provider_error_counts": {
+      "gemini": 2
+    },
+    "successful_response_parse_ok": 58,
+    "successful_response_total": 58,
+    "successful_responses_parsed_cleanly": true
+  },
+  "provider_roster": [
+    "openai:gpt-4o-mini",
+    "anthropic:claude-haiku-4-5-20251001",
+    "gemini:gemini-2.5-flash-lite",
+    "xai:grok-3-mini",
+    "minimax:MiniMax-Text-01"
+  ],
+  "qa_or_ablation_run": false,
+  "report_type": "BAL100_BATCH_002_bounded_scout_triage",
+  "results_pointer": "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/results.jsonl",
+  "run_directory": "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors",
+  "scope": {
+    "actual_row_count": 60,
+    "excluded_family_ids": [
+      "BAL100-BEC-EXPLAINED-ANOMALY-014",
+      "BAL100-BEC-EXPLAINED-ANOMALY-016"
+    ],
+    "expected_row_count": 60,
+    "family_ids_scouted": [
+      "BAL100-BEC-EXPLAINED-ANOMALY-011",
+      "BAL100-BEC-EXPLAINED-ANOMALY-012",
+      "BAL100-BEC-EXPLAINED-ANOMALY-013",
+      "BAL100-BEC-EXPLAINED-ANOMALY-015",
+      "BAL100-BEC-EXPLAINED-ANOMALY-017",
+      "BAL100-BEC-EXPLAINED-ANOMALY-018"
+    ],
+    "packet_ids_scouted": [
+      "BAL100-BEC-EXPLAINED-ANOMALY-011-A",
+      "BAL100-BEC-EXPLAINED-ANOMALY-011-B",
+      "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+      "BAL100-BEC-EXPLAINED-ANOMALY-012-B",
+      "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+      "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+      "BAL100-BEC-EXPLAINED-ANOMALY-015-A",
+      "BAL100-BEC-EXPLAINED-ANOMALY-015-B",
+      "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+      "BAL100-BEC-EXPLAINED-ANOMALY-017-B",
+      "BAL100-BEC-EXPLAINED-ANOMALY-018-A",
+      "BAL100-BEC-EXPLAINED-ANOMALY-018-B"
+    ],
+    "scope_match": true
+  },
+  "scout_only": true,
+  "seam_name": "explained anomaly",
+  "summary_pointer": "scout_runs/BAL100-BATCH-002_bounded_static_gate_survivors/summary.json"
+}

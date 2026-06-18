@@ -1,0 +1,210 @@
+{
+  "report_type": "BAL100_BATCH_001_residual_triage",
+  "created_at": "2026-06-18",
+  "scope": "Residual triage for BAL100 Batch 001 families BEC-PAIR-003 through BEC-PAIR-008 only.",
+  "benchmark_credit": false,
+  "official_trace": false,
+  "judge": false,
+  "qa": false,
+  "ablation": false,
+  "freeze": false,
+  "proof_credit_status_changes": false,
+  "reviewed_families": [
+    "BEC-PAIR-003",
+    "BEC-PAIR-004",
+    "BEC-PAIR-005",
+    "BEC-PAIR-006",
+    "BEC-PAIR-007",
+    "BEC-PAIR-008"
+  ],
+  "excluded_from_scope": [
+    "BEC-PAIR-009",
+    "BEC-PAIR-010",
+    "HBB-BEC-001",
+    "HBB-BEC-002"
+  ],
+  "core_seam": [
+    "trigger != blocker",
+    "completed scrutiny != unresolved risk",
+    "pre-change vendor-master callback source = compliant",
+    "portal/change-request/invoice/submitted-contact callback source = noncompliant",
+    "completed downstream controls do not cure bad callback-source provenance"
+  ],
+  "do_not_introduce_blockers": [
+    "missing PO",
+    "missing approval",
+    "sanctions hold",
+    "expired delegation",
+    "bank mismatch",
+    "invoice amount anomaly",
+    "unresolved hold",
+    "incomplete cross-reference"
+  ],
+  "evidence_basis": [
+    {
+      "path": "reports/BAL100_BATCH_001_second_repair_scout_triage.json",
+      "use": "Primary family-level status for 003-008 after second repair scout."
+    },
+    {
+      "path": "reports/BAL100_BATCH_001_second_repair_summary.json",
+      "use": "Repair context and preserved one-delta constraints."
+    },
+    {
+      "path": "reports/BAL100_BATCH_001_repair_plan.json",
+      "use": "Prior family-specific repair intent."
+    },
+    {
+      "path": "reports/BAL100_BATCH_001_post_repair_raw_output_diagnosis.json",
+      "use": "Field-level failure patterns and repair principles."
+    },
+    {
+      "path": "reports/BAL100_scorecard.json",
+      "use": "Comparison boundary: only 009/010 have proof credit."
+    }
+  ],
+  "classification_counts": {
+    "promote_to_prefreeze_candidate": 0,
+    "repair_once": 5,
+    "parse_autopsy_required": 1,
+    "retire_or_quarantine": 0
+  },
+  "family_triage": [
+    {
+      "family_id": "BEC-PAIR-003",
+      "classification": "repair_once",
+      "current_status": "promising_but_allow_openai_false_escalate_remains",
+      "allow_packet_id": "BAL100-BEC-PAIR-003-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-003-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_issue": "One false ESCALATE row from openai:gpt-4o-mini; OpenAI still escalates on scrutiny/trigger reasoning.",
+      "escalate_sibling_issue": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no ESCALATE parse error; useful single-defect disagreement remains.",
+      "scout_evidence_pointer": [
+        "reports/BAL100_BATCH_001_second_repair_scout_triage.json",
+        "reports/BAL100_BATCH_001_second_repair_summary.json",
+        "reports/BAL100_BATCH_001_post_repair_raw_output_diagnosis.json"
+      ],
+      "recommended_next_action": "repair_once",
+      "exact_repair_principle": "Keep ALLOW callback evidence positive and local: pre-change vendor-master snapshot/record selected, matching dialed number and phone-on-file, compact closure facts, and reduced nearby forbidden-source/risk vocabulary. Preserve ESCALATE as an inferable portal/submitted-contact provenance defect without answer labels.",
+      "eligible_for_prefreeze_after_one_repair": true,
+      "prefreeze_eligibility_condition": "ALLOW OpenAI false-ESCALATE clears, no parse contamination appears, and ESCALATE retains non-trivial single-defect disagreement.",
+      "quarantine_from_bal100_proof_credit_path": false
+    },
+    {
+      "family_id": "BEC-PAIR-004",
+      "classification": "repair_once",
+      "current_status": "promising_but_allow_openai_false_escalate_remains",
+      "allow_packet_id": "BAL100-BEC-PAIR-004-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-004-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_issue": "One false ESCALATE row from openai:gpt-4o-mini.",
+      "escalate_sibling_issue": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no ESCALATE parse error in latest scout.",
+      "scout_evidence_pointer": [
+        "reports/BAL100_BATCH_001_second_repair_scout_triage.json",
+        "reports/BAL100_BATCH_001_repair_plan.json",
+        "reports/BAL100_BATCH_001_post_repair_raw_output_diagnosis.json"
+      ],
+      "recommended_next_action": "repair_once",
+      "exact_repair_principle": "Repair ALLOW source clarity and closure chronology; keep callback source tied only to pre-change vendor-master data and avoid unresolved-risk wording. Preserve ESCALATE as an inferable change-request/submitted-contact provenance defect rather than adding neon labels.",
+      "eligible_for_prefreeze_after_one_repair": true,
+      "prefreeze_eligibility_condition": "ALLOW OpenAI false-ESCALATE clears and ESCALATE keeps interpretable MiniMax wrong-ALLOW collapse.",
+      "quarantine_from_bal100_proof_credit_path": false
+    },
+    {
+      "family_id": "BEC-PAIR-005",
+      "classification": "parse_autopsy_required",
+      "current_status": "blocked_by_parse_contamination",
+      "allow_packet_id": "BAL100-BEC-PAIR-005-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_issue": "No counted false ESCALATE row, but Anthropic parse failed after a successful provider call; raw excerpt was fenced JSON with semantic ALLOW.",
+      "escalate_sibling_issue": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no ESCALATE parse error; useful single-defect disagreement remains.",
+      "parse_failure": {
+        "packet_id": "BAL100-BEC-PAIR-005-ALLOW",
+        "provider": "anthropic",
+        "model": "claude-haiku-4-5-20251001",
+        "provider_call_ok": true,
+        "parse_error": "No JSON object with verdict was found in provider response.",
+        "raw_excerpt_semantic_verdict": "ALLOW"
+      },
+      "scout_evidence_pointer": [
+        "reports/BAL100_BATCH_001_second_repair_scout_triage.json",
+        "reports/BAL100_BATCH_001_repair_plan.json"
+      ],
+      "recommended_next_action": "parse_autopsy_required",
+      "exact_repair_principle": "Do not edit packet first. Inspect raw Anthropic response and parser behavior to determine parser rigidity versus packet-induced formatting. If packet repair is later needed, keep it limited to callback provenance clarity and avoid changing the clean ESCALATE sibling unless autopsy points there.",
+      "eligible_for_prefreeze_after_one_repair": false,
+      "prefreeze_eligibility_condition": "Only after parse autopsy resolves or explains the parse contamination and a clean scout confirms no ALLOW false escalation.",
+      "quarantine_from_bal100_proof_credit_path": false,
+      "hold_from_prefreeze_until_parse_resolved": true
+    },
+    {
+      "family_id": "BEC-PAIR-006",
+      "classification": "repair_once",
+      "current_status": "promising_but_allow_openai_false_escalate_remains",
+      "allow_packet_id": "BAL100-BEC-PAIR-006-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-006-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_issue": "One false ESCALATE row from openai:gpt-4o-mini; OpenAI treats recent payment-profile change plus scrutiny trigger as unresolved risk.",
+      "escalate_sibling_issue": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no ESCALATE parse error; improved from earlier parse-contaminated/weak state.",
+      "scout_evidence_pointer": [
+        "reports/BAL100_BATCH_001_second_repair_scout_triage.json",
+        "reports/BAL100_BATCH_001_repair_plan.json"
+      ],
+      "recommended_next_action": "repair_once",
+      "exact_repair_principle": "Make ALLOW closure facts boring and chronological: callback complete, signoff complete, scrutiny completed, hold released, cross-reference complete, release checklist complete, and no unresolved discrepancy. Keep selected callback source as pre-change vendor-master only.",
+      "eligible_for_prefreeze_after_one_repair": true,
+      "prefreeze_eligibility_condition": "ALLOW OpenAI false-ESCALATE clears and ESCALATE remains interpretable with MiniMax collapse.",
+      "quarantine_from_bal100_proof_credit_path": false
+    },
+    {
+      "family_id": "BEC-PAIR-007",
+      "classification": "repair_once",
+      "current_status": "promising_but_allow_openai_false_escalate_remains",
+      "allow_packet_id": "BAL100-BEC-PAIR-007-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-007-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_issue": "One false ESCALATE row from openai:gpt-4o-mini; OpenAI treats low trailing invoice count/recent profile change as unresolved blockers on ALLOW.",
+      "escalate_sibling_issue": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no ESCALATE parse error. Prior too-easy concern improved after second repair.",
+      "scout_evidence_pointer": [
+        "reports/BAL100_BATCH_001_second_repair_scout_triage.json",
+        "reports/BAL100_BATCH_001_second_repair_summary.json"
+      ],
+      "recommended_next_action": "repair_once",
+      "exact_repair_principle": "Separate recent-change/scary-trigger facts from unresolved-risk semantics on ALLOW. Keep pre-change vendor-master callback source concise and selected. Preserve ESCALATE MiniMax collapse; do not add answer labels.",
+      "eligible_for_prefreeze_after_one_repair": true,
+      "prefreeze_eligibility_condition": "ALLOW OpenAI false-ESCALATE clears and ESCALATE retains useful disagreement.",
+      "quarantine_from_bal100_proof_credit_path": false
+    },
+    {
+      "family_id": "BEC-PAIR-008",
+      "classification": "repair_once",
+      "current_status": "promising_but_allow_openai_false_escalate_remains",
+      "allow_packet_id": "BAL100-BEC-PAIR-008-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-008-CALLBACK-PROVENANCE-FAIL",
+      "allow_sibling_issue": "One false ESCALATE row from openai:gpt-4o-mini; OpenAI treats scrutiny/recent profile change language as material blockers on ALLOW.",
+      "escalate_sibling_issue": "One wrong-ALLOW row from minimax:MiniMax-Text-01; no ESCALATE parse error.",
+      "scout_evidence_pointer": [
+        "reports/BAL100_BATCH_001_second_repair_scout_triage.json",
+        "reports/BAL100_BATCH_001_repair_plan.json",
+        "reports/BAL100_BATCH_001_post_repair_raw_output_diagnosis.json"
+      ],
+      "recommended_next_action": "repair_once",
+      "exact_repair_principle": "Keep ALLOW callback source affirmative and source-local: pre-change vendor-master snapshot selected, dialed number matches phone-on-file, and controls closed before release. Avoid regional/new/submitted/change-source terms in the ALLOW callback provenance field. Preserve ESCALATE as a single portal/change/newly supplied callback-source defect.",
+      "eligible_for_prefreeze_after_one_repair": true,
+      "prefreeze_eligibility_condition": "ALLOW OpenAI false-ESCALATE clears and ESCALATE remains interpretable.",
+      "quarantine_from_bal100_proof_credit_path": false
+    }
+  ],
+  "recommended_queue": [
+    "Parse autopsy: BEC-PAIR-005-ALLOW.",
+    "One narrow ALLOW-side repair pass: BEC-PAIR-003, BEC-PAIR-004, BEC-PAIR-006, BEC-PAIR-007, BEC-PAIR-008.",
+    "Do not repair, freeze, trace, Judge, QA, ablate, or mark proof credit without a separate explicit approval."
+  ],
+  "attestation": {
+    "live_calls": false,
+    "scout_rerun": false,
+    "judge": false,
+    "qa": false,
+    "ablation": false,
+    "traces_created": false,
+    "packet_edits": false,
+    "frozen_artifact_edits": false,
+    "proof_credit_status_changes": false,
+    "push": false
+  }
+}

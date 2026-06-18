@@ -116,6 +116,8 @@ class ChatSession:
 
 DEFAULT_RUNTIME_PROFILE = "mini_only"
 FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
+DEFAULT_THREAD_HANDOFF_MIN_TURNS = 24
+THREAD_HANDOFF_FORCE_SCORE = 5
 
 # Local, non-authoritative pricing estimates. Only include model prices when we
 # are comfortable showing a rough estimate; otherwise the UI reports unknown.
@@ -130,15 +132,41 @@ def _holochat_runtime_profile() -> str:
     return (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
 
 
+def _thread_handoff_min_turns() -> int:
+    raw = os.getenv("HOLOCHAT_HANDOFF_MIN_TURNS", "").strip()
+    if not raw:
+        return DEFAULT_THREAD_HANDOFF_MIN_TURNS
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return DEFAULT_THREAD_HANDOFF_MIN_TURNS
+
+
+def _thread_handoff_ready(session: "ChatSession") -> bool:
+    if session.thread_health_level != "RED":
+        return False
+    return (
+        session.turn_count >= _thread_handoff_min_turns()
+        or session.thread_health_score <= THREAD_HANDOFF_FORCE_SCORE
+    )
+
+
 def _handoff_for_context_window(session: "ChatSession") -> Optional[dict[str, Any]]:
     """Return one visible fresh-thread prompt per session/context window."""
-    if session.thread_health_level != "RED" or session.handoff_suggested:
+    if not _thread_handoff_ready(session) or session.handoff_suggested:
         return None
     session.handoff_suggested = True
+    arc = session.gov_arc_state
     return {
         "suggested": True,
         "message": THREAD_HANDOFF_MESSAGE,
         "new_thread": "/chat",
+        "arc": {
+            "topic": _compact_text(arc.current_topic or "", limit=160),
+            "goal": _compact_text(arc.user_goal or arc.current_directive or "", limit=220),
+            "tension": _compact_text(arc.current_tension or "", limit=220),
+            "next_paths": [_compact_text(path, limit=180) for path in arc.next_paths[:3]],
+        },
     }
 
 
@@ -149,7 +177,7 @@ def _claim_autocompact_for_context_window(
     incognito: bool,
 ) -> bool:
     """Allow one consolidation/reseed attempt per session/context window."""
-    if not capsule_id or incognito or session.thread_health_level != "RED":
+    if not capsule_id or incognito or not _thread_handoff_ready(session):
         return False
     if session.autocompact_attempted:
         return False

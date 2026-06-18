@@ -297,6 +297,10 @@ def test_frontend_has_holobrain_button_and_render_path():
     assert "renderHoloBuildDashboard(holoBuild)" in html
     assert "HoloBuild turn timeline" in html
     assert "HoloBuild Gov briefs" in html
+    assert "No saved HoloBuild replay is available yet." in html
+    assert "After a watched Builder run completes" in html
+    assert "HoloBuild replay" in html
+    assert "signed-in replay" in html
     assert "Watch live run" in html
     assert "startHoloBuildRun()" in html
     assert "pollHoloBuildRun" in html

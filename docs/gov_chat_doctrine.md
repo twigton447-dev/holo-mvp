@@ -42,6 +42,8 @@ Gov is responsible for:
 
 Gov should not be a visible second speaker. Gov acts through state, metadata, private briefs, and UI traces.
 
+Gov should push harder than a normal assistant. That does not mean being rude. It means refusing to let the conversation slide past the live unresolved tension, the assumption being protected, or the question the user is circling.
+
 ## Python Kernel Versus Gov Mind
 
 The deterministic Python layer is the hard authority for:
@@ -63,6 +65,7 @@ The Gov mind is the semantic layer for:
 - where the conversation is going
 - which tension is unresolved
 - what the analyst should do next
+- what the user needs to confront, decide, or inspect next
 - whether something should be remembered
 - whether the current answer needs checking
 - which three next paths are most useful
@@ -148,6 +151,8 @@ They should be:
 - phrased as the user's plausible next thought
 - short enough to scan
 - free of internal architecture references
+
+When there is a real unresolved tension, at least one path should be a pressure path: a sharper fork that asks the user to inspect the assumption, name the tradeoff, decide what standard matters, or face the consequence of the current direction.
 
 Gov should use memory only to shape relevance, not to expose private memory details.
 

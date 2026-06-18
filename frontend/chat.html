@@ -245,6 +245,7 @@
     #avatar-menu button { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--text); padding: 8px 12px; font-size: 13px; font-family: inherit; cursor: pointer; border-radius: 7px; }
     #avatar-menu button:hover { background: var(--bg3); }
     #avatar-menu .menu-danger { color: #ef4444; }
+    #avatar-menu .mobile-only { display: none; }
 
     /* Memory panel */
     #memory-panel { position: fixed; top: 0; right: 0; height: 100vh; width: 300px; background: var(--bg); border-left: 1px solid var(--border); z-index: 90; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.22s ease; }
@@ -433,6 +434,7 @@
     #incognito-btn { background: none; border: 1px solid var(--border); color: var(--text3); border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em; }
     #incognito-btn:hover { border-color: #a78bfa; color: #a78bfa; }
     #incognito-btn.active { border-color: #a78bfa; color: #a78bfa; background: #a78bfa11; }
+    #mobile-action-bar { display: none; }
 
     /* Mobile */
     @media (max-width: 480px) {
@@ -454,9 +456,37 @@
       #thread-panel-close { font-size: 26px; padding: 8px 10px; color: var(--text); }
       #thread-panel-header { padding: 16px 16px 12px; }
       #thread-new-btn button { font-size: 15px; padding: 13px 16px; }
-      /* Hide secondary header actions on small screens — keep avatar + send */
-      #incognito-btn, #thread-toggle, #new-thread, #theme-toggle { display: none; }
+      #header { padding: 8px 12px; gap: 6px; }
+      #header h1 { font-size: 14px; gap: 5px; }
+      #brand-sub { font-size: 14px; }
+      #header-right { gap: 5px; }
+      #thread-toggle { display: block; padding: 5px 8px; font-size: 10px; letter-spacing: 0; }
+      #holobrain-toggle { padding: 5px 8px; font-size: 10px; letter-spacing: 0; }
+      #new-thread { display: block; width: 30px; height: 30px; padding: 0; font-size: 0; flex-shrink: 0; }
+      #new-thread::before { content: "+"; font-size: 18px; line-height: 1; }
+      #incognito-btn, #theme-toggle { display: none; }
+      #avatar-menu .mobile-only { display: block; }
       #incognito-badge { display: none !important; }
+      #mobile-action-bar {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+        padding: 8px 12px 10px;
+        border-bottom: 1px solid var(--border2);
+        background: var(--bg);
+      }
+      #mobile-action-bar button {
+        min-width: 0;
+        border: 1px solid var(--border);
+        background: var(--bg2);
+        color: var(--text4);
+        border-radius: 9px;
+        padding: 7px 4px;
+        font: inherit;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+      }
     }
   </style>
 </head>
@@ -665,6 +695,12 @@
       <button id="signout-btn" onclick="signOut()" style="display:none;background:none;border:1px solid var(--border);color:var(--text3);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;">Log out</button>
       <div id="user-avatar" style="display:none"></div>
     </div>
+  </div>
+  <div id="mobile-action-bar" aria-label="Mobile chat controls">
+    <button onclick="toggleThreadPanel()">Threads</button>
+    <button onclick="newThread()">New</button>
+    <button onclick="openHoloBrainPanel()">Engine</button>
+    <button onclick="toggleIncognito()">Incognito</button>
   </div>
 
   <div id="messages">
@@ -1438,7 +1474,7 @@
       return `
         <div class="brain-row">
           <div class="brain-row-key">HoloBuild trace</div>
-          <div class="brain-row-val">No saved HoloBuild traces yet.</div>
+          <div class="brain-row-val">No saved HoloBuild replay is available yet. After a watched Builder run completes, the replay appears here when you are signed in.</div>
           <span class="brain-pill">read-only</span>
           <span class="brain-pill">${escHtml(String(specs.length))} specs</span>
         </div>
@@ -1479,6 +1515,12 @@
       .join(" · ");
 
     return `
+      <div class="brain-row">
+        <div class="brain-row-key">HoloBuild replay</div>
+        <div class="brain-row-val">This is the latest saved Builder run. Use it to replay the Builder, QA attacker, and Gov handoff sequence without re-running providers.</div>
+        <span class="brain-pill">signed-in replay</span>
+        ${latest.timestamp ? `<span class="brain-pill">${escHtml(latest.timestamp)}</span>` : ""}
+      </div>
       <div class="brain-row">
         <div class="brain-row-key">Latest HoloBuild run</div>
         <div class="brain-row-val">${escHtml(latest.scenario_id || latest.builder_id || "builder run")}</div>
@@ -1650,6 +1692,10 @@
     const menu = document.createElement("div");
     menu.id = "avatar-menu";
     menu.innerHTML = `
+      <button class="mobile-only" onclick="closeAvatarMenu();toggleThreadPanel()">See my threads</button>
+      <button class="mobile-only" onclick="closeAvatarMenu();newThread()">Start new thread</button>
+      <button class="mobile-only" onclick="closeAvatarMenu();openHoloBrainPanel()">Engine data</button>
+      <button class="mobile-only" onclick="closeAvatarMenu();toggleIncognito()">Start incognito thread</button>
       <button class="menu-danger" onclick="signOut()">Sign out</button>`;
     document.getElementById("user-avatar").appendChild(menu);
     // Close on outside click
@@ -1773,13 +1819,14 @@
 
   function showHandoff(handoff) {
     // Renders as a Holo message, not a system banner — the Captain's own voice
+    _pendingHandoffTransition = safeHandoffTransition(handoff);
     const container = document.getElementById("messages");
     const msg = document.createElement("div");
     msg.className = "msg holo";
     msg.innerHTML = `
       <div class="holo-icon">✦</div>
       <div class="holo-body">
-        <div class="bubble">${escHtml(handoff.message)} <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;font-weight:600;">Start fresh thread →</a></div>
+        <div class="bubble">${escHtml(handoff.message)} <a href="#" onclick="startHandoffThread();return false;" style="color:var(--accent);text-decoration:none;font-weight:600;">Start fresh thread →</a></div>
       </div>`;
     container.appendChild(msg);
     scrollToBottom();
@@ -2359,14 +2406,67 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
 	    meter.setAttribute("aria-label", `Thread health ${pct}%`);
 	    meter.classList.toggle("low", pct <= 40 && pct > 20);
 	    meter.classList.toggle("critical", pct <= 20);
-	  }
+  }
 
-	  function newThread() {
+  const HANDOFF_TRANSITION_KEY = "holo_handoff_transition";
+  let _pendingHandoffTransition = null;
+
+  function safeHandoffTransition(handoff) {
+    const arc = (handoff && handoff.arc) || {};
+    const paths = Array.isArray(arc.next_paths) ? arc.next_paths : [];
+    return {
+      at: new Date().toISOString(),
+      source: "thread_handoff",
+      topic: String(arc.topic || "").slice(0, 180),
+      goal: String(arc.goal || "").slice(0, 240),
+      tension: String(arc.tension || "").slice(0, 240),
+      next_paths: paths.slice(0, 3).map(path => String(path).slice(0, 200)),
+    };
+  }
+
+  function readHandoffTransition() {
+    try {
+      return JSON.parse(sessionStorage.getItem(HANDOFF_TRANSITION_KEY) || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  function startHandoffThread() {
+    const transition = _pendingHandoffTransition || safeHandoffTransition(null);
+    try {
+      sessionStorage.setItem(HANDOFF_TRANSITION_KEY, JSON.stringify(transition));
+    } catch {}
+    newThread({ fromHandoff: true, handoffTransition: transition });
+  }
+
+  function handoffWelcomeHtml(transition = {}) {
+    const topic = transition.topic || transition.goal || "";
+    const nextPath = Array.isArray(transition.next_paths) ? transition.next_paths[0] : "";
+    const title = topic ? `Continuing: ${escHtml(topic)}` : "Fresh thread, same workspace.";
+    const body = topic
+      ? `You were working through ${escHtml(topic)}. The old thread stays separate; this new one can continue from the selected memory and context available here.`
+      : "The old thread stays separate; this new one can continue from the selected memory and context available here.";
+    return `<div id="empty" class="handoff-empty"><h2>${title}</h2><p>${body}</p>${nextPath ? `<p>A useful next move: ${escHtml(nextPath)}</p>` : ""}</div>`;
+  }
+
+	  function newThread(options = {}) {
 	    sessionId = null;
 	    turnCount = 0;
 	    updateThreadMeter(100);
+    let fromHandoff = options.fromHandoff === true;
+    let handoffTransition = options.handoffTransition || null;
+    if (!fromHandoff) {
+      try {
+        handoffTransition = readHandoffTransition();
+        fromHandoff = handoffTransition !== null;
+      } catch {}
+    }
 	    document.getElementById("messages").innerHTML =
-      `<div id="empty"><h2>What's on your mind?</h2><p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p></div>`;
+      fromHandoff
+        ? handoffWelcomeHtml(handoffTransition || {})
+        : `<div id="empty"><h2>What's on your mind?</h2><p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p></div>`;
+    try { sessionStorage.removeItem(HANDOFF_TRANSITION_KEY); } catch {}
     document.getElementById("input").focus();
   }
 

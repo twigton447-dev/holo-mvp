@@ -413,8 +413,13 @@ def test_currentness_query_forces_web_search_without_gov_gate(monkeypatch):
 def test_prompt_assembly_loads_canonical_doctrine_docs():
     assert "Canonical HoloChat Doctrine" in HOLO_CHAT_SYSTEM_PROMPT
     assert "HoloChat is not omniscient." in HOLO_CHAT_SYSTEM_PROMPT
+    assert "Use short bold section headers" in HOLO_CHAT_SYSTEM_PROMPT
+    assert "Stay warm and human" in HOLO_CHAT_SYSTEM_PROMPT
+    assert "No bullets. No headers." not in HOLO_CHAT_SYSTEM_PROMPT
     assert "Gov continuity comes from Holo-owned state" in GOVERNOR_SYSTEM_PROMPT
     assert "Python enforces." in GOVERNOR_SYSTEM_PROMPT
+    assert "Gov should push harder than a normal assistant." in GOVERNOR_SYSTEM_PROMPT
+    assert "at least one path should be a pressure path" in GOVERNOR_SYSTEM_PROMPT
 
 
 def test_thread_handoff_markdown_is_clean_reseed_not_raw_chat():
@@ -502,23 +507,42 @@ def test_thread_handoff_artifact_is_tethered_to_source_session():
 
 def test_handoff_prompt_is_once_per_context_window():
     session = ChatSession(session_id="session-1")
-    session.turn_count = 16
+    session.turn_count = 24
+    session.gov_arc_state = GovArcState(
+        current_topic="mobile controls and reseed continuity",
+        user_goal="make the fresh thread feel continuous",
+        current_tension="avoid generic transition copy",
+        next_paths=["carry the source arc into the welcome"],
+    )
 
     first = _handoff_for_context_window(session)
     second = _handoff_for_context_window(session)
 
-    assert first == {
-        "suggested": True,
-        "message": THREAD_HANDOFF_MESSAGE,
-        "new_thread": "/chat",
+    assert first["suggested"] is True
+    assert first["message"] == THREAD_HANDOFF_MESSAGE
+    assert first["new_thread"] == "/chat"
+    assert first["arc"] == {
+        "topic": "mobile controls and reseed continuity",
+        "goal": "make the fresh thread feel continuous",
+        "tension": "avoid generic transition copy",
+        "next_paths": ["carry the source arc into the welcome"],
     }
     assert second is None
     assert session.handoff_suggested is True
 
 
-def test_autocompact_is_claimed_once_per_context_window():
+def test_handoff_prompt_waits_past_initial_red_zone():
     session = ChatSession(session_id="session-1")
     session.turn_count = 16
+
+    assert session.thread_health_level == "RED"
+    assert _handoff_for_context_window(session) is None
+    assert session.handoff_suggested is False
+
+
+def test_autocompact_is_claimed_once_per_context_window():
+    session = ChatSession(session_id="session-1")
+    session.turn_count = 24
 
     first = _claim_autocompact_for_context_window(
         session,
@@ -536,12 +560,25 @@ def test_autocompact_is_claimed_once_per_context_window():
     assert session.autocompact_attempted is True
 
     incognito_session = ChatSession(session_id="session-2")
-    incognito_session.turn_count = 16
+    incognito_session.turn_count = 24
     assert _claim_autocompact_for_context_window(
         incognito_session,
         capsule_id="capsule-1",
         incognito=True,
     ) is False
+
+
+def test_autocompact_waits_with_visible_handoff_gate():
+    session = ChatSession(session_id="session-1")
+    session.turn_count = 16
+
+    assert session.thread_health_level == "RED"
+    assert _claim_autocompact_for_context_window(
+        session,
+        capsule_id="capsule-1",
+        incognito=False,
+    ) is False
+    assert session.autocompact_attempted is False
 
 
 def test_usage_metadata_falls_back_to_estimates_when_provider_usage_unavailable(monkeypatch):

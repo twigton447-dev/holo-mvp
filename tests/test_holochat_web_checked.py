@@ -336,7 +336,17 @@ def test_frontend_thread_meter_uses_thread_health_score():
     assert "pct <= 40" in html
     assert "pct <= 20" in html
     assert "Start fresh thread" in html
+    assert "startHandoffThread()" in html
+    assert 'const HANDOFF_TRANSITION_KEY = "holo_handoff_transition";' in html
+    assert "safeHandoffTransition(handoff)" in html
+    assert "Continuing: ${escHtml(topic)}" in html
+    assert "You were working through ${escHtml(topic)}." in html
+    assert "A useful next move:" in html
+    assert "selected memory and context available here" in html
+    assert "Fresh thread, same workspace." in html
     assert ("Start a " + "fresh one") not in html
+    assert ("full " + "context") not in html.lower()
+    assert ("everything " + "you tell me") not in html.lower()
     assert ("how much context " + "do you want carried") not in chat_engine_py
     assert ("Full detail, " + "key points only") not in chat_engine_py
 
@@ -350,6 +360,45 @@ def test_frontend_header_avatar_has_safe_account_tooltip_and_hidden_count_badge(
     assert 'badge.style.display = "none";' in html
     assert "badge.textContent = count" not in html
     assert 'title="${name}"' not in html
+
+
+def test_mobile_header_keeps_core_controls_available():
+    html = Path("frontend/chat.html").read_text()
+
+    assert 'id="mobile-action-bar" aria-label="Mobile chat controls"' in html
+    assert '<button onclick="toggleThreadPanel()">Threads</button>' in html
+    assert '<button onclick="newThread()">New</button>' in html
+    assert '<button onclick="openHoloBrainPanel()">Engine</button>' in html
+    assert '<button onclick="toggleIncognito()">Incognito</button>' in html
+    assert "#mobile-action-bar { display: none; }" in html
+    assert "grid-template-columns: repeat(4, minmax(0, 1fr));" in html
+    assert "#thread-toggle { display: block; padding: 5px 8px;" in html
+    assert "#holobrain-toggle { padding: 5px 8px;" in html
+    assert "#new-thread { display: block; width: 30px;" in html
+    assert '#avatar-menu .mobile-only { display: block; }' in html
+    assert '<button class="mobile-only" onclick="closeAvatarMenu();toggleThreadPanel()">See my threads</button>' in html
+    assert '<button class="mobile-only" onclick="closeAvatarMenu();newThread()">Start new thread</button>' in html
+    assert '<button class="mobile-only" onclick="closeAvatarMenu();openHoloBrainPanel()">Engine data</button>' in html
+    assert '<button class="mobile-only" onclick="closeAvatarMenu();toggleIncognito()">Start incognito thread</button>' in html
+    assert "#incognito-btn, #thread-toggle, #new-thread, #theme-toggle { display: none; }" not in html
+
+
+def test_holochat_runtime_prompt_prefers_structured_human_answers():
+    prompt = Path("llm_adapters.py").read_text()
+    doctrine = Path("docs/holo_chat_doctrine.md").read_text()
+    gov_doctrine = Path("docs/gov_chat_doctrine.md").read_text()
+
+    assert "Sound human in the ordinary sense" in prompt
+    assert "short **bold section headers**" in prompt
+    assert "Do not leave complex answers as one flat wall of prose" in prompt
+    assert "Format guidance for this response: use short **bold headers**" in prompt
+    assert "If a sentence could appear in a generic AI demo" in prompt
+    assert "No bullets. No headers." not in prompt
+    assert "Holo should feel like a vivid, attentive person" in doctrine
+    assert "For complex answers, structure is a kindness." in doctrine
+    assert "At least one path should pressure-test" in doctrine
+    assert "Gov should push harder than a normal assistant." in gov_doctrine
+    assert "pressure path" in gov_doctrine
 
 
 def test_frontend_google_auth_is_config_gated():

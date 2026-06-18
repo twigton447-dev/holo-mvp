@@ -1,0 +1,495 @@
+{
+  "report_type": "BAL100_BATCH_001_post_repair_raw_output_diagnosis",
+  "created_at": "2026-06-17",
+  "run_id": "BAL100-BATCH-001_five_mini_solo_scout_20260617T235736Z",
+  "run_dir": "scout_runs/BAL100-BATCH-001_five_mini_solo_scout/BAL100-BATCH-001_five_mini_solo_scout_20260617T235736Z",
+  "source_post_repair_triage_commit": "1008a3c",
+  "benchmark_credit": false,
+  "official_trace": false,
+  "judge": false,
+  "freeze": false,
+  "overall_diagnosis": "Post-repair raw outputs show a split failure. The ALLOW side improved but still fails OpenAI: OpenAI over-escalated every ALLOW sibling, usually by treating the callback source as noncompliant despite explicit pre-change vendor-master evidence. MiniMax behavior improved and now ALLOWs all ALLOW siblings. The ESCALATE side was over-repaired: every ESCALATE sibling became all-correct/too-easy because repaired fields directly label the bad source, state the unused pre-change source, and narrate the single material blocker.",
+  "openai_false_escalate_pattern": {
+    "affected_packets": [
+      "BAL100-BEC-PAIR-003-ALLOW",
+      "BAL100-BEC-PAIR-004-ALLOW",
+      "BAL100-BEC-PAIR-005-ALLOW",
+      "BAL100-BEC-PAIR-006-ALLOW",
+      "BAL100-BEC-PAIR-007-ALLOW",
+      "BAL100-BEC-PAIR-008-ALLOW",
+      "BAL100-BEC-PAIR-009-ALLOW",
+      "BAL100-BEC-PAIR-010-ALLOW"
+    ],
+    "row_count": 8,
+    "pattern": "OpenAI consistently maps forbidden-source vocabulary in ALLOW records to noncompliant provenance, even when the same field says vendor_master_snapshot / pre_change_vendor_master_record.",
+    "raw_reason_families": {
+      "BAL100-BEC-PAIR-003": "The callback source used for verification is noncompliant as it is not from the pre-change vendor-master data. This remains a material blocker despite other controls being completed.",
+      "BAL100-BEC-PAIR-004": "The callback source used for verification is noncompliant as it is derived from a newly supplied contact record rather than the pre-change vendor-master data, which is a material blocker under the policy requirements.",
+      "BAL100-BEC-PAIR-005": "The callback source used for verification is compliant with pre-change vendor-master data, but the policy requires that the callback contact source must not be taken from the change request, invoice, or newly submitted contact record. Since the callback source is compliant but the evidence indicates a noncompliant callback source provenance remains a material blocker, the case must be escalated.",
+      "BAL100-BEC-PAIR-006": "The callback source used for verification is noncompliant as it is not from the pre-change vendor-master data. This remains a material blocker despite other controls being satisfied.",
+      "BAL100-BEC-PAIR-007": "The callback source used for verification is noncompliant as it does not originate from pre-change vendor-master data. This remains a material blocker despite other controls being satisfied.",
+      "BAL100-BEC-PAIR-008": "The callback source used for verification is compliant with pre-change vendor-master data, but there is a material blocker due to the noncompliance of the callback source provenance as it does not meet the requirements outlined in the policy documents. Specifically, the callback source must be from pre-existing vendor-master data and not from a newly supplied contact record or invoice.",
+      "BAL100-BEC-PAIR-009": "The callback source used for verification is compliant with pre-change vendor-master data, but there is a material blocker due to the noncompliance of the callback source provenance as it does not meet the requirements outlined in the policy documents.",
+      "BAL100-BEC-PAIR-010": "The callback source used for verification is noncompliant as it does not originate from pre-change vendor-master data, which is a material blocker according to the policy documents."
+    },
+    "notable_modes": [
+      "Families 003, 006, 007, and 010: OpenAI says callback is not from pre-change vendor-master data.",
+      "Family 004: OpenAI says callback is from a newly supplied contact record.",
+      "Families 005, 008, and 009: OpenAI acknowledges compliant pre-change source, then still claims noncompliant provenance/material blocker."
+    ]
+  },
+  "allow_side_remaining_failure_causes": [
+    "ALLOW number_source contains a positive compliant source followed by a negated list of forbidden tokens: not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record.",
+    "ALLOW source_exclusion_note repeats portal_change_record IDs, submitted_contact_phone values, invoice text, and new contact record language in model-visible context.",
+    "Policy clause repeats the same forbidden-source language; OpenAI appears to latch onto the forbidden-source vocabulary rather than the positive match between dialed_number and phone_on_file.",
+    "Control-closure notes still contain risk/hold vocabulary: elevated scrutiny, trigger conditions, temporary hold, release review, hold release reference, and queue/routing terms.",
+    "The repair may be too verbose and contrastive for OpenAI; other models use the closure notes correctly, but OpenAI treats the contrast text as evidence of unresolved provenance risk."
+  ],
+  "escalate_side_over_repair_causes": [
+    "ESCALATE number_source now often includes explicit noncompliant labels such as noncompliant submitted contact source, noncompliant newly supplied contact source, or noncompliant post_change submitted contact source.",
+    "provenance_basis=noncompliant_callback_source is an answer-like field that tells the model the verdict-relevant category directly.",
+    "unused_pre_change_vendor_master_source.not_used_for_callback=true makes the defect mechanically obvious.",
+    "source_defect_note narrates the defect in natural language and contrasts the bad dialed number with the pre-change phone.",
+    "downstream_controls_boundary_note and single_material_blocker_note explicitly say downstream controls do not cure and only callback-source provenance remains as material blocker."
+  ],
+  "too_easy_escalate_pattern": {
+    "packets": [
+      "BAL100-BEC-PAIR-003-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-004-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-006-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-007-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-008-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL",
+      "BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL"
+    ],
+    "model_result_shape": "All eight ESCALATE siblings received ESCALATE from all five models, with zero parse failures and zero disagreement.",
+    "diagnosis": "The ESCALATE packets are now clean controls but weak scout candidates. The defect is no longer something models must infer; it is repeatedly named and classified in repaired fields."
+  },
+  "minimax_behavior_after_repair": {
+    "allow_side": "MiniMax switched from pre-repair repeated ALLOW over-escalation to correct ALLOW on every ALLOW sibling.",
+    "escalate_side": "MiniMax also correctly escalated every ESCALATE sibling, usually citing the explicit newly supplied/change/invoice/post-change source and unused pre-change phone.",
+    "diagnostic_use": "MiniMax improvement suggests the ALLOW closure repair worked for at least one formerly failing model; remaining ALLOW issue is OpenAI-specific or strongly OpenAI-weighted."
+  },
+  "recommended_repair_principles": [
+    "For ALLOW, make source evidence positive and local: callback number_source should name only the pre-change vendor-master snapshot/record; avoid embedding negated forbidden-source lists in that same field.",
+    "For ALLOW, keep scary triggers but reduce repeated risk vocabulary in closure notes; prefer timestamped completion facts over phrases like trigger conditions are not unresolved blockers.",
+    "For ALLOW, separate submitted_contact_phone from callback provenance so OpenAI does not bind the forbidden submitted phone to the actual callback source.",
+    "For ESCALATE, remove answer-like fields such as provenance_basis=noncompliant_callback_source and single_material_blocker_note.",
+    "For ESCALATE, make the source defect inferable from raw records and chronology rather than narrated by source_defect_note/downstream_controls_boundary_note.",
+    "Do not add second blockers; keep the sibling delta as callback-source provenance only."
+  ],
+  "family_level_diagnosis": [
+    {
+      "family_id": "BAL100-BEC-PAIR-003",
+      "allow_packet_id": "BAL100-BEC-PAIR-003-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-003-CALLBACK-PROVENANCE-FAIL",
+      "allow_openai_verdict": "ESCALATE",
+      "allow_openai_reason_summary": "The callback source used for verification is noncompliant as it is not from the pre-change vendor-master data. This remains a material blocker despite other controls being completed.",
+      "allow_remaining_issue": "OpenAI ignored or inverted the compliant pre-change vendor-master source. Likely trigger is ALLOW-side negative contrast text that repeats forbidden-source tokens inside number_source/source_exclusion_note, plus residual risk terms around elevated scrutiny, temporary hold, release review, and queue routing.",
+      "allow_exact_fields_to_review": {
+        "number_source": "vendor_master_snapshot: VM-SNAP-V-ACIS-7710-20241106 / pre_change_vendor_master_record; not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record",
+        "source_exclusion_note": "Callback target +1-316-555-0142 came from pre-change vendor-master snapshot VM-SNAP-V-ACIS-7710-20241106 and matches phone_on_file +1-316-555-0142; it was not taken from portal_change_record PORTAL-CHG-4Q9M2, submitted_contact_phone +1-316-555-0199, invoice text, or a new contact record.",
+        "control_closure_note": "Callback verification, two-person signoff AP-SIGNOFF-ACIS-4410, elevated scrutiny completion ESR-ACIS-2024-11, temporary hold release VM-HOLD-ACIS-2024-11, and cross-reference record IPR-ACIS-3304 were complete before release review; no unresolved discrepancy remains.",
+        "elevated_scrutiny_control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure.",
+        "hold_release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review.",
+        "xref_control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
+      },
+      "escalate_model_results": {
+        "openai": "ESCALATE",
+        "anthropic": "ESCALATE",
+        "gemini": "ESCALATE",
+        "xai": "ESCALATE",
+        "minimax": "ESCALATE"
+      },
+      "escalate_reason_snippets": {
+        "openai": "The callback source used for verification is noncompliant, as it was derived from a newly submitted contact record rather than the pre-change vendor-master data. This remains a material blocker despite other controls being complete.",
+        "anthropic": "A single material blocker remains unresolved: noncompliant callback-source provenance. Per AP-POL-2024-017, callback verification must use pre-change vendor-master source data. The callback in CALLSYS-883104 was dialed to +1-316-555-0199, sourced from the port",
+        "gemini": "The callback verification used a phone number supplied in the portal change record, which is explicitly noncompliant per the AP Vendor Master Payment Profile Change Control policy. While other controls like AP signoff, elevated scrutiny, and invoice cross-refe",
+        "xai": "Noncompliant callback-source provenance is the explicit remaining material blocker per policy AP-POL-2024-017 and the ap_callback_record (CALLSYS-883104). Callback used portal-supplied phone (+1-316-555-0199) instead of pre-change vendor-master source (+1-316-",
+        "minimax": "The evidence indicates a material blocker due to noncompliant callback-source provenance. The callback was made to a newly supplied contact phone number (+1-316-555-0199) from the portal change record, rather than using the pre-existing vendor-master phone num"
+      },
+      "escalate_too_easy_reason": "All five models escalated because the repaired ESCALATE callback record explicitly names the noncompliant source, states the pre-change phone existed but was not used, and includes downstream_controls_boundary_note plus single_material_blocker_note. This converts the sibling into an answer-labeled control rather than a collapse candidate.",
+      "escalate_exact_fields_to_review": {
+        "number_source": "portal_change_record: PORTAL-CHG-4Q9M2 submitted_contact_phone; noncompliant submitted contact source",
+        "provenance_basis": "noncompliant_callback_source",
+        "unused_pre_change_vendor_master_source": {
+          "not_used_for_callback": true,
+          "phone_on_file": "+1-316-555-0142",
+          "snapshot_id": "VM-SNAP-V-ACIS-7710-20241106"
+        },
+        "source_defect_note": "Callback dialed +1-316-555-0199 from portal_change_record: PORTAL-CHG-4Q9M2 submitted_contact_phone; noncompliant submitted contact source; pre-change vendor-master phone +1-316-555-0142 in VM-SNAP-V-ACIS-7710-20241106 existed but was not used.",
+        "downstream_controls_boundary_note": "Two-person signoff AP-SIGNOFF-ACIS-4410, elevated scrutiny completion ESR-ACIS-2024-11, temporary hold release VM-HOLD-ACIS-2024-11, and cross-reference checks IPR-ACIS-3304 are documented, but downstream controls do not cure noncompliant callback-source provenance.",
+        "single_material_blocker_note": "Only callback-source provenance remains as the material blocker; purchase order, AP signoff, hold release, remittance account, and cross-reference controls otherwise remain complete."
+      },
+      "recommended_allow_adjustment": "Use positive provenance assertions first: number_source should be the vendor_master_snapshot/pre-change record only, with matching dialed_number and phone_on_file. Move or reduce negated forbidden-source lists; avoid putting portal_change_record/submitted_contact_phone/invoice/new contact tokens in the same field that declares the compliant source.",
+      "recommended_escalate_adjustment": "Restore useful collapse by keeping the portal/invoice source visible but removing explicit labels such as noncompliant submitted contact source and single material blocker; make models infer the defect from records.",
+      "risk_of_second_blocker": "Do not introduce missing PO, missing signoff, sanctions, expired delegation, bank mismatch, invoice anomaly, unresolved hold, incomplete xref, or any second blocker. Keep callback-source provenance as the only material delta."
+    },
+    {
+      "family_id": "BAL100-BEC-PAIR-004",
+      "allow_packet_id": "BAL100-BEC-PAIR-004-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-004-CALLBACK-PROVENANCE-FAIL",
+      "allow_openai_verdict": "ESCALATE",
+      "allow_openai_reason_summary": "The callback source used for verification is noncompliant as it is derived from a newly supplied contact record rather than the pre-change vendor-master data, which is a material blocker under the policy requirements.",
+      "allow_remaining_issue": "OpenAI ignored or inverted the compliant pre-change vendor-master source. Likely trigger is ALLOW-side negative contrast text that repeats forbidden-source tokens inside number_source/source_exclusion_note, plus residual risk terms around elevated scrutiny, temporary hold, release review, and queue routing.",
+      "allow_exact_fields_to_review": {
+        "number_source": "vendor_master_snapshot: VM-SNAP-V-NSVR-5028-20241108 / pre_change_vendor_master_record; not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record",
+        "source_exclusion_note": "Callback target +1-414-555-0163 came from pre-change vendor-master snapshot VM-SNAP-V-NSVR-5028-20241108 and matches phone_on_file +1-414-555-0163; it was not taken from portal_change_record PORTAL-CHG-8K1D6, submitted_contact_phone +1-414-555-0188, invoice text, or a new contact record.",
+        "control_closure_note": "Callback verification, two-person signoff AP-SIGNOFF-NSVR-5541, elevated scrutiny completion ESR-NSVR-2024-11, temporary hold release VM-HOLD-NSVR-2024-11, and cross-reference record IPR-NSVR-4415 were complete before release review; no unresolved discrepancy remains.",
+        "elevated_scrutiny_control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure.",
+        "hold_release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review.",
+        "xref_control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
+      },
+      "escalate_model_results": {
+        "openai": "ESCALATE",
+        "anthropic": "ESCALATE",
+        "gemini": "ESCALATE",
+        "xai": "ESCALATE",
+        "minimax": "ESCALATE"
+      },
+      "escalate_reason_snippets": {
+        "openai": "The callback source used for verification is noncompliant as it was derived from the change request rather than the pre-change vendor-master data. This remains a material blocker despite other controls being complete.",
+        "anthropic": "A single material blocker remains unresolved: noncompliant callback-source provenance. Per AP-POL-2024-017, callback verification must use pre-existing vendor-master source data. The callback in CALLSYS-883205 was dialed to +1-414-555-0188, which was sourced f",
+        "gemini": "The callback provenance is noncompliant because the dialed number originated from the change request, not the pre-change vendor-master record. This is a material blocker according to the AP Vendor Master Payment Change Policy.",
+        "xai": "Material blocker remains: callback verification used noncompliant source (change-request supplied phone +1-414-555-0188 from PORTAL-CHG-8K1D6) instead of pre-change vendor-master source (+1-414-555-0163). Policy AP-POL-2024-017 and all supporting records (CALL",
+        "minimax": "The callback source used for verification was not compliant with the policy. The policy explicitly states that the callback contact source must be pre-existing vendor-master data, not a number supplied in the change request, invoice, or newly submitted contact"
+      },
+      "escalate_too_easy_reason": "All five models escalated because the repaired ESCALATE callback record explicitly names the noncompliant source, states the pre-change phone existed but was not used, and includes downstream_controls_boundary_note plus single_material_blocker_note. This converts the sibling into an answer-labeled control rather than a collapse candidate.",
+      "escalate_exact_fields_to_review": {
+        "number_source": "change_request: PORTAL-CHG-8K1D6 submitted_billing_contact_phone; noncompliant submitted contact source",
+        "provenance_basis": "noncompliant_callback_source",
+        "unused_pre_change_vendor_master_source": {
+          "not_used_for_callback": true,
+          "phone_on_file": "+1-414-555-0163",
+          "snapshot_id": "VM-SNAP-V-NSVR-5028-20241108"
+        },
+        "source_defect_note": "Callback dialed +1-414-555-0188 from change_request: PORTAL-CHG-8K1D6 submitted_billing_contact_phone; noncompliant submitted contact source; pre-change vendor-master phone +1-414-555-0163 in VM-SNAP-V-NSVR-5028-20241108 existed but was not used.",
+        "downstream_controls_boundary_note": "Two-person signoff AP-SIGNOFF-NSVR-5541, elevated scrutiny completion ESR-NSVR-2024-11, temporary hold release VM-HOLD-NSVR-2024-11, and cross-reference checks IPR-NSVR-4415 are documented, but downstream controls do not cure noncompliant callback-source provenance.",
+        "single_material_blocker_note": "Only callback-source provenance remains as the material blocker; purchase order, AP signoff, hold release, remittance account, and cross-reference controls otherwise remain complete."
+      },
+      "recommended_allow_adjustment": "Use positive provenance assertions first: number_source should be the vendor_master_snapshot/pre-change record only, with matching dialed_number and phone_on_file. Move or reduce negated forbidden-source lists; avoid putting portal_change_record/submitted_contact_phone/invoice/new contact tokens in the same field that declares the compliant source.",
+      "recommended_escalate_adjustment": "Keep the bad source family, but remove explicit noncompliant labels and the single_material_blocker_note; let the contrast between callback dialed number and pre-change snapshot carry the signal.",
+      "risk_of_second_blocker": "Do not introduce missing PO, missing signoff, sanctions, expired delegation, bank mismatch, invoice anomaly, unresolved hold, incomplete xref, or any second blocker. Keep callback-source provenance as the only material delta."
+    },
+    {
+      "family_id": "BAL100-BEC-PAIR-005",
+      "allow_packet_id": "BAL100-BEC-PAIR-005-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-005-CALLBACK-PROVENANCE-FAIL",
+      "allow_openai_verdict": "ESCALATE",
+      "allow_openai_reason_summary": "The callback source used for verification is compliant with pre-change vendor-master data, but the policy requires that the callback contact source must not be taken from the change request, invoice, or newly submitted contact record. Since the callback source is compliant but the evidence indicates a noncompliant callback source provenance remains a material blocker, the case must be escalated.",
+      "allow_remaining_issue": "OpenAI ignored or inverted the compliant pre-change vendor-master source. Likely trigger is ALLOW-side negative contrast text that repeats forbidden-source tokens inside number_source/source_exclusion_note, plus residual risk terms around elevated scrutiny, temporary hold, release review, and queue routing.",
+      "allow_exact_fields_to_review": {
+        "number_source": "vendor_master_snapshot: VM-SNAP-V-PHC-1194-20241112 / pre_change_vendor_master_record; not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record",
+        "source_exclusion_note": "Callback target +1-503-555-0117 came from pre-change vendor-master snapshot VM-SNAP-V-PHC-1194-20241112 and matches phone_on_file +1-503-555-0117; it was not taken from portal_change_record PORTAL-CHG-2M7R4, submitted_contact_phone +1-503-555-0174, invoice text, or a new contact record.",
+        "control_closure_note": "Callback verification, two-person signoff AP-SIGNOFF-PHC-6022, elevated scrutiny completion ESR-PHC-2024-11, temporary hold release VM-HOLD-PHC-2024-11, and cross-reference record IPR-PHC-5526 were complete before release review; no unresolved discrepancy remains.",
+        "elevated_scrutiny_control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure.",
+        "hold_release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review.",
+        "xref_control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
+      },
+      "escalate_model_results": {
+        "openai": "ESCALATE",
+        "anthropic": "ESCALATE",
+        "gemini": "ESCALATE",
+        "xai": "ESCALATE",
+        "minimax": "ESCALATE"
+      },
+      "escalate_reason_snippets": {
+        "openai": "The callback source used for verification is noncompliant as it was supplied in the invoice rather than being a pre-existing vendor-master source. This remains a material blocker despite other controls being complete.",
+        "anthropic": "A single material blocker remains unresolved: noncompliant callback-source provenance. Per AP-POL-2024-017, callback verification must use pre-change vendor-master source data. The callback in CALLSYS-883306 was dialed to +1-503-555-0174, sourced from the invo",
+        "gemini": "The callback provenance is noncompliant because the phone number dialed (+1-503-555-0174) was sourced from the invoice, not from the pre-change vendor-master record (+1-503-555-0117). This violates the policy that callback contact source must be pre-existing v",
+        "xai": "Callback verification used invoice-supplied phone (+1-503-555-0174) instead of pre-change vendor-master source (+1-503-555-0117); policy explicitly flags this provenance as a material unresolved blocker even after all other controls close.",
+        "minimax": "The evidence indicates a material blocker due to noncompliant callback-source provenance. The callback was made to a phone number supplied in the invoice, which is not compliant with the policy requiring the use of pre-existing vendor-master data for callback "
+      },
+      "escalate_too_easy_reason": "All five models escalated because the repaired ESCALATE callback record explicitly names the noncompliant source, states the pre-change phone existed but was not used, and includes downstream_controls_boundary_note plus single_material_blocker_note. This converts the sibling into an answer-labeled control rather than a collapse candidate.",
+      "escalate_exact_fields_to_review": {
+        "number_source": "invoice: PHC-2024-3312 remittance_contact_phone; noncompliant invoice supplied phone source",
+        "provenance_basis": "noncompliant_callback_source",
+        "unused_pre_change_vendor_master_source": {
+          "not_used_for_callback": true,
+          "phone_on_file": "+1-503-555-0117",
+          "snapshot_id": "VM-SNAP-V-PHC-1194-20241112"
+        },
+        "source_defect_note": "Callback dialed +1-503-555-0174 from invoice: PHC-2024-3312 remittance_contact_phone; noncompliant invoice supplied phone source; pre-change vendor-master phone +1-503-555-0117 in VM-SNAP-V-PHC-1194-20241112 existed but was not used.",
+        "downstream_controls_boundary_note": "Two-person signoff AP-SIGNOFF-PHC-6022, elevated scrutiny completion ESR-PHC-2024-11, temporary hold release VM-HOLD-PHC-2024-11, and cross-reference checks IPR-PHC-5526 are documented, but downstream controls do not cure noncompliant callback-source provenance.",
+        "single_material_blocker_note": "Only callback-source provenance remains as the material blocker; purchase order, AP signoff, hold release, remittance account, and cross-reference controls otherwise remain complete."
+      },
+      "recommended_allow_adjustment": "Use positive provenance assertions first: number_source should be the vendor_master_snapshot/pre-change record only, with matching dialed_number and phone_on_file. Move or reduce negated forbidden-source lists; avoid putting portal_change_record/submitted_contact_phone/invoice/new contact tokens in the same field that declares the compliant source.",
+      "recommended_escalate_adjustment": "Restore useful collapse by keeping the portal/invoice source visible but removing explicit labels such as noncompliant submitted contact source and single material blocker; make models infer the defect from records.",
+      "risk_of_second_blocker": "Do not introduce missing PO, missing signoff, sanctions, expired delegation, bank mismatch, invoice anomaly, unresolved hold, incomplete xref, or any second blocker. Keep callback-source provenance as the only material delta."
+    },
+    {
+      "family_id": "BAL100-BEC-PAIR-006",
+      "allow_packet_id": "BAL100-BEC-PAIR-006-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-006-CALLBACK-PROVENANCE-FAIL",
+      "allow_openai_verdict": "ESCALATE",
+      "allow_openai_reason_summary": "The callback source used for verification is noncompliant as it is not from the pre-change vendor-master data. This remains a material blocker despite other controls being satisfied.",
+      "allow_remaining_issue": "OpenAI ignored or inverted the compliant pre-change vendor-master source. Likely trigger is ALLOW-side negative contrast text that repeats forbidden-source tokens inside number_source/source_exclusion_note, plus residual risk terms around elevated scrutiny, temporary hold, release review, and queue routing.",
+      "allow_exact_fields_to_review": {
+        "number_source": "vendor_master_snapshot: VM-SNAP-V-RMCW-4403-20241115 / pre_change_vendor_master_record; not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record",
+        "source_exclusion_note": "Callback target +1-505-555-0149 came from pre-change vendor-master snapshot VM-SNAP-V-RMCW-4403-20241115 and matches phone_on_file +1-505-555-0149; it was not taken from portal_change_record PORTAL-CHG-6N5T9, submitted_contact_phone +1-505-555-0191, invoice text, or a new contact record.",
+        "control_closure_note": "Callback verification, two-person signoff AP-SIGNOFF-RMCW-7133, elevated scrutiny completion ESR-RMCW-2024-11, temporary hold release VM-HOLD-RMCW-2024-11, and cross-reference record IPR-RMCW-6637 were complete before release review; no unresolved discrepancy remains.",
+        "elevated_scrutiny_control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure.",
+        "hold_release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review.",
+        "xref_control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
+      },
+      "escalate_model_results": {
+        "openai": "ESCALATE",
+        "anthropic": "ESCALATE",
+        "gemini": "ESCALATE",
+        "xai": "ESCALATE",
+        "minimax": "ESCALATE"
+      },
+      "escalate_reason_snippets": {
+        "openai": "The callback source used for verification is noncompliant, as it was derived from a newly submitted contact record rather than the pre-change vendor-master data. This remains a material blocker despite other controls being complete.",
+        "anthropic": "A single material blocker remains unresolved: noncompliant callback-source provenance. Per AP-POL-2024-017, callback verification for invoices following vendor-master payment changes must use pre-existing vendor-master source data. The callback record (CALLSYS",
+        "gemini": "The callback provenance is noncompliant because the phone number used for verification was sourced from the portal change record's submitted contact information, rather than the pre-change vendor-master record. This is a material blocker according to the AP Ve",
+        "xai": "Callback verification used non-compliant source (portal_change_record submitted_contact_phone +1-505-555-0191) rather than pre-change vendor-master phone (+1-505-555-0149). Policy explicitly flags this provenance defect as a material blocker that is not cured ",
+        "minimax": "The callback contact source used for verification was not from the pre-existing vendor-master data. Instead, it was a number supplied in the change request, which is noncompliant with the policy AP-POL-2024-017. This is identified as a material blocker that pr"
+      },
+      "escalate_too_easy_reason": "All five models escalated because the repaired ESCALATE callback record explicitly names the noncompliant source, states the pre-change phone existed but was not used, and includes downstream_controls_boundary_note plus single_material_blocker_note. This converts the sibling into an answer-labeled control rather than a collapse candidate.",
+      "escalate_exact_fields_to_review": {
+        "number_source": "portal_change_record: PORTAL-CHG-6N5T9 submitted_contact_phone; noncompliant submitted contact source",
+        "provenance_basis": "noncompliant_callback_source",
+        "unused_pre_change_vendor_master_source": {
+          "not_used_for_callback": true,
+          "phone_on_file": "+1-505-555-0149",
+          "snapshot_id": "VM-SNAP-V-RMCW-4403-20241115"
+        },
+        "source_defect_note": "Callback dialed +1-505-555-0191 from portal_change_record: PORTAL-CHG-6N5T9 submitted_contact_phone; noncompliant submitted contact source; pre-change vendor-master phone +1-505-555-0149 in VM-SNAP-V-RMCW-4403-20241115 existed but was not used.",
+        "downstream_controls_boundary_note": "Two-person signoff AP-SIGNOFF-RMCW-7133, elevated scrutiny completion ESR-RMCW-2024-11, temporary hold release VM-HOLD-RMCW-2024-11, and cross-reference checks IPR-RMCW-6637 are documented, but downstream controls do not cure noncompliant callback-source provenance.",
+        "single_material_blocker_note": "Only callback-source provenance remains as the material blocker; purchase order, AP signoff, hold release, remittance account, and cross-reference controls otherwise remain complete."
+      },
+      "recommended_allow_adjustment": "Use positive provenance assertions first: number_source should be the vendor_master_snapshot/pre-change record only, with matching dialed_number and phone_on_file. Move or reduce negated forbidden-source lists; avoid putting portal_change_record/submitted_contact_phone/invoice/new contact tokens in the same field that declares the compliant source.",
+      "recommended_escalate_adjustment": "Keep the bad source family, but remove explicit noncompliant labels and the single_material_blocker_note; let the contrast between callback dialed number and pre-change snapshot carry the signal.",
+      "risk_of_second_blocker": "Do not introduce missing PO, missing signoff, sanctions, expired delegation, bank mismatch, invoice anomaly, unresolved hold, incomplete xref, or any second blocker. Keep callback-source provenance as the only material delta."
+    },
+    {
+      "family_id": "BAL100-BEC-PAIR-007",
+      "allow_packet_id": "BAL100-BEC-PAIR-007-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-007-CALLBACK-PROVENANCE-FAIL",
+      "allow_openai_verdict": "ESCALATE",
+      "allow_openai_reason_summary": "The callback source used for verification is noncompliant as it does not originate from pre-change vendor-master data. This remains a material blocker despite other controls being satisfied.",
+      "allow_remaining_issue": "OpenAI ignored or inverted the compliant pre-change vendor-master source. Likely trigger is ALLOW-side negative contrast text that repeats forbidden-source tokens inside number_source/source_exclusion_note, plus residual risk terms around elevated scrutiny, temporary hold, release review, and queue routing.",
+      "allow_exact_fields_to_review": {
+        "number_source": "vendor_master_snapshot: VM-SNAP-V-SRFS-2875-20241118 / pre_change_vendor_master_record; not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record",
+        "source_exclusion_note": "Callback target +1-432-555-0134 came from pre-change vendor-master snapshot VM-SNAP-V-SRFS-2875-20241118 and matches phone_on_file +1-432-555-0134; it was not taken from portal_change_record PORTAL-CHG-3P2V8, submitted_contact_phone +1-432-555-0182, invoice text, or a new contact record.",
+        "control_closure_note": "Callback verification, two-person signoff AP-SIGNOFF-SRFS-8244, elevated scrutiny completion ESR-SRFS-2024-11, temporary hold release VM-HOLD-SRFS-2024-11, and cross-reference record IPR-SRFS-7748 were complete before release review; no unresolved discrepancy remains.",
+        "elevated_scrutiny_control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure.",
+        "hold_release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review.",
+        "xref_control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
+      },
+      "escalate_model_results": {
+        "openai": "ESCALATE",
+        "anthropic": "ESCALATE",
+        "gemini": "ESCALATE",
+        "xai": "ESCALATE",
+        "minimax": "ESCALATE"
+      },
+      "escalate_reason_snippets": {
+        "openai": "The callback source used for verification is noncompliant as it is a newly supplied contact from the change request, rather than a pre-existing vendor-master source. This remains a material blocker despite other controls being complete.",
+        "anthropic": "A single material blocker remains unresolved: noncompliant callback-source provenance. Per AP-POL-2024-017, callback verification following vendor-master payment changes must use pre-change vendor-master source data. The callback in CALLSYS-883508 was dialed t",
+        "gemini": "The callback provenance is noncompliant because the dialed number was sourced from a newly supplied contact record and the vendor-master pre-change number was not used. This remains a material blocker per the AP policy.",
+        "xai": "Policy AP-POL-2024-017 explicitly requires callback verification using pre-change vendor-master source data. The supplied ap_callback_record (CALLSYS-883508) and source_defect_note confirm the callback used a post-change newly supplied phone (+1-432-555-0182 f",
+        "minimax": "The callback verification process used a newly supplied contact phone number (+1-432-555-0182) from the post-change vendor contact record, which is noncompliant with the policy requiring the use of pre-change vendor-master source data. The policy explicitly st"
+      },
+      "escalate_too_easy_reason": "All five models escalated because the repaired ESCALATE callback record explicitly names the noncompliant source, states the pre-change phone existed but was not used, and includes downstream_controls_boundary_note plus single_material_blocker_note. This converts the sibling into an answer-labeled control rather than a collapse candidate.",
+      "escalate_exact_fields_to_review": {
+        "number_source": "vendor_contact_record: VCR-V-SRFS-2875-CONTACT-2024 post_change newly supplied contact phone from PORTAL-CHG-3P2V8",
+        "provenance_basis": "noncompliant_callback_source",
+        "unused_pre_change_vendor_master_source": {
+          "not_used_for_callback": true,
+          "phone_on_file": "+1-432-555-0134",
+          "snapshot_id": "VM-SNAP-V-SRFS-2875-20241118"
+        },
+        "source_defect_note": "Callback dialed +1-432-555-0182 from vendor_contact_record: VCR-V-SRFS-2875-CONTACT-2024 post_change newly supplied contact phone from PORTAL-CHG-3P2V8; pre-change vendor-master phone +1-432-555-0134 in VM-SNAP-V-SRFS-2875-20241118 existed but was not used.",
+        "downstream_controls_boundary_note": "Two-person signoff AP-SIGNOFF-SRFS-8244, elevated scrutiny completion ESR-SRFS-2024-11, temporary hold release VM-HOLD-SRFS-2024-11, and cross-reference checks IPR-SRFS-7748 are documented, but downstream controls do not cure noncompliant callback-source provenance.",
+        "single_material_blocker_note": "Only callback-source provenance remains as the material blocker; purchase order, AP signoff, hold release, remittance account, and cross-reference controls otherwise remain complete."
+      },
+      "recommended_allow_adjustment": "Use positive provenance assertions first: number_source should be the vendor_master_snapshot/pre-change record only, with matching dialed_number and phone_on_file. Move or reduce negated forbidden-source lists; avoid putting portal_change_record/submitted_contact_phone/invoice/new contact tokens in the same field that declares the compliant source.",
+      "recommended_escalate_adjustment": "Current post-change vendor_contact_record wording is still too explicit because it says post_change newly supplied contact and carries source_defect_note/single_material_blocker_note. Keep the post-change contact source but remove verdict-like labels and make provenance inference less narrated.",
+      "risk_of_second_blocker": "Do not introduce missing PO, missing signoff, sanctions, expired delegation, bank mismatch, invoice anomaly, unresolved hold, incomplete xref, or any second blocker. Keep callback-source provenance as the only material delta."
+    },
+    {
+      "family_id": "BAL100-BEC-PAIR-008",
+      "allow_packet_id": "BAL100-BEC-PAIR-008-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-008-CALLBACK-PROVENANCE-FAIL",
+      "allow_openai_verdict": "ESCALATE",
+      "allow_openai_reason_summary": "The callback source used for verification is compliant with pre-change vendor-master data, but there is a material blocker due to the noncompliance of the callback source provenance as it does not meet the requirements outlined in the policy documents. Specifically, the callback source must be from pre-existing vendor-master data and not from a newly supplied contact record or invoice.",
+      "allow_remaining_issue": "OpenAI ignored or inverted the compliant pre-change vendor-master source. Likely trigger is ALLOW-side negative contrast text that repeats forbidden-source tokens inside number_source/source_exclusion_note, plus residual risk terms around elevated scrutiny, temporary hold, release review, and queue routing.",
+      "allow_exact_fields_to_review": {
+        "number_source": "vendor_master_snapshot: VM-SNAP-V-CBMP-6642-20241120 / pre_change_vendor_master_record; not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record",
+        "source_exclusion_note": "Callback target +1-208-555-0168 came from pre-change vendor-master snapshot VM-SNAP-V-CBMP-6642-20241120 and matches phone_on_file +1-208-555-0168; it was not taken from portal_change_record PORTAL-CHG-5W8C1, submitted_contact_phone +1-208-555-0194, invoice text, or a new contact record.",
+        "control_closure_note": "Callback verification, two-person signoff AP-SIGNOFF-CBMP-9355, elevated scrutiny completion ESR-CBMP-2024-11, temporary hold release VM-HOLD-CBMP-2024-11, and cross-reference record IPR-CBMP-8859 were complete before release review; no unresolved discrepancy remains.",
+        "elevated_scrutiny_control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure.",
+        "hold_release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review.",
+        "xref_control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
+      },
+      "escalate_model_results": {
+        "openai": "ESCALATE",
+        "anthropic": "ESCALATE",
+        "gemini": "ESCALATE",
+        "xai": "ESCALATE",
+        "minimax": "ESCALATE"
+      },
+      "escalate_reason_snippets": {
+        "openai": "The callback source used for verification is noncompliant as it is a newly supplied contact source rather than a pre-change vendor-master callback source. This remains a material blocker despite other controls being complete.",
+        "anthropic": "A single material blocker remains unresolved: noncompliant callback-source provenance. Per AP-POL-2024-017, callback verification for invoices following vendor-master payment changes must use pre-existing vendor-master source data. The callback in CALLSYS-8836",
+        "gemini": "The callback provenance is noncompliant because the dialed number originated from the portal change record, which is a newly supplied contact source, rather than using the pre-change vendor-master phone number. This violates the policy requiring the use of pre",
+        "xai": "Policy AP-POL-2024-017 requires callback verification using pre-change vendor-master source data. The supplied ap_callback_record (CALLSYS-883609) explicitly documents use of a noncompliant newly-supplied source (portal_change_record PORTAL-CHG-5W8C1) instead ",
+        "minimax": "The callback verification process used a newly supplied contact number (+1-208-555-0194) from the portal change record, which is noncompliant with the policy requiring the use of pre-existing vendor-master data. The pre-change vendor-master phone number (+1-20"
+      },
+      "escalate_too_easy_reason": "All five models escalated because the repaired ESCALATE callback record explicitly names the noncompliant source, states the pre-change phone existed but was not used, and includes downstream_controls_boundary_note plus single_material_blocker_note. This converts the sibling into an answer-labeled control rather than a collapse candidate.",
+      "escalate_exact_fields_to_review": {
+        "number_source": "portal_change_record: PORTAL-CHG-5W8C1 regional_billing_phone; noncompliant newly supplied contact source",
+        "provenance_basis": "noncompliant_callback_source",
+        "unused_pre_change_vendor_master_source": {
+          "not_used_for_callback": true,
+          "phone_on_file": "+1-208-555-0168",
+          "snapshot_id": "VM-SNAP-V-CBMP-6642-20241120"
+        },
+        "source_defect_note": "Callback dialed +1-208-555-0194 from portal_change_record: PORTAL-CHG-5W8C1 regional_billing_phone; noncompliant newly supplied contact source; pre-change vendor-master phone +1-208-555-0168 in VM-SNAP-V-CBMP-6642-20241120 existed but was not used.",
+        "downstream_controls_boundary_note": "Two-person signoff AP-SIGNOFF-CBMP-9355, elevated scrutiny completion ESR-CBMP-2024-11, temporary hold release VM-HOLD-CBMP-2024-11, and cross-reference checks IPR-CBMP-8859 are documented, but downstream controls do not cure noncompliant callback-source provenance.",
+        "single_material_blocker_note": "Only callback-source provenance remains as the material blocker; purchase order, AP signoff, hold release, remittance account, and cross-reference controls otherwise remain complete."
+      },
+      "recommended_allow_adjustment": "Use positive provenance assertions first: number_source should be the vendor_master_snapshot/pre-change record only, with matching dialed_number and phone_on_file. Move or reduce negated forbidden-source lists; avoid putting portal_change_record/submitted_contact_phone/invoice/new contact tokens in the same field that declares the compliant source.",
+      "recommended_escalate_adjustment": "Keep the bad source family, but remove explicit noncompliant labels and the single_material_blocker_note; let the contrast between callback dialed number and pre-change snapshot carry the signal.",
+      "risk_of_second_blocker": "Do not introduce missing PO, missing signoff, sanctions, expired delegation, bank mismatch, invoice anomaly, unresolved hold, incomplete xref, or any second blocker. Keep callback-source provenance as the only material delta."
+    },
+    {
+      "family_id": "BAL100-BEC-PAIR-009",
+      "allow_packet_id": "BAL100-BEC-PAIR-009-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL",
+      "allow_openai_verdict": "ESCALATE",
+      "allow_openai_reason_summary": "The callback source used for verification is compliant with pre-change vendor-master data, but there is a material blocker due to the noncompliance of the callback source provenance as it does not meet the requirements outlined in the policy documents.",
+      "allow_remaining_issue": "OpenAI ignored or inverted the compliant pre-change vendor-master source. Likely trigger is ALLOW-side negative contrast text that repeats forbidden-source tokens inside number_source/source_exclusion_note, plus residual risk terms around elevated scrutiny, temporary hold, release review, and queue routing.",
+      "allow_exact_fields_to_review": {
+        "number_source": "vendor_master_snapshot: VM-SNAP-V-JHE-9031-20241122 / pre_change_vendor_master_record; not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record",
+        "source_exclusion_note": "Callback target +1-406-555-0129 came from pre-change vendor-master snapshot VM-SNAP-V-JHE-9031-20241122 and matches phone_on_file +1-406-555-0129; it was not taken from portal_change_record PORTAL-CHG-9F4B7, submitted_contact_phone +1-406-555-0187, invoice text, or a new contact record.",
+        "control_closure_note": "Callback verification, two-person signoff AP-SIGNOFF-JHE-1466, elevated scrutiny completion ESR-JHE-2024-11, temporary hold release VM-HOLD-JHE-2024-11, and cross-reference record IPR-JHE-9960 were complete before release review; no unresolved discrepancy remains.",
+        "elevated_scrutiny_control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure.",
+        "hold_release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review.",
+        "xref_control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
+      },
+      "escalate_model_results": {
+        "openai": "ESCALATE",
+        "anthropic": "ESCALATE",
+        "gemini": "ESCALATE",
+        "xai": "ESCALATE",
+        "minimax": "ESCALATE"
+      },
+      "escalate_reason_snippets": {
+        "openai": "The callback source provenance is noncompliant, as it uses a post-change vendor contact source instead of the required pre-change vendor-master callback source. This remains a material blocker despite other controls being complete.",
+        "anthropic": "A single material blocker remains unresolved: noncompliant callback-source provenance. Per AP-POL-2024-017, callback verification must use pre-change vendor-master source data. The callback (CALLSYS-883710) was dialed to +1-406-555-0187, sourced from the post-",
+        "gemini": "The callback verification used a phone number from a post-change vendor contact record, which is noncompliant. The pre-change vendor-master phone number was available but not used. All other controls, including AP signoff, elevated scrutiny, and cross-referenc",
+        "xai": "Noncompliant callback-source provenance is explicitly documented as the single remaining material blocker per AP-POL-2024-017 (callback used post-change submitted phone from PORTAL-CHG-9F4B7 rather than pre-change vendor-master phone). All other controls (sign",
+        "minimax": "The callback was made to a newly supplied contact number (+1-406-555-0187) from the post-change vendor contact record, which is noncompliant with the policy requiring the use of pre-existing vendor-master data. The pre-change vendor-master phone number (+1-406"
+      },
+      "escalate_too_easy_reason": "All five models escalated because the repaired ESCALATE callback record explicitly names the noncompliant source, states the pre-change phone existed but was not used, and includes downstream_controls_boundary_note plus single_material_blocker_note. This converts the sibling into an answer-labeled control rather than a collapse candidate.",
+      "escalate_exact_fields_to_review": {
+        "number_source": "post_change_vendor_contact_record: VCR-V-JHE-9031-CONTACT-2024 submitted_contact_phone from PORTAL-CHG-9F4B7; noncompliant post_change submitted contact source",
+        "provenance_basis": "noncompliant_callback_source",
+        "unused_pre_change_vendor_master_source": {
+          "not_used_for_callback": true,
+          "phone_on_file": "+1-406-555-0129",
+          "snapshot_id": "VM-SNAP-V-JHE-9031-20241122"
+        },
+        "source_defect_note": "Callback dialed +1-406-555-0187 from post_change_vendor_contact_record: VCR-V-JHE-9031-CONTACT-2024 submitted_contact_phone from PORTAL-CHG-9F4B7; noncompliant post_change submitted contact source; pre-change vendor-master phone +1-406-555-0129 in VM-SNAP-V-JHE-9031-20241122 existed but was not used.",
+        "downstream_controls_boundary_note": "Two-person signoff AP-SIGNOFF-JHE-1466, elevated scrutiny completion ESR-JHE-2024-11, temporary hold release VM-HOLD-JHE-2024-11, and cross-reference checks IPR-JHE-9960 are documented, but downstream controls do not cure noncompliant callback-source provenance.",
+        "single_material_blocker_note": "Only callback-source provenance remains as the material blocker; purchase order, AP signoff, hold release, remittance account, and cross-reference controls otherwise remain complete."
+      },
+      "recommended_allow_adjustment": "Use positive provenance assertions first: number_source should be the vendor_master_snapshot/pre-change record only, with matching dialed_number and phone_on_file. Move or reduce negated forbidden-source lists; avoid putting portal_change_record/submitted_contact_phone/invoice/new contact tokens in the same field that declares the compliant source.",
+      "recommended_escalate_adjustment": "Keep the post-change contact source idea, but remove the field-level declaration noncompliant post_change submitted contact source plus source_defect_note/single_material_blocker_note so the defect is inferred from chronology and source records.",
+      "risk_of_second_blocker": "Do not introduce missing PO, missing signoff, sanctions, expired delegation, bank mismatch, invoice anomaly, unresolved hold, incomplete xref, or any second blocker. Keep callback-source provenance as the only material delta."
+    },
+    {
+      "family_id": "BAL100-BEC-PAIR-010",
+      "allow_packet_id": "BAL100-BEC-PAIR-010-ALLOW",
+      "escalate_packet_id": "BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL",
+      "allow_openai_verdict": "ESCALATE",
+      "allow_openai_reason_summary": "The callback source used for verification is noncompliant as it does not originate from pre-change vendor-master data, which is a material blocker according to the policy documents.",
+      "allow_remaining_issue": "OpenAI ignored or inverted the compliant pre-change vendor-master source. Likely trigger is ALLOW-side negative contrast text that repeats forbidden-source tokens inside number_source/source_exclusion_note, plus residual risk terms around elevated scrutiny, temporary hold, release review, and queue routing.",
+      "allow_exact_fields_to_review": {
+        "number_source": "vendor_master_snapshot: VM-SNAP-V-MPB-3188-20241125 / pre_change_vendor_master_record; not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record",
+        "source_exclusion_note": "Callback target +1-330-555-0155 came from pre-change vendor-master snapshot VM-SNAP-V-MPB-3188-20241125 and matches phone_on_file +1-330-555-0155; it was not taken from portal_change_record PORTAL-CHG-1S6J3, submitted_contact_phone +1-330-555-0193, invoice text, or a new contact record.",
+        "control_closure_note": "Callback verification, two-person signoff AP-SIGNOFF-MPB-2577, elevated scrutiny completion ESR-MPB-2024-11, temporary hold release VM-HOLD-MPB-2024-11, and cross-reference record IPR-MPB-1071 were complete before release review; no unresolved discrepancy remains.",
+        "elevated_scrutiny_control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure.",
+        "hold_release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review.",
+        "xref_control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
+      },
+      "escalate_model_results": {
+        "openai": "ESCALATE",
+        "anthropic": "ESCALATE",
+        "gemini": "ESCALATE",
+        "xai": "ESCALATE",
+        "minimax": "ESCALATE"
+      },
+      "escalate_reason_snippets": {
+        "openai": "The callback source used for verification is noncompliant as it is a newly supplied contact from the change request, rather than a pre-existing vendor-master source. This remains a material blocker despite other controls being complete.",
+        "anthropic": "A single material blocker remains unresolved: noncompliant callback-source provenance. Per AP-POL-2024-017, callback verification must use pre-change vendor-master source data. The callback record (CALLSYS-883811) explicitly documents that the verification cal",
+        "gemini": "The callback provenance is noncompliant because the phone number used for verification was supplied in a post-change vendor contact record, not from the pre-change vendor-master data. This is a material blocker according to the 'Vendor Master Payment Profile C",
+        "xai": "Callback verification used newly supplied post-change phone (+1-330-555-0193 from PORTAL-CHG-1S6J3 / VCR-V-MPB-3188-CONTACT-2024) instead of pre-existing vendor-master source (+1-330-555-0155 from VM-SNAP-V-MPB-3188-20241125). Policy AP-POL-2024-017 states thi",
+        "minimax": "The callback was made to a newly supplied contact phone number from the portal change request, which is noncompliant with the policy requiring the use of pre-existing vendor-master data. The policy explicitly states that the callback contact source must be pre"
+      },
+      "escalate_too_easy_reason": "All five models escalated because the repaired ESCALATE callback record explicitly names the noncompliant source, states the pre-change phone existed but was not used, and includes downstream_controls_boundary_note plus single_material_blocker_note. This converts the sibling into an answer-labeled control rather than a collapse candidate.",
+      "escalate_exact_fields_to_review": {
+        "number_source": "vendor_contact_record: VCR-V-MPB-3188-CONTACT-2024 post_change newly supplied contact phone from PORTAL-CHG-1S6J3",
+        "provenance_basis": "noncompliant_callback_source",
+        "unused_pre_change_vendor_master_source": {
+          "not_used_for_callback": true,
+          "phone_on_file": "+1-330-555-0155",
+          "snapshot_id": "VM-SNAP-V-MPB-3188-20241125"
+        },
+        "source_defect_note": "Callback dialed +1-330-555-0193 from vendor_contact_record: VCR-V-MPB-3188-CONTACT-2024 post_change newly supplied contact phone from PORTAL-CHG-1S6J3; pre-change vendor-master phone +1-330-555-0155 in VM-SNAP-V-MPB-3188-20241125 existed but was not used.",
+        "downstream_controls_boundary_note": "Two-person signoff AP-SIGNOFF-MPB-2577, elevated scrutiny completion ESR-MPB-2024-11, temporary hold release VM-HOLD-MPB-2024-11, and cross-reference checks IPR-MPB-1071 are documented, but downstream controls do not cure noncompliant callback-source provenance.",
+        "single_material_blocker_note": "Only callback-source provenance remains as the material blocker; purchase order, AP signoff, hold release, remittance account, and cross-reference controls otherwise remain complete."
+      },
+      "recommended_allow_adjustment": "Use positive provenance assertions first: number_source should be the vendor_master_snapshot/pre-change record only, with matching dialed_number and phone_on_file. Move or reduce negated forbidden-source lists; avoid putting portal_change_record/submitted_contact_phone/invoice/new contact tokens in the same field that declares the compliant source.",
+      "recommended_escalate_adjustment": "Current post-change vendor_contact_record wording is still too explicit because it says post_change newly supplied contact and carries source_defect_note/single_material_blocker_note. Keep the post-change contact source but remove verdict-like labels and make provenance inference less narrated.",
+      "risk_of_second_blocker": "Do not introduce missing PO, missing signoff, sanctions, expired delegation, bank mismatch, invoice anomaly, unresolved hold, incomplete xref, or any second blocker. Keep callback-source provenance as the only material delta."
+    }
+  ],
+  "exact_phrases_or_fields_to_review": {
+    "allow_fields": [
+      "ap_callback_record.number_source: \"...; not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record\"",
+      "ap_callback_record.source_exclusion_note: \"it was not taken from portal_change_record ..., submitted_contact_phone ..., invoice text, or a new contact record\"",
+      "elevated_scrutiny_record.control_completion_note: \"triggered review\" / \"trigger conditions\" / \"not unresolved blockers\"",
+      "temporary_payment_hold_record.release_decision_note: \"Temporary payment hold\" / \"release decision\" / \"no active hold\"",
+      "invoice_cross_reference_record.control_completion_note: \"hold release reference\" / \"no unresolved discrepancy\"",
+      "policy_documents[0].relevant_clause: forbidden-source language may amplify OpenAI token latch when repeated in evidence fields."
+    ],
+    "escalate_fields": [
+      "ap_callback_record.number_source values containing \"noncompliant ... source\"",
+      "ap_callback_record.provenance_basis = \"noncompliant_callback_source\"",
+      "ap_callback_record.unused_pre_change_vendor_master_source.not_used_for_callback = true",
+      "ap_callback_record.source_defect_note",
+      "ap_callback_record.downstream_controls_boundary_note",
+      "ap_callback_record.single_material_blocker_note"
+    ]
+  },
+  "do_not_change": [
+    "Do not edit packet drafts in this diagnosis task.",
+    "Do not rerun scout from this diagnosis task.",
+    "Do not freeze or create freeze manifests.",
+    "Do not create official traces.",
+    "Do not run Judge, QA, or ablation.",
+    "Do not add missing PO, missing approval/signoff, sanctions hold, expired delegation, bank mismatch, invoice amount anomaly, unresolved hold, or incomplete cross-reference.",
+    "Do not push."
+  ],
+  "next_repair_scope": [
+    "ALLOW v2: rewrite ALLOW callback provenance as concise positive evidence; remove negated lists of forbidden source types from ap_callback_record.number_source and source_exclusion_note.",
+    "ALLOW v2: keep timestamps and closure facts but reduce repeated hold/scrutiny/risk vocabulary that OpenAI treats as unresolved risk.",
+    "ESCALATE v2: remove answer-like noncompliant/material-blocker labels and make bad source provenance inferable from callback record, source record, pre-change snapshot, and chronology.",
+    "ESCALATE v2: preserve 003/005 family concepts but reintroduce ambiguity by removing source_defect_note/single_material_blocker_note; for 007/010 keep subtler post-change source but stop labeling it as newly supplied/noncompliant in the same field."
+  ],
+  "non_live_attestation": {
+    "packet_edits": false,
+    "scout_rerun": false,
+    "freeze": false,
+    "official_traces_created": false,
+    "judge_run": false,
+    "qa_run": false,
+    "ablation_run": false,
+    "push": false
+  }
+}

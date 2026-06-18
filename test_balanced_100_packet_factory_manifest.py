@@ -92,3 +92,32 @@ def test_existing_hbb_bec_pairs_are_represented_without_proof_credit() -> None:
     assert "loss_autopsied" in hbb_bec_002["evidence_state"]
     assert "regression_protected" in hbb_bec_002["evidence_state"]
     assert "needs post-patch rerun" in hbb_bec_002["notes"].lower()
+
+
+def test_bal100_batch001_selected_pairs_are_only_current_proof_credit_ready_pairs() -> None:
+    families = {family["family_id"]: family for family in _manifest()["pair_families"]}
+    proof_ready = {
+        family["family_id"]
+        for family in families.values()
+        if family["proof_credit_ready"] is True
+    }
+
+    assert proof_ready == {"BEC-PAIR-009", "BEC-PAIR-010"}
+
+    bec_pair_009 = families["BEC-PAIR-009"]
+    assert bec_pair_009["promotion_status"] == "proof_credit_ready"
+    assert bec_pair_009["allow_packet_id"] == "BAL100-BEC-PAIR-009-ALLOW"
+    assert bec_pair_009["escalate_packet_id"] == "BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL"
+    assert "proof_credit_ready" in bec_pair_009["evidence_state"]
+    assert bec_pair_009["judge_report"] == "reports/BAL100_BATCH_001_selected_pairs_judge_summary.json"
+
+    bec_pair_010 = families["BEC-PAIR-010"]
+    assert bec_pair_010["promotion_status"] == "proof_credit_ready"
+    assert bec_pair_010["allow_packet_id"] == "BAL100-BEC-PAIR-010-ALLOW"
+    assert bec_pair_010["escalate_packet_id"] == "BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL"
+    assert "proof_credit_ready" in bec_pair_010["evidence_state"]
+    assert bec_pair_010["judge_report"] == "reports/BAL100_BATCH_001_selected_pairs_judge_summary.json"
+
+    for family_id in ("BEC-PAIR-003", "BEC-PAIR-004", "BEC-PAIR-005", "BEC-PAIR-006", "BEC-PAIR-007", "BEC-PAIR-008"):
+        assert families[family_id]["proof_credit_ready"] is False
+        assert families[family_id]["promotion_status"] == "planned"

@@ -148,7 +148,7 @@
             }
           ],
           "vendor_master_update_ref": "VM-AUDIT-NSVR-28C4",
-          "control_completion_note": "Two-person AP signoff completed before vendor-master update and before payment release review; the signoff record is closed evidence, not an open signoff item."
+          "control_completion_note": "Two-person AP signoff complete: AP-SIGNOFF-NSVR-5541 closed before vendor-master update and before payment release decision."
         },
         {
           "doc_id": "CALLSYS-883205",
@@ -157,7 +157,7 @@
           "agent_id": "AP-1842",
           "agent_name": "Lena Cho",
           "dialed_number": "+1-414-555-0163",
-          "number_source": "vendor_master_snapshot: VM-SNAP-V-NSVR-5028-20241108 / pre_change_vendor_master_record; not portal_change_record, submitted_contact_phone, invoice, or newly supplied contact record",
+          "number_source": "pre_change_vendor_master_snapshot: VM-SNAP-V-NSVR-5028-20241108",
           "call_date": "2024-11-15",
           "call_start_time": "2024-11-15T17:41:13Z",
           "call_duration_seconds": 438,
@@ -182,9 +182,21 @@
           "outcome_code": "VERIFICATION_COMPLETE",
           "related_change_request": "AP-SIGNOFF-NSVR-5541",
           "provenance_basis": "pre_change_vendor_master_record",
-          "source_exclusion_note": "Callback target +1-414-555-0163 came from pre-change vendor-master snapshot VM-SNAP-V-NSVR-5028-20241108 and matches phone_on_file +1-414-555-0163; it was not taken from portal_change_record PORTAL-CHG-8K1D6, submitted_contact_phone +1-414-555-0188, invoice text, or a new contact record.",
-          "control_closure_note": "Callback verification, two-person signoff AP-SIGNOFF-NSVR-5541, elevated scrutiny completion ESR-NSVR-2024-11, temporary hold release VM-HOLD-NSVR-2024-11, and cross-reference record IPR-NSVR-4415 were complete before release review; no unresolved discrepancy remains.",
-          "downstream_controls_boundary_note": "Completed controls support ALLOW here because callback provenance is compliant pre-change vendor-master data."
+          "source_exclusion_note": "Callback target +1-414-555-0163 matches phone_on_file in VM-SNAP-V-NSVR-5028-20241108; callback completed before the release decision.",
+          "control_closure_note": "callback_complete=true; signoff_complete=AP-SIGNOFF-NSVR-5541; scrutiny_completed=ESR-NSVR-2024-11; hold_released=VM-HOLD-NSVR-2024-11; xref_complete=IPR-NSVR-4415; release_checklist_complete=true; no unresolved discrepancy remains.",
+          "downstream_controls_boundary_note": "Release checklist complete; callback source lineage points to the pre-change vendor-master record.",
+          "callback_phone_lineage": {
+            "selected_record_type": "vendor_master_snapshot",
+            "selected_record_id": "VM-SNAP-V-NSVR-5028-20241108",
+            "contact_phone_source": "phone_on_file",
+            "selected_phone": "+1-414-555-0163",
+            "record_state": "pre_change"
+          },
+          "pre_change_vendor_master_source": {
+            "snapshot_id": "VM-SNAP-V-NSVR-5028-20241108",
+            "phone_on_file": "+1-414-555-0163",
+            "selected_for_callback": true
+          }
         },
         {
           "doc_id": "VM-AUDIT-NSVR-28C4",
@@ -258,7 +270,7 @@
           "temporary_hold_ref": "VM-HOLD-NSVR-2024-11",
           "completion_timestamp": "2024-11-22T14:05:22Z",
           "disposition_code": "ROUTED_FOR_STANDARD_PAYMENT_REVIEW",
-          "control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure."
+          "control_completion_note": "scrutiny_completed=true; review_closed=ESR-NSVR-2024-11; completion_timestamp=2024-11-22T14:05:22Z; release_checklist_complete=true."
         },
         {
           "doc_id": "IPR-NSVR-4415",
@@ -292,7 +304,7 @@
             }
           ],
           "completed_at": "2024-11-22T14:22:31Z",
-          "control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
+          "control_completion_note": "xref_complete=true; IPR-NSVR-4415 completed before payment release decision; vendor-master effective date, billing contact, remittance account, release reference, and purchase order reference checks show no unresolved discrepancy."
         },
         {
           "doc_id": "VM-HOLD-NSVR-2024-11",
@@ -307,7 +319,7 @@
           "hold_release_ref": "ESR-NSVR-2024-11",
           "hold_released_at": "2024-11-22T14:10:00Z",
           "release_routing_code": "STANDARD_PAYMENT_REVIEW_QUEUE",
-          "release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review."
+          "release_decision_note": "hold_released=true; release_ref=ESR-NSVR-2024-11; released_at=2024-11-22T14:10:00Z; no active hold remained for payment release."
         },
         {
           "doc_id": "NOISE-NSVR-5028-2024-11",
@@ -323,7 +335,7 @@
           "doc_id": "AP-POL-2024-017",
           "type": "ap_vendor_master_payment_change_policy",
           "policy_name": "Vendor Master Payment Profile Change Control",
-          "relevant_clause": "Invoices following recent vendor-master payment or contact changes require authenticated portal submission, two-person AP signoff, callback verification using pre-change vendor-master source data, vendor-master audit evidence, elevated-scrutiny routing when triggered, invoice cross-reference checks, and temporary hold release when a hold was opened. Callback contact source must be pre-existing vendor-master data, not a number supplied in the change request, invoice, or newly submitted contact record. Elevated-scrutiny triggers and historical temporary holds are not blockers after documented control closure, but noncompliant callback source provenance remains a material blocker."
+          "relevant_clause": "Invoices following recent vendor-master payment or contact changes require authenticated portal submission, two-person AP signoff, callback verification using pre-change vendor-master source data, vendor-master audit evidence, scrutiny routing when required, invoice cross-reference checks, and hold-release evidence when a hold was opened. The callback log should trace the dialed number to the pre-change vendor-master record rather than later request, invoice, or submitted-contact data. Signoff, xref, scrutiny, and release records are assessed separately from callback-source lineage."
         }
       ]
     }

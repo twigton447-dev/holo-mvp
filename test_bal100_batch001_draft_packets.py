@@ -40,6 +40,27 @@ ESCALATE_SOURCE_MARKERS = (
     "ap_queue_note",
     "vendor_contact_record",
 )
+ALLOW_CALLBACK_SOURCE_NOISE = (
+    "portal_change_record",
+    "submitted_contact_phone",
+    "invoice supplied phone",
+    "newly supplied contact record",
+    "post-change contact source",
+    "change_request_contact_update",
+    "remittance_contact_phone",
+    "regional_billing_phone",
+)
+NEON_ESCALATE_LABELS = (
+    "noncompliant_callback_source",
+    "source_defect_note",
+    "single_material_blocker_note",
+    "noncompliant",
+    "material blocker",
+    "violation",
+    "unsafe",
+    "do not pay",
+    "bad source",
+)
 CALLBACK_DELTA_FIELDS = {
     "number_source",
     "dialed_number",
@@ -47,6 +68,8 @@ CALLBACK_DELTA_FIELDS = {
     "source_exclusion_note",
     "control_closure_note",
     "downstream_controls_boundary_note",
+    "callback_phone_lineage",
+    "pre_change_vendor_master_source",
     "unused_pre_change_vendor_master_source",
     "source_defect_note",
     "single_material_blocker_note",
@@ -187,30 +210,49 @@ def test_allow_uses_prechange_vendor_master_callback_source() -> None:
         assert "snapshot" in source or "pre-change" in source
         assert callback["dialed_number"] == snapshot["phone_on_file"]
         assert callback["provenance_basis"] == "pre_change_vendor_master_record"
-        assert "not taken from portal_change_record" in callback["source_exclusion_note"].lower()
-        assert "submitted_contact_phone" in callback["source_exclusion_note"]
+        assert callback["callback_phone_lineage"]["selected_record_type"] == "vendor_master_snapshot"
+        assert callback["callback_phone_lineage"]["selected_record_id"] == snapshot["doc_id"]
+        assert callback["callback_phone_lineage"]["contact_phone_source"] == "phone_on_file"
+        assert callback["pre_change_vendor_master_source"]["snapshot_id"] == snapshot["doc_id"]
+        assert callback["pre_change_vendor_master_source"]["selected_for_callback"] is True
         assert "no unresolved discrepancy remains" in callback["control_closure_note"].lower()
-        assert "compliant pre-change vendor-master data" in callback["downstream_controls_boundary_note"].lower()
+        assert "release_checklist_complete=true" in callback["control_closure_note"]
+        assert "pre-change vendor-master record" in callback["downstream_controls_boundary_note"].lower()
 
 
-def test_escalate_uses_noncompliant_submitted_or_new_callback_source() -> None:
+def test_allow_callback_record_is_not_overloaded_with_forbidden_source_vocabulary() -> None:
+    for draft in _drafts():
+        if draft["expected_verdict"] != "ALLOW":
+            continue
+        callback_text = json.dumps(_callback(draft), sort_keys=True).lower()
+
+        for marker in ALLOW_CALLBACK_SOURCE_NOISE:
+            assert marker not in callback_text
+
+
+def test_escalate_uses_submitted_or_new_callback_source_without_neon_labels() -> None:
     for draft in _drafts():
         if draft["expected_verdict"] != "ESCALATE":
             continue
         callback = _callback(draft)
         source = callback["number_source"].lower()
         snapshot = _snapshot(draft)
+        callback_text = json.dumps(callback, sort_keys=True).lower()
+        callback_keys = set(_walk_keys(callback))
 
         assert "vendor_master_snapshot" not in source
         assert "pre-change" not in source
         assert any(marker in source for marker in ESCALATE_SOURCE_MARKERS)
-        assert callback["provenance_basis"] == "noncompliant_callback_source"
-        assert callback["unused_pre_change_vendor_master_source"]["snapshot_id"] == snapshot["doc_id"]
-        assert callback["unused_pre_change_vendor_master_source"]["phone_on_file"] == snapshot["phone_on_file"]
-        assert callback["unused_pre_change_vendor_master_source"]["not_used_for_callback"] is True
-        assert "existed but was not used" in callback["source_defect_note"]
-        assert "downstream controls do not cure" in callback["downstream_controls_boundary_note"]
-        assert "only callback-source provenance remains" in callback["single_material_blocker_note"].lower()
+        assert callback["provenance_basis"] == "selected_callback_source_record"
+        assert callback["callback_phone_lineage"]["selected_record_type"] != "vendor_master_snapshot"
+        assert callback["callback_phone_lineage"]["selected_phone"] == callback["dialed_number"]
+        assert callback["pre_change_vendor_master_source"]["snapshot_id"] == snapshot["doc_id"]
+        assert callback["pre_change_vendor_master_source"]["phone_on_file"] == snapshot["phone_on_file"]
+        assert callback["pre_change_vendor_master_source"]["comparison_to_callback_log"] == "different_phone_than_selected_record"
+        assert "do not substitute for pre-change callback-source lineage" in callback["downstream_controls_boundary_note"]
+        assert not (callback_keys & {"source_defect_note", "single_material_blocker_note", "unused_pre_change_vendor_master_source"})
+        for label in NEON_ESCALATE_LABELS:
+            assert label not in callback_text
 
 
 def test_repaired_control_closure_is_visible_without_second_blockers() -> None:
@@ -220,13 +262,12 @@ def test_repaired_control_closure_is_visible_without_second_blockers() -> None:
         xref = _doc(draft, "invoice_cross_reference_record")
         hold = _doc(draft, "temporary_payment_hold_record")
 
-        assert "two-person ap signoff completed" in signoff["control_completion_note"].lower()
-        assert "not an open signoff item" in signoff["control_completion_note"].lower()
-        assert "completed before the payment release decision" in scrutiny["control_completion_note"].lower()
-        assert "not unresolved blockers" in scrutiny["control_completion_note"].lower()
-        assert "released before the payment release decision" in hold["release_decision_note"].lower()
+        assert "two-person ap signoff complete" in signoff["control_completion_note"].lower()
+        assert "scrutiny_completed=true" in scrutiny["control_completion_note"]
+        assert "review_closed=" in scrutiny["control_completion_note"]
+        assert "hold_released=true" in hold["release_decision_note"]
         assert "no active hold remained" in hold["release_decision_note"].lower()
-        assert "cross-reference checks completed" in xref["control_completion_note"].lower()
+        assert "xref_complete=true" in xref["control_completion_note"]
         assert "no unresolved discrepancy" in xref["control_completion_note"].lower()
 
 
@@ -242,7 +283,9 @@ def test_too_easy_escalate_variants_were_strengthened_without_second_blockers() 
         source = _callback(draft)["number_source"].lower()
 
         assert "vendor_contact_record" in source
-        assert "newly supplied" in source
+        assert "created_from=portal-chg" in source
+        assert "contact_phone_source=change_request_contact_update" in source
+        assert "newly supplied" not in source
         assert "invoice:" not in source
         assert "ap_queue_note" not in source
 

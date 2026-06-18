@@ -1,0 +1,108 @@
+{
+  "report_type": "BAL100_BATCH_001_second_repair_summary",
+  "created_at": "2026-06-18",
+  "repo": "/Users/taylorwigton/CascadeProjects/holo-mvp",
+  "branch": "holo-builder-freeze-manifest-gate-001",
+  "basis_commit": "c07b888",
+  "basis_report_paths": [
+    "reports/BAL100_BATCH_001_post_repair_raw_output_diagnosis.json",
+    "reports/BAL100_BATCH_001_post_repair_raw_output_diagnosis.md"
+  ],
+  "edited_packet_glob": "holo_builder/outputs/builder/BAL100_BEC_PAIR_*_draft_v0_1.json",
+  "families_changed": [
+    "BEC-PAIR-003",
+    "BEC-PAIR-004",
+    "BEC-PAIR-005",
+    "BEC-PAIR-006",
+    "BEC-PAIR-007",
+    "BEC-PAIR-008",
+    "BEC-PAIR-009",
+    "BEC-PAIR-010"
+  ],
+  "draft_packet_count": 16,
+  "allow_side_language_repair": {
+    "families": [
+      "BEC-PAIR-003",
+      "BEC-PAIR-004",
+      "BEC-PAIR-005",
+      "BEC-PAIR-006",
+      "BEC-PAIR-007",
+      "BEC-PAIR-008",
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "summary": "ALLOW callback provenance was rewritten as concise positive source-lineage evidence instead of contrastive warnings about forbidden sources.",
+    "callback_source_shape": "number_source names only the pre_change_vendor_master_snapshot; callback_phone_lineage selects vendor_master_snapshot / phone_on_file; pre_change_vendor_master_source selected_for_callback=true.",
+    "closure_shape": "callback_complete, signoff_complete, scrutiny_completed, hold_released, xref_complete, and release_checklist_complete are recorded with no unresolved discrepancy remaining.",
+    "removed_or_reduced_near_callback": [
+      "portal_change_record",
+      "submitted_contact_phone",
+      "invoice supplied phone",
+      "newly supplied contact record",
+      "post-change contact source",
+      "temporary hold",
+      "trigger conditions",
+      "elevated scrutiny"
+    ]
+  },
+  "escalate_side_subtlety_repair": {
+    "families": [
+      "BEC-PAIR-003",
+      "BEC-PAIR-004",
+      "BEC-PAIR-005",
+      "BEC-PAIR-006",
+      "BEC-PAIR-007",
+      "BEC-PAIR-008",
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "summary": "ESCALATE callback provenance still uses portal/change-request/invoice/submitted/update-derived sources, but answer-like labels were removed so the blocker must be inferred from lineage.",
+    "lineage_shape": "number_source and callback_phone_lineage identify selected source record, created_from when applicable, contact_phone_source, and selected_phone; pre_change_vendor_master_source records the different pre-change phone.",
+    "removed_answer_labels": [
+      "noncompliant_callback_source",
+      "source_defect_note",
+      "single_material_blocker_note",
+      "explicit not_used_for_callback marker",
+      "noncompliant/material blocker wording in callback record"
+    ],
+    "blocker_preserved_as_facts": [
+      "callback log selected a later request/invoice/vendor-contact source",
+      "pre-change vendor-master snapshot contains a different phone",
+      "downstream completion records do not substitute for pre-change callback-source lineage"
+    ]
+  },
+  "preserved_constraints": {
+    "only_material_delta": "callback source provenance only",
+    "no_second_blockers_added": [
+      "missing PO",
+      "missing approval",
+      "sanctions hold",
+      "expired delegation",
+      "bank mismatch",
+      "invoice amount anomaly",
+      "unresolved hold",
+      "incomplete cross-reference"
+    ],
+    "payload_keys": [
+      "action",
+      "context"
+    ]
+  },
+  "test_updates": [
+    "ALLOW callback record cannot include noisy forbidden-source vocabulary near the provenance field.",
+    "ESCALATE callback record must use submitted/update/invoice lineage without neon answer labels.",
+    "Closure checks now assert signoff_complete, scrutiny_completed, hold_released, xref_complete, release_checklist_complete, and no unresolved discrepancy.",
+    "Too-easy 007/010 checks now require vendor_contact_record created_from portal lineage while banning newly supplied wording in number_source."
+  ],
+  "expected_next_validation": "A later Taylor-approved scout rerun is needed to measure whether OpenAI ALLOW over-escalation falls while ESCALATE siblings regain useful difficulty.",
+  "non_live_attestation": {
+    "scout_rerun": false,
+    "freeze": false,
+    "official_traces_created": false,
+    "judge_run": false,
+    "qa_run": false,
+    "ablation_run": false,
+    "frozen_artifacts_modified": false,
+    "push": false
+  }
+}

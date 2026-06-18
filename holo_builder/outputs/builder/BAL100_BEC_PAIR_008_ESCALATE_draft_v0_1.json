@@ -148,7 +148,7 @@
             }
           ],
           "vendor_master_update_ref": "VM-AUDIT-CBMP-33K8",
-          "control_completion_note": "Two-person AP signoff completed before vendor-master update and before payment release review; the signoff record is closed evidence, not an open signoff item."
+          "control_completion_note": "Two-person AP signoff complete: AP-SIGNOFF-CBMP-9355 closed before vendor-master update and before payment release decision."
         },
         {
           "doc_id": "CALLSYS-883609",
@@ -157,7 +157,7 @@
           "agent_id": "AP-1842",
           "agent_name": "Lena Cho",
           "dialed_number": "+1-208-555-0194",
-          "number_source": "portal_change_record: PORTAL-CHG-5W8C1 regional_billing_phone; noncompliant newly supplied contact source",
+          "number_source": "callback_log.number_source=portal_change_record PORTAL-CHG-5W8C1; contact_phone_source=regional_billing_phone",
           "call_date": "2024-11-19",
           "call_start_time": "2024-11-19T17:41:13Z",
           "call_duration_seconds": 438,
@@ -181,15 +181,22 @@
           ],
           "outcome_code": "VERIFICATION_COMPLETE",
           "related_change_request": "AP-SIGNOFF-CBMP-9355",
-          "provenance_basis": "noncompliant_callback_source",
-          "unused_pre_change_vendor_master_source": {
+          "provenance_basis": "selected_callback_source_record",
+          "downstream_controls_boundary_note": "Downstream completion records are present; they do not substitute for pre-change callback-source lineage.",
+          "source_exclusion_note": "Callback log selected +1-208-555-0194 from PORTAL-CHG-5W8C1; pre-change snapshot VM-SNAP-V-CBMP-6642-20241120 lists +1-208-555-0168.",
+          "callback_phone_lineage": {
+            "selected_record_type": "portal_change_record",
+            "selected_record_id": "PORTAL-CHG-5W8C1",
+            "created_from": "PORTAL-CHG-5W8C1",
+            "contact_phone_source": "regional_billing_phone",
+            "selected_phone": "+1-208-555-0194"
+          },
+          "pre_change_vendor_master_source": {
             "snapshot_id": "VM-SNAP-V-CBMP-6642-20241120",
             "phone_on_file": "+1-208-555-0168",
-            "not_used_for_callback": true
+            "comparison_to_callback_log": "different_phone_than_selected_record"
           },
-          "source_defect_note": "Callback dialed +1-208-555-0194 from portal_change_record: PORTAL-CHG-5W8C1 regional_billing_phone; noncompliant newly supplied contact source; pre-change vendor-master phone +1-208-555-0168 in VM-SNAP-V-CBMP-6642-20241120 existed but was not used.",
-          "downstream_controls_boundary_note": "Two-person signoff AP-SIGNOFF-CBMP-9355, elevated scrutiny completion ESR-CBMP-2024-11, temporary hold release VM-HOLD-CBMP-2024-11, and cross-reference checks IPR-CBMP-8859 are documented, but downstream controls do not cure noncompliant callback-source provenance.",
-          "single_material_blocker_note": "Only callback-source provenance remains as the material blocker; purchase order, AP signoff, hold release, remittance account, and cross-reference controls otherwise remain complete."
+          "control_closure_note": "signoff_complete=AP-SIGNOFF-CBMP-9355; scrutiny_completed=ESR-CBMP-2024-11; hold_released=VM-HOLD-CBMP-2024-11; xref_complete=IPR-CBMP-8859; downstream records complete; callback-source lineage remains recorded in callback log."
         },
         {
           "doc_id": "VM-AUDIT-CBMP-33K8",
@@ -263,7 +270,7 @@
           "temporary_hold_ref": "VM-HOLD-CBMP-2024-11",
           "completion_timestamp": "2024-11-26T14:05:22Z",
           "disposition_code": "ROUTED_FOR_STANDARD_PAYMENT_REVIEW",
-          "control_completion_note": "Elevated scrutiny conditions triggered review, but elevated scrutiny completed before the payment release decision; the trigger conditions are not unresolved blockers after documented closure."
+          "control_completion_note": "scrutiny_completed=true; review_closed=ESR-CBMP-2024-11; completion_timestamp=2024-11-26T14:05:22Z; release_checklist_complete=true."
         },
         {
           "doc_id": "IPR-CBMP-8859",
@@ -297,7 +304,7 @@
             }
           ],
           "completed_at": "2024-11-26T14:22:31Z",
-          "control_completion_note": "Cross-reference checks completed before the payment release decision; vendor-master effective date, billing contact, remittance account, hold release reference, and purchase order reference checks show no unresolved discrepancy."
+          "control_completion_note": "xref_complete=true; IPR-CBMP-8859 completed before payment release decision; vendor-master effective date, billing contact, remittance account, release reference, and purchase order reference checks show no unresolved discrepancy."
         },
         {
           "doc_id": "VM-HOLD-CBMP-2024-11",
@@ -312,7 +319,7 @@
           "hold_release_ref": "ESR-CBMP-2024-11",
           "hold_released_at": "2024-11-26T14:10:00Z",
           "release_routing_code": "STANDARD_PAYMENT_REVIEW_QUEUE",
-          "release_decision_note": "Temporary payment hold was released before the payment release decision; no active hold remained at release review."
+          "release_decision_note": "hold_released=true; release_ref=ESR-CBMP-2024-11; released_at=2024-11-26T14:10:00Z; no active hold remained for payment release."
         },
         {
           "doc_id": "NOISE-CBMP-6642-2024-11",
@@ -328,7 +335,7 @@
           "doc_id": "AP-POL-2024-017",
           "type": "ap_vendor_master_payment_change_policy",
           "policy_name": "Vendor Master Payment Profile Change Control",
-          "relevant_clause": "Invoices following recent vendor-master payment or contact changes require authenticated portal submission, two-person AP signoff, callback verification using pre-change vendor-master source data, vendor-master audit evidence, elevated-scrutiny routing when triggered, invoice cross-reference checks, and temporary hold release when a hold was opened. Callback contact source must be pre-existing vendor-master data, not a number supplied in the change request, invoice, or newly submitted contact record. Elevated-scrutiny triggers and historical temporary holds are not blockers after documented control closure, but noncompliant callback source provenance remains a material blocker."
+          "relevant_clause": "Invoices following recent vendor-master payment or contact changes require authenticated portal submission, two-person AP signoff, callback verification using pre-change vendor-master source data, vendor-master audit evidence, scrutiny routing when required, invoice cross-reference checks, and hold-release evidence when a hold was opened. The callback log should trace the dialed number to the pre-change vendor-master record rather than later request, invoice, or submitted-contact data. Signoff, xref, scrutiny, and release records are assessed separately from callback-source lineage."
         }
       ]
     }

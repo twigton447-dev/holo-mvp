@@ -14,7 +14,7 @@ That is 4 proof-credit-ready packets toward the 100-packet target.
 
 The process works, but 48 pair families remain.
 
-The Batch 001 residual lane is now closed for accounting purposes: `BEC-PAIR-003`, `BEC-PAIR-004`, `BEC-PAIR-006`, `BEC-PAIR-007`, and `BEC-PAIR-008` remain quarantined after the bounded post-repair scout, while `BEC-PAIR-005` remains `parse_autopsy_required`. This does not change proof-credit totals.
+The Batch 001 residual lane is now closed for accounting purposes: `BEC-PAIR-003`, `BEC-PAIR-004`, `BEC-PAIR-006`, `BEC-PAIR-007`, and `BEC-PAIR-008` remain quarantined after the bounded post-repair scout, while `BEC-PAIR-005` is now `prompt_patch_required` / `scout_prompt_budget_backlog` after parser autopsy. This does not change proof-credit totals.
 
 ## Target Accounting
 
@@ -54,7 +54,7 @@ The Batch 001 residual lane is now closed for accounting purposes: `BEC-PAIR-003
 | BAL100 Batch 001 selected set | 2 | 4 | `proof_credit_ready` |
 | HBB-BEC-001 / HBB-BEC-002 | 2 | 4 | Frozen, ledgered, traced, judged, loss-autopsied, patched, regression-protected; needs post-patch rerun before proof credit |
 | BAL100 Batch 001 residual 003/004/006/007/008 | 5 | 10 | `quarantined_after_repair_scout`; 0/5 clean pair-level prefreeze candidates after one repair |
-| BAL100 Batch 001 residual 005 | 1 | 2 | `parse_autopsy_required`; not scouted in bounded post-repair scout |
+| BAL100 Batch 001 residual 005 | 1 | 2 | `prompt_patch_required` / `scout_prompt_budget_backlog`; autopsy found Anthropic output-budget truncation, not packet defect |
 
 ## BAL100 Batch 001 Residual Accounting
 
@@ -62,14 +62,14 @@ The Batch 001 residual lane is now closed for accounting purposes: `BEC-PAIR-003
 | --- | --- | --- | --- |
 | `BEC-PAIR-003` | `quarantined_after_repair_scout` | Bounded post-repair scout found clean ALLOW precision but a too-easy pair; no pair-level prefreeze candidate. | No |
 | `BEC-PAIR-004` | `quarantined_after_repair_scout` | Bounded post-repair scout found residual OpenAI ALLOW false escalation and a too-easy ESCALATE sibling. | No |
-| `BEC-PAIR-005` | `parse_autopsy_required` | Left out of bounded post-repair scout; parser autopsy remains the next required step before any packet edit or prefreeze decision. | No |
+| `BEC-PAIR-005` | `prompt_patch_required` / `scout_prompt_budget_backlog` | Parser autopsy found incomplete Anthropic fenced JSON, likely output-budget exhaustion at `output_tokens=900` after a long rationale. No packet repair, parser patch, or prefreeze promotion is recommended from this evidence. | No |
 | `BEC-PAIR-006` | `quarantined_after_repair_scout` | Bounded post-repair scout retained useful ESCALATE disagreement, but ALLOW had OpenAI false escalation plus one Anthropic parse failure. | No |
 | `BEC-PAIR-007` | `quarantined_after_repair_scout` | Bounded post-repair scout found residual OpenAI ALLOW false escalation and a too-easy ESCALATE sibling. | No |
 | `BEC-PAIR-008` | `quarantined_after_repair_scout` | Bounded post-repair scout found residual OpenAI ALLOW false escalation and a too-easy ESCALATE sibling. | No |
 | `BEC-PAIR-009` | `proof_credit_ready` | Selected BAL100 Batch 001 pair passed freeze, trace, and Judge path. | Yes |
 | `BEC-PAIR-010` | `proof_credit_ready` | Selected BAL100 Batch 001 pair passed freeze, trace, and Judge path. | Yes |
 
-Residual evidence pointer: `reports/BAL100_BATCH_001_bounded_post_repair_scout_triage.json`.
+Residual evidence pointers: `reports/BAL100_BATCH_001_bounded_post_repair_scout_triage.json`, `reports/BAL100_BEC_PAIR_005_parse_autopsy.json`.
 
 ## Non-Credit Boundaries
 
@@ -77,7 +77,7 @@ Residual evidence pointer: `reports/BAL100_BATCH_001_bounded_post_repair_scout_t
 - Do not claim all 16 Batch 001 drafts passed.
 - Do not count `BEC-PAIR-003` through `BEC-PAIR-008` as proof-credit-ready.
 - Do not mark `BEC-PAIR-003`, `BEC-PAIR-004`, `BEC-PAIR-006`, `BEC-PAIR-007`, or `BEC-PAIR-008` as prefreeze candidates from the bounded post-repair scout.
-- Do not advance `BEC-PAIR-005` before parse autopsy.
+- Do not advance `BEC-PAIR-005` before a scout prompt/budget patch and later clean diagnostic rescout.
 - Do not count `HBB-BEC-001` or `HBB-BEC-002` as proof-credit-ready until post-patch rerun evidence exists.
 - Historical ledger rows remain scout or historical material unless promoted through the active evidence pipeline.
 

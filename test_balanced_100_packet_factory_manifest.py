@@ -18,6 +18,8 @@ APPROVED_STATUSES = {
     "loss_autopsied",
     "regression_protected",
     "parse_autopsy_required",
+    "prompt_patch_required",
+    "scout_prompt_budget_backlog",
     "quarantined_after_repair_scout",
     "proof_credit_ready",
 }
@@ -123,7 +125,7 @@ def test_bal100_batch001_selected_pairs_are_only_current_proof_credit_ready_pair
     residual_statuses = {
         "BEC-PAIR-003": "quarantined_after_repair_scout",
         "BEC-PAIR-004": "quarantined_after_repair_scout",
-        "BEC-PAIR-005": "parse_autopsy_required",
+        "BEC-PAIR-005": "prompt_patch_required",
         "BEC-PAIR-006": "quarantined_after_repair_scout",
         "BEC-PAIR-007": "quarantined_after_repair_scout",
         "BEC-PAIR-008": "quarantined_after_repair_scout",
@@ -132,3 +134,6 @@ def test_bal100_batch001_selected_pairs_are_only_current_proof_credit_ready_pair
         assert families[family_id]["proof_credit_ready"] is False
         assert families[family_id]["promotion_status"] == expected_status
         assert expected_status in families[family_id]["evidence_state"]
+
+    assert "scout_prompt_budget_backlog" in families["BEC-PAIR-005"]["evidence_state"]
+    assert families["BEC-PAIR-005"]["parse_autopsy_report"] == "reports/BAL100_BEC_PAIR_005_parse_autopsy.json"

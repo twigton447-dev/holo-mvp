@@ -1,0 +1,250 @@
+{
+  "batch_id": "BAL100-BATCH-003",
+  "seam_name": "subtle action-boundary defect",
+  "source_commit": "eeaff9a draft: generate BAL100 batch003 subtle escalate candidates",
+  "runner_commit": "f4a5157 scout: add BAL100 batch003 bounded scout runner",
+  "source_run_dir": "scout_runs/BAL100-BATCH-003_bounded_scout",
+  "source_summary_path": "scout_runs/BAL100-BATCH-003_bounded_scout/summary.json",
+  "source_results_path": "scout_runs/BAL100-BATCH-003_bounded_scout/results.jsonl",
+  "scout_scope": {
+    "family_ids": [
+      "BAL100-BEC-SUBTLE-CLOSEOUT-019",
+      "BAL100-BEC-SUBTLE-CLOSEOUT-020",
+      "BAL100-BEC-SUBTLE-CLOSEOUT-021",
+      "BAL100-BEC-SUBTLE-CLOSEOUT-022"
+    ],
+    "packet_count": 8,
+    "allow_packets": 4,
+    "escalate_packets": 4,
+    "provider_roster": [
+      "openai:gpt-4o-mini",
+      "anthropic:claude-haiku-4-5-20251001",
+      "gemini:gemini-2.5-flash-lite",
+      "xai:grok-3-mini",
+      "minimax:MiniMax-Text-01"
+    ],
+    "expected_row_count": 40,
+    "benchmark_credit": false,
+    "scout_only": true,
+    "official_trace": false,
+    "judge": false,
+    "freeze": false
+  },
+  "run_health": {
+    "run_status": "complete",
+    "rows_attempted": 40,
+    "rows_completed": 40,
+    "provider_calls_succeeded": 40,
+    "provider_calls_failed": 0,
+    "parse_ok": 40,
+    "parse_failed": 0,
+    "provider_error_counts": {},
+    "incomplete_packets": []
+  },
+  "proof_credit": {
+    "proof_credit_remains_unchanged": true,
+    "current_proof_credit_pair_families": 2,
+    "current_proof_credit_packets": 4,
+    "credited_families": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "batch003_credit_claimed": false
+  },
+  "family_triage": [
+    {
+      "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-019",
+      "packet_ids": [
+        "BAL100-BEC-SUBTLE-CLOSEOUT-019-A",
+        "BAL100-BEC-SUBTLE-CLOSEOUT-019-B"
+      ],
+      "intended_sibling_balance": {
+        "ALLOW": 1,
+        "ESCALATE": 1
+      },
+      "provider_model_rows_attempted": 10,
+      "provider_calls_succeeded": 10,
+      "provider_calls_failed": 0,
+      "parse_health": {
+        "parse_ok": 10,
+        "parse_failed": 0
+      },
+      "allow_sibling_observed_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-019-A",
+        "verdict_counts": {
+          "ALLOW": 4,
+          "ESCALATE": 1
+        },
+        "false_escalation": true,
+        "false_escalation_providers": [
+          "openai:gpt-4o-mini"
+        ]
+      },
+      "escalate_sibling_observed_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-019-B",
+        "verdict_counts": {
+          "ESCALATE": 3,
+          "ALLOW": 2
+        },
+        "missed_risk_providers": [
+          "anthropic:claude-haiku-4-5-20251001",
+          "minimax:MiniMax-Text-01"
+        ],
+        "too_easy_or_too_obvious": false,
+        "useful_disagreement_preserved": true
+      },
+      "one_material_delta_preserved": true,
+      "secondary_blockers_observed": false,
+      "evidence_chain_contamination": false,
+      "primary_failure_mode": "Closest family, but not promotion-clean: one OpenAI false escalation on the ALLOW sibling and two provider missed-risk outcomes on the ESCALATE sibling.",
+      "triage_class": "repair_once",
+      "recommended_next_action": "Repair once. Strengthen exact source-grounded SKU-class closure in the ALLOW sibling and clarify the ESCALATE sibling's adjacent accessory-class mismatch without making it neon."
+    },
+    {
+      "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-020",
+      "packet_ids": [
+        "BAL100-BEC-SUBTLE-CLOSEOUT-020-A",
+        "BAL100-BEC-SUBTLE-CLOSEOUT-020-B"
+      ],
+      "intended_sibling_balance": {
+        "ALLOW": 1,
+        "ESCALATE": 1
+      },
+      "provider_model_rows_attempted": 10,
+      "provider_calls_succeeded": 10,
+      "provider_calls_failed": 0,
+      "parse_health": {
+        "parse_ok": 10,
+        "parse_failed": 0
+      },
+      "allow_sibling_observed_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-020-A",
+        "verdict_counts": {
+          "ALLOW": 3,
+          "ESCALATE": 2
+        },
+        "false_escalation": true,
+        "false_escalation_providers": [
+          "openai:gpt-4o-mini",
+          "gemini:gemini-2.5-flash-lite"
+        ]
+      },
+      "escalate_sibling_observed_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-020-B",
+        "verdict_counts": {
+          "ESCALATE": 5
+        },
+        "missed_risk_providers": [],
+        "too_easy_or_too_obvious": true,
+        "useful_disagreement_preserved": false
+      },
+      "one_material_delta_preserved": true,
+      "secondary_blockers_observed": false,
+      "evidence_chain_contamination": false,
+      "primary_failure_mode": "Timing seam is still too obvious on the ESCALATE sibling, while the ALLOW sibling leaves enough timing ambiguity for two false escalations.",
+      "triage_class": "repair_once",
+      "recommended_next_action": "Repair once only if preserving the single TERM-LME-020 timing delta. Make the ALLOW pre-release effective timestamp impossible to misread and make the ESCALATE defect less directly timestamp-neon."
+    },
+    {
+      "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021",
+      "packet_ids": [
+        "BAL100-BEC-SUBTLE-CLOSEOUT-021-A",
+        "BAL100-BEC-SUBTLE-CLOSEOUT-021-B"
+      ],
+      "intended_sibling_balance": {
+        "ALLOW": 1,
+        "ESCALATE": 1
+      },
+      "provider_model_rows_attempted": 10,
+      "provider_calls_succeeded": 10,
+      "provider_calls_failed": 0,
+      "parse_health": {
+        "parse_ok": 10,
+        "parse_failed": 0
+      },
+      "allow_sibling_observed_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A",
+        "verdict_counts": {
+          "ALLOW": 1,
+          "ESCALATE": 4
+        },
+        "false_escalation": true,
+        "false_escalation_providers": [
+          "openai:gpt-4o-mini",
+          "anthropic:claude-haiku-4-5-20251001",
+          "gemini:gemini-2.5-flash-lite",
+          "minimax:MiniMax-Text-01"
+        ]
+      },
+      "escalate_sibling_observed_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B",
+        "verdict_counts": {
+          "ESCALATE": 5
+        },
+        "missed_risk_providers": [],
+        "too_easy_or_too_obvious": true,
+        "useful_disagreement_preserved": false
+      },
+      "one_material_delta_preserved": true,
+      "secondary_blockers_observed": false,
+      "evidence_chain_contamination": false,
+      "primary_failure_mode": "The hold-class authority closure did not read as clean on the ALLOW sibling, and the packaging-inspection versus thermal-transport ESCALATE sibling was unanimous.",
+      "triage_class": "kill_before_freeze",
+      "recommended_next_action": "Do not repair in this lane. The family has both ALLOW collapse and neon ESCALATE behavior, so it is not a good one-repair candidate."
+    },
+    {
+      "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022",
+      "packet_ids": [
+        "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+        "BAL100-BEC-SUBTLE-CLOSEOUT-022-B"
+      ],
+      "intended_sibling_balance": {
+        "ALLOW": 1,
+        "ESCALATE": 1
+      },
+      "provider_model_rows_attempted": 10,
+      "provider_calls_succeeded": 10,
+      "provider_calls_failed": 0,
+      "parse_health": {
+        "parse_ok": 10,
+        "parse_failed": 0
+      },
+      "allow_sibling_observed_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+        "verdict_counts": {
+          "ESCALATE": 5
+        },
+        "false_escalation": true,
+        "false_escalation_providers": [
+          "openai:gpt-4o-mini",
+          "anthropic:claude-haiku-4-5-20251001",
+          "gemini:gemini-2.5-flash-lite",
+          "xai:grok-3-mini",
+          "minimax:MiniMax-Text-01"
+        ]
+      },
+      "escalate_sibling_observed_outcomes": {
+        "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B",
+        "verdict_counts": {
+          "ESCALATE": 5
+        },
+        "missed_risk_providers": [],
+        "too_easy_or_too_obvious": true,
+        "useful_disagreement_preserved": false
+      },
+      "one_material_delta_preserved": true,
+      "secondary_blockers_observed": false,
+      "evidence_chain_contamination": true,
+      "primary_failure_mode": "The lab-versus-production naming-prefix material contaminated the ALLOW sibling: all providers treated the supposedly closing dependency evidence as unresolved, while the ESCALATE sibling was unanimous.",
+      "triage_class": "kill_before_freeze",
+      "recommended_next_action": "Do not repair in this lane. The dependency seam needs reseeding rather than another pass over this construction."
+    }
+  ],
+  "triage_counts": {
+    "promote_to_prefreeze_review": 0,
+    "repair_once": 2,
+    "kill_before_freeze": 2,
+    "quarantine": 0
+  },
+  "recommended_next_action": "No Batch 003 family is ready for prefreeze review. If continuing this seam, repair only BAL100-BEC-SUBTLE-CLOSEOUT-019 and possibly 020; retire or reseed 021 and 022."
+}

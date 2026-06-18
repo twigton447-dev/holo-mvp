@@ -1,0 +1,475 @@
+{
+  "attestation": {
+    "freeze_run": false,
+    "frozen_artifacts_edited": false,
+    "judge_run": false,
+    "official_trace": false,
+    "original_trace": false,
+    "packet_drafts_edited": false,
+    "post_patch_rerun": true,
+    "proof_credit_changed": false,
+    "proof_credit_ready_marked": false,
+    "push": false,
+    "qa_or_ablation_run": false
+  },
+  "created_at": "2026-06-18T17:41:59Z",
+  "execution_mode": "codex_approved",
+  "family_triage": [
+    {
+      "accounting_status": "not_eligible_for_proof_credit_accounting_review",
+      "eligible_for_proof_credit_accounting_review": false,
+      "family_id": "HBB-BEC-001",
+      "hologov_labels": {
+        "HBB-BEC-001": "WRONG",
+        "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL": "KNEW"
+      },
+      "packet_ids": [
+        "HBB-BEC-001",
+        "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL"
+      ],
+      "parse_ok": 7,
+      "parse_total": 8,
+      "provider_call_ok": 7,
+      "provider_call_total": 8,
+      "provider_errors": [
+        {
+          "error_excerpt": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+          "error_type": "HTTPError",
+          "http_status": 503,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "HBB-BEC-001",
+          "provider": "google",
+          "role": "active_non_gov"
+        }
+      ],
+      "reason": "The previous ALLOW false escalation was not cured: HoloGov still returned ESCALATE on HBB-BEC-001. The family also has a Google HTTP 503 row and a MiniMax missed-risk row on the ESCALATE sibling."
+    },
+    {
+      "accounting_status": "not_eligible_for_proof_credit_accounting_review",
+      "eligible_for_proof_credit_accounting_review": false,
+      "family_id": "HBB-BEC-002-HARD",
+      "hologov_labels": {
+        "HBB-BEC-002-HARD-ALLOW": "WRONG",
+        "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL": "KNEW"
+      },
+      "packet_ids": [
+        "HBB-BEC-002-HARD-ALLOW",
+        "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL"
+      ],
+      "parse_ok": 7,
+      "parse_total": 8,
+      "provider_call_ok": 7,
+      "provider_call_total": 8,
+      "provider_errors": [
+        {
+          "error_excerpt": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+          "error_type": "HTTPError",
+          "http_status": 503,
+          "model": "gemini-2.5-flash-lite",
+          "packet_id": "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL",
+          "provider": "google",
+          "role": "active_non_gov"
+        }
+      ],
+      "reason": "The previous ESCALATE missed-risk HoloGov loss was cured, but the ALLOW sibling now has a HoloGov false escalation; the ESCALATE sibling also has a Google HTTP 503 row and a MiniMax missed-risk row."
+    }
+  ],
+  "hash_verification": {
+    "all_frozen_hashes_remained_exact": true,
+    "records": [
+      {
+        "computed_hash": "8181d83ceb7f36f97160f078a4d4d35bdced5555fba5478c55bd3d954f40c4f1",
+        "expected_hash": "8181d83ceb7f36f97160f078a4d4d35bdced5555fba5478c55bd3d954f40c4f1",
+        "family_id": "HBB-BEC-001",
+        "frozen_artifact_path": "holo_builder/outputs/frozen/HBB-BEC-001_8181d83c.json",
+        "hash8": "8181d83c",
+        "packet_id": "HBB-BEC-001",
+        "status": "PASS"
+      },
+      {
+        "computed_hash": "807468fcba476a97ef92cf4058af0767c73a66a450bda37c60c6bfaa8be5e883",
+        "expected_hash": "807468fcba476a97ef92cf4058af0767c73a66a450bda37c60c6bfaa8be5e883",
+        "family_id": "HBB-BEC-001",
+        "frozen_artifact_path": "holo_builder/outputs/frozen/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc.json",
+        "hash8": "807468fc",
+        "packet_id": "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL",
+        "status": "PASS"
+      },
+      {
+        "computed_hash": "f7986fa2d852183033f1596780f9a763da803f61490af0b18d439d73ba5810d5",
+        "expected_hash": "f7986fa2d852183033f1596780f9a763da803f61490af0b18d439d73ba5810d5",
+        "family_id": "HBB-BEC-002-HARD",
+        "frozen_artifact_path": "holo_builder/outputs/frozen/HBB-BEC-002-HARD-ALLOW_f7986fa2.json",
+        "hash8": "f7986fa2",
+        "packet_id": "HBB-BEC-002-HARD-ALLOW",
+        "status": "PASS"
+      },
+      {
+        "computed_hash": "0151f5e643eb27d56d879b6b12b66ae9bcbebd962e2ce7a014c51e17ee68b4cf",
+        "expected_hash": "0151f5e643eb27d56d879b6b12b66ae9bcbebd962e2ce7a014c51e17ee68b4cf",
+        "family_id": "HBB-BEC-002-HARD",
+        "frozen_artifact_path": "holo_builder/outputs/frozen/HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL_0151f5e6.json",
+        "hash8": "0151f5e6",
+        "packet_id": "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL",
+        "status": "PASS"
+      }
+    ]
+  },
+  "hologov_knew_on_both_previously_failed_cases": false,
+  "hologov_knew_on_both_previously_failed_cases_note": "No. HoloGov returned KNEW on the previous HBB-BEC-002-HARD ESCALATE missed-risk case, but remained WRONG on the previous HBB-BEC-001 ALLOW false-escalation case.",
+  "operator": "Taylor",
+  "overall_decision": "not_ready_for_proof_credit_accounting_review",
+  "overall_reason": "The run produced all expected rows and exact frozen hashes, but it was not clean: two Google rows failed with HTTP 503, HBB-BEC-001 ALLOW remains a HoloGov false escalation, and HBB-BEC-002-HARD ALLOW now false escalates under HoloGov.",
+  "packet_triage": [
+    {
+      "family_id": "HBB-BEC-001",
+      "hologov_controlling_reason_excerpt": "The callback record's number_source field indicates a portal_change_record, which is a decisive ESCALATE blocker according to the patched guidance. The pre-change vendor-master source is compliant, but the newly supplied contact source remains a material blocker.",
+      "hologov_label": "WRONG",
+      "hologov_verdict": "ESCALATE",
+      "packet_id": "HBB-BEC-001",
+      "parse_ok": 3,
+      "parse_total": 4,
+      "provider_call_ok": 3,
+      "provider_call_total": 4,
+      "provider_results": [
+        {
+          "error_type": "HTTPError",
+          "http_status": 503,
+          "label_against_packet_role": "ERROR",
+          "model": "gemini-2.5-flash-lite",
+          "parse_ok": false,
+          "provider": "google",
+          "provider_call_ok": false,
+          "reason_excerpt": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+          "role": "active_non_gov",
+          "truth": "ALLOW",
+          "verdict": "ERROR"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "KNEW",
+          "model": "MiniMax-Text-01",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "reason_excerpt": "The payment account update followed the required controls, including callback verification to the pre-change vendor-master phone, two-person AP signoff, vendor-master audit logging, and elevated scrutiny routing. The callback source was compliant as it originated from the vendor-master data, and all risk conditions were reviewed and documented. The invoice cross-reference checks were completed, supporting the payment decision.",
+          "role": "active_non_gov",
+          "truth": "ALLOW",
+          "verdict": "ALLOW"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "KNEW",
+          "model": "grok-3-mini",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "reason_excerpt": "Callback record uses pre-change vendor_master_snapshot source, satisfying provenance rule. All required controls (elevated scrutiny routing, two-person signoff, cross-reference checks, callback verification) completed with no unresolved contradictions. No field-level blocker applies as number_source is not portal_change_record or newly supplied contact.",
+          "role": "active_non_gov",
+          "truth": "ALLOW",
+          "verdict": "ALLOW"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "WRONG",
+          "model": "gpt-4o-mini",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "reason_excerpt": "The callback record's number_source field indicates a portal_change_record, which is a decisive ESCALATE blocker according to the patched guidance. The pre-change vendor-master source is compliant, but the newly supplied contact source remains a material blocker.",
+          "role": "holo_gov",
+          "truth": "ALLOW",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "truth_role": "ALLOW"
+    },
+    {
+      "family_id": "HBB-BEC-001",
+      "hologov_controlling_reason_excerpt": "Noncompliant Callback Source",
+      "hologov_label": "KNEW",
+      "hologov_verdict": "ESCALATE",
+      "packet_id": "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL",
+      "parse_ok": 4,
+      "parse_total": 4,
+      "provider_call_ok": 4,
+      "provider_call_total": 4,
+      "provider_results": [
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "KNEW",
+          "model": "gemini-2.5-flash-lite",
+          "parse_ok": true,
+          "provider": "google",
+          "provider_call_ok": true,
+          "reason_excerpt": "The callback verification was sourced from a portal change request's submitted contact phone number, which is explicitly noncompliant per the HBB BEC doctrine. This noncompliant callback source remains a material blocker, overriding other completed controls. The doctrine states that downstream controls do not cure a callback to a newly supplied source.",
+          "role": "active_non_gov",
+          "truth": "ESCALATE",
+          "verdict": "ESCALATE"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "WRONG",
+          "model": "MiniMax-Text-01",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "reason_excerpt": "The callback verification was completed using the pre-change vendor-master phone number, and all required controls including two-person AP signoff, vendor-master audit, and elevated scrutiny routing were fulfilled. The invoice cross-reference checks are complete, and no material blockers are present.",
+          "role": "active_non_gov",
+          "truth": "ESCALATE",
+          "verdict": "ALLOW"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "KNEW",
+          "model": "grok-3-mini",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "reason_excerpt": "Callback record explicitly sources dialed number from portal_change_record submitted_contact_phone rather than pre-change vendor-master data. Field-level gate treats this provenance as noncompliant regardless of completed AP-SIGNOFF-7712, ESR-V-SDS-5829-2024-09, IPR-SDS-811, or VM-AUDIT-88F1G. Policy requires callback to pre-existing vendor-master phone; downstream controls do not cure the defect.",
+          "role": "active_non_gov",
+          "truth": "ESCALATE",
+          "verdict": "ESCALATE"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "KNEW",
+          "model": "gpt-4o-mini",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "reason_excerpt": "Noncompliant Callback Source",
+          "role": "holo_gov",
+          "truth": "ESCALATE",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "truth_role": "ESCALATE"
+    },
+    {
+      "family_id": "HBB-BEC-002-HARD",
+      "hologov_controlling_reason_excerpt": "The callback record's number_source field indicates a portal_change_record, which is a noncompliant source and remains a material blocker despite other controls being satisfied.",
+      "hologov_label": "WRONG",
+      "hologov_verdict": "ESCALATE",
+      "packet_id": "HBB-BEC-002-HARD-ALLOW",
+      "parse_ok": 4,
+      "parse_total": 4,
+      "provider_call_ok": 4,
+      "provider_call_total": 4,
+      "provider_results": [
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "KNEW",
+          "model": "gemini-2.5-flash-lite",
+          "parse_ok": true,
+          "provider": "google",
+          "provider_call_ok": true,
+          "reason_excerpt": "The callback record (CALLSYS-771904) originated from a vendor_master_snapshot, which is a compliant source. All required downstream controls, including AP signoff, vendor-master audit, and invoice cross-reference checks, have been completed. The temporary payment hold was released after these controls were satisfied.",
+          "role": "active_non_gov",
+          "truth": "ALLOW",
+          "verdict": "ALLOW"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "KNEW",
+          "model": "MiniMax-Text-01",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "reason_excerpt": "The callback originated from the pre-change vendor-master data, and all required controls including elevated scrutiny routing, cross-reference checks, two-person AP signoff, and temporary hold release were completed. The invoice and payment details align with the updated vendor-master records, and no material blockers are present.",
+          "role": "active_non_gov",
+          "truth": "ALLOW",
+          "verdict": "ALLOW"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "KNEW",
+          "model": "grok-3-mini",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "reason_excerpt": "Callback record CALLSYS-771904 sources number explicitly from pre-change vendor_master_snapshot (not portal_change_record/invoice/new contact). All required controls (two-person signoff, elevated scrutiny routing, cross-reference checks, hold release) completed per policy. No field-level provenance blocker present.",
+          "role": "active_non_gov",
+          "truth": "ALLOW",
+          "verdict": "ALLOW"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "WRONG",
+          "model": "gpt-4o-mini",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "reason_excerpt": "The callback record's number_source field indicates a portal_change_record, which is a noncompliant source and remains a material blocker despite other controls being satisfied.",
+          "role": "holo_gov",
+          "truth": "ALLOW",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "truth_role": "ALLOW"
+    },
+    {
+      "family_id": "HBB-BEC-002-HARD",
+      "hologov_controlling_reason_excerpt": "Callback record CALLSYS-771904 explicitly sources number from portal_change_record PORTAL-CHG-7K2Q9 submitted_contact_phone rather than pre-change vendor-master data. Policy field-level gate treats any such source as noncompliant regardless of AP-SIGNOFF-BTP-5540, ESR-BTP-2024-11, VM-HOLD-BTP-2024-11 release, or IPR-BTP-4421 cross-references. Pre-change snapshot confirms different phone_on_file, confirming provenance violation.",
+      "hologov_label": "KNEW",
+      "hologov_verdict": "ESCALATE",
+      "packet_id": "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL",
+      "parse_ok": 3,
+      "parse_total": 4,
+      "provider_call_ok": 3,
+      "provider_call_total": 4,
+      "provider_results": [
+        {
+          "error_type": "HTTPError",
+          "http_status": 503,
+          "label_against_packet_role": "ERROR",
+          "model": "gemini-2.5-flash-lite",
+          "parse_ok": false,
+          "provider": "google",
+          "provider_call_ok": false,
+          "reason_excerpt": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+          "role": "active_non_gov",
+          "truth": "ESCALATE",
+          "verdict": "ERROR"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "WRONG",
+          "model": "MiniMax-Text-01",
+          "parse_ok": true,
+          "provider": "minimax",
+          "provider_call_ok": true,
+          "reason_excerpt": "The callback originated from the pre-change vendor-master phone number, and all required controls including elevated scrutiny, cross-reference checks, two-person AP signoff, and temporary hold release have been completed. The invoice and payment account update are compliant with policy, and no material blockers are present.",
+          "role": "active_non_gov",
+          "truth": "ESCALATE",
+          "verdict": "ALLOW"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "KNEW",
+          "model": "grok-3-mini",
+          "parse_ok": true,
+          "provider": "xai",
+          "provider_call_ok": true,
+          "reason_excerpt": "Callback record CALLSYS-771904 explicitly sources number from portal_change_record PORTAL-CHG-7K2Q9 submitted_contact_phone rather than pre-change vendor-master data. Policy field-level gate treats any such source as noncompliant regardless of AP-SIGNOFF-BTP-5540, ESR-BTP-2024-11, VM-HOLD-BTP-2024-11 release, or IPR-BTP-4421 cross-references. Pre-change snapshot confirms different phone_on_file, confirming provenance violation.",
+          "role": "active_non_gov",
+          "truth": "ESCALATE",
+          "verdict": "ESCALATE"
+        },
+        {
+          "error_type": null,
+          "http_status": 200,
+          "label_against_packet_role": "KNEW",
+          "model": "gpt-4o-mini",
+          "parse_ok": true,
+          "provider": "openai",
+          "provider_call_ok": true,
+          "reason_excerpt": "Callback record CALLSYS-771904 explicitly sources number from portal_change_record PORTAL-CHG-7K2Q9 submitted_contact_phone rather than pre-change vendor-master data. Policy field-level gate treats any such source as noncompliant regardless of AP-SIGNOFF-BTP-5540, ESR-BTP-2024-11, VM-HOLD-BTP-2024-11 release, or IPR-BTP-4421 cross-references. Pre-change snapshot confirms different phone_on_file, confirming provenance violation.",
+          "role": "holo_gov",
+          "truth": "ESCALATE",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "truth_role": "ESCALATE"
+    }
+  ],
+  "previous_failure_triage": {
+    "HBB-BEC-001_ALLOW_false_escalation": {
+      "cured": false,
+      "note": "Not cured: HoloGov still returned ESCALATE on the ALLOW sibling.",
+      "packet_id": "HBB-BEC-001",
+      "post_patch_hologov_label": "WRONG",
+      "post_patch_hologov_verdict": "ESCALATE",
+      "previous_failure": "HoloGov false escalation on ALLOW sibling from trigger-vs-completion confusion"
+    },
+    "HBB-BEC-002-HARD_ESCALATE_missed_risk": {
+      "cured": true,
+      "note": "Cured on the previously failed ESCALATE case: HoloGov returned ESCALATE with callback-source provenance as the controlling reason.",
+      "packet_id": "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL",
+      "post_patch_hologov_label": "KNEW",
+      "post_patch_hologov_verdict": "ESCALATE",
+      "previous_failure": "HoloGov missed callback-source provenance risk and allowed the ESCALATE sibling"
+    }
+  },
+  "proof_credit": {
+    "hbb_marked_proof_credit_ready": false,
+    "proof_credit_ready_families": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "proof_credit_ready_packets": 4,
+    "proof_credit_ready_pair_families": 2,
+    "proof_credit_remained_unchanged_pending_accounting": true
+  },
+  "provider_health": {
+    "all_provider_calls_succeeded": false,
+    "all_rows_parsed": false,
+    "error_rows": [
+      {
+        "error_excerpt": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+        "error_type": "HTTPError",
+        "family_id": "HBB-BEC-001",
+        "http_status": 503,
+        "model": "gemini-2.5-flash-lite",
+        "packet_id": "HBB-BEC-001",
+        "provider": "google",
+        "role": "active_non_gov"
+      },
+      {
+        "error_excerpt": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+        "error_type": "HTTPError",
+        "family_id": "HBB-BEC-002-HARD",
+        "http_status": 503,
+        "model": "gemini-2.5-flash-lite",
+        "packet_id": "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL",
+        "provider": "google",
+        "role": "active_non_gov"
+      }
+    ],
+    "parse_ok": 14,
+    "parse_total": 16,
+    "provider_call_ok": 14,
+    "provider_call_total": 16,
+    "provider_error_counts": {
+      "google": 2
+    },
+    "successful_response_parse_ok": 14,
+    "successful_response_total": 14,
+    "successful_responses_parsed_cleanly": true
+  },
+  "report_type": "HBB_BEC_post_patch_rerun_triage",
+  "results_pointer": "scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/results.jsonl",
+  "run_directory": "scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun",
+  "run_id": "HBB-BEC-post-patch-4dna-seed447-rerun",
+  "run_type": "hbb_bec_post_patch_4dna_rerun",
+  "scope": {
+    "actual_row_count": 16,
+    "all_expected_rows_completed": true,
+    "expected_row_count": 16,
+    "families": [
+      "HBB-BEC-001",
+      "HBB-BEC-002-HARD"
+    ],
+    "packets": [
+      "HBB-BEC-001",
+      "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL",
+      "HBB-BEC-002-HARD-ALLOW",
+      "HBB-BEC-002-HARD-CALLBACK-PROVENANCE-FAIL"
+    ],
+    "seed": 447
+  },
+  "summary_pointer": "scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/summary.json"
+}

@@ -2,7 +2,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
-REQUIRED = ['README.md','ARTIFACT_BENCHMARK_MANDATE.md','RUNBOOK.md','CHECKLIST.md','GEMINI_25_PRO_BLOCKED_NOTE.md','registry/artifact_benchmark_registry.json','harness/common.py','harness/validate_instance.py','harness/generate_stub_run.py','harness/build_pairwise_packets.py','harness/judge_harness.py','harness/tiny_live_smoke.py']
+REQUIRED = ['README.md','ARTIFACT_BENCHMARK_MANDATE.md','RUNBOOK.md','CHECKLIST.md','GEMINI_25_PRO_BLOCKED_NOTE.md','registry/artifact_benchmark_registry.json','harness/common.py','harness/validate_instance.py','harness/generate_stub_run.py','harness/build_pairwise_packets.py','harness/judge_harness.py','harness/tiny_live_smoke.py','harness/run_full_generation.py']
 def main() -> int:
     missing = [rel for rel in REQUIRED if not (ROOT / rel).exists()]
     if missing:

@@ -186,15 +186,47 @@ def test_explicit_frontier_profile_uses_legacy_loader():
     assert bench == frontier_bench
 
 
+def test_balanced_profile_uses_mini_pool_with_frontier_assist_pool():
+    mini_pool = _mini_pool()
+    frontier_active = [FakeAdapter("openai", "gpt-5.4")]
+    frontier_bench = [FakeAdapter("xai", "grok-3")]
+
+    profile, active, bench = _select_runtime_pools(
+        "balanced",
+        fast_loader=lambda: mini_pool,
+        frontier_loader=lambda: (frontier_active, frontier_bench),
+    )
+
+    assert profile == "balanced"
+    assert active == mini_pool
+    assert bench == frontier_active + frontier_bench
+
+
 def test_runtime_metadata_reports_mini_only_without_frontier_fallback():
     metadata = _runtime_metadata("mini_only", _mini_pool(), [])
 
     assert metadata["runtime_profile"] == "mini_only"
     assert metadata["frontier_enabled"] is False
+    assert metadata["frontier_assist_enabled"] is False
     assert metadata["fallback_policy"] == "no_frontier_fallback"
     assert metadata["serial_call"] is True
     assert metadata["parallel_fanout"] is False
     assert metadata["bench_pool"] == []
+
+
+def test_runtime_metadata_reports_balanced_frontier_assist():
+    metadata = _runtime_metadata(
+        "balanced",
+        _mini_pool(),
+        [FakeAdapter("openai", "gpt-5.4"), FakeAdapter("xai", "grok-3")],
+    )
+
+    assert metadata["runtime_profile"] == "balanced"
+    assert metadata["frontier_enabled"] is True
+    assert metadata["frontier_assist_enabled"] is True
+    assert metadata["fallback_policy"] == "gov_triggered_frontier_assist"
+    assert len(metadata["active_pool"]) == 5
+    assert len(metadata["bench_pool"]) == 2
 
 
 def test_holochat_engine_init_uses_mini_loader(monkeypatch):
@@ -244,6 +276,8 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["serial_call"] is True
     assert result["runtime"]["parallel_fanout"] is False
     assert result["runtime"]["frontier_enabled"] is False
+    assert result["runtime"]["frontier_assist"]["enabled"] is False
+    assert result["runtime"]["frontier_assist"]["triggered"] is False
     assert result["runtime"]["analyst_pool_role"] == "analyst"
     assert result["runtime"]["analyst_call_mode"] == "serial_one_per_turn"
     assert result["runtime"]["selection_mode"] == "round_robin"
@@ -302,6 +336,41 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
         "secret",
     ):
         assert forbidden not in runtime_text.lower()
+
+
+def test_balanced_runtime_uses_frontier_assist_for_complex_turn(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setattr(chat_engine.random, "choice", lambda seq: seq[0])
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._runtime_profile = "balanced"
+    engine._adapters = _mini_pool()
+    engine._bench = [
+        FakeAdapter("openai", "gpt-5.4"),
+        FakeAdapter("anthropic", "claude-sonnet-4-6"),
+    ]
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("balanced", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    result = engine.send_message(str(uuid4()), "Design the HoloChat routing doctrine and architecture.")
+
+    assert result["_provider"] == "anthropic"
+    assert result["response"] == "anthropic mini answer"
+    assert result["runtime"]["runtime_profile"] == "balanced"
+    assert result["runtime"]["frontier_assist_enabled"] is True
+    assert result["runtime"]["frontier_assist"] == {
+        "enabled": True,
+        "triggered": True,
+        "reason": "complexity_or_high_stakes",
+        "source": "balanced_runtime",
+        "selected": {"provider": "anthropic", "model": "claude-sonnet-4-6"},
+    }
+    assert result["runtime"]["selected_analyst"] == {
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-6",
+    }
+    assert result["runtime"]["failover"]["policy"] == "balanced_frontier_assist_then_next_mini"
 
 
 def test_browser_chat_skips_failed_mini_and_reports_safe_failover(monkeypatch):
@@ -415,6 +484,8 @@ def test_prompt_assembly_loads_canonical_doctrine_docs():
     assert "HoloChat is not omniscient." in HOLO_CHAT_SYSTEM_PROMPT
     assert "Use short bold section headers" in HOLO_CHAT_SYSTEM_PROMPT
     assert "Stay warm and human" in HOLO_CHAT_SYSTEM_PROMPT
+    assert "I want you to do a deep calibration pass on me." in HOLO_CHAT_SYSTEM_PROMPT
+    assert "inspiring, creative, pragmatic, and hopeful" in HOLO_CHAT_SYSTEM_PROMPT
     assert "No bullets. No headers." not in HOLO_CHAT_SYSTEM_PROMPT
     assert "Gov continuity comes from Holo-owned state" in GOVERNOR_SYSTEM_PROMPT
     assert "Python enforces." in GOVERNOR_SYSTEM_PROMPT

@@ -115,9 +115,62 @@ class ChatSession:
 # ---------------------------------------------------------------------------
 
 DEFAULT_RUNTIME_PROFILE = "mini_only"
+BALANCED_RUNTIME_PROFILE = "balanced"
 FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
 DEFAULT_THREAD_HANDOFF_MIN_TURNS = 24
 THREAD_HANDOFF_FORCE_SCORE = 5
+
+_BALANCED_USER_POWER_TERMS = (
+    "frontier",
+    "power mode",
+    "deep mode",
+    "smarter",
+    "not as smart",
+    "amp this up",
+)
+
+_BALANCED_COMPLEXITY_TERMS = (
+    "architecture",
+    "doctrine",
+    "under the hood",
+    "strategy",
+    "strategic",
+    "complex",
+    "hard problem",
+    "deep reasoning",
+    "tradeoff",
+    "adversarial",
+    "debug",
+    "diagnose",
+    "legal",
+    "medical",
+    "financial",
+    "high stakes",
+)
+
+_BALANCED_CREATIVE_STRATEGY_TERMS = (
+    "inspire",
+    "inspiring",
+    "creative",
+    "vision",
+    "hopeful",
+    "pragmatic",
+    "doctrine",
+    "manifesto",
+)
+
+_BALANCED_GOV_ESCALATION_TERMS = (
+    "pressure point",
+    "live tension",
+    "high stakes",
+    "deep reasoning",
+    "strategic",
+    "hard part",
+    "precision",
+    "confront",
+    "unresolved",
+    "challenge",
+)
 
 # Local, non-authoritative pricing estimates. Only include model prices when we
 # are comfortable showing a rough estimate; otherwise the UI reports unknown.
@@ -130,6 +183,63 @@ THREAD_HANDOFF_MESSAGE = "This thread is getting long. Start a fresh thread to k
 
 def _holochat_runtime_profile() -> str:
     return (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
+
+
+def _contains_any(text: str, terms: tuple[str, ...]) -> bool:
+    lowered = (text or "").lower()
+    return any(term in lowered for term in terms)
+
+
+def _balanced_frontier_assist_reason(
+    *,
+    user_message: str,
+    tenor: Optional[str],
+) -> Optional[str]:
+    """Return a safe reason when Balanced should use a frontier assist analyst."""
+    if _contains_any(user_message, _BALANCED_USER_POWER_TERMS):
+        return "user_requested_power_lane"
+    if _contains_any(user_message, _BALANCED_COMPLEXITY_TERMS):
+        return "complexity_or_high_stakes"
+    if _contains_any(user_message, _BALANCED_CREATIVE_STRATEGY_TERMS):
+        return "creative_strategy_depth"
+    if tenor and _contains_any(tenor, _BALANCED_GOV_ESCALATION_TERMS):
+        return "governor_escalated_depth"
+    return None
+
+
+def _select_frontier_assist_adapter(
+    bench_pool: list[Any],
+    *,
+    initial_adapter: Any,
+    governor: Any,
+) -> Optional[Any]:
+    if not bench_pool:
+        return None
+    blocked = {
+        getattr(initial_adapter, "provider", None),
+        getattr(governor, "provider", None) if governor is not None else None,
+    }
+    candidates = [adapter for adapter in bench_pool if getattr(adapter, "provider", None) not in blocked]
+    if not candidates:
+        candidates = [adapter for adapter in bench_pool if adapter is not initial_adapter]
+    if not candidates:
+        candidates = bench_pool
+    return random.choice(candidates)
+
+
+def _frontier_assist_metadata(
+    *,
+    enabled: bool,
+    reason: Optional[str] = None,
+    selected_adapter: Optional[Any] = None,
+) -> dict[str, Any]:
+    return {
+        "enabled": bool(enabled),
+        "triggered": bool(reason and selected_adapter),
+        "reason": reason if reason and selected_adapter else ("not_triggered" if enabled else "off"),
+        "source": "balanced_runtime" if enabled else "off",
+        "selected": _adapter_identity_dict(selected_adapter) if selected_adapter is not None else None,
+    }
 
 
 def _thread_handoff_min_turns() -> int:
@@ -560,6 +670,7 @@ def _turn_runtime_metadata(
     failover: Optional[dict[str, Any]] = None,
     governor_trace: Optional[dict[str, Any]] = None,
     gov_arc_state: Optional[GovArcState] = None,
+    frontier_assist: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
@@ -594,6 +705,8 @@ def _turn_runtime_metadata(
         metadata["governor_trace"] = governor_trace
     if gov_arc_state is not None:
         metadata["gov_arc_state"] = gov_arc_state.model_dump(mode="json")
+    if frontier_assist is not None:
+        metadata["frontier_assist"] = frontier_assist
     metadata.update(
         _governor_turn_metadata(
             governor,
@@ -609,12 +722,19 @@ def _runtime_metadata(
     bench_pool: list[Any],
 ) -> dict[str, Any]:
     mini_only = runtime_profile == "mini_only"
+    balanced = runtime_profile == BALANCED_RUNTIME_PROFILE
+    frontier_assist_enabled = balanced and bool(bench_pool)
     return {
         "runtime_profile": runtime_profile,
         "active_pool": _adapter_pool_metadata(active_pool),
         "bench_pool": _adapter_pool_metadata(bench_pool),
         "frontier_enabled": not mini_only,
-        "fallback_policy": "no_frontier_fallback" if mini_only else "bench_failover_enabled",
+        "frontier_assist_enabled": frontier_assist_enabled,
+        "fallback_policy": (
+            "no_frontier_fallback"
+            if mini_only
+            else ("gov_triggered_frontier_assist" if balanced else "bench_failover_enabled")
+        ),
         "serial_call": True,
         "parallel_fanout": False,
     }
@@ -637,6 +757,13 @@ def _select_runtime_pools(
                 "frontier fallback is disabled."
             )
         return runtime_profile, active_pool, []
+    if runtime_profile == BALANCED_RUNTIME_PROFILE:
+        active_pool = fast_loader()
+        if not active_pool:
+            raise RuntimeError("HoloChat balanced runtime has no mini adapters.")
+        frontier_active, frontier_bench = frontier_loader()
+        frontier_pool = [*frontier_active, *frontier_bench]
+        return runtime_profile, active_pool, frontier_pool
     if runtime_profile in FRONTIER_RUNTIME_PROFILES:
         active_pool, bench_pool = frontier_loader()
         if not active_pool:
@@ -806,6 +933,33 @@ class HoloChatEngine:
             web_trace=web_trace,
         )
 
+        frontier_assist_enabled = (
+            getattr(self, "_runtime_profile", DEFAULT_RUNTIME_PROFILE) == BALANCED_RUNTIME_PROFILE
+            and bool(self._bench)
+            and not incognito
+        )
+        frontier_assist_reason = (
+            _balanced_frontier_assist_reason(user_message=user_message, tenor=tenor)
+            if frontier_assist_enabled
+            else None
+        )
+        frontier_assist_adapter = (
+            _select_frontier_assist_adapter(
+                self._bench,
+                initial_adapter=initial_adapter,
+                governor=self._governor,
+            )
+            if frontier_assist_reason
+            else None
+        )
+        if frontier_assist_adapter is not None:
+            adapter = frontier_assist_adapter
+        frontier_assist = _frontier_assist_metadata(
+            enabled=frontier_assist_enabled,
+            reason=frontier_assist_reason,
+            selected_adapter=frontier_assist_adapter,
+        )
+
         # Build enriched message — search results injected for the model only,
         # not stored in history (history stays clean with the original message)
         enriched_message = user_message
@@ -927,7 +1081,11 @@ class HoloChatEngine:
             initial_adapter=initial_adapter,
             final_adapter=adapter,
             attempts=failover_attempts,
-            policy="try_next_active_mini_then_bench",
+            policy=(
+                "balanced_frontier_assist_then_next_mini"
+                if frontier_assist.get("triggered")
+                else "try_next_active_mini_then_bench"
+            ),
         )
 
         if holo4dna_shadow is not None:
@@ -1093,6 +1251,7 @@ class HoloChatEngine:
                 thread_health_level=session.thread_health_level,
             ),
             gov_arc_state=session.gov_arc_state,
+            frontier_assist=frontier_assist,
         )
 
         return {
@@ -1176,6 +1335,33 @@ class HoloChatEngine:
             user_message=user_message,
             tenor=tenor,
             web_trace=web_trace,
+        )
+
+        frontier_assist_enabled = (
+            getattr(self, "_runtime_profile", DEFAULT_RUNTIME_PROFILE) == BALANCED_RUNTIME_PROFILE
+            and bool(self._bench)
+            and not incognito
+        )
+        frontier_assist_reason = (
+            _balanced_frontier_assist_reason(user_message=user_message, tenor=tenor)
+            if frontier_assist_enabled
+            else None
+        )
+        frontier_assist_adapter = (
+            _select_frontier_assist_adapter(
+                self._bench,
+                initial_adapter=initial_adapter,
+                governor=self._governor,
+            )
+            if frontier_assist_reason
+            else None
+        )
+        if frontier_assist_adapter is not None:
+            adapter = frontier_assist_adapter
+        frontier_assist = _frontier_assist_metadata(
+            enabled=frontier_assist_enabled,
+            reason=frontier_assist_reason,
+            selected_adapter=frontier_assist_adapter,
         )
 
         enriched_message = user_message
@@ -1294,7 +1480,11 @@ class HoloChatEngine:
             initial_adapter=initial_adapter,
             final_adapter=adapter,
             attempts=failover_attempts,
-            policy="try_next_active_mini",
+            policy=(
+                "balanced_frontier_assist_then_next_mini"
+                if frontier_assist.get("triggered")
+                else "try_next_active_mini"
+            ),
         )
 
         if holo4dna_shadow is not None:
@@ -1429,6 +1619,7 @@ class HoloChatEngine:
                 thread_health_level=session.thread_health_level,
             ),
             gov_arc_state=session.gov_arc_state,
+            frontier_assist=frontier_assist,
         )
 
         yield {

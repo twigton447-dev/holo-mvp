@@ -264,6 +264,8 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
         "serial, one analyst per turn",
         "Selection",
         "Active pool",
+        "Frontier assist",
+        "Frontier assist pool",
         "Governor",
         "Governor mode",
         "Context delivery",
@@ -277,6 +279,9 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
         "Analyst failover",
         "Failover policy",
         "Final analyst",
+        "Frontier assist status",
+        "Frontier assist reason",
+        "Frontier assist model",
         "Gov temperature",
         "Gov web decision",
         "Web decision source",
@@ -397,6 +402,9 @@ def test_holochat_runtime_prompt_prefers_structured_human_answers():
     assert "Holo should feel like a vivid, attentive person" in doctrine
     assert "For complex answers, structure is a kindness." in doctrine
     assert "At least one path should pressure-test" in doctrine
+    assert "I want you to do a deep calibration pass on me." in doctrine
+    assert "inspiring, creative, pragmatic, and hopeful" in doctrine
+    assert "imaginative without becoming vague" in doctrine
     assert "Gov should push harder than a normal assistant." in gov_doctrine
     assert "pressure path" in gov_doctrine
 

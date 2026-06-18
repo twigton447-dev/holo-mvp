@@ -2523,7 +2523,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     const model = runtime.selected_model || selected.model || "";
     const activePoolCount = runtime.active_pool_count || (runtime.active_pool || []).length || 0;
     const runtimeProfile = runtime.runtime_profile || "";
-    const poolLabel = runtimeProfile === "mini_only" ? "mini models" : "models";
+    const poolLabel = runtimeProfile === "mini_only" || runtimeProfile === "balanced" ? "mini models" : "models";
     const modeLabel = runtime.serial_call === true && runtime.parallel_fanout !== true
       ? "serial, one analyst per turn"
       : "parallel or unavailable";
@@ -2564,6 +2564,11 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       : (runtime.selection_mode || "unknown");
     rows.push(["Selection", selectionLabel]);
     if (activePoolCount) rows.push(["Active pool", `${activePoolCount} ${poolLabel}`]);
+    if (runtime.frontier_assist_enabled === true) {
+      const assistPoolCount = (runtime.bench_pool || []).length || 0;
+      rows.push(["Frontier assist", "Gov-triggered"]);
+      if (assistPoolCount) rows.push(["Frontier assist pool", `${assistPoolCount} models`]);
+    }
     rows.push(["Governor", govLabel]);
     rows.push(["Governor mode", govMode]);
     rows.push(["Context delivery", contextDelivery]);
@@ -2582,6 +2587,17 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       const final = failover.final || {};
       if (skipped && (final.provider || final.model)) {
         rows.push(["Final analyst", `${final.provider || "unknown"}${final.model ? ":" + final.model : ""}`]);
+      }
+    }
+    const frontierAssist = runtime.frontier_assist || {};
+    if (Object.keys(frontierAssist).length) {
+      rows.push(["Frontier assist status", frontierAssist.triggered === true ? "triggered" : (frontierAssist.reason || "not triggered")]);
+      if (frontierAssist.reason && frontierAssist.reason !== "not_triggered" && frontierAssist.reason !== "off") {
+        rows.push(["Frontier assist reason", frontierAssist.reason]);
+      }
+      const assistSelected = frontierAssist.selected || {};
+      if (assistSelected.provider || assistSelected.model) {
+        rows.push(["Frontier assist model", `${assistSelected.provider || "unknown"}${assistSelected.model ? ":" + assistSelected.model : ""}`]);
       }
     }
     const govTrace = runtime.governor_trace || {};

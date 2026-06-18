@@ -401,11 +401,14 @@ def test_mobile_header_keeps_core_controls_available():
     assert "#mobile-action-bar { display: none; }" in html
     assert "#mobile-composer-controls { display: none; }" in html
     assert "#mobile-action-bar,\n      #mobile-composer-controls { display: none !important; }" in html
-    assert "#thread-toggle,\n      #holobrain-toggle" in html
+    assert "#app { width: 100%; max-width: none; margin: 0; }" in html
+    assert "#thread-toggle,\n      #new-thread" in html
     assert "display: inline-flex !important;" in html
-    assert "#thread-toggle::before" in html
-    assert '#holobrain-toggle::before { content: "Engine";' in html
-    assert "#new-thread, #incognito-btn, #theme-toggle { display: none !important; }" in html
+    assert '#thread-toggle::before { content: "‹";' in html
+    assert '#new-thread::before { content: "✎";' in html
+    assert "#holobrain-toggle, #incognito-btn, #theme-toggle { display: none !important; }" in html
+    assert '#user-avatar .avatar-placeholder::before' in html
+    assert 'content: "•••";' in html
     assert '#avatar-menu .mobile-only { display: block; }' in html
     assert '<button class="mobile-only" onclick="closeAvatarMenu();toggleThreadPanel()">See my threads</button>' in html
     assert '<button class="mobile-only" onclick="closeAvatarMenu();newThread()">Start new thread</button>' in html

@@ -16,6 +16,11 @@ EXPECTED_READY = [
     "BAL100-BEC-EXPLAINED-ANOMALY-017",
     "BAL100-BEC-EXPLAINED-ANOMALY-018",
 ]
+EXPECTED_TARGETED_REPAIR = [
+    "BAL100-BEC-EXPLAINED-ANOMALY-012",
+    "BAL100-BEC-EXPLAINED-ANOMALY-013",
+    "BAL100-BEC-EXPLAINED-ANOMALY-017",
+]
 
 
 def test_static_gate_survivor_set_is_exact() -> None:
@@ -59,6 +64,23 @@ def test_load_scout_ready_packets_selects_12_balanced_packets() -> None:
     assert [packet["expected_verdict"] for packet in packets].count("ESCALATE") == 6
 
 
+def test_load_targeted_post_repair_packets_selects_exact_6_packets() -> None:
+    packets = scout.load_targeted_post_repair_packets()
+
+    assert len(packets) == 6
+    assert [packet["_builder"]["family_id"] for packet in packets][::2] == EXPECTED_TARGETED_REPAIR
+    assert [packet["scenario_id"] for packet in packets] == [
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-B",
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-B",
+    ]
+    assert [packet["expected_verdict"] for packet in packets].count("ALLOW") == 3
+    assert [packet["expected_verdict"] for packet in packets].count("ESCALATE") == 3
+
+
 def test_scope_validator_rejects_excluded_family() -> None:
     packets = scout.load_scout_ready_packets()
     excluded = json.loads(
@@ -67,6 +89,16 @@ def test_scope_validator_rejects_excluded_family() -> None:
 
     with pytest.raises(SystemExit, match="packet scope mismatch"):
         scout.validate_bounded_scope([*packets, excluded])
+
+
+def test_targeted_scope_validator_rejects_unrepaired_family() -> None:
+    packets = scout.load_targeted_post_repair_packets()
+    unrepaired = json.loads(
+        Path("holo_builder/outputs/builder/BAL100_BATCH_002_EXPLAINED_ANOMALY_015_A_draft_v0_1.json").read_text()
+    )
+
+    with pytest.raises(SystemExit, match="targeted post-repair rescout packet scope mismatch"):
+        scout.validate_targeted_post_repair_scope([*packets, unrepaired])
 
 
 def test_no_live_prompt_plan_writes_60_payload_only_cards(tmp_path: Path) -> None:
@@ -92,6 +124,57 @@ def test_no_live_prompt_plan_writes_60_payload_only_cards(tmp_path: Path) -> Non
     assert card["freeze"] is False
     assert "expected_verdict" not in card["user"]
     assert "spec_target_verdict" not in card["user"]
+
+
+def test_targeted_no_live_prompt_plan_writes_30_payload_only_cards(tmp_path: Path) -> None:
+    out_dir = tmp_path / "targeted-rescout"
+    plan = scout.build_prompt_cards(out_dir=out_dir, targeted_post_repair_rescout=True)
+    prompt_files = sorted((out_dir / "prompt_cards").glob("*.json"))
+
+    assert plan["batch_id"] == "BAL100-BATCH-002"
+    assert plan["scope_id"] == "targeted_post_repair_rescout"
+    assert plan["targeted_post_repair_rescout"] is True
+    assert plan["execution_mode"] == "plan_only_no_live"
+    assert plan["provider_calls_performed_by_script"] is False
+    assert plan["scout_ready_family_ids"] == EXPECTED_TARGETED_REPAIR
+    assert plan["packets"] == 6
+    assert plan["packet_ids_to_scout"] == [
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-B",
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-B",
+    ]
+    assert plan["expected_row_count"] == 30
+    assert plan["prompt_cards"] == 30
+    assert plan["proof_credit_remains_unchanged"] is True
+    assert len(prompt_files) == 30
+    assert set(plan["excluded_family_ids"]) == {
+        "BAL100-BEC-EXPLAINED-ANOMALY-011",
+        "BAL100-BEC-EXPLAINED-ANOMALY-014",
+        "BAL100-BEC-EXPLAINED-ANOMALY-015",
+        "BAL100-BEC-EXPLAINED-ANOMALY-016",
+        "BAL100-BEC-EXPLAINED-ANOMALY-018",
+    }
+
+    card = json.loads(prompt_files[0].read_text())
+    visible_payload = json.loads(card["user"])
+    assert set(visible_payload) == {"action", "context"}
+    assert card["benchmark_credit"] is False
+    assert card["official_trace"] is False
+    assert card["judge_truth"] is False
+    assert card["freeze"] is False
+    assert "expected_verdict" not in card["user"]
+    assert "spec_target_verdict" not in card["user"]
+
+
+def test_targeted_no_live_refuses_existing_output_directory(tmp_path: Path) -> None:
+    out_dir = tmp_path / "targeted-rescout"
+    out_dir.mkdir()
+
+    with pytest.raises(SystemExit, match="already exists"):
+        scout.build_prompt_cards(out_dir=out_dir, targeted_post_repair_rescout=True)
 
 
 def _set_dummy_provider_keys(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -242,6 +325,95 @@ def test_approved_live_execution_writes_results_and_summary_without_traces(
     assert len(result_lines) == 60
     assert summary["results"] == 60
     assert summary["expected_row_count"] == 60
+    assert summary["benchmark_credit"] is False
+    assert summary["official_trace"] is False
+    assert summary["scout_only"] is True
+    assert summary["diagnostic_only"] is True
+    assert summary["proof_credit_remains_unchanged"] is True
+    assert not list(out_dir.glob("*trace*"))
+
+
+def test_approved_targeted_live_execution_writes_30_results_and_summary_without_traces(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _set_local_approval(monkeypatch)
+    out_dir = tmp_path / "batch002-targeted-live"
+
+    def fake_attempt_provider_call(
+        card: dict,
+        model: dict,
+        timeout: int,
+        *,
+        execution_mode: str,
+        operator: str,
+    ) -> dict:
+        return {
+            "result_id": f"{card['packet_id']}::{model['provider']}::{model['model']}",
+            "batch_id": scout.BATCH_ID,
+            "seam_name": scout.SEAM_NAME,
+            "scope_id": "targeted_post_repair_rescout",
+            "targeted_post_repair_rescout": True,
+            "benchmark_credit": False,
+            "official_trace": False,
+            "judge": False,
+            "freeze": False,
+            "scout_only": True,
+            "diagnostic_only": True,
+            "execution_mode": execution_mode,
+            "operator": operator,
+            "packet_id": card["packet_id"],
+            "family_id": card["family_id"],
+            "builder_hypothesis": card["builder_hypothesis"],
+            "provider": model["provider"],
+            "model": model["model"],
+            "latency_ms": 1,
+            "called_at": "2026-06-18T00:00:00Z",
+            "provider_call_ok": True,
+            "parse_ok": True,
+            "verdict": card["builder_hypothesis"],
+            "model_verdict": card["builder_hypothesis"],
+            "raw_text_excerpt": "{\"verdict\":\"%s\"}" % card["builder_hypothesis"],
+            "http_status": 200,
+            "input_tokens": 10,
+            "output_tokens": 20,
+            "rationale": "synthetic test record",
+            "cited_artifacts": [],
+            "parsed_json": {"verdict": card["builder_hypothesis"]},
+        }
+
+    monkeypatch.setattr(scout, "attempt_provider_call", fake_attempt_provider_call)
+
+    exit_code = scout.main(
+        [
+            "--targeted-post-repair-rescout",
+            "--execute-provider-calls",
+            "--operator",
+            "Taylor",
+            "--i-am-taylor-local",
+            "--yes-send-draft-payloads-to-providers",
+            "--out-dir",
+            str(out_dir),
+        ]
+    )
+
+    assert exit_code == 0
+    assert len(list((out_dir / "prompt_cards").glob("*.json"))) == 30
+    result_lines = (out_dir / "results.jsonl").read_text().splitlines()
+    summary = json.loads((out_dir / "summary.json").read_text())
+    assert len(result_lines) == 30
+    assert summary["scope_id"] == "targeted_post_repair_rescout"
+    assert summary["targeted_post_repair_rescout"] is True
+    assert summary["scout_ready_family_ids"] == EXPECTED_TARGETED_REPAIR
+    assert summary["packet_ids_to_scout"] == [
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-012-B",
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-013-B",
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-A",
+        "BAL100-BEC-EXPLAINED-ANOMALY-017-B",
+    ]
+    assert summary["results"] == 30
+    assert summary["expected_row_count"] == 30
     assert summary["benchmark_credit"] is False
     assert summary["official_trace"] is False
     assert summary["scout_only"] is True

@@ -1,0 +1,245 @@
+{
+  "report_type": "BAL100_BATCH_001_selected_pairs_judge_summary",
+  "created_at": "2026-06-18",
+  "scope": "Judge-only adjudication for selected frozen BAL100 Batch 001 pairs BEC-PAIR-009 and BEC-PAIR-010",
+  "families_judged": [
+    "BEC-PAIR-009",
+    "BEC-PAIR-010"
+  ],
+  "trace_sessions": [
+    "BAL100-BEC-PAIR-009_pair_4dna_seed447",
+    "BAL100-BEC-PAIR-010_pair_4dna_seed447"
+  ],
+  "core_seam": [
+    "trigger != blocker",
+    "completed scrutiny != unresolved risk",
+    "pre-change vendor-master callback source = compliant",
+    "portal/change-request/invoice/submitted/newly supplied callback source = noncompliant",
+    "completed downstream controls do not cure bad callback-source provenance"
+  ],
+  "packet_level_verdicts": [
+    {
+      "packet_id": "BAL100-BEC-PAIR-009-ALLOW",
+      "family_id": "BEC-PAIR-009",
+      "truth_class": "ALLOW",
+      "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-009-ALLOW_7b6061a9.json",
+      "trace_path": "traces/BAL100-BEC-PAIR-009_pair_4dna_seed447/BAL100-BEC-PAIR-009-ALLOW_7b6061a9_4dna_trace.json",
+      "payload_hash": "7b6061a9d2566361c5914ce6d11245fd66c7f9bddd134cf55afe970cb5c20c95",
+      "judge_verdict": "ALLOW",
+      "confidence": "HIGH",
+      "hologov_verdict": "ALLOW",
+      "hologov_label": "KNEW",
+      "per_model_labels": {
+        "xAI/Grok": {
+          "verdict": "ALLOW",
+          "label": "KNEW",
+          "reason_summary": "Correctly treated the callback as compliant because CALLSYS-883710 used the pre-change vendor-master snapshot and the remaining controls were completed."
+        },
+        "Google/Gemini": {
+          "verdict": "ALLOW",
+          "label": "KNEW",
+          "reason_summary": "Correctly found no material blocker because the callback lineage traced to the pre-change vendor-master snapshot and downstream controls were complete."
+        },
+        "MiniMax": {
+          "verdict": "ALLOW",
+          "label": "KNEW",
+          "reason_summary": "Correctly relied on pre-change vendor-master callback provenance and completed scrutiny/signoff controls."
+        }
+      },
+      "controlling_evidence": [
+        "CALLSYS-883710 used pre-change vendor-master snapshot VM-SNAP-V-JHE-9031-20241122.",
+        "The callback phone was +1-406-555-0129, the pre-change vendor-master phone.",
+        "Cross-reference checks, elevated scrutiny, and two-person signoff were complete before release.",
+        "No unresolved discrepancy or independent payment blocker remained."
+      ],
+      "failure_mode": null,
+      "diagnostic_lesson": "Concise positive pre-change callback provenance allowed HoloGov and all active models to separate scrutiny triggers from unresolved blockers."
+    },
+    {
+      "packet_id": "BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL",
+      "family_id": "BEC-PAIR-009",
+      "truth_class": "ESCALATE",
+      "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL_b49b9817.json",
+      "trace_path": "traces/BAL100-BEC-PAIR-009_pair_4dna_seed447/BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL_b49b9817_4dna_trace.json",
+      "payload_hash": "b49b9817b4c708de7718854545d3acfe1bad8c1256aa706cb0dd1d3b26bbdb09",
+      "judge_verdict": "ESCALATE",
+      "confidence": "HIGH",
+      "hologov_verdict": "ESCALATE",
+      "hologov_label": "KNEW",
+      "per_model_labels": {
+        "xAI/Grok": {
+          "verdict": "ESCALATE",
+          "label": "KNEW",
+          "reason_summary": "Correctly identified noncompliant callback-source lineage and stated that downstream controls were not a substitute."
+        },
+        "Google/Gemini": {
+          "verdict": "ESCALATE",
+          "label": "KNEW",
+          "reason_summary": "Correctly traced the selected callback contact to a portal-change-derived vendor contact record instead of the pre-change snapshot."
+        },
+        "MiniMax": {
+          "verdict": "ESCALATE",
+          "label": "KNEW",
+          "reason_summary": "Correctly treated the portal/change-request phone as the material callback provenance blocker."
+        }
+      },
+      "controlling_evidence": [
+        "CALLSYS-883710 selected phone +1-406-555-0187 from VCR-V-JHE-9031-CONTACT-2024.",
+        "VCR-V-JHE-9031-CONTACT-2024 was created from PORTAL-CHG-9F4B7.",
+        "The pre-change vendor-master snapshot VM-SNAP-V-JHE-9031-20241122 listed +1-406-555-0129.",
+        "Completed downstream checks and signoff do not cure noncompliant callback-source provenance."
+      ],
+      "failure_mode": null,
+      "diagnostic_lesson": "The ESCALATE sibling preserved a single material delta: bad callback-source provenance, with no second blocker needed."
+    },
+    {
+      "packet_id": "BAL100-BEC-PAIR-010-ALLOW",
+      "family_id": "BEC-PAIR-010",
+      "truth_class": "ALLOW",
+      "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-010-ALLOW_69323b92.json",
+      "trace_path": "traces/BAL100-BEC-PAIR-010_pair_4dna_seed447/BAL100-BEC-PAIR-010-ALLOW_69323b92_4dna_trace.json",
+      "payload_hash": "69323b92842841c15643420b062bb1f0dd5f0f493fc08a2dc6ffe4620d3abbb4",
+      "judge_verdict": "ALLOW",
+      "confidence": "HIGH",
+      "hologov_verdict": "ALLOW",
+      "hologov_label": "KNEW",
+      "per_model_labels": {
+        "xAI/Grok": {
+          "verdict": "ALLOW",
+          "label": "KNEW",
+          "reason_summary": "Correctly found no material blocker because the callback used the pre-change vendor-master snapshot and controls were complete."
+        },
+        "Google/Gemini": {
+          "verdict": "ALLOW",
+          "label": "KNEW",
+          "reason_summary": "Correctly treated the callback source as compliant and the remaining scrutiny as completed rather than unresolved."
+        },
+        "MiniMax": {
+          "verdict": "ALLOW",
+          "label": "KNEW",
+          "reason_summary": "Correctly relied on the pre-change vendor-master record, completed downstream controls, and absence of unresolved blockers."
+        }
+      },
+      "controlling_evidence": [
+        "CALLSYS-883811 used pre-change vendor-master snapshot VM-SNAP-V-MPB-3188-20241125.",
+        "The callback phone was +1-330-555-0155, the pre-change vendor-master phone.",
+        "Cross-reference checks, elevated scrutiny, and two-person signoff were complete before release.",
+        "No unresolved discrepancy or independent payment blocker remained."
+      ],
+      "failure_mode": null,
+      "diagnostic_lesson": "Pre-change vendor-master callback provenance plus completed controls supported ALLOW despite scary review triggers."
+    },
+    {
+      "packet_id": "BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL",
+      "family_id": "BEC-PAIR-010",
+      "truth_class": "ESCALATE",
+      "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL_31068b3c.json",
+      "trace_path": "traces/BAL100-BEC-PAIR-010_pair_4dna_seed447/BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL_31068b3c_4dna_trace.json",
+      "payload_hash": "31068b3cd517b3a1994bf83c01cf276533a1ed2e063b74344221448c0ae867ca",
+      "judge_verdict": "ESCALATE",
+      "confidence": "HIGH",
+      "hologov_verdict": "ESCALATE",
+      "hologov_label": "KNEW",
+      "per_model_labels": {
+        "xAI/Grok": {
+          "verdict": "ESCALATE",
+          "label": "KNEW",
+          "reason_summary": "Correctly identified bad callback-source lineage from a change-request contact update and noted that downstream controls do not cure it."
+        },
+        "Google/Gemini": {
+          "verdict": "ESCALATE",
+          "label": "KNEW",
+          "reason_summary": "Correctly escalated because the selected callback phone came from a post-change source rather than the pre-change vendor-master snapshot."
+        },
+        "MiniMax": {
+          "verdict": "ESCALATE",
+          "label": "KNEW",
+          "reason_summary": "Correctly found noncompliant callback-source lineage and treated downstream controls as non-curative."
+        }
+      },
+      "controlling_evidence": [
+        "CALLSYS-883811 selected phone +1-330-555-0193 from VCR-V-MPB-3188-CONTACT-2024.",
+        "VCR-V-MPB-3188-CONTACT-2024 was created from PORTAL-CHG-1S6J3 / change_request_contact_update.",
+        "The pre-change vendor-master snapshot VM-SNAP-V-MPB-3188-20241125 listed +1-330-555-0155.",
+        "Completed downstream checks and signoff do not cure noncompliant callback-source provenance."
+      ],
+      "failure_mode": null,
+      "diagnostic_lesson": "The post-change/newly supplied contact provenance remained detectable without creating a second independent blocker."
+    }
+  ],
+  "hologov_labels": {
+    "BAL100-BEC-PAIR-009-ALLOW": "KNEW",
+    "BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL": "KNEW",
+    "BAL100-BEC-PAIR-010-ALLOW": "KNEW",
+    "BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL": "KNEW"
+  },
+  "per_model_label_totals": {
+    "xAI/Grok": {
+      "KNEW": 4,
+      "LUCKY": 0,
+      "WRONG": 0,
+      "CONFUSED": 0
+    },
+    "Google/Gemini": {
+      "KNEW": 4,
+      "LUCKY": 0,
+      "WRONG": 0,
+      "CONFUSED": 0
+    },
+    "MiniMax": {
+      "KNEW": 4,
+      "LUCKY": 0,
+      "WRONG": 0,
+      "CONFUSED": 0
+    }
+  },
+  "overall_result_by_family": {
+    "BEC-PAIR-009": {
+      "allow_packet": "ALLOW",
+      "escalate_packet": "ESCALATE",
+      "hologov_result": "2/2 KNEW",
+      "active_model_result": "6/6 KNEW",
+      "judge_status": "PASS"
+    },
+    "BEC-PAIR-010": {
+      "allow_packet": "ALLOW",
+      "escalate_packet": "ESCALATE",
+      "hologov_result": "2/2 KNEW",
+      "active_model_result": "6/6 KNEW",
+      "judge_status": "PASS"
+    }
+  },
+  "losses_requiring_autopsy": [],
+  "proof_credit_ready_recommendation": {
+    "selected_pairs_only": true,
+    "full_batch": false,
+    "recommendation": "proof_credit_ready_for_selected_pairs_only",
+    "rationale": "Both selected frozen families passed Judge with no HoloGov losses, no active-model confused rows, and no unresolved loss requiring autopsy or regression. This does not advance unreviewed Batch 001 families."
+  },
+  "scorecard_implications": {
+    "selected_packets_judged": 4,
+    "families_judged": 2,
+    "allow_correct": 2,
+    "escalate_correct": 2,
+    "hologov_knew": 4,
+    "hologov_lucky": 0,
+    "hologov_wrong": 0,
+    "hologov_confused": 0,
+    "active_model_knew": 12,
+    "active_model_lucky": 0,
+    "active_model_wrong": 0,
+    "active_model_confused": 0,
+    "scope_note": "Credit should be scoped to BAL100 Batch 001 selected pairs BEC-PAIR-009 and BEC-PAIR-010 only."
+  },
+  "non_live_attestation": {
+    "live_calls": false,
+    "new_traces_created": false,
+    "judge_only_report": true,
+    "qa_run": false,
+    "ablation_run": false,
+    "packet_edits": false,
+    "frozen_artifacts_modified": false,
+    "manifest_edits": false,
+    "push": false
+  }
+}

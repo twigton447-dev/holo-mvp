@@ -28,6 +28,23 @@ HoloResearch does not ask:
 
 That is HoloBuild's job.
 
+## Solo Research Bootstrap
+
+Until the full HoloResearch harness is executable, a solo model may be used to mine materials and create a frozen research packet for HoloBuild.
+
+This mode is called `SR-Bootstrap`.
+
+Rules:
+
+- label the packet as solo research
+- preserve the same source budget and retrieval policy that HoloResearch would use
+- capture sources, rejected sources, question ledger, contradictions, claim boundaries, and builder handoff
+- validate and hash lock the packet before HoloBuild uses it
+- judge the solo research packet directly
+- do not treat the packet as HoloResearch benchmark credit
+
+SR-Bootstrap is a bridge, a baseline, and a useful production shortcut. It is not the adversarial HoloResearch reactor.
+
 ## Agent Arms
 
 HoloResearch may use controlled research arms:

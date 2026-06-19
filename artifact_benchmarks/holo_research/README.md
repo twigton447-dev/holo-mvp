@@ -21,6 +21,10 @@ Default benchmark mode:
 Optional deep mode:
 - `HR-10`: unlocked only when Gov records unresolved contradictions, missing decisive sources, or domain complexity that justifies the extra spend.
 
+Bootstrap mode:
+- `SR-Bootstrap`: a solo model mines materials and produces a frozen research packet for HoloBuild.
+- This is useful now, but it is labeled as solo research, not HoloResearch benchmark credit.
+
 The research output is not the final article, memo, report, or deck. The output is a sealed research packet that HoloBuild can use.
 
 HoloResearch should surface what is worth solving before HoloBuild solves it.
@@ -50,6 +54,11 @@ Benchmark comparison:
 - HoloResearch creates a research packet from the same seed and source budget.
 - Blind judges score the packets.
 - Downstream test: feed both packets into the same HoloBuild harness and compare final artifact quality.
+
+Practical bootstrap:
+- Use one solo model to create a research packet when the HoloResearch harness is not ready.
+- Validate and hash lock the packet before HoloBuild uses it.
+- Judge the solo research packet directly so later HoloResearch has a baseline to beat.
 
 Research judgment:
 - Judge the research packet directly before HoloBuild sees it.

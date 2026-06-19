@@ -54,6 +54,7 @@ caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --routing-config
 python3 inspect_google_frontier_run.py --latest
 python3 analyze_google_frontier_run.py --latest
 python3 build_benchmark_intelligence.py --latest
+python3 build_hash_locked_lift_rollup.py
 ```
 
 If preflight reports any key as `MISSING`, stop and use your existing local secret setup. Do not paste keys into chat.
@@ -69,6 +70,7 @@ caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite min
 python3 inspect_google_frontier_run.py --latest
 python3 analyze_google_frontier_run.py --latest
 python3 build_benchmark_intelligence.py --latest
+python3 build_hash_locked_lift_rollup.py
 ```
 
 Mini suite solos:
@@ -92,6 +94,7 @@ caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite min
 python3 inspect_google_frontier_run.py --latest
 python3 analyze_google_frontier_run.py --latest
 python3 build_benchmark_intelligence.py --latest
+python3 build_hash_locked_lift_rollup.py
 ```
 
 Then repeat one at a time:
@@ -206,6 +209,14 @@ The analyzer writes chart/report-ready files into the live run folder:
 - `analysis/analysis_summary.md`
 - `analysis/scores.csv`
 - `analysis/judge_rows.csv`
+
+The rollup writes cross-run files into:
+
+- `suite_rollups/hash_locked_lift_rollup.json`
+- `suite_rollups/hash_locked_lift_rollup.md`
+- `suite_rollups/hash_locked_lift_rollup.csv`
+
+Use `aggregate_current_lock_matching_runs` for strict claims. Use older completed runs only as labeled diagnostics.
 - `analysis/criterion_gaps.csv`
 - `analysis/condition_results.csv`
 

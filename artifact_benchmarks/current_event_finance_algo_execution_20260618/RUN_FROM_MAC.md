@@ -48,6 +48,7 @@ python3 run_google_frontier_e2e.py --preflight
 python3 run_google_frontier_e2e.py --no-provider-smoke
 caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --timeout 420
 python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
 ```
 
 If preflight reports any key as `MISSING`, stop and use your existing local secret setup. Do not paste keys into chat.
@@ -70,5 +71,14 @@ The inspector prints:
 - judge summary path
 - Holo-vs-solo gap
 - judge validation flags
+
+The analyzer writes chart/report-ready files into the live run folder:
+
+- `analysis/analysis_summary.json`
+- `analysis/analysis_summary.md`
+- `analysis/scores.csv`
+- `analysis/judge_rows.csv`
+- `analysis/criterion_gaps.csv`
+- `analysis/condition_results.csv`
 
 After it finishes, paste the inspector output or just tell Codex the run id.

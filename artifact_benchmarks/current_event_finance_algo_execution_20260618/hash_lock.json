@@ -17,18 +17,19 @@
     "judge_brief.md": "48dc4870c536aab0bf69c64b29ddd34243b05990adc6fca3aef2184d5ac2a141",
     "judge_panel_frontier_blind.json": "bed31a1ac56410a8163b5e1cff0165126ff0fee0f1cfdecbebf0c5e90e7b5856",
     "judge_rubric_8criteria.json": "05b43cb7d83a84be57279046d73140030c6928584c665cca53060ba48807ba1d",
-    "README.md": "61780a1bdfb0ae1e4a89ef6f8b0a3d1272ca67c32ed3987e787dfaeb12bfad5e",
-    "holo_routing_configs.json": "efdf6d90d5be143e1fc9a6352afb6c54f214e531029e05c82c9b73f4c1a6519a",
-    "solo_model_sweep.json": "78a06b7a9759a14bcc296f8998d2a603253102e884a61c18954c7000ad3539c8"
+    "README.md": "38825f1494138506573b6b53c457eb8b8aefe0e200ab0af7a8c4bf4a0d5d024a",
+    "holo_routing_configs.json": "8722bcddcbd64e32bde6b4b0d4d3eac462f15339c234cb345c2ad07430f48f68",
+    "solo_model_sweep.json": "78a06b7a9759a14bcc296f8998d2a603253102e884a61c18954c7000ad3539c8",
+    "mini_holo_data_trail_matrix.json": "6dbae6d6d2bd6fa2cf8d856c4b019e4fded6c32df1dfd85480b709523ac14eca"
   },
   "runner_file_sha256": {
-    "run_google_frontier_e2e.py": "159e4c84d32a1a77ca8a2d4afdb413cddc2abd99975d1a07aae8cdfa3474dd59",
-    "google_frontier_e2e_live.py": "37e35f626271b7985979bd57138b29562a9f5f5016f620c24d5bdc6f51eeb1d8",
-    "google_frontier_no_provider_smoke.py": "ad2cf424d0fcb72987dfc79e43da946040f4b7fb978bcc38c88e205c482d14c3",
+    "run_google_frontier_e2e.py": "3657f50d2cc9d46cd2ce819c863373469945ed0106c805c6a0bb78b3e0d39fad",
+    "google_frontier_e2e_live.py": "03c2f718f72cb06efc7e568b4d190bbfaad33607295e2076cdc7a46033ee91d1",
+    "google_frontier_no_provider_smoke.py": "b0950cc3cfe7295d740202063026b7420c01fc4e3d2c43538ab626602e0c25bd",
     "inspect_google_frontier_run.py": "e75a2b16ad1ee125d1e0f0ecae8462bba6b0a47f757b97c0afdb694607983070",
     "analyze_google_frontier_run.py": "0c41e33dff442e4faf4c8b33a28bb939e0090e16fe95d66e2937b00b9827908b",
     "build_benchmark_intelligence.py": "8f1a92dbea58bd0d0dba148e334758fa48281cab020ceb9b02ee2c65c6850b99",
-    "RUN_FROM_MAC.md": "297a394c105be14f9e70488d3f032063b64c91f04d85456aee8a24cfe0928de5"
+    "RUN_FROM_MAC.md": "1ec5a1f3fd586a5a4fd3d0c89ff4b277460f44e8f1fe8f50dff2663c1ed7fb11"
   },
   "source_pack_id": "current_event_finance_algo_execution_20260618",
   "cohort": {
@@ -86,9 +87,9 @@
       "outside_judge": true
     }
   ],
-  "combined_packet_hash": "dc3b834217233102d9ad3cd88b71dd370786025c4fdcc121096496aa78bd4225",
-  "combined_runner_hash": "97616ca51c5d3a5e4ae37f07b0f84658a99d690dc34532a9c9f1b7c834d74849",
-  "combined_execution_lock_hash": "e268e79d2ee3d9875187b5572ffecccf601e51eb50e44cd80273e14ea2aca395",
+  "combined_packet_hash": "4a5fe8834a37d5c781643084ce289f376ebf47073ae66fe5166f4d012720981c",
+  "combined_runner_hash": "4d08acc159c949b7005c8fff2649dc8ba9300b1f9898aece44680c633836fac2",
+  "combined_execution_lock_hash": "17f5fd2caaf6d1c0770017fe6755409373731d8ac4e09cad948ca4977f6ec0be",
   "verification": {
     "preflight_command": "python3 run_google_frontier_e2e.py --preflight",
     "no_provider_smoke_command": "python3 run_google_frontier_e2e.py --no-provider-smoke",
@@ -103,7 +104,20 @@
   "holo_routing_config_ids": [
     "order_a_current",
     "order_b_opus_bookend",
-    "order_c_gemini_bookend"
+    "order_c_gemini_bookend",
+    "mini_order_a_openai_bookend",
+    "mini_order_b_haiku_bookend",
+    "mini_order_c_gemini_lite_bookend",
+    "mini_order_d_grok_bookend",
+    "mini_order_e_minimax_bookend"
   ],
-  "holo_order_sensitivity_rule": "Run each routing config separately. Fixed Gov and fixed packet; only Holo analyst order changes."
+  "holo_order_sensitivity_rule": "Run each routing config separately. Fixed Gov and fixed packet; only Holo analyst order changes. For mini-Holo claims, run all mini routing configs or label missing configs explicitly.",
+  "holo_mini_routing_config_ids": [
+    "mini_order_a_openai_bookend",
+    "mini_order_b_haiku_bookend",
+    "mini_order_c_gemini_lite_bookend",
+    "mini_order_d_grok_bookend",
+    "mini_order_e_minimax_bookend"
+  ],
+  "holo_mini_matrix_id": "finance_algo_execution_mini_holo_all5_matrix_v1"
 }

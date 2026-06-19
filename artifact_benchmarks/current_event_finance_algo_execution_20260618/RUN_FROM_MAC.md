@@ -60,7 +60,7 @@ If preflight reports any key as `MISSING`, stop and use your existing local secr
 
 ## Mini Solo Baseline
 
-Use this after the frontier baseline smoke/preflight is clean:
+Use this after the frontier baseline smoke/preflight is clean. This run tests the locked mini solos against the default Holo route selected by `--routing-config`.
 
 ```bash
 python3 run_google_frontier_e2e.py --preflight --solo-suite mini_baseline
@@ -78,6 +78,47 @@ Mini suite solos:
 - `solo_google_flash_lite`: `google:gemini-2.5-flash-lite`
 - `solo_xai_grok_mini`: `xai:grok-3-mini`
 - `solo_minimax_m25_highspeed`: `minimax:MiniMax-M2.5-highspeed`
+
+## Mini-Holo All-5 Matrix
+
+Use this lane to put minis on both sides: every locked mini solo versus all-mini Holo routes. Each route uses all five mini analysts; one model opens and closes because six turns cannot evenly divide five models. Gov is fixed to `openai:gpt-4o-mini` across this diagnostic matrix.
+
+First run:
+
+```bash
+python3 run_google_frontier_e2e.py --preflight --solo-suite mini_baseline --routing-config mini_order_a_openai_bookend
+python3 run_google_frontier_e2e.py --no-provider-smoke --solo-suite mini_baseline --routing-config mini_order_a_openai_bookend
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_order_a_openai_bookend --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+```
+
+Then repeat one at a time:
+
+```bash
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_order_b_haiku_bookend --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_order_c_gemini_lite_bookend --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_order_d_grok_bookend --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_order_e_minimax_bookend --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+```
+
+Do not run these routes in parallel. Each run creates a full data trail: prompt cards, traces, condition manifests, state objects, mission packets, final selection, blind judge packets, judge scores, analysis CSVs, and intelligence chart data.
 
 ## Extended Solo Sweep
 

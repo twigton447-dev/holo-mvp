@@ -1,6 +1,6 @@
 {
   "routing_suite_id": "finance_algo_execution_holo_order_sensitivity_v1",
-  "purpose": "Test whether Holo analyst order changes final artifact quality while keeping the same source pack, same roles, same turn budget, same fixed Opus Gov, same solo baselines, and same blinded judges.",
+  "purpose": "Test whether Holo analyst order changes final artifact quality while keeping the same source pack, same roles, same turn budget, fixed Gov per run, same solo baselines, and same blinded judges.",
   "fixed_governor_model": "anthropic:claude-opus-4-8",
   "law": "Gov is fixed for the full session. Only the Holo analyst model assigned to each role may change across routing configs.",
   "default_routing_config_id": "order_a_current",
@@ -43,7 +43,82 @@
         "google:gemini-3.1-pro-preview"
       ],
       "notes": "Gemini opens and closes. Opus performs both critique turns. OpenAI performs both repair/synthesis turns."
+    },
+    {
+      "routing_config_id": "mini_order_a_openai_bookend",
+      "label": "Mini Holo - OpenAI bookend",
+      "cohort_lane": "mini_all5",
+      "governor_model": "openai:gpt-4o-mini",
+      "analyst_rotation": [
+        "openai:gpt-4o-mini",
+        "anthropic:claude-haiku-4-5-20251001",
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini",
+        "minimax:MiniMax-M2.5-highspeed",
+        "openai:gpt-4o-mini"
+      ],
+      "notes": "All five locked minis participate; OpenAI mini opens and closes. OpenAI mini is fixed Gov for this mini diagnostic lane."
+    },
+    {
+      "routing_config_id": "mini_order_b_haiku_bookend",
+      "label": "Mini Holo - Haiku bookend",
+      "cohort_lane": "mini_all5",
+      "governor_model": "openai:gpt-4o-mini",
+      "analyst_rotation": [
+        "anthropic:claude-haiku-4-5-20251001",
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini",
+        "minimax:MiniMax-M2.5-highspeed",
+        "openai:gpt-4o-mini",
+        "anthropic:claude-haiku-4-5-20251001"
+      ],
+      "notes": "All five locked minis participate; Haiku opens and closes. OpenAI mini remains fixed Gov for comparability across mini routes."
+    },
+    {
+      "routing_config_id": "mini_order_c_gemini_lite_bookend",
+      "label": "Mini Holo - Gemini Flash Lite bookend",
+      "cohort_lane": "mini_all5",
+      "governor_model": "openai:gpt-4o-mini",
+      "analyst_rotation": [
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini",
+        "minimax:MiniMax-M2.5-highspeed",
+        "openai:gpt-4o-mini",
+        "anthropic:claude-haiku-4-5-20251001",
+        "google:gemini-2.5-flash-lite"
+      ],
+      "notes": "All five locked minis participate; Gemini Flash Lite opens and closes. OpenAI mini remains fixed Gov for comparability across mini routes."
+    },
+    {
+      "routing_config_id": "mini_order_d_grok_bookend",
+      "label": "Mini Holo - Grok mini bookend",
+      "cohort_lane": "mini_all5",
+      "governor_model": "openai:gpt-4o-mini",
+      "analyst_rotation": [
+        "xai:grok-3-mini",
+        "minimax:MiniMax-M2.5-highspeed",
+        "openai:gpt-4o-mini",
+        "anthropic:claude-haiku-4-5-20251001",
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini"
+      ],
+      "notes": "All five locked minis participate; Grok mini opens and closes. OpenAI mini remains fixed Gov for comparability across mini routes."
+    },
+    {
+      "routing_config_id": "mini_order_e_minimax_bookend",
+      "label": "Mini Holo - MiniMax bookend",
+      "cohort_lane": "mini_all5",
+      "governor_model": "openai:gpt-4o-mini",
+      "analyst_rotation": [
+        "minimax:MiniMax-M2.5-highspeed",
+        "openai:gpt-4o-mini",
+        "anthropic:claude-haiku-4-5-20251001",
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini",
+        "minimax:MiniMax-M2.5-highspeed"
+      ],
+      "notes": "All five locked minis participate; MiniMax opens and closes. OpenAI mini remains fixed Gov for comparability across mini routes."
     }
   ],
-  "balance_rule": "Each routing config uses the same three analyst models exactly twice. Across the three configs, each model occupies each paired role family once: opening/final, critique/skeptic, and repair/near-final."
+  "balance_rule": "Frontier configs use the same three analyst models exactly twice. Mini configs use all five locked mini analyst models, with one mini bookending each config because six turns cannot evenly divide five models. Run all five mini configs before making route-insensitive mini-Holo claims."
 }

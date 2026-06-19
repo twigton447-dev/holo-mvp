@@ -1,0 +1,104 @@
+{
+  "matrix_id": "finance_algo_execution_mini_holo_all5_matrix_v1",
+  "status": "diagnostic_ready_not_benchmark_credit",
+  "created_at_utc": "2026-06-19T08:10:00Z",
+  "benchmark_credit": false,
+  "public_claim": false,
+  "purpose": "Run every locked mini solo against multiple all-mini Holo routing configs using the same frozen finance packet, same six-turn role flow, same word band, same judges, same validity gates, and complete trace accounting.",
+  "packet_id": "current_event_finance_algo_execution_20260618",
+  "solo_suite_id": "mini_baseline",
+  "solo_conditions": [
+    "solo_openai_mini",
+    "solo_anthropic_haiku",
+    "solo_google_flash_lite",
+    "solo_xai_grok_mini",
+    "solo_minimax_m25_highspeed"
+  ],
+  "holo_routing_configs": [
+    "mini_order_a_openai_bookend",
+    "mini_order_b_haiku_bookend",
+    "mini_order_c_gemini_lite_bookend",
+    "mini_order_d_grok_bookend",
+    "mini_order_e_minimax_bookend"
+  ],
+  "fixed_mini_governor_model": "openai:gpt-4o-mini",
+  "governor_note": "Gov is fixed within each run and held constant across this mini diagnostic matrix. Future Gov-ablation lanes can test MiniMax, Grok mini, Haiku, or Gemini Flash Lite Gov separately.",
+  "one_to_one_comparison_contract": {
+    "same_packet": true,
+    "same_turn_budget": 6,
+    "same_base_turn_prompts": true,
+    "same_final_word_band": true,
+    "same_judge_panel": true,
+    "same_blind_pair_format": true,
+    "same_validity_gate": true,
+    "same_no_browse_generation_policy": true,
+    "holo_extra_context": "Gov Baton Pass plus STATE_OBJECT plus pinned artifacts.",
+    "comparison_unit": "Each routing config generates one Holo final. Each valid mini solo final is paired 1:1 against that Holo final in blinded judge packets."
+  },
+  "required_data_trail_per_run": [
+    "run_manifest.json",
+    "condition_manifests/*.json",
+    "prompt_cards/**/*.json",
+    "traces/**/*.json",
+    "state_objects/**/*.json",
+    "mission_packets/**/*.md",
+    "artifacts/**/*.md",
+    "final_selection/*.json",
+    "judge_packets/*.json",
+    "judge_scores/**/*.json",
+    "sealed/anonymization_map.json",
+    "turn_judge_packets/*.json",
+    "analysis/analysis_summary.json",
+    "analysis/scores.csv",
+    "analysis/judge_rows.csv",
+    "analysis/criterion_gaps.csv",
+    "analysis/condition_results.csv",
+    "intelligence/benchmark_intelligence.json",
+    "intelligence/chart_data.csv"
+  ],
+  "chart_units": [
+    {
+      "chart_id": "mini_route_final_score_bars",
+      "description": "For each mini Holo route, plot Holo final score against every valid mini solo final score."
+    },
+    {
+      "chart_id": "mini_route_gap_heatmap",
+      "description": "Rows are Holo mini route configs; columns are mini solo conditions; cell is Holo minus solo primary no-self-DNA gap."
+    },
+    {
+      "chart_id": "mini_token_cost_vs_gap",
+      "description": "For each route, plot generation token ratio and score lift."
+    },
+    {
+      "chart_id": "mini_invalid_artifact_rate",
+      "description": "Track truncation, missing source IDs, missing required sections, and other deterministic gate failures by mini model."
+    },
+    {
+      "chart_id": "mini_judge_agreement",
+      "description": "Track how many blinded judges prefer Holo over each mini solo for each route."
+    }
+  ],
+  "recommended_run_order": [
+    {
+      "step": 1,
+      "command": "python3 run_google_frontier_e2e.py --preflight --solo-suite mini_baseline --routing-config mini_order_a_openai_bookend"
+    },
+    {
+      "step": 2,
+      "command": "python3 run_google_frontier_e2e.py --no-provider-smoke --solo-suite mini_baseline --routing-config mini_order_a_openai_bookend"
+    },
+    {
+      "step": 3,
+      "command": "caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_order_a_openai_bookend --timeout 900"
+    },
+    {
+      "step": 4,
+      "command": "Inspect, analyze, and build intelligence before running the next mini route."
+    },
+    {
+      "step": 5,
+      "command": "Repeat for mini_order_b_haiku_bookend, mini_order_c_gemini_lite_bookend, mini_order_d_grok_bookend, and mini_order_e_minimax_bookend."
+    }
+  ],
+  "interpretation_rule": "Do not claim mini-Holo route-insensitive lift until all five mini Holo configs have run or the missing configs are clearly labeled as not run. Single-route results are diagnostic."
+}

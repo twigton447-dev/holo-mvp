@@ -115,7 +115,7 @@ def required_provider_envs(
         providers.add(provider_model(provider_model_name)[0])
     for provider_model_name in route["analyst_rotation"]:
         providers.add(provider_model(provider_model_name)[0])
-    providers.add(provider_model(lock["holo_governor_model"])[0])
+    providers.add(provider_model(route.get("governor_model") or lock["holo_governor_model"])[0])
     for judge in judge_panel["judge_models"]:
         providers.add(judge["provider"])
     return {PROVIDER_ENV[provider] for provider in providers}
@@ -151,7 +151,8 @@ def preflight(routing_config_id: str | None, solo_suite_id: str | None, solo_con
         "routing_config_label": route.get("label"),
         "available_routing_configs": lock["holo_routing_config_ids"],
         "holo_analyst_rotation": route["analyst_rotation"],
-        "holo_governor_model": lock["holo_governor_model"],
+        "holo_governor_model": route.get("governor_model") or lock["holo_governor_model"],
+        "holo_cohort_lane": route.get("cohort_lane", "frontier"),
         "holo_governor_continuity_rule": lock["holo_governor_continuity_rule"],
         "turn_prompt_parity": turn_prompt_parity_contract(role_flow, route),
         "parity_note": "Solo and Holo share the same base turn role/instruction; Holo additionally receives Gov Baton/state/artifacts.",

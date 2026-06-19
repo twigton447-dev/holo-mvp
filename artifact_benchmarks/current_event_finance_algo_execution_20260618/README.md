@@ -39,6 +39,16 @@ Solo sweep suites:
 - `mini_baseline` - OpenAI mini, Anthropic Haiku, Gemini Flash Lite, Grok mini, and MiniMax.
 - `extended_solo_sweep` - mapped frontier, robustness, fallback, mini, and MiniMax solos.
 
+Mini-Holo diagnostic matrix:
+
+- `mini_order_a_openai_bookend`
+- `mini_order_b_haiku_bookend`
+- `mini_order_c_gemini_lite_bookend`
+- `mini_order_d_grok_bookend`
+- `mini_order_e_minimax_bookend`
+
+These routes use all five locked minis as Holo analysts with one mini bookending each six-turn run. Run all five before making route-insensitive mini-Holo claims.
+
 Unavailable on this key:
 
 - Anthropic: `claude-fable-5`
@@ -53,6 +63,7 @@ Unavailable on this key:
 - `judge_rubric_8criteria.json` - weighted finance-specific scoring rubric.
 - `judge_panel_frontier_blind.json` - four-judge blinded panel contract with no-self-DNA primary scoring.
 - `solo_model_sweep.json` - immutable suite manifest for frontier, mini, and extended solo runs.
+- `mini_holo_data_trail_matrix.json` - diagnostic matrix for every locked mini solo versus every all-mini Holo route.
 
 - `gov_technical_probe_protocol.json` / `.md` - technical probing requirements for Gov mission packets.
 - `finance_algo_adversarial_role_flow.json` / `.md` - finance-specific six-turn adversarial role order.

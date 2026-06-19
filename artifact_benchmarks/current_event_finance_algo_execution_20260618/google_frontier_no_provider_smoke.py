@@ -94,6 +94,10 @@ def apply_holo_routing_config(role_flow: dict[str, Any], routing_config: dict[st
         routed["turns"][idx]["provider_model"] = provider_model
     routed["routing_config_id"] = routing_config["routing_config_id"]
     routed["routing_config_label"] = routing_config.get("label")
+    if routing_config.get("governor_model"):
+        routed["governor_model"] = routing_config["governor_model"]
+    if routing_config.get("cohort_lane"):
+        routed["cohort_lane"] = routing_config["cohort_lane"]
     return routed
 
 
@@ -906,7 +910,8 @@ def main() -> int:
         "routing_config_id": routing_config["routing_config_id"],
         "routing_config_label": routing_config.get("label"),
         "holo_role_flow": [item["provider_model"] for item in turns],
-        "holo_governor_model": report_brief["holo_turn_design"]["governor_model"],
+        "holo_governor_model": role_flow.get("governor_model") or report_brief["holo_turn_design"]["governor_model"],
+        "holo_cohort_lane": role_flow.get("cohort_lane", "frontier"),
         "holo_architecture_mode": STATE_OBJECT_VERSION,
         "turn_prompt_parity": parity_contract,
         "parity_note": "Solo and Holo share the same base turn role/instruction; Holo additionally receives Gov Baton/state/artifacts.",

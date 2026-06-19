@@ -249,6 +249,10 @@ def apply_holo_routing_config(role_flow: dict[str, Any], routing_config: dict[st
         routed["turns"][idx]["provider_model"] = provider_model_name
     routed["routing_config_id"] = routing_config["routing_config_id"]
     routed["routing_config_label"] = routing_config.get("label")
+    if routing_config.get("governor_model"):
+        routed["governor_model"] = routing_config["governor_model"]
+    if routing_config.get("cohort_lane"):
+        routed["cohort_lane"] = routing_config["cohort_lane"]
     return routed
 
 
@@ -1783,7 +1787,7 @@ def run_holo_condition(
     traces: list[dict[str, Any]] = []
     turn_texts: dict[int, str] = {}
     state_objects: dict[int, dict[str, Any]] = {}
-    gov_provider_model = report_brief["holo_turn_design"]["governor_model"]
+    gov_provider_model = role_flow.get("governor_model") or report_brief["holo_turn_design"]["governor_model"]
     gov_provider, _ = provider_model(gov_provider_model)
     for role_item in role_flow["turns"]:
         turn = int(role_item["turn"])
@@ -2587,8 +2591,9 @@ def run(args: argparse.Namespace) -> int:
         "solo_suite_id": solo_suite_id,
         "routing_config_id": routing_config["routing_config_id"],
         "routing_config_label": routing_config.get("label"),
+        "holo_cohort_lane": role_flow.get("cohort_lane", "frontier"),
         "holo_analyst_rotation": routing_config["analyst_rotation"],
-        "holo_governor_model": report_brief["holo_turn_design"]["governor_model"],
+        "holo_governor_model": role_flow.get("governor_model") or report_brief["holo_turn_design"]["governor_model"],
         "hashes": hashes,
         "conditions": [*solo_conditions.keys(), "holo_frontier_gov"],
         "solo_condition_scope": list(solo_conditions.keys()),

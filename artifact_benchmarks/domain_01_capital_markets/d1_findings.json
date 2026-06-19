@@ -1,0 +1,79 @@
+{
+  "generated_at_utc": "2026-06-19T19:45:52Z",
+  "domain_id": "capital_markets_trade_shock_execution",
+  "current_lock_run": "holo_factory_live_20260619T180210Z",
+  "decision": "Finish current-lock final judging and validity-adjusted rollup before running D2 or making a headline lift claim.",
+  "evidence_classes": [
+    {
+      "name": "current_lock_operational",
+      "status": "strong_for_operations_weak_for_quality_claim",
+      "summary": "The current HoloFactory frontier D1 run completed generation, packet assembly, final pair packets, turn pair packets, traces, and deterministic validation."
+    },
+    {
+      "name": "current_lock_scoring",
+      "status": "incomplete",
+      "summary": "2 of 12 expected final judge scores are present."
+    },
+    {
+      "name": "historical_diagnostic_lift",
+      "status": "directional_only",
+      "summary": "Historical runs show 10.713% mean lift all rows and 13.808% clean lift, but no rows match the current lock."
+    }
+  ],
+  "current_lock_quality_state": {
+    "conditions": 4,
+    "valid_finals": 2,
+    "invalid_finals": 2,
+    "invalid_conditions": [
+      {
+        "condition": "solo_anthropic",
+        "flags": "missing_required_section:risk compliance and audit controls",
+        "provider_model": "anthropic:claude-opus-4-8"
+      },
+      {
+        "condition": "solo_google",
+        "flags": "word_count_out_of_band:3798",
+        "provider_model": "google:gemini-3.1-pro-preview"
+      }
+    ],
+    "raw_observed_score_summary": {
+      "rows": 2,
+      "pairs_scored": [
+        "solo_anthropic"
+      ],
+      "mean_gap": -0.03,
+      "mean_percent_lift": -0.146,
+      "claimable": false
+    },
+    "validity_adjusted_observed_score_summary": {
+      "rows": 2,
+      "mean_raw_gap": -0.03,
+      "mean_raw_percent_lift": -0.146,
+      "mean_adjusted_gap": 0.68,
+      "mean_adjusted_percent_lift": 8.5,
+      "policy_note": "Validity-adjusted scores preserve raw judge scores and apply deterministic caps only when revalidation flagged invalid finals."
+    }
+  },
+  "token_and_latency_state": {
+    "holo_tokens": 298740,
+    "mean_solo_tokens": 92996.0,
+    "holo_vs_mean_solo_token_multiple": 3.212,
+    "run_total_tokens": 577728,
+    "run_latency_minutes": 31.585
+  },
+  "findings": [
+    "D1 generation is operationally real: the current HoloFactory frontier run completed all four generation conditions and produced judge packets.",
+    "D1 current-lock quality scoring is not complete: only the Anthropic solo pair has any parsed judge scores, and only two judges are present.",
+    "The four-judge law changes the score gap: current D1 expects twelve final judge scores, not nine.",
+    "Raw current-lock scores presently show a near tie on the Anthropic pair, but the Anthropic solo final is deterministically invalid for missing the required risk/compliance/audit section.",
+    "Under the proposed deterministic validity cap, the existing Anthropic-pair sample flips from a raw near tie to a Holo advantage; this remains non-claimable until all pairs and judges are scored.",
+    "Historical D1 evidence supports directional Holo lift, but it must be labeled diagnostic because it does not match the current run lock.",
+    "For public or client-facing claims, report raw quality, validity-adjusted quality, and provider reliability as separate scores."
+  ],
+  "next_actions": [
+    "Score the remaining current-lock final judge queue.",
+    "Regenerate this D1 evidence board after scoring.",
+    "Only then decide whether D1 is ready to promote from operational evidence to benchmark-credit evidence.",
+    "Keep D2-D5 packet generation paused until D1 final scoring is closed or explicitly accepted as partial."
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema_id": "holoresearch_research_packet_v0_1",
+  "status": "doctrine_locked_candidate",
+  "required_top_level_fields": [
+    "packet_id",
+    "domain",
+    "seed_material_hash",
+    "research_mode",
+    "source_budget",
+    "turn_budget",
+    "research_thesis",
+    "question_ledger",
+    "source_ledger",
+    "contradiction_ledger",
+    "insight_map",
+    "open_gaps",
+    "builder_implications",
+    "claim_boundaries",
+    "confidence_limits",
+    "gov_stop_or_unlock_decision"
+  ],
+  "research_mode_values": [
+    "locked_packet_no_browse",
+    "web_enabled_controlled_retrieval"
+  ],
+  "question_ledger_item": {
+    "question": "string",
+    "why_it_matters": "string",
+    "decision_relevance": "high|medium|low",
+    "evidence_found": "array",
+    "contradictions": "array",
+    "status": "resolved|partially_resolved|open",
+    "builder_implication": "string"
+  },
+  "source_ledger_item": {
+    "source_id": "string",
+    "title": "string",
+    "source_type": "string",
+    "url": "string|null",
+    "accessed_at": "string|null",
+    "retrieval_query": "string|null",
+    "excerpt": "string",
+    "claims_supported": "array",
+    "claims_contradicted": "array",
+    "confidence": "high|medium|low",
+    "limitations": "string"
+  },
+  "validity_gates": [
+    "required fields present",
+    "source IDs unique",
+    "no unsupported source claims",
+    "open gaps explicitly marked",
+    "builder implications present",
+    "mode-specific source policy followed",
+    "hash lock present before benchmark scoring"
+  ]
+}

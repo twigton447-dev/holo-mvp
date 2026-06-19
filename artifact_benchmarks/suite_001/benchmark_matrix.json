@@ -50,7 +50,48 @@
         "google:gemini-3.1-pro-preview"
       ],
       "holo_governor_model": "anthropic:claude-opus-4-8",
-      "holo_governor_continuity_rule": "Fixed for the full session; never rotated by turn. Gov is a role, not an extra model slot, so the Gov model may also appear in analyst, solo, and judge cohorts."
+      "holo_governor_continuity_rule": "Fixed for the full session; never rotated by turn. Gov is a role, not an extra model slot, so the Gov model may also appear in analyst, solo, and judge cohorts.",
+      "holo_routing_suite_id": "finance_algo_execution_holo_order_sensitivity_v1",
+      "holo_routing_default_config_id": "order_a_current",
+      "holo_order_sensitivity_configs": [
+        {
+          "routing_config_id": "order_a_current",
+          "label": "Current baseline order",
+          "analyst_rotation": [
+            "openai:gpt-5.5",
+            "google:gemini-3.1-pro-preview",
+            "anthropic:claude-opus-4-8",
+            "google:gemini-3.1-pro-preview",
+            "anthropic:claude-opus-4-8",
+            "openai:gpt-5.5"
+          ]
+        },
+        {
+          "routing_config_id": "order_b_opus_bookend",
+          "label": "Opus bookend order",
+          "analyst_rotation": [
+            "anthropic:claude-opus-4-8",
+            "openai:gpt-5.5",
+            "google:gemini-3.1-pro-preview",
+            "openai:gpt-5.5",
+            "google:gemini-3.1-pro-preview",
+            "anthropic:claude-opus-4-8"
+          ]
+        },
+        {
+          "routing_config_id": "order_c_gemini_bookend",
+          "label": "Gemini bookend order",
+          "analyst_rotation": [
+            "google:gemini-3.1-pro-preview",
+            "anthropic:claude-opus-4-8",
+            "openai:gpt-5.5",
+            "anthropic:claude-opus-4-8",
+            "openai:gpt-5.5",
+            "google:gemini-3.1-pro-preview"
+          ]
+        }
+      ],
+      "order_sensitivity_rule": "Run each routing config separately with fixed Opus Gov, same solos, same judges, same packet, and same six-turn role flow."
     },
     {
       "cohort_id": "frontier_2_model_ablation",

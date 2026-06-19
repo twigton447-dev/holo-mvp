@@ -12,7 +12,7 @@ Solos:
 - `solo_anthropic`: `anthropic:claude-opus-4-8`
 - `solo_google`: `google:gemini-3.1-pro-preview`
 
-Holo:
+Holo analyst order A, current baseline:
 
 1. `openai:gpt-5.5`
 2. `google:gemini-3.1-pro-preview`
@@ -23,12 +23,9 @@ Holo:
 
 Gov:
 
-1. none
-2. `google:gemini-3.1-pro-preview`
-3. `openai:gpt-5.5`
-4. `anthropic:claude-opus-4-8`
-5. `google:gemini-3.1-pro-preview`
-6. `openai:gpt-5.5`
+Fixed for the full Holo session: `anthropic:claude-opus-4-8`.
+
+Gov is a role, not an extra model slot. Opus may also appear as analyst, solo, and judge. Analyst order can be varied with `--routing-config`, but Gov never rotates inside a run.
 
 Judges:
 
@@ -46,12 +43,28 @@ git pull --ff-only
 cd artifact_benchmarks/current_event_finance_algo_execution_20260618
 python3 run_google_frontier_e2e.py --preflight
 python3 run_google_frontier_e2e.py --no-provider-smoke
-caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --timeout 420
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --routing-config order_a_current --timeout 900
 python3 inspect_google_frontier_run.py --latest
 python3 analyze_google_frontier_run.py --latest
 ```
 
 If preflight reports any key as `MISSING`, stop and use your existing local secret setup. Do not paste keys into chat.
+
+## Order-Sensitivity Runs
+
+Run these only after the baseline run completes cleanly:
+
+```bash
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --routing-config order_b_opus_bookend --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --routing-config order_c_gemini_bookend --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+```
+
+Use one run at a time. Do not run A, B, and C in parallel.
 
 ## Expected Output
 

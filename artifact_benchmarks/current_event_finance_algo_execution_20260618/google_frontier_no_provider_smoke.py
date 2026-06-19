@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
@@ -41,6 +42,29 @@ def sha_text(text: str) -> str:
 
 def sha_file(path: Path) -> str:
     return sha_text(read_text(path))
+
+
+def load_routing_config(routing_config_id: str | None) -> dict[str, Any]:
+    suite = read_json(PACKET_DIR / "holo_routing_configs.json")
+    selected = routing_config_id or suite["default_routing_config_id"]
+    for config in suite["routing_configs"]:
+        if config["routing_config_id"] == selected:
+            return config
+    valid = ", ".join(config["routing_config_id"] for config in suite["routing_configs"])
+    raise RuntimeError(f"unknown_routing_config:{selected}; valid={valid}")
+
+
+def apply_holo_routing_config(role_flow: dict[str, Any], routing_config: dict[str, Any]) -> dict[str, Any]:
+    turns = role_flow["turns"]
+    rotation = routing_config["analyst_rotation"]
+    if len(rotation) != len(turns):
+        raise RuntimeError("routing_config_must_have_one_model_per_turn")
+    routed = json.loads(json.dumps(role_flow))
+    for idx, provider_model in enumerate(rotation):
+        routed["turns"][idx]["provider_model"] = provider_model
+    routed["routing_config_id"] = routing_config["routing_config_id"]
+    routed["routing_config_label"] = routing_config.get("label")
+    return routed
 
 
 def utc_stamp() -> str:
@@ -236,10 +260,16 @@ def word_gate(text: str, min_words: int, max_words: int) -> dict[str, Any]:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--routing-config", default=None)
+    args = parser.parse_args()
+
     source_pack = read_json(PACKET_DIR / "source_pack.json")
     report_brief = read_json(PACKET_DIR / "report_brief.json")
     gov_protocol = read_json(PACKET_DIR / "gov_technical_probe_protocol.json")
-    role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
+    base_role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
+    routing_config = load_routing_config(args.routing_config)
+    role_flow = apply_holo_routing_config(base_role_flow, routing_config)
     run_prompt = read_text(PACKET_DIR / "holo_frontier_run_prompt.md")
     judge_brief = read_text(PACKET_DIR / "judge_brief.md")
 
@@ -247,13 +277,14 @@ def main() -> int:
     min_words, max_words = report_brief["deliverable_requirements"]["target_length_words"]
     target_words = 2900
     turns = role_flow["turns"]
-    run_id = f"no_provider_smoke_finance_algo_execution_{utc_stamp()}"
+    run_id = f"no_provider_smoke_finance_algo_execution_{routing_config['routing_config_id']}_{utc_stamp()}"
     root = PACKET_DIR / "runs" / run_id
 
     hashes = {
         "source_pack": sha_file(PACKET_DIR / "source_pack.json"),
         "report_brief": sha_file(PACKET_DIR / "report_brief.json"),
         "role_flow": sha_file(PACKET_DIR / "finance_algo_adversarial_role_flow.json"),
+        "routing_configs": sha_file(PACKET_DIR / "holo_routing_configs.json"),
         "gov_protocol": sha_file(PACKET_DIR / "gov_technical_probe_protocol.json"),
         "run_prompt": sha_text(run_prompt),
         "judge_brief": sha_text(judge_brief),
@@ -491,7 +522,10 @@ def main() -> int:
         "domain": report_brief["domain"],
         "conditions": [*SOLO_CONDITIONS.keys(), "holo_frontier_gov"],
         "solo_models": SOLO_CONDITIONS,
+        "routing_config_id": routing_config["routing_config_id"],
+        "routing_config_label": routing_config.get("label"),
         "holo_role_flow": [item["provider_model"] for item in turns],
+        "holo_governor_model": report_brief["holo_turn_design"]["governor_model"],
         "word_count_band": [min_words, max_words],
         "hashes": hashes,
         "counts": {

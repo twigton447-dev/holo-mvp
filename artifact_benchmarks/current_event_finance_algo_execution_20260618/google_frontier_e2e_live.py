@@ -119,12 +119,36 @@ def provider_model(provider_model: str) -> tuple[str, str]:
     return provider, model
 
 
+def load_routing_config(routing_config_id: str | None) -> dict[str, Any]:
+    suite = read_json(PACKET_DIR / "holo_routing_configs.json")
+    selected = routing_config_id or suite["default_routing_config_id"]
+    for config in suite["routing_configs"]:
+        if config["routing_config_id"] == selected:
+            return config
+    valid = ", ".join(config["routing_config_id"] for config in suite["routing_configs"])
+    raise RuntimeError(f"unknown_routing_config:{selected}; valid={valid}")
+
+
+def apply_holo_routing_config(role_flow: dict[str, Any], routing_config: dict[str, Any]) -> dict[str, Any]:
+    turns = role_flow["turns"]
+    rotation = routing_config["analyst_rotation"]
+    if len(rotation) != len(turns):
+        raise RuntimeError("routing_config_must_have_one_model_per_turn")
+    routed = json.loads(json.dumps(role_flow))
+    for idx, provider_model_name in enumerate(rotation):
+        routed["turns"][idx]["provider_model"] = provider_model_name
+    routed["routing_config_id"] = routing_config["routing_config_id"]
+    routed["routing_config_label"] = routing_config.get("label")
+    return routed
+
+
 def packet_hashes() -> dict[str, str]:
     files = {
         "source_pack": "source_pack.json",
         "report_brief": "report_brief.json",
         "gov_protocol": "gov_technical_probe_protocol.json",
         "role_flow": "finance_algo_adversarial_role_flow.json",
+        "routing_configs": "holo_routing_configs.json",
         "judge_rubric": "judge_rubric_8criteria.json",
         "judge_panel": "judge_panel_frontier_blind.json",
         "run_prompt": "holo_frontier_run_prompt.md",
@@ -133,7 +157,7 @@ def packet_hashes() -> dict[str, str]:
     return {key: sha_file(PACKET_DIR / name) for key, name in files.items()}
 
 
-def frozen_generation_payload() -> str:
+def frozen_generation_payload(*, role_flow: dict[str, Any], routing_config: dict[str, Any]) -> str:
     payload = {
         "benchmark_credit": False,
         "public_claim": False,
@@ -141,7 +165,8 @@ def frozen_generation_payload() -> str:
         "source_pack": read_json(PACKET_DIR / "source_pack.json"),
         "report_brief": read_json(PACKET_DIR / "report_brief.json"),
         "gov_technical_probe_protocol": read_json(PACKET_DIR / "gov_technical_probe_protocol.json"),
-        "role_flow": read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json"),
+        "role_flow": role_flow,
+        "holo_routing_config": routing_config,
     }
     return json.dumps(payload, indent=2, sort_keys=True)
 
@@ -1500,7 +1525,9 @@ def run(args: argparse.Namespace) -> int:
 
     source_pack = read_json(PACKET_DIR / "source_pack.json")
     report_brief = read_json(PACKET_DIR / "report_brief.json")
-    role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
+    base_role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
+    routing_config = load_routing_config(args.routing_config)
+    role_flow = apply_holo_routing_config(base_role_flow, routing_config)
     judge_panel = read_json(PACKET_DIR / "judge_panel_frontier_blind.json")
     rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
     if len(role_flow["turns"]) != 6:
@@ -1510,10 +1537,10 @@ def run(args: argparse.Namespace) -> int:
     if sum(item["weight"] for item in rubric["criteria"]) != 100:
         raise RuntimeError("rubric_weights_must_sum_to_100")
 
-    run_id = args.run_id or f"full_frontier_finance_algo_execution_{utc_stamp()}"
+    run_id = args.run_id or f"full_frontier_finance_algo_execution_{routing_config['routing_config_id']}_{utc_stamp()}"
     run_root = PACKET_DIR / "runs" / run_id
     run_root.mkdir(parents=True, exist_ok=True)
-    payload = frozen_generation_payload()
+    payload = frozen_generation_payload(role_flow=role_flow, routing_config=routing_config)
     judge_payload_text = frozen_judge_payload()
     hashes = packet_hashes()
     all_traces: list[dict[str, Any]] = []
@@ -1528,6 +1555,10 @@ def run(args: argparse.Namespace) -> int:
         "provider_env": status,
         "models": {p: cfg["model"] for p, cfg in PROVIDERS.items()},
         "source_pack_id": source_pack["packet_id"],
+        "routing_config_id": routing_config["routing_config_id"],
+        "routing_config_label": routing_config.get("label"),
+        "holo_analyst_rotation": routing_config["analyst_rotation"],
+        "holo_governor_model": report_brief["holo_turn_design"]["governor_model"],
         "hashes": hashes,
         "conditions": [*SOLO_CONDITIONS.keys(), "holo_frontier_gov"],
         "judge_panel": judge_panel["judge_panel_id"],
@@ -1650,6 +1681,7 @@ def main() -> int:
     parser.add_argument("--run-live", action="store_true")
     parser.add_argument("--run-id")
     parser.add_argument("--timeout", type=int, default=360)
+    parser.add_argument("--routing-config", default=None)
     args = parser.parse_args()
     if not args.preflight and not args.run_live:
         print(

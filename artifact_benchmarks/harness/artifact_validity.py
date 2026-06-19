@@ -7,6 +7,7 @@ from typing import Any
 
 
 FINAL_PUNCTUATION = ('.', '!', '?', ')', ']', '"', "'")
+TRAILING_MARKDOWN_MARKERS = ('*', '_', '`')
 PROCESS_RESIDUE_PATTERNS = (
     r'\bprobe\s+\d+\s+answered\b',
     r'\bturn\s+\d+\s+mission\b',
@@ -29,6 +30,9 @@ def ends_cleanly(text: str) -> bool:
     stripped = text.rstrip()
     if not stripped:
         return False
+    if stripped.endswith(FINAL_PUNCTUATION):
+        return True
+    stripped = stripped.rstrip(''.join(TRAILING_MARKDOWN_MARKERS))
     if stripped.endswith(FINAL_PUNCTUATION):
         return True
     return bool(re.search(r'```$', stripped))

@@ -23,6 +23,7 @@ Core law:
 - Same source budget.
 - Same turn budget.
 - Same retrieval policy.
+- Same Gov dispatch rules.
 - Same scoring rubric.
 - All source claims captured with provenance.
 - No hidden browsing outside the run contract.
@@ -30,6 +31,7 @@ Core law:
 Primary artifact:
 - `research_packet.json`
 - `research_packet.md`
+- `dispatch_ledger.json`
 - `source_ledger.json`
 - `question_ledger.json`
 - `contradiction_ledger.json`

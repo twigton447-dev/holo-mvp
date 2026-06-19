@@ -9,6 +9,7 @@
     "source_budget",
     "turn_budget",
     "research_thesis",
+    "dispatch_ledger",
     "question_ledger",
     "source_ledger",
     "contradiction_ledger",
@@ -32,6 +33,21 @@
     "status": "resolved|partially_resolved|open",
     "builder_implication": "string"
   },
+  "dispatch_ledger_item": {
+    "turn": "integer",
+    "agent_role": "string",
+    "research_mission": "string",
+    "why_it_matters": "string",
+    "search_angles": "array",
+    "source_classes_to_seek": "array",
+    "contradiction_to_hunt": "string",
+    "source_budget": "integer",
+    "stop_condition": "string",
+    "returned_source_ids": "array",
+    "rejected_sources": "array",
+    "thesis_change": "string",
+    "builder_use_or_avoid": "string"
+  },
   "source_ledger_item": {
     "source_id": "string",
     "title": "string",
@@ -47,6 +63,7 @@
   },
   "validity_gates": [
     "required fields present",
+    "dispatch ledger present in web-enabled mode",
     "source IDs unique",
     "no unsupported source claims",
     "open gaps explicitly marked",

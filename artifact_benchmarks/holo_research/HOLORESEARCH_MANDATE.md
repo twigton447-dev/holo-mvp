@@ -30,6 +30,34 @@ HoloResearch may use controlled research arms:
 
 These arms must be governed by a run contract. Free browsing is not benchmark credit.
 
+## Gov Dispatch Doctrine
+
+In web-enabled mode, Gov pushes HoloAgents outward.
+
+Gov does not simply ask agents to think. Gov assigns research missions:
+
+- the question to resolve
+- why the question matters
+- search angles to test
+- source classes to seek
+- contradiction or counter-source to hunt
+- evidence standard required
+- source budget and stop condition
+- expected return format
+
+Each dispatched HoloAgent must return:
+
+- sources found
+- sources rejected and why
+- claims supported
+- claims contradicted
+- confidence level
+- unresolved gaps
+- what changed in the research thesis
+- what HoloBuild should use or avoid
+
+The point is not to collect more links. The point is to make the team seek the materials that can change the answer.
+
 ## Default Turn Law
 
 Default mode is `HR-6`.
@@ -115,7 +143,9 @@ Locked packet mode:
 
 Web-enabled research mode:
 - Gov sets query budget and source budget before retrieval
+- Gov dispatches HoloAgents with explicit outbound research missions
 - all retrieved sources are captured
+- rejected sources and failed search paths are logged when they affect confidence
 - URL, access timestamp, title, source type, excerpt, and claim map are stored
 - sources are frozen before HoloBuild sees them
 - HoloBuild does not browse during build unless a separate benchmark lane explicitly permits it

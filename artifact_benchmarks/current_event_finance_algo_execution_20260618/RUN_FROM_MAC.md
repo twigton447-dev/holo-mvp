@@ -32,6 +32,9 @@ Judges:
 - OpenAI `gpt-5.5`
 - Anthropic `claude-opus-4-8`
 - Google `gemini-3.1-pro-preview`
+- xAI `grok-4.3`
+
+Primary scoring excludes judge rows where the judge provider is the same provider as the solo model being evaluated. Excluded rows stay available as diagnostics.
 
 ## Commands
 
@@ -46,6 +49,7 @@ python3 run_google_frontier_e2e.py --no-provider-smoke
 caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --routing-config order_a_current --timeout 900
 python3 inspect_google_frontier_run.py --latest
 python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
 ```
 
 If preflight reports any key as `MISSING`, stop and use your existing local secret setup. Do not paste keys into chat.
@@ -58,10 +62,12 @@ Run these only after the baseline run completes cleanly:
 caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --routing-config order_b_opus_bookend --timeout 900
 python3 inspect_google_frontier_run.py --latest
 python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
 
 caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --routing-config order_c_gemini_bookend --timeout 900
 python3 inspect_google_frontier_run.py --latest
 python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
 ```
 
 Use one run at a time. Do not run A, B, and C in parallel.
@@ -93,5 +99,11 @@ The analyzer writes chart/report-ready files into the live run folder:
 - `analysis/judge_rows.csv`
 - `analysis/criterion_gaps.csv`
 - `analysis/condition_results.csv`
+
+The intelligence builder writes client-readable benchmark intelligence and chart data:
+
+- `intelligence/benchmark_intelligence.json`
+- `intelligence/benchmark_intelligence.md`
+- `intelligence/chart_data.csv`
 
 After it finishes, paste the inspector output or just tell Codex the run id.

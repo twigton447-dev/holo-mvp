@@ -5,7 +5,7 @@ Created: `2026-06-18T22:39:48.375563+00:00`
 
 This packet is a frozen-context draft for a finance-facing HoloBuild report run. The intended artifact is a highly complex institutional report on adaptive execution intelligence for algorithmic trading under current June 2026 market conditions.
 
-No full report generation has been run from this packet yet. A tiny live smoke transmitted the frozen packet to the frontier providers with `benchmark_credit: false`.
+Live proof-of-concept report generation has been run from this packet with `benchmark_credit: false` and `public_claim: false`. Use the generated intelligence reports as diagnostics until a full frozen benchmark run is completed.
 
 ## Intended Model Policy
 
@@ -41,10 +41,11 @@ Unavailable on this key:
 - `holo_frontier_run_prompt.md` - draft prompt for the generation run.
 - `judge_brief.md` - human-readable judge scoring brief.
 - `judge_rubric_8criteria.json` - weighted finance-specific scoring rubric.
-- `judge_panel_frontier_blind.json` - three-frontier blinded judge panel contract.
+- `judge_panel_frontier_blind.json` - four-judge blinded panel contract with no-self-DNA primary scoring.
 
 - `gov_technical_probe_protocol.json` / `.md` - technical probing requirements for Gov mission packets.
 - `finance_algo_adversarial_role_flow.json` / `.md` - finance-specific six-turn adversarial role order.
+- `build_benchmark_intelligence.py` - builds the client-readable intelligence report and chart-ready data from completed run artifacts.
 
 ## Approval Boundary
 

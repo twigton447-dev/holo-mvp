@@ -756,8 +756,19 @@ def weighted_score(doc: dict[str, Any], rubric: dict[str, Any]) -> float:
     return round(value / total, 3)
 
 
+def ensure_judge_score_shape(score: dict[str, Any]) -> None:
+    for doc_key in ["document_x", "document_y"]:
+        doc = score.get(doc_key)
+        if not isinstance(doc, dict):
+            score[doc_key] = {"criterion_scores": []}
+        score[doc_key].setdefault("criterion_scores", [])
+    score.setdefault("comparative_verdict", {})
+    score.setdefault("validation_flags", [])
+
+
 def validate_judge_score(score: dict[str, Any], rubric: dict[str, Any]) -> list[str]:
     flags: list[str] = []
+    ensure_judge_score_shape(score)
     criteria = [item["id"] for item in rubric["criteria"]]
     for doc_key in ["document_x", "document_y"]:
         doc = score.get(doc_key) or {}
@@ -1299,6 +1310,11 @@ def judge_pair(
     provider = judge["provider"]
     judge_id = judge["judge_id"]
     pair_id = packet["judge_packet_id"]
+    score_path = run_root / "judge_scores" / pair_id / f"{judge_id}.json"
+    trace_path = run_root / "traces" / "judges" / pair_id / f"{judge_id}.json"
+    if score_path.exists() and trace_path.exists():
+        return read_json(score_path), [read_json(trace_path)]
+
     system = judge_system(judge_id)
     user = judge_prompt(
         payload=judge_payload_text,
@@ -1359,13 +1375,18 @@ def judge_pair(
         traces.append(repair_trace)
 
     rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
+    ensure_judge_score_shape(parsed)
     validation_flags = validate_judge_score(parsed, rubric)
     parsed.setdefault("validation_flags", [])
     parsed["validation_flags"].extend(validation_flags)
-    if "weighted_score_1_10" not in parsed["document_x"]:
-        parsed["document_x"]["weighted_score_1_10"] = weighted_score(parsed["document_x"], rubric)
-    if "weighted_score_1_10" not in parsed["document_y"]:
-        parsed["document_y"]["weighted_score_1_10"] = weighted_score(parsed["document_y"], rubric)
+    for doc_key in ["document_x", "document_y"]:
+        if "weighted_score_1_10" in parsed[doc_key]:
+            continue
+        try:
+            parsed[doc_key]["weighted_score_1_10"] = weighted_score(parsed[doc_key], rubric)
+        except Exception:
+            parsed[doc_key]["weighted_score_1_10"] = None
+            parsed["validation_flags"].append(f"{doc_key}_weighted_score_unavailable")
     parsed["_harness"] = {
         "judge_packet_id": pair_id,
         "judge_provider": provider,
@@ -1373,7 +1394,6 @@ def judge_pair(
         "parse_repair_attempted": parse_repair_attempted,
         "raw_output_sha256": sha_text(raw_text),
     }
-    score_path = run_root / "judge_scores" / pair_id / f"{judge_id}.json"
     write_json(score_path, parsed)
     trace = save_call(
         run_root,
@@ -1400,6 +1420,7 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
     pair_summaries = []
     overall_holo_scores = []
     overall_solo_scores = []
+    skipped_judge_rows = []
     rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
     criteria_ids = [item["id"] for item in rubric["criteria"]]
     criterion_acc: dict[str, list[float]] = {cid: [] for cid in criteria_ids}
@@ -1413,15 +1434,39 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
             score = read_json(score_path)
             x_condition = pair_map["document_x_condition"]
             y_condition = pair_map["document_y_condition"]
-            x_score = float(score["document_x"]["weighted_score_1_10"])
-            y_score = float(score["document_y"]["weighted_score_1_10"])
+            x_score_raw = score.get("document_x", {}).get("weighted_score_1_10")
+            y_score_raw = score.get("document_y", {}).get("weighted_score_1_10")
+            if x_score_raw is None or y_score_raw is None:
+                skipped_judge_rows.append(
+                    {
+                        "pair_id": pair_id,
+                        "judge_id": score.get("judge_id"),
+                        "reason": "missing_weighted_score",
+                        "validation_flags": score.get("validation_flags", []),
+                    }
+                )
+                continue
+            x_score = float(x_score_raw)
+            y_score = float(y_score_raw)
             holo_score = x_score if x_condition == "holo_frontier_gov" else y_score
             solo_score = x_score if x_condition != "holo_frontier_gov" else y_score
             holo_scores.append(holo_score)
             solo_scores.append(solo_score)
             for cid in criteria_ids:
-                x_item = next(item for item in score["document_x"]["criterion_scores"] if item["criterion_id"] == cid)
-                y_item = next(item for item in score["document_y"]["criterion_scores"] if item["criterion_id"] == cid)
+                try:
+                    x_item = next(item for item in score["document_x"]["criterion_scores"] if item["criterion_id"] == cid)
+                    y_item = next(item for item in score["document_y"]["criterion_scores"] if item["criterion_id"] == cid)
+                except StopIteration:
+                    skipped_judge_rows.append(
+                        {
+                            "pair_id": pair_id,
+                            "judge_id": score.get("judge_id"),
+                            "criterion_id": cid,
+                            "reason": "missing_criterion_score",
+                            "validation_flags": score.get("validation_flags", []),
+                        }
+                    )
+                    continue
                 h_val = float(x_item["score_1_10"] if x_condition == "holo_frontier_gov" else y_item["score_1_10"])
                 s_val = float(x_item["score_1_10"] if x_condition != "holo_frontier_gov" else y_item["score_1_10"])
                 criterion_acc[cid].append(h_val - s_val)
@@ -1440,9 +1485,11 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
         pair_summary = {
             "pair_id": pair_id,
             "solo_condition": solo_condition,
-            "holo_mean": round(statistics.mean(holo_scores), 3),
-            "solo_mean": round(statistics.mean(solo_scores), 3),
-            "gap_holo_minus_solo": round(statistics.mean(holo_scores) - statistics.mean(solo_scores), 3),
+            "holo_mean": round(statistics.mean(holo_scores), 3) if holo_scores else None,
+            "solo_mean": round(statistics.mean(solo_scores), 3) if solo_scores else None,
+            "gap_holo_minus_solo": round(statistics.mean(holo_scores) - statistics.mean(solo_scores), 3)
+            if holo_scores and solo_scores
+            else None,
             "holo_scores": holo_scores,
             "solo_scores": solo_scores,
             "judge_rows": judge_rows,
@@ -1455,10 +1502,13 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
         "benchmark_credit": False,
         "public_claim": False,
         "pair_summaries": pair_summaries,
+        "skipped_judge_rows": skipped_judge_rows,
         "overall": {
-            "holo_mean": round(statistics.mean(overall_holo_scores), 3),
-            "solo_mean": round(statistics.mean(overall_solo_scores), 3),
-            "gap_holo_minus_solo": round(statistics.mean(overall_holo_scores) - statistics.mean(overall_solo_scores), 3),
+            "holo_mean": round(statistics.mean(overall_holo_scores), 3) if overall_holo_scores else None,
+            "solo_mean": round(statistics.mean(overall_solo_scores), 3) if overall_solo_scores else None,
+            "gap_holo_minus_solo": round(statistics.mean(overall_holo_scores) - statistics.mean(overall_solo_scores), 3)
+            if overall_holo_scores and overall_solo_scores
+            else None,
             "judge_observations": len(overall_holo_scores),
         },
         "criterion_gap_holo_minus_solo": {

@@ -10,6 +10,14 @@ Pipeline law:
 - HoloBuild solves by producing the final artifact from the frozen research/source packet.
 - HoloVerify verifies claims, evidence, risk, proof boundaries, and hallucination exposure.
 
+Judgment law:
+
+- Everything gets judged.
+- HoloResearch is judged on the research packet itself before HoloBuild uses it.
+- HoloBuild is judged on the built artifact.
+- HoloVerify is judged on the verification audit.
+- The full pipeline is judged on downstream lift and traceable improvement across stages.
+
 HoloResearch asks:
 
 > What are the highest-value questions hidden inside this material, what evidence resolves them, and what insight can be created from the collision?
@@ -164,6 +172,8 @@ Benchmark-credit HoloResearch requires:
 - fixed source budget
 - fixed turn budget
 - fixed role flow
+- research judge rubric
+- research judge packets
 - provider call traces
 - source ledger
 - anonymized judge packets

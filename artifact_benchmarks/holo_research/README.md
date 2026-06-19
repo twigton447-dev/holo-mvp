@@ -50,3 +50,11 @@ Benchmark comparison:
 - HoloResearch creates a research packet from the same seed and source budget.
 - Blind judges score the packets.
 - Downstream test: feed both packets into the same HoloBuild harness and compare final artifact quality.
+
+Research judgment:
+- Judge the research packet directly before HoloBuild sees it.
+- Judge whether the questions are important, source-backed, adversarially tested, and useful for build.
+- Preserve the downstream score separately so packet quality and final artifact quality do not blur.
+
+Rubric:
+- `research_judge_rubric.json`

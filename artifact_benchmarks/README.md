@@ -12,3 +12,10 @@ Pipeline law:
 - HoloResearch mines topics, questions, sources, contradictions, and fresh research opportunities.
 - HoloBuild solves by turning frozen research/source packets into final artifacts.
 - HoloVerify verifies claims, evidence, risk, proof boundaries, and hallucination exposure after build.
+
+Judgment law:
+
+- Research packets are judged.
+- Built artifacts are judged.
+- Verification audits are judged.
+- Downstream lift is judged by comparing what each stage made possible.

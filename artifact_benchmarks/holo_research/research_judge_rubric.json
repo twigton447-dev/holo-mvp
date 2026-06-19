@@ -1,0 +1,99 @@
+{
+  "rubric_id": "holoresearch_research_judge_rubric_v0_1",
+  "status": "doctrine_locked_candidate",
+  "purpose": "Score research packets before they are used by HoloBuild.",
+  "judge_visibility": {
+    "judges_see": [
+      "original seed material",
+      "research objective",
+      "source budget",
+      "retrieval policy",
+      "anonymized research packet",
+      "question ledger",
+      "dispatch ledger",
+      "source ledger",
+      "contradiction ledger",
+      "builder handoff"
+    ],
+    "judges_do_not_see": [
+      "model names",
+      "provider names",
+      "condition labels",
+      "Holo versus solo identity",
+      "anonymization map",
+      "downstream HoloBuild scores"
+    ]
+  },
+  "scale": {
+    "primary": "1-10",
+    "secondary": "1-5",
+    "higher_is_better": true
+  },
+  "criteria": [
+    {
+      "id": "question_quality",
+      "label": "Question Quality",
+      "weight": 15,
+      "definition": "Identifies high-value, solvable questions that matter to the domain decision rather than merely listing obvious topics."
+    },
+    {
+      "id": "source_discovery",
+      "label": "Source Discovery",
+      "weight": 15,
+      "definition": "Finds or extracts strong source classes, data, factual anchors, and counter-sources within the allowed budget."
+    },
+    {
+      "id": "source_discipline",
+      "label": "Source Discipline",
+      "weight": 12,
+      "definition": "Tracks provenance, access context, source limits, rejected sources, and unsupported claims without laundering inference as fact."
+    },
+    {
+      "id": "adversarial_pressure",
+      "label": "Adversarial Pressure",
+      "weight": 13,
+      "definition": "Actively attacks assumptions, weak evidence, causal jumps, missing stakeholders, and practitioner objections."
+    },
+    {
+      "id": "contradiction_handling",
+      "label": "Contradiction Handling",
+      "weight": 12,
+      "definition": "Finds meaningful contradictions, maps what they change, and distinguishes resolved, partially resolved, and open conflicts."
+    },
+    {
+      "id": "insight_generation",
+      "label": "Insight Generation",
+      "weight": 15,
+      "definition": "Produces fresh, decision-relevant insight from evidence collisions rather than generic summary."
+    },
+    {
+      "id": "builder_utility",
+      "label": "Builder Utility",
+      "weight": 12,
+      "definition": "Hands HoloBuild clear implications, use-or-avoid guidance, claim boundaries, and the materials needed to produce a stronger artifact."
+    },
+    {
+      "id": "auditability",
+      "label": "Auditability",
+      "weight": 6,
+      "definition": "Preserves enough structure for another reviewer to understand what was asked, searched, found, rejected, inferred, and left open."
+    }
+  ],
+  "automatic_flags": [
+    "missing required ledger",
+    "unattributed source claim",
+    "unsupported current-event claim",
+    "missing rejected-source rationale when confidence depends on source exclusion",
+    "builder handoff absent or vague",
+    "research packet contains final-artifact prose instead of research handoff"
+  ],
+  "score_outputs": [
+    "criterion_scores_1_to_10",
+    "criterion_scores_1_to_5",
+    "weighted_overall_score",
+    "qualitative_rationale",
+    "top_strengths",
+    "top_failures",
+    "downstream_builder_risks"
+  ]
+}

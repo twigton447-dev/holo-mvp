@@ -18,6 +18,14 @@ The suite asks whether Holo's Governor-orchestrated adversarial loop creates mea
 - Legal/regulatory: AI vendor risk and contract controls.
 - Energy/infrastructure: AI data-center power and grid-risk strategy.
 
+## Expansion Backlog
+
+- Medical diagnostic paradoxes: synthetic differential-diagnosis reasoning only, with no real patient data and no medical advice.
+- Adversarial paradox reasoning: contradiction, impossibility, and tradeoff artifacts across domains.
+- Experience-quality domains: food, hotel, travel, service, education, and student workflows where measured lift is easy to understand.
+
+See `DOMAIN_EXPANSION_BACKLOG_20260619.md` and `domain_expansion_backlog.json`.
+
 ## Current Status
 
 Finance has a built and hash-locked frontier-3 packet.

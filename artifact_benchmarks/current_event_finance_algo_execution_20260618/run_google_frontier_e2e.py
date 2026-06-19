@@ -15,6 +15,7 @@ NO_PROVIDER_SMOKE = PACKET_DIR / "google_frontier_no_provider_smoke.py"
 HASH_LOCK = PACKET_DIR / "hash_lock.json"
 ROUTING_CONFIGS = PACKET_DIR / "holo_routing_configs.json"
 ROLE_FLOW = PACKET_DIR / "finance_algo_adversarial_role_flow.json"
+JUDGE_PANEL = PACKET_DIR / "judge_panel_frontier_blind.json"
 
 
 def read_json(path: Path) -> dict:
@@ -44,6 +45,7 @@ def provider_env_status() -> dict[str, str]:
         "OPENAI_API_KEY": "PRESENT" if os.getenv("OPENAI_API_KEY") else "MISSING",
         "ANTHROPIC_API_KEY": "PRESENT" if os.getenv("ANTHROPIC_API_KEY") else "MISSING",
         "GOOGLE_API_KEY": "PRESENT" if os.getenv("GOOGLE_API_KEY") else "MISSING",
+        "XAI_API_KEY": "PRESENT" if os.getenv("XAI_API_KEY") else "MISSING",
     }
 
 
@@ -65,6 +67,7 @@ def preflight(routing_config_id: str | None, solo_condition: str | None) -> int:
     lock = read_json(HASH_LOCK)
     route = load_routing_config(routing_config_id)
     role_flow = read_json(ROLE_FLOW)
+    judge_panel = read_json(JUDGE_PANEL)
     status = provider_env_status()
     payload = {
         "status": "PREFLIGHT_PASS"
@@ -85,7 +88,12 @@ def preflight(routing_config_id: str | None, solo_condition: str | None) -> int:
         "holo_governor_continuity_rule": lock["holo_governor_continuity_rule"],
         "turn_prompt_parity": turn_prompt_parity_contract(role_flow, route),
         "parity_note": "Solo and Holo share the same base turn role/instruction; Holo additionally receives Gov Baton/state/artifacts.",
-        "judge_panel": lock["judge_panel"],
+        "judge_panel": judge_panel["judge_models"],
+        "judge_count": len(judge_panel["judge_models"]),
+        "primary_scoring_rule": "exclude judge rows where judge_provider == solo_provider",
+        "planned_judge_calls": (1 if solo_condition else len(lock["solo_conditions"])) * len(judge_panel["judge_models"]),
+        "planned_turn_judge_packets": (1 if solo_condition else len(lock["solo_conditions"])) * 6,
+        "turn_judging_default": "packets only; live scoring requires a future explicit flag",
         "live_calls_default": "disabled",
     }
     print(json.dumps(payload, indent=2, sort_keys=True))

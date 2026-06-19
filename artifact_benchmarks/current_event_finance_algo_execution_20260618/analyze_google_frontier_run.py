@@ -61,6 +61,22 @@ def score_to_condition(
     raise KeyError(f"condition {condition} not in pair {pair_map}")
 
 
+def solo_provider_for_condition(condition: str, manifest: dict[str, Any]) -> str | None:
+    solo_conditions = manifest.get("solo_conditions") or {}
+    provider_model = solo_conditions.get(condition)
+    if isinstance(provider_model, str) and ":" in provider_model:
+        return provider_model.split(":", 1)[0]
+    if condition.startswith("solo_openai"):
+        return "openai"
+    if condition.startswith("solo_anthropic"):
+        return "anthropic"
+    if condition.startswith("solo_google"):
+        return "google"
+    if condition.startswith("solo_xai"):
+        return "xai"
+    return None
+
+
 def verdict_consistency(row: dict[str, Any]) -> str:
     flags = row.get("validation_flags") or []
     contradiction_flags = [
@@ -73,7 +89,11 @@ def verdict_consistency(row: dict[str, Any]) -> str:
     return "flagged" if contradiction_flags else "clean"
 
 
-def collect_score_rows(run_dir: Path, judge_summary: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+def collect_score_rows(
+    run_dir: Path,
+    judge_summary: dict[str, Any],
+    manifest: dict[str, Any],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     anon_path = run_dir / "sealed" / "anonymization_map.json"
     if not anon_path.exists():
         return [], [], []
@@ -91,8 +111,11 @@ def collect_score_rows(run_dir: Path, judge_summary: dict[str, Any]) -> tuple[li
             score = read_json(score_path)
             judge_id = score.get("judge_id") or score_path.stem
             harness = score.get("_harness") or {}
+            judge_provider = harness.get("judge_provider")
             holo_doc = score_to_condition(score=score, pair_map=pair_map, condition="holo_frontier_gov")
             solo_doc = score_to_condition(score=score, pair_map=pair_map, condition=solo_condition)
+            solo_provider = solo_provider_for_condition(solo_condition, manifest)
+            primary_score_included = not (solo_provider and judge_provider == solo_provider)
             holo_score = float(holo_doc["weighted_score_1_10"])
             solo_score = float(solo_doc["weighted_score_1_10"])
             gap = round(holo_score - solo_score, 3)
@@ -102,7 +125,7 @@ def collect_score_rows(run_dir: Path, judge_summary: dict[str, Any]) -> tuple[li
                 "pair_id": pair_id,
                 "solo_condition": solo_condition,
                 "judge_id": judge_id,
-                "judge_provider": harness.get("judge_provider"),
+                "judge_provider": judge_provider,
                 "judge_model": harness.get("judge_model"),
                 "holo_score": holo_score,
                 "solo_score": solo_score,
@@ -112,6 +135,10 @@ def collect_score_rows(run_dir: Path, judge_summary: dict[str, Any]) -> tuple[li
                 "judge_confidence_1_5": verdict.get("judge_confidence_1_5"),
                 "validation_flags": "; ".join(str(flag) for flag in flags),
                 "verdict_consistency": verdict_consistency({"validation_flags": flags}),
+                "primary_score_included": primary_score_included,
+                "primary_exclusion_reason": "same_provider_as_solo_condition"
+                if not primary_score_included
+                else "",
             }
             judge_rows.append(judge_row)
             score_rows.append(judge_row)
@@ -172,8 +199,12 @@ def analyze(run_dir: Path) -> dict[str, Any]:
         return result
 
     judge_summary = read_json(summary_path)
-    score_rows, judge_rows, criterion_rows = collect_score_rows(run_dir, judge_summary)
+    score_rows, judge_rows, criterion_rows = collect_score_rows(run_dir, judge_summary, manifest)
     clean_judge_rows = [row for row in judge_rows if not row["validation_flags"]]
+    primary_judge_rows = [row for row in judge_rows if row.get("primary_score_included")]
+    primary_clean_judge_rows = [
+        row for row in judge_rows if row.get("primary_score_included") and not row["validation_flags"]
+    ]
     flagged_judge_rows = [row for row in judge_rows if row["validation_flags"]]
 
     condition_results = manifest.get("condition_results") or {}
@@ -199,6 +230,10 @@ def analyze(run_dir: Path) -> dict[str, Any]:
     for pair in judge_summary.get("pair_summaries", []):
         rows_for_pair = [row for row in judge_rows if row["solo_condition"] == pair.get("solo_condition")]
         clean_rows_for_pair = [row for row in rows_for_pair if not row["validation_flags"]]
+        primary_rows_for_pair = [row for row in rows_for_pair if row.get("primary_score_included")]
+        primary_clean_rows_for_pair = [
+            row for row in rows_for_pair if row.get("primary_score_included") and not row["validation_flags"]
+        ]
         pair_rows.append(
             {
                 "pair_id": pair.get("pair_id"),
@@ -207,8 +242,15 @@ def analyze(run_dir: Path) -> dict[str, Any]:
                 "solo_mean_all": pair.get("solo_mean"),
                 "gap_all": pair.get("gap_holo_minus_solo"),
                 "gap_clean_only": mean_or_none([float(row["gap_holo_minus_solo"]) for row in clean_rows_for_pair]),
+                "gap_primary_no_self_dna": mean_or_none(
+                    [float(row["gap_holo_minus_solo"]) for row in primary_rows_for_pair]
+                ),
+                "gap_primary_clean_no_self_dna": mean_or_none(
+                    [float(row["gap_holo_minus_solo"]) for row in primary_clean_rows_for_pair]
+                ),
                 "judge_count": len(rows_for_pair),
                 "flagged_judge_count": len(rows_for_pair) - len(clean_rows_for_pair),
+                "primary_judge_count": len(primary_rows_for_pair),
             }
         )
 
@@ -232,11 +274,20 @@ def analyze(run_dir: Path) -> dict[str, Any]:
         "judge_summary_path": str(summary_path),
         "overall": judge_summary.get("overall"),
         "overall_gap_clean_only": mean_or_none([float(row["gap_holo_minus_solo"]) for row in clean_judge_rows]),
+        "overall_gap_primary_no_self_dna": mean_or_none(
+            [float(row["gap_holo_minus_solo"]) for row in primary_judge_rows]
+        ),
+        "overall_gap_primary_clean_no_self_dna": mean_or_none(
+            [float(row["gap_holo_minus_solo"]) for row in primary_clean_judge_rows]
+        ),
+        "primary_no_self_dna": judge_summary.get("primary_no_self_dna"),
         "pair_summaries": pair_rows,
         "criterion_gap_means": criterion_gap_means,
         "condition_results": condition_rows,
         "judge_row_count": len(judge_rows),
         "clean_judge_row_count": len(clean_judge_rows),
+        "primary_judge_row_count": len(primary_judge_rows),
+        "primary_clean_judge_row_count": len(primary_clean_judge_rows),
         "flagged_judge_row_count": len(flagged_judge_rows),
         "flagged_judge_rows": flagged_judge_rows,
         "provider_call_count": manifest.get("provider_call_count"),
@@ -270,6 +321,8 @@ def analyze(run_dir: Path) -> dict[str, Any]:
             "judge_confidence_1_5",
             "validation_flags",
             "verdict_consistency",
+            "primary_score_included",
+            "primary_exclusion_reason",
         ],
     )
     csv_write(analysis_dir / "judge_rows.csv", judge_rows, list(score_rows[0].keys()) if score_rows else [])
@@ -319,7 +372,10 @@ def analyze(run_dir: Path) -> dict[str, Any]:
         f"- Solo mean: `{(summary['overall'] or {}).get('solo_mean')}`",
         f"- Gap Holo minus Solo: `{(summary['overall'] or {}).get('gap_holo_minus_solo')}`",
         f"- Clean-only gap: `{summary['overall_gap_clean_only']}`",
+        f"- Primary no-self-DNA gap: `{summary['overall_gap_primary_no_self_dna']}`",
+        f"- Primary clean no-self-DNA gap: `{summary['overall_gap_primary_clean_no_self_dna']}`",
         f"- Judge rows: `{summary['judge_row_count']}`",
+        f"- Primary judge rows: `{summary['primary_judge_row_count']}`",
         f"- Flagged judge rows: `{summary['flagged_judge_row_count']}`",
         "",
         "## Pair Summary",
@@ -332,6 +388,9 @@ def analyze(run_dir: Path) -> dict[str, Any]:
                 "",
                 f"- Gap all judges: `{pair['gap_all']}`",
                 f"- Gap clean-only: `{pair['gap_clean_only']}`",
+                f"- Gap primary no-self-DNA: `{pair['gap_primary_no_self_dna']}`",
+                f"- Gap primary clean no-self-DNA: `{pair['gap_primary_clean_no_self_dna']}`",
+                f"- Primary judge rows: `{pair['primary_judge_count']}`",
                 f"- Flagged judge rows: `{pair['flagged_judge_count']}`",
                 "",
             ]

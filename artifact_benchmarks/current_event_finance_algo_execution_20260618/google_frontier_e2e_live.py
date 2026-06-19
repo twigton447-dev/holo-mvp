@@ -36,6 +36,11 @@ PROVIDERS = {
         "api_key_env": "GOOGLE_API_KEY",
         "base_url": "https://generativelanguage.googleapis.com/v1beta",
     },
+    "xai": {
+        "model": "grok-4.3",
+        "api_key_env": "XAI_API_KEY",
+        "base_url": "https://api.x.ai/v1",
+    },
 }
 
 SOLO_CONDITIONS = {
@@ -49,6 +54,11 @@ FINAL_TARGET_MAX_WORDS = 3400
 FINAL_MAX_WORDS = 3600
 STATE_OBJECT_VERSION = "patent_grade_holo_state_v1"
 MAX_PRIOR_ARTIFACT_CHARS = 18000
+HC_STATE_AUTHORITY_RULE = (
+    "Only HC may mutate benchmark architecture/state. HoloAgents may write artifacts; "
+    "Gov may baton, gate, and summarize; durable architecture updates enter through "
+    "HC via ROLLING_SUMMARY."
+)
 
 
 class ProviderCallError(RuntimeError):
@@ -119,6 +129,14 @@ def env_status() -> dict[str, str]:
 def provider_model(provider_model: str) -> tuple[str, str]:
     provider, model = provider_model.split(":", 1)
     return provider, model
+
+
+def solo_provider_for_condition(condition: str) -> str | None:
+    provider_model_name = SOLO_CONDITIONS.get(condition)
+    if not provider_model_name:
+        return None
+    provider, _ = provider_model(provider_model_name)
+    return provider
 
 
 def turn_prompt_parity_contract(role_flow: dict[str, Any]) -> list[dict[str, Any]]:
@@ -236,6 +254,92 @@ def clean_ending(text: str) -> bool:
 
 def source_ids_in_text(text: str) -> list[str]:
     return sorted(set(re.findall(r"\[S\d+(?:_[A-Z0-9_]+)?\]", text)))
+
+
+def allowed_source_ids() -> set[str]:
+    source_pack = read_json(PACKET_DIR / "source_pack.json")
+    ids = set()
+    for entry in source_pack.get("source_entries", []):
+        full_id = entry["id"]
+        ids.add(f"[{full_id}]")
+        ids.add(f"[{full_id.split('_', 1)[0]}]")
+    return ids
+
+
+def has_any(text: str, needles: list[str]) -> bool:
+    lowered = text.lower()
+    return any(needle.lower() in lowered for needle in needles)
+
+
+def final_artifact_validity_report(text: str) -> dict[str, Any]:
+    wc = word_count(text)
+    lowered = text.lower()
+    flags: list[str] = []
+    if not (FINAL_MIN_WORDS <= wc <= FINAL_MAX_WORDS):
+        flags.append(f"final_word_count_out_of_band:{wc}")
+    if not clean_ending(text):
+        flags.append("final_does_not_end_cleanly")
+    tail = text.strip()[-260:].lower()
+    if re.search(r"(\n|^)\s*[-*]\s+\S.{0,120}$", text.strip()) and not clean_ending(text):
+        flags.append("final_appears_cut_off_mid_bullet")
+    if tail.count("(") > tail.count(")") or tail.count("[") > tail.count("]"):
+        flags.append("final_tail_has_unbalanced_bracket_or_parenthesis")
+
+    required_topics = {
+        "disclaimer_no_investment_advice": ["not investment advice", "not legal", "not a recommendation"],
+        "disclaimer_no_live_execution": [
+            "does not execute",
+            "not a live execution",
+            "does not route orders",
+            "no live execution",
+            "not a live trading",
+            "not connected to live brokerage",
+            "not an order-routing system",
+        ],
+        "executive_thesis": ["executive thesis", "thesis"],
+        "current_market_setup": ["current market", "market setup", "market regime"],
+        "execution_architecture": ["architecture", "execution governor", "control plane"],
+        "benchmark_framework": ["implementation shortfall", "arrival price", "benchmark"],
+        "portfolio_funding_settlement": ["portfolio", "funding", "settlement"],
+        "regulatory_controls_audit": ["controls", "audit", "kill switch", "kill-switch"],
+        "model_risk_adversarial": ["model risk", "adversarial", "bias"],
+        "implementation_roadmap": ["roadmap", "phase", "implementation"],
+        "success_metrics": ["success metrics", "metrics", "kpis", "measurement"],
+    }
+    for topic, needles in required_topics.items():
+        if not has_any(lowered, needles):
+            flags.append(f"missing_required_topic:{topic}")
+
+    internal_residue_terms = [
+        "state_object",
+        "mission packet",
+        "baton pass",
+        "benchmark_credit",
+        "document x",
+        "document y",
+        "turn_5",
+        "turn_6",
+        "hologov",
+        "holoagent",
+    ]
+    residue = [term for term in internal_residue_terms if term in lowered]
+    if residue:
+        flags.append("internal_process_residue:" + ",".join(residue))
+
+    unknown_source_ids = sorted(set(source_ids_in_text(text)) - allowed_source_ids())
+    if unknown_source_ids:
+        flags.append("unknown_source_ids:" + ",".join(unknown_source_ids))
+    if not source_ids_in_text(text):
+        flags.append("missing_source_ids")
+
+    return {
+        "valid": not flags,
+        "flags": flags,
+        "word_count": wc,
+        "word_count_in_band": FINAL_MIN_WORDS <= wc <= FINAL_MAX_WORDS,
+        "clean_ending": clean_ending(text),
+        "source_ids": source_ids_in_text(text),
+    }
 
 
 def detect_preserved_insights(previous_artifacts: list[dict[str, str]]) -> list[dict[str, Any]]:
@@ -363,11 +467,17 @@ def build_state_object(
             f"Target final length: {requirements['target_length_words'][0]}-{requirements['target_length_words'][1]} words.",
             "Use only frozen source pack facts unless explicitly labeled as inference.",
             "No browsing during generation or judging.",
+            HC_STATE_AUTHORITY_RULE,
         ],
         "ROLLING_SUMMARY": [
             {"turn": int(item["turn"]), "role": item["role"], "summary": excerpt(item["text"], 500)}
             for item in previous_artifacts
         ],
+        "HC_STATE_AUTHORITY": {
+            "architecture_mutation_surface": "HC",
+            "mutable_state_surface": "ROLLING_SUMMARY",
+            "rule": HC_STATE_AUTHORITY_RULE,
+        },
         "SETTLED_DECISIONS": [
             "Fixed Opus Gov for this session.",
             f"Routing config: {routing_config['routing_config_id']}.",
@@ -682,6 +792,7 @@ def gov_system() -> str:
         "Use only the frozen packet, canonical STATE_OBJECT, and pinned artifacts. Do not browse. "
         "Your job is to produce the Baton Pass for the next model: preserve winning insights, "
         "name regressions, update the repair ledger, and ask concrete finance-native probes. "
+        f"{HC_STATE_AUTHORITY_RULE} "
         "Output Markdown only."
     )
 
@@ -797,6 +908,7 @@ Create the Turn {turn} HoloGov mission packet. It must include:
 
 Make the next model uncomfortable in the useful way: specific, technical, source-grounded, and hard to hand-wave.
 Preserve any STATE_OBJECT.PRESERVED_INSIGHT_LEDGER item unless you explicitly reject it with a source-grounded rationale.
+Do not mutate architecture directly. If architecture/state needs to change, write the proposed delta for HC to apply through ROLLING_SUMMARY.
 """
 
 
@@ -840,6 +952,7 @@ Target length for this turn: {turn_word_target(turn)}.
 
 Write the best possible updated report draft for this turn. Answer the Gov probes in the artifact or explicitly resolve why a probe does not apply. Preserve the strongest prior content, repair weaknesses, and improve source-grounded technical depth. Final turns must be client-shareable and within the word band.
 Treat prior artifacts as external hypotheses, not ground truth. Preserve STATE_OBJECT.PRESERVED_INSIGHT_LEDGER items unless you explicitly reject them with source-grounded rationale.
+Do not mutate benchmark architecture. Surface any proposed architecture/state change as an HC rolling-summary delta, not as an agent-level state rewrite.
 """
 
 
@@ -909,6 +1022,162 @@ Output Markdown only.
 Current final draft:
 {draft}
 """
+
+
+def final_validity_repair_prompt(
+    *,
+    payload: str,
+    draft: str,
+    condition: str,
+    role: str,
+    report: dict[str, Any],
+) -> str:
+    return f"""Frozen benchmark packet:
+
+{payload}
+
+Condition: {condition}
+Role: {role}
+
+The current final artifact failed deterministic validity checks before judging.
+
+Validity report:
+```json
+{json.dumps(report, indent=2, sort_keys=False)}
+```
+
+Repair only the flagged issues. The repaired final must:
+- be complete and end cleanly,
+- stay within 2,800-3,400 words if possible and never over 3,600,
+- include required disclaimers: no investment advice and no live execution/routing claim,
+- include implementation roadmap and success metrics,
+- preserve source IDs and use only the frozen source pack,
+- remove internal benchmark/process residue such as STATE_OBJECT, mission packet, Document X/Y, or turn labels,
+- preserve technical specificity rather than adding filler.
+
+Output the complete repaired final report in Markdown only.
+
+Draft:
+{draft}
+"""
+
+
+def maybe_repair_final_validity(
+    *,
+    run_root: Path,
+    hashes: dict[str, str],
+    payload: str,
+    provider: str,
+    condition: str,
+    role: str,
+    turn: int,
+    text: str,
+    artifact_path: Path,
+    timeout: int,
+) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
+    traces: list[dict[str, Any]] = []
+    report = final_artifact_validity_report(text)
+    if report["valid"]:
+        return text, traces, report
+    for attempt in range(1, 3):
+        system = markdown_system("Final deterministic validity repair")
+        user = final_validity_repair_prompt(
+            payload=payload,
+            draft=text,
+            condition=condition,
+            role=role,
+            report=report,
+        )
+        repaired, trace = call_and_save(
+            run_root=run_root,
+            hashes=hashes,
+            provider=provider,
+            system=system,
+            user=user,
+            max_tokens=9000,
+            timeout=timeout,
+            call_type="final_validity_repair",
+            condition=condition,
+            role=role,
+            turn=turn,
+            prompt_rel=f"{condition}/turn_{turn}_final_validity_repair_attempt_{attempt}",
+            trace_rel=f"{condition}/turn_{turn}_final_validity_repair_attempt_{attempt}",
+            artifact_path=artifact_path,
+            extra={"original_validity_report": report, "validity_repair_attempt": attempt},
+        )
+        text = repaired
+        report = final_artifact_validity_report(text)
+        trace["repaired_validity_report"] = report
+        traces.append(trace)
+        if report["valid"]:
+            return text, traces, report
+    if not report["valid"]:
+        raise RuntimeError(
+            f"final_artifact_invalid condition={condition} turn={turn} flags={report['flags']}"
+        )
+    return text, traces, report
+
+
+def finalize_final_artifact(
+    *,
+    run_root: Path,
+    hashes: dict[str, str],
+    payload: str,
+    provider: str,
+    condition: str,
+    role: str,
+    turn: int,
+    text: str,
+    artifact_path: Path,
+    timeout: int,
+) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
+    traces: list[dict[str, Any]] = []
+    text, word_traces = maybe_repair_final_word_count(
+        run_root=run_root,
+        hashes=hashes,
+        payload=payload,
+        provider=provider,
+        condition=condition,
+        role=role,
+        turn=turn,
+        text=text,
+        artifact_path=artifact_path,
+        timeout=timeout,
+    )
+    traces.extend(word_traces)
+    text, validity_traces, report = maybe_repair_final_validity(
+        run_root=run_root,
+        hashes=hashes,
+        payload=payload,
+        provider=provider,
+        condition=condition,
+        role=role,
+        turn=turn,
+        text=text,
+        artifact_path=artifact_path,
+        timeout=timeout,
+    )
+    traces.extend(validity_traces)
+    if not report["word_count_in_band"]:
+        text, second_word_traces = maybe_repair_final_word_count(
+            run_root=run_root,
+            hashes=hashes,
+            payload=payload,
+            provider=provider,
+            condition=condition,
+            role=role,
+            turn=turn,
+            text=text,
+            artifact_path=artifact_path,
+            timeout=timeout,
+        )
+        traces.extend(second_word_traces)
+        report = final_artifact_validity_report(text)
+    if not report["valid"]:
+        raise RuntimeError(
+            f"final_artifact_invalid condition={condition} turn={turn} flags={report['flags']}"
+        )
+    return text, traces, report
 
 
 def selector_prompt(*, payload: str, state_object: dict[str, Any], turn5: str, turn6: str) -> str:
@@ -1197,6 +1466,9 @@ def existing_condition(
     result = read_json(manifest_path)
     if result.get("word_count_in_band") is False:
         return None
+    validity = result.get("artifact_validity_report")
+    if not validity or validity.get("valid") is not True:
+        return None
     traces = [read_json(path) for path in sorted((run_root / "traces" / condition).glob("*.json"))]
     return result, traces
 
@@ -1357,7 +1629,7 @@ def run_solo_condition(
         previous = text
         if turn == 6:
             final_text = text
-    final_text, repair_traces = maybe_repair_final_word_count(
+    final_text, repair_traces, validity_report = finalize_final_artifact(
         run_root=run_root,
         hashes=hashes,
         payload=payload,
@@ -1377,6 +1649,7 @@ def run_solo_condition(
         "final_sha256": sha_file(final_path),
         "final_word_count": word_count(final_text),
         "word_count_in_band": FINAL_MIN_WORDS <= word_count(final_text) <= FINAL_MAX_WORDS,
+        "artifact_validity_report": validity_report,
         "turn_count": 6,
     }
     write_json(run_root / "condition_manifests" / f"{condition}.json", result)
@@ -1520,7 +1793,7 @@ def run_holo_condition(
 
     for turn in [5, 6]:
         provider, _ = provider_model(role_flow["turns"][turn - 1]["provider_model"])
-        repaired, repair_traces = maybe_repair_final_word_count(
+        repaired, repair_traces, _validity_report = finalize_final_artifact(
             run_root=run_root,
             hashes=hashes,
             payload=payload,
@@ -1561,16 +1834,17 @@ def run_holo_condition(
             selected_turn = str(selected_turn_raw)
         selector_trace = read_json(selector_trace_path)
         traces.append(selector_trace)
+        final_validity_report = final_artifact_validity_report(read_text(final_path))
     else:
         selector_card = save_prompt_card(
-        run_root,
-        rel=f"{condition}/post_turn_6_selector",
-        system=system,
-        user=user,
-        provider=selector_provider,
-        model=PROVIDERS[selector_provider]["model"],
-        call_type="post_turn_6_gov_selector",
-    )
+            run_root,
+            rel=f"{condition}/post_turn_6_selector",
+            system=system,
+            user=user,
+            provider=selector_provider,
+            model=PROVIDERS[selector_provider]["model"],
+            call_type="post_turn_6_gov_selector",
+        )
         selector_result = call_provider(selector_provider, system=system, user=user, max_tokens=1400, timeout=timeout)
         selector_text = selector_result["text"].strip()
         selector_json = extract_json_object(selector_text)
@@ -1617,22 +1891,23 @@ def run_holo_condition(
                 hashes=hashes,
             )
             traces.append(synthesis_trace)
-            final_text, repair_traces = maybe_repair_final_word_count(
-                run_root=run_root,
-                hashes=hashes,
-                payload=payload,
-                provider=selector_provider,
-                condition=condition,
-                role="HoloGov final synthesis",
-                turn=6,
-                text=synth_text,
-                artifact_path=final_path,
-                timeout=timeout,
-            )
-            traces.extend(repair_traces)
         else:
             final_source = run_root / "artifacts" / condition / f"turn_{selected_turn}.md"
             write_text(final_path, read_text(final_source))
+        final_text = read_text(final_path)
+        final_text, final_validity_traces, final_validity_report = finalize_final_artifact(
+            run_root=run_root,
+            hashes=hashes,
+            payload=payload,
+            provider=selector_provider,
+            condition=condition,
+            role="HoloGov final selected artifact",
+            turn=6,
+            text=final_text,
+            artifact_path=final_path,
+            timeout=timeout,
+        )
+        traces.extend(final_validity_traces)
         selector_payload = {
             "selector_provider": selector_provider,
             "selector_model": PROVIDERS[selector_provider]["model"],
@@ -1640,6 +1915,7 @@ def run_holo_condition(
             "parsed": selector_json,
             "selected_turn": selected_turn,
             "selected_artifact_path": str(final_path),
+            "selected_artifact_validity_report": final_validity_report,
             "turn_5_path": str(run_root / "artifacts" / condition / "turn_5.md"),
             "turn_6_path": str(run_root / "artifacts" / condition / "turn_6.md"),
         }
@@ -1665,6 +1941,7 @@ def run_holo_condition(
         "final_sha256": sha_file(final_path),
         "final_word_count": word_count(read_text(final_path)),
         "word_count_in_band": FINAL_MIN_WORDS <= word_count(read_text(final_path)) <= FINAL_MAX_WORDS,
+        "artifact_validity_report": final_validity_report,
         "selected_turn": selected_turn,
         "selector_path": str(selector_out_path),
         "turn_count": 6,
@@ -1720,6 +1997,72 @@ def build_judge_packets(
         )
         packets.append(packet)
     write_json(run_root / "sealed" / "anonymization_map.json", anonymization)
+    return packets
+
+
+def build_turn_judge_packets(
+    *,
+    run_root: Path,
+    run_id: str,
+    role_flow: dict[str, Any],
+    solo_conditions: dict[str, str],
+) -> list[dict[str, Any]]:
+    packets: list[dict[str, Any]] = []
+    anonymization = {"run_id": run_id, "pairs": []}
+    source_pack = read_json(PACKET_DIR / "source_pack.json")
+    report_brief = read_json(PACKET_DIR / "report_brief.json")
+    rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
+    for solo_condition in solo_conditions:
+        for role_item in role_flow["turns"]:
+            turn = int(role_item["turn"])
+            solo_path = run_root / "artifacts" / solo_condition / f"turn_{turn}.md"
+            holo_path = run_root / "artifacts" / "holo_frontier_gov" / f"turn_{turn}.md"
+            if not solo_path.exists() or not holo_path.exists():
+                continue
+            solo_text = read_text(solo_path)
+            holo_text = read_text(holo_path)
+            pair_id = f"{run_id}_{solo_condition}_vs_holo_turn_{turn}_pair"
+            flip = int(hashlib.sha256(pair_id.encode("utf-8")).hexdigest()[:2], 16) % 2 == 0
+            if flip:
+                doc_x, doc_y = holo_text, solo_text
+                x_condition, y_condition = "holo_frontier_gov", solo_condition
+            else:
+                doc_x, doc_y = solo_text, holo_text
+                x_condition, y_condition = solo_condition, "holo_frontier_gov"
+            packet = {
+                "judge_packet_id": pair_id,
+                "packet_type": "turn_level_diagnostic",
+                "blind": True,
+                "benchmark_credit": False,
+                "public_claim": False,
+                "domain": report_brief["domain"],
+                "turn": turn,
+                "turn_role": role_item["role"],
+                "turn_instruction": role_item["instruction"],
+                "turn_scoring_note": (
+                    "Score each document for this turn's assigned role and its contribution "
+                    "to the artifact trajectory. Do not score early critique/repair turns as "
+                    "if they must be final board-ready reports."
+                ),
+                "brief": report_brief,
+                "source_pack": source_pack,
+                "rubric": rubric,
+                "documents": {
+                    "document_x": {"anonymous_id": "Document X", "text": doc_x},
+                    "document_y": {"anonymous_id": "Document Y", "text": doc_y},
+                },
+            }
+            write_json(run_root / "turn_judge_packets" / f"{pair_id}.json", packet)
+            anonymization["pairs"].append(
+                {
+                    "judge_packet_id": pair_id,
+                    "turn": turn,
+                    "document_x_condition": x_condition,
+                    "document_y_condition": y_condition,
+                }
+            )
+            packets.append(packet)
+    write_json(run_root / "sealed" / "turn_anonymization_map.json", anonymization)
     return packets
 
 
@@ -1845,6 +2188,8 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
     pair_summaries = []
     overall_holo_scores = []
     overall_solo_scores = []
+    primary_overall_holo_scores = []
+    primary_overall_solo_scores = []
     skipped_judge_rows = []
     rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
     criteria_ids = [item["id"] for item in rubric["criteria"]]
@@ -1852,13 +2197,19 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
     for packet in packets:
         pair_id = packet["judge_packet_id"]
         pair_map = mapping[pair_id]
+        solo_condition = pair_map["document_x_condition"] if pair_map["document_x_condition"] != "holo_frontier_gov" else pair_map["document_y_condition"]
+        solo_provider = solo_provider_for_condition(solo_condition)
         judge_rows = []
         holo_scores = []
         solo_scores = []
+        primary_holo_scores = []
+        primary_solo_scores = []
         for score_path in sorted((run_root / "judge_scores" / pair_id).glob("*.json")):
             score = read_json(score_path)
             x_condition = pair_map["document_x_condition"]
             y_condition = pair_map["document_y_condition"]
+            judge_provider = score.get("_harness", {}).get("judge_provider")
+            self_dna_excluded = bool(solo_provider and judge_provider == solo_provider)
             x_score_raw = score.get("document_x", {}).get("weighted_score_1_10")
             y_score_raw = score.get("document_y", {}).get("weighted_score_1_10")
             if x_score_raw is None or y_score_raw is None:
@@ -1877,6 +2228,9 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
             solo_score = x_score if x_condition != "holo_frontier_gov" else y_score
             holo_scores.append(holo_score)
             solo_scores.append(solo_score)
+            if not self_dna_excluded:
+                primary_holo_scores.append(holo_score)
+                primary_solo_scores.append(solo_score)
             for cid in criteria_ids:
                 try:
                     x_item = next(item for item in score["document_x"]["criterion_scores"] if item["criterion_id"] == cid)
@@ -1898,15 +2252,18 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
             judge_rows.append(
                 {
                     "judge_id": score.get("judge_id"),
-                    "judge_provider": score.get("_harness", {}).get("judge_provider"),
+                    "judge_provider": judge_provider,
                     "holo_score": holo_score,
                     "solo_score": solo_score,
                     "gap_holo_minus_solo": round(holo_score - solo_score, 3),
                     "stronger_document": score.get("comparative_verdict", {}).get("stronger_document"),
                     "validation_flags": score.get("validation_flags", []),
+                    "primary_score_included": not self_dna_excluded,
+                    "primary_exclusion_reason": "same_provider_as_solo_condition"
+                    if self_dna_excluded
+                    else "",
                 }
             )
-        solo_condition = pair_map["document_x_condition"] if pair_map["document_x_condition"] != "holo_frontier_gov" else pair_map["document_y_condition"]
         pair_summary = {
             "pair_id": pair_id,
             "solo_condition": solo_condition,
@@ -1915,13 +2272,26 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
             "gap_holo_minus_solo": round(statistics.mean(holo_scores) - statistics.mean(solo_scores), 3)
             if holo_scores and solo_scores
             else None,
+            "primary_holo_mean": round(statistics.mean(primary_holo_scores), 3) if primary_holo_scores else None,
+            "primary_solo_mean": round(statistics.mean(primary_solo_scores), 3) if primary_solo_scores else None,
+            "primary_gap_holo_minus_solo": round(
+                statistics.mean(primary_holo_scores) - statistics.mean(primary_solo_scores), 3
+            )
+            if primary_holo_scores and primary_solo_scores
+            else None,
+            "primary_judge_observations": len(primary_holo_scores),
+            "primary_exclusion_rule": "exclude judge rows where judge_provider == solo_provider",
             "holo_scores": holo_scores,
             "solo_scores": solo_scores,
+            "primary_holo_scores": primary_holo_scores,
+            "primary_solo_scores": primary_solo_scores,
             "judge_rows": judge_rows,
         }
         pair_summaries.append(pair_summary)
         overall_holo_scores.extend(holo_scores)
         overall_solo_scores.extend(solo_scores)
+        primary_overall_holo_scores.extend(primary_holo_scores)
+        primary_overall_solo_scores.extend(primary_solo_scores)
     summary = {
         "status": "judging_complete",
         "benchmark_credit": False,
@@ -1935,6 +2305,21 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
             if overall_holo_scores and overall_solo_scores
             else None,
             "judge_observations": len(overall_holo_scores),
+        },
+        "primary_no_self_dna": {
+            "rule": "exclude judge rows where judge_provider == solo_provider",
+            "holo_mean": round(statistics.mean(primary_overall_holo_scores), 3)
+            if primary_overall_holo_scores
+            else None,
+            "solo_mean": round(statistics.mean(primary_overall_solo_scores), 3)
+            if primary_overall_solo_scores
+            else None,
+            "gap_holo_minus_solo": round(
+                statistics.mean(primary_overall_holo_scores) - statistics.mean(primary_overall_solo_scores), 3
+            )
+            if primary_overall_holo_scores and primary_overall_solo_scores
+            else None,
+            "judge_observations": len(primary_overall_holo_scores),
         },
         "criterion_gap_holo_minus_solo": {
             cid: round(statistics.mean(values), 3) if values else 0 for cid, values in criterion_acc.items()
@@ -1955,6 +2340,14 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
         f"- Gap Holo minus Solo: {summary['overall']['gap_holo_minus_solo']}",
         f"- Judge observations: {summary['overall']['judge_observations']}",
         "",
+        "## Primary No-Self-DNA Score",
+        "",
+        f"- Holo mean: {summary['primary_no_self_dna']['holo_mean']}",
+        f"- Solo mean: {summary['primary_no_self_dna']['solo_mean']}",
+        f"- Gap Holo minus Solo: {summary['primary_no_self_dna']['gap_holo_minus_solo']}",
+        f"- Judge observations: {summary['primary_no_self_dna']['judge_observations']}",
+        f"- Rule: {summary['primary_no_self_dna']['rule']}",
+        "",
         "## Pair Summaries",
         "",
     ]
@@ -1966,6 +2359,8 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
                 f"- Holo mean: {pair['holo_mean']}",
                 f"- Solo mean: {pair['solo_mean']}",
                 f"- Gap: {pair['gap_holo_minus_solo']}",
+                f"- Primary no-self-DNA gap: {pair['primary_gap_holo_minus_solo']}",
+                f"- Primary judge observations: {pair['primary_judge_observations']}",
                 "",
             ]
         )
@@ -1984,6 +2379,7 @@ def run(args: argparse.Namespace) -> int:
         base_role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
         routing_config = load_routing_config(args.routing_config)
         role_flow = apply_holo_routing_config(base_role_flow, routing_config)
+        judge_panel = read_json(PACKET_DIR / "judge_panel_frontier_blind.json")
         print(
             json.dumps(
                 {
@@ -1995,7 +2391,9 @@ def run(args: argparse.Namespace) -> int:
                     "turn_prompt_parity": turn_prompt_parity_contract(role_flow),
                     "parity_note": "Solo and Holo share the same base turn role/instruction; Holo additionally receives Gov Baton/state/artifacts.",
                     "planned_generation_calls_minimum": (solo_condition_count * 6) + 12,
-                    "planned_judge_calls": solo_condition_count * 3,
+                    "planned_judge_calls": solo_condition_count * len(judge_panel["judge_models"]),
+                    "planned_turn_judge_packets": solo_condition_count * 6,
+                    "turn_judging_default": "packets only; live scoring requires a future explicit flag",
                 },
                 indent=2,
                 sort_keys=True,
@@ -2020,8 +2418,8 @@ def run(args: argparse.Namespace) -> int:
     rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
     if len(role_flow["turns"]) != 6:
         raise RuntimeError("role_flow_must_have_6_turns")
-    if len(judge_panel["judge_models"]) != 3:
-        raise RuntimeError("judge_panel_must_have_3_judges")
+    if len(judge_panel["judge_models"]) < 4:
+        raise RuntimeError("judge_panel_must_have_at_least_4_judges_for_no_self_dna_primary_scoring")
     if sum(item["weight"] for item in rubric["criteria"]) != 100:
         raise RuntimeError("rubric_weights_must_sum_to_100")
 
@@ -2100,6 +2498,15 @@ def run(args: argparse.Namespace) -> int:
             solo_conditions=solo_conditions,
         )
         manifest["judge_packets"] = [packet["judge_packet_id"] for packet in packets]
+        turn_packets = build_turn_judge_packets(
+            run_root=run_root,
+            run_id=run_id,
+            role_flow=role_flow,
+            solo_conditions=solo_conditions,
+        )
+        manifest["turn_judge_packets"] = [packet["judge_packet_id"] for packet in turn_packets]
+        manifest["turn_judge_packet_count"] = len(turn_packets)
+        manifest["turn_judge_status"] = "packets_built_not_scored"
         manifest["status"] = "running_frontier_judges"
         write_manifest(run_root, manifest)
 

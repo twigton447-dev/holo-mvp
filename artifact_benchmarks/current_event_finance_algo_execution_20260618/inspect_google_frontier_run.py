@@ -38,6 +38,10 @@ def summarize_judges(summary_path: Path | None) -> dict[str, Any] | None:
                 "holo_mean": pair.get("holo_mean"),
                 "solo_mean": pair.get("solo_mean"),
                 "gap_holo_minus_solo": pair.get("gap_holo_minus_solo"),
+                "primary_holo_mean": pair.get("primary_holo_mean"),
+                "primary_solo_mean": pair.get("primary_solo_mean"),
+                "primary_gap_holo_minus_solo": pair.get("primary_gap_holo_minus_solo"),
+                "primary_judge_observations": pair.get("primary_judge_observations"),
             }
         )
         for row in pair.get("judge_rows", []):
@@ -53,6 +57,7 @@ def summarize_judges(summary_path: Path | None) -> dict[str, Any] | None:
                 )
     return {
         "overall": summary.get("overall"),
+        "primary_no_self_dna": summary.get("primary_no_self_dna"),
         "pair_summaries": pair_rows,
         "criterion_gap_holo_minus_solo": summary.get("criterion_gap_holo_minus_solo"),
         "judge_validation_flags": all_validation_flags,
@@ -114,6 +119,8 @@ def main() -> int:
         "total_output_tokens": manifest.get("total_output_tokens"),
         "total_latency_ms": manifest.get("total_latency_ms"),
         "counts": manifest.get("counts"),
+        "turn_judge_packet_count": manifest.get("turn_judge_packet_count"),
+        "turn_judge_status": manifest.get("turn_judge_status"),
         "failures": manifest.get("failures"),
         "overall_gap_holo_minus_solo": manifest.get("overall_gap_holo_minus_solo"),
         "judge_summary_path": str(summary_path) if summary_path else None,

@@ -17,6 +17,11 @@ SOLO_CONDITIONS = {
     "solo_google": "google:gemini-3.1-pro-preview",
 }
 STATE_OBJECT_VERSION = "patent_grade_holo_state_v1"
+HC_STATE_AUTHORITY_RULE = (
+    "Only HC may mutate benchmark architecture/state. HoloAgents may write artifacts; "
+    "Gov may baton, gate, and summarize; durable architecture updates enter through "
+    "HC via ROLLING_SUMMARY."
+)
 
 
 def read_text(path: Path) -> str:
@@ -98,6 +103,107 @@ def source_label(source: dict[str, Any]) -> str:
     return f"[{sid}]"
 
 
+def clean_ending(text: str) -> bool:
+    stripped = text.strip()
+    return bool(stripped) and stripped[-1] in ".!?)]`\"'"
+
+
+def source_ids_in_text(text: str) -> list[str]:
+    return sorted(set(re.findall(r"\[S\d+(?:_[A-Z0-9_]+)?\]", text)))
+
+
+def allowed_source_ids(source_entries: list[dict[str, Any]]) -> set[str]:
+    ids = set()
+    for entry in source_entries:
+        full_id = entry["id"]
+        ids.add(f"[{full_id}]")
+        ids.add(f"[{full_id.split('_', 1)[0]}]")
+    return ids
+
+
+def has_any(text: str, needles: list[str]) -> bool:
+    lowered = text.lower()
+    return any(needle.lower() in lowered for needle in needles)
+
+
+def final_artifact_validity_report(
+    text: str,
+    *,
+    source_entries: list[dict[str, Any]],
+    min_words: int,
+    max_words: int,
+) -> dict[str, Any]:
+    wc = word_count(text)
+    lowered = text.lower()
+    flags: list[str] = []
+    if not (min_words <= wc <= max_words):
+        flags.append(f"final_word_count_out_of_band:{wc}")
+    if not clean_ending(text):
+        flags.append("final_does_not_end_cleanly")
+    tail = text.strip()[-260:].lower()
+    if re.search(r"(\n|^)\s*[-*]\s+\S.{0,120}$", text.strip()) and not clean_ending(text):
+        flags.append("final_appears_cut_off_mid_bullet")
+    if tail.count("(") > tail.count(")") or tail.count("[") > tail.count("]"):
+        flags.append("final_tail_has_unbalanced_bracket_or_parenthesis")
+
+    required_topics = {
+        "disclaimer_no_investment_advice": ["not investment advice", "not legal", "not a recommendation"],
+        "disclaimer_no_live_execution": [
+            "does not execute",
+            "not a live execution",
+            "does not route orders",
+            "no live execution",
+            "not a live trading",
+            "not connected to live brokerage",
+            "not an order-routing system",
+        ],
+        "executive_thesis": ["executive thesis", "thesis"],
+        "current_market_setup": ["current market", "market setup", "market regime"],
+        "execution_architecture": ["architecture", "execution governor", "control plane"],
+        "benchmark_framework": ["implementation shortfall", "arrival price", "benchmark"],
+        "portfolio_funding_settlement": ["portfolio", "funding", "settlement"],
+        "regulatory_controls_audit": ["controls", "audit", "kill switch", "kill-switch"],
+        "model_risk_adversarial": ["model risk", "adversarial", "bias"],
+        "implementation_roadmap": ["roadmap", "phase", "implementation"],
+        "success_metrics": ["success metrics", "metrics", "kpis", "measurement"],
+    }
+    for topic, needles in required_topics.items():
+        if not has_any(lowered, needles):
+            flags.append(f"missing_required_topic:{topic}")
+
+    residue_terms = [
+        "state_object",
+        "mission packet",
+        "baton pass",
+        "benchmark_credit",
+        "document x",
+        "document y",
+        "turn_5",
+        "turn_6",
+        "hologov",
+        "holoagent",
+    ]
+    residue = [term for term in residue_terms if term in lowered]
+    if residue:
+        flags.append("internal_process_residue:" + ",".join(residue))
+
+    sources = source_ids_in_text(text)
+    unknown_source_ids = sorted(set(sources) - allowed_source_ids(source_entries))
+    if unknown_source_ids:
+        flags.append("unknown_source_ids:" + ",".join(unknown_source_ids))
+    if not sources:
+        flags.append("missing_source_ids")
+
+    return {
+        "valid": not flags,
+        "flags": flags,
+        "word_count": wc,
+        "word_count_in_band": min_words <= wc <= max_words,
+        "clean_ending": clean_ending(text),
+        "source_ids": sources,
+    }
+
+
 def synthetic_final_doc(
     *,
     title: str,
@@ -118,7 +224,34 @@ Benchmark credit: `false`
 Provider calls: `0`
 Source refs exercised: {source_refs}
 
-This placeholder exists only to test filesystem layout, trace hashing, final-document word-count gates, and no-browse packet plumbing. It is not a finance report, not a benchmark result, not investment advice, and not suitable for external sharing.
+This placeholder exists only to test filesystem layout, trace hashing, final-document word-count gates, deterministic validity gates, and no-browse packet plumbing. It is not a finance report, not a benchmark result, not investment advice, not legal advice, not a recommendation, and not a live execution or order-routing system.
+
+## Executive Thesis
+The diagnostic thesis is that an execution governor can organize current market setup, execution architecture, benchmark framework, portfolio funding settlement, regulatory controls audit, model risk adversarial review, implementation roadmap, and success metrics into one complete artifact for gate testing. {source_refs}
+
+## Current Market Setup
+The fixture names the market regime, current market context, and market setup so the gate can confirm that source-grounded current-event analysis would be required in a real run.
+
+## Execution Architecture
+The fixture names architecture, execution governor, and control plane concepts without claiming deployment capability.
+
+## Benchmark Framework
+The fixture names implementation shortfall, arrival price, VWAP, peer benchmark, venue benchmark, and benchmark conflict logic.
+
+## Portfolio Funding Settlement
+The fixture names portfolio weights, active risk, funding, settlement, repo, collateral, and cash constraints.
+
+## Regulatory Controls Audit
+The fixture names controls, audit, kill switch, pre-trade limits, logs, escalation, and compliance evidence.
+
+## Model Risk Adversarial Review
+The fixture names model risk, adversarial pressure, bias, unsupported claims, and disagreement handling.
+
+## Implementation Roadmap
+The fixture names roadmap, phase gates, implementation sequencing, validation, and production monitoring.
+
+## Success Metrics
+The fixture names success metrics, KPIs, measurement, completion, and client-readiness.
 
 """
     sentence = (
@@ -263,6 +396,70 @@ def trace_payload(
     }
 
 
+def build_turn_judge_packets(
+    *,
+    root: Path,
+    run_id: str,
+    role_flow: dict[str, Any],
+    solo_conditions: dict[str, str],
+    source_pack: dict[str, Any],
+    report_brief: dict[str, Any],
+    rubric: dict[str, Any],
+) -> list[str]:
+    packet_ids: list[str] = []
+    anonymization = {"run_id": run_id, "pairs": []}
+    for solo_condition in solo_conditions:
+        for role_item in role_flow["turns"]:
+            turn = int(role_item["turn"])
+            solo_path = root / "artifacts" / solo_condition / f"turn_{turn}.md"
+            holo_path = root / "artifacts" / "holo_frontier_gov" / f"turn_{turn}.md"
+            if not solo_path.exists() or not holo_path.exists():
+                continue
+            pair_id = f"{run_id}_{solo_condition}_vs_holo_turn_{turn}_pair"
+            flip = int(hashlib.sha256(pair_id.encode("utf-8")).hexdigest()[:2], 16) % 2 == 0
+            if flip:
+                doc_x, doc_y = read_text(holo_path), read_text(solo_path)
+                x_condition, y_condition = "holo_frontier_gov", solo_condition
+            else:
+                doc_x, doc_y = read_text(solo_path), read_text(holo_path)
+                x_condition, y_condition = solo_condition, "holo_frontier_gov"
+            packet = {
+                "judge_packet_id": pair_id,
+                "packet_type": "turn_level_diagnostic",
+                "blind": True,
+                "benchmark_credit": False,
+                "public_claim": False,
+                "domain": report_brief["domain"],
+                "turn": turn,
+                "turn_role": role_item["role"],
+                "turn_instruction": role_item["instruction"],
+                "turn_scoring_note": (
+                    "Score each document for this turn's assigned role and its contribution "
+                    "to the artifact trajectory. Do not score early critique/repair turns as "
+                    "if they must be final board-ready reports."
+                ),
+                "brief": report_brief,
+                "source_pack": source_pack,
+                "rubric": rubric,
+                "documents": {
+                    "document_x": {"anonymous_id": "Document X", "text": doc_x},
+                    "document_y": {"anonymous_id": "Document Y", "text": doc_y},
+                },
+            }
+            write_json(root / "turn_judge_packets" / f"{pair_id}.json", packet)
+            anonymization["pairs"].append(
+                {
+                    "judge_packet_id": pair_id,
+                    "turn": turn,
+                    "document_x_condition": x_condition,
+                    "document_y_condition": y_condition,
+                }
+            )
+            packet_ids.append(pair_id)
+    write_json(root / "sealed" / "turn_anonymization_map.json", anonymization)
+    return packet_ids
+
+
 def word_gate(text: str, min_words: int, max_words: int) -> dict[str, Any]:
     count = word_count(text)
     return {
@@ -290,10 +487,16 @@ def smoke_state_object(
             *req["must_not_include"],
             f"Target final length: {req['target_length_words'][0]}-{req['target_length_words'][1]} words.",
             "No browsing during generation or judging.",
+            HC_STATE_AUTHORITY_RULE,
         ],
         "ROLLING_SUMMARY": [
             {"turn": item["turn"], "artifact_sha256": item["sha256"]} for item in previous_holo
         ],
+        "HC_STATE_AUTHORITY": {
+            "architecture_mutation_surface": "HC",
+            "mutable_state_surface": "ROLLING_SUMMARY",
+            "rule": HC_STATE_AUTHORITY_RULE,
+        },
         "SETTLED_DECISIONS": [
             "Fixed Gov for the session.",
             f"Routing config: {routing_config['routing_config_id']}.",
@@ -333,6 +536,7 @@ def main() -> int:
     role_flow = apply_holo_routing_config(base_role_flow, routing_config)
     run_prompt = read_text(PACKET_DIR / "holo_frontier_run_prompt.md")
     judge_brief = read_text(PACKET_DIR / "judge_brief.md")
+    rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
 
     source_entries = source_pack["source_entries"]
     min_words, max_words = report_brief["deliverable_requirements"]["target_length_words"]
@@ -426,6 +630,12 @@ def main() -> int:
         final_candidates[condition] = {
             "artifact_path": str(root / "artifacts" / condition / "turn_6.md"),
             "gate": word_gate(read_text(root / "artifacts" / condition / "turn_6.md"), min_words, max_words),
+            "artifact_validity_report": final_artifact_validity_report(
+                read_text(root / "artifacts" / condition / "turn_6.md"),
+                source_entries=source_entries,
+                min_words=min_words,
+                max_words=max_words,
+            ),
         }
 
     previous_holo: list[dict[str, Any]] = []
@@ -557,6 +767,12 @@ def main() -> int:
     final_candidates["holo_frontier_gov"] = {
         "artifact_path": str(root / "artifacts" / "holo_frontier_gov" / "turn_6.md"),
         "gate": final_selection["candidate_turn_6"]["word_gate"],
+        "artifact_validity_report": final_artifact_validity_report(
+            read_text(root / "artifacts" / "holo_frontier_gov" / "turn_6.md"),
+            source_entries=source_entries,
+            min_words=min_words,
+            max_words=max_words,
+        ),
     }
 
     below = "too short"
@@ -574,15 +790,49 @@ def main() -> int:
         "within_band_should_pass": word_gate(within, min_words, max_words),
         "above_max_should_fail": word_gate(above, min_words, max_words),
     }
+    validity_gate_tests = {
+        "within_complete_should_pass": final_artifact_validity_report(
+            within,
+            source_entries=source_entries,
+            min_words=min_words,
+            max_words=max_words,
+        ),
+        "truncated_mid_bullet_should_fail": final_artifact_validity_report(
+            within + "\n- No rout",
+            source_entries=source_entries,
+            min_words=min_words,
+            max_words=max_words,
+        ),
+        "missing_source_ids_should_fail": final_artifact_validity_report(
+            re.sub(r"\[S\d+(?:_[A-Z0-9_]+)?\]", "", within),
+            source_entries=source_entries,
+            min_words=min_words,
+            max_words=max_words,
+        ),
+    }
     check("word_gate_below_min_fails", word_gate_tests["below_min_should_fail"]["passes"] is False)
     check("word_gate_within_band_passes", word_gate_tests["within_band_should_pass"]["passes"] is True)
     check("word_gate_above_max_fails", word_gate_tests["above_max_should_fail"]["passes"] is False)
+    check("validity_gate_within_complete_passes", validity_gate_tests["within_complete_should_pass"]["valid"] is True, validity_gate_tests["within_complete_should_pass"])
+    check("validity_gate_truncated_mid_bullet_fails", validity_gate_tests["truncated_mid_bullet_should_fail"]["valid"] is False, validity_gate_tests["truncated_mid_bullet_should_fail"])
+    check("validity_gate_missing_source_ids_fails", validity_gate_tests["missing_source_ids_should_fail"]["valid"] is False, validity_gate_tests["missing_source_ids_should_fail"])
+
+    turn_judge_packet_ids = build_turn_judge_packets(
+        root=root,
+        run_id=run_id,
+        role_flow=role_flow,
+        solo_conditions=SOLO_CONDITIONS,
+        source_pack=source_pack,
+        report_brief=report_brief,
+        rubric=rubric,
+    )
 
     artifact_count = len(list((root / "artifacts").glob("*/*.md")))
     trace_count = len(list((root / "traces").glob("*/*.json")))
     mission_count = len(list((root / "mission_packets").glob("*/*.md")))
     state_object_count = len(list((root / "state_objects").glob("*/*.json")))
     final_gate_count = len(list((root / "final_selection").glob("*.json")))
+    turn_judge_packet_count = len(list((root / "turn_judge_packets").glob("*.json")))
     final_state = read_json(root / "state_objects" / "holo_frontier_gov" / "turn_6_state_object.json")
     check("artifact_count_24", artifact_count == 24, artifact_count)
     check("trace_count_29", trace_count == 29, trace_count)
@@ -596,6 +846,7 @@ def main() -> int:
                 "USER_GOAL",
                 "CRITICAL_CONSTRAINTS",
                 "ROLLING_SUMMARY",
+                "HC_STATE_AUTHORITY",
                 "SETTLED_DECISIONS",
                 "ARTIFACTS_REGISTRY",
                 "BATON_PASS",
@@ -608,6 +859,12 @@ def main() -> int:
     check("state_object_version", final_state.get("state_object_version") == STATE_OBJECT_VERSION, final_state.get("state_object_version"))
     check("final_selection_count_1", final_gate_count == 1, final_gate_count)
     check("all_final_word_gates_pass", all(item["gate"]["passes"] for item in final_candidates.values()), final_candidates)
+    check(
+        "all_final_validity_gates_pass",
+        all(item["artifact_validity_report"]["valid"] for item in final_candidates.values()),
+        final_candidates,
+    )
+    check("turn_judge_packet_count_18", turn_judge_packet_count == 18, turn_judge_packet_count)
 
     failures = [item for item in checks if not item["ok"]]
     manifest = {
@@ -637,9 +894,14 @@ def main() -> int:
             "mission_packets": mission_count,
             "state_objects": state_object_count,
             "final_selection_files": final_gate_count,
+            "turn_judge_packets": turn_judge_packet_count,
         },
         "word_gate_tests": word_gate_tests,
+        "validity_gate_tests": validity_gate_tests,
         "final_candidates": final_candidates,
+        "turn_judge_packets": turn_judge_packet_ids,
+        "turn_judge_packet_count": turn_judge_packet_count,
+        "turn_judge_status": "packets_built_not_scored",
         "checks": checks,
         "failures": failures,
         "notes": (
@@ -659,6 +921,7 @@ def main() -> int:
         "trace_count": trace_count,
         "mission_packet_count": mission_count,
         "final_selection_count": final_gate_count,
+        "turn_judge_packet_count": turn_judge_packet_count,
         "run_manifest": str(root / "run_manifest.json"),
         "failures": failures,
     }

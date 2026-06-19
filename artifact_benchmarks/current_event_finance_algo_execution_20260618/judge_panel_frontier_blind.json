@@ -1,7 +1,7 @@
 {
   "judge_panel_id": "finance_algo_execution_frontier_blind_judge_panel_v1",
   "domain": "current_event_finance_algorithmic_execution",
-  "judge_count": 3,
+  "judge_count": 4,
   "same_frontier_cohort_as_generation": true,
   "judge_models": [
     {
@@ -21,6 +21,13 @@
       "provider": "google",
       "model": "gemini-3.1-pro-preview",
       "same_as_generation_cohort": true
+    },
+    {
+      "judge_id": "judge_frontier_04",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "same_as_generation_cohort": false,
+      "outside_judge": true
     }
   ],
   "blinding_contract": {
@@ -76,7 +83,8 @@
   },
   "aggregation_contract": {
     "per_judge_weight": "equal",
-    "primary_metric": "mean weighted_score_1_10 across three frontier judges",
+    "primary_metric": "mean weighted_score_1_10 across non-self-DNA eligible frontier judges",
+    "self_dna_exclusion_rule": "A judge row is excluded from primary scoring when the judge provider is the same provider as the solo model being evaluated. Excluded rows remain diagnostic.",
     "secondary_metrics": [
       "median weighted_score_1_10",
       "judge-level margin",

@@ -67,3 +67,12 @@ Research judgment:
 
 Rubric:
 - `research_judge_rubric.json`
+
+Solo bootstrap commands:
+
+```bash
+python3 artifact_benchmarks/holo_research/sr_bootstrap.py --generate-smoke
+python3 artifact_benchmarks/holo_research/sr_bootstrap.py --validate /private/tmp/holoresearch_sr_bootstrap_smoke
+python3 artifact_benchmarks/holo_research/sr_bootstrap.py --freeze /private/tmp/holoresearch_sr_bootstrap_smoke
+python3 artifact_benchmarks/holo_research/sr_bootstrap.py --build-judge-packet /private/tmp/holoresearch_sr_bootstrap_smoke
+```

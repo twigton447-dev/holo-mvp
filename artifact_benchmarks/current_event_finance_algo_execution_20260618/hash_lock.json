@@ -8,7 +8,7 @@
   "packet_file_sha256": {
     "source_pack.json": "db86ad609234651a14769db9ea6fc922a7f6ad52b485d94bc99b6d2071226cd2",
     "source_pack.md": "cc2395f7162c898299b96bc9c70279725ee2edb9a66255b6de9a359daea72c7f",
-    "report_brief.json": "88550c3aa5e4dc64496ac79a6262d42fde908ab88cc74cc69745a1c668783036",
+    "report_brief.json": "ab65eebdbf079e1e172cbdda13d5dde8e7497882a28eb462cab6815b50f9d167",
     "gov_technical_probe_protocol.json": "6e464efffeec090b55e22c19bc955b01d26d5ffb50bbf19a37d81bb4310c1550",
     "gov_technical_probe_protocol.md": "72e7bf4897ec1d16c6fe119979c01dd36c18350dad5062290cbdadd5cf123578",
     "finance_algo_adversarial_role_flow.json": "c447ef800496ff4f3b984be5b9bd2af5e962728675ef003d2e27a1e2e487e573",
@@ -20,8 +20,8 @@
     "README.md": "3d8229ea23e37362d066184ac68d1737da1f83144b6f86225693c3e513b4a172"
   },
   "runner_file_sha256": {
-    "run_google_frontier_e2e.py": "9046fad24ba864d9f43433f4d545e53cb8eec56d08032e59d7a6971a596a4afb",
-    "google_frontier_e2e_live.py": "c298de4084763b94eee428431ceaffea3c320dfe0a17091ffeb2c600ea61e0b5",
+    "run_google_frontier_e2e.py": "93a5c83eae366c3b56fa840da2d6fd0498003152834c42b9fea1632ab2879919",
+    "google_frontier_e2e_live.py": "bb37332448071c9ed3fd0c3b7d4b21e51a354692ace000dd411832d21d509cb1",
     "google_frontier_no_provider_smoke.py": "8b212d75d5019457ecd16718f02fb65b8982c05e5d51ac6c7abe5e6baad229e7",
     "inspect_google_frontier_run.py": "8389122a4c8adae8b5af70514c245ffc80096513e3efb5f33a71b016909a4f99",
     "analyze_google_frontier_run.py": "a632c77633538d81e2c687bf77c14d4a1c8cdc432bbe393608d0eac1728f83c7",
@@ -56,14 +56,6 @@
     "anthropic:claude-opus-4-8",
     "openai:gpt-5.5"
   ],
-  "holo_governor_rotation": [
-    null,
-    "google:gemini-3.1-pro-preview",
-    "openai:gpt-5.5",
-    "anthropic:claude-opus-4-8",
-    "google:gemini-3.1-pro-preview",
-    "openai:gpt-5.5"
-  ],
   "judge_panel": [
     {
       "judge_id": "judge_frontier_01",
@@ -84,14 +76,16 @@
       "same_as_generation_cohort": true
     }
   ],
-  "combined_packet_hash": "e5f09f68ebce9305a5a2bfe5aa76e17de5dbefb7f3309c7e88fd04c010a097ae",
-  "combined_runner_hash": "6661846f7f7b3c499d0ac74cb18ea0bc3d4078b329870e527faaa4df8d39f096",
-  "combined_execution_lock_hash": "23c38f064c4265800698e268d1f8eb5f4bf6804474957f124503b942e63f9477",
+  "combined_packet_hash": "0878b157bcc6bd5520dd4407791b66c4452d6abb5db87014a32a4f50840cc03b",
+  "combined_runner_hash": "fc12ecc16b39be3d4867449e790e128e52d43be820a3735d57f2fa2a068883df",
+  "combined_execution_lock_hash": "be0bf38fa4a80756c66e95f8c471cee36c142fbc55a2bf9660fb2d93ae17375a",
   "verification": {
     "preflight_command": "python3 run_google_frontier_e2e.py --preflight",
     "no_provider_smoke_command": "python3 run_google_frontier_e2e.py --no-provider-smoke",
     "live_command_requires_local_approval": "python3 run_google_frontier_e2e.py --run-live",
     "post_run_inspection_command": "python3 inspect_google_frontier_run.py --latest",
     "post_run_analysis_command": "python3 analyze_google_frontier_run.py --latest"
-  }
+  },
+  "holo_governor_model": "anthropic:claude-opus-4-8",
+  "holo_governor_continuity_rule": "Fixed for the full session; never rotated by turn. Gov may see the frozen Gov protocol, domain DNA, repair ledger, prior artifacts, and validity gates. Gov is a role, not an extra model slot."
 }

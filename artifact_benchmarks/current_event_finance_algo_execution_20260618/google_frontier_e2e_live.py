@@ -1043,15 +1043,14 @@ def run_holo_condition(
     previous_artifacts: list[dict[str, str]] = []
     traces: list[dict[str, Any]] = []
     turn_texts: dict[int, str] = {}
-    gov_rotation = report_brief["holo_turn_design"]["governor_rotation"]
+    gov_provider_model = report_brief["holo_turn_design"]["governor_model"]
+    gov_provider, _ = provider_model(gov_provider_model)
     for role_item in role_flow["turns"]:
         turn = int(role_item["turn"])
         analyst_provider, _ = provider_model(role_item["provider_model"])
         mission_text: str | None = None
         mission_path: Path | None = None
-        gov_provider_model = gov_rotation[turn - 1]
-        if gov_provider_model:
-            gov_provider, _ = provider_model(gov_provider_model)
+        if turn > 1:
             system = gov_system()
             user = gov_prompt(payload=payload, turn=turn, role_item=role_item, previous_artifacts=previous_artifacts)
             mission_path = run_root / "mission_packets" / condition / f"turn_{turn}_mission.md"
@@ -1142,8 +1141,7 @@ def run_holo_condition(
         traces.extend(repair_traces)
         turn_texts[turn] = repaired
 
-    selector_provider_model = report_brief["holo_turn_design"]["governor_rotation"][5]
-    selector_provider, _ = provider_model(selector_provider_model)
+    selector_provider, _ = provider_model(gov_provider_model)
     system = selector_system()
     user = selector_prompt(payload=payload, turn5=turn_texts[5], turn6=turn_texts[6])
     selector_out_path = run_root / "final_selection" / f"{condition}_selector.json"

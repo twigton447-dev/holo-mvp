@@ -22,7 +22,10 @@
     "judge_count": 3,
     "deterministic_validity_gate_required": true,
     "hash_lock_required": true,
-    "trace_autopsy_required": true
+    "trace_autopsy_required": true,
+    "fixed_governor_per_session": true,
+    "governor_is_role_not_extra_model_slot": true,
+    "governor_model_may_overlap_generation_cohort": true
   },
   "cohort_lanes": [
     {
@@ -41,19 +44,13 @@
         "anthropic:claude-opus-4-8",
         "openai:gpt-5.5"
       ],
-      "holo_governor_rotation": [
-        null,
-        "google:gemini-3.1-pro-preview",
-        "openai:gpt-5.5",
-        "anthropic:claude-opus-4-8",
-        "google:gemini-3.1-pro-preview",
-        "openai:gpt-5.5"
-      ],
       "judge_panel": [
         "openai:gpt-5.5",
         "anthropic:claude-opus-4-8",
         "google:gemini-3.1-pro-preview"
-      ]
+      ],
+      "holo_governor_model": "anthropic:claude-opus-4-8",
+      "holo_governor_continuity_rule": "Fixed for the full session; never rotated by turn. Gov is a role, not an extra model slot, so the Gov model may also appear in analyst, solo, and judge cohorts."
     },
     {
       "cohort_id": "frontier_2_model_ablation",
@@ -70,19 +67,13 @@
         "anthropic:claude-opus-4-8",
         "openai:gpt-5.5"
       ],
-      "holo_governor_rotation": [
-        null,
-        "anthropic:claude-opus-4-8",
-        "openai:gpt-5.5",
-        "anthropic:claude-opus-4-8",
-        "openai:gpt-5.5",
-        "openai:gpt-5.5"
-      ],
       "judge_panel": [
         "openai:gpt-5.5",
         "anthropic:claude-opus-4-8",
         "google:gemini-3.1-pro-preview"
-      ]
+      ],
+      "holo_governor_model": "openai:gpt-5.5",
+      "holo_governor_continuity_rule": "Fixed for the full session; never rotated by turn. Gov is a role, not an extra model slot, so the Gov model may also appear in analyst, solo, and judge cohorts."
     },
     {
       "cohort_id": "mini_3_model_cost_lane",
@@ -100,19 +91,13 @@
         "xai:grok-3-mini",
         "openai:gpt-4o-mini"
       ],
-      "holo_governor_rotation": [
-        null,
-        "google:gemini-2.5-flash-lite",
-        "openai:gpt-4o-mini",
-        "xai:grok-3-mini",
-        "google:gemini-2.5-flash-lite",
-        "openai:gpt-4o-mini"
-      ],
       "judge_panel": [
         "openai:gpt-5.5",
         "anthropic:claude-opus-4-8",
         "google:gemini-3.1-pro-preview"
-      ]
+      ],
+      "holo_governor_model": "openai:gpt-4o-mini",
+      "holo_governor_continuity_rule": "Fixed for the full session; never rotated by turn. Gov is a role, not an extra model slot, so the Gov model may also appear in analyst, solo, and judge cohorts."
     }
   ],
   "domains": [

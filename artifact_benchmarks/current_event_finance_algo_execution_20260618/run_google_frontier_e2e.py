@@ -44,7 +44,8 @@ def preflight() -> int:
         "cohort_id": lock["cohort"]["cohort_id"],
         "solo_conditions": lock["solo_conditions"],
         "holo_analyst_rotation": lock["holo_analyst_rotation"],
-        "holo_governor_rotation": lock["holo_governor_rotation"],
+        "holo_governor_model": lock["holo_governor_model"],
+        "holo_governor_continuity_rule": lock["holo_governor_continuity_rule"],
         "judge_panel": lock["judge_panel"],
         "live_calls_default": "disabled",
     }

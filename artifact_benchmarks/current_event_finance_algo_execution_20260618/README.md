@@ -11,11 +11,27 @@ No full report generation has been run from this packet yet. A tiny live smoke t
 
 Models do **not** browse during generation. Holo, solos, and judges receive the same frozen context pack.
 
-## Recommended Frontier Cohort
+## Verified Frontier Cohorts
+
+Packetless smoke probes completed with no benchmark/source/artifact payload.
+
+Main max-intelligence cohort:
 
 - OpenAI: `gpt-5.5`
 - Anthropic: `claude-opus-4-8`
+- Google: `gemini-3.1-pro-preview`
+
+Stable Google fallback:
+
+- Google: `gemini-3.5-flash`
+
+Robustness lane:
+
 - xAI: `grok-4.3`
+
+Unavailable on this key:
+
+- Anthropic: `claude-fable-5`
 
 ## Files
 

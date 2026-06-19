@@ -6,7 +6,9 @@ The judge panel is the same frontier cohort as the generation cohort:
 
 - `judge_frontier_01`: OpenAI `gpt-5.5`
 - `judge_frontier_02`: Anthropic `claude-opus-4-8`
-- `judge_frontier_03`: xAI `grok-4.3`
+- `judge_frontier_03`: Google `gemini-3.1-pro-preview`
+
+`grok-4.3` is available for a separate robustness judge lane, but it is not part of the main max-intelligence judge panel for this packet.
 
 The documents are blinded. Judges are not told which document is Holo, which document is Solo, which model generated either document, or how other judges scored.
 

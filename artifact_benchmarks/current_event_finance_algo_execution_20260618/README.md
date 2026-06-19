@@ -38,6 +38,7 @@ Solo sweep suites:
 - `frontier_baseline` - primary three frontier solos.
 - `mini_baseline` - OpenAI mini, Anthropic Haiku, Gemini Flash Lite, Grok mini, and MiniMax.
 - `extended_solo_sweep` - mapped frontier, robustness, fallback, mini, and MiniMax solos.
+- `frontier_plus_xai_baseline` - OpenAI, Anthropic, Google, and xAI Grok frontier solos for Frontier4 Holo comparisons.
 
 Mini-Holo diagnostic matrix:
 
@@ -46,6 +47,15 @@ Mini-Holo diagnostic matrix:
 - `mini_order_c_gemini_lite_bookend`
 - `mini_order_d_grok_bookend`
 - `mini_order_e_minimax_bookend`
+
+Frontier4 diagnostic matrix:
+
+- `frontier4_order_a_openai_bookend`
+- `frontier4_order_b_opus_bookend`
+- `frontier4_order_c_gemini_bookend`
+- `frontier4_order_d_grok_bookend`
+
+These routes add Grok 4.3 as a HoloAgent while preserving the same source pack, role flow, fixed Gov, word band, validity gate, and blind judges. Run all four before making Frontier4 route-insensitive claims.
 
 These routes use all five locked minis as Holo analysts with one mini bookending each six-turn run. Run all five before making route-insensitive mini-Holo claims.
 
@@ -73,6 +83,7 @@ Unavailable on this key:
 - `judge_panel_frontier_blind.json` - four-judge blinded panel contract with no-self-DNA primary scoring.
 - `solo_model_sweep.json` - immutable suite manifest for frontier, mini, and extended solo runs.
 - `mini_holo_data_trail_matrix.json` - diagnostic matrix for every locked mini solo versus every all-mini Holo route.
+- `frontier_plus_xai_holo_matrix.json` - diagnostic matrix for four-frontier solo baselines and Frontier4 Holo routes including Grok 4.3.
 - `mini_holo_governor_ablation_matrix.json` - diagnostic matrix for fixed analyst order with different mini Gov models.
 
 - `gov_technical_probe_protocol.json` / `.md` - technical probing requirements for Gov mission packets.

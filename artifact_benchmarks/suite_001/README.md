@@ -7,6 +7,7 @@ The suite asks whether Holo's Governor-orchestrated adversarial loop creates mea
 ## Lanes
 
 - `frontier_3_model_main`: GPT + Opus + Gemini Holo versus the same three solo baselines.
+- `frontier_4_model_xai_matrix`: GPT + Opus + Gemini + Grok Holo versus the same four solo baselines.
 - `frontier_2_model_ablation`: GPT + Opus Holo versus GPT solo and Opus solo.
 - `mini_3_model_cost_lane`: three mini models as Holo versus the same three mini solo baselines.
 

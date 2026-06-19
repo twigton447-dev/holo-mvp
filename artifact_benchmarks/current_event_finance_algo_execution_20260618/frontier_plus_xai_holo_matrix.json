@@ -1,0 +1,73 @@
+{
+  "matrix_id": "finance_algo_execution_frontier_plus_xai_holo_matrix_v1",
+  "status": "diagnostic_ready_not_benchmark_credit",
+  "created_at_utc": "2026-06-19T16:15:00Z",
+  "benchmark_credit": false,
+  "public_claim": false,
+  "purpose": "Test every mapped frontier solo and multiple four-frontier HoloAgent rotations, including Grok 4.3 as a HoloAgent, under the same frozen finance packet, judge panel, turn budget, word band, validity gate, and rollup/insight extraction.",
+  "packet_id": "current_event_finance_algo_execution_20260618",
+  "solo_suite_id": "frontier_plus_xai_baseline",
+  "solo_conditions": [
+    "solo_openai",
+    "solo_anthropic",
+    "solo_google",
+    "solo_xai_frontier"
+  ],
+  "holo_routing_configs": [
+    "frontier4_order_a_openai_bookend",
+    "frontier4_order_b_opus_bookend",
+    "frontier4_order_c_gemini_bookend",
+    "frontier4_order_d_grok_bookend"
+  ],
+  "fixed_governor_model": "anthropic:claude-opus-4-8",
+  "judge_panel_policy": "Use the same four frontier judges. Primary scoring excludes same-provider judge rows for the solo being evaluated; excluded rows remain diagnostic.",
+  "one_to_one_comparison_contract": {
+    "same_packet": true,
+    "same_turn_budget": 6,
+    "same_base_turn_prompts": true,
+    "same_final_word_band": true,
+    "same_judge_panel": true,
+    "same_blind_pair_format": true,
+    "same_validity_gate": true,
+    "same_no_browse_generation_policy": true,
+    "comparison_unit": "Each Frontier4 route generates one Holo final. Each valid frontier solo final is paired 1:1 against that Holo final in blinded judge packets."
+  },
+  "balance_rule": "Across the four Frontier4 routes, each frontier model appears six total analyst turns. Each model bookends one route.",
+  "chart_units": [
+    {
+      "chart_id": "frontier4_route_gap_heatmap",
+      "description": "Rows are Frontier4 routes; columns are frontier solo conditions; cell is Holo minus solo primary no-self-DNA gap."
+    },
+    {
+      "chart_id": "frontier4_model_position_effects",
+      "description": "Compare lift when each frontier model opens/closes versus appears in middle turns."
+    },
+    {
+      "chart_id": "frontier4_grok_effect",
+      "description": "Compare routes with Grok bookend versus Grok middle-turn participation and versus Grok solo."
+    },
+    {
+      "chart_id": "frontier4_token_cost_vs_gap",
+      "description": "Compare generation token ratio, latency ratio, and score lift by route."
+    }
+  ],
+  "recommended_run_order": [
+    {
+      "step": 1,
+      "command": "python3 run_google_frontier_e2e.py --preflight --solo-suite frontier_plus_xai_baseline --routing-config frontier4_order_a_openai_bookend"
+    },
+    {
+      "step": 2,
+      "command": "python3 run_google_frontier_e2e.py --no-provider-smoke --solo-suite frontier_plus_xai_baseline --routing-config frontier4_order_a_openai_bookend"
+    },
+    {
+      "step": 3,
+      "command": "caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite frontier_plus_xai_baseline --routing-config frontier4_order_a_openai_bookend --timeout 1200"
+    },
+    {
+      "step": 4,
+      "command": "Repeat one at a time for frontier4_order_b_opus_bookend, frontier4_order_c_gemini_bookend, and frontier4_order_d_grok_bookend."
+    }
+  ],
+  "interpretation_rule": "Do not claim Frontier4 route-insensitive lift until all four Frontier4 routes have run or missing routes are explicitly labeled. Report Grok solo, Grok middle-turn, and Grok bookend results separately."
+}

@@ -178,7 +178,67 @@
         "openai:gpt-4o-mini"
       ],
       "notes": "Gov ablation route. Analyst order is identical to mini_order_a_openai_bookend; only Gov changes to MiniMax."
+    },
+    {
+      "routing_config_id": "frontier4_order_a_openai_bookend",
+      "label": "Frontier4 Holo - OpenAI bookend",
+      "cohort_lane": "frontier_plus_xai_all4",
+      "governor_model": "anthropic:claude-opus-4-8",
+      "analyst_rotation": [
+        "openai:gpt-5.5",
+        "google:gemini-3.1-pro-preview",
+        "anthropic:claude-opus-4-8",
+        "xai:grok-4.3",
+        "google:gemini-3.1-pro-preview",
+        "openai:gpt-5.5"
+      ],
+      "notes": "All four frontier models participate; OpenAI opens and closes. Opus remains fixed Gov for comparability with the main frontier lane."
+    },
+    {
+      "routing_config_id": "frontier4_order_b_opus_bookend",
+      "label": "Frontier4 Holo - Opus bookend",
+      "cohort_lane": "frontier_plus_xai_all4",
+      "governor_model": "anthropic:claude-opus-4-8",
+      "analyst_rotation": [
+        "anthropic:claude-opus-4-8",
+        "xai:grok-4.3",
+        "openai:gpt-5.5",
+        "google:gemini-3.1-pro-preview",
+        "xai:grok-4.3",
+        "anthropic:claude-opus-4-8"
+      ],
+      "notes": "All four frontier models participate; Opus opens and closes while also remaining fixed Gov. This intentionally tests same-DNA Gov overlap under a declared route."
+    },
+    {
+      "routing_config_id": "frontier4_order_c_gemini_bookend",
+      "label": "Frontier4 Holo - Gemini bookend",
+      "cohort_lane": "frontier_plus_xai_all4",
+      "governor_model": "anthropic:claude-opus-4-8",
+      "analyst_rotation": [
+        "google:gemini-3.1-pro-preview",
+        "openai:gpt-5.5",
+        "xai:grok-4.3",
+        "anthropic:claude-opus-4-8",
+        "openai:gpt-5.5",
+        "google:gemini-3.1-pro-preview"
+      ],
+      "notes": "All four frontier models participate; Gemini opens and closes. Opus remains fixed Gov."
+    },
+    {
+      "routing_config_id": "frontier4_order_d_grok_bookend",
+      "label": "Frontier4 Holo - Grok bookend",
+      "cohort_lane": "frontier_plus_xai_all4",
+      "governor_model": "anthropic:claude-opus-4-8",
+      "analyst_rotation": [
+        "xai:grok-4.3",
+        "anthropic:claude-opus-4-8",
+        "google:gemini-3.1-pro-preview",
+        "openai:gpt-5.5",
+        "anthropic:claude-opus-4-8",
+        "xai:grok-4.3"
+      ],
+      "notes": "All four frontier models participate; Grok opens and closes. Opus remains fixed Gov. This route directly tests Grok as opening and final HoloAgent."
     }
   ],
-  "balance_rule": "Frontier configs use the same three analyst models exactly twice. Mini order configs use all five locked mini analyst models, with one mini bookending each config because six turns cannot evenly divide five models. Mini Gov-ablation configs hold analyst order constant and change only Gov. Run all relevant configs before making route-insensitive or Gov-insensitive mini-Holo claims."
+  "balance_rule": "Frontier3 configs use the same three analyst models exactly twice. Frontier4 configs use OpenAI, Opus, Gemini, and Grok across four declared routes; each route bookends one frontier model and repeats one secondary model so that, across the full Frontier4 matrix, each model appears six times. Mini order configs use all five locked mini analyst models, with one mini bookending each config because six turns cannot evenly divide five models. Mini Gov-ablation configs hold analyst order constant and change only Gov. Run all relevant configs before making route-insensitive, Gov-insensitive, or cohort-insensitive claims."
 }

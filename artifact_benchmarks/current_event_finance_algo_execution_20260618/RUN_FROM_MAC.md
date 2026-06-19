@@ -59,6 +59,44 @@ python3 build_hash_locked_lift_rollup.py
 
 If preflight reports any key as `MISSING`, stop and use your existing local secret setup. Do not paste keys into chat.
 
+## Frontier Plus xAI Baseline
+
+Use this lane when you want every mapped frontier solo against a four-frontier HoloAgent cohort that includes Grok 4.3. Gov remains fixed to Opus for the full Holo session.
+
+```bash
+python3 run_google_frontier_e2e.py --preflight --solo-suite frontier_plus_xai_baseline --routing-config frontier4_order_a_openai_bookend
+python3 run_google_frontier_e2e.py --no-provider-smoke --solo-suite frontier_plus_xai_baseline --routing-config frontier4_order_a_openai_bookend
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite frontier_plus_xai_baseline --routing-config frontier4_order_a_openai_bookend --timeout 1200
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+python3 build_hash_locked_lift_rollup.py
+```
+
+Then repeat one at a time:
+
+```bash
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite frontier_plus_xai_baseline --routing-config frontier4_order_b_opus_bookend --timeout 1200
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+python3 build_hash_locked_lift_rollup.py
+
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite frontier_plus_xai_baseline --routing-config frontier4_order_c_gemini_bookend --timeout 1200
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+python3 build_hash_locked_lift_rollup.py
+
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite frontier_plus_xai_baseline --routing-config frontier4_order_d_grok_bookend --timeout 1200
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+python3 build_hash_locked_lift_rollup.py
+```
+
+Interpretation rule: report Grok solo, Grok middle-turn, and Grok bookend results separately. Do not claim Frontier4 route-insensitive lift until all four Frontier4 routes have run or missing routes are labeled.
+
 ## Mini Solo Baseline
 
 Use this after the frontier baseline smoke/preflight is clean. This run tests the locked mini solos against the default Holo route selected by `--routing-config`.

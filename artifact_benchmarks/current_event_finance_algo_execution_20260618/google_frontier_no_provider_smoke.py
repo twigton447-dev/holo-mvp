@@ -10,6 +10,7 @@ from typing import Any
 
 
 PACKET_DIR = Path(__file__).resolve().parent
+SOLO_SWEEP = PACKET_DIR / "solo_model_sweep.json"
 
 SOLO_CONDITIONS = {
     "solo_openai": "openai:gpt-5.5",
@@ -71,6 +72,16 @@ def load_routing_config(routing_config_id: str | None) -> dict[str, Any]:
             return config
     valid = ", ".join(config["routing_config_id"] for config in suite["routing_configs"])
     raise RuntimeError(f"unknown_routing_config:{selected}; valid={valid}")
+
+
+def load_solo_conditions(solo_suite_id: str | None) -> tuple[str, dict[str, str]]:
+    suites = read_json(SOLO_SWEEP)
+    selected = solo_suite_id or suites["default_solo_suite_id"]
+    suite = suites.get("solo_suites", {}).get(selected)
+    if not suite:
+        valid = ", ".join(sorted(suites.get("solo_suites", {})))
+        raise RuntimeError(f"unknown_solo_suite:{selected}; valid={valid}")
+    return selected, dict(suite["conditions"])
 
 
 def apply_holo_routing_config(role_flow: dict[str, Any], routing_config: dict[str, Any]) -> dict[str, Any]:
@@ -526,6 +537,7 @@ def smoke_state_object(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--routing-config", default=None)
+    parser.add_argument("--solo-suite", default=None)
     args = parser.parse_args()
 
     source_pack = read_json(PACKET_DIR / "source_pack.json")
@@ -534,6 +546,7 @@ def main() -> int:
     base_role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
     routing_config = load_routing_config(args.routing_config)
     role_flow = apply_holo_routing_config(base_role_flow, routing_config)
+    solo_suite_id, solo_conditions = load_solo_conditions(args.solo_suite)
     run_prompt = read_text(PACKET_DIR / "holo_frontier_run_prompt.md")
     judge_brief = read_text(PACKET_DIR / "judge_brief.md")
     rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
@@ -542,7 +555,10 @@ def main() -> int:
     min_words, max_words = report_brief["deliverable_requirements"]["target_length_words"]
     target_words = 2900
     turns = role_flow["turns"]
-    run_id = f"no_provider_smoke_finance_algo_execution_{routing_config['routing_config_id']}_{utc_stamp()}"
+    run_id = (
+        f"no_provider_smoke_finance_algo_execution_"
+        f"{routing_config['routing_config_id']}_{solo_suite_id}_{utc_stamp()}"
+    )
     root = PACKET_DIR / "runs" / run_id
 
     hashes = {
@@ -577,7 +593,7 @@ def main() -> int:
     all_traces: list[dict[str, Any]] = []
     final_candidates: dict[str, dict[str, Any]] = {}
 
-    for condition, provider_model in SOLO_CONDITIONS.items():
+    for condition, provider_model in solo_conditions.items():
         previous: list[dict[str, Any]] = []
         for turn in range(1, 7):
             role = f"Solo Recursive Builder Turn {turn}"
@@ -821,7 +837,7 @@ def main() -> int:
         root=root,
         run_id=run_id,
         role_flow=role_flow,
-        solo_conditions=SOLO_CONDITIONS,
+        solo_conditions=solo_conditions,
         source_pack=source_pack,
         report_brief=report_brief,
         rubric=rubric,
@@ -834,8 +850,11 @@ def main() -> int:
     final_gate_count = len(list((root / "final_selection").glob("*.json")))
     turn_judge_packet_count = len(list((root / "turn_judge_packets").glob("*.json")))
     final_state = read_json(root / "state_objects" / "holo_frontier_gov" / "turn_6_state_object.json")
-    check("artifact_count_24", artifact_count == 24, artifact_count)
-    check("trace_count_29", trace_count == 29, trace_count)
+    expected_artifacts = (len(solo_conditions) * 6) + 6
+    expected_traces = (len(solo_conditions) * 6) + 11
+    expected_turn_judge_packets = len(solo_conditions) * 6
+    check("artifact_count_expected", artifact_count == expected_artifacts, {"actual": artifact_count, "expected": expected_artifacts})
+    check("trace_count_expected", trace_count == expected_traces, {"actual": trace_count, "expected": expected_traces})
     check("mission_packet_count_5", mission_count == 5, mission_count)
     check("state_object_count_6", state_object_count == 6, state_object_count)
     check(
@@ -864,7 +883,11 @@ def main() -> int:
         all(item["artifact_validity_report"]["valid"] for item in final_candidates.values()),
         final_candidates,
     )
-    check("turn_judge_packet_count_18", turn_judge_packet_count == 18, turn_judge_packet_count)
+    check(
+        "turn_judge_packet_count_expected",
+        turn_judge_packet_count == expected_turn_judge_packets,
+        {"actual": turn_judge_packet_count, "expected": expected_turn_judge_packets},
+    )
 
     failures = [item for item in checks if not item["ok"]]
     manifest = {
@@ -877,8 +900,9 @@ def main() -> int:
         "provider_calls": 0,
         "live_calls_allowed": False,
         "domain": report_brief["domain"],
-        "conditions": [*SOLO_CONDITIONS.keys(), "holo_frontier_gov"],
-        "solo_models": SOLO_CONDITIONS,
+        "conditions": [*solo_conditions.keys(), "holo_frontier_gov"],
+        "solo_suite_id": solo_suite_id,
+        "solo_models": solo_conditions,
         "routing_config_id": routing_config["routing_config_id"],
         "routing_config_label": routing_config.get("label"),
         "holo_role_flow": [item["provider_model"] for item in turns],

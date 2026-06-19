@@ -7,6 +7,10 @@ This packet is a frozen-context draft for a finance-facing HoloBuild report run.
 
 Live proof-of-concept report generation has been run from this packet with `benchmark_credit: false` and `public_claim: false`. Use the generated intelligence reports as diagnostics until a full frozen benchmark run is completed.
 
+## Immutability Rule
+
+The source pack, brief, rubric, Gov protocol, role flow, routing configs, judge panel, and solo-suite manifest are hash-locked. After live evidence exists for a suite, do not edit that suite in place. Add a new suite id instead.
+
 ## Intended Model Policy
 
 Models do **not** browse during generation. Holo, solos, and judges receive the same frozen context pack.
@@ -29,6 +33,12 @@ Robustness lane:
 
 - xAI: `grok-4.3`
 
+Solo sweep suites:
+
+- `frontier_baseline` - primary three frontier solos.
+- `mini_baseline` - OpenAI mini, Anthropic Haiku, Gemini Flash Lite, Grok mini, and MiniMax.
+- `extended_solo_sweep` - mapped frontier, robustness, fallback, mini, and MiniMax solos.
+
 Unavailable on this key:
 
 - Anthropic: `claude-fable-5`
@@ -42,6 +52,7 @@ Unavailable on this key:
 - `judge_brief.md` - human-readable judge scoring brief.
 - `judge_rubric_8criteria.json` - weighted finance-specific scoring rubric.
 - `judge_panel_frontier_blind.json` - four-judge blinded panel contract with no-self-DNA primary scoring.
+- `solo_model_sweep.json` - immutable suite manifest for frontier, mini, and extended solo runs.
 
 - `gov_technical_probe_protocol.json` / `.md` - technical probing requirements for Gov mission packets.
 - `finance_algo_adversarial_role_flow.json` / `.md` - finance-specific six-turn adversarial role order.

@@ -1,0 +1,44 @@
+{
+  "solo_sweep_id": "finance_algo_execution_solo_model_sweep_v1",
+  "created_at_utc": "2026-06-19T07:05:00Z",
+  "benchmark_credit": false,
+  "public_claim": false,
+  "immutability_note": "Suites are declarative run conditions. Do not edit a suite after live evidence exists; add a new suite id instead.",
+  "default_solo_suite_id": "frontier_baseline",
+  "solo_suites": {
+    "frontier_baseline": {
+      "description": "Hash-locked frontier baseline solo conditions. Use for the primary finance claim.",
+      "conditions": {
+        "solo_openai": "openai:gpt-5.5",
+        "solo_anthropic": "anthropic:claude-opus-4-8",
+        "solo_google": "google:gemini-3.1-pro-preview"
+      }
+    },
+    "mini_baseline": {
+      "description": "Mini/fast solo baselines against the same frozen packet, same six-turn role flow, and same judges.",
+      "conditions": {
+        "solo_openai_mini": "openai:gpt-4o-mini",
+        "solo_anthropic_haiku": "anthropic:claude-haiku-4-5-20251001",
+        "solo_google_flash_lite": "google:gemini-2.5-flash-lite",
+        "solo_xai_grok_mini": "xai:grok-3-mini",
+        "solo_minimax_m25_highspeed": "minimax:MiniMax-M2.5-highspeed"
+      }
+    },
+    "extended_solo_sweep": {
+      "description": "Every currently mapped solo model for diagnostic ranking. This is expensive and should be run after frontier and mini smoke checks pass.",
+      "conditions": {
+        "solo_openai": "openai:gpt-5.5",
+        "solo_anthropic": "anthropic:claude-opus-4-8",
+        "solo_google": "google:gemini-3.1-pro-preview",
+        "solo_xai_frontier": "xai:grok-4.3",
+        "solo_google_flash": "google:gemini-3.5-flash",
+        "solo_openai_mini": "openai:gpt-4o-mini",
+        "solo_anthropic_haiku": "anthropic:claude-haiku-4-5-20251001",
+        "solo_google_flash_lite": "google:gemini-2.5-flash-lite",
+        "solo_xai_grok_mini": "xai:grok-3-mini",
+        "solo_minimax_m25_highspeed": "minimax:MiniMax-M2.5-highspeed",
+        "solo_minimax_text_01": "minimax:MiniMax-Text-01"
+      }
+    }
+  }
+}

@@ -16,6 +16,7 @@ from urllib import error as urllib_error
 from urllib import request as urllib_request
 
 PACKET_DIR = Path(__file__).resolve().parent
+SOLO_SWEEP = PACKET_DIR / "solo_model_sweep.json"
 REPO_ROOT = PACKET_DIR.parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 from artifact_benchmarks.harness.judge_consistency import score_verdict_consistency_flags
@@ -40,6 +41,12 @@ PROVIDERS = {
         "model": "grok-4.3",
         "api_key_env": "XAI_API_KEY",
         "base_url": "https://api.x.ai/v1",
+    },
+    "minimax": {
+        "model": "MiniMax-M2.5-highspeed",
+        "api_key_env": "MINIMAX_API_KEY",
+        "base_url": "https://api.minimax.io/v1",
+        "base_url_env": "MINIMAX_BASE_URL",
     },
 }
 
@@ -126,13 +133,83 @@ def env_status() -> dict[str, str]:
     }
 
 
+def env_name_for_provider(provider: str) -> str:
+    return PROVIDERS[provider]["api_key_env"]
+
+
+def base_url_for_provider(cfg: dict[str, str]) -> str:
+    env_name = cfg.get("base_url_env")
+    if env_name:
+        return os.getenv(env_name) or cfg["base_url"]
+    return cfg["base_url"]
+
+
 def provider_model(provider_model: str) -> tuple[str, str]:
     provider, model = provider_model.split(":", 1)
     return provider, model
 
 
-def solo_provider_for_condition(condition: str) -> str | None:
-    provider_model_name = SOLO_CONDITIONS.get(condition)
+def read_solo_sweep() -> dict[str, Any]:
+    if not SOLO_SWEEP.exists():
+        return {
+            "default_solo_suite_id": "frontier_baseline",
+            "solo_suites": {
+                "frontier_baseline": {
+                    "description": "Hash-locked frontier baseline solo conditions.",
+                    "conditions": SOLO_CONDITIONS,
+                }
+            },
+        }
+    return read_json(SOLO_SWEEP)
+
+
+def load_solo_conditions(solo_suite_id: str | None) -> tuple[str, dict[str, str]]:
+    suites = read_solo_sweep()
+    selected = solo_suite_id or suites["default_solo_suite_id"]
+    suite = suites.get("solo_suites", {}).get(selected)
+    if not suite:
+        valid = ", ".join(sorted(suites.get("solo_suites", {})))
+        raise RuntimeError(f"unknown_solo_suite:{selected}; valid={valid}")
+    conditions = dict(suite["conditions"])
+    for condition, provider_model_name in conditions.items():
+        provider, model = provider_model(provider_model_name)
+        if provider not in PROVIDERS:
+            raise RuntimeError(f"unknown_provider_for_solo_condition:{condition}:{provider}")
+        if not model:
+            raise RuntimeError(f"missing_model_for_solo_condition:{condition}")
+    return selected, conditions
+
+
+def select_solo_conditions(solo_suite_id: str | None, solo_condition: str | None) -> tuple[str, dict[str, str]]:
+    selected, conditions = load_solo_conditions(solo_suite_id)
+    if not solo_condition:
+        return selected, conditions
+    if solo_condition not in conditions:
+        valid = ", ".join(sorted(conditions))
+        raise RuntimeError(f"unknown_solo_condition:{solo_condition}; suite={selected}; valid={valid}")
+    return selected, {solo_condition: conditions[solo_condition]}
+
+
+def required_provider_envs(
+    *,
+    solo_conditions: dict[str, str],
+    role_flow: dict[str, Any],
+    report_brief: dict[str, Any],
+    judge_panel: dict[str, Any],
+) -> set[str]:
+    providers = set()
+    for provider_model_name in solo_conditions.values():
+        providers.add(provider_model(provider_model_name)[0])
+    for role_item in role_flow["turns"]:
+        providers.add(provider_model(role_item["provider_model"])[0])
+    providers.add(provider_model(report_brief["holo_turn_design"]["governor_model"])[0])
+    for judge in judge_panel["judge_models"]:
+        providers.add(judge["provider"])
+    return {env_name_for_provider(provider) for provider in providers}
+
+
+def solo_provider_for_condition(condition: str, solo_conditions: dict[str, str] | None = None) -> str | None:
+    provider_model_name = (solo_conditions or SOLO_CONDITIONS).get(condition)
     if not provider_model_name:
         return None
     provider, _ = provider_model(provider_model_name)
@@ -575,8 +652,11 @@ def call_provider(
     user: str,
     max_tokens: int,
     timeout: int,
+    model_override: str | None = None,
 ) -> dict[str, Any]:
     cfg = PROVIDERS[provider]
+    model = model_override or cfg["model"]
+    base_url = base_url_for_provider(cfg)
     attempt = 0
     current_max_tokens = max_tokens
     last_out: dict[str, Any] | None = None
@@ -585,13 +665,13 @@ def call_provider(
         if provider == "anthropic":
             result = http_post_json(
                 provider=provider,
-                url=cfg["base_url"].rstrip("/") + "/messages",
+                url=base_url.rstrip("/") + "/messages",
                 headers={
                     "x-api-key": os.getenv(cfg["api_key_env"], ""),
                     "anthropic-version": "2023-06-01",
                 },
                 payload={
-                    "model": cfg["model"],
+                    "model": model,
                     "max_tokens": current_max_tokens,
                     "system": system,
                     "messages": [{"role": "user", "content": user}],
@@ -613,8 +693,8 @@ def call_provider(
             result = http_post_json(
                 provider=provider,
                 url=(
-                    cfg["base_url"].rstrip("/")
-                    + f"/models/{cfg['model']}:generateContent"
+                    base_url.rstrip("/")
+                    + f"/models/{model}:generateContent"
                     + "?key="
                     + os.getenv(cfg["api_key_env"], "")
                 ),
@@ -659,7 +739,7 @@ def call_provider(
             }
         else:
             payload = {
-                "model": cfg["model"],
+                "model": model,
                 "messages": [
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},
@@ -671,7 +751,7 @@ def call_provider(
                 payload["max_tokens"] = current_max_tokens
             result = http_post_json(
                 provider=provider,
-                url=cfg["base_url"].rstrip("/") + "/chat/completions",
+                url=base_url.rstrip("/") + "/chat/completions",
                 headers={"Authorization": "Bearer " + os.getenv(cfg["api_key_env"], "")},
                 payload=payload,
                 timeout=timeout,
@@ -738,6 +818,7 @@ def save_call(
     call_type: str,
     condition: str,
     provider: str,
+    model: str | None = None,
     role: str,
     turn: int | None,
     result: dict[str, Any],
@@ -751,7 +832,7 @@ def save_call(
         "condition": condition,
         "turn": turn,
         "provider": provider,
-        "model": PROVIDERS[provider]["model"],
+        "model": model or PROVIDERS[provider]["model"],
         "role": role,
         "benchmark_credit": False,
         "public_claim": False,
@@ -1074,6 +1155,7 @@ def maybe_repair_final_validity(
     text: str,
     artifact_path: Path,
     timeout: int,
+    model_override: str | None = None,
 ) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
     traces: list[dict[str, Any]] = []
     report = final_artifact_validity_report(text)
@@ -1104,6 +1186,7 @@ def maybe_repair_final_validity(
             trace_rel=f"{condition}/turn_{turn}_final_validity_repair_attempt_{attempt}",
             artifact_path=artifact_path,
             extra={"original_validity_report": report, "validity_repair_attempt": attempt},
+            model_override=model_override,
         )
         text = repaired
         report = final_artifact_validity_report(text)
@@ -1130,6 +1213,7 @@ def finalize_final_artifact(
     text: str,
     artifact_path: Path,
     timeout: int,
+    model_override: str | None = None,
 ) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
     traces: list[dict[str, Any]] = []
     text, word_traces = maybe_repair_final_word_count(
@@ -1143,6 +1227,7 @@ def finalize_final_artifact(
         text=text,
         artifact_path=artifact_path,
         timeout=timeout,
+        model_override=model_override,
     )
     traces.extend(word_traces)
     text, validity_traces, report = maybe_repair_final_validity(
@@ -1156,6 +1241,7 @@ def finalize_final_artifact(
         text=text,
         artifact_path=artifact_path,
         timeout=timeout,
+        model_override=model_override,
     )
     traces.extend(validity_traces)
     if not report["word_count_in_band"]:
@@ -1170,6 +1256,7 @@ def finalize_final_artifact(
             text=text,
             artifact_path=artifact_path,
             timeout=timeout,
+            model_override=model_override,
         )
         traces.extend(second_word_traces)
         report = final_artifact_validity_report(text)
@@ -1409,17 +1496,26 @@ def call_and_save(
     trace_rel: str,
     artifact_path: Path | None,
     extra: dict[str, Any] | None = None,
+    model_override: str | None = None,
 ) -> tuple[str, dict[str, Any]]:
+    model = model_override or PROVIDERS[provider]["model"]
     prompt_card_path = save_prompt_card(
         run_root,
         rel=prompt_rel,
         system=system,
         user=user,
         provider=provider,
-        model=PROVIDERS[provider]["model"],
+        model=model,
         call_type=call_type,
     )
-    result = call_provider(provider, system=system, user=user, max_tokens=max_tokens, timeout=timeout)
+    result = call_provider(
+        provider,
+        system=system,
+        user=user,
+        max_tokens=max_tokens,
+        timeout=timeout,
+        model_override=model_override,
+    )
     text = result["text"].strip() + "\n"
     trace = save_call(
         run_root,
@@ -1430,6 +1526,7 @@ def call_and_save(
         call_type=call_type,
         condition=condition,
         provider=provider,
+        model=model,
         role=role,
         turn=turn,
         result=result,
@@ -1485,6 +1582,7 @@ def maybe_repair_final_word_count(
     text: str,
     artifact_path: Path,
     timeout: int,
+    model_override: str | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
     traces: list[dict[str, Any]] = []
     for attempt in range(1, 4):
@@ -1509,6 +1607,7 @@ def maybe_repair_final_word_count(
             trace_rel=f"{condition}/turn_{turn}_word_count_repair_attempt_{attempt}",
             artifact_path=artifact_path,
             extra={"original_word_count": count, "repair_attempt": attempt},
+            model_override=model_override,
         )
         trace["repaired_word_count"] = word_count(repaired)
         traces.append(trace)
@@ -1523,10 +1622,17 @@ def maybe_repair_final_word_count(
             system=system,
             user=user,
             provider=provider,
-            model=PROVIDERS[provider]["model"],
+            model=model_override or PROVIDERS[provider]["model"],
             call_type="word_count_append_expansion",
         )
-        result = call_provider(provider, system=system, user=user, max_tokens=5000, timeout=timeout)
+        result = call_provider(
+            provider,
+            system=system,
+            user=user,
+            max_tokens=5000,
+            timeout=timeout,
+            model_override=model_override,
+        )
         append_text = result["text"].strip() + "\n"
         append_path = run_root / "artifacts" / condition / f"turn_{turn}_word_count_append.md"
         combined = text.strip() + "\n\n" + append_text
@@ -1541,6 +1647,7 @@ def maybe_repair_final_word_count(
             call_type="word_count_append_expansion",
             condition=condition,
             provider=provider,
+            model=model_override or PROVIDERS[provider]["model"],
             role=role,
             turn=turn,
             result=result,
@@ -1579,7 +1686,7 @@ def run_solo_condition(
     cached_condition = existing_condition(run_root=run_root, condition=condition)
     if cached_condition:
         return cached_condition
-    provider, _model = provider_model(provider_model_name)
+    provider, model = provider_model(provider_model_name)
     previous: str | None = None
     traces: list[dict[str, Any]] = []
     final_text = ""
@@ -1624,6 +1731,7 @@ def run_solo_condition(
             prompt_rel=f"{condition}/turn_{turn}",
             trace_rel=f"{condition}/turn_{turn}",
             artifact_path=artifact_path,
+            model_override=model,
         )
         traces.append(trace)
         previous = text
@@ -1640,6 +1748,7 @@ def run_solo_condition(
         text=final_text,
         artifact_path=final_path,
         timeout=timeout,
+        model_override=model,
     )
     traces.extend(repair_traces)
     result = {
@@ -1964,7 +2073,20 @@ def build_judge_packets(
     report_brief = read_json(PACKET_DIR / "report_brief.json")
     rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
     for solo_condition in solo_conditions:
-        solo_text = read_text(Path(condition_results[solo_condition]["final_artifact_path"]))
+        solo_result = condition_results.get(solo_condition) or {}
+        validity = solo_result.get("artifact_validity_report") or {}
+        if solo_result.get("status") in {"invalid_final", "generation_error"} or validity.get("valid") is False:
+            anonymization.setdefault("skipped_pairs", []).append(
+                {
+                    "solo_condition": solo_condition,
+                    "reason": solo_result.get("status") or "invalid_final",
+                    "error_message_excerpt": solo_result.get("error_message_excerpt"),
+                    "artifact_validity_report": validity,
+                }
+            )
+            continue
+        solo_text = read_text(Path(solo_result["final_artifact_path"]))
+        solo_provider, solo_model = provider_model(solo_conditions[solo_condition])
         pair_id = f"{run_id}_{solo_condition}_vs_holo_pair"
         flip = int(hashlib.sha256(pair_id.encode("utf-8")).hexdigest()[:2], 16) % 2 == 0
         if flip:
@@ -1993,6 +2115,9 @@ def build_judge_packets(
                 "judge_packet_id": pair_id,
                 "document_x_condition": x_condition,
                 "document_y_condition": y_condition,
+                "solo_condition": solo_condition,
+                "solo_provider": solo_provider,
+                "solo_model": solo_model,
             }
         )
         packets.append(packet)
@@ -2197,8 +2322,12 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
     for packet in packets:
         pair_id = packet["judge_packet_id"]
         pair_map = mapping[pair_id]
-        solo_condition = pair_map["document_x_condition"] if pair_map["document_x_condition"] != "holo_frontier_gov" else pair_map["document_y_condition"]
-        solo_provider = solo_provider_for_condition(solo_condition)
+        solo_condition = pair_map.get("solo_condition") or (
+            pair_map["document_x_condition"]
+            if pair_map["document_x_condition"] != "holo_frontier_gov"
+            else pair_map["document_y_condition"]
+        )
+        solo_provider = pair_map.get("solo_provider") or solo_provider_for_condition(solo_condition)
         judge_rows = []
         holo_scores = []
         solo_scores = []
@@ -2373,21 +2502,33 @@ def aggregate_scores(run_root: Path, packets: list[dict[str, Any]]) -> dict[str,
 
 def run(args: argparse.Namespace) -> int:
     status = env_status()
-    missing = [name for name, value in status.items() if value != "PRESENT"]
+    report_brief = read_json(PACKET_DIR / "report_brief.json")
+    base_role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
+    routing_config = load_routing_config(args.routing_config)
+    role_flow = apply_holo_routing_config(base_role_flow, routing_config)
+    solo_suite_id, solo_conditions = select_solo_conditions(args.solo_suite, args.solo_condition)
+    judge_panel = read_json(PACKET_DIR / "judge_panel_frontier_blind.json")
+    required_env = required_provider_envs(
+        solo_conditions=solo_conditions,
+        role_flow=role_flow,
+        report_brief=report_brief,
+        judge_panel=judge_panel,
+    )
+    missing = [name for name in sorted(required_env) if status.get(name) != "PRESENT"]
     if args.preflight:
-        solo_condition_count = 1 if args.solo_condition else len(SOLO_CONDITIONS)
-        base_role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
-        routing_config = load_routing_config(args.routing_config)
-        role_flow = apply_holo_routing_config(base_role_flow, routing_config)
-        judge_panel = read_json(PACKET_DIR / "judge_panel_frontier_blind.json")
+        solo_condition_count = len(solo_conditions)
         print(
             json.dumps(
                 {
                     "status": "PREFLIGHT_PASS" if not missing else "PREFLIGHT_MISSING_ENV",
                     "provider_env": status,
+                    "required_provider_env": sorted(required_env),
+                    "missing_required_provider_env": missing,
                     "models": {p: cfg["model"] for p, cfg in PROVIDERS.items()},
                     "holo_architecture_mode": STATE_OBJECT_VERSION,
-                    "solo_condition_scope": [args.solo_condition] if args.solo_condition else list(SOLO_CONDITIONS),
+                    "solo_suite_id": solo_suite_id,
+                    "solo_condition_scope": list(solo_conditions),
+                    "solo_conditions": solo_conditions,
                     "turn_prompt_parity": turn_prompt_parity_contract(role_flow),
                     "parity_note": "Solo and Holo share the same base turn role/instruction; Holo additionally receives Gov Baton/state/artifacts.",
                     "planned_generation_calls_minimum": (solo_condition_count * 6) + 12,
@@ -2401,20 +2542,21 @@ def run(args: argparse.Namespace) -> int:
         )
         return 0 if not missing else 2
     if missing:
-        print(json.dumps({"status": "MISSING_ENV", "provider_env": status}, indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                {
+                    "status": "MISSING_ENV",
+                    "provider_env": status,
+                    "required_provider_env": sorted(required_env),
+                    "missing_required_provider_env": missing,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
         return 2
 
     source_pack = read_json(PACKET_DIR / "source_pack.json")
-    report_brief = read_json(PACKET_DIR / "report_brief.json")
-    base_role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
-    routing_config = load_routing_config(args.routing_config)
-    role_flow = apply_holo_routing_config(base_role_flow, routing_config)
-    solo_conditions = (
-        {args.solo_condition: SOLO_CONDITIONS[args.solo_condition]}
-        if args.solo_condition
-        else dict(SOLO_CONDITIONS)
-    )
-    judge_panel = read_json(PACKET_DIR / "judge_panel_frontier_blind.json")
     rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
     if len(role_flow["turns"]) != 6:
         raise RuntimeError("role_flow_must_have_6_turns")
@@ -2442,6 +2584,7 @@ def run(args: argparse.Namespace) -> int:
         "provider_env": status,
         "models": {p: cfg["model"] for p, cfg in PROVIDERS.items()},
         "source_pack_id": source_pack["packet_id"],
+        "solo_suite_id": solo_suite_id,
         "routing_config_id": routing_config["routing_config_id"],
         "routing_config_label": routing_config.get("label"),
         "holo_analyst_rotation": routing_config["analyst_rotation"],
@@ -2461,15 +2604,44 @@ def run(args: argparse.Namespace) -> int:
         for condition, model_name in solo_conditions.items():
             manifest["status"] = f"running_generation_{condition}"
             write_manifest(run_root, manifest)
-            result, traces = run_solo_condition(
-                run_root=run_root,
-                hashes=hashes,
-                payload=solo_payload,
-                role_flow=role_flow,
-                condition=condition,
-                provider_model_name=model_name,
-                timeout=args.timeout,
-            )
+            try:
+                result, traces = run_solo_condition(
+                    run_root=run_root,
+                    hashes=hashes,
+                    payload=solo_payload,
+                    role_flow=role_flow,
+                    condition=condition,
+                    provider_model_name=model_name,
+                    timeout=args.timeout,
+                )
+            except Exception as exc:
+                if args.fail_fast_solo_error:
+                    raise
+                result = {
+                    "condition": condition,
+                    "provider_model": model_name,
+                    "status": "generation_error",
+                    "error_type": type(exc).__name__,
+                    "error_message_excerpt": excerpt(exc),
+                    "benchmark_credit": False,
+                    "public_claim": False,
+                    "turn_count": 6,
+                }
+                traces = [read_json(path) for path in sorted((run_root / "traces" / condition).glob("*.json"))]
+                candidate_path = run_root / "artifacts" / condition / "turn_6.md"
+                if candidate_path.exists():
+                    text = read_text(candidate_path)
+                    result.update(
+                        {
+                            "status": "invalid_final",
+                            "final_artifact_path": str(candidate_path),
+                            "final_sha256": sha_file(candidate_path),
+                            "final_word_count": word_count(text),
+                            "word_count_in_band": FINAL_MIN_WORDS <= word_count(text) <= FINAL_MAX_WORDS,
+                            "artifact_validity_report": final_artifact_validity_report(text),
+                        }
+                    )
+                write_json(run_root / "condition_manifests" / f"{condition}.json", result)
             condition_results[condition] = result
             all_traces.extend(traces)
             manifest["condition_results"] = condition_results
@@ -2497,6 +2669,8 @@ def run(args: argparse.Namespace) -> int:
             condition_results=condition_results,
             solo_conditions=solo_conditions,
         )
+        if not packets:
+            raise RuntimeError("no_valid_solo_final_pairs_available_for_judging")
         manifest["judge_packets"] = [packet["judge_packet_id"] for packet in packets]
         turn_packets = build_turn_judge_packets(
             run_root=run_root,
@@ -2587,7 +2761,9 @@ def main() -> int:
     parser.add_argument("--run-id")
     parser.add_argument("--timeout", type=int, default=360)
     parser.add_argument("--routing-config", default=None)
-    parser.add_argument("--solo-condition", choices=sorted(SOLO_CONDITIONS), default=None)
+    parser.add_argument("--solo-suite", default=None)
+    parser.add_argument("--solo-condition", default=None)
+    parser.add_argument("--fail-fast-solo-error", action="store_true")
     args = parser.parse_args()
     if not args.preflight and not args.run_live:
         print(

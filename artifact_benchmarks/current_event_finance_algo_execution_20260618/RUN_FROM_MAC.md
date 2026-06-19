@@ -12,6 +12,10 @@ Solos:
 - `solo_anthropic`: `anthropic:claude-opus-4-8`
 - `solo_google`: `google:gemini-3.1-pro-preview`
 
+Solo suite: `frontier_baseline`.
+
+The suite manifest is `solo_model_sweep.json`. Treat it as immutable after live evidence exists. If model conditions change, add a new suite id instead of editing historical conditions.
+
 Holo analyst order A, current baseline:
 
 1. `openai:gpt-5.5`
@@ -53,6 +57,42 @@ python3 build_benchmark_intelligence.py --latest
 ```
 
 If preflight reports any key as `MISSING`, stop and use your existing local secret setup. Do not paste keys into chat.
+
+## Mini Solo Baseline
+
+Use this after the frontier baseline smoke/preflight is clean:
+
+```bash
+python3 run_google_frontier_e2e.py --preflight --solo-suite mini_baseline
+python3 run_google_frontier_e2e.py --no-provider-smoke --solo-suite mini_baseline
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config order_a_current --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+```
+
+Mini suite solos:
+
+- `solo_openai_mini`: `openai:gpt-4o-mini`
+- `solo_anthropic_haiku`: `anthropic:claude-haiku-4-5-20251001`
+- `solo_google_flash_lite`: `google:gemini-2.5-flash-lite`
+- `solo_xai_grok_mini`: `xai:grok-3-mini`
+- `solo_minimax_m25_highspeed`: `minimax:MiniMax-M2.5-highspeed`
+
+## Extended Solo Sweep
+
+This is the expensive diagnostic lane for ranking every mapped solo against the same Holo artifact. Run only after frontier and mini suites smoke cleanly:
+
+```bash
+python3 run_google_frontier_e2e.py --preflight --solo-suite extended_solo_sweep
+python3 run_google_frontier_e2e.py --no-provider-smoke --solo-suite extended_solo_sweep
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite extended_solo_sweep --routing-config order_a_current --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+```
+
+Invalid solo finals are preserved as invalid rows and skipped for final pair judging instead of killing the whole sweep. That lets the sweep finish while still showing which model failed the deterministic artifact gates.
 
 ## Order-Sensitivity Runs
 

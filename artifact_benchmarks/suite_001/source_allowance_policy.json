@@ -1,0 +1,162 @@
+{
+  "policy_id": "artifact_suite_001_capped_source_allowance_v1",
+  "status": "planning_not_frozen",
+  "created_at_utc": "2026-06-19T07:30:00Z",
+  "benchmark_credit": false,
+  "public_claim": false,
+  "purpose": "Define how current internet-derived context can be included without breaking apples-to-apples benchmark controls.",
+  "core_rule": "Internet access is allowed only during a pre-generation source-scout phase. The resulting vetted sources are frozen into a source pack. HoloAgents, solo models, and judges do not browse during generation or judging.",
+  "why": [
+    "Free browsing adds an uncontrolled variable beyond architecture.",
+    "Frozen source packs keep Holo and solo conditions identical.",
+    "Capped sources prevent context bloat and make source grounding auditable.",
+    "Gov can steer with source anchors without letting agents wander the internet."
+  ],
+  "source_budget_per_domain": {
+    "min_total_sources": 8,
+    "max_total_sources": 12,
+    "min_primary_or_official_sources": 5,
+    "max_news_or_market_context_sources": 3,
+    "max_academic_or_technical_research_sources": 2,
+    "required_pressure_types": [
+      "current_event_pressure",
+      "regulatory_or_compliance_pressure",
+      "operational_practitioner_pressure",
+      "measurement_or_audit_pressure"
+    ]
+  },
+  "allowed_source_classes": [
+    "official regulator or agency source",
+    "standards body or recognized framework",
+    "primary company filing or official disclosure",
+    "recognized industry body report",
+    "peer-reviewed or preprint technical research labeled as research",
+    "reputable current news only for market/context pressure"
+  ],
+  "disallowed_source_classes": [
+    "anonymous forum claims",
+    "unsourced social media",
+    "vendor marketing used as fact without counter-source",
+    "unlabeled legal or medical advice blogs",
+    "sources that cannot be cited or archived",
+    "sources that expose private client data"
+  ],
+  "gov_distribution_rule": {
+    "gov_receives": [
+      "source_pack",
+      "source_budget",
+      "allowed_inferences",
+      "prohibited_inferences",
+      "source_conflict_map"
+    ],
+    "gov_must_assign": [
+      "source_context_anchors",
+      "facts_vs_inferences_to_preserve",
+      "source_claims_to_attack",
+      "missing_source_risks",
+      "source_conflict_questions"
+    ],
+    "gov_must_not": [
+      "browse during generation",
+      "introduce new source facts after hash lock",
+      "let an agent cite unknown source IDs",
+      "select a final artifact with unsupported current claims"
+    ]
+  },
+  "domain_frames": {
+    "finance_algorithmic_execution": {
+      "solve": "Adaptive execution governance under current market structure, portfolio, funding, settlement, and model-risk constraints.",
+      "artifact": "institutional execution-intelligence report",
+      "source_pressure_mix": [
+        "market regime and rates",
+        "market microstructure and execution benchmarks",
+        "settlement, clearing, and funding constraints",
+        "AI-agent trading/model-risk evidence",
+        "supervision and best-execution controls"
+      ],
+      "current_status": "packet_built_hash_locked_frontier_3"
+    },
+    "healthcare_clinical_operations": {
+      "solve": "Safe AI-assisted triage and care routing without substituting for clinical diagnosis or clinician authority.",
+      "artifact": "hospital AI triage and care-routing governance report",
+      "source_pressure_mix": [
+        "capacity and ED boarding pressure",
+        "AI-enabled medical device/FDA lifecycle expectations",
+        "clinical decision support transparency",
+        "HIPAA/privacy and EHR data quality",
+        "bias, equity, escalation, and adverse-event audit"
+      ],
+      "recommended_seed_sources": [
+        "FDA Artificial Intelligence-Enabled Medical Devices",
+        "FDA AI-enabled medical device lifecycle/marketing-submission guidance",
+        "ONC HTI-1 algorithm transparency and predictive decision support interventions",
+        "HHS HIPAA privacy/security guidance",
+        "AHRQ or hospital-capacity/ED boarding source",
+        "clinical safety source for sepsis, stroke, or deterioration escalation"
+      ]
+    },
+    "cyber_incident_response": {
+      "solve": "Incident response under partial observability where containment, evidence preservation, legal notification, insurance, vendor ambiguity, and business continuity collide.",
+      "artifact": "board-level incident response and containment packet",
+      "source_pressure_mix": [
+        "NIST CSF 2.0 and ransomware profile",
+        "CISA/StopRansomware response guidance",
+        "SEC cyber incident disclosure/materiality",
+        "identity and third-party access best practices",
+        "insurance, legal hold, and evidence preservation workflow"
+      ],
+      "recommended_seed_sources": [
+        "NIST Cybersecurity Framework 2.0",
+        "NIST ransomware risk management profile",
+        "CISA ransomware/incident response guide",
+        "SEC cybersecurity disclosure final rule",
+        "identity compromise hardening guidance",
+        "breach notification or cyber-insurance operational source"
+      ]
+    },
+    "legal_regulatory_vendor_risk": {
+      "solve": "AI vendor procurement risk where vendor claims, auditability, privacy, security, data rights, privilege, discovery, and regulatory exposure must become enforceable controls.",
+      "artifact": "AI vendor risk and regulatory strategy memo",
+      "source_pressure_mix": [
+        "NIST AI RMF and generative AI profile",
+        "EU AI Act or equivalent AI regulatory source",
+        "FTC enforcement/AI overclaim source",
+        "privacy/data processing source",
+        "security/vendor risk source",
+        "contract audit rights and incident notice source"
+      ],
+      "recommended_seed_sources": [
+        "NIST AI Risk Management Framework",
+        "NIST Generative AI Profile",
+        "EU AI Act official text",
+        "FTC AI claims/enforcement guidance",
+        "privacy/data-processing regulator source",
+        "vendor security or third-party risk framework"
+      ]
+    },
+    "energy_infrastructure_ai_datacenters": {
+      "solve": "AI data-center expansion decisions under power availability, interconnection, reliability, PPA deliverability, carbon claims, water, permitting, customer commitments, and capex timing constraints.",
+      "artifact": "AI data-center power and grid-risk strategy report",
+      "source_pressure_mix": [
+        "data-center electricity demand growth",
+        "NERC reliability and load-growth assessment",
+        "FERC interconnection/transmission rules",
+        "PPA deliverability and procurement risk",
+        "carbon accounting and scope 2 claims",
+        "water/permitting/community opposition"
+      ],
+      "recommended_seed_sources": [
+        "IEA energy and AI/data center electricity demand report",
+        "NERC reliability assessment",
+        "FERC interconnection or transmission planning rule",
+        "DOE/LBNL data center energy usage source",
+        "GHG Protocol or EPA Scope 2 source",
+        "utility/regulatory source on large-load interconnection"
+      ]
+    }
+  },
+  "live_browsing_lane": {
+    "status": "future_ablation_only",
+    "rule": "If live browsing is ever tested, run it as a separate explicit lane with identical browse budgets for solo and Holo, logged URLs, capped retrieval count, and no claim mixing with frozen-source benchmark runs."
+  }
+}

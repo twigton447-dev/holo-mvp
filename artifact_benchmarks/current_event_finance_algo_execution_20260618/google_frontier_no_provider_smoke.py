@@ -1,0 +1,532 @@
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+
+PACKET_DIR = Path(__file__).resolve().parent
+
+SOLO_CONDITIONS = {
+    "solo_openai": "openai:gpt-5.5",
+    "solo_anthropic": "anthropic:claude-opus-4-8",
+    "solo_google": "google:gemini-3.1-pro-preview",
+}
+
+
+def read_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def read_json(path: Path) -> Any:
+    return json.loads(read_text(path))
+
+
+def write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def write_json(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+
+def sha_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def sha_file(path: Path) -> str:
+    return sha_text(read_text(path))
+
+
+def utc_stamp() -> str:
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def utc_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def word_count(text: str) -> int:
+    return len(re.findall(r"\b[\w'-]+\b", text))
+
+
+def source_label(source: dict[str, Any]) -> str:
+    sid = source["id"].split("_", 1)[0]
+    return f"[{sid}]"
+
+
+def synthetic_final_doc(
+    *,
+    title: str,
+    condition: str,
+    model: str,
+    source_entries: list[dict[str, Any]],
+    min_words: int,
+    target_words: int,
+) -> str:
+    source_refs = " ".join(source_label(entry) for entry in source_entries[:8])
+    header = f"""# {title}
+
+Diagnostic no-provider smoke artifact.
+
+Condition: `{condition}`
+Model: `{model}`
+Benchmark credit: `false`
+Provider calls: `0`
+Source refs exercised: {source_refs}
+
+This placeholder exists only to test filesystem layout, trace hashing, final-document word-count gates, and no-browse packet plumbing. It is not a finance report, not a benchmark result, not investment advice, and not suitable for external sharing.
+
+"""
+    sentence = (
+        "Smoke fixture verifies source grounding order flow benchmark portfolio risk "
+        "funding settlement clearing controls audit model bias and client usefulness. "
+    )
+    body = []
+    while word_count(header + "\n".join(body)) < target_words:
+        body.append(sentence)
+    text = header + "\n".join(body)
+    if word_count(text) < min_words:
+        raise RuntimeError("synthetic_final_doc_word_count_under_min")
+    return text
+
+
+def synthetic_turn_doc(
+    *,
+    title: str,
+    condition: str,
+    model: str,
+    turn: int,
+    role: str,
+    source_entries: list[dict[str, Any]],
+) -> str:
+    refs = " ".join(source_label(entry) for entry in source_entries[:4])
+    return f"""# {title} Turn {turn} Diagnostic Artifact
+
+Condition: `{condition}`
+Model: `{model}`
+Role: `{role}`
+Provider calls: `0`
+Benchmark credit: `false`
+Source refs exercised: {refs}
+
+This no-provider artifact is a smoke-test placeholder. It confirms that the harness can persist turn artifacts, bind them to model order, include frozen source-pack hashes, and carry previous-turn state without treating this output as benchmark evidence.
+"""
+
+
+def mission_packet(
+    *,
+    turn: int,
+    role_item: dict[str, Any],
+    gov_protocol: dict[str, Any],
+    source_entries: list[dict[str, Any]],
+    previous_artifacts: list[dict[str, Any]],
+) -> str:
+    required = gov_protocol["mission_packet_required_fields"]
+    probes = gov_protocol["standing_probe_bank"]
+    probe_lines = []
+    for category, questions in probes.items():
+        if questions:
+            probe_lines.append(f"- {category}: {questions[0]}")
+    anchors = ", ".join(entry["id"] for entry in source_entries[:5])
+    previous = ", ".join(f"turn_{item['turn']}" for item in previous_artifacts) or "none"
+    return f"""# HoloGov Mission Packet - Turn {turn}
+
+## Current Best State
+Diagnostic placeholder state from previous artifacts: {previous}.
+
+## New Learnings From Prior Turns
+This no-provider smoke confirms the Gov packet can summarize accumulated turn state without model calls.
+
+## Highest Value Flaw
+Force the next model to resolve technical execution assumptions rather than rewriting generically.
+
+## Source Context Anchors
+{anchors}
+
+## Technical Probe Questions
+{chr(10).join(probe_lines)}
+
+## Order Flow And Microstructure Checks
+Probe venue routing, queue fade, adverse selection, odd-lot depth, and fee/rebate economics.
+
+## Benchmark And Peer Comparison Checks
+Probe VWAP versus implementation shortfall, arrival price, peer-relative crowding, and benchmark gaming.
+
+## Portfolio Weight And Risk Checks
+Probe active risk, target-weight drift, liquidity budget, cash drag, and exposure tradeoffs.
+
+## Funding Settlement And Clearing Checks
+Probe T+1, Treasury clearing, repo margin, collateral mobility, and funding throttles.
+
+## Regulatory Control And Audit Checks
+Probe pre-trade controls, price collars, participation limits, kill switches, logs, and human escalation.
+
+## Model Risk And Bias Checks
+Probe recency bias, extrapolation, unsupported market claims, and disagreement handling.
+
+## Next Role Objective
+{role_item['instruction']}
+
+## Constraints And Do Not Do
+Do not browse. Do not invent facts outside the frozen source pack. Do not claim live trading capability.
+
+## Open Tensions
+Can the next artifact become technically sharper without losing client readability?
+
+## Convergence Target
+Create a stronger final report candidate while preserving source grounding, technical specificity, and the word-count band.
+
+## Required Field Coverage
+{", ".join(required)}
+"""
+
+
+def trace_payload(
+    *,
+    call_type: str,
+    condition: str,
+    turn: int,
+    provider_model: str,
+    role: str,
+    prompt_text: str,
+    output_text: str,
+    output_path: Path,
+    hashes: dict[str, str],
+    previous_turns: list[int],
+) -> dict[str, Any]:
+    return {
+        "call_type": call_type,
+        "condition": condition,
+        "turn": turn,
+        "provider_model": provider_model,
+        "role": role,
+        "provider_call_made": False,
+        "benchmark_credit": False,
+        "public_claim": False,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "latency_ms": 0,
+        "system_sha256": sha_text("NO_PROVIDER_SMOKE_SYSTEM"),
+        "user_sha256": sha_text(prompt_text),
+        "output_sha256": sha_text(output_text),
+        "artifact_path": str(output_path),
+        "previous_turns_included": previous_turns,
+        "source_pack_sha256": hashes["source_pack"],
+        "report_brief_sha256": hashes["report_brief"],
+        "role_flow_sha256": hashes["role_flow"],
+        "gov_protocol_sha256": hashes["gov_protocol"],
+        "word_count": word_count(output_text),
+    }
+
+
+def word_gate(text: str, min_words: int, max_words: int) -> dict[str, Any]:
+    count = word_count(text)
+    return {
+        "word_count": count,
+        "min_words": min_words,
+        "max_words": max_words,
+        "passes": min_words <= count <= max_words,
+    }
+
+
+def main() -> int:
+    source_pack = read_json(PACKET_DIR / "source_pack.json")
+    report_brief = read_json(PACKET_DIR / "report_brief.json")
+    gov_protocol = read_json(PACKET_DIR / "gov_technical_probe_protocol.json")
+    role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
+    run_prompt = read_text(PACKET_DIR / "holo_frontier_run_prompt.md")
+    judge_brief = read_text(PACKET_DIR / "judge_brief.md")
+
+    source_entries = source_pack["source_entries"]
+    min_words, max_words = report_brief["deliverable_requirements"]["target_length_words"]
+    target_words = 2900
+    turns = role_flow["turns"]
+    run_id = f"no_provider_smoke_finance_algo_execution_{utc_stamp()}"
+    root = PACKET_DIR / "runs" / run_id
+
+    hashes = {
+        "source_pack": sha_file(PACKET_DIR / "source_pack.json"),
+        "report_brief": sha_file(PACKET_DIR / "report_brief.json"),
+        "role_flow": sha_file(PACKET_DIR / "finance_algo_adversarial_role_flow.json"),
+        "gov_protocol": sha_file(PACKET_DIR / "gov_technical_probe_protocol.json"),
+        "run_prompt": sha_text(run_prompt),
+        "judge_brief": sha_text(judge_brief),
+    }
+
+    checks: list[dict[str, Any]] = []
+
+    def check(name: str, ok: bool, detail: Any = "") -> None:
+        checks.append({"check": name, "ok": bool(ok), "detail": detail})
+
+    check("provider_calls_disabled", True)
+    check("benchmark_credit_false", True)
+    check("source_pack_entries", len(source_entries) == 11, len(source_entries))
+    check("no_browse_policy", "browse" in source_pack["model_internet_policy"].lower())
+    check("word_band", [min_words, max_words] == [2800, 3400], [min_words, max_words])
+    check("six_turn_role_flow", len(turns) == 6, len(turns))
+
+    all_traces: list[dict[str, Any]] = []
+    final_candidates: dict[str, dict[str, Any]] = {}
+
+    for condition, provider_model in SOLO_CONDITIONS.items():
+        previous: list[dict[str, Any]] = []
+        for turn in range(1, 7):
+            role = f"Solo Recursive Builder Turn {turn}"
+            if turn == 6:
+                text = synthetic_final_doc(
+                    title="The Execution Governor: Solo Diagnostic Final",
+                    condition=condition,
+                    model=provider_model,
+                    source_entries=source_entries,
+                    min_words=min_words,
+                    target_words=target_words,
+                )
+            else:
+                text = synthetic_turn_doc(
+                    title="Solo",
+                    condition=condition,
+                    model=provider_model,
+                    turn=turn,
+                    role=role,
+                    source_entries=source_entries,
+                )
+            path = root / "artifacts" / condition / f"turn_{turn}.md"
+            write_text(path, text)
+            prompt = json.dumps(
+                {
+                    "packet": "diagnostic_no_provider",
+                    "condition": condition,
+                    "turn": turn,
+                    "source_pack_hash": hashes["source_pack"],
+                    "brief_hash": hashes["report_brief"],
+                    "previous_turns": [item["turn"] for item in previous],
+                },
+                sort_keys=True,
+            )
+            trace = trace_payload(
+                call_type="solo_turn_no_provider_smoke",
+                condition=condition,
+                turn=turn,
+                provider_model=provider_model,
+                role=role,
+                prompt_text=prompt,
+                output_text=text,
+                output_path=path,
+                hashes=hashes,
+                previous_turns=[item["turn"] for item in previous],
+            )
+            write_json(root / "traces" / condition / f"turn_{turn}.json", trace)
+            all_traces.append(trace)
+            previous.append({"turn": turn, "path": str(path), "sha256": trace["output_sha256"]})
+        final_candidates[condition] = {
+            "artifact_path": str(root / "artifacts" / condition / "turn_6.md"),
+            "gate": word_gate(read_text(root / "artifacts" / condition / "turn_6.md"), min_words, max_words),
+        }
+
+    previous_holo: list[dict[str, Any]] = []
+    for role_item in turns:
+        turn = int(role_item["turn"])
+        condition = "holo_frontier_gov"
+        provider_model = role_item["provider_model"]
+        mission_text = ""
+        mission_path = None
+        if turn > 1:
+            mission_text = mission_packet(
+                turn=turn,
+                role_item=role_item,
+                gov_protocol=gov_protocol,
+                source_entries=source_entries,
+                previous_artifacts=previous_holo,
+            )
+            mission_path = root / "mission_packets" / condition / f"turn_{turn}_mission.md"
+            write_text(mission_path, mission_text)
+            gov_trace = trace_payload(
+                call_type="gov_mission_packet_no_provider_smoke",
+                condition=condition,
+                turn=turn,
+                provider_model="hologov:deterministic_no_provider",
+                role="HoloGov Technical Probe Mission Builder",
+                prompt_text=json.dumps(
+                    {
+                        "turn": turn,
+                        "role": role_item,
+                        "previous_turns": [item["turn"] for item in previous_holo],
+                        "gov_protocol_hash": hashes["gov_protocol"],
+                    },
+                    sort_keys=True,
+                ),
+                output_text=mission_text,
+                output_path=mission_path,
+                hashes=hashes,
+                previous_turns=[item["turn"] for item in previous_holo],
+            )
+            write_json(root / "traces" / condition / f"gov_turn_{turn}.json", gov_trace)
+            all_traces.append(gov_trace)
+
+        if turn in (5, 6):
+            text = synthetic_final_doc(
+                title="The Execution Governor: Holo Diagnostic Final",
+                condition=condition,
+                model=provider_model,
+                source_entries=source_entries,
+                min_words=min_words,
+                target_words=target_words + (20 if turn == 6 else 0),
+            )
+        else:
+            text = synthetic_turn_doc(
+                title="Holo",
+                condition=condition,
+                model=provider_model,
+                turn=turn,
+                role=role_item["role"],
+                source_entries=source_entries,
+            )
+        path = root / "artifacts" / condition / f"turn_{turn}.md"
+        write_text(path, text)
+        prompt = json.dumps(
+            {
+                "packet": "diagnostic_no_provider",
+                "condition": condition,
+                "turn": turn,
+                "role": role_item,
+                "mission_sha256": sha_text(mission_text) if mission_text else None,
+                "source_pack_hash": hashes["source_pack"],
+                "brief_hash": hashes["report_brief"],
+                "previous_turns": [item["turn"] for item in previous_holo],
+            },
+            sort_keys=True,
+        )
+        trace = trace_payload(
+            call_type="holo_analyst_turn_no_provider_smoke",
+            condition=condition,
+            turn=turn,
+            provider_model=provider_model,
+            role=role_item["role"],
+            prompt_text=prompt,
+            output_text=text,
+            output_path=path,
+            hashes=hashes,
+            previous_turns=[item["turn"] for item in previous_holo],
+        )
+        if mission_path:
+            trace["mission_path"] = str(mission_path)
+        write_json(root / "traces" / condition / f"turn_{turn}.json", trace)
+        all_traces.append(trace)
+        previous_holo.append({"turn": turn, "path": str(path), "sha256": trace["output_sha256"]})
+
+    turn5_text = read_text(root / "artifacts" / "holo_frontier_gov" / "turn_5.md")
+    turn6_text = read_text(root / "artifacts" / "holo_frontier_gov" / "turn_6.md")
+    final_selection = {
+        "selection_type": "diagnostic_no_provider_final_gate",
+        "benchmark_credit": False,
+        "provider_calls": 0,
+        "gate_instruction": role_flow["post_turn_6_governor_gate"],
+        "candidate_turn_5": {
+            "artifact_path": str(root / "artifacts" / "holo_frontier_gov" / "turn_5.md"),
+            "sha256": sha_text(turn5_text),
+            "word_gate": word_gate(turn5_text, min_words, max_words),
+        },
+        "candidate_turn_6": {
+            "artifact_path": str(root / "artifacts" / "holo_frontier_gov" / "turn_6.md"),
+            "sha256": sha_text(turn6_text),
+            "word_gate": word_gate(turn6_text, min_words, max_words),
+        },
+        "selected": "turn_6",
+        "selection_reason": (
+            "Diagnostic fixture selected Turn 6 because it preserves the required word band "
+            "and exercises the no-degradation guard. This is not a quality judgment."
+        ),
+    }
+    write_json(root / "final_selection" / "holo_frontier_gov_final_selection.json", final_selection)
+    final_candidates["holo_frontier_gov"] = {
+        "artifact_path": str(root / "artifacts" / "holo_frontier_gov" / "turn_6.md"),
+        "gate": final_selection["candidate_turn_6"]["word_gate"],
+    }
+
+    below = "too short"
+    within = synthetic_final_doc(
+        title="Word Gate Within Fixture",
+        condition="word_gate",
+        model="deterministic",
+        source_entries=source_entries,
+        min_words=min_words,
+        target_words=target_words,
+    )
+    above = within + (" overflow" * 700)
+    word_gate_tests = {
+        "below_min_should_fail": word_gate(below, min_words, max_words),
+        "within_band_should_pass": word_gate(within, min_words, max_words),
+        "above_max_should_fail": word_gate(above, min_words, max_words),
+    }
+    check("word_gate_below_min_fails", word_gate_tests["below_min_should_fail"]["passes"] is False)
+    check("word_gate_within_band_passes", word_gate_tests["within_band_should_pass"]["passes"] is True)
+    check("word_gate_above_max_fails", word_gate_tests["above_max_should_fail"]["passes"] is False)
+
+    artifact_count = len(list((root / "artifacts").glob("*/*.md")))
+    trace_count = len(list((root / "traces").glob("*/*.json")))
+    mission_count = len(list((root / "mission_packets").glob("*/*.md")))
+    final_gate_count = len(list((root / "final_selection").glob("*.json")))
+    check("artifact_count_24", artifact_count == 24, artifact_count)
+    check("trace_count_29", trace_count == 29, trace_count)
+    check("mission_packet_count_5", mission_count == 5, mission_count)
+    check("final_selection_count_1", final_gate_count == 1, final_gate_count)
+    check("all_final_word_gates_pass", all(item["gate"]["passes"] for item in final_candidates.values()), final_candidates)
+
+    failures = [item for item in checks if not item["ok"]]
+    manifest = {
+        "run_id": run_id,
+        "status": "NO_PROVIDER_SMOKE_PASS" if not failures else "NO_PROVIDER_SMOKE_FAIL",
+        "created_at_utc": utc_iso(),
+        "packet_dir": str(PACKET_DIR),
+        "benchmark_credit": False,
+        "public_claim": False,
+        "provider_calls": 0,
+        "live_calls_allowed": False,
+        "domain": report_brief["domain"],
+        "conditions": [*SOLO_CONDITIONS.keys(), "holo_frontier_gov"],
+        "solo_models": SOLO_CONDITIONS,
+        "holo_role_flow": [item["provider_model"] for item in turns],
+        "word_count_band": [min_words, max_words],
+        "hashes": hashes,
+        "counts": {
+            "artifacts": artifact_count,
+            "traces": trace_count,
+            "mission_packets": mission_count,
+            "final_selection_files": final_gate_count,
+        },
+        "word_gate_tests": word_gate_tests,
+        "final_candidates": final_candidates,
+        "checks": checks,
+        "failures": failures,
+        "notes": (
+            "No-provider diagnostic smoke only. It validates artifact layout, trace hashes, "
+            "Gov mission-packet scaffolding, word-count gates, and final-selection scaffolding. "
+            "It is not benchmark evidence."
+        ),
+    }
+    write_json(root / "run_manifest.json", manifest)
+
+    summary = {
+        "status": manifest["status"],
+        "run_id": run_id,
+        "provider_calls": 0,
+        "benchmark_credit": False,
+        "artifact_count": artifact_count,
+        "trace_count": trace_count,
+        "mission_packet_count": mission_count,
+        "final_selection_count": final_gate_count,
+        "run_manifest": str(root / "run_manifest.json"),
+        "failures": failures,
+    }
+    print(json.dumps(summary, indent=2, sort_keys=True))
+    return 0 if not failures else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

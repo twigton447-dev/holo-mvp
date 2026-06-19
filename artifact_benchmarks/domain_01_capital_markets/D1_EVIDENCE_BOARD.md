@@ -1,6 +1,6 @@
 # D1 Evidence Board - Capital Markets
 
-Generated: `2026-06-19T20:21:27Z`
+Generated: `2026-06-19T21:41:42Z`
 
 Domain: `capital_markets_trade_shock_execution`
 
@@ -11,8 +11,8 @@ D1 now has a real data map. The current-lock HoloFactory frontier run generated 
 The key split:
 
 - **Current-lock operational evidence:** HoloFactory live frontier run `holo_factory_live_20260619T180210Z`.
-- **Current-lock scoring evidence:** diagnostic only; `2 / 12` legacy frontier-panel final judge scores are present, but `0` proof-credit outside-DNA final scores are present.
-- **Proof-credit rejudge queue:** `0 / 6` outside-DNA final judge scores are present.
+- **Current-lock scoring evidence:** `6` outside-DNA proof-credit candidate rows and `2` same-DNA diagnostic rows are present.
+- **Proof-credit rejudge queue:** `6 / 6` outside-DNA final judge scores are present.
 - **Historical judged lift evidence:** legacy finance runs with measured Holo lift, but `matches_current_lock=false`.
 
 ## Current-Lock Frontier Snapshot
@@ -28,9 +28,9 @@ The key split:
 - Holo vs mean solo token multiple: `3.212x`
 - Final judge packets: `3`
 - Turn judge packets: `18`
-- Final judge scores observed: `2 / 12`
-- Missing final judge scores: `10`
-- Proof-credit outside-DNA judge scores observed: `0 / 6`
+- Final judge scores observed: `8 / 12`
+- Missing final judge scores: `4`
+- Proof-credit outside-DNA judge scores observed: `6 / 6`
 - Final score status counts: `{'scored': 2, 'attempted_no_parsed_score': 1, 'not_attempted': 9}`
 
 ## Current-Lock Condition Matrix
@@ -46,35 +46,47 @@ The key split:
 
 | run_id | judge_id | judge_provider | solo_condition | holo_score | solo_score | gap_holo_minus_solo | percent_lift | score_credit_label |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| holo_factory_live_20260619T180210Z | judge_frontier_01 | openai | solo_anthropic | 8.6 | 9.06 | -0.46 | -5.077 | diagnostic_same_dna_boundary_violation |
-| holo_factory_live_20260619T180210Z | judge_frontier_02 | anthropic | solo_anthropic | 8.76 | 8.36 | 0.4 | 4.785 | diagnostic_same_dna_boundary_violation |
+| holo_factory_live_20260619T180210Z | judge_frontier_01 | openai | solo_anthropic | 8.6 | 9.06 | -0.46 | -5.077 | diagnostic_same_dna |
+| holo_factory_live_20260619T180210Z | judge_frontier_02 | anthropic | solo_anthropic | 8.76 | 8.36 | 0.4 | 4.785 | diagnostic_same_dna |
+| holo_factory_live_20260619T180210Z | judge_outside_minimax_01 | minimax | solo_anthropic | 6.92 | 5.86 | 1.06 | 18.089 | proof_credit_candidate |
+| holo_factory_live_20260619T180210Z | judge_outside_xai_01 | xai | solo_anthropic | 7.36 | 8.78 | -1.42 | -16.173 | proof_credit_candidate |
+| holo_factory_live_20260619T180210Z | judge_outside_minimax_01 | minimax | solo_google | 8.22 | 5.96 | 2.26 | 37.919 | proof_credit_candidate |
+| holo_factory_live_20260619T180210Z | judge_outside_xai_01 | xai | solo_google | 9.26 | 6.08 | 3.18 | 52.303 | proof_credit_candidate |
+| holo_factory_live_20260619T180210Z | judge_outside_minimax_01 | minimax | solo_openai | 8.26 | 6.36 | 1.9 | 29.874 | proof_credit_candidate |
+| holo_factory_live_20260619T180210Z | judge_outside_xai_01 | xai | solo_openai | 9.28 | 7.44 | 1.84 | 24.731 | proof_credit_candidate |
 
-These scores are only for scored packets already present on disk. They are diagnostic because judge DNA overlaps generation DNA.
+These scores are only for scored packets already present on disk. Rows labeled `proof_credit_candidate` use outside-DNA judges with clean prompt/trace boundaries; rows labeled `diagnostic_same_dna` remain diagnostic because judge DNA overlaps generation DNA.
 
 ## Validity-Adjusted Score Lens
 
 Raw judge scores are preserved. This lens applies deterministic caps only when the artifact gate says a final is invalid.
 
-- Rows adjusted: `2`
-- Proof-credit rows adjusted: `0`
+- Rows adjusted: `8`
+- Proof-credit rows adjusted: `6`
 - Diagnostic rows adjusted: `2`
-- Raw observed mean gap: `-0.03`
-- Raw observed mean lift: `-0.146%`
-- Validity-adjusted observed mean gap: `0.68`
-- Validity-adjusted observed mean lift: `8.5%`
+- Raw observed mean gap: `1.095`
+- Raw observed mean lift: `18.306%`
+- Validity-adjusted observed mean gap: `1.37`
+- Validity-adjusted observed mean lift: `21.489%`
 
 | judge_id | solo_condition | score_credit_label | raw_holo_score | raw_solo_score | raw_gap_holo_minus_solo | adjusted_holo_score | adjusted_solo_score | adjusted_gap_holo_minus_solo | adjusted_percent_lift | solo_validity_cap_reason |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| judge_frontier_01 | solo_anthropic | diagnostic_same_dna_boundary_violation | 8.6 | 9.06 | -0.46 | 8.6 | 8.0 | 0.6 | 7.5 | missing_required_section_cap_8_0 |
-| judge_frontier_02 | solo_anthropic | diagnostic_same_dna_boundary_violation | 8.76 | 8.36 | 0.4 | 8.76 | 8.0 | 0.76 | 9.5 | missing_required_section_cap_8_0 |
+| judge_frontier_01 | solo_anthropic | diagnostic_same_dna | 8.6 | 9.06 | -0.46 | 8.6 | 8.0 | 0.6 | 7.5 | missing_required_section_cap_8_0 |
+| judge_frontier_02 | solo_anthropic | diagnostic_same_dna | 8.76 | 8.36 | 0.4 | 8.76 | 8.0 | 0.76 | 9.5 | missing_required_section_cap_8_0 |
+| judge_outside_minimax_01 | solo_anthropic | proof_credit_candidate | 6.92 | 5.86 | 1.06 | 6.92 | 5.86 | 1.06 | 18.089 | missing_required_section_cap_8_0 |
+| judge_outside_xai_01 | solo_anthropic | proof_credit_candidate | 7.36 | 8.78 | -1.42 | 7.36 | 8.0 | -0.64 | -8.0 | missing_required_section_cap_8_0 |
+| judge_outside_minimax_01 | solo_google | proof_credit_candidate | 8.22 | 5.96 | 2.26 | 8.22 | 5.96 | 2.26 | 37.919 | word_count_out_of_band_cap_8_5 |
+| judge_outside_xai_01 | solo_google | proof_credit_candidate | 9.26 | 6.08 | 3.18 | 9.26 | 6.08 | 3.18 | 52.303 | word_count_out_of_band_cap_8_5 |
+| judge_outside_minimax_01 | solo_openai | proof_credit_candidate | 8.26 | 6.36 | 1.9 | 8.26 | 6.36 | 1.9 | 29.874 | valid_final_no_cap |
+| judge_outside_xai_01 | solo_openai | proof_credit_candidate | 9.28 | 7.44 | 1.84 | 9.28 | 7.44 | 1.84 | 24.731 | valid_final_no_cap |
 
-This is still not a final claim because the rows are diagnostic-only and the outside-DNA proof-credit queue is unscored.
+This is still not a final public architecture claim because D1 is one domain. The proof-credit queue is scored for the current-lock frontier lane; the next proof burden is matched mini, order-permutation, and cross-domain replication.
 
 ## Missing Current-Lock Final Judging Queue
 
 | solo_condition | judge_id | judge_provider | judge_model | proof_credit_eligible | score_credit_label | score_status | prompt_card_exists | trace_exists |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| solo_anthropic | judge_frontier_03 | google | gemini-3.1-pro-preview | False | diagnostic_same_dna_boundary_violation | attempted_no_parsed_score | True | True |
+| solo_anthropic | judge_frontier_03 | google | gemini-3.1-pro-preview | False | diagnostic_same_dna | attempted_no_parsed_score | True | True |
 | solo_anthropic | judge_frontier_04 | xai | grok-4.3 | True | proof_credit_candidate | not_attempted | False | False |
 | solo_google | judge_frontier_01 | openai | gpt-5.5 | False | diagnostic_same_dna | not_attempted | False | False |
 | solo_google | judge_frontier_02 | anthropic | claude-opus-4-8 | False | diagnostic_same_dna | not_attempted | False | False |
@@ -90,17 +102,17 @@ This is still not a final claim because the rows are diagnostic-only and the out
 This queue is the proof-credit path for D1. It is not executed by this board builder.
 
 - Expected proof-credit outside-DNA final judge scores: `6`
-- Observed proof-credit outside-DNA final judge scores: `0`
-- Score status counts: `{'not_attempted': 6}`
+- Observed proof-credit outside-DNA final judge scores: `6`
+- Score status counts: `{'scored': 6}`
 
 | solo_condition | judge_id | judge_provider | judge_model | proof_credit_eligible | score_status | rejudge_reason |
 | --- | --- | --- | --- | --- | --- | --- |
-| solo_anthropic | judge_outside_xai_01 | xai | grok-4.3 | True | not_attempted | outside_dna_required_for_proof_credit |
-| solo_anthropic | judge_outside_minimax_01 | minimax | MiniMax-M2.5-highspeed | True | not_attempted | outside_dna_required_for_proof_credit |
-| solo_google | judge_outside_xai_01 | xai | grok-4.3 | True | not_attempted | outside_dna_required_for_proof_credit |
-| solo_google | judge_outside_minimax_01 | minimax | MiniMax-M2.5-highspeed | True | not_attempted | outside_dna_required_for_proof_credit |
-| solo_openai | judge_outside_xai_01 | xai | grok-4.3 | True | not_attempted | outside_dna_required_for_proof_credit |
-| solo_openai | judge_outside_minimax_01 | minimax | MiniMax-M2.5-highspeed | True | not_attempted | outside_dna_required_for_proof_credit |
+| solo_anthropic | judge_outside_xai_01 | xai | grok-4.3 | True | scored | outside_dna_required_for_proof_credit |
+| solo_anthropic | judge_outside_minimax_01 | minimax | MiniMax-M2.5-highspeed | True | scored | outside_dna_required_for_proof_credit |
+| solo_google | judge_outside_xai_01 | xai | grok-4.3 | True | scored | outside_dna_required_for_proof_credit |
+| solo_google | judge_outside_minimax_01 | minimax | MiniMax-M2.5-highspeed | True | scored | outside_dna_required_for_proof_credit |
+| solo_openai | judge_outside_xai_01 | xai | grok-4.3 | True | scored | outside_dna_required_for_proof_credit |
+| solo_openai | judge_outside_minimax_01 | minimax | MiniMax-M2.5-highspeed | True | scored | outside_dna_required_for_proof_credit |
 
 ## Historical Diagnostic Lift
 
@@ -129,7 +141,7 @@ The legacy hash-locked lift rollup contains judged final-output comparisons, but
 
 | lane | run_id | status | run_class | condition_count | total_tokens | latency_minutes | final_judge_packets | turn_judge_packets | judge_scores |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| holo_factory | holo_factory_live_20260619T180210Z | HOLO_FACTORY_LIVE_COMPLETE | holo_factory_live | 4 | 577728 | 31.585 | 3 | 18 | 2 |
+| holo_factory | holo_factory_live_20260619T180210Z | HOLO_FACTORY_LIVE_COMPLETE | holo_factory_live | 4 | 577728 | 31.585 | 3 | 18 | 8 |
 | holo_factory | holo_factory_no_provider_smoke_20260619T175124Z | HOLO_FACTORY_NO_PROVIDER_SMOKE_PASS | no_provider_smoke | None | None | None | 8 | 48 | None |
 | holo_factory | holo_factory_no_provider_smoke_live_adapter_canary_20260619T000000Z | HOLO_FACTORY_NO_PROVIDER_SMOKE_PASS | no_provider_smoke | None | None | None | 3 | 18 | None |
 | legacy_finance_algo | full_frontier_finance_algo_execution_20260618T232008Z | FULL_FRONTIER_FINANCE_E2E_COMPLETE | live_or_partial_live | 4 |  |  | 3 | 0 | 9 |

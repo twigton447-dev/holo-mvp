@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "harness"))
 from proof_credit_rules import (  # noqa: E402
     annotate_judge_credit,
+    forbidden_text_errors,
     generation_dna_for_pair,
     runtime_visibility_errors,
     select_outside_dna_judges,
@@ -110,12 +111,27 @@ def pair_generation_dna(run_root: Path, pair: dict[str, Any]) -> dict[str, Any]:
 
 def judge_boundary_status(prompt_card_path: Path, trace_path: Path) -> dict[str, Any]:
     errors: list[str] = []
-    for path, scope in ((prompt_card_path, "judge_prompt_card"), (trace_path, "judge_trace")):
-        if path.exists():
-            try:
-                errors.extend(runtime_visibility_errors(read_json(path), scope=scope))
-            except Exception as exc:
-                errors.append(f"{scope}:unreadable:{exc.__class__.__name__}")
+    if prompt_card_path.exists():
+        try:
+            prompt_card = read_json(prompt_card_path)
+            visible_prompt = {
+                "system": prompt_card.get("system", ""),
+                "user": prompt_card.get("user", ""),
+            }
+            errors.extend(runtime_visibility_errors(visible_prompt, scope="judge_prompt_card_visible_text"))
+        except Exception as exc:
+            errors.append(f"judge_prompt_card:unreadable:{exc.__class__.__name__}")
+    if trace_path.exists():
+        try:
+            trace = read_json(trace_path)
+            trace_text = {
+                "artifact_text": trace.get("artifact_text", ""),
+                "raw_text": trace.get("raw_text", ""),
+                "response_text": trace.get("response_text", ""),
+            }
+            errors.extend(forbidden_text_errors(trace_text, scope="judge_trace_text"))
+        except Exception as exc:
+            errors.append(f"judge_trace:unreadable:{exc.__class__.__name__}")
     return {
         "judge_boundary_clean": not errors,
         "judge_boundary_errors": ";".join(errors),
@@ -792,7 +808,7 @@ def build_findings(
         "generated_at_utc": utc_iso(),
         "domain_id": D1_DOMAIN,
         "current_lock_run": CURRENT_LOCK_RUN_ID,
-        "decision": "Rejudge current-lock D1 with outside-DNA blind solo judges before running D2 or making a headline lift claim.",
+        "decision": "D1 current-lock frontier scoring is now outside-DNA scored locally; keep D1 out of public benchmark-credit promotion until score provenance is committed and mini/order/domain replication is run.",
         "evidence_classes": [
             {
                 "name": "current_lock_operational",
@@ -801,8 +817,8 @@ def build_findings(
             },
             {
                 "name": "current_lock_scoring",
-                "status": "diagnostic_only",
-                "summary": f"{missing_summary['score_status_counts'].get('scored', 0)} of {missing_summary['expected_final_scores']} legacy-panel final judge scores are present; proof-credit outside-DNA scores are still missing.",
+                "status": "proof_credit_scored_for_frontier_d1",
+                "summary": f"{score_summary['current_holo_factory_proof_credit_rows']} outside-DNA proof-credit candidate rows and {score_summary['current_holo_factory_diagnostic_rows']} same-DNA diagnostic rows are present.",
             },
             {
                 "name": "historical_diagnostic_lift",
@@ -841,19 +857,19 @@ def build_findings(
         },
         "findings": [
             "D1 generation is operationally real: the current HoloFactory frontier run completed all four generation conditions and produced judge packets.",
-            "D1 current-lock quality scoring is not proof-credit complete: the only parsed final judge scores are same-DNA rows and must remain diagnostic.",
-            "The legacy four-judge frontier panel still has twelve diagnostic score slots, but proof credit now requires a separate outside-DNA rejudge panel.",
-            "Raw current-lock scores presently show a near tie on the Anthropic pair, but the Anthropic solo final is deterministically invalid for missing the required risk/compliance/audit section.",
-            "Under the proposed deterministic validity cap, the existing Anthropic-pair sample flips from a raw near tie to a Holo advantage; this remains non-claimable until outside-DNA rejudging is complete.",
+            "D1 current-lock final scoring now has six outside-DNA blind solo judge rows across the three final pairwise packets.",
+            "Same-DNA frontier judge rows remain diagnostic-only and are separated from the proof-credit outside-DNA rows.",
+            "Raw current-lock proof-credit scores show Holo lift across five of six outside-DNA judge rows, with one negative Anthropic-pair xAI row.",
+            "Validity-adjusted scoring preserves raw judge scores and applies deterministic caps only when revalidation flagged invalid finals.",
             "Historical D1 evidence supports directional Holo lift, but it must be labeled diagnostic because it does not match the current run lock.",
-            "For public or client-facing claims, report raw quality, validity-adjusted quality, and provider reliability as separate scores.",
+            "For public or client-facing claims, D1 alone is still insufficient: the architecture claim needs the mini lane, order permutations, and D2-D5 replication.",
         ],
         "next_actions": [
-            "Rejudge current-lock D1 final packets with outside-DNA blind solo judges.",
-            "Regenerate this D1 evidence board after outside-DNA judging.",
+            "Commit the D1 proof-credit scoring board and boundary-accounting patch.",
+            "Preserve the raw outside-DNA judge artifacts and parse-failure provenance for audit.",
             "Keep same-DNA frontier judge rows diagnostic-only even if additional legacy-panel scores are added.",
-            "Only then decide whether D1 is ready to promote from operational evidence to benchmark-credit evidence.",
-            "Keep D2-D5 packet generation paused until D1 final scoring is closed or explicitly accepted as partial.",
+            "Run the matched mini Holo versus mini solo lane for D1.",
+            "Then run order permutations and D2-D5 replication before making the architecture-level lift claim.",
         ],
     }
 
@@ -876,7 +892,7 @@ Domain: `{findings['domain_id']}`
 
 ## Bottom Line
 
-D1 is useful now, but it is not a finished public benchmark claim yet. The strongest current-lock fact is operational: HoloFactory completed the frontier D1 generation run and produced the trace/packet structure we need. The weakest current-lock fact is proof-credit scoring: `{quality['raw_observed_score_summary']['proof_credit_rows']}` outside-DNA final judge scores exist, while `{quality['raw_observed_score_summary']['diagnostic_rows']}` parsed final judge scores are diagnostic only.
+D1 is useful now, and its current-lock frontier lane has outside-DNA final scoring on disk. It is still not a finished public benchmark claim: D1 is one domain and the broader architecture proof still needs matched mini results, order permutations, and D2-D5 replication. Current D1 has `{quality['raw_observed_score_summary']['proof_credit_rows']}` outside-DNA proof-credit candidate rows and `{quality['raw_observed_score_summary']['diagnostic_rows']}` same-DNA diagnostic rows.
 
 ## Current-Lock Quality
 
@@ -958,7 +974,7 @@ D1 now has a real data map. The current-lock HoloFactory frontier run generated 
 The key split:
 
 - **Current-lock operational evidence:** HoloFactory live frontier run `{CURRENT_LOCK_RUN_ID}`.
-- **Current-lock scoring evidence:** diagnostic only; `{judging_gap['d1_observed_final_judge_scores']} / {judging_gap['d1_expected_final_judge_scores']}` legacy frontier-panel final judge scores are present, but `0` proof-credit outside-DNA final scores are present.
+- **Current-lock scoring evidence:** `{score_summary['current_holo_factory_proof_credit_rows']}` outside-DNA proof-credit candidate rows and `{score_summary['current_holo_factory_diagnostic_rows']}` same-DNA diagnostic rows are present.
 - **Proof-credit rejudge queue:** `{outside_rejudge_summary['observed_proof_credit_scores']} / {outside_rejudge_summary['expected_proof_credit_scores']}` outside-DNA final judge scores are present.
 - **Historical judged lift evidence:** legacy finance runs with measured Holo lift, but `matches_current_lock=false`.
 
@@ -988,7 +1004,7 @@ The key split:
 
 {markdown_table(current_scores, ['run_id', 'judge_id', 'judge_provider', 'solo_condition', 'holo_score', 'solo_score', 'gap_holo_minus_solo', 'percent_lift', 'score_credit_label'], limit=20)}
 
-These scores are only for scored packets already present on disk. They are diagnostic because judge DNA overlaps generation DNA.
+These scores are only for scored packets already present on disk. Rows labeled `proof_credit_candidate` use outside-DNA judges with clean prompt/trace boundaries; rows labeled `diagnostic_same_dna` remain diagnostic because judge DNA overlaps generation DNA.
 
 ## Validity-Adjusted Score Lens
 
@@ -1004,7 +1020,7 @@ Raw judge scores are preserved. This lens applies deterministic caps only when t
 
 {markdown_table(adjusted_rows, ['judge_id', 'solo_condition', 'score_credit_label', 'raw_holo_score', 'raw_solo_score', 'raw_gap_holo_minus_solo', 'adjusted_holo_score', 'adjusted_solo_score', 'adjusted_gap_holo_minus_solo', 'adjusted_percent_lift', 'solo_validity_cap_reason'], limit=20)}
 
-This is still not a final claim because the rows are diagnostic-only and the outside-DNA proof-credit queue is unscored.
+This is still not a final public architecture claim because D1 is one domain. The proof-credit queue is scored for the current-lock frontier lane; the next proof burden is matched mini, order-permutation, and cross-domain replication.
 
 ## Missing Current-Lock Final Judging Queue
 

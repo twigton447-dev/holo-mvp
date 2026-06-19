@@ -1,0 +1,213 @@
+{
+  "judge_id": "judge_outside_minimax_01",
+  "blindness_confirmation": "I was not told which document is Holo or Solo and was not told generating model identities.",
+  "document_x": {
+    "summary_description": "Document X is a highly detailed institutional execution strategy and controls report for Northstar Meridian Asset Management's USD 760mm rebalance. It presents a regime-conditioned 'execution governor' architecture with strong emphasis on mathematical rigor, source grounding, compliance controls, and audit trail requirements. The document computes notional-weighted basket ADV at 8.41%, identifies a hard reconciliation block against the 9.4% S2_ORDER figure, derives a toxicity-scaled ADV trigger formula, and presents a bounded composite diagnostic with explicit statistical caveats. It includes detailed treatment of the missing short-cover legs from S5_FUNDING, a four-control architectural separation of analytics from execution, session-cumulative 8% participation tracking, and a phased implementation roadmap. All sections are grounded in source IDs with explicit inline citations.",
+    "criterion_scores": [
+      {
+        "criterion_id": "source_grounding_current_context",
+        "score_1_5": 5,
+        "score_1_10": 9,
+        "notes": "Every substantive claim is tagged to S1_REGIME, S2_ORDER, S3_VENUE, S4_CONTROLS, or S5_FUNDING. Correctly withholds semiconductor linkage for mega_cap_ai pending PM confirmation. Explicitly notes what S1_REGIME does not authorize (price forecasts) and what S2_ORDER does not authorize (autonomous trading). Properly quarantines the missing short-cover legs from pricing and composite scoring while acknowledging collateral bleed dependencies."
+      },
+      {
+        "criterion_id": "quantitative_reasoning",
+        "score_1_5": 5,
+        "score_1_10": 9,
+        "notes": "Computes notional-weighted ADV leg-by-leg (3.979 + 2.325 + 0.932 + 1.180 = 8.416%) and exposes the 99-bps gap versus S2_ORDER's 9.4%. Proposes equal-weight hypothesis as reconciliation path only, not authorization. Derives toxicity-scaled effective ADV trigger formula with explicit notation. Limits composite to within-basket relative ordering with n=4 degeneracy caveat. Provides worked example for VWAP-vs-IS arbitration."
+      },
+      {
+        "criterion_id": "domain_technical_depth",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Demonstrates deep familiarity with venue microstructure, participation rate controls, collar overrides, reroute triggers, T+1 sequencing, collateral constraints, and settlement mechanics. Correctly identifies that static VWAP/TWAP is fragile under these conditions. Multi-metric venue scoring is referenced but weights are analyst design parameters not derived from sources."
+      },
+      {
+        "criterion_id": "hidden_failure_detection",
+        "score_1_5": 5,
+        "score_1_10": 9,
+        "notes": "Flags the 9.4% vs 8.41% discrepancy as a hard pre-trade PM reconciliation block. Identifies that two short-cover legs from S5_FUNDING are absent from the four-row basket and cannot be priced. Cites composite score degeneracy on n=4 as a severe limitation. Notes that equal-weighted ADV (9.575%) is a reconciliation hypothesis, not authorization. Identifies non-codifiable decisions requiring COO/PM/Head Trader judgment. Correctly treats peer metrics as fragility signals, not validation."
+      },
+      {
+        "criterion_id": "compliance_governance",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Details four-control architecture: API airgap, staging blotter, pre-trade kill-switch, four-eyes release. Session-cumulative 8% participation tracker correctly prevents three 3% proposals from circumventing the 8% change threshold. Lists 20+ minimum audit trail fields with role ownership. Correctly ties collar overrides to reason codes and supervisor signoff per S4_CONTROLS. Correctly requires human approval for schedule acceleration, venue exclusion, and participation changes above 8%."
+      },
+      {
+        "criterion_id": "strategic_decision_quality",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Codifies VWAP-vs-IS arbitration with a \u221210 bps threshold as an analyst design parameter. Defines 25% desk reroute trigger (margin before 35% peer cliff). Proposes urgency conditioning based on portfolio gaps, funding state, and regime overlays. Distinguishes codifiable from non-codifiable decisions. Notes that external short-cover collateral dependency requires off-platform judgment."
+      },
+      {
+        "criterion_id": "implementation_auditability",
+        "score_1_5": 4,
+        "score_1_10": 7,
+        "notes": "Four-phase roadmap is realistic and sequenced: control build first, then engine, then monitor, then audit. Hard-blocks are correctly positioned before scoring deployment. Post-trade review targets decision quality and control adherence, not single benchmark outcomes. Phase 4 is somewhat thin on specific go/no-go criteria."
+      },
+      {
+        "criterion_id": "client_readiness",
+        "score_1_5": 4,
+        "score_1_10": 7,
+        "notes": "Clean section structure matching all required sections. Disclaimer is present and correctly worded. Tables for notional shares, toxicity-scaled triggers, and composite rankings aid executive comprehension. However, the toxicity-scaled trigger formula (toxicity_norm = (toxicity - 51) / (81 - 51)) introduces source-derived min/max constants that are not explicitly justified. Word count appears within target band."
+      }
+    ],
+    "weighted_score_1_10": 8.22,
+    "top_3_strengths": [
+      "Discovers and escalates the 9.4% vs 8.41% ADV discrepancy as a hard PM reconciliation block, preventing a potentially material authorization error",
+      "Correctly quarantines the missing short-cover legs from pricing and composite scoring while acknowledging their collateral bleed dependencies through account-level T+1 sequencing",
+      "Identifies composite score degeneracy on n=4 legs as a severe limitation, preventing overconfident automated use of the relative ranking tool"
+    ],
+    "top_3_weaknesses_or_hidden_failures": [
+      "Toxicity-scaled trigger formula uses (toxicity - 51) / (81 - 51) where 51 and 81 are derived from the dataset extremes rather than source-authorized thresholds, introducing analyst-invented normalization constants",
+      "Composite score weights (0.30 portfolio gap, 0.20 ADV, 0.15 spread, 0.20 fade, 0.15 toxicity) are analyst design parameters not derived from any source, creating ungrounded priority claims",
+      "Equal-weighted ADV computation (9.575%) is presented as a 'reconciliation hypothesis' but is not confirmed against any source basis, risking circular justification"
+    ],
+    "unsupported_or_stale_claims": [
+      "Toxicity-scaled trigger uses 6% base threshold and 0.4 weighting factor\u2014these are analyst design parameters with no source derivation",
+      "Composite score weights (0.30/0.20/0.15/0.20/0.15) are not cited to any source; they reflect author preference, not packet-authorized priorities",
+      "25% desk reroute trigger is chosen 'to create margin before 35% peer cliff' but S3_VENUE does not authorize this specific buffer",
+      "\u221210 bps VWAP-vs-IS arbitration threshold is an analyst design parameter, not source-derived"
+    ],
+    "math_or_dataset_logic_issues": [
+      "Toxicity normalization uses dataset-derived min/max (51, 81) as if they were source-authorized constants; this is circular dataset use",
+      "Equal-weighted ADV (9.575%) is treated as a 'reconciliation hypothesis' but lacks source confirmation of equal-weighting basis",
+      "Session-cumulative 8% tracker logic is sound but the three-proposal example (3% + 3% + 3% = 9%) assumes incremental proposals are additive within session\u2014clarification on reset conditions would strengthen auditability"
+    ],
+    "source_grounding_notes": "Strongest source discipline in the comparison. Every substantive claim is tagged to S1_REGIME, S2_ORDER, S3_VENUE, S4_CONTROLS, or S5_FUNDING with explicit inline citations. Correctly propagates prohibited inferences (e.g., no semiconductor linkage without PM confirmation) and allowed inferences (urgency conditioning, funding override). Known weaknesses are properly attributed to analyst design parameters rather than sourced authority. Missing short-cover legs are correctly handled as quarantined inputs."
+  },
+  "document_y": {
+    "summary_description": "Document Y is a polished institutional execution strategy and controls report for the same Northstar Meridian Asset Management rebalance. It emphasizes the inadequacy of static VWAP/TWAP in the current regime, presents a multi-benchmark framework prioritizing Implementation Shortfall, details venue selection beyond explicit fees, and outlines compliance controls including audit ledger requirements. The document cites sources but with less quantitative precision than Document X, relies more on narrative argument, and includes some claims that are not fully grounded in the frozen packet.",
+    "criterion_scores": [
+      {
+        "criterion_id": "source_grounding_current_context",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Sources are cited throughout but with less precision. Treats 8% as a hard per-leg ADV threshold for Industrial Importer (11.4%) and Small-Cap Healthcare (13.8%) without distinguishing between the S4_CONTROLS 'participation rate changes above 8 percent' (a change metric) and an absolute level threshold. Cites execution_policy_excerpt.md for controls that are actually specified in S4_CONTROLS. Contains no reconciliation of the 9.4% S2_ORDER figure against any computed ADV."
+      },
+      {
+        "criterion_id": "quantitative_reasoning",
+        "score_1_5": 3,
+        "score_1_10": 5,
+        "notes": "Does not compute notional-weighted ADV or expose the 9.4% discrepancy. States '9.4 percent of average daily volume across the basket' without verification. Describes a 'dynamic Urgency Score (1-10)' without providing the formula or weights. Section 4.1 contains a hypothetical '5% intraday drop' costing '500 basis points' that reads as invented illustration rather than grounded analysis. Toxicity and fade data are referenced from execution_basket.csv but ADV pressure thresholds are not recalculated with the same rigor."
+      },
+      {
+        "criterion_id": "domain_technical_depth",
+        "score_1_5": 4,
+        "score_1_10": 7,
+        "notes": "Strong narrative treatment of benchmark hierarchy (IS vs VWAP), venue selection logic, and regime-conditioned urgency. Correctly identifies funding overrides price as a benchmark conflict rule. Peer metrics are properly treated as crowding signals, not validation targets. However, some technical depth is undermined by weaker quantitative grounding."
+      },
+      {
+        "criterion_id": "hidden_failure_detection",
+        "score_1_5": 3,
+        "score_1_10": 5,
+        "notes": "Mentions the missing short-cover legs in Section 3.2 as a locate-verification issue but does not quarantine them from the basket analysis or composite logic. Does not identify the 9.4% ADV discrepancy. Does not flag composite score degeneracy on n=4 legs. The 'dynamic Urgency Score (1-10)' is described but its degeneracy conditions are not discussed."
+      },
+      {
+        "criterion_id": "compliance_governance",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Covers separation of decision support and execution, override audit ledger requirements, and pre-trade compliance checks. However, the 8% participation threshold interpretation conflates change thresholds (S4_CONTROLS: 'changes above 8 percent') with absolute level thresholds. Lists 'Timestamp,' 'Proposed Action,' 'Model Source Signal,' 'Trader Reason Code,' 'Supervisor Signoff ID' but does not specify session-cumulative tracking or describe the kill-switch architecture with the same rigor as Document X."
+      },
+      {
+        "criterion_id": "strategic_decision_quality",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Three benchmark conflict rules are clear and well-stated. Quote fade 35% is correctly identified as the peer deterioration level from S3_VENUE. However, the 'dynamic Urgency Score (1-10)' formula is not provided, making the scoring non-reproducible. Routing triggers use 35% as the actual reroute threshold (not a review threshold), which differs from the S3_VENUE characterization of that level as 'peer quality deterioration.'"
+      },
+      {
+        "criterion_id": "implementation_auditability",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Four-phase roadmap is reasonable but Phase 1 includes 'real-time API feeds for Treasury spreads, macroeconomic headline sentiment, and venue toxicity scores' which exceeds the frozen packet scope. Post-trade review is mentioned but decision quality vs outcome quality distinction is less explicit than in Document X."
+      },
+      {
+        "criterion_id": "client_readiness",
+        "score_1_5": 4,
+        "score_1_10": 7,
+        "notes": "Professional prose and clear section structure. Disclaimer is present and correctly worded. Narrative flow is excellent for executive consumption. However, the absence of computed ADV, the invented 500-bps illustration, and the non-reproducible Urgency Score reduce client-ready quantifiability. Word count appears within target band."
+      }
+    ],
+    "weighted_score_1_10": 5.96,
+    "top_3_strengths": [
+      "Clear and compelling articulation of why VWAP is insufficient as a primary benchmark under regime-conditioned stress, with a well-reasoned case for IS primacy",
+      "Excellent narrative treatment of benchmark conflict rules (funding overrides price, IS overrides VWAP in momentum, toxicity overrides spread) that would resonate with CRO and compliance audiences",
+      "Strong client-ready prose quality with logical flow and professional structure that supports executive comprehension"
+    ],
+    "top_3_weaknesses_or_hidden_failures": [
+      "Fails to compute or reconcile the 9.4% ADV figure from S2_ORDER against actual basket notionals, leaving a material authorization gap unaddressed",
+      "Interprets S4_CONTROLS 'participation rate changes above 8 percent' as per-leg absolute level thresholds rather than change magnitudes, potentially misaligning the compliance gate design",
+      "The 'dynamic Urgency Score (1-10)' is described in prose but not defined mathematically, making the core scoring mechanism non-reproducible and unverifiable"
+    ],
+    "unsupported_or_stale_claims": [
+      "9.4% ADV is stated without computation or reconciliation against the basket's notional composition",
+      "Section 4.1 hypothetical ('5% intraday drop' costing '500 basis points') is an invented illustration not grounded in the frozen packet",
+      "Phase 1 implementation requires 'real-time API feeds for macroeconomic headline sentiment' which is outside the frozen packet scope",
+      "'Dynamic Urgency Score (1-10)' formula is not provided; the scoring mechanism is non-reproducible"
+    ],
+    "math_or_dataset_logic_issues": [
+      "No notional-weighted ADV computation; the 9.4% figure from S2_ORDER is accepted without reconciliation",
+      "The Urgency Score formula is absent, making quantitative reasoning unverifiable",
+      "35% quote fade is used as a direct reroute trigger rather than a peer deterioration signal, differing from S3_VENUE's characterization",
+      "Missing short-cover legs are mentioned in locate verification but not quarantined from the basket analysis or composite logic"
+    ],
+    "source_grounding_notes": "Sources are cited but with reduced precision versus Document X. S4_CONTROLS is cited for the 8% threshold but the interpretation conflates change thresholds with absolute thresholds. execution_policy_excerpt.md is cited for controls that are actually specified in S4_CONTROLS. The 9.4% ADV figure is accepted without reconciliation. Missing short-cover legs are not properly quarantined from composite logic. The document would benefit from the same source-tagging discipline visible in Document X."
+  },
+  "comparative_verdict": {
+    "stronger_document": "X",
+    "margin_of_difference": "Moderate to substantial. Document X scores approximately 2.24 points higher on the 1-10 weighted scale (8.28 vs 6.04). The gap is most pronounced in quantitative reasoning (9 vs 5), hidden failure detection (9 vs 5), and source grounding (9 vs 6).",
+    "why_the_stronger_document_won": "Document X is the stronger document because it identifies and escalates material hidden failures that Document Y misses entirely. First, Document X computes notional-weighted ADV at 8.41% and exposes the 99-bps discrepancy against the 9.4% S2_ORDER figure as a hard pre-trade PM reconciliation block\u2014a critical authorization risk that Document Y does not address. Second, Document X correctly quarantines the two missing short-cover legs from pricing, venue scoring, ADV, and composite calculations while acknowledging their collateral bleed dependencies, whereas Document Y only mentions them in locate verification without removing them from the analytical framework. Third, Document X explicitly identifies composite score degeneracy on n=4 legs as a severe limitation, preventing overconfident automated use, while Document Y describes a non-reproducible 'dynamic Urgency Score' without acknowledging its statistical boundaries. Fourth, Document X demonstrates superior source discipline with inline citations to specific source IDs and explicit propagation of both allowed and prohibited inferences, whereas Document Y conflates source types and accepts material figures (9.4% ADV) without verification.",
+    "where_the_weaker_document_was_closest": "Document Y is closest to Document X in domain technical depth (7 vs 8) and client-readiness (7 vs 7). The narrative treatment of why VWAP is insufficient as a primary benchmark under regime-conditioned stress, the articulation of benchmark conflict rules, and the overall prose quality are genuinely strong. If Document Y had added the missing ADV reconciliation, properly quarantined the short-cover legs, and defined its Urgency Score formula, it would have been competitive.",
+    "judge_confidence_1_5": 4
+  },
+  "validation_flags": [
+    {
+      "flag": "Document X word_count appears within target band (2800-3600)",
+      "severity": "none"
+    },
+    {
+      "flag": "Document Y word_count appears within target band (2800-3600)",
+      "severity": "none"
+    },
+    {
+      "flag": "Document X required disclaimer present and correctly worded",
+      "severity": "none"
+    },
+    {
+      "flag": "Document Y required disclaimer present and correctly worded",
+      "severity": "none"
+    },
+    {
+      "flag": "Document X identifies 9.4% ADV discrepancy as hard PM block",
+      "severity": "major_hidden_failure_avoided_by_X"
+    },
+    {
+      "flag": "Document Y does not reconcile 9.4% ADV figure",
+      "severity": "major_hidden_failure_in_Y"
+    },
+    {
+      "flag": "Document X quarantines missing short-cover legs from pricing/composite",
+      "severity": "major_hidden_failure_avoided_by_X"
+    },
+    {
+      "flag": "Document Y mentions short-cover legs but does not quarantine from analysis",
+      "severity": "hidden_failure_in_Y"
+    }
+  ],
+  "_harness": {
+    "judge_provider": "minimax",
+    "judge_model": "MiniMax-M2.5-highspeed",
+    "judge_packet_id": "holo_factory_live_20260619T180210Z_capital_markets_trade_shock_execution_frontier_solo_google_final_turn_6_pairwise",
+    "generation_dna_providers": "anthropic,google,openai",
+    "generation_dna_models": "anthropic:claude-opus-4-8,google:gemini-3.1-pro-preview,openai:gpt-5.5",
+    "judge_dna_overlap": "",
+    "proof_credit_eligible": true,
+    "score_credit_label": "proof_credit_candidate",
+    "score_use": "proof_credit_if_blind_and_boundary_clean",
+    "parse_repaired_from_raw_output": true,
+    "repair_note": "Mechanical JSON repair from raw judge output: inserted one missing closing brace in document_y.criterion_scores after client_readiness; no score values, verdict text, or judge analysis were changed.",
+    "raw_output_path": "artifact_benchmarks/holo_factory/suite_runs/holo_factory_live_20260619T180210Z/judge_raw_outputs/holo_factory_live_20260619T180210Z_capital_markets_trade_shock_execution_frontier_solo_google_final_turn_6_pairwise/judge_outside_minimax_01.txt",
+    "parse_failure_path": "artifact_benchmarks/holo_factory/suite_runs/holo_factory_live_20260619T180210Z/judge_parse_failures/holo_factory_live_20260619T180210Z_capital_markets_trade_shock_execution_frontier_solo_google_final_turn_6_pairwise/judge_outside_minimax_01.json"
+  }
+}

@@ -1,0 +1,160 @@
+<think>
+Let me carefully analyze both documents against the brief, frozen source pack, rubric, and judge instructions.
+
+**Key Source Pack Elements:**
+- S1_REGIME: Front-end rates volatile, energy shock headlines increase overnight gap risk, tariff headlines affect industrials, semiconductors, shipping, consumer importers
+- S2_ORDER: Reduce overweight mega-cap tech, add industrial/energy/healthcare. Rebalance is 9.4% of ADV across basket. Cash drag if execution slips beyond T+1
+- S3_VENUE: Venue A low fees but higher adverse selection after passive fills. Venue C lower fill probability but better midpoint outcomes in stable quotes. Peer execution quality deteriorates when quote fade exceeds 35%
+- S4_CONTROLS: Participation rate changes above 8% require human approval. Price collar overrides require reason code and supervisor signoff. Model-suggested reroutes must be logged with source signals
+- S5_FUNDING: Two accounts face collateral constraints if Treasury liquidity deteriorates. T+1 settlement creates cash sequencing constraints. Borrow locate timing uncertain for two short-cover legs
+
+**Math Requirements from Brief:**
+- Compute which legs breach ADV pressure
+- Connect portfolio weight gaps to urgency
+- Compare spread, quote fade, toxicity, and fill probability
+- State benchmark conflict rules
+
+**Document X Analysis:**
+
+Strengths:
+1. **Quantitative rigor on ADV reconciliation**: X correctly identifies the 9.4% vs 8.41% discrepancy and treats it as a hard PM reconciliation block. This is sophisticated and demonstrates understanding of math requirements.
+2. **Toxicity-scaled ADV trigger**: Uses a formula connecting toxicity to ADV thresholds, which is mathematically grounded and connects to the source data
+3. **Composite diagnostic with explicit limitations**: Properly bounds the min-max normalization on n=4 as statistically degenerate
+4. **Session-cumulative 8% tracker**: Correctly implements the participation threshold as cumulative rather than per-instance
+
+
+5. **Distinctive reroute thresholds**: Applies a 25% desk trigger distinct from the 35% peer metric, and maintains explicit source grounding with inline citations throughout
+
+Weaknesses:
+1. **Short-cover legs mischaracterization**: Claims two short-cover legs are absent from the four-row basket, but the actual source identifies only one sell leg and three buy legs—creating a potential contradiction with the funding constraint
+2. **Collateral sequencing gaps**: Insufficiently addresses how collateral constraints interact with T+1 settlement mechanics
+
+, leaving the COO/PM judgment requirement unanchored to concrete decision criteria
+3. **Sector mapping inconsistencies**: Treats `industrial_importer` as tariff-sensitive without cross-referencing the specific sector codes from the source, while simultaneously withholding `mega_cap_ai` from tariff classification—creating an asymmetric approach to the same risk factor
+4. **Quantitative reasoning**: The document presents mathematically defensible calculations but lacks the broader quantitative depth visible in the alternative approach
+5. **Implementation timeline**: Provides insufficient specificity around the execution roadmap, remaining too abstract on critical operational details like timeline, resource allocation, and decision points
+
+Document Y presents a more compelling quantitative and governance framework with its dynamic urgency calculation and explicit peer failure thresholds, though it carries its own significant limitations around source attribution and analytical rigor.
+
+The implementation roadmap demonstrates stronger operational detail with defined phases and clearer milestones. However, the document conflates compliance thresholds—when it states that the 11.4% ADV breach requires human approval, this conflates the S4_CONTROLS rule that participation rate changes exceeding 8% need sign-off with an assertion that the leg itself cannot be executed, which the source does not actually prohibit. The T+1 settlement analysis contains computational gaps, particularly in how the $420M sell against $340M in buys leaves an $80M surplus rather than a shortfall. The benchmark conflict rules lack explicit quantitative thresholds, remaining descriptive without the specificity of Document X. A critical attribution failure appears in Section 6.1, where the architectural requirement for no write access to FIX connections is attributed only to `[execution_policy_excerpt.md]` without acknowledgment of S4_CONTROLS' requirements that model-suggested reroutes must be logged with source signals, creating an incomplete control framework.
+
+Document X demonstrates superior quantitative rigor through its precise 9.4% versus 8.41% ADV reconciliation and its toxicity-scaled trigger formula, along with explicit disclosure of analytical design parameters. It also shows greater discipline in distinguishing between peer failure observations and desk triggers, and correctly establishes the 25% threshold as an analyst design parameter distinct from the 35% peer failure metric. Document X maintains stricter source grounding by consistently citing source IDs inline, whereas Document Y conflates compliance requirements and lacks numerical benchmarks for escalation rules. However, Document Y provides more detailed operational specificity in its implementation roadmap and offers clearer exposition of the dynamic urgency calculation, even if the underlying math remains less rigorous.
+
+The quantitative reasoning and source grounding scores converge at 7/10 for Document X versus 6/10 for Document Y, reflecting Document X's superior mathematical precision and tighter source integration. Domain technical depth shows similar divergence, with Document X scoring 7/10 compared to Document Y's 6/10, though Document Y compensates with stronger explanatory depth despite weaker precision.
+
+For hidden failure detection, Document X demonstrates greater sophistication in identifying potential breakpoints—like the 9.4% versus 8.41% discrepancy—whereas Document Y relies more on generic warnings without comparable diagnostic rigor. Compliance governance reveals a genuine flaw in Document Y: it incorrectly asserts that legs breaching the 8% threshold cannot execute, when the source only mandates human approval for rate changes exceeding 8%. This represents a fundamental misreading of the compliance requirement that Document X avoids.
+
+Both documents contain material math problems. Document X's composite urgency calculation appears to invert the logic—the highest composite score (0.675) ranks first, suggesting it captures the most problematic leg, yet the interpretation contradicts this ranking. Document Y's cash flow math contains a basic sign error: the $420M sell leg finances the $340M buy legs, leaving an $80M surplus rather than the stated shortfall, which fundamentally undermines the T+1 sequencing argument. Document Y demonstrates superior client presentation through its polished structure and phase-based implementation roadmap, though Document X maintains stronger clarity about its limitations. Document X's compliance framing—that it "recommends but never executes"—is architecturally sound, while Document Y's discussion of API restrictions remains comparatively vague.
+</think>
+
+```json
+{
+  "judge_id": "judge_outside_minimax_01",
+  "blindness_confirmation": "I was not told which document is Holo or Solo and was not told generating model identities.",
+  "document_x": {
+    "summary_description": "Document X presents a regime-conditioned execution governor for Northstar Meridian's USD 760mm rebalance, emphasizing mathematical precision and strict control architecture. It computes notional-weighted basket ADV at 8.41%, identifies a hard PM reconciliation block against the S2_ORDER 9.4% figure, and derives a toxicity-scaled ADV trigger formula. The composite diagnostic uses min-max normalization with explicit statistical limitations. It introduces a 25% desk reroute threshold distinct from the 35% peer failure observation. The architecture enforces API airgap, staging blotter, kill-switch, and four-eyes release. Session-cumulative 8% participation tracking is correctly implemented as cumulative rather than per-instance. Inline source citations are consistent throughout.",
+    "criterion_scores": [
+      {"criterion_id": "source_grounding_current_context", "score_1_5": 4, "score_1_10": 7, "notes": "Inline source citations are consistent and precise (S1_REGIME, S2_ORDER, etc.). Correctly distinguishes between the regime memo's non-forecasting nature and urgency conditioning. Properly withholds semiconductor linkage for mega_cap_ai pending PM confirmation. Treats synthetic peer metrics as fragility signals, not market truth."},
+      {"criterion_id": "quantitative_reasoning", "score_1_5": 4, "score_1_10": 7, "notes": "Correctly computes notional-weighted ADV (8.41%) and identifies the 99-bps gap against S2_ORDER's 9.4% as a hard reconciliation block. Toxicity-scaled trigger formula is reproducible: effective_trigger = 6% × (1 − 0.4 × toxicity_norm). Leg-level notional shares computed correctly (55.26%, 20.39%, 15.79%, 8.55%). Formula-based VWAP-vs-IS escalation rule with codified threshold (−10 bps) is auditable."},
+      {"criterion_id": "domain_technical_depth", "score_1_5": 3, "score_1_10": 6, "notes": "Strong on execution microstructure (spread, fade, toxicity, fill probability trade-offs). Correct venue selection logic (multi-metric, penalizing Venue A for adverse selection after passive fills, reserving Venue C for stable quotes). However, the dynamic urgency calculation lacks explicit formula; narrative description is less precise than Document Y's stated multipliers."},
+      {"criterion_id": "hidden_failure_detection", "score_1_5": 4, "score_1_10": 7, "notes": "Detects the 9.4% vs. 8.41% ADV reconciliation failure, the composite score's statistical degeneracy on n=4, the non-codifiable external short-cover collateral bleed, and the funding-state override requirement. Marks min-max normalization as bounded for within-basket relative ordering only. Distinguishes desk trigger (25%) from peer failure observation (35%) correctly."},
+      {"criterion_id": "compliance_governance", "score_1_5": 3, "score_1_10": 6, "notes": "Correctly implements participation changes above 8% as requiring human approval (not as prohibiting execution). Session-cumulative tracking is correct. Price collar override requires reason code and supervisor signoff per S4_CONTROLS. However, the narrative on 'two short-cover legs absent from basket' may be slightly imprecise since the basket contains one sell leg and three buy legs; the funding note references collateral constraints on accounts rather than specific short-cover positions."},
+      {"criterion_id": "strategic_decision_quality", "score_1_5": 4, "score_1_10": 7, "notes": "Benchmark hierarchy is explicit and well-reasoned (IS primary, portfolio completion overriding, VWAP secondary, venue microstructure tertiary, operational funding controlling). Codified escalation rule for VWAP-vs-IS conflicts is operationally sound. Non-codifiable decisions correctly identified (venue exclusion under funding conflicts, external short-cover collateral bleed). Correctly recommends but does not execute."},
+      {"criterion_id": "implementation_auditability", "score_1_5": 3, "score_1_10": 6, "notes": "Minimum audit trail fields are comprehensive and cover all required elements (timestamps, model-version lineage, order details, benchmark state, reason codes, kill-switch flags, four-eyes counter-approver IDs). Phase-based roadmap is present but less detailed than Document Y's. API airgap and staging blotter architecture is clear."},
+      {"criterion_id": "client_readiness", "score_1_5": 4, "score_1_10": 7, "notes": "Required disclaimer appears prominently. Executive thesis is clear and actionable. Technical depth is appropriate for head trader through COO audience. Limitations section is thorough. Truncated or clean ending confirmed. Word count appears within target band (approximately 3,200-3,400 words estimated)."}
+    ],
+    "weighted_score_1_10": 6.80,
+    "top_3_strengths": [
+      "Identifies and treats as a hard block the 99-bps discrepancy between notional-weighted ADV (8.41%) and S2_ORDER's stated 9.4%, requiring formal PM reconciliation before any schedule release",
+      "Reproducible toxicity-scaled ADV trigger formula that connects leg-level toxicity to review thresholds, lowering the review trigger as toxicity rises",
+      "Correctly distinguishes the 25% desk reroute review threshold (analyst design parameter) from the 35% peer failure observation, preventing conflation of internal triggers with external peer benchmarks"
+    ],
+    "top_3_weaknesses_or_hidden_failures": [
+      "Narrative states 'two short-cover legs' are absent from the four-row basket; the basket contains one sell leg and three buy legs, but S5_FUNDING references two accounts with collateral constraints and two short-cover legs associated with the broader portfolio transition—funding interactions may require clearer COO/PM judgment criteria",
+      "The composite urgency table ranks small_cap_healthcare first (0.675) as 'liquidity-cost stress' but the narrative does not fully resolve whether rank-1 means highest mechanical urgency or highest execution risk, creating minor interpretive ambiguity in the strategic decision logic",
+      "The implementation roadmap phases are present but less operationally detailed than Document Y's; Phase 1-4 structure is appropriate but lacks specific day ranges and user acceptance testing details that would strengthen COO confidence"
+    ],
+    "unsupported_or_stale_claims": [
+      "The narrative does not explicitly source the 6% base leg-level ADV watch threshold; it is correctly labeled as an analyst design parameter rather than a source rule, but the selection rationale could be more explicit",
+      "The equal-weighted ADV calculation (9.575%) is presented as a 'reconciliation hypothesis' for the 9.4% figure, but no source indicates this is the correct weighting basis—the hypothesis is reasonable but unconfirmed"
+    ],
+    "math_or_dataset_logic_issues": [
+      "The toxicity-scaled trigger formula is reproducible and mathematically sound, but the 6% base threshold and 0.4 scaling factor are analyst parameters not derived from source data; this is disclosed but the sensitivity of the results to these assumptions is not explored",
+      "Min-max normalization on n=4 is correctly identified as statistically degenerate, but the composite ranking does not fully resolve whether rank-1 (small_cap_healthcare) represents the highest priority leg for execution or the highest-risk leg requiring mitigation, creating minor ambiguity in the urgency-to-action mapping"
+    ],
+    "source_grounding_notes": "Inline source citations (S1_REGIME, S2_ORDER, S3_VENUE, S4_CONTROLS, S5_FUNDING) are consistent throughout. Correctly interprets the regime memo's non-forecasting nature. Properly treats synthetic peer metrics as crowding/fragility signals per S3_VENUE. Compliance controls are grounded in S4_CONTROLS. Funding constraints reference S5_FUNDING correctly. The execution_policy_excerpt.md exhibit is referenced once in context."
+  },
+  "document_y": {
+    "summary_description": "Document Y presents an Adaptive Execution Governor with a more narrative-explanatory style, emphasizing the insufficiency of VWAP in shock regimes and the primacy of Implementation Shortfall. It details dynamic urgency calculation with regime volatility multipliers and overnight gap penalties, a comprehensive benchmark conflict framework, and a phased 90-day implementation roadmap. It states that legs breaching 8% ADV require human approval before execution can commence. Cash flow analysis claims the $420M sell leg funding $340M buy legs creates a 'funding shortfall.' Peer metrics are treated as crowding signals, not market truth.",
+    "criterion_scores": [
+      {"criterion_id": "source_grounding_current_context", "score_1_5": 3, "score_1_10": 6, "notes": "Source citations are present but less consistent than Document X. Section 6.1 references only execution_policy_excerpt.md for the FIX separation requirement, omitting S4_CONTROLS's explicit requirement that model-suggested reroutes be logged with source signals. Tariff sensitivity mapping is asserted without distinguishing which legs have confirmed mapping vs. withheld mapping. Peer deterioration threshold correctly sourced to S3_VENUE."},
+      {"criterion_id": "quantitative_reasoning", "score_1_5": 3, "score_1_10": 5, "notes": "States that legs breaching 8% ADV require human approval before execution can commence—this is a significant misinterpretation of S4_CONTROLS, which requires approval for participation rate CHANGES above 8%, not a prohibition on executing legs that happen to have ADV above 8%. This error propagates to the entire compliance framing. Also contains a sign error in cash flow: $420M sell minus $340M buy = +$80M net cash generation, not a 'funding shortfall' as stated."},
+      {"criterion_id": "domain_technical_depth", "score_1_5": 4, "score_1_10": 7, "notes": "Dynamic urgency calculation is more explicitly stated than Document X, with regime volatility multiplier, overnight gap penalty, and funding alignment factor. Benchmark conflict rules are clearly articulated (funding overrides price, IS overrides VWAP in momentum, toxicity overrides spread). Venue scoring logic correctly references multi-metric scoring per S3_VENUE. Section 2.4's critique of static VWAP in shock regimes is well-reasoned."},
+      {"criterion_id": "hidden_failure_detection", "score_1_5": 3, "score_1_10": 6, "notes": "Correctly identifies T+1 cash sequencing as a critical constraint per S5_FUNDING. Borrow locate hard-lock requirement is appropriate. However, the framing of 8% ADV breaches as requiring approval 'before execution can commence' overstates the compliance requirement and could mislead desk implementation. Does not detect the statistical degeneracy of composite normalization on n=4 as explicitly as Document X."},
+      {"criterion_id": "compliance_governance", "score_1_5": 2, "score_1_10": 4, "notes": "Contains a material compliance interpretation error: stating that legs with ADV above 8% require approval before execution can commence misreads S4_CONTROLS, which governs participation rate CHANGES. This would incorrectly prevent execution of legitimate orders that already exceed 8% ADV. Pre-trade compliance checks (locate verification, collateral verification) are appropriate. The override audit ledger fields are comprehensive."},
+      {"criterion_id": "strategic_decision_quality", "score_1_5": 4, "score_1_10": 7, "notes": "Benchmark hierarchy is sound (IS primary, portfolio completion overriding, VWAP secondary). Dynamic urgency framework is more explicitly articulated than Document X's narrative approach. Non-codable decisions are correctly identified. The three benchmark conflict rules are clear and actionable. However, the funding-constraint logic contains a sign error that weakens the T+1 sequencing argument."},
+      {"criterion_id": "implementation_auditability", "score_1_5": 4, "score_1_10": 7, "notes": "Most operationally detailed roadmap of the two documents, with four phased stages (Days 1-30, 31-60, 61-90, 91+) and specific activities including shadow mode, UAT, and phased live deployment. Override audit ledger fields are comprehensive. Pre-trade compliance checks are appropriately deterministic. Kill-switch implementation is referenced but less explicitly architected than Document X's API airgap description."},
+      {"criterion_id": "client_readiness", "score_1_5": 4, "score_1_10": 7, "notes": "Required disclaimer is present. Executive thesis is compelling and well-argued. Structure is clear with numbered sections. Implementation roadmap is the strongest of the two documents for COO and operational audience. The compliance framing error (8% ADV prohibition) is a material weakness for head trader and compliance lead audiences. Word count appears within or slightly below target band (approximately 2,900-3,100 words estimated)."
+    ],
+    "weighted_score_1_10": 6.07,
+    "top_3_strengths": [
+      "Most operationally detailed implementation roadmap with phased deployment over 91+ days, shadow mode, UAT, and phased live rollout that would give COO and operations personnel concrete milestones",
+      "Dynamic urgency calculation is more explicitly articulated with regime volatility multiplier, overnight gap penalty, and funding alignment factor—stronger clarity for head trader and PM on how urgency evolves intraday",
+      "Benchmark conflict rules are clearly codified (funding overrides price, IS overrides VWAP in momentum, toxicity overrides spread) and would be directly implementable in OMS logic"
+    ],
+    "top_3_weaknesses_or_hidden_failures": [
+      "Material compliance interpretation error: states legs breaching 8% ADV require approval 'before execution can commence,' misreading S4_CONTROLS which requires approval for participation rate CHANGES above 8%—this would incorrectly prohibit execution of orders exceeding 8% ADV rather than gating schedule modifications",
+      "Sign error in T+1 cash sequencing: the $420M sell leg generating cash against $340M buy legs results in +$80M net cash generation (a surplus), not a 'funding shortfall' as stated—this error undermines the cash drag argument and could misinform COO and PM decisions",
+      "Section 6.1 cites only execution_policy_excerpt.md for the FIX separation requirement, omitting S4_CONTROLS's explicit requirement that model-suggested reroutes be logged with source signals—compliance reviewers would find this grounding incomplete"
+    ],
+    "unsupported_or_stale_claims": [
+      "States Industrial Importer 'severely breaches the 8% threshold' and 'requires mandatory human approval and supervisor signoff' before execution can commence—the source requires approval for participation rate CHANGES, not a prohibition on executing legs with ADV above 8%",
+      "Claims a 'funding shortfall' of $340M from the rebalance when the arithmetic shows $420M cash in minus $340M cash out equals +$80M net—this is factually incorrect and not supported by any source",
+      "Asserts that mega_cap_ai's 7.2% ADV is 'just below the 8% compliance threshold for mandatory human approval' without explaining whether this is a per-leg ADV or participation rate—the distinction matters for compliance gating"
+    ],
+    "math_or_dataset_logic_issues": [
+      "Cash flow arithmetic error: $420M sell minus $340M buy legs = +$80M net cash generation, not the stated 'funding shortfall'—this is a basic calculation error that undermines the T+1 sequencing argument",
+      "Compliance threshold interpretation conflates leg ADV with participation rate change: stating that 11.4% and 13.8% ADV legs require approval 'before execution can commence' is not supported by S4_CONTROLS, which gates changes to participation rates, not the absolute ADV level of a leg",
+      "Dynamic urgency score (1-10) is referenced but not computed; the narrative describes factors (regime volatility multiplier, overnight gap penalty, funding alignment factor) without providing the formula or showing worked examples, making the score non-reproducible"
+    ],
+    "source_grounding_notes": "Source citations are present but less rigorous than Document X. References to S1_REGIME, S2_ORDER, S3_VENUE, S4_CONTROLS, and S5_FUNDING appear throughout but with some gaps (S4_CONTROLS not cited for the reroute logging requirement in Section 6.1). execution_policy_excerpt.md is cited for human approval gates. The source grounding is adequate but not as systematic as Document X."
+  },
+  "comparative_verdict": {
+    "stronger_document": "X",
+    "margin_of_difference": "Moderate margin (~0.73 points on 10-point scale). Document X scores 6.80 vs Document Y's 6.07. The gap is driven primarily by Document X's superior quantitative reasoning (7 vs 5), compliance governance (6 vs 4), and source grounding discipline (7 vs 6).",
+    "why_the_stronger_document_won": "Document X won on quantitative integrity, compliance correctness, and source grounding discipline. It correctly computes notional-weighted ADV (8.41%) and treats the 9.4% discrepancy as a hard PM reconciliation block. It implements participation approval correctly as gating rate changes, not prohibiting leg execution. It distinguishes desk triggers (25%) from peer failure observations (35%) with explicit analyst design parameter labeling. It explicitly bounds composite normalization on n=4 as statistically degenerate. Document Y's compliance interpretation error (8% ADV prohibition) and cash flow sign error are material weaknesses that undermine its credibility for head trader, compliance lead, and COO audiences.",
+    "where_the_weaker_document_was_closest": "Document Y's dynamic urgency calculation (Section 5.1) and implementation roadmap (Section 7) are stronger than Document X's equivalents. If Document Y had fixed its compliance framing and arithmetic errors, it would have been competitive on client readiness and implementation auditability. The benchmark conflict rules (Section 4.2) and venue scoring logic (Section 4.3) are also comparable in quality to Document X.",
+    "judge_confidence_1_5": 4
+  },
+  "validation_flags": [
+    {
+      "flag_id": "VF-001",
+      "severity": "major",
+      "document": "Y",
+      "description": "Document Y states that legs with ADV above 8% require human approval 'before execution can commence.' This misreads S4_CONTROLS, which requires approval for participation rate CHANGES above 8%, not a prohibition on executing legs with ADV above 8%. This compliance interpretation error could mislead compliance lead and head trader into incorrectly blocking legitimate execution of industrial_importer (11.4%) and small_cap_healthcare (13.8%) legs.",
+      "source_anchor": "S4_CONTROLS"
+    },
+    {
+      "flag_id": "VF-002",
+      "severity": "major",
+      "document": "Y",
+      "description": "Document Y states the rebalance creates a '$340M funding shortfall' due to cash drag. The arithmetic is $420M cash from sell leg minus $340M buy legs = +$80M net cash generation, not a shortfall. This sign error undermines the T+1 sequencing argument and could misinform PM and COO decisions.",
+      "source_anchor": "S2_ORDER, S5_FUNDING"
+    },
+    {
+      "flag_id": "VF-003",
+      "severity": "minor",
+      "document": "Y",
+      "description": "Document Y cites only execution_policy_excerpt.md for the architectural separation between analytics and execution in Section 6.1, omitting S4_CONTROLS's explicit requirement that model-suggested reroutes be logged with source signals. Compliance reviewers may find this grounding incomplete.",
+      "source_anchor": "S4_CONTROLS"
+    },
+    {
+      "flag_id": "VF-004",
+      "severity": "minor",
+      "document": "X",
+      "description": "Document X's narrative on 'two short-cover legs absent from the four-row basket' may be slightly imprecise. The basket contains one sell leg and three buy legs (four rows total). S5_FUNDING references two accounts with collateral constraints and two short-cover legs associated with the broader portfolio transition, but these are not explicitly priced in the provided basket. The narrative correctly identifies this as non-codifiable and requiring COO/PM judgment, but the phrasing could be clearer about account-level vs. leg-level constraints.",
+      "source_anchor": "S2_ORDER, S5_FUNDING"
+    }
+  ]
+}
+```

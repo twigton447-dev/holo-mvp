@@ -1,0 +1,204 @@
+{
+  "judge_id": "judge_outside_minimax_01",
+  "blindness_confirmation": "I was not told which document is Holo or Solo and was not told generating model identities.",
+  "document_x": {
+    "summary_description": "Document X is a comprehensive institutional execution strategy and controls report presenting an Adaptive Execution Governor design for Northstar Meridian's USD 760mm rebalance. It covers all eight required sections, grounds sources inline, and establishes a clear non-autonomous governance framework. The document correctly identifies key stress vectors (rates volatility, energy gap risk, tariff friction, funding/collateral constraints) and maps them to execution control states. Portfolio diagnostics are presented in tabular form with notional calculations, ADV pressure analysis, and triage logic. The benchmark hierarchy, benchmark conflict rules, venue selection guidance, and compliance audit controls are all present. The required disclaimer appears at the end. However, Document X treats the 9.4% ADV figure from S2_ORDER as a given reference point without questioning its reconciliation against actual basket composition. It references short-cover legs only obliquely and does not provide architectural controls (API airgap, staging blotter, kill-switch) for the recommend-but-never-execute posture. The quantitative layer relies on straightforward tabular analysis without introducing toxicity-scaled thresholds, cumulative participation tracking, or codified arbitration rules. Overall it is a solid, well-structured deliverable that is competent but not distinctive in hidden-failure detection or quantitative depth.",
+    "criterion_scores": [
+      {
+        "criterion_id": "source_grounding_current_context",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Consistent inline source citations throughout (S1_REGIME, S2_ORDER, S3_VENUE, S4_CONTROLS, S5_FUNDING). Regime memo used correctly for control-state framing without price forecasting. Peer metrics appropriately flagged as synthetic fragility, not market truth. Minor deduction: references 'execution policy excerpt' exhibit without distinguishing it from derived policy. No unsupported claims beyond the source pack."
+      },
+      {
+        "criterion_id": "quantitative_reasoning",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Notional shares and basket totals are correct. ADV pressure table correctly identifies industrial_importer and small_cap_healthcare as above the 9.4% reference. However, Document X never questions whether 9.4% is the correct basket-level reference, never computes a notional-weighted basket ADV, and never flags the discrepancy as a hidden failure. The toxicity-scaled trigger, composite scoring formula, and cumulative participation tracking that would demonstrate deeper quantitative reasoning are absent. The math is accurate but incomplete relative to the hidden-failure detection standard."
+      },
+      {
+        "criterion_id": "domain_technical_depth",
+        "score_1_5": 4,
+        "score_1_10": 7,
+        "notes": "Strong regime mapping with four-dimensional control state framework. Multi-metric venue comparison logic is sound. Benchmark hierarchy is well-structured. Leg-specific control postures are differentiated. T+1 cash sequencing and collateral constraints are acknowledged as decision gates. The document demonstrates good institutional knowledge but does not reach the level of Document Y in surfacing structural data inconsistencies or providing codified decision thresholds."
+      },
+      {
+        "criterion_id": "hidden_failure_detection",
+        "score_1_5": 2,
+        "score_1_10": 4,
+        "notes": "The most significant gap. Document X fails to detect the 9.4% ADV claim vs. actual computed basket ADV mismatch (8.41% notional-weighted). This is a material data inconsistency that should be a hard pre-trade reconciliation block. It also does not structurally address the two missing short-cover legs from S5_FUNDING\u2014treating borrow-locate uncertainty abstractly rather than identifying that these legs have no priced rows in the basket. The composite diagnostic table is presented without flagging the n=4 normalization degeneracy. Document X's prose sounds authoritative but misses the most consequential hidden failures in the packet."
+      },
+      {
+        "criterion_id": "compliance_governance",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "All required compliance controls are present: 8% participation threshold, price-collar override signoff, source-signal logging, human approval gates. The non-autonomous principle is stated clearly. However, the governance design lacks the architectural specificity of Document Y\u2014there is no API airgap, staging blotter, kill-switch, or four-eyes release mechanism. The 'separate from live execution' claim is presented as a policy statement rather than enforced through code-level controls. The cumulative participation tracking design is also absent."
+      },
+      {
+        "criterion_id": "strategic_decision_quality",
+        "score_1_5": 4,
+        "score_1_10": 7,
+        "notes": "Benchmark conflict rules are clearly stated and internally consistent. The five governing principles are well-reasoned and properly sourced. Leg triage is sensible. The fundamental weakness is the absence of codified escalation thresholds (e.g., the VWAP-vs-IS arbitration rule that Document Y provides). Strategic recommendations are correct but presented at a higher level of abstraction without the operational specificity that a head trader or PM would need to act confidently."
+      },
+      {
+        "criterion_id": "implementation_auditability",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Phase-based implementation roadmap is present. Pre-decision, approval, and post-decision record fields are defined. Compliance testing targets are listed. However, the architectural controls needed to make auditability enforceable (API airgap, staging blotter, kill-switch, four-eyes release) are not specified. The 9.4% reconciliation block is absent. Cumulative participation tracking is not designed. The audit trail design is comprehensive in principle but thin on the controls that prove no autonomous action occurred."
+      },
+      {
+        "criterion_id": "client_readiness",
+        "score_1_5": 4,
+        "score_1_10": 7,
+        "notes": "Clear executive thesis, well-structured sections, appropriate audience framing for head trader, PM, CRO, compliance, and COO. Disclaimer is present and correctly placed. Tables are clean and informative. Ownership assignments appear in the implementation roadmap. Word count appears within the 2800-3600 target band. The document is professional and client-ready but lacks the distinctive technical credibility that Document Y's quantitative breakthroughs and architectural specificity would provide to a sophisticated audience."
+      }
+    ],
+    "weighted_score_1_10": 6.36,
+    "top_3_strengths": [
+      "Consistent, disciplined source grounding with proper inline citations throughout; correctly treats synthetic peer metrics as fragility signals rather than market truth",
+      "Clear five-principle governance framework establishing non-autonomous execution intelligence with well-structured benchmark hierarchy and benchmark conflict rules",
+      "Solid institutional domain coverage including regime control states, multi-metric venue comparison, leg-specific control postures, and complete compliance audit design"
+    ],
+    "top_3_weaknesses_or_hidden_failures": [
+      "Fails to detect the 9.4% S2_ORDER ADV claim inconsistency against actual notional-weighted basket composition (~8.41%); this is a material pre-trade reconciliation gap that should be a hard PM block",
+      "Does not structurally address the two missing short-cover legs from S5_FUNDING; borrow-locate uncertainty is treated abstractly rather than identifying that these legs have no priced rows in the basket",
+      "Governance design lacks architectural enforcement controls (API airgap, staging blotter, kill-switch, four-eyes release); the non-autonomous posture is stated as policy but not proven through code-level separation"
+    ],
+    "unsupported_or_stale_claims": [
+      "The 9.4% ADV figure from S2_ORDER is treated as a given reference without reconciliation against basket composition or acknowledgment that it may require PM clarification",
+      "Composite diagnostic table is presented without flagging the statistical degeneracy of min-max normalization on n=4 observations",
+      "No design parameters (thresholds, formulas) are introduced, which while conservative, limits operational specificity and the ability to surface hidden failures through quantitative analysis"
+    ],
+    "math_or_dataset_logic_issues": [
+      "ADV pressure analysis uses 9.4% as a fixed reference without computing the actual notional-weighted basket ADV or questioning the discrepancy",
+      "Notional-weighted basket ADV is not computed; equal-weighted average of legs yields ~9.575%, which is close to 9.4% but not identical and the reconciliation hypothesis is not explored",
+      "Session-cumulative participation tracking design is absent, making it unclear how the 8% threshold would be enforced across multiple proposals within a session"
+    ],
+    "source_grounding_notes": "Document X demonstrates strong source discipline overall. All five source entries are cited inline at relevant points. Regime information is correctly used for control-state framing, not price forecasting. Synthetic peer metrics are appropriately labeled as fragility signals. The non-autonomous execution boundary is properly maintained. Minor issues: the 'execution policy excerpt' exhibit is cited but its content appears to overlap with derived policy rather than standing as an independent source. The 9.4% ADV figure is accepted without reconciliation, which is a source-grounding gap rather than a violation. No citations to sources outside the frozen packet are present."
+  },
+  "document_y": {
+    "summary_description": "Document Y is a technically sophisticated institutional execution strategy and controls report that distinguishes itself through quantitative rigor and hidden-failure detection. It identifies the critical 9.4% vs 8.41% notional-weighted ADV discrepancy as a hard pre-trade PM reconciliation block, provides a toxicity-scaled ADV trigger formula, introduces a bounded composite diagnostic with explicit n=4 normalization limitations, and designs architectural controls (API airgap, staging blotter, kill-switch, four-eyes release) that prove rather than merely state the non-autonomous execution posture. The document surfaces the two missing short-cover legs from S5_FUNDING, quarantines them from pricing/venue scoring, and identifies their collateral bleed effect as non-codifiable. It provides codified benchmark conflict rules including a VWAP-vs-IS arbitration formula with explicit \u221210 bps threshold and conditions. The 25% desk reroute trigger vs 35% peer cliff distinction is analytically sound. The session-cumulative 8% participation tracker addresses a real operational gap. All eight required sections are present, the disclaimer is correctly placed, and source grounding is disciplined throughout. The primary weakness is that several design parameters (toxicity scaling coefficients, 25% trigger, \u221210 bps threshold) are introduced without explicit source derivation, though they are appropriately labeled as analyst parameters.",
+    "criterion_scores": [
+      {
+        "criterion_id": "source_grounding_current_context",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Disciplined inline source citations throughout. Correctly withholds semiconductor exposure linkage for mega_cap_ai pending PM confirmation. Appropriately quarantines missing short-cover legs from pricing/venue scoring. Treats synthetic peer metrics as fragility signals, not market truth. Regime information used for urgency conditioning, not price forecasting. Design parameters are labeled as analyst parameters rather than source-derived. Minor: the toxicity-scaled trigger formula (coefficients 0.4, 6%) is not explicitly sourced even though it is labeled as analyst design."
+      },
+      {
+        "criterion_id": "quantitative_reasoning",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Notional-weighted ADV calculation (8.41%) is mathematically correct and reveals the 9.4% discrepancy. Toxicity-scaled ADV trigger formula is novel and demonstrates quantitative sophistication even though the coefficients are analyst parameters. Composite diagnostic with explicit min-max normalization degeneracy acknowledgment is methodologically honest. Codified VWAP-vs-IS arbitration rule with explicit conditions is a significant advance. Session-cumulative participation tracker addresses a real operational gap. Strong quantitative reasoning overall."
+      },
+      {
+        "criterion_id": "domain_technical_depth",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Four stress vectors correctly mapped to execution implications. Short-cover leg quarantine and collateral bleed identification demonstrates deep structural reading of S5_FUNDING. Multi-metric venue scoring with explicit qualitative constraints (Venue C fill probability handled correctly without invented numbers). Benchmark hierarchy is the most complete of the two documents. 25%/35% threshold distinction is analytically precise. Leg-specific urgency analysis integrates portfolio gap, microstructure metrics, and regime overlays correctly."
+      },
+      {
+        "criterion_id": "hidden_failure_detection",
+        "score_1_5": 5,
+        "score_1_10": 9,
+        "notes": "Document Y's strongest criterion. It surfaces two critical hidden failures that Document X misses entirely: (1) the 9.4% vs 8.41% ADV discrepancy treated as a hard PM reconciliation block, and (2) the two missing short-cover legs from S5_FUNDING that cannot be priced but impose collateral and sequencing constraints. The n=4 normalization degeneracy is explicitly flagged. The session-cumulative participation tracking addresses a systemic automation gap. The four-architectural-control design (API airgap, staging blotter, kill-switch, four-eyes release) is itself a hidden-failure detection mechanism. This level of hidden-failure detection is rare and distinctive."
+      },
+      {
+        "criterion_id": "compliance_governance",
+        "score_1_5": 5,
+        "score_1_10": 9,
+        "notes": "The most complete compliance design. API airgap, staging blotter, pre-trade kill-switch, and four-eyes release are architectural controls that prove the non-autonomous posture rather than merely stating it. Session-cumulative 8% participation tracker is operationally specific. Source-signal logging requirement is embedded in the staging blotter design. Codified escalation rule for benchmark conflicts. Reason code and supervisor signoff requirements are enforced through workflow blocks. Ownership assignments (Head Trader, PM, CRO, COO, Compliance) are explicit. This exceeds the compliance design in Document X by a significant margin."
+      },
+      {
+        "criterion_id": "strategic_decision_quality",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Codified VWAP-vs-IS arbitration rule with explicit \u221210 bps threshold and portfolio gap/composite conditions provides actionable decision logic. Benchmark hierarchy is clear and complete. Short-cover leg treatment correctly identifies non-codifiable decisions requiring COO/PM/Head Trader judgment. The central safety claim ('recommend but never execute') is substantiated through architectural controls rather than assertion. The 25% desk reroute trigger provides operational specificity. Strategic decisions are grounded in both source facts and quantitative analysis."
+      },
+      {
+        "criterion_id": "implementation_auditability",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Phase-based implementation roadmap with specific deliverables. Minimum audit trail fields are comprehensive and include all necessary provenance data. Four-architectural-control design makes replayability enforceable rather than aspirational. Kill-switch and hard-block flag design enables proof of no autonomous action. PM reconciliation block is hard-coded as a precondition. Compliance testing targets are defined. The 9.4% reconciliation is embedded as a Phase 1 precondition, making it auditable."
+      },
+      {
+        "criterion_id": "client_readiness",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Clear executive thesis with three quantitative anchors. Tables are clean and informative. Explicit ownership assignments add credibility for COO and CRO audiences. Limitations section is the most complete, explicitly noting the three unresolved inputs (9.4% discrepancy, n=4 normalization degeneracy, missing short-cover legs). Disclaimer is present and correctly placed. The document reads as a decision-grade deliverable for a sophisticated institutional audience. Word count appears within bounds. Minor: the level of quantitative detail (formulas, thresholds) may require additional PM/Head Trader calibration session before deployment, which is acknowledged but slightly reduces near-term client-readiness."
+      }
+    ],
+    "weighted_score_1_10": 8.26,
+    "top_3_strengths": [
+      "Identifies two critical hidden failures that Document X misses entirely: the 9.4% vs 8.41% notional-weighted ADV discrepancy (hard PM reconciliation block) and the structurally missing two short-cover legs from S5_FUNDING that cannot be priced but impose non-codifiable collateral and sequencing constraints",
+      "Provides the most complete compliance and governance design through four architectural controls (API airgap, staging blotter, kill-switch, four-eyes release) that prove the non-autonomous execution posture rather than merely asserting it, plus session-cumulative participation tracking and codified VWAP-vs-IS arbitration rules",
+      "Quantitative reasoning is distinctive: notional-weighted ADV calculation, toxicity-scaled trigger formula, bounded composite diagnostic with explicit normalization limitations, and explicit labeling of analyst design parameters prevents conflation of derived thresholds with source facts"
+    ],
+    "top_3_weaknesses_or_hidden_failures": [
+      "Several design parameters (toxicity-scaled trigger coefficients of 0.4 and 6% base threshold, 25% desk reroute trigger, \u221210 bps VWAP-vs-IS arbitration threshold) are introduced as analyst parameters without explicit source derivation, which while labeled appropriately, may require additional firm-level validation before deployment",
+      "The equal-weighted ADV hypothesis (~9.575%) is proposed as a reconciliation hypothesis for the 9.4% discrepancy but is not confirmed; the document correctly treats this as unresolved pending PM input, but this leaves a material ambiguity open at the strategy design stage",
+      "The toxicity-scaled trigger formula lowers effective ADV thresholds as toxicity rises (e.g., 3.60% for mega_cap_ai), which is analytically reasonable but creates a complex, non-obvious relationship between microstructure stress and review thresholds that desk users may not immediately grasp without training"
+    ],
+    "unsupported_or_stale_claims": [
+      "The toxicity-scaled ADV trigger formula and its coefficients (0.4 scaling factor, 6% base threshold) are analyst design parameters without explicit source derivation from the frozen packet; they are reasonable and labeled correctly but should not be treated as sourced requirements",
+      "The 25% desk reroute review trigger (vs 35% peer cliff) and the \u221210 bps VWAP-vs-IS arbitration threshold are analyst design parameters; while operationally sensible, they are not sourced and require firm-level calibration",
+      "The equal-weighted ADV hypothesis (~9.575%) is speculative and not confirmed by the source pack; it is presented as a reconciliation hypothesis, which is methodologically appropriate, but the discrepancy remains unresolved pending PM input"
+    ],
+    "math_or_dataset_logic_issues": [
+      "The toxicity-scaled trigger formula uses analyst-derived coefficients (toxicity_norm = (toxicity - 51) / (81 - 51); effective trigger = 6% \u00d7 (1 - 0.4 \u00d7 toxicity_norm)) that are reasonable but not sourced; the 6% base threshold and 0.4 scaling factor require firm-level validation",
+      "Min-max normalization on n=4 is explicitly acknowledged as statistically degenerate, which is methodologically honest, but the composite diagnostic is valid only for within-basket relative ordering and must never be compared across baskets or treated as an absolute risk measure",
+      "The equal-weighted ADV calculation yielding ~9.575% is presented as a reconciliation hypothesis for the 9.4% discrepancy; this is reasonable but unconfirmed, and the actual basket-level ADV remains uncertain pending PM resolution"
+    ],
+    "source_grounding_notes": "Document Y demonstrates the strongest source discipline of the two documents. It correctly uses regime information for urgency conditioning only, treats synthetic peer metrics as fragility signals, appropriately withholds semiconductor exposure linkage pending PM confirmation, and quarantines unpriced short-cover legs from scoring. The 9.4% ADV discrepancy is surfaced as a source-grounded finding rather than accepted as fact. Design parameters are consistently labeled as analyst parameters, preventing conflation with source requirements. All source entries are cited inline. The document exceeds the source-grounding standard by identifying structural data issues (missing legs, ADV discrepancy) that other documents treat as given."
+  },
+  "comparative_verdict": {
+    "stronger_document": "Y",
+    "margin_of_difference": "Substantial. Document Y scores meaningfully higher in hidden-failure detection (9 vs 4), quantitative reasoning (8 vs 6), compliance governance (9 vs 6), and implementation realism (8 vs 6). Both documents are strong on source grounding (8 each), domain technical depth (8 vs 7), and client-readiness (8 vs 7). The margin is driven by Document Y's identification of two critical hidden failures that Document X misses entirely: the 9.4% vs 8.41% ADV discrepancy and the structurally missing short-cover legs. Document Y's architectural compliance controls (API airgap, staging blotter, kill-switch, four-eyes release) and quantitative innovations (toxicity-scaled trigger, codified arbitration rule, session-cumulative tracker) provide substantially higher operational credibility.",
+    "why_the_stronger_document_won": "Document Y wins because it demonstrates a higher standard of hidden-failure detection\u2014the most heavily weighted criterion after source grounding, quantitative reasoning, and domain technical depth (all at 14 points). It surfaces two structural data issues that Document X treats as given: the 9.4% ADV claim inconsistency and the missing short-cover leg structure from S5_FUNDING. These are not minor oversights; they are the kind of failures that create pre-trade execution risk, audit failures, and compliance breaches. Document Y's architectural compliance controls (API airgap, staging blotter, kill-switch, four-eyes release) go beyond policy statements to provide enforceable proof that the recommend-but-never-execute posture is architecturally guaranteed. Its quantitative innovations\u2014toxicity-scaled trigger, bounded composite diagnostic, codified VWAP-vs-IS arbitration rule, session-cumulative participation tracker\u2014transform a policy document into an operational design. Document X is a solid, well-grounded institutional deliverable; Document Y is a decision-grade artifact that anticipates audit and operational failure modes.",
+    "where_the_weaker_document_was_closest": "Document X is closest to Document Y in source grounding (both score 8) and domain technical depth (X=7, Y=8). Document X's governance framework is conceptually sound and its benchmark hierarchy and conflict rules are well-reasoned. Its leg-specific control postures and regime mapping are competent. The gap is not in fundamentals\u2014both documents are professionally produced\u2014but in the level of hidden-failure detection, quantitative depth, and architectural specificity that distinguishes a competent deliverable from a decision-grade one. Document X would benefit most from adopting Document Y's ADV reconciliation discipline and architectural control design.",
+    "judge_confidence_1_5": 4
+  },
+  "validation_flags": [
+    {
+      "flag": "document_x_adv_discrepancy_not_flagged",
+      "severity": "major",
+      "description": "Document X treats the 9.4% S2_ORDER ADV claim as a given reference without computing the notional-weighted basket ADV (8.41%) or flagging the discrepancy as a hidden failure requiring PM reconciliation. This is a material pre-trade risk."
+    },
+    {
+      "flag": "document_x_missing_short_cover_leg_structure",
+      "severity": "major",
+      "description": "Document X references borrow-locate uncertainty for two short-cover legs from S5_FUNDING but does not identify that these legs have no priced rows in the basket. Document Y correctly quarantines them from pricing/venue scoring and identifies their collateral bleed as non-codifiable. This is a structural hidden failure that affects T+1 sequencing and collateral readiness."
+    },
+    {
+      "flag": "document_y_design_parameters_not_source_derived",
+      "severity": "minor",
+      "description": "Document Y introduces several analyst design parameters (toxicity-scaled trigger coefficients, 25% desk reroute trigger, -10 bps VWAP-vs-IS threshold) that are reasonable and properly labeled but lack explicit source derivation. These require firm-level validation before deployment."
+    },
+    {
+      "flag": "both_documents_within_word_band",
+      "severity": "info",
+      "description": "Both documents appear to be within the 2800-3600 target word band with the disclaimer correctly placed."
+    },
+    {
+      "flag": "both_documents_source_discipline",
+      "severity": "info",
+      "description": "Both documents correctly treat synthetic peer metrics as fragility signals, do not browse, do not recommend live trades, and ground claims in source pack citations. No out-of-bounds sourcing detected."
+    },
+    {
+      "flag": "document_y_required_disclaimer_present",
+      "severity": "info",
+      "description": "Required disclaimer is present and correctly placed in both documents."
+    }
+  ],
+  "_harness": {
+    "judge_provider": "minimax",
+    "judge_model": "MiniMax-M2.5-highspeed",
+    "judge_packet_id": "holo_factory_live_20260619T180210Z_capital_markets_trade_shock_execution_frontier_solo_openai_final_turn_6_pairwise",
+    "generation_dna_providers": "anthropic,google,openai",
+    "generation_dna_models": "anthropic:claude-opus-4-8,google:gemini-3.1-pro-preview,openai:gpt-5.5",
+    "judge_dna_overlap": "",
+    "proof_credit_eligible": true,
+    "score_credit_label": "proof_credit_candidate",
+    "score_use": "proof_credit_if_blind_and_boundary_clean"
+  }
+}

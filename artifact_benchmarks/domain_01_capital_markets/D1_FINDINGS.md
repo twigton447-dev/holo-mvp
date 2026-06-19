@@ -1,27 +1,27 @@
 # D1 Findings - Capital Markets
 
-Generated: `2026-06-19T20:21:27Z`
+Generated: `2026-06-19T21:41:42Z`
 
 Domain: `capital_markets_trade_shock_execution`
 
 ## Decision
 
-Rejudge current-lock D1 with outside-DNA blind solo judges before running D2 or making a headline lift claim.
+D1 current-lock frontier scoring is now outside-DNA scored locally; keep D1 out of public benchmark-credit promotion until score provenance is committed and mini/order/domain replication is run.
 
 ## Bottom Line
 
-D1 is useful now, but it is not a finished public benchmark claim yet. The strongest current-lock fact is operational: HoloFactory completed the frontier D1 generation run and produced the trace/packet structure we need. The weakest current-lock fact is proof-credit scoring: `0` outside-DNA final judge scores exist, while `2` parsed final judge scores are diagnostic only.
+D1 is useful now, and its current-lock frontier lane has outside-DNA final scoring on disk. It is still not a finished public benchmark claim: D1 is one domain and the broader architecture proof still needs matched mini results, order permutations, and D2-D5 replication. Current D1 has `6` outside-DNA proof-credit candidate rows and `2` same-DNA diagnostic rows.
 
 ## Current-Lock Quality
 
 - Conditions: `4`
 - Valid finals: `2`
 - Invalid finals: `2`
-- Raw observed mean gap: `-0.03`
-- Raw observed mean lift: `-0.146%`
-- Validity-adjusted observed mean gap: `0.68`
-- Validity-adjusted observed mean lift: `8.5%`
-- Proof-credit final judge scores observed: `0 / 6`
+- Raw observed mean gap: `1.095`
+- Raw observed mean lift: `18.306%`
+- Validity-adjusted observed mean gap: `1.37`
+- Validity-adjusted observed mean lift: `21.489%`
+- Proof-credit final judge scores observed: `6 / 6`
 - Claimable now: `false`
 
 ## Invalid Finals
@@ -42,17 +42,17 @@ D1 is useful now, but it is not a finished public benchmark claim yet. The stron
 ## Findings
 
 - D1 generation is operationally real: the current HoloFactory frontier run completed all four generation conditions and produced judge packets.
-- D1 current-lock quality scoring is not proof-credit complete: the only parsed final judge scores are same-DNA rows and must remain diagnostic.
-- The legacy four-judge frontier panel still has twelve diagnostic score slots, but proof credit now requires a separate outside-DNA rejudge panel.
-- Raw current-lock scores presently show a near tie on the Anthropic pair, but the Anthropic solo final is deterministically invalid for missing the required risk/compliance/audit section.
-- Under the proposed deterministic validity cap, the existing Anthropic-pair sample flips from a raw near tie to a Holo advantage; this remains non-claimable until outside-DNA rejudging is complete.
+- D1 current-lock final scoring now has six outside-DNA blind solo judge rows across the three final pairwise packets.
+- Same-DNA frontier judge rows remain diagnostic-only and are separated from the proof-credit outside-DNA rows.
+- Raw current-lock proof-credit scores show Holo lift across five of six outside-DNA judge rows, with one negative Anthropic-pair xAI row.
+- Validity-adjusted scoring preserves raw judge scores and applies deterministic caps only when revalidation flagged invalid finals.
 - Historical D1 evidence supports directional Holo lift, but it must be labeled diagnostic because it does not match the current run lock.
-- For public or client-facing claims, report raw quality, validity-adjusted quality, and provider reliability as separate scores.
+- For public or client-facing claims, D1 alone is still insufficient: the architecture claim needs the mini lane, order permutations, and D2-D5 replication.
 
 ## Next Actions
 
-1. Rejudge current-lock D1 final packets with outside-DNA blind solo judges.
-2. Regenerate this D1 evidence board after outside-DNA judging.
+1. Commit the D1 proof-credit scoring board and boundary-accounting patch.
+2. Preserve the raw outside-DNA judge artifacts and parse-failure provenance for audit.
 3. Keep same-DNA frontier judge rows diagnostic-only even if additional legacy-panel scores are added.
-4. Only then decide whether D1 is ready to promote from operational evidence to benchmark-credit evidence.
-5. Keep D2-D5 packet generation paused until D1 final scoring is closed or explicitly accepted as partial.
+4. Run the matched mini Holo versus mini solo lane for D1.
+5. Then run order permutations and D2-D5 replication before making the architecture-level lift claim.

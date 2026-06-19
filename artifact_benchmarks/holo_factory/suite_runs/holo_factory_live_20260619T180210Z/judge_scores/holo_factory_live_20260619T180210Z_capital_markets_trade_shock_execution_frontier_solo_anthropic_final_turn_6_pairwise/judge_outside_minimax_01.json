@@ -1,0 +1,196 @@
+{
+  "judge_id": "judge_outside_minimax_01",
+  "blindness_confirmation": "I was not told which document is Holo or Solo and was not told generating model identities.",
+  "document_x": {
+    "summary_description": "Document X presents an 8-section institutional execution strategy for Northstar Meridian's USD 760mm synthetic rebalance. It introduces a decision-support 'governor' architecture, defines four gating controls (G0/G1/G3/GR), computes a within-basket urgency score U, designs a two-venue composite scorecard, and provides a ten-field audit schema. The document is structurally clean, prose is direct, and it correctly avoids treating synthetic peer metrics as market truth. However, it does not flag or reconcile the material discrepancy between S2_ORDER's stated 9.4% ADV and the per-leg ADV figures in the basket CSV, treats the 8% participation gate as a solved problem when the source is genuinely ambiguous, and provides less architectural specificity for the compliance kill-path than Document Y.",
+    "criterion_scores": [
+      {
+        "criterion_id": "source_grounding_current_context",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Good source citation discipline throughout. Correctly declines to infer mega_cap_ai as a semiconductor from S1_REGIME tariff language, explicitly naming it an analyst inference. Acknowledges regime memo does not forecast prices. However, does not flag the 9.4% vs per-leg ADV discrepancy in S2_ORDER \u2014 a latent math inconsistency left undetected."
+      },
+      {
+        "criterion_id": "quantitative_reasoning",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Urgency score U is correctly defined with a named formula, stated column maxima, and worked per-leg calculations. Venue composite V is correct and falsifiable. ADV pressure section correctly distinguishes coded breach (8% participation) from analyst flags. Weaker than Document Y on three fronts: does not compute basket-level ADV to reconcile with S2_ORDER's 9.4%; does not scale toxicity-adverse-selection relationship; and treats the 8% gate definition as resolved by adopting percentage-points rather than diagnosing the ambiguity as unresolved pending policy clarification."
+      },
+      {
+        "criterion_id": "domain_technical_depth",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Demonstrates solid execution domain knowledge: VWAP/IS conflict is correctly arbitrated in favor of IS; toxicity is identified as side-dependent; cash sequencing/T+1 constraints are folded into per-leg posture; peer fade is treated as crowding signal not validation. Missing the explicit architectural separation design (API airgap, staging blotter, kill-switch, four-eyes release) that Document Y provides for the same governance claim."
+      },
+      {
+        "criterion_id": "hidden_failure_detection",
+        "score_1_5": 2,
+        "score_1_10": 5,
+        "notes": "Correctly catches the short-cover leg unmapping failure and states the refusal to invent the mapping. Catches the side-neutrality toxicity simplification. Correctly identifies that low fees alone can game venue routing. But misses the 9.4% vs 8.41% notional-weighted ADV discrepancy entirely \u2014 a material, calculable hidden inconsistency in S2_ORDER that the trader and PM must resolve before any schedule is authorized. G0 deadlock guard is present but less formally specified than Document Y's kill-switch architecture."
+      },
+      {
+        "criterion_id": "compliance_governance",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Four gates are correctly named and sourced: G0 (funding/locate), G1 (participation change >8%), G3 (collar override with reason code + supervisor signoff), GR (reroute logging). Correctly distinguishes G1 human approval from G3 supervisor signoff. Decision-support/execution separation is stated. However, the governor architecture lacks the explicit enforcement layer (API airgap, staging blotter, kill-switch, four-eyes release) that would make 'recommend but never execute' architecturally proven rather than merely stated."
+      },
+      {
+        "criterion_id": "strategic_decision_quality",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "IS over VWAP when gaps are large is the correct strategic call. mega_cap_ai default to patient/IS-primary with cash-lead acceleration as the logged exception is a sound default-posture design. Per-leg postures are differentiated. Funding-state override of pure execution benchmarks is correctly acknowledged. Short-cover leg reconciliation with G0 is defensively sound. Slightly less granular than Document Y on escalation thresholds (no numeric IS slippage rule or toxicity-scaled ADV trigger)."
+      },
+      {
+        "criterion_id": "implementation_auditability",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Ten-field audit schema is well-structured with fields for parameter set ID, baseline participation rate, and 8%-change definition. Phase-by-phase roadmap is clear. Kill-switch is implied in G0 escalation language but not explicitly designed. Session-cumulative participation tracking is mentioned but not specified. Document Y's four-control kill-switch design and session-cumulative 8% tracker are more operationally specific."
+      },
+      {
+        "criterion_id": "client_readiness",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Clean structural layout with numbered sections maps directly to brief requirements. Required disclaimer is present and prominent. Executive thesis is direct and action-oriented. Limitations are enumerated and honest. Word count appears within band. Slightly cleaner prose than Document Y but at the cost of lower architectural depth. The unreconciled ADV figure (9.4%) could create confusion at the PM/head trader level if not flagged."
+      }
+    ],
+    "weighted_score_1_10": 5.86,
+    "top_3_strengths": [
+      "Clean, well-structured presentation with all 8 required sections present and correctly mapped to source IDs",
+      "Urgency score U with worked per-leg calculations and honest limitation framing (lambda is illustrative, basket-relative only)",
+      "Defensive refusal to map short-cover legs onto basket rows \u2014 correctly avoids inventing facts the packet does not provide"
+    ],
+    "top_3_weaknesses_or_hidden_failures": [
+      "Does not flag or reconcile the material discrepancy between S2_ORDER's stated 9.4% ADV and the per-leg ADV figures, leaving a calculable inconsistency undetected at client-deliverable level",
+      "Treats the 8% participation-rate change gate as resolved by adopting percentage-points when the source genuinely does not state this \u2014 should be flagged as a hard policy gap requiring external clarification before the gate is operable",
+      "Governor architecture states decision-support/execution separation but does not architecturally enforce it (no explicit API airgap, staging blotter, kill-switch, or four-eyes release design)"
+    ],
+    "unsupported_or_stale_claims": [
+      "No explicit claim is directly fabricated, but the 9.4% ADV figure from S2_ORDER is used without noting the discrepancy against per-leg ADV figures \u2014 this is a latent unsupported internal assumption rather than an explicit false claim",
+      "The U score's lambda=0.5 and equal friction weights are stated as illustrative but the composite urgency ranking (mega_cap_ai first, small_cap_healthcare last) could be misread as a calibrated conclusion"
+    ],
+    "math_or_dataset_logic_issues": [
+      "Basket-level ADV is stated as 9.4% from S2_ORDER but never cross-checked against per-leg ADV values (7.2%, 11.4%, 5.9%, 13.8%) \u2014 a notional-weighted average would be ~8.4%, a 99bps gap that is material for pacing and approval thresholds",
+      "U score lambda and friction weights are illustrative (not calibrated) but the document does not provide a framework for how they would be calibrated or owned",
+      "The 8% participation gate definition (points vs. relative) is unresolved in source \u2014 the document adopts percentage-points as a working convention but does not escalate this as a hard pre-trade policy block"
+    ],
+    "source_grounding_notes": "Source ID citations are consistently applied across all 5 synthetic sources (S1\u2013S5). Prohibited inferences are correctly respected: no autonomous trading authorized, no regulatory/legal conclusion, no synthetic peer metrics treated as market truth, no price forecasting from the regime memo. The only material sourcing gap is the ADV discrepancy \u2014 S2_ORDER states 9.4% but the per-leg ADV values in the basket CSV do not sum or average to this figure without clarification of weighting basis, and Document X does not flag this inconsistency."
+  },
+  "document_y": {
+    "summary_description": "Document Y is a comprehensive institutional execution strategy report for Northstar Meridian's USD 760mm synthetic rebalance. It introduces an execution governor with explicit architectural controls (API airgap, staging blotter, pre-trade kill-switch, four-eyes release), computes notional-weighted basket ADV at 8.41% and elevates the 9.4% vs 8.41% discrepancy as a hard pre-trade PM reconciliation block, designs a toxicity-scaled ADV trigger and a bounded composite diagnostic, specifies a VWAP-vs-IS escalation rule with a numeric IS slippage threshold, and provides a detailed audit trail schema. The document is more architecturally dense than Document X and contains stronger hidden-failure detection, but has marginally less clean source discipline and its composite urgency ranking (small_cap_healthcare first) conflicts with the portfolio's explicit economic objective of closing mega_cap_ai's weight gap.",
+    "criterion_scores": [
+      {
+        "criterion_id": "source_grounding_current_context",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Correctly withholds mega_cap_ai semiconductor mapping as unverified pending PM confirmation. Correctly states regime memo does not forecast prices. Correctly treats peer metrics as crowding signal not validation. Correctly notes funding note does not model all capital charges. Minor sourcing imprecision: the 9.4% vs 8.41% reconciliation correctly identifies the discrepancy but states 'equal-weighted ADV is (7.2+11.4+5.9+13.8)/4 = 9.575%, close to 9.4%, but that is only a reconciliation hypothesis' \u2014 the equal-weight hypothesis is not a supported source inference but a generated guess, which should be explicitly labeled as such."
+      },
+      {
+        "criterion_id": "quantitative_reasoning",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Strongest quantitative section of the two documents. Notional-weighted ADV computation (8.41%) is correct and mathematically rigorous. Toxicity-scaled ADV trigger (6% base scaled by toxicity norm) is well-reasoned. Composite diagnostic formula is correct with named analyst parameters. VWAP-vs-IS arbitration rule with -10 bps threshold is explicitly labeled as an analyst design parameter. The 0.4\u00d7 toxicity-scaling coefficient in the effective trigger formula is an analyst parameter (not sourced) \u2014 correctly labeled as such. Overall quantitative reasoning is the strongest criterion for this document."
+      },
+      {
+        "criterion_id": "domain_technical_depth",
+        "score_1_5": 4,
+        "score_1_10": 7,
+        "notes": "Superior architectural specificity: API airgap, staging blotter, pre-trade kill-switch, and four-eyes release make the 'recommend but never execute' claim architecturally proven rather than merely stated. Session-cumulative 8% participation tracker is operationally more specific than Document X's gate language. Phase-by-phase implementation roadmap is detailed. The only depth caveat is that the composite urgency ranking (small_cap_healthcare rank 1, energy_integrated rank 4) conflates mechanical liquidity-cost score with portfolio economic urgency \u2014 the portfolio's objective per S2_ORDER is to reduce mega_cap_ai overweight, not to prioritize the worst liquidity-cost leg."
+      },
+      {
+        "criterion_id": "hidden_failure_detection",
+        "score_1_5": 4,
+        "score_1_10": 8,
+        "notes": "Catches and escalates the 9.4% vs 8.41% ADV discrepancy as a hard pre-trade PM block \u2014 the most significant hidden failure in the packet. Catches the short-cover leg unmapping issue and correctly quarantines them from scoring. Correctly identifies min-max normalization on n=4 as statistically degenerate. Session-cumulative 8% tracker prevents gaming via incremental proposals below the threshold. However, the toxicity-scaled ADV trigger formula (toxicity_norm \u00d7 0.4) introduces a new illustrative parameter (0.4) that is not validated and could itself be a hidden-failure if treated as calibrated."
+      },
+      {
+        "criterion_id": "compliance_governance",
+        "score_1_5": 4,
+        "score_1_10": 7,
+        "notes": "Four-control isolation design (API airgap, staging blotter, kill-switch, four-eyes release) is the most operationally specific compliance design in either document. Kill-switch triggers are named (9.4% block, cumulative participation breach, collar breach, collateral deterioration). Session-cumulative 8% tracker is more robust than a per-change measurement. Reason codes and supervisor signoff are correctly scoped to collar overrides only. Ownership table is clear and role-specific. Minor gap: the equal-weight ADV hypothesis (9.575%) is treated as a 'reconciliation hypothesis' without flagging it as an unverified analyst guess, which could be misread as a sourced explanation."
+      },
+      {
+        "criterion_id": "strategic_decision_quality",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "Correct strategic call on IS over VWAP with a codified escalation rule. G0 funding/locate gate with bounded escalation is sound. 25% desk reroute trigger is well-reasoned as a leading indicator before the 35% peer cliff. However, the composite urgency ranking places small_cap_healthcare first (composite 0.675) and mega_cap_ai second (0.599), which inverts the portfolio's economic priority: mega_cap_ai has the largest weight gap (-85 bps), largest notional ($420M), and is the cash source for the buys. The document notes that 'mega_cap_ai is the highest portfolio-risk leg even though its spread is the tightest' \u2014 but the composite score still ranks it below small_cap_healthcare, creating an internal contradiction between stated portfolio intent and mechanical ranking."
+      },
+      {
+        "criterion_id": "implementation_auditability",
+        "score_1_5": 4,
+        "score_1_10": 7,
+        "notes": "Four-control kill-switch architecture provides the most auditable governance design of the two documents. Session-cumulative participation tracker is explicitly specified. Phase-by-phase roadmap is detailed with pre-trade control build prioritized before scoring deployment. Post-trade review focuses on decision quality and control adherence, not benchmark outcome. 15-field audit trail schema covers all required elements plus additional operational fields. Very close to Document X on this criterion but slightly more operationally specific."
+      },
+      {
+        "criterion_id": "client_readiness",
+        "score_1_5": 3,
+        "score_1_10": 6,
+        "notes": "All 8 required sections present. Disclaimer is prominent and complete. Required disclaimer is present and correct. Architecture is impressive but more dense than Document X \u2014 a head trader or COO may need to work harder to extract the operational action items from the text. The 9.4% reconciliation block is a strength (it shows analytical rigor) but also creates a hard pre-condition that a PM must resolve before any schedule is authorized, which may delay execution planning if the PM is unavailable. Required disclaimer is present and correctly stated."
+      }
+    ],
+    "weighted_score_1_10": 6.92,
+    "top_3_strengths": [
+      "Catches and elevates the 9.4% vs 8.41% notional-weighted ADV discrepancy as a hard pre-trade PM reconciliation block \u2014 the most significant hidden mathematical failure in the packet",
+      "Architectural enforcement of the 'recommend but never execute' claim via API airgap, staging blotter, pre-trade kill-switch, and four-eyes release makes governance claim verifiable rather than merely stated",
+      "Toxicity-scaled ADV trigger, session-cumulative 8% participation tracker, and 15-field audit schema provide the most operationally specific compliance and audit design"
+    ],
+    "top_3_weaknesses_or_hidden_failures": [
+      "Composite urgency ranking (small_cap_healthcare rank 1, mega_cap_ai rank 2) inverts the portfolio's explicit economic objective per S2_ORDER \u2014 the largest weight gap (-85 bps), largest notional ($420M), and cash source leg is ranked below the worst liquidity-cost leg, creating an internal strategic contradiction",
+      "The toxicity-scaled ADV trigger introduces a 0.4\u00d7 coefficient that is itself an unvalidated analyst design parameter \u2014 a new hidden assumption layered on top of the source ambiguity it purports to resolve",
+      "The equal-weight ADV hypothesis (9.575%) is labeled as a 'reconciliation hypothesis' without explicitly flagging it as an unverified analyst-generated guess rather than a sourced explanation"
+    ],
+    "unsupported_or_stale_claims": [
+      "The equal-weight ADV computation (9.575%) is presented as a 'reconciliation hypothesis' but is not labeled as an analyst-generated guess distinct from the sourced figures \u2014 it could be misread as a sourced or derived conclusion",
+      "The composite urgency ranking ranks mega_cap_ai below small_cap_healthcare despite the portfolio order file explicitly stating mega-cap technology is the overweight to be reduced \u2014 this is an internally inconsistent strategic claim"
+    ],
+    "math_or_dataset_logic_issues": [
+      "Composite urgency formula (gap 0.30, ADV 0.20, spread 0.15, fade 0.20, toxicity 0.15) weights portfolio gap at 30% but gives small_cap_healthcare a higher composite score than mega_cap_ai because small_cap_healthcare's extreme spread (14.7 bps), fade (55%), and toxicity (76) dominate the mechanical sum \u2014 the portfolio's stated objective (reduce mega-cap overweight) is not reflected in the ranking output",
+      "Toxicity-scaled ADV trigger uses a 0.4\u00d7 multiplier (effective_adv_trigger = 6% \u00d7 (1 \u2212 0.4 \u00d7 toxicity_norm)) that is an illustrative design parameter with no empirical or source basis \u2014 its output (3.60% for mega_cap_ai, 4.72% for industrial_importer) is only as valid as the assumption",
+      "Min-max normalization on n=4 is correctly identified as statistically degenerate but the resulting composite scores (0.675, 0.599, 0.483, 0.072) are still used to drive relative ordering with a stated escalation threshold of 0.55 \u2014 this threshold is sensitive to the degenerate normalization"
+    ],
+    "source_grounding_notes": "Source ID citations are consistently applied. Prohibited inferences are well-respected: no autonomous trading, no regulatory/legal conclusion, no synthetic peer metrics as market truth, no price forecasting from regime memo, no all-capital-charges model from funding note. Primary sourcing gap: the 9.4% vs 8.41% discrepancy is correctly identified as a reconciliation block, but the equal-weight ADV hypothesis (9.575%) is not explicitly labeled as an analyst-generated guess rather than a sourced explanation \u2014 it sits in an ambiguous zone between documented inference and unsupported claim."
+  },
+  "comparative_verdict": {
+    "stronger_document": "Y",
+    "margin_of_difference": "Modest but meaningful. Document Y scores higher on weighted average (6.41 vs 6.18), driven primarily by superior hidden-failure detection (Y=8 vs X=5) and stronger quantitative reasoning (Y=8 vs X=6). The single most decisive factor is Document Y's detection of the 9.4% vs 8.41% notional-weighted ADV discrepancy as a hard pre-trade PM reconciliation block \u2014 this is a material, calculable inconsistency that a head trader and PM must resolve before any schedule authorization. Document X misses this entirely. Document Y also provides architecturally superior enforcement of the 'recommend but never execute' claim. Document X is stronger on source discipline (correct tariff inference boundary for mega_cap_ai more cleanly articulated) and produces a cleaner urgency ranking consistent with portfolio intent (mega_cap_ai first), but these advantages do not outweigh the missed ADV reconciliation failure and less rigorous compliance architecture.",
+    "why_the_stronger_document_won": "Document Y wins on the three highest-weighted criteria: hidden-failure detection (weight 14, Y=8 vs X=5), quantitative reasoning (weight 14, Y=8 vs X=6), and domain technical depth (weight 14, Y=7 vs X=6). The ADV reconciliation catch alone is a critical client-deliverable failure that Document X leaves unaddressed, and the four-control kill-switch architecture (API airgap, staging blotter, kill-switch, four-eyes release) makes Document Y's governance claim architecturally verifiable while Document X's remains merely stated. Document X's cleaner mega_cap_ai urgency ranking and slightly tighter source discipline are real but insufficient advantages relative to these gaps.",
+    "where_the_weaker_document_was_closest": "Document X was closest to Document Y in compliance governance and client readiness. Its gate design (G0/G1/G3/GR) is structurally sound and correctly sourced, and its ten-field audit schema is adequate for the brief. Document X's prose is cleaner and its urgency ranking (mega_cap_ai first) is more consistent with the portfolio's stated economic objective than Document Y's composite-driven ranking. These near-parity areas are where Document X's execution strategy is strongest, but they do not close the gap opened by the missed ADV reconciliation and less rigorous compliance architecture.",
+    "judge_confidence_1_5": 3
+  },
+  "validation_flags": [
+    {
+      "flag_type": "hidden_failure",
+      "severity": "major",
+      "document": "X",
+      "description": "Document X does not flag or reconcile the material discrepancy between S2_ORDER's stated 9.4% ADV across the basket and the per-leg ADV figures (7.2%, 11.4%, 5.9%, 13.8%). A notional-weighted basket ADV computes to approximately 8.41%, a 99bps gap material for pacing and participation thresholds. Document Y correctly identifies this as a hard pre-trade PM reconciliation block. Document X leaves this calculable inconsistency undetected."
+    },
+    {
+      "flag_type": "internal_inconsistency",
+      "severity": "moderate",
+      "document": "Y",
+      "description": "Document Y's composite urgency ranking places small_cap_healthcare first (composite 0.675) and mega_cap_ai second (0.599), inverting the portfolio's explicit economic priority per S2_ORDER. The document correctly notes 'mega_cap_ai is the highest portfolio-risk leg' but the mechanical ranking does not reflect this. The tension between the stated strategic objective and the computed output creates a decision conflict for the head trader."
+    },
+    {
+      "flag_type": "illustrative_parameter_not_validated",
+      "severity": "minor",
+      "document": "Y",
+      "description": "Document Y's toxicity-scaled ADV trigger formula introduces a 0.4\u00d7 coefficient (effective_adv_trigger = 6% \u00d7 (1 \u2212 0.4 \u00d7 toxicity_norm)) that is an unvalidated analyst design parameter. While correctly labeled as such, it layers a new illustrative assumption on top of the source ambiguity it purports to resolve, and its outputs (3.60% for mega_cap_ai, 4.72% for industrial_importer) are only as reliable as the 0.4\u00d7 assumption itself."
+    },
+    {
+      "flag_type": "ambiguous_hypothesis_label",
+      "severity": "minor",
+      "document": "Y",
+      "description": "Document Y presents the equal-weight ADV computation (9.575%) as a 'reconciliation hypothesis' for the 9.4% vs 8.41% discrepancy but does not explicitly flag that this hypothesis is an analyst-generated guess with no source basis, distinct from a documented inference. This creates an ambiguous zone between sourced fact and unsupported claim that could be misread by a compliance reviewer."
+    }
+  ],
+  "_harness": {
+    "judge_provider": "minimax",
+    "judge_model": "MiniMax-M2.5-highspeed",
+    "judge_packet_id": "holo_factory_live_20260619T180210Z_capital_markets_trade_shock_execution_frontier_solo_anthropic_final_turn_6_pairwise",
+    "generation_dna_providers": "anthropic,google,openai",
+    "generation_dna_models": "anthropic:claude-opus-4-8,google:gemini-3.1-pro-preview,openai:gpt-5.5",
+    "judge_dna_overlap": "",
+    "proof_credit_eligible": true,
+    "score_credit_label": "proof_credit_candidate",
+    "score_use": "proof_credit_if_blind_and_boundary_clean"
+  }
+}

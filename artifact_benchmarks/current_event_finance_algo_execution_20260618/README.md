@@ -77,7 +77,7 @@ Unavailable on this key:
 
 - `gov_technical_probe_protocol.json` / `.md` - technical probing requirements for Gov mission packets.
 - `finance_algo_adversarial_role_flow.json` / `.md` - finance-specific six-turn adversarial role order.
-- `build_benchmark_intelligence.py` - builds the client-readable intelligence report and chart-ready data from completed run artifacts.
+- `build_benchmark_intelligence.py` - builds the client-readable intelligence report, deterministic insight extraction, and chart-ready data from completed run artifacts.
 - `build_hash_locked_lift_rollup.py` - aggregates completed analyzed runs into mean Holo lift, current-lock match status, and chart-ready CSV.
 
 ## Approval Boundary

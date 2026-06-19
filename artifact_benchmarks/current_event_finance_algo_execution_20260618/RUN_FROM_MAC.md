@@ -210,6 +210,14 @@ The analyzer writes chart/report-ready files into the live run folder:
 - `analysis/scores.csv`
 - `analysis/judge_rows.csv`
 
+The intelligence builder writes:
+
+- `intelligence/benchmark_intelligence.json`
+- `intelligence/benchmark_intelligence.md`
+- `intelligence/chart_data.csv`
+
+The intelligence output includes deterministic insight extraction: top lift drivers, insight themes, per-solo theme heatmaps, judge-rationale evidence, token cost, and latency.
+
 The rollup writes cross-run files into:
 
 - `suite_rollups/hash_locked_lift_rollup.json`

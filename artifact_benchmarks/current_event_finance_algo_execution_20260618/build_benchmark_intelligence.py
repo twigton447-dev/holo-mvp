@@ -14,6 +14,96 @@ PACKET_DIR = Path(__file__).resolve().parent
 RUNS_DIR = PACKET_DIR / "runs"
 
 
+INSIGHT_THEME_RULES = {
+    "bounded_decision_policy": [
+        "bounded action",
+        "action set",
+        "decision policy",
+        "constraint ladder",
+        "conflict resolution",
+        "escalate",
+        "pause",
+        "reroute",
+    ],
+    "execution_microstructure_depth": [
+        "microstructure",
+        "quote fade",
+        "queue fade",
+        "markout",
+        "odd-lot",
+        "venue toxicity",
+        "spread",
+        "lit/dark",
+        "clock-skew",
+    ],
+    "portfolio_funding_integration": [
+        "funding",
+        "cash",
+        "T+1",
+        "settlement",
+        "repo",
+        "collateral",
+        "active-risk",
+        "portfolio",
+        "locate",
+    ],
+    "audit_control_realism": [
+        "audit",
+        "kill-switch",
+        "FINRA",
+        "validation",
+        "pre-trade",
+        "ledger",
+        "control",
+        "version",
+        "owner",
+    ],
+    "model_risk_adversarial_insight": [
+        "recency",
+        "disagreement",
+        "adversarial",
+        "inference",
+        "source_grounding",
+        "prompt",
+        "simulation",
+        "averaging",
+    ],
+    "source_grounding_accuracy": [
+        "source",
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "S7",
+        "S8",
+        "cites",
+        "timestamp",
+    ],
+    "benchmark_design": [
+        "benchmark",
+        "VWAP",
+        "implementation shortfall",
+        "arrival",
+        "TWAP",
+        "POV",
+        "peer",
+        "gaming",
+    ],
+    "client_readiness_completeness": [
+        "client",
+        "executive",
+        "usable",
+        "roadmap",
+        "truncated",
+        "repetition",
+        "complete",
+        "readability",
+    ],
+}
+
+
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
@@ -349,6 +439,133 @@ def collect_repeated_phrases(rows: list[dict[str, Any]], key: str, limit: int = 
     return seen[:limit]
 
 
+def classify_theme(text: str, fallback: str = "general_quality_lift") -> str:
+    lowered = text.lower()
+    best_theme = fallback
+    best_hits = 0
+    for theme, keywords in INSIGHT_THEME_RULES.items():
+        hits = sum(1 for keyword in keywords if keyword.lower() in lowered)
+        if hits > best_hits:
+            best_theme = theme
+            best_hits = hits
+    return best_theme
+
+
+def compact_note(text: str, limit: int = 260) -> str:
+    clean = re.sub(r"\s+", " ", str(text or "")).strip()
+    if len(clean) <= limit:
+        return clean
+    return clean[: limit - 3].rstrip() + "..."
+
+
+def extract_insights(judge_rows: list[dict[str, Any]], criterion_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    atoms: list[dict[str, Any]] = []
+    theme_values: dict[str, list[float]] = defaultdict(list)
+    theme_by_solo: dict[tuple[str, str], list[float]] = defaultdict(list)
+
+    for row in criterion_rows:
+        if not row.get("primary_score_included"):
+            continue
+        gap = float(row.get("gap_holo_minus_solo") or 0)
+        if abs(gap) < 0.5:
+            continue
+        combined_notes = f"{row.get('holo_notes', '')} {row.get('solo_notes', '')}"
+        theme = classify_theme(combined_notes or row.get("criterion_id", ""))
+        atom = {
+            "source_type": "criterion_gap",
+            "theme": theme,
+            "pair_id": row.get("pair_id"),
+            "solo_condition": row.get("solo_condition"),
+            "judge_id": row.get("judge_id"),
+            "judge_provider": row.get("judge_provider"),
+            "criterion_id": row.get("criterion_id"),
+            "gap_holo_minus_solo": round(gap, 3),
+            "direction": "holo_lift" if gap > 0 else "solo_edge",
+            "evidence_note": compact_note(row.get("holo_notes") if gap > 0 else row.get("solo_notes")),
+            "contrast_note": compact_note(row.get("solo_notes") if gap > 0 else row.get("holo_notes")),
+        }
+        atoms.append(atom)
+        theme_values[theme].append(gap)
+        theme_by_solo[(str(row.get("solo_condition")), theme)].append(gap)
+
+    for row in judge_rows:
+        if not row.get("primary_score_included"):
+            continue
+        for key, direction in [
+            ("holo_strengths", "holo_strength"),
+            ("solo_weaknesses", "solo_hidden_failure"),
+            ("holo_weaknesses", "holo_residual_risk"),
+        ]:
+            for value in row.get(key) or []:
+                text = str(value)
+                theme = classify_theme(text)
+                atoms.append(
+                    {
+                        "source_type": key,
+                        "theme": theme,
+                        "pair_id": row.get("pair_id"),
+                        "solo_condition": row.get("solo_condition"),
+                        "judge_id": row.get("judge_id"),
+                        "judge_provider": row.get("judge_provider"),
+                        "criterion_id": "",
+                        "gap_holo_minus_solo": row.get("gap_holo_minus_solo"),
+                        "direction": direction,
+                        "evidence_note": compact_note(text),
+                        "contrast_note": "",
+                    }
+                )
+
+    theme_summary = []
+    for theme, values in sorted(theme_values.items(), key=lambda item: mean(item[1]), reverse=True):
+        theme_atoms = [atom for atom in atoms if atom["theme"] == theme]
+        sample = next((atom["evidence_note"] for atom in theme_atoms if atom.get("evidence_note")), "")
+        theme_summary.append(
+            {
+                "theme": theme,
+                "mean_gap_holo_minus_solo": round(mean(values), 3),
+                "evidence_count": len(values),
+                "atom_count": len(theme_atoms),
+                "sample_evidence": sample,
+            }
+        )
+
+    theme_solo_heatmap = []
+    for (solo_condition, theme), values in sorted(theme_by_solo.items()):
+        theme_solo_heatmap.append(
+            {
+                "solo_condition": solo_condition,
+                "theme": theme,
+                "mean_gap_holo_minus_solo": round(mean(values), 3),
+                "evidence_count": len(values),
+            }
+        )
+
+    lift_drivers = []
+    grouped: dict[str, list[float]] = defaultdict(list)
+    for row in criterion_rows:
+        if row.get("primary_score_included"):
+            grouped[str(row["criterion_id"])].append(float(row["gap_holo_minus_solo"]))
+    for criterion_id, values in grouped.items():
+        lift_drivers.append(
+            {
+                "criterion_id": criterion_id,
+                "theme": classify_theme(criterion_id.replace("_", " ")),
+                "mean_gap_holo_minus_solo": round(mean(values), 3),
+                "evidence_count": len(values),
+            }
+        )
+    lift_drivers.sort(key=lambda item: item["mean_gap_holo_minus_solo"], reverse=True)
+
+    return {
+        "status": "insight_extraction_complete",
+        "method": "deterministic_keyword_theme_mapping_over_primary_judge_notes_and_criterion_gaps",
+        "theme_summary": theme_summary,
+        "theme_solo_heatmap": theme_solo_heatmap,
+        "top_lift_drivers": lift_drivers,
+        "insight_atoms": atoms,
+    }
+
+
 def build_intelligence(run_dir: Path) -> dict[str, Any]:
     manifest = read_json(run_dir / "run_manifest.json")
     analysis = load_analysis(run_dir)
@@ -378,6 +595,11 @@ def build_intelligence(run_dir: Path) -> dict[str, Any]:
         caveats.append("At least one final artifact does not end cleanly.")
 
     token_summary = summarize_trace_tokens(trace_rows)
+    insight_extraction = extract_insights(judge_rows, criterion_rows)
+    charts = chart_rows(judge_rows, criterion_rows, trace_rows)
+    charts["insight_theme_bars"] = insight_extraction["theme_summary"]
+    charts["insight_theme_solo_heatmap"] = insight_extraction["theme_solo_heatmap"]
+    charts["lift_driver_bars"] = insight_extraction["top_lift_drivers"]
     intelligence = {
         "status": "benchmark_intelligence_complete",
         "run_id": manifest.get("run_id", run_dir.name),
@@ -429,10 +651,11 @@ def build_intelligence(run_dir: Path) -> dict[str, Any]:
                 if row["validation_flags"]
             ],
         },
+        "insight_extraction": insight_extraction,
         "token_summary": token_summary,
         "turn_trajectory": turn_trajectory(trace_rows, manifest),
         "final_artifact_checks": final_checks,
-        "chart_data": chart_rows(judge_rows, criterion_rows, trace_rows),
+        "chart_data": charts,
         "source_files": {
             "run_manifest": str(run_dir / "run_manifest.json"),
             "analysis_summary": str(run_dir / "analysis" / "analysis_summary.json"),
@@ -533,6 +756,47 @@ def render_markdown(intel: dict[str, Any]) -> str:
         else:
             lines.extend(f"- {value}" for value in values[:8]) if values else lines.append("- None")
         lines.append("")
+
+    insights = intel.get("insight_extraction") or {}
+    lines.extend(["## Extracted Insight Drivers", ""])
+    theme_summary = insights.get("theme_summary") or []
+    if theme_summary:
+        lines.extend(
+            md_table(
+                [
+                    [
+                        item["theme"],
+                        item["mean_gap_holo_minus_solo"],
+                        item["evidence_count"],
+                        item["sample_evidence"],
+                    ]
+                    for item in theme_summary[:10]
+                ],
+                ["Theme", "Mean Gap", "Evidence Count", "Sample Evidence"],
+            )
+        )
+    else:
+        lines.append("- No deterministic insight themes met the extraction threshold.")
+
+    lines.extend(["", "## Top Lift Drivers", ""])
+    lift_drivers = insights.get("top_lift_drivers") or []
+    if lift_drivers:
+        lines.extend(
+            md_table(
+                [
+                    [
+                        item["criterion_id"],
+                        item["theme"],
+                        item["mean_gap_holo_minus_solo"],
+                        item["evidence_count"],
+                    ]
+                    for item in lift_drivers[:10]
+                ],
+                ["Criterion", "Theme", "Mean Gap", "Evidence Count"],
+            )
+        )
+    else:
+        lines.append("- No lift drivers extracted.")
 
     lines.extend(["## Token And Latency Accounting", ""])
     by_condition = intel["token_summary"]["by_condition"]

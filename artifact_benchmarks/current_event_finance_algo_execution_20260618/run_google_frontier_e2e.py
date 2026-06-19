@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import subprocess
@@ -13,10 +14,29 @@ LIVE_HARNESS = PACKET_DIR / "google_frontier_e2e_live.py"
 NO_PROVIDER_SMOKE = PACKET_DIR / "google_frontier_no_provider_smoke.py"
 HASH_LOCK = PACKET_DIR / "hash_lock.json"
 ROUTING_CONFIGS = PACKET_DIR / "holo_routing_configs.json"
+ROLE_FLOW = PACKET_DIR / "finance_algo_adversarial_role_flow.json"
 
 
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def sha_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def turn_prompt_parity_contract(role_flow: dict, route: dict) -> list[dict]:
+    return [
+        {
+            "turn": int(item["turn"]),
+            "role": item["role"],
+            "analyst_model": route["analyst_rotation"][idx],
+            "turn_instruction_sha256": sha_text(item["instruction"]),
+            "same_base_turn_prompt_for_solo_and_holo": True,
+            "holo_extra_context": "Gov Baton Pass plus STATE_OBJECT plus pinned artifacts.",
+        }
+        for idx, item in enumerate(role_flow["turns"])
+    ]
 
 
 def provider_env_status() -> dict[str, str]:
@@ -44,6 +64,7 @@ def load_routing_config(routing_config_id: str | None) -> dict:
 def preflight(routing_config_id: str | None, solo_condition: str | None) -> int:
     lock = read_json(HASH_LOCK)
     route = load_routing_config(routing_config_id)
+    role_flow = read_json(ROLE_FLOW)
     status = provider_env_status()
     payload = {
         "status": "PREFLIGHT_PASS"
@@ -62,6 +83,8 @@ def preflight(routing_config_id: str | None, solo_condition: str | None) -> int:
         "holo_analyst_rotation": route["analyst_rotation"],
         "holo_governor_model": lock["holo_governor_model"],
         "holo_governor_continuity_rule": lock["holo_governor_continuity_rule"],
+        "turn_prompt_parity": turn_prompt_parity_contract(role_flow, route),
+        "parity_note": "Solo and Holo share the same base turn role/instruction; Holo additionally receives Gov Baton/state/artifacts.",
         "judge_panel": lock["judge_panel"],
         "live_calls_default": "disabled",
     }

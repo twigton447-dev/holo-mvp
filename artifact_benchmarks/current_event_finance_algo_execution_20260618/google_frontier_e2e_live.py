@@ -121,6 +121,19 @@ def provider_model(provider_model: str) -> tuple[str, str]:
     return provider, model
 
 
+def turn_prompt_parity_contract(role_flow: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "turn": int(item["turn"]),
+            "role": item["role"],
+            "turn_instruction_sha256": sha_text(item["instruction"]),
+            "same_base_turn_prompt_for_solo_and_holo": True,
+            "holo_extra_context": "Gov Baton Pass plus STATE_OBJECT plus pinned artifacts.",
+        }
+        for item in role_flow["turns"]
+    ]
+
+
 def load_routing_config(routing_config_id: str | None) -> dict[str, Any]:
     suite = read_json(PACKET_DIR / "holo_routing_configs.json")
     selected = routing_config_id or suite["default_routing_config_id"]
@@ -1968,6 +1981,9 @@ def run(args: argparse.Namespace) -> int:
     missing = [name for name, value in status.items() if value != "PRESENT"]
     if args.preflight:
         solo_condition_count = 1 if args.solo_condition else len(SOLO_CONDITIONS)
+        base_role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
+        routing_config = load_routing_config(args.routing_config)
+        role_flow = apply_holo_routing_config(base_role_flow, routing_config)
         print(
             json.dumps(
                 {
@@ -1976,6 +1992,8 @@ def run(args: argparse.Namespace) -> int:
                     "models": {p: cfg["model"] for p, cfg in PROVIDERS.items()},
                     "holo_architecture_mode": STATE_OBJECT_VERSION,
                     "solo_condition_scope": [args.solo_condition] if args.solo_condition else list(SOLO_CONDITIONS),
+                    "turn_prompt_parity": turn_prompt_parity_contract(role_flow),
+                    "parity_note": "Solo and Holo share the same base turn role/instruction; Holo additionally receives Gov Baton/state/artifacts.",
                     "planned_generation_calls_minimum": (solo_condition_count * 6) + 12,
                     "planned_judge_calls": solo_condition_count * 3,
                 },
@@ -2034,6 +2052,8 @@ def run(args: argparse.Namespace) -> int:
         "conditions": [*solo_conditions.keys(), "holo_frontier_gov"],
         "solo_condition_scope": list(solo_conditions.keys()),
         "holo_architecture_mode": STATE_OBJECT_VERSION,
+        "turn_prompt_parity": turn_prompt_parity_contract(role_flow),
+        "parity_note": "Solo and Holo share the same base turn role/instruction; Holo additionally receives Gov Baton/state/artifacts.",
         "judge_panel": judge_panel["judge_panel_id"],
         "condition_results": condition_results,
         "notes": "Full one-domain frontier run. Non-public and benchmark_credit=false until inspected.",

@@ -45,6 +45,19 @@ def sha_file(path: Path) -> str:
     return sha_text(read_text(path))
 
 
+def turn_prompt_parity_contract(role_flow: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "turn": int(item["turn"]),
+            "role": item["role"],
+            "turn_instruction_sha256": sha_text(item["instruction"]),
+            "same_base_turn_prompt_for_solo_and_holo": True,
+            "holo_extra_context": "Gov Baton Pass plus STATE_OBJECT plus pinned artifacts.",
+        }
+        for item in role_flow["turns"]
+    ]
+
+
 def load_routing_config(routing_config_id: str | None) -> dict[str, Any]:
     suite = read_json(PACKET_DIR / "holo_routing_configs.json")
     selected = routing_config_id or suite["default_routing_config_id"]
@@ -349,6 +362,13 @@ def main() -> int:
     check("no_browse_policy", "browse" in source_pack["model_internet_policy"].lower())
     check("word_band", [min_words, max_words] == [2800, 3400], [min_words, max_words])
     check("six_turn_role_flow", len(turns) == 6, len(turns))
+    parity_contract = turn_prompt_parity_contract(role_flow)
+    check(
+        "same_base_turn_prompts_for_solo_and_holo",
+        len(parity_contract) == 6
+        and all(item["same_base_turn_prompt_for_solo_and_holo"] for item in parity_contract),
+        parity_contract,
+    )
 
     all_traces: list[dict[str, Any]] = []
     final_candidates: dict[str, dict[str, Any]] = {}
@@ -607,6 +627,8 @@ def main() -> int:
         "holo_role_flow": [item["provider_model"] for item in turns],
         "holo_governor_model": report_brief["holo_turn_design"]["governor_model"],
         "holo_architecture_mode": STATE_OBJECT_VERSION,
+        "turn_prompt_parity": parity_contract,
+        "parity_note": "Solo and Holo share the same base turn role/instruction; Holo additionally receives Gov Baton/state/artifacts.",
         "word_count_band": [min_words, max_words],
         "hashes": hashes,
         "counts": {

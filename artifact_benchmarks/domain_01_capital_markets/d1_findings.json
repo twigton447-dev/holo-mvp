@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-06-19T21:41:42Z",
+  "generated_at_utc": "2026-06-19T22:08:04Z",
   "domain_id": "capital_markets_trade_shock_execution",
   "current_lock_run": "holo_factory_live_20260619T180210Z",
   "decision": "D1 current-lock frontier scoring is now outside-DNA scored locally; keep D1 out of public benchmark-credit promotion until score provenance is committed and mini/order/domain replication is run.",
@@ -12,12 +12,12 @@
     {
       "name": "current_lock_scoring",
       "status": "proof_credit_scored_for_frontier_d1",
-      "summary": "6 outside-DNA proof-credit candidate rows and 2 same-DNA diagnostic rows are present."
+      "summary": "6 outside-DNA proof-credit candidate rows and 0 same-DNA diagnostic rows are present."
     },
     {
-      "name": "historical_diagnostic_lift",
-      "status": "directional_only",
-      "summary": "Historical runs show 10.713% mean lift all rows and 13.808% clean lift, but no rows match the current lock."
+      "name": "current_lock_mini_lane",
+      "status": "pending_not_scored",
+      "summary": "No current-lock HoloFactory mini live run has proof-credit scores. Older mini/error attempts are excluded from D1 proof analytics."
     }
   ],
   "current_lock_quality_state": {
@@ -37,29 +37,41 @@
       }
     ],
     "raw_observed_score_summary": {
-      "rows": 8,
+      "rows": 6,
       "proof_credit_rows": 6,
-      "diagnostic_rows": 2,
+      "diagnostic_rows": 0,
       "pairs_scored": [
         "solo_anthropic",
         "solo_google",
         "solo_openai"
       ],
-      "mean_gap": 1.095,
-      "mean_percent_lift": 18.306,
-      "proof_credit_mean_gap": 1.47,
-      "proof_credit_mean_percent_lift": 24.457,
+      "raw_audit_mean_gap": 1.47,
+      "raw_audit_mean_percent_lift": 24.457,
+      "raw_audit_median_percent_lift": 27.303,
+      "raw_audit_trimmed_mean_percent_lift": 27.653,
+      "proof_credit_raw_audit_mean_gap": 1.47,
+      "proof_credit_raw_audit_mean_percent_lift": 24.457,
+      "primary_clean_rows": 1,
+      "primary_clean_mean_gap": 1.9,
+      "primary_clean_mean_percent_lift": 29.874,
+      "valid_baseline_rows": 2,
+      "valid_baseline_mean_percent_lift": 27.303,
+      "quarantined_rows": 5,
+      "outlier_rows": 2,
       "claimable": false
     },
     "validity_adjusted_observed_score_summary": {
-      "rows": 8,
+      "rows": 6,
       "proof_credit_rows": 6,
-      "diagnostic_rows": 2,
-      "mean_raw_gap": 1.095,
-      "mean_raw_percent_lift": 18.306,
-      "mean_adjusted_gap": 1.37,
-      "mean_adjusted_percent_lift": 21.489,
-      "policy_note": "Validity-adjusted scores preserve raw judge scores and apply deterministic caps only when revalidation flagged invalid finals. Rows with same-DNA or historical-current-lock mismatch are diagnostic only."
+      "diagnostic_rows": 0,
+      "mean_raw_gap_audit_all": 1.47,
+      "mean_raw_percent_lift_audit_all": 24.457,
+      "mean_adjusted_gap_audit_all": 1.6,
+      "mean_adjusted_percent_lift_audit_all": 25.819,
+      "primary_clean_rows": 1,
+      "primary_clean_mean_raw_percent_lift": 29.874,
+      "primary_clean_mean_adjusted_percent_lift": 29.874,
+      "policy_note": "Validity-adjusted scores preserve raw judge scores. Rows with invalid finals, high-variance judge-family behavior, or lift outliers are quarantined from the primary clean metric and retained for audit/retest."
     },
     "outside_dna_rejudge_summary": {
       "current_lock_run": "holo_factory_live_20260619T180210Z",
@@ -94,15 +106,16 @@
     "D1 generation is operationally real: the current HoloFactory frontier run completed all four generation conditions and produced judge packets.",
     "D1 current-lock final scoring now has six outside-DNA blind solo judge rows across the three final pairwise packets.",
     "Same-DNA frontier judge rows remain diagnostic-only and are separated from the proof-credit outside-DNA rows.",
-    "Raw current-lock proof-credit scores show Holo lift across five of six outside-DNA judge rows, with one negative Anthropic-pair xAI row.",
+    "Raw current-lock proof-credit scores show Holo lift across five of six outside-DNA judge rows, but xAI produced both a negative outlier and a high positive outlier and is quarantined from the primary clean metric pending retest.",
     "Validity-adjusted scoring preserves raw judge scores and applies deterministic caps only when revalidation flagged invalid finals.",
-    "Historical D1 evidence supports directional Holo lift, but it must be labeled diagnostic because it does not match the current run lock.",
+    "Current-lock mini proof is not present yet; older mini/error attempts are excluded from this D1 analytics board.",
     "For public or client-facing claims, D1 alone is still insufficient: the architecture claim needs the mini lane, order permutations, and D2-D5 replication."
   ],
   "next_actions": [
-    "Commit the D1 proof-credit scoring board and boundary-accounting patch.",
     "Preserve the raw outside-DNA judge artifacts and parse-failure provenance for audit.",
-    "Keep same-DNA frontier judge rows diagnostic-only even if additional legacy-panel scores are added.",
+    "Keep invalid-baseline rows, same-DNA rows, and high-variance/outlier judge-family rows out of the primary clean metric.",
+    "Retest quarantined rows with additional outside-DNA judges before using them in any headline.",
+    "Repair or rerun invalid solo baselines under the current lock.",
     "Run the matched mini Holo versus mini solo lane for D1.",
     "Then run order permutations and D2-D5 replication before making the architecture-level lift claim."
   ]

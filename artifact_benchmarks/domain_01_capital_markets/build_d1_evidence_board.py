@@ -22,9 +22,6 @@ D1_DOMAIN = "capital_markets_trade_shock_execution"
 CURRENT_LOCK_RUN_ID = "holo_factory_live_20260619T180210Z"
 OUT = ROOT / "domain_01_capital_markets"
 HOLO_FACTORY_RUNS = ROOT / "holo_factory" / "suite_runs"
-LEGACY_PACKET = ROOT / "current_event_finance_algo_execution_20260618"
-LEGACY_RUNS = LEGACY_PACKET / "runs"
-LEGACY_ROLLUP = LEGACY_PACKET / "suite_rollups" / "hash_locked_lift_rollup.json"
 DEFAULT_JUDGE_PANEL = [
     {"judge_id": "judge_frontier_01", "provider": "openai", "model": "gpt-5.5", "outside_judge": False},
     {"judge_id": "judge_frontier_02", "provider": "anthropic", "model": "claude-opus-4-8", "outside_judge": False},
@@ -35,6 +32,7 @@ OUTSIDE_DNA_REJUDGE_PANEL = [
     {"judge_id": "judge_outside_xai_01", "provider": "xai", "model": "grok-4.3"},
     {"judge_id": "judge_outside_minimax_01", "provider": "minimax", "model": "MiniMax-M2.5-highspeed"},
 ]
+HIGH_LIFT_OUTLIER_THRESHOLD = 40.0
 
 
 def utc_iso() -> str:
@@ -213,50 +211,6 @@ def collect_holo_factory_runs() -> list[dict[str, Any]]:
     return rows
 
 
-def collect_legacy_runs() -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    for manifest_path in sorted(LEGACY_RUNS.glob("*/run_manifest.json")):
-        manifest = read_json(manifest_path)
-        run_root = manifest_path.parent
-        final_packets = safe_len_glob(run_root, "judge_packets/*.json") + safe_len_glob(run_root, "final_judge_packets/*.json")
-        turn_packets = safe_len_glob(run_root, "turn_judge_packets/*.json")
-        judge_scores = safe_len_glob(run_root, "judge_scores/*.json") + safe_len_glob(run_root, "judge_scores/**/*.json")
-        condition_results = manifest.get("condition_results") or {}
-        if isinstance(condition_results, dict):
-            condition_count = len(condition_results)
-        elif isinstance(condition_results, list):
-            condition_count = len(condition_results)
-        else:
-            condition_count = ""
-        rows.append(
-            {
-                "lane": "legacy_finance_algo",
-                "run_id": manifest.get("run_id", run_root.name),
-                "run_dir": str(run_root),
-                "status": manifest.get("status"),
-                "status_bucket": status_bucket(manifest.get("status")),
-                "run_class": classify_run(manifest.get("run_id", run_root.name), manifest.get("status")),
-                "benchmark_credit": manifest.get("benchmark_credit"),
-                "public_claim": manifest.get("public_claim"),
-                "domains": D1_DOMAIN,
-                "cohorts": manifest.get("solo_suite_id") or manifest.get("routing_config_id") or "",
-                "condition_count": condition_count,
-                "provider_call_trace_count": manifest.get("provider_call_trace_count") or "",
-                "input_tokens": manifest.get("input_tokens") or "",
-                "output_tokens": manifest.get("output_tokens") or "",
-                "total_tokens": manifest.get("total_tokens") or "",
-                "latency_ms": manifest.get("latency_ms") or "",
-                "latency_minutes": ms_to_minutes(manifest.get("latency_ms")) if manifest.get("latency_ms") else "",
-                "final_judge_packets": final_packets,
-                "turn_judge_packets": turn_packets,
-                "judge_scores": judge_scores,
-                "sealed_pair_count": "",
-                "error_count": 1 if (run_root / "run_error.json").exists() else 0,
-            }
-        )
-    return rows
-
-
 def collect_holo_factory_conditions() -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for intelligence_path in sorted(HOLO_FACTORY_RUNS.glob("*/analysis/run_intelligence.json")):
@@ -291,45 +245,6 @@ def collect_holo_factory_conditions() -> list[dict[str, Any]]:
     return rows
 
 
-def collect_legacy_conditions() -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    for intelligence_path in sorted(LEGACY_RUNS.glob("*/intelligence/benchmark_intelligence.json")):
-        data = read_json(intelligence_path)
-        run_id = data.get("run_id", intelligence_path.parents[1].name)
-        token_by_condition = (data.get("token_summary") or {}).get("by_condition", {})
-        final_checks = {item.get("condition"): item for item in data.get("final_artifact_checks", [])}
-        trajectory = data.get("turn_trajectory", [])
-        provider_by_condition = {}
-        for item in trajectory:
-            provider_by_condition.setdefault(item.get("condition"), item.get("provider_model"))
-        for condition, token_row in token_by_condition.items():
-            final = final_checks.get(condition, {})
-            rows.append(
-                {
-                    "source": "legacy_finance_algo",
-                    "run_id": run_id,
-                    "cohort": "mini" if "mini" in run_id else "frontier",
-                    "condition": condition,
-                    "condition_type": "holo" if condition.startswith("holo") else "solo",
-                    "provider_model": provider_by_condition.get(condition),
-                    "manifest_status": data.get("run_status"),
-                    "revalidated_status": "clean_ending" if final.get("clean_ending") else ("not_clean_or_unknown" if final else ""),
-                    "turns_complete": len({x.get("turn") for x in trajectory if x.get("condition") == condition and x.get("call_type") in {"solo_turn", "holo_analyst_turn"}}),
-                    "gov_turns_complete": len([x for x in trajectory if x.get("condition") == condition and x.get("call_type") == "holo_gov_mission_packet"]),
-                    "input_tokens": token_row.get("input_tokens"),
-                    "output_tokens": token_row.get("output_tokens"),
-                    "total_tokens": token_row.get("total_tokens"),
-                    "latency_ms": token_row.get("latency_ms"),
-                    "latency_minutes": ms_to_minutes(token_row.get("latency_ms")),
-                    "final_word_count": final.get("word_count"),
-                    "selected_turn": 6 if final else "",
-                    "flags": "possible_mid_bullet_cutoff" if final.get("possible_mid_bullet_cutoff") else "",
-                    "final_artifact_path": final.get("artifact_path"),
-                }
-            )
-    return rows
-
-
 def load_anonymization_map(run_root: Path) -> dict[str, dict[str, Any]]:
     maps = list((run_root / "sealed").glob("*anonymization_map.json"))
     if not maps:
@@ -339,70 +254,16 @@ def load_anonymization_map(run_root: Path) -> dict[str, dict[str, Any]]:
 
 
 def collect_missing_final_judge_queue() -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    for run_root in sorted(HOLO_FACTORY_RUNS.glob("*")):
-        if not run_root.is_dir():
+    rows, _summary = collect_outside_dna_rejudge_queue()
+    missing_rows: list[dict[str, Any]] = []
+    for row in rows:
+        if row.get("score_status") == "scored":
             continue
-        pair_map = load_anonymization_map(run_root)
-        panel = load_judge_panel(run_root)
-        final_packets = sorted(run_root.glob(f"judge_packets/final/{D1_DOMAIN}/**/*.json"))
-        if not final_packets:
-            continue
-        for packet_path in final_packets:
-            packet_id = packet_path.stem
-            pair = pair_map.get(packet_id, {})
-            generation_dna = pair_generation_dna(run_root, pair)
-            if pair.get("domain_id") and pair.get("domain_id") != D1_DOMAIN:
-                continue
-            for judge in panel:
-                judge_id = judge.get("judge_id")
-                score_path = run_root / "judge_scores" / packet_id / f"{judge_id}.json"
-                prompt_card_path = run_root / "prompt_cards" / "judges" / packet_id / f"{judge_id}.json"
-                trace_path = run_root / "traces" / "judges" / packet_id / f"{judge_id}.json"
-                credit = annotate_judge_credit(judge, generation_dna)
-                boundary = judge_boundary_status(prompt_card_path, trace_path)
-                proof_credit_eligible = credit["proof_credit_eligible"] and boundary["judge_boundary_clean"]
-                score_credit_label = credit["score_credit_label"] if boundary["judge_boundary_clean"] else f"{credit['score_credit_label']}_boundary_violation"
-                score_use = credit["score_use"] if proof_credit_eligible else "diagnostic_only"
-                if score_path.exists():
-                    score_status = "scored"
-                elif prompt_card_path.exists() or trace_path.exists():
-                    score_status = "attempted_no_parsed_score"
-                else:
-                    score_status = "not_attempted"
-                rows.append(
-                    {
-                        "run_id": run_root.name,
-                        "judge_packet_id": packet_id,
-                        "packet_kind": "final",
-                        "domain_id": pair.get("domain_id") or D1_DOMAIN,
-                        "cohort": pair.get("cohort"),
-                        "turn": pair.get("turn"),
-                        "solo_condition": pair.get("solo_condition"),
-                        "holo_condition": pair.get("holo_condition"),
-                        "judge_id": judge_id,
-                        "judge_provider": judge.get("provider"),
-                        "judge_model": judge.get("model"),
-                        "outside_judge": proof_credit_eligible,
-                        "panel_outside_judge_claim": judge.get("outside_judge", False),
-                        "proof_credit_eligible": proof_credit_eligible,
-                        "score_credit_label": score_credit_label,
-                        "score_use": score_use,
-                        "judge_dna_overlap": credit["judge_dna_overlap"],
-                        "generation_dna_providers": credit["generation_dna_providers"],
-                        "generation_dna_models": credit["generation_dna_models"],
-                        "judge_boundary_clean": boundary["judge_boundary_clean"],
-                        "judge_boundary_errors": boundary["judge_boundary_errors"],
-                        "score_status": score_status,
-                        "score_exists": score_path.exists(),
-                        "prompt_card_exists": prompt_card_path.exists(),
-                        "trace_exists": trace_path.exists(),
-                        "score_path": str(score_path) if score_path.exists() else "",
-                        "prompt_card_path": str(prompt_card_path) if prompt_card_path.exists() else "",
-                        "trace_path": str(trace_path) if trace_path.exists() else "",
-                    }
-                )
-    return rows
+        proof_row = dict(row)
+        proof_row["outside_judge"] = proof_row.get("proof_credit_eligible") is True
+        proof_row["panel_outside_judge_claim"] = True
+        missing_rows.append(proof_row)
+    return missing_rows
 
 
 def collect_outside_dna_rejudge_queue() -> tuple[list[dict[str, Any]], dict[str, Any]]:
@@ -550,6 +411,9 @@ def collect_validity_adjusted_scores(score_rows: list[dict[str, Any]], condition
                 "solo_validity_cap": solo_cap or "",
                 "holo_validity_cap_reason": holo_cap_reason,
                 "solo_validity_cap_reason": solo_cap_reason,
+                "analysis_flags": row.get("analysis_flags", ""),
+                "analysis_bucket": row.get("analysis_bucket", ""),
+                "primary_metric_included": row.get("primary_metric_included", False),
             }
         )
 
@@ -560,11 +424,14 @@ def collect_validity_adjusted_scores(score_rows: list[dict[str, Any]], condition
         "rows": len(rows),
         "proof_credit_rows": len([r for r in rows if r.get("proof_credit_eligible") is True]),
         "diagnostic_rows": len([r for r in rows if r.get("proof_credit_eligible") is not True]),
-        "mean_raw_gap": mean([r["raw_gap_holo_minus_solo"] for r in rows if isinstance(r.get("raw_gap_holo_minus_solo"), (int, float))]),
-        "mean_raw_percent_lift": mean([r["raw_percent_lift"] for r in rows if isinstance(r.get("raw_percent_lift"), (int, float))]),
-        "mean_adjusted_gap": mean([r["adjusted_gap_holo_minus_solo"] for r in rows if isinstance(r.get("adjusted_gap_holo_minus_solo"), (int, float))]),
-        "mean_adjusted_percent_lift": mean([r["adjusted_percent_lift"] for r in rows if isinstance(r.get("adjusted_percent_lift"), (int, float))]),
-        "policy_note": "Validity-adjusted scores preserve raw judge scores and apply deterministic caps only when revalidation flagged invalid finals. Rows with same-DNA or historical-current-lock mismatch are diagnostic only.",
+        "mean_raw_gap_audit_all": mean([r["raw_gap_holo_minus_solo"] for r in rows if isinstance(r.get("raw_gap_holo_minus_solo"), (int, float))]),
+        "mean_raw_percent_lift_audit_all": mean([r["raw_percent_lift"] for r in rows if isinstance(r.get("raw_percent_lift"), (int, float))]),
+        "mean_adjusted_gap_audit_all": mean([r["adjusted_gap_holo_minus_solo"] for r in rows if isinstance(r.get("adjusted_gap_holo_minus_solo"), (int, float))]),
+        "mean_adjusted_percent_lift_audit_all": mean([r["adjusted_percent_lift"] for r in rows if isinstance(r.get("adjusted_percent_lift"), (int, float))]),
+        "primary_clean_rows": len([r for r in rows if r.get("primary_metric_included") is True]),
+        "primary_clean_mean_raw_percent_lift": mean([r["raw_percent_lift"] for r in rows if r.get("primary_metric_included") is True and isinstance(r.get("raw_percent_lift"), (int, float))]),
+        "primary_clean_mean_adjusted_percent_lift": mean([r["adjusted_percent_lift"] for r in rows if r.get("primary_metric_included") is True and isinstance(r.get("adjusted_percent_lift"), (int, float))]),
+        "policy_note": "Validity-adjusted scores preserve raw judge scores. Rows with invalid finals, high-variance judge-family behavior, or lift outliers are quarantined from the primary clean metric and retained for audit/retest.",
     }
     return rows, summary
 
@@ -573,6 +440,8 @@ def collect_judge_scores() -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for run_root in sorted(HOLO_FACTORY_RUNS.glob("*")):
         if not run_root.is_dir():
+            continue
+        if run_root.name != CURRENT_LOCK_RUN_ID:
             continue
         pair_map = load_anonymization_map(run_root)
         for score_path in sorted((run_root / "judge_scores").glob("**/*.json")):
@@ -593,6 +462,8 @@ def collect_judge_scores() -> list[dict[str, Any]]:
             trace_path = run_root / "traces" / "judges" / judge_packet_id / f"{score.get('judge_id')}.json"
             boundary = judge_boundary_status(prompt_card_path, trace_path)
             proof_credit_eligible = credit["proof_credit_eligible"] and boundary["judge_boundary_clean"]
+            if not proof_credit_eligible:
+                continue
             score_credit_label = credit["score_credit_label"] if boundary["judge_boundary_clean"] else f"{credit['score_credit_label']}_boundary_violation"
             doc_x_condition = pair.get("document_x_condition")
             doc_y_condition = pair.get("document_y_condition")
@@ -637,91 +508,134 @@ def collect_judge_scores() -> list[dict[str, Any]]:
                     "solo_summary": (score.get("document_y") if doc_x_condition == pair.get("holo_condition") else score.get("document_x") or {}).get("summary_description", ""),
                 }
             )
-    if LEGACY_ROLLUP.exists():
-        rollup = read_json(LEGACY_ROLLUP)
-        for run in rollup.get("runs", []):
-            for pair in run.get("pair_rows", []):
-                rows.append(
-                    {
-                        "source": "legacy_hash_locked_lift_rollup",
-                        "run_id": run.get("run_id"),
-                        "judge_packet_id": pair.get("pair_id"),
-                        "judge_id": "aggregate",
-                        "packet_kind": "final",
-                        "cohort": run.get("holo_cohort_lane") or "",
-                        "turn": 6,
-                        "solo_condition": pair.get("solo_condition"),
-                        "holo_condition": "holo",
-                        "judge_provider": "",
-                        "judge_model": "",
-                        "proof_credit_eligible": False,
-                        "score_credit_label": "diagnostic_historical_non_current_lock",
-                        "score_use": "diagnostic_only",
-                        "judge_dna_overlap": "",
-                        "generation_dna_providers": "",
-                        "generation_dna_models": "",
-                        "judge_boundary_clean": "",
-                        "judge_boundary_errors": "",
-                        "document_x_condition": "",
-                        "document_y_condition": "",
-                        "document_x_score": "",
-                        "document_y_score": "",
-                        "holo_score": pair.get("holo_mean_all"),
-                        "solo_score": pair.get("solo_mean_all"),
-                        "gap_holo_minus_solo": pair.get("gap_all"),
-                        "percent_lift": pair.get("percent_lift_all"),
-                        "clean_gap": pair.get("gap_clean_only"),
-                        "clean_percent_lift": pair.get("percent_lift_clean"),
-                        "matches_current_lock": run.get("matches_current_lock"),
-                        "judge_count": pair.get("judge_count"),
-                        "flagged_judge_count": pair.get("flagged_judge_count"),
-                    }
-                )
     return rows
+
+
+def annotate_score_rows(score_rows: list[dict[str, Any]], condition_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    condition_index = {
+        (row.get("run_id"), row.get("condition")): row
+        for row in condition_rows
+        if row.get("source") == "holo_factory"
+    }
+    annotated: list[dict[str, Any]] = []
+    for row in score_rows:
+        row = dict(row)
+        holo_condition_row = condition_index.get((row.get("run_id"), row.get("holo_condition"))) or {}
+        solo_condition_row = condition_index.get((row.get("run_id"), row.get("solo_condition"))) or {}
+        holo_validity = holo_condition_row.get("revalidated_status") or ""
+        solo_validity = solo_condition_row.get("revalidated_status") or ""
+        flags: list[str] = []
+        pct = row.get("percent_lift")
+        if holo_validity != "valid_final":
+            flags.append("invalid_holo_final")
+        if solo_validity != "valid_final":
+            flags.append("invalid_solo_baseline")
+        if row.get("judge_provider") == "xai":
+            flags.append("judge_family_variance_retest")
+        if isinstance(pct, (int, float)) and pct < 0:
+            flags.append("negative_lift_outlier")
+        if isinstance(pct, (int, float)) and pct >= HIGH_LIFT_OUTLIER_THRESHOLD:
+            flags.append("high_positive_outlier")
+
+        primary_clean = row.get("proof_credit_eligible") is True and not flags
+        if primary_clean:
+            bucket = "primary_clean_metric"
+        elif "invalid_solo_baseline" in flags or "invalid_holo_final" in flags:
+            bucket = "quarantine_invalid_final_retest"
+        elif "judge_family_variance_retest" in flags:
+            bucket = "quarantine_judge_family_retest"
+        elif flags:
+            bucket = "quarantine_outlier_retest"
+        else:
+            bucket = "audit_only"
+
+        row.update(
+            {
+                "holo_final_validity": holo_validity,
+                "solo_final_validity": solo_validity,
+                "analysis_flags": ";".join(flags),
+                "analysis_bucket": bucket,
+                "primary_metric_included": primary_clean,
+            }
+        )
+        annotated.append(row)
+    return annotated
 
 
 def summarize_scores(score_rows: list[dict[str, Any]]) -> dict[str, Any]:
     current = [r for r in score_rows if r.get("source") == "holo_factory" and isinstance(r.get("gap_holo_minus_solo"), (int, float))]
     current_proof = [r for r in current if r.get("proof_credit_eligible") is True]
     current_diagnostic = [r for r in current if r.get("proof_credit_eligible") is not True]
-    historical = [r for r in score_rows if r.get("source") == "legacy_hash_locked_lift_rollup" and isinstance(r.get("percent_lift"), (int, float))]
+    primary = [r for r in current if r.get("primary_metric_included") is True]
+    valid_baseline = [r for r in current if r.get("holo_final_validity") == "valid_final" and r.get("solo_final_validity") == "valid_final"]
+    quarantined = [r for r in current if r.get("primary_metric_included") is not True]
+    outliers = [r for r in current if "outlier" in str(r.get("analysis_flags") or "")]
+
     def mean(values: list[float]) -> float | None:
         return round(sum(values) / len(values), 3) if values else None
+
+    def median(values: list[float]) -> float | None:
+        if not values:
+            return None
+        ordered = sorted(values)
+        midpoint = len(ordered) // 2
+        if len(ordered) % 2:
+            return round(ordered[midpoint], 3)
+        return round((ordered[midpoint - 1] + ordered[midpoint]) / 2, 3)
+
+    def trimmed_mean(values: list[float]) -> float | None:
+        if len(values) < 3:
+            return mean(values)
+        ordered = sorted(values)
+        return mean(ordered[1:-1])
+
+    current_lifts = [r["percent_lift"] for r in current if isinstance(r.get("percent_lift"), (int, float))]
     return {
         "current_holo_factory_scored_rows": len(current),
         "current_holo_factory_proof_credit_rows": len(current_proof),
         "current_holo_factory_diagnostic_rows": len(current_diagnostic),
         "current_holo_factory_mean_gap": mean([r["gap_holo_minus_solo"] for r in current]),
         "current_holo_factory_mean_percent_lift": mean([r["percent_lift"] for r in current if isinstance(r.get("percent_lift"), (int, float))]),
+        "current_holo_factory_median_percent_lift": median(current_lifts),
+        "current_holo_factory_trimmed_mean_percent_lift": trimmed_mean(current_lifts),
         "current_holo_factory_proof_credit_mean_gap": mean([r["gap_holo_minus_solo"] for r in current_proof]),
         "current_holo_factory_proof_credit_mean_percent_lift": mean([r["percent_lift"] for r in current_proof if isinstance(r.get("percent_lift"), (int, float))]),
+        "primary_clean_rows": len(primary),
+        "primary_clean_mean_gap": mean([r["gap_holo_minus_solo"] for r in primary]),
+        "primary_clean_mean_percent_lift": mean([r["percent_lift"] for r in primary if isinstance(r.get("percent_lift"), (int, float))]),
+        "valid_baseline_rows": len(valid_baseline),
+        "valid_baseline_mean_percent_lift": mean([r["percent_lift"] for r in valid_baseline if isinstance(r.get("percent_lift"), (int, float))]),
+        "quarantined_rows": len(quarantined),
+        "outlier_rows": len(outliers),
         "current_holo_factory_pairs_scored": sorted(set(r.get("solo_condition") for r in current)),
-        "historical_scored_pair_rows": len(historical),
-        "historical_mean_percent_lift_all": mean([r["percent_lift"] for r in historical]),
-        "historical_mean_percent_lift_clean": mean([r["clean_percent_lift"] for r in historical if isinstance(r.get("clean_percent_lift"), (int, float))]),
-        "historical_lift_range_all": [
-            min([r["percent_lift"] for r in historical]) if historical else None,
-            max([r["percent_lift"] for r in historical]) if historical else None,
-        ],
-        "historical_current_lock_matching_rows": len([r for r in historical if r.get("matches_current_lock") is True]),
     }
 
 
-def build_projections(run_rows: list[dict[str, Any]], condition_rows: list[dict[str, Any]], score_rows: list[dict[str, Any]], missing_rows: list[dict[str, Any]]) -> dict[str, Any]:
+def build_projections(
+    run_rows: list[dict[str, Any]],
+    condition_rows: list[dict[str, Any]],
+    score_rows: list[dict[str, Any]],
+    missing_rows: list[dict[str, Any]],
+    outside_rejudge_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
     hf_live = next((r for r in run_rows if r["lane"] == "holo_factory" and r["run_id"] == CURRENT_LOCK_RUN_ID), None)
-    mini_conditions = [r for r in condition_rows if r["run_id"] == "full_frontier_finance_algo_execution_mini_order_a_openai_bookend_20260619T160811Z"]
-    mini_tokens = sum(int(r.get("total_tokens") or 0) for r in mini_conditions)
-    mini_latency = sum(int(r.get("latency_ms") or 0) for r in mini_conditions)
-    current_missing_rows = [r for r in missing_rows if r.get("run_id") == CURRENT_LOCK_RUN_ID]
-    expected_final_scores_per_domain_frontier = len(current_missing_rows)
-    current_final_scores = len([r for r in score_rows if r["source"] == "holo_factory" and r.get("run_id") == CURRENT_LOCK_RUN_ID and r.get("packet_kind") == "final"])
+    expected_final_scores_per_domain_frontier = len(outside_rejudge_rows)
+    current_final_scores = len(
+        [
+            r
+            for r in outside_rejudge_rows
+            if r.get("run_id") == CURRENT_LOCK_RUN_ID
+            and r.get("score_status") == "scored"
+            and r.get("proof_credit_eligible") is True
+        ]
+    )
     return {
         "generated_at_utc": utc_iso(),
         "projection_basis": {
             "frontier_current_lock_run": hf_live["run_id"] if hf_live else None,
             "frontier_current_lock_status": hf_live["status"] if hf_live else None,
-            "mini_diagnostic_run": "full_frontier_finance_algo_execution_mini_order_a_openai_bookend_20260619T160811Z" if mini_conditions else None,
-            "note": "Token and latency projections multiply observed D1 traces. Dollar projections require a separately locked pricing table.",
+            "mini_current_lock_status": "pending_not_scored",
+            "note": "Token and latency projections use only the current-lock D1 HoloFactory frontier run. Legacy/historical/mini-error runs are excluded from proof analytics.",
         },
         "frontier_current_lock_d1": {
             "tokens": hf_live.get("total_tokens") if hf_live else None,
@@ -745,21 +659,15 @@ def build_projections(run_rows: list[dict[str, Any]], condition_rows: list[dict[
             "d1_expected_final_judge_scores": expected_final_scores_per_domain_frontier,
             "d1_observed_final_judge_scores": current_final_scores,
             "d1_missing_final_judge_scores": max(expected_final_scores_per_domain_frontier - current_final_scores, 0),
-            "note": "Only final judging is counted here; turn-level judge packets exist but have not been live-scored.",
+            "note": "Only outside-DNA proof-credit final judging is counted here.",
         },
-        "mini_diagnostic_d1": {
-            "tokens": mini_tokens or None,
-            "latency_ms": mini_latency or None,
-            "latency_minutes": ms_to_minutes(mini_latency) if mini_latency else None,
-            "condition_count": len(mini_conditions) or None,
-            "status": "diagnostic_partial_or_error",
-        },
-        "mini_diagnostic_5_domain_projection": {
-            "tokens": mini_tokens * 5 if mini_tokens else None,
-            "latency_ms": mini_latency * 5 if mini_latency else None,
-            "latency_minutes": round(ms_to_minutes(mini_latency) * 5, 3) if mini_latency else None,
-            "condition_count": len(mini_conditions) * 5 if mini_conditions else None,
-            "note": "Mini projection uses legacy diagnostic run with error status, not a clean current-lock HoloFactory mini run.",
+        "mini_current_lock_d1": {
+            "tokens": None,
+            "latency_ms": None,
+            "latency_minutes": None,
+            "condition_count": None,
+            "status": "pending_not_scored",
+            "note": "No current-lock HoloFactory mini live proof run is scored. Legacy mini/error attempts are excluded.",
         },
     }
 
@@ -794,7 +702,6 @@ def build_findings(
     outside_rejudge_summary: dict[str, Any],
 ) -> dict[str, Any]:
     score_summary = summarize_scores(score_rows)
-    missing_summary = summarize_missing_judging(missing_rows)
     current_conditions = [r for r in condition_rows if r["source"] == "holo_factory" and r["run_id"] == CURRENT_LOCK_RUN_ID]
     valid_current = [r for r in current_conditions if r.get("revalidated_status") == "valid_final"]
     invalid_current = [r for r in current_conditions if r.get("revalidated_status") != "valid_final"]
@@ -821,9 +728,9 @@ def build_findings(
                 "summary": f"{score_summary['current_holo_factory_proof_credit_rows']} outside-DNA proof-credit candidate rows and {score_summary['current_holo_factory_diagnostic_rows']} same-DNA diagnostic rows are present.",
             },
             {
-                "name": "historical_diagnostic_lift",
-                "status": "directional_only",
-                "summary": f"Historical runs show {score_summary['historical_mean_percent_lift_all']}% mean lift all rows and {score_summary['historical_mean_percent_lift_clean']}% clean lift, but no rows match the current lock.",
+                "name": "current_lock_mini_lane",
+                "status": "pending_not_scored",
+                "summary": "No current-lock HoloFactory mini live run has proof-credit scores. Older mini/error attempts are excluded from D1 proof analytics.",
             },
         ],
         "current_lock_quality_state": {
@@ -839,10 +746,19 @@ def build_findings(
                 "proof_credit_rows": score_summary["current_holo_factory_proof_credit_rows"],
                 "diagnostic_rows": score_summary["current_holo_factory_diagnostic_rows"],
                 "pairs_scored": score_summary["current_holo_factory_pairs_scored"],
-                "mean_gap": score_summary["current_holo_factory_mean_gap"],
-                "mean_percent_lift": score_summary["current_holo_factory_mean_percent_lift"],
-                "proof_credit_mean_gap": score_summary["current_holo_factory_proof_credit_mean_gap"],
-                "proof_credit_mean_percent_lift": score_summary["current_holo_factory_proof_credit_mean_percent_lift"],
+                "raw_audit_mean_gap": score_summary["current_holo_factory_mean_gap"],
+                "raw_audit_mean_percent_lift": score_summary["current_holo_factory_mean_percent_lift"],
+                "raw_audit_median_percent_lift": score_summary["current_holo_factory_median_percent_lift"],
+                "raw_audit_trimmed_mean_percent_lift": score_summary["current_holo_factory_trimmed_mean_percent_lift"],
+                "proof_credit_raw_audit_mean_gap": score_summary["current_holo_factory_proof_credit_mean_gap"],
+                "proof_credit_raw_audit_mean_percent_lift": score_summary["current_holo_factory_proof_credit_mean_percent_lift"],
+                "primary_clean_rows": score_summary["primary_clean_rows"],
+                "primary_clean_mean_gap": score_summary["primary_clean_mean_gap"],
+                "primary_clean_mean_percent_lift": score_summary["primary_clean_mean_percent_lift"],
+                "valid_baseline_rows": score_summary["valid_baseline_rows"],
+                "valid_baseline_mean_percent_lift": score_summary["valid_baseline_mean_percent_lift"],
+                "quarantined_rows": score_summary["quarantined_rows"],
+                "outlier_rows": score_summary["outlier_rows"],
                 "claimable": False,
             },
             "validity_adjusted_observed_score_summary": adjusted_summary,
@@ -859,15 +775,16 @@ def build_findings(
             "D1 generation is operationally real: the current HoloFactory frontier run completed all four generation conditions and produced judge packets.",
             "D1 current-lock final scoring now has six outside-DNA blind solo judge rows across the three final pairwise packets.",
             "Same-DNA frontier judge rows remain diagnostic-only and are separated from the proof-credit outside-DNA rows.",
-            "Raw current-lock proof-credit scores show Holo lift across five of six outside-DNA judge rows, with one negative Anthropic-pair xAI row.",
+            "Raw current-lock proof-credit scores show Holo lift across five of six outside-DNA judge rows, but xAI produced both a negative outlier and a high positive outlier and is quarantined from the primary clean metric pending retest.",
             "Validity-adjusted scoring preserves raw judge scores and applies deterministic caps only when revalidation flagged invalid finals.",
-            "Historical D1 evidence supports directional Holo lift, but it must be labeled diagnostic because it does not match the current run lock.",
+            "Current-lock mini proof is not present yet; older mini/error attempts are excluded from this D1 analytics board.",
             "For public or client-facing claims, D1 alone is still insufficient: the architecture claim needs the mini lane, order permutations, and D2-D5 replication.",
         ],
         "next_actions": [
-            "Commit the D1 proof-credit scoring board and boundary-accounting patch.",
             "Preserve the raw outside-DNA judge artifacts and parse-failure provenance for audit.",
-            "Keep same-DNA frontier judge rows diagnostic-only even if additional legacy-panel scores are added.",
+            "Keep invalid-baseline rows, same-DNA rows, and high-variance/outlier judge-family rows out of the primary clean metric.",
+            "Retest quarantined rows with additional outside-DNA judges before using them in any headline.",
+            "Repair or rerun invalid solo baselines under the current lock.",
             "Run the matched mini Holo versus mini solo lane for D1.",
             "Then run order permutations and D2-D5 replication before making the architecture-level lift claim.",
         ],
@@ -892,17 +809,20 @@ Domain: `{findings['domain_id']}`
 
 ## Bottom Line
 
-D1 is useful now, and its current-lock frontier lane has outside-DNA final scoring on disk. It is still not a finished public benchmark claim: D1 is one domain and the broader architecture proof still needs matched mini results, order permutations, and D2-D5 replication. Current D1 has `{quality['raw_observed_score_summary']['proof_credit_rows']}` outside-DNA proof-credit candidate rows and `{quality['raw_observed_score_summary']['diagnostic_rows']}` same-DNA diagnostic rows.
+D1 is useful now, and its current-lock frontier lane has outside-DNA final scoring on disk. It is still not a finished public benchmark claim: D1 is one domain, two solo baselines carry validity flags, and xAI judge rows show high variance that must be retested. Current D1 has `{quality['raw_observed_score_summary']['proof_credit_rows']}` outside-DNA proof-credit candidate rows, of which `{quality['raw_observed_score_summary']['primary_clean_rows']}` are currently primary-clean metric rows after quarantine.
 
 ## Current-Lock Quality
 
 - Conditions: `{quality['conditions']}`
 - Valid finals: `{quality['valid_finals']}`
 - Invalid finals: `{quality['invalid_finals']}`
-- Raw observed mean gap: `{quality['raw_observed_score_summary']['mean_gap']}`
-- Raw observed mean lift: `{quality['raw_observed_score_summary']['mean_percent_lift']}%`
-- Validity-adjusted observed mean gap: `{adjusted['mean_adjusted_gap']}`
-- Validity-adjusted observed mean lift: `{adjusted['mean_adjusted_percent_lift']}%`
+- Primary-clean rows: `{quality['raw_observed_score_summary']['primary_clean_rows']}`
+- Primary-clean mean lift: `{quality['raw_observed_score_summary']['primary_clean_mean_percent_lift']}%`
+- Raw audit mean lift, all proof-credit rows: `{quality['raw_observed_score_summary']['proof_credit_raw_audit_mean_percent_lift']}%`
+- Raw audit median lift, all proof-credit rows: `{quality['raw_observed_score_summary']['raw_audit_median_percent_lift']}%`
+- Quarantined rows: `{quality['raw_observed_score_summary']['quarantined_rows']}`
+- Outlier rows: `{quality['raw_observed_score_summary']['outlier_rows']}`
+- Validity-adjusted primary-clean mean lift: `{adjusted['primary_clean_mean_adjusted_percent_lift']}%`
 - Proof-credit final judge scores observed: `{rejudge['observed_proof_credit_scores']} / {rejudge['expected_proof_credit_scores']}`
 - Claimable now: `false`
 
@@ -949,17 +869,14 @@ def build_board(
     projections: dict[str, Any],
 ) -> str:
     score_summary = summarize_scores(score_rows)
-    missing_summary = summarize_missing_judging(missing_rows)
     hf_live = projections["frontier_current_lock_d1"]
     hf_projection = projections["frontier_current_lock_5_domain_projection"]
     judging_gap = projections["current_frontier_judging_gap"]
-    complete_runs = [r for r in run_rows if r["status_bucket"] in {"complete", "pass"}]
-    live_runs = [r for r in run_rows if r["run_class"] in {"holo_factory_live", "live_or_partial_live", "tiny_live_smoke"}]
+    board_run_rows = [r for r in run_rows if r.get("run_id") == CURRENT_LOCK_RUN_ID]
+    complete_runs = [r for r in board_run_rows if r["status_bucket"] in {"complete", "pass"}]
+    live_runs = [r for r in board_run_rows if r["run_class"] in {"holo_factory_live", "live_or_partial_live", "tiny_live_smoke"}]
     current_conditions = [r for r in condition_rows if r["source"] == "holo_factory" and r["run_id"] == CURRENT_LOCK_RUN_ID]
-    historical_pairs = [r for r in score_rows if r["source"] == "legacy_hash_locked_lift_rollup"]
     current_scores = [r for r in score_rows if r["source"] == "holo_factory"]
-    current_missing = [r for r in missing_rows if r.get("run_id") == CURRENT_LOCK_RUN_ID]
-    current_missing_not_scored = [r for r in current_missing if r.get("score_status") != "scored"]
 
     return f"""# D1 Evidence Board - Capital Markets
 
@@ -974,9 +891,9 @@ D1 now has a real data map. The current-lock HoloFactory frontier run generated 
 The key split:
 
 - **Current-lock operational evidence:** HoloFactory live frontier run `{CURRENT_LOCK_RUN_ID}`.
-- **Current-lock scoring evidence:** `{score_summary['current_holo_factory_proof_credit_rows']}` outside-DNA proof-credit candidate rows and `{score_summary['current_holo_factory_diagnostic_rows']}` same-DNA diagnostic rows are present.
+- **Current-lock scoring evidence:** `{score_summary['primary_clean_rows']}` primary-clean row, `{score_summary['quarantined_rows']}` quarantined audit/retest rows, and `{score_summary['current_holo_factory_proof_credit_rows']}` total outside-DNA proof-credit candidate rows are present.
 - **Proof-credit rejudge queue:** `{outside_rejudge_summary['observed_proof_credit_scores']} / {outside_rejudge_summary['expected_proof_credit_scores']}` outside-DNA final judge scores are present.
-- **Historical judged lift evidence:** legacy finance runs with measured Holo lift, but `matches_current_lock=false`.
+- **Mini lane:** no current-lock mini proof-credit run is scored yet; older legacy mini/error attempts are excluded from this board.
 
 ## Current-Lock Frontier Snapshot
 
@@ -994,7 +911,6 @@ The key split:
 - Final judge scores observed: `{judging_gap['d1_observed_final_judge_scores']} / {judging_gap['d1_expected_final_judge_scores']}`
 - Missing final judge scores: `{judging_gap['d1_missing_final_judge_scores']}`
 - Proof-credit outside-DNA judge scores observed: `{outside_rejudge_summary['observed_proof_credit_scores']} / {outside_rejudge_summary['expected_proof_credit_scores']}`
-- Final score status counts: `{missing_summary['score_status_counts']}`
 
 ## Current-Lock Condition Matrix
 
@@ -1002,9 +918,9 @@ The key split:
 
 ## Current Judge Scores Seen
 
-{markdown_table(current_scores, ['run_id', 'judge_id', 'judge_provider', 'solo_condition', 'holo_score', 'solo_score', 'gap_holo_minus_solo', 'percent_lift', 'score_credit_label'], limit=20)}
+{markdown_table(current_scores, ['run_id', 'judge_id', 'judge_provider', 'solo_condition', 'holo_score', 'solo_score', 'gap_holo_minus_solo', 'percent_lift', 'analysis_bucket', 'analysis_flags'], limit=20)}
 
-These scores are only for scored packets already present on disk. Rows labeled `proof_credit_candidate` use outside-DNA judges with clean prompt/trace boundaries; rows labeled `diagnostic_same_dna` remain diagnostic because judge DNA overlaps generation DNA.
+These scores are only for scored current-lock outside-DNA packets already present on disk. Rows in `primary_clean_metric` are the only rows currently allowed to drive the clean metric. Quarantined rows are retained for audit and retest, not deleted.
 
 ## Validity-Adjusted Score Lens
 
@@ -1012,19 +928,15 @@ Raw judge scores are preserved. This lens applies deterministic caps only when t
 
 - Rows adjusted: `{adjusted_summary['rows']}`
 - Proof-credit rows adjusted: `{adjusted_summary['proof_credit_rows']}`
-- Diagnostic rows adjusted: `{adjusted_summary['diagnostic_rows']}`
-- Raw observed mean gap: `{adjusted_summary['mean_raw_gap']}`
-- Raw observed mean lift: `{adjusted_summary['mean_raw_percent_lift']}%`
-- Validity-adjusted observed mean gap: `{adjusted_summary['mean_adjusted_gap']}`
-- Validity-adjusted observed mean lift: `{adjusted_summary['mean_adjusted_percent_lift']}%`
+- Primary-clean rows adjusted: `{adjusted_summary['primary_clean_rows']}`
+- Primary-clean raw mean lift: `{adjusted_summary['primary_clean_mean_raw_percent_lift']}%`
+- Primary-clean adjusted mean lift: `{adjusted_summary['primary_clean_mean_adjusted_percent_lift']}%`
+- Raw audit mean lift, all rows: `{adjusted_summary['mean_raw_percent_lift_audit_all']}%`
+- Validity-adjusted audit mean lift, all rows: `{adjusted_summary['mean_adjusted_percent_lift_audit_all']}%`
 
-{markdown_table(adjusted_rows, ['judge_id', 'solo_condition', 'score_credit_label', 'raw_holo_score', 'raw_solo_score', 'raw_gap_holo_minus_solo', 'adjusted_holo_score', 'adjusted_solo_score', 'adjusted_gap_holo_minus_solo', 'adjusted_percent_lift', 'solo_validity_cap_reason'], limit=20)}
+{markdown_table(adjusted_rows, ['judge_id', 'solo_condition', 'raw_holo_score', 'raw_solo_score', 'raw_percent_lift', 'adjusted_percent_lift', 'analysis_bucket', 'analysis_flags', 'solo_validity_cap_reason'], limit=20)}
 
 This is still not a final public architecture claim because D1 is one domain. The proof-credit queue is scored for the current-lock frontier lane; the next proof burden is matched mini, order-permutation, and cross-domain replication.
-
-## Missing Current-Lock Final Judging Queue
-
-{markdown_table(current_missing_not_scored, ['solo_condition', 'judge_id', 'judge_provider', 'judge_model', 'proof_credit_eligible', 'score_credit_label', 'score_status', 'prompt_card_exists', 'trace_exists'], limit=20)}
 
 ## Outside-DNA Rejudge Queue
 
@@ -1036,27 +948,14 @@ This queue is the proof-credit path for D1. It is not executed by this board bui
 
 {markdown_table(outside_rejudge_rows, ['solo_condition', 'judge_id', 'judge_provider', 'judge_model', 'proof_credit_eligible', 'score_status', 'rejudge_reason'], limit=20)}
 
-## Historical Diagnostic Lift
+## Current-Lock Run Inventory
 
-The legacy hash-locked lift rollup contains judged final-output comparisons, but those runs do not match the current lock. Treat as directional diagnostics, not public benchmark claims.
-
-- Historical scored pair rows: `{score_summary['historical_scored_pair_rows']}`
-- Historical mean lift, all rows: `{score_summary['historical_mean_percent_lift_all']}%`
-- Historical mean lift, clean rows: `{score_summary['historical_mean_percent_lift_clean']}%`
-- Historical lift range, all rows: `{score_summary['historical_lift_range_all']}`
-- Current-lock matching historical rows: `{score_summary['historical_current_lock_matching_rows']}`
-
-{markdown_table(historical_pairs, ['run_id', 'solo_condition', 'holo_score', 'solo_score', 'gap_holo_minus_solo', 'percent_lift', 'clean_percent_lift', 'matches_current_lock'], limit=12)}
-
-## Run Inventory Summary
-
-- Total D1 run records found: `{len(run_rows)}`
+- D1 run records shown: `{len(board_run_rows)}`
 - Complete/pass records: `{len(complete_runs)}`
 - Live/partial-live records: `{len(live_runs)}`
-- HoloFactory suite records: `{len([r for r in run_rows if r['lane'] == 'holo_factory'])}`
-- Legacy finance-algo records: `{len([r for r in run_rows if r['lane'] == 'legacy_finance_algo'])}`
+- HoloFactory suite records: `{len([r for r in board_run_rows if r['lane'] == 'holo_factory'])}`
 
-{markdown_table(run_rows, ['lane', 'run_id', 'status', 'run_class', 'condition_count', 'total_tokens', 'latency_minutes', 'final_judge_packets', 'turn_judge_packets', 'judge_scores'], limit=40)}
+{markdown_table(board_run_rows, ['lane', 'run_id', 'status', 'run_class', 'condition_count', 'total_tokens', 'latency_minutes', 'final_judge_packets', 'turn_judge_packets', 'judge_scores'], limit=40)}
 
 ## Five-Domain Projection
 
@@ -1070,38 +969,38 @@ Using the current-lock D1 HoloFactory frontier run as the base:
 - Final judge scores expected for 5 domains: `{hf_projection['final_judge_scores_expected']}`
 - Turn judge scores if enabled for 5 domains: `{hf_projection['turn_judge_scores_expected_if_enabled']}`
 
-Mini-lane projection is available but should be treated as diagnostic because the observed D1 mini source run ended with an error/partial status:
+Mini-lane projection is not proof evidence. No current-lock HoloFactory mini live run is scored yet:
 
-- Mini diagnostic D1 tokens: `{projections['mini_diagnostic_d1']['tokens']}`
-- Mini diagnostic 5-domain tokens: `{projections['mini_diagnostic_5_domain_projection']['tokens']}`
-- Mini diagnostic 5-domain latency: `{projections['mini_diagnostic_5_domain_projection']['latency_minutes']}` minutes
+- Mini current-lock status: `{projections['mini_current_lock_d1']['status']}`
+- Mini current-lock note: `{projections['mini_current_lock_d1']['note']}`
 
 ## Claim Boundaries
 
-- Do not claim current benchmark lift from D1 until outside-DNA final judging and proof-credit rollup are complete.
-- Do not merge historical judged lift with current-lock operational data as if they are the same benchmark.
+- Do not claim architecture-wide benchmark lift from D1 alone; mini, order, and cross-domain replication are still pending.
+- Do not merge historical or legacy judged lift with current-lock D1 proof analytics.
+- Do not use invalid-baseline rows, same-DNA rows, or high-variance/outlier judge rows in the primary clean metric.
 - Do not publish dollar cost projections until a model-pricing table is separately locked.
-- Current-lock D1 shows operational feasibility and validity gaps; historical D1 shows directional lift.
-- D1 has enough data to plan D2-D5, but not enough outside-DNA proof-credit judging to make the headline claim.
+- Current-lock D1 frontier has outside-DNA proof-credit candidate scoring; two solo baseline finals carry validity flags.
+- D1 has enough data to plan mini, order, and D2-D5 replication, but not enough to make the architecture-wide headline claim.
 
 ## Immediate Data Gaps
 
-1. Rejudge the current-lock final packets with outside-DNA blind solo judges.
-2. Build a current-lock proof-credit judge rollup separate from diagnostic same-DNA rows.
-3. Keep raw quality score, validity-adjusted score, and provider reliability score separate.
-4. Run or rebuild the current-lock mini lane cleanly if mini claims matter.
+1. Retest quarantined D1 rows with additional outside-DNA judges.
+2. Repair/rerun invalid solo baselines under the current lock.
+3. Keep raw audit score, primary-clean score, validity-adjusted score, and provider reliability score separate.
+4. Run the current-lock mini lane cleanly.
 5. Add dollar-cost estimates only after pricing assumptions are locked.
 """
 
 
 def main() -> int:
-    run_rows = collect_holo_factory_runs() + collect_legacy_runs()
-    condition_rows = collect_holo_factory_conditions() + collect_legacy_conditions()
-    score_rows = collect_judge_scores()
+    run_rows = collect_holo_factory_runs()
+    condition_rows = collect_holo_factory_conditions()
+    score_rows = annotate_score_rows(collect_judge_scores(), condition_rows)
     missing_rows = collect_missing_final_judge_queue()
     outside_rejudge_rows, outside_rejudge_summary = collect_outside_dna_rejudge_queue()
     adjusted_rows, adjusted_summary = collect_validity_adjusted_scores(score_rows, condition_rows)
-    projections = build_projections(run_rows, condition_rows, score_rows, missing_rows)
+    projections = build_projections(run_rows, condition_rows, score_rows, missing_rows, outside_rejudge_rows)
     score_summary = summarize_scores(score_rows)
     missing_summary = summarize_missing_judging(missing_rows)
     findings = build_findings(run_rows, condition_rows, score_rows, missing_rows, adjusted_summary, projections, outside_rejudge_summary)
@@ -1175,11 +1074,11 @@ def main() -> int:
         "solo_score",
         "gap_holo_minus_solo",
         "percent_lift",
-        "clean_gap",
-        "clean_percent_lift",
-        "matches_current_lock",
-        "judge_count",
-        "flagged_judge_count",
+        "holo_final_validity",
+        "solo_final_validity",
+        "analysis_bucket",
+        "analysis_flags",
+        "primary_metric_included",
     ]
     missing_fields = [
         "run_id",
@@ -1234,6 +1133,9 @@ def main() -> int:
         "solo_validity_cap",
         "holo_validity_cap_reason",
         "solo_validity_cap_reason",
+        "analysis_flags",
+        "analysis_bucket",
+        "primary_metric_included",
     ]
 
     write_json(OUT / "d1_run_index.json", {"generated_at_utc": utc_iso(), "rows": run_rows})
@@ -1312,13 +1214,12 @@ def main() -> int:
         OUT / "d1_claim_boundaries.md",
         """# D1 Claim Boundaries
 
-- Current-lock D1 operational evidence exists, but full current-lock judging is incomplete.
-- Existing current-lock judge scores are diagnostic if judge DNA overlaps generation DNA.
-- Proof-credit D1 scoring requires outside-DNA blind solo judges and a clean judge-visible boundary.
-- Historical D1 judged lift exists, but the scored runs do not match the current execution lock.
-- Treat historical lift as diagnostic until reproduced under the current lock.
-- Keep raw scores, validity-adjusted scores, and provider reliability separate.
-- No public headline claim should be made from D1 until outside-DNA final judging and rollup are complete.
+- Current-lock D1 frontier outside-DNA scoring exists, but it is not an architecture-wide public claim.
+- Primary-clean D1 scoring excludes invalid solo baselines, same-DNA judges, and high-variance/outlier judge-family rows.
+- xAI judge rows are retained for audit and retest, but are quarantined from the primary clean metric.
+- Raw audit scores, primary-clean scores, validity-adjusted scores, and provider reliability must remain separate.
+- Historical/legacy/different-architecture runs are excluded from D1 proof analytics.
+- No public headline claim should be made from D1 until quarantined rows are retested, invalid baselines are repaired/rerun, and mini/order/cross-domain replication is complete.
 """,
     )
     print(

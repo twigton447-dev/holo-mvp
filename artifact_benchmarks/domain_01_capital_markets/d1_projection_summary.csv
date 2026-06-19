@@ -1,7 +1,6 @@
 projection_group,tokens,latency_ms,latency_minutes,provider_calls,final_judge_packets,turn_judge_packets,final_judge_scores_expected,turn_judge_scores_expected_if_enabled,condition_count,status,note
-projection_basis,,,,,,,,,,,Token and latency projections multiply observed D1 traces. Dollar projections require a separately locked pricing table.
+projection_basis,,,,,,,,,,,Token and latency projections use only the current-lock D1 HoloFactory frontier run. Legacy/historical/mini-error runs are excluded from proof analytics.
 frontier_current_lock_d1,577728,1895126,31.585,30,3,18,,,,,
-frontier_current_lock_5_domain_projection,2888640,9475630,157.925,150,15,90,60,360,,,
-current_frontier_judging_gap,,,,,,,,,,,Only final judging is counted here; turn-level judge packets exist but have not been live-scored.
-mini_diagnostic_d1,892818,3154580,52.576,,,,,,6,diagnostic_partial_or_error,
-mini_diagnostic_5_domain_projection,4464090,15772900,262.88,,,,,,30,,"Mini projection uses legacy diagnostic run with error status, not a clean current-lock HoloFactory mini run."
+frontier_current_lock_5_domain_projection,2888640,9475630,157.925,150,15,90,30,360,,,
+current_frontier_judging_gap,,,,,,,,,,,Only outside-DNA proof-credit final judging is counted here.
+mini_current_lock_d1,,,,,,,,,,pending_not_scored,No current-lock HoloFactory mini live proof run is scored. Legacy mini/error attempts are excluded.

@@ -1,0 +1,111 @@
+{
+  "brief_id": "finance_algo_execution_report_brief_20260618",
+  "created_at_utc": "2026-06-18T22:39:48.375563+00:00",
+  "domain": "Finance / algorithmic trading / execution governance / market structure",
+  "audience": [
+    "portfolio managers",
+    "traders",
+    "quant leads",
+    "risk/compliance leaders",
+    "finance clients evaluating HoloBuild"
+  ],
+  "task": "Write a sophisticated, client-shareable report that designs and evaluates an adaptive execution intelligence system for algorithmic trading under current June 2026 market conditions.",
+  "deliverable_requirements": {
+    "format": "Markdown report",
+    "target_length_words": [
+      2800,
+      3400
+    ],
+    "tone": "institutional, precise, finance-native, visionary but not promotional",
+    "must_include": [
+      "A clear thesis that execution quality is now a real-time intelligence/governance problem.",
+      "A current-event market setup using the provided source pack only.",
+      "A system architecture with data inputs, decision modules, controls, and audit outputs.",
+      "A multi-interval segmentation from event-time/sub-second through T+1/funding/clearing horizons.",
+      "A benchmark framework: VWAP/TWAP/arrival price/implementation shortfall/POV plus conditional peer/venue/portfolio-weight benchmarks.",
+      "A portfolio-aware decision policy: continue, slow, accelerate, pause, reroute, cross, dark/lit split, hedge, resize, or escalate.",
+      "A risk/compliance section grounded in FINRA/SEC-style controls: testing, validation, kill switches, model logs, and post-trade review.",
+      "A model-risk section explaining why single AI agents can amplify recency/extrapolation and why adversarial multi-model review matters.",
+      "A practical implementation roadmap with instrumentation and success metrics.",
+      "Explicit statement that this is not investment advice and does not recommend buying/selling any security."
+    ],
+    "must_not_include": [
+      "No live trading instructions or specific security buy/sell recommendations.",
+      "No unsupported current-market claims outside the source pack.",
+      "No claims that Holo executes trades or has real brokerage access.",
+      "No legal advice; only operational/regulatory-aware framing.",
+      "No free browsing by models during generation."
+    ]
+  },
+  "holo_turn_design": {
+    "max_turns": 6,
+    "frontier_cohort": {
+      "openai": "gpt-5.5",
+      "anthropic": "claude-opus-4-8",
+      "xai": "grok-4.3"
+    },
+    "analyst_rotation": [
+      "openai:gpt-5.5",
+      "xai:grok-4.3",
+      "anthropic:claude-opus-4-8",
+      "xai:grok-4.3",
+      "anthropic:claude-opus-4-8",
+      "openai:gpt-5.5"
+    ],
+    "governor_rotation": [
+      null,
+      "xai:grok-4.3",
+      "openai:gpt-5.5",
+      "anthropic:claude-opus-4-8",
+      "xai:grok-4.3",
+      "openai:gpt-5.5"
+    ],
+    "final_turn_guard": "Turn 6 must create a candidate final report. Governor then runs deterministic validity gates on Turn 5 and Turn 6 before quality comparison. Incomplete, truncated, disclaimer-missing, source-invalid, process-contaminated, or out-of-band candidates cannot be selected for clean scoring. Governor then selects the stronger valid final artifact or requires a surgical merge. Turn 6 must not degrade Turn 5.",
+    "governor_job": "At each turn, produce a distilled mission packet with specific technical probe questions. Gov must pressure-test order flow, benchmarks, portfolio weights, funding/settlement, controls, model risk, source grounding, and client credibility before assigning the next role objective.",
+    "role_sequence_id": "finance_algo_execution_adversarial_six_turn_v1",
+    "technical_probe_protocol": "gov_technical_probe_protocol.json",
+    "finance_adversarial_role_flow": "finance_algo_adversarial_role_flow.json",
+    "post_turn_6_governor_gate": {
+      "required": true,
+      "instruction": "After Turn 6, Gov checks Turn 5 and Turn 6 with deterministic validity gates before quality comparison. Incomplete, truncated, disclaimer-missing, source-invalid, process-contaminated, or out-of-band candidates cannot be selected for clean scoring. Gov then compares valid candidates against the brief, source pack, rubric, and word-count band, and selects Turn 5, Turn 6, or requires a surgical merge. The judged final artifact is Gov-selected, not automatically Turn 6."
+    }
+  },
+  "judge_design": {
+    "judge_panel": "judge_panel_frontier_blind.json",
+    "scoring_rubric": "judge_rubric_8criteria.json",
+    "judge_count": 3,
+    "same_frontier_cohort_as_generation": true,
+    "judge_models": [
+      "openai:gpt-5.5",
+      "anthropic:claude-opus-4-8",
+      "xai:grok-4.3"
+    ],
+    "judges_receive": [
+      "original brief",
+      "frozen source pack",
+      "weighted scoring rubric",
+      "blind Document X",
+      "blind Document Y"
+    ],
+    "judges_do_not_receive": [
+      "which document is Holo",
+      "which document is Solo",
+      "which model generated either document",
+      "trace metadata",
+      "other judges' scores"
+    ],
+    "judge_internet_policy": "No browsing; score against the frozen source pack.",
+    "criteria": [
+      "Source-grounded current-market accuracy",
+      "Execution and microstructure sophistication",
+      "Benchmark and peer-comparison design",
+      "Portfolio-weight, risk, and funding integration",
+      "Adaptive decision-policy quality",
+      "Regulatory, control, and audit realism",
+      "Model-risk and adversarial insight",
+      "Executive clarity and client usefulness"
+    ],
+    "summary_descriptions_required": true,
+    "strict_json_output_required": true
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "judge_panel_id": "finance_algo_execution_frontier_blind_judge_panel_v1",
+  "domain": "current_event_finance_algorithmic_execution",
+  "judge_count": 3,
+  "same_frontier_cohort_as_generation": true,
+  "judge_models": [
+    {
+      "judge_id": "judge_frontier_01",
+      "provider": "openai",
+      "model": "gpt-5.5",
+      "same_as_generation_cohort": true
+    },
+    {
+      "judge_id": "judge_frontier_02",
+      "provider": "anthropic",
+      "model": "claude-opus-4-8",
+      "same_as_generation_cohort": true
+    },
+    {
+      "judge_id": "judge_frontier_03",
+      "provider": "xai",
+      "model": "grok-4.3",
+      "same_as_generation_cohort": true
+    }
+  ],
+  "blinding_contract": {
+    "documents_are_anonymous": true,
+    "document_labels": [
+      "Document X",
+      "Document Y"
+    ],
+    "judges_do_not_receive": [
+      "which document is Holo",
+      "which document is a solo model",
+      "which model generated either document",
+      "trace metadata",
+      "the anonymization map",
+      "other judges' scores or feedback"
+    ],
+    "judges_receive": [
+      "original brief",
+      "frozen source pack",
+      "weighted scoring rubric",
+      "Document X",
+      "Document Y"
+    ],
+    "judge_identity_visibility": "The harness knows which frontier model is judging. The judge prompt uses only the neutral judge_id and does not disclose document authorship.",
+    "judge_prompt_must_include_confirmation": "Confirm that you were not told which document is Holo or Solo and were not told the generating model identities."
+  },
+  "judge_internet_policy": "No browsing. Judges score only the frozen source pack, original brief, rubric, and blind documents.",
+  "scoring_output_contract": {
+    "format": "strict_json",
+    "required_top_level_fields": [
+      "judge_id",
+      "blindness_confirmation",
+      "document_x",
+      "document_y",
+      "comparative_verdict",
+      "validation_flags"
+    ],
+    "document_fields": [
+      "summary_description",
+      "criterion_scores",
+      "weighted_score_1_10",
+      "top_3_strengths",
+      "top_3_weaknesses_or_hidden_failures",
+      "unsupported_or_stale_claims",
+      "math_or_benchmark_logic_issues"
+    ],
+    "criterion_score_fields": [
+      "criterion_id",
+      "score_1_5",
+      "score_1_10",
+      "notes"
+    ]
+  },
+  "aggregation_contract": {
+    "per_judge_weight": "equal",
+    "primary_metric": "mean weighted_score_1_10 across three frontier judges",
+    "secondary_metrics": [
+      "median weighted_score_1_10",
+      "judge-level margin",
+      "criterion-level margin",
+      "qualitative hidden-failure count",
+      "unsupported-claim count"
+    ],
+    "chart_ready_outputs": [
+      "solo_vs_holo_weighted_gap",
+      "criterion_gap_table",
+      "judge_summary_table",
+      "source_grounding_flags"
+    ]
+  }
+}

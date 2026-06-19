@@ -1,0 +1,94 @@
+{
+  "rubric_id": "finance_algo_execution_artifact_rubric_v1",
+  "domain": "current_event_finance_algorithmic_execution",
+  "judge_internet_policy": "No browsing. Score only against the original brief, frozen source pack, and blind documents.",
+  "score_scales": {
+    "score_1_5": {
+      "1": "poor or materially flawed",
+      "2": "weak, incomplete, or shallow",
+      "3": "adequate but ordinary",
+      "4": "strong and professionally useful",
+      "5": "excellent, differentiated, and client-ready"
+    },
+    "score_1_10": {
+      "1": "unusable",
+      "5": "acceptable baseline",
+      "8": "strong institutional quality",
+      "10": "exceptional and unusually insightful"
+    }
+  },
+  "weighted_score_uses": "score_1_10",
+  "criteria": [
+    {
+      "id": "source_grounded_current_market_accuracy",
+      "name": "Source-grounded current-market accuracy",
+      "weight": 15,
+      "judge_notes": "Rewards precise use of the June 2026 source pack, correct source IDs, timestamp discipline, and clear separation of source facts from inference. Penalizes unsupported market claims or stale/current-event confusion."
+    },
+    {
+      "id": "execution_microstructure_sophistication",
+      "name": "Execution and microstructure sophistication",
+      "weight": 15,
+      "judge_notes": "Rewards concrete treatment of order flow, venue routing, queue fade, adverse selection, displayed versus hidden liquidity, tick/odd-lot implications, fee/rebate economics, and real execution failure modes."
+    },
+    {
+      "id": "benchmark_peer_comparison_design",
+      "name": "Benchmark and peer-comparison design",
+      "weight": 15,
+      "judge_notes": "Rewards robust benchmark logic across arrival price, implementation shortfall, VWAP, TWAP, POV, fill-adjusted measures, peer/venue-relative comparison, and benchmark-gaming defenses."
+    },
+    {
+      "id": "portfolio_weight_risk_funding_integration",
+      "name": "Portfolio-weight, risk, and funding integration",
+      "weight": 15,
+      "judge_notes": "Rewards integration of portfolio weights, active risk, factor/sector exposure, liquidity budget, cash drag, T+1 settlement, Treasury clearing, margin, collateral, and funding constraints."
+    },
+    {
+      "id": "adaptive_decision_policy_quality",
+      "name": "Adaptive decision-policy quality",
+      "weight": 12,
+      "judge_notes": "Rewards a usable policy for continue, slow, accelerate, pause, reroute, cross, dark/lit split, hedge, resize, or escalate, including clear trigger logic and conflict resolution."
+    },
+    {
+      "id": "regulatory_control_audit_realism",
+      "name": "Regulatory, control, and audit realism",
+      "weight": 10,
+      "judge_notes": "Rewards pre-trade controls, price collars, participation limits, kill switches, model logs, independent validation, auditability, human escalation, and separation of decision support from live execution."
+    },
+    {
+      "id": "model_risk_adversarial_insight",
+      "name": "Model-risk and adversarial insight",
+      "weight": 10,
+      "judge_notes": "Rewards identification of hidden failures, LLM recency/extrapolation bias, overconfident unsupported claims, model disagreement handling, and the value of adversarial multi-model review."
+    },
+    {
+      "id": "executive_clarity_client_usefulness",
+      "name": "Executive clarity and client usefulness",
+      "weight": 8,
+      "judge_notes": "Rewards a report that a portfolio manager, execution trader, quant lead, risk/compliance leader, or finance client could actually use. Penalizes architecture theater, vague prose, and poor prioritization."
+    }
+  ],
+  "required_document_feedback": [
+    "summary_description",
+    "top_3_strengths",
+    "top_3_weaknesses_or_hidden_failures",
+    "unsupported_or_stale_claims",
+    "math_or_benchmark_logic_issues",
+    "source_grounding_notes"
+  ],
+  "required_comparative_feedback": [
+    "stronger_document",
+    "margin_of_difference",
+    "why_the_stronger_document_won",
+    "where_the_weaker_document_was_closest",
+    "judge_confidence_1_5"
+  ],
+  "validation_rules": [
+    "Every criterion must have score_1_5 and score_1_10 for both documents.",
+    "Every criterion must include criterion-specific notes for both documents.",
+    "Scores must be numeric and within range.",
+    "If the weighted scores differ by less than 0.25 on the 1-10 scale, the judge must explain whether the result is a true tie or a narrow preference.",
+    "Extreme scores of 1, 2, 9, or 10 require notes naming the concrete evidence.",
+    "Judges must flag unsupported claims rather than rewarding confident prose."
+  ]
+}

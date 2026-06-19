@@ -1,0 +1,170 @@
+{
+  "protocol_id": "finance_algo_execution_gov_technical_probe_v1",
+  "purpose": "Make HoloGov actively interrogate each next model with technical, finance-native probes rather than merely summarizing prior turns.",
+  "internet_policy": "No browsing. Gov and all analysts must use only the frozen source pack and accumulated artifacts.",
+  "mission_packet_required_fields": [
+    "current_best_state",
+    "new_learnings_from_prior_turns",
+    "highest_value_flaw",
+    "source_context_anchors",
+    "artifact_validity_gates",
+    "repair_ledger",
+    "hidden_failure_probes",
+    "winning_features_to_preserve",
+    "technical_probe_questions",
+    "order_flow_and_microstructure_checks",
+    "benchmark_and_peer_comparison_checks",
+    "portfolio_weight_and_risk_checks",
+    "funding_settlement_and_clearing_checks",
+    "regulatory_control_and_audit_checks",
+    "model_risk_and_bias_checks",
+    "next_role_objective",
+    "constraints_and_do_not_do",
+    "open_tensions",
+    "convergence_target"
+  ],
+  "gov_behavior": [
+    "Ask pointed technical questions that the next model must answer or resolve in the artifact.",
+    "Prefer concrete probes over general critique.",
+    "Force the next model to defend benchmark choice, order-flow assumptions, portfolio constraints, and control design.",
+    "Identify where a real execution trader, quant PM, or compliance reviewer would challenge the draft.",
+    "Name the source IDs that support or constrain each technical repair.",
+    "Flag unsupported claims, stale assumptions, hand-wavy architecture, and missing failure modes.",
+    "Maintain a repair ledger in the form: open issue -> repaired -> regressed -> still missing.",
+    "Separate deterministic artifact validity from model-quality judgment; technical richness cannot rescue an incomplete or invalid final artifact.",
+    "Preserve known winning finance features unless they violate source grounding or validity gates: intent provenance, funding formula, audit schema, tiered controls, and model-risk safeguards.",
+    "Keep mission packets concise enough to focus the next model, but specific enough to prevent generic rewriting."
+  ],
+  "artifact_validity_doctrine": {
+    "incomplete_artifact_is_automatic_fail": true,
+    "technical_specificity_is_not_enough": true,
+    "required_final_checks": [
+      "final artifact must end cleanly, not mid-sentence or mid-section",
+      "final artifact must include every required brief item",
+      "final artifact must stay inside the target word band",
+      "final artifact must not contain internal process labels or mission-packet residue",
+      "final artifact must use only source IDs from the frozen source pack",
+      "final artifact must include explicit no-investment-advice and no-live-execution/no-brokerage-access disclaimers",
+      "final artifact must be client-ready, readable, source-grounded, and auditable"
+    ],
+    "selection_rule": "Gov may compare quality only after candidates pass deterministic validity gates. If Turn 6 is richer but incomplete or invalid, Gov must not select it. Select the complete valid candidate or require a surgical repair/merge and keep the run diagnostic until repaired."
+  },
+  "final_selection_gate": {
+    "turn_5_and_turn_6_both_checked": true,
+    "validity_precedes_quality_selection": true,
+    "required_selector_questions": [
+      "Does each candidate end cleanly?",
+      "Does each candidate contain every required brief item?",
+      "Does each candidate preserve the winning finance features?",
+      "Does either candidate contain unsupported source claims or process residue?",
+      "Did Turn 6 improve Turn 5, or did it degrade completeness, readability, or source grounding?",
+      "If both are valid, which is more client-ready after considering technical depth, auditability, and source grounding?"
+    ]
+  },
+  "standing_probe_bank": {
+    "order_flow_and_microstructure": [
+      "If the report says reroute, what exact observed signal triggers rerouting: spread widening, queue fade, fill shortfall, venue toxicity, quote instability, odd-lot depth, or fee/rebate economics?",
+      "How does the system distinguish genuine liquidity from fleeting displayed liquidity or quote fade?",
+      "Where does the report account for adverse selection after passive fills?",
+      "Does the architecture separate lit, dark, midpoint, auction, and internalization decisions, or does it blur venue types?",
+      "What happens when a venue looks cheap on explicit fees but expensive after impact, adverse selection, or missed fills?",
+      "How would Reg NMS tick-size/access-fee/odd-lot changes alter queue position, displayed depth, and benchmark interpretation?"
+    ],
+    "benchmarks_and_peer_comparison": [
+      "Which benchmark is authoritative for each strategy state: arrival price, implementation shortfall, VWAP, TWAP, POV, fill-adjusted VWAP, or custom portfolio-weight benchmark?",
+      "What if VWAP improves while implementation shortfall worsens?",
+      "Can peer/venue-relative performance be a crowding warning rather than validation?",
+      "How does the system avoid gaming the benchmark by slowing execution into favorable volume or hiding opportunity cost?",
+      "Does the report distinguish execution benchmark failure from alpha-model failure?",
+      "Are benchmark windows fixed clock-time, event-time, liquidity-time, or regime-conditioned?"
+    ],
+    "portfolio_weight_and_risk": [
+      "How does a single order's execution urgency change when the portfolio is off target weight, breaching factor exposure, or accumulating cash drag?",
+      "Where are active-risk, tracking-error, sector/factor, and liquidity-budget constraints represented?",
+      "Does the governor know when a trade is risk-reducing versus alpha-seeking versus cash-management driven?",
+      "How should the system behave when the best execution choice worsens portfolio-level exposure?",
+      "Where does the report incorporate cross-asset signals from rates, energy, FX, volatility, and Treasury liquidity?"
+    ],
+    "funding_settlement_and_clearing": [
+      "How does T+1 settlement affect cash availability, fail risk, borrow/locate timing, and rebalance sequencing?",
+      "Where do Treasury clearing, repo margin, collateral mobility, and funding liquidity enter the execution decision?",
+      "Does the system treat overnight/funding constraints as first-class inputs or after-the-fact operations concerns?",
+      "What happens when the execution model wants to accelerate but settlement/funding state argues for throttling?"
+    ],
+    "regulatory_control_and_audit": [
+      "What pre-trade controls fire before the model can change schedule, venue, price collar, or participation rate?",
+      "What is the kill-switch condition and who/what can activate it?",
+      "How are parameter changes logged so compliance can reconstruct why an order accelerated, paused, or rerouted?",
+      "Where does independent testing/validation sit before production rollout?",
+      "Does the report separate advisory decision support from autonomous trade execution?"
+    ],
+    "model_risk_and_ai_bias": [
+      "Where could an LLM agent amplify recency bias, extrapolative beliefs, or disposition-like behavior?",
+      "How does adversarial review detect confident but source-unsupported market claims?",
+      "What does the system do when the models disagree: average, escalate, pick a specialist, or require human review?",
+      "What claims must be labeled as inference rather than source-grounded fact?",
+      "How do we prevent the final report from sounding sophisticated while hiding an untested trading assumption?",
+      "Could the artifact sound technically rich while still being incomplete, non-client-ready, or unauditable?"
+    ],
+    "client_quality_bar": [
+      "Would a head trader find the execution loop operationally real, or just conceptually elegant?",
+      "Would a quant PM see enough benchmark math and failure modes to trust the architecture?",
+      "Would compliance see sufficient controls, logs, and human escalation points?",
+      "What is the single most impressive non-obvious insight in the current draft?",
+      "What is the single most dangerous overclaim in the current draft?"
+    ]
+  },
+  "turn_specific_probe_emphasis": [
+    {
+      "turn": 2,
+      "gov_or_critic_focus": "Initial hostile microstructure attack",
+      "must_probe": [
+        "order-flow assumptions",
+        "benchmark gaming",
+        "venue-routing failure modes",
+        "unsupported market claims"
+      ]
+    },
+    {
+      "turn": 3,
+      "gov_or_critic_focus": "Risk/control and portfolio repair",
+      "must_probe": [
+        "portfolio weights",
+        "funding and T+1",
+        "Reg NMS and Treasury clearing implications",
+        "auditability and kill switches"
+      ]
+    },
+    {
+      "turn": 4,
+      "gov_or_critic_focus": "Practitioner skepticism",
+      "must_probe": [
+        "would a trader believe this",
+        "would a quant PM trust the benchmark logic",
+        "would compliance approve the controls",
+        "what is hand-wavy"
+      ]
+    },
+    {
+      "turn": 5,
+      "gov_or_critic_focus": "Near-final synthesis pressure",
+      "must_probe": [
+        "source-grounded current-market setup",
+        "architecture completeness",
+        "implementation roadmap",
+        "client readability"
+      ]
+    },
+    {
+      "turn": 6,
+      "gov_or_critic_focus": "Final report selection and degradation guard",
+      "must_probe": [
+        "does Turn 6 improve on Turn 5",
+        "does it preserve the strongest technical insights",
+        "does it introduce unsupported claims",
+        "does each candidate pass deterministic validity gates before quality comparison",
+        "should Gov select Turn 5, Turn 6, or require surgical merge"
+      ]
+    }
+  ]
+}

@@ -12,8 +12,13 @@ PROCESS_RESIDUE_PATTERNS = (
     r'\bprobe\s+\d+\s+answered\b',
     r'\bturn\s+\d+\s+mission\b',
     r'\bgovernor mission packet\b',
+    r'\bcurrent_best_state\b',
     r'\bnext_role_objective\b',
     r'\bhighest_value_flaw\b',
+    r'\btechnical_probe_questions\b',
+    r'\brepair_ledger\b',
+    r'\bhidden_failure_probes\b',
+    r'\bwinning_features_to_preserve\b',
     r'\bconvergence_target\b',
 )
 DISCLAIMER_PATTERNS = (
@@ -64,7 +69,9 @@ def context_allowed_source_ids(context: dict[str, Any]) -> set[str] | None:
 
 def context_required_items(context: dict[str, Any]) -> list[str]:
     deliverable = context.get('deliverable', {})
-    items = deliverable.get('must_include', [])
+    items = deliverable.get('must_include')
+    if items is None:
+        items = context.get('deliverable_requirements', {}).get('must_include', [])
     if isinstance(items, list):
         return [str(item) for item in items]
     return []
@@ -88,6 +95,10 @@ def context_word_bounds(context: dict[str, Any], fallback_max_words: int | None 
     target = context.get('deliverable', {}).get('word_count_target', {})
     min_words = target.get('min')
     max_words = target.get('max', fallback_max_words)
+    if min_words is None and max_words is None:
+        current_event_target = context.get('deliverable_requirements', {}).get('target_length_words')
+        if isinstance(current_event_target, list) and len(current_event_target) >= 2:
+            min_words, max_words = current_event_target[0], current_event_target[1]
     return (
         int(min_words) if min_words else None,
         int(max_words) if max_words else None,

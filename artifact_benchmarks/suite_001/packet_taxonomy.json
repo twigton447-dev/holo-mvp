@@ -1,0 +1,128 @@
+{
+  "taxonomy_id": "holo_packet_taxonomy_20260619",
+  "status": "planning_not_frozen",
+  "benchmark_credit": false,
+  "public_claim": false,
+  "created_at_utc": "2026-06-19T10:05:00Z",
+  "core_worlds": {
+    "holobuild": {
+      "core_verb": "build",
+      "proof_question": "Can Holo produce a materially better artifact than solo models from the same brief, source pack, turn budget, word band, and judging rubric?",
+      "outputs": [
+        "report",
+        "memo",
+        "deck",
+        "legal ruling",
+        "strategy packet",
+        "clinical reasoning packet",
+        "service design",
+        "student plan"
+      ]
+    },
+    "holoverify": {
+      "core_verb": "verify",
+      "proof_question": "Can Holo prevent unsupported claims, unsafe actions, boundary violations, false positives, and false negatives better than solo models?",
+      "outputs": [
+        "boundary decision",
+        "source-grounding audit",
+        "hallucination check",
+        "authority check",
+        "policy/action decision",
+        "evidence ledger"
+      ]
+    },
+    "overlap": {
+      "core_verbs": [
+        "dissect",
+        "compare",
+        "repair"
+      ],
+      "proof_question": "Can Holo inspect an already trusted artifact and find material discrepancies that solo models miss while staying grounded and bounded?",
+      "outputs": [
+        "discrepancy report",
+        "postmortem",
+        "premortem",
+        "baseline improvement",
+        "ruling critique",
+        "guideline gap analysis"
+      ]
+    }
+  },
+  "packet_families": [
+    {
+      "family_id": "blank_slate_build",
+      "world": "holobuild",
+      "start_state": "Brief plus source pack; no strong baseline artifact.",
+      "task": "Create the best possible artifact from scratch.",
+      "primary_metric": "Holo final score minus solo final score."
+    },
+    {
+      "family_id": "best_existing_artifact_improvement",
+      "world": "holobuild_overlap",
+      "start_state": "Brief plus source pack plus strong baseline artifact.",
+      "task": "Improve an already good artifact.",
+      "primary_metric": "Holo-improved artifact minus solo-improved artifact, plus both versus baseline."
+    },
+    {
+      "family_id": "discrepancy_discovery",
+      "world": "overlap",
+      "start_state": "Predefined trusted artifact plus authority/source pack plus finding schema.",
+      "task": "Find discrepancies, contradictions, unsupported claims, missing assumptions, missing gates, or unhandled edge cases.",
+      "primary_metric": "Material true discrepancies found minus false positives."
+    },
+    {
+      "family_id": "known_outcome_retrospective",
+      "world": "overlap_holoverify",
+      "start_state": "Pre-event information and artifact; later known outcome hidden from generation and used only for evaluation.",
+      "task": "Identify failure modes that later became real without hindsight laundering.",
+      "primary_metric": "Real failure mode found, ranked correctly, and repaired from pre-event evidence."
+    },
+    {
+      "family_id": "competition_court",
+      "world": "holobuild_overlap",
+      "start_state": "Frozen fact pattern, authority pack, role rules, output format.",
+      "task": "Run adversarial argument, counterargument, clerk analysis, majority/dissent, or final ruling.",
+      "primary_metric": "Reasoning quality, counterargument strength, source handling, administrability, and final decision clarity."
+    },
+    {
+      "family_id": "medical_diagnostic_paradox",
+      "world": "overlap_holoverify",
+      "start_state": "Synthetic case, guideline/source pack, contradiction ledger, red-flag/cannot-miss checklist.",
+      "task": "Produce a diagnostic reasoning and safety packet, not a diagnosis or treatment plan.",
+      "primary_metric": "Cannot-miss conditions preserved, contradictions identified, uncertainty stated, unsafe closure avoided.",
+      "boundary": "No real patient data, no medical advice, no treatment instructions."
+    },
+    {
+      "family_id": "experience_quality",
+      "world": "holobuild",
+      "start_state": "User/customer objective, constraints, context pack, evaluation rubric.",
+      "task": "Design a better experience, plan, or recommendation artifact.",
+      "primary_metric": "Quality lift, usefulness, constraint fit, specificity, and implementation realism."
+    }
+  ],
+  "recommended_execution_order": [
+    "finance blank-slate build packet under current lock",
+    "finance best-existing-artifact improvement packet",
+    "finance discrepancy discovery packet",
+    "adversarial paradox packet",
+    "medical diagnostic paradox packet with synthetic data only",
+    "legal competition/court packet",
+    "experience quality packet for food/hotel/student workflows"
+  ],
+  "claim_required_fields": [
+    "packet_family",
+    "packet_id",
+    "hash_lock",
+    "holo_cohort",
+    "solo_cohort",
+    "governor_model",
+    "judge_panel",
+    "turn_budget",
+    "source_policy",
+    "clean_only_mean_lift",
+    "all_judge_mean_lift",
+    "token_ratio",
+    "latency_ratio",
+    "invalid_artifact_rate"
+  ]
+}

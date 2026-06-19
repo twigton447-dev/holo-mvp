@@ -26,6 +26,18 @@ The suite asks whether Holo's Governor-orchestrated adversarial loop creates mea
 
 See `DOMAIN_EXPANSION_BACKLOG_20260619.md` and `domain_expansion_backlog.json`.
 
+## Packet Taxonomy
+
+Suite packets now split into three worlds:
+
+- HoloBuild packets: build or improve artifacts.
+- HoloVerify packets: verify facts, boundaries, authority, and action safety.
+- Overlap packets: dissect trusted artifacts, find discrepancies, and repair them.
+
+The working packet families are blank-slate build, best-existing-artifact improvement, discrepancy discovery, known-outcome retrospective, competition/court, medical diagnostic paradox, and experience quality.
+
+See `PACKET_TAXONOMY_20260619.md` and `packet_taxonomy.json`.
+
 ## Current Status
 
 Finance has a built and hash-locked frontier-3 packet.

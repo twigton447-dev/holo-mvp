@@ -38,6 +38,12 @@ The working packet families are blank-slate build, best-existing-artifact improv
 
 See `PACKET_TAXONOMY_20260619.md` and `packet_taxonomy.json`.
 
+## Packet Roadmap
+
+The current packet queue starts with the finance blank-slate build packet, then moves to finance best-existing-artifact improvement and finance discrepancy discovery before opening new domains.
+
+See `PACKET_ROADMAP_20260619.md` and `packet_roadmap.json`.
+
 ## Current Status
 
 Finance has a built and hash-locked frontier-3 packet.

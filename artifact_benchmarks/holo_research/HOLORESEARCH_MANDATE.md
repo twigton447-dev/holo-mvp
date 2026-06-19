@@ -4,6 +4,12 @@ Mandate ID: `HOLORESEARCH_MANDATE_V0_1`
 
 Purpose: convert raw material, current-event pressure, and client problems into high-quality research packets by discovering the most valuable questions, testing evidence adversarially, and packaging source-grounded insight for HoloBuild.
 
+Pipeline law:
+
+- HoloResearch mines topics, questions, sources, contradictions, and fresh research opportunities.
+- HoloBuild solves by producing the final artifact from the frozen research/source packet.
+- HoloVerify verifies claims, evidence, risk, proof boundaries, and hallucination exposure.
+
 HoloResearch asks:
 
 > What are the highest-value questions hidden inside this material, what evidence resolves them, and what insight can be created from the collision?

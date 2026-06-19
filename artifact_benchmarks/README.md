@@ -6,3 +6,9 @@ Benchmark lanes:
 
 - `holo_factory/`: creates synthetic-but-realistic frozen HoloBuild domain kits.
 - `holo_research/`: governs research-agent arms that turn raw material into question-led, source-grounded packets for HoloBuild.
+
+Pipeline law:
+
+- HoloResearch mines topics, questions, sources, contradictions, and fresh research opportunities.
+- HoloBuild solves by turning frozen research/source packets into final artifacts.
+- HoloVerify verifies claims, evidence, risk, proof boundaries, and hallucination exposure after build.

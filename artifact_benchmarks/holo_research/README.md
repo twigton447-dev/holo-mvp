@@ -2,6 +2,11 @@
 
 HoloResearch turns raw material, a topic, or a client problem into a decision-ready research packet for HoloBuild.
 
+Pipeline:
+- HoloResearch mines.
+- HoloBuild solves.
+- HoloVerify verifies.
+
 Boundary:
 - HoloResearch discovers and stress-tests questions, sources, contradictions, and insight.
 - HoloBuild turns a frozen research/source packet into the final artifact.
@@ -17,6 +22,8 @@ Optional deep mode:
 - `HR-10`: unlocked only when Gov records unresolved contradictions, missing decisive sources, or domain complexity that justifies the extra spend.
 
 The research output is not the final article, memo, report, or deck. The output is a sealed research packet that HoloBuild can use.
+
+HoloResearch should surface what is worth solving before HoloBuild solves it.
 
 Core law:
 - Same seed material.

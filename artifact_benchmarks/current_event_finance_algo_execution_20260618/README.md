@@ -49,6 +49,15 @@ Mini-Holo diagnostic matrix:
 
 These routes use all five locked minis as Holo analysts with one mini bookending each six-turn run. Run all five before making route-insensitive mini-Holo claims.
 
+Mini-Holo Gov-ablation matrix:
+
+- `mini_gov_haiku_order_a`
+- `mini_gov_gemini_lite_order_a`
+- `mini_gov_grok_order_a`
+- `mini_gov_minimax_order_a`
+
+These routes keep the same mini HoloAgent analyst order as `mini_order_a_openai_bookend` and change only Gov. Frontier judges remain fixed for all runs. Use these to measure Gov sensitivity, not to replace the order matrix.
+
 Unavailable on this key:
 
 - Anthropic: `claude-fable-5`
@@ -64,6 +73,7 @@ Unavailable on this key:
 - `judge_panel_frontier_blind.json` - four-judge blinded panel contract with no-self-DNA primary scoring.
 - `solo_model_sweep.json` - immutable suite manifest for frontier, mini, and extended solo runs.
 - `mini_holo_data_trail_matrix.json` - diagnostic matrix for every locked mini solo versus every all-mini Holo route.
+- `mini_holo_governor_ablation_matrix.json` - diagnostic matrix for fixed analyst order with different mini Gov models.
 
 - `gov_technical_probe_protocol.json` / `.md` - technical probing requirements for Gov mission packets.
 - `finance_algo_adversarial_role_flow.json` / `.md` - finance-specific six-turn adversarial role order.

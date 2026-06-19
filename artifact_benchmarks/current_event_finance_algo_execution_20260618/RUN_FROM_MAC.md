@@ -120,6 +120,34 @@ python3 build_benchmark_intelligence.py --latest
 
 Do not run these routes in parallel. Each run creates a full data trail: prompt cards, traces, condition manifests, state objects, mission packets, final selection, blind judge packets, judge scores, analysis CSVs, and intelligence chart data.
 
+## Mini-Holo Gov Ablation
+
+Use this after the first mini-Holo route exists. This holds the HoloAgent analyst order constant and changes only Gov. Frontier judges remain fixed across every run.
+
+```bash
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_gov_haiku_order_a --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_gov_gemini_lite_order_a --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_gov_grok_order_a --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+
+caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_gov_minimax_order_a --timeout 900
+python3 inspect_google_frontier_run.py --latest
+python3 analyze_google_frontier_run.py --latest
+python3 build_benchmark_intelligence.py --latest
+```
+
+Interpretation rule: if lift survives Gov changes, report it as Gov-robust within this packet and cohort. Still report the best Gov, worst Gov, sensitivity range, token cost, and latency.
+
 ## Extended Solo Sweep
 
 This is the expensive diagnostic lane for ranking every mapped solo against the same Holo artifact. Run only after frontier and mini suites smoke cleanly:

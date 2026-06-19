@@ -1,0 +1,87 @@
+{
+  "matrix_id": "finance_algo_execution_mini_holo_gov_ablation_v1",
+  "status": "diagnostic_ready_not_benchmark_credit",
+  "created_at_utc": "2026-06-19T09:05:00Z",
+  "benchmark_credit": false,
+  "public_claim": false,
+  "purpose": "Test whether mini-Holo lift survives Gov DNA changes while keeping frontier judges, frozen packet, mini solo suite, analyst HoloAgent order, turn budget, prompts, word band, and validity gates constant.",
+  "packet_id": "current_event_finance_algo_execution_20260618",
+  "solo_suite_id": "mini_baseline",
+  "judge_panel_policy": "Keep the same frontier judge panel for all Gov ablations. Judges are the measuring instrument, not the experimental variable.",
+  "fixed_items": {
+    "same_packet": true,
+    "same_frontier_judges": true,
+    "same_solo_suite": "mini_baseline",
+    "same_analyst_order_as": "mini_order_a_openai_bookend",
+    "same_turn_budget": 6,
+    "same_base_turn_prompts": true,
+    "same_blind_pair_format": true,
+    "same_validity_gate": true,
+    "same_no_browse_generation_policy": true
+  },
+  "variable_under_test": "governor_model",
+  "baseline_route": {
+    "routing_config_id": "mini_order_a_openai_bookend",
+    "governor_model": "openai:gpt-4o-mini"
+  },
+  "gov_ablation_routing_configs": [
+    {
+      "routing_config_id": "mini_gov_haiku_order_a",
+      "governor_model": "anthropic:claude-haiku-4-5-20251001"
+    },
+    {
+      "routing_config_id": "mini_gov_gemini_lite_order_a",
+      "governor_model": "google:gemini-2.5-flash-lite"
+    },
+    {
+      "routing_config_id": "mini_gov_grok_order_a",
+      "governor_model": "xai:grok-3-mini"
+    },
+    {
+      "routing_config_id": "mini_gov_minimax_order_a",
+      "governor_model": "minimax:MiniMax-M2.5-highspeed"
+    }
+  ],
+  "interpretation_rule": "If Holo lift persists across multiple Gov models, describe it as Gov-robust within this packet and cohort. Do not claim Gov does not matter; report the Gov sensitivity range, best Gov, worst Gov, and variance.",
+  "audience_note": "This lane is useful for lower-cost, high-accessibility claims: mini HoloAgents can be tested for student, college, and lightweight professional workflows while frontier judges keep the evaluation bar high.",
+  "chart_units": [
+    {
+      "chart_id": "gov_ablation_score_bars",
+      "description": "Plot each Gov route against every mini solo under identical frontier judging."
+    },
+    {
+      "chart_id": "gov_sensitivity_range",
+      "description": "Show min, max, and mean Holo score across Gov models."
+    },
+    {
+      "chart_id": "gov_cost_vs_lift",
+      "description": "Compare token cost and latency by Gov model against score lift."
+    },
+    {
+      "chart_id": "gov_failure_rate",
+      "description": "Track deterministic validity failures by Gov model."
+    }
+  ],
+  "recommended_run_order": [
+    {
+      "step": 1,
+      "command": "Complete or reuse mini_order_a_openai_bookend as the OpenAI-mini Gov baseline."
+    },
+    {
+      "step": 2,
+      "command": "caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_gov_haiku_order_a --timeout 900"
+    },
+    {
+      "step": 3,
+      "command": "caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_gov_gemini_lite_order_a --timeout 900"
+    },
+    {
+      "step": 4,
+      "command": "caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_gov_grok_order_a --timeout 900"
+    },
+    {
+      "step": 5,
+      "command": "caffeinate -dimsu python3 run_google_frontier_e2e.py --run-live --solo-suite mini_baseline --routing-config mini_gov_minimax_order_a --timeout 900"
+    }
+  ]
+}

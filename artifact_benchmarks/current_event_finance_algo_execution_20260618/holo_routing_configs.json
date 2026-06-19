@@ -118,7 +118,67 @@
         "minimax:MiniMax-M2.5-highspeed"
       ],
       "notes": "All five locked minis participate; MiniMax opens and closes. OpenAI mini remains fixed Gov for comparability across mini routes."
+    },
+    {
+      "routing_config_id": "mini_gov_haiku_order_a",
+      "label": "Mini Holo Gov Ablation - Haiku Gov",
+      "cohort_lane": "mini_all5_gov_ablation",
+      "governor_model": "anthropic:claude-haiku-4-5-20251001",
+      "analyst_rotation": [
+        "openai:gpt-4o-mini",
+        "anthropic:claude-haiku-4-5-20251001",
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini",
+        "minimax:MiniMax-M2.5-highspeed",
+        "openai:gpt-4o-mini"
+      ],
+      "notes": "Gov ablation route. Analyst order is identical to mini_order_a_openai_bookend; only Gov changes to Haiku."
+    },
+    {
+      "routing_config_id": "mini_gov_gemini_lite_order_a",
+      "label": "Mini Holo Gov Ablation - Gemini Flash Lite Gov",
+      "cohort_lane": "mini_all5_gov_ablation",
+      "governor_model": "google:gemini-2.5-flash-lite",
+      "analyst_rotation": [
+        "openai:gpt-4o-mini",
+        "anthropic:claude-haiku-4-5-20251001",
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini",
+        "minimax:MiniMax-M2.5-highspeed",
+        "openai:gpt-4o-mini"
+      ],
+      "notes": "Gov ablation route. Analyst order is identical to mini_order_a_openai_bookend; only Gov changes to Gemini Flash Lite."
+    },
+    {
+      "routing_config_id": "mini_gov_grok_order_a",
+      "label": "Mini Holo Gov Ablation - Grok mini Gov",
+      "cohort_lane": "mini_all5_gov_ablation",
+      "governor_model": "xai:grok-3-mini",
+      "analyst_rotation": [
+        "openai:gpt-4o-mini",
+        "anthropic:claude-haiku-4-5-20251001",
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini",
+        "minimax:MiniMax-M2.5-highspeed",
+        "openai:gpt-4o-mini"
+      ],
+      "notes": "Gov ablation route. Analyst order is identical to mini_order_a_openai_bookend; only Gov changes to Grok mini."
+    },
+    {
+      "routing_config_id": "mini_gov_minimax_order_a",
+      "label": "Mini Holo Gov Ablation - MiniMax Gov",
+      "cohort_lane": "mini_all5_gov_ablation",
+      "governor_model": "minimax:MiniMax-M2.5-highspeed",
+      "analyst_rotation": [
+        "openai:gpt-4o-mini",
+        "anthropic:claude-haiku-4-5-20251001",
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini",
+        "minimax:MiniMax-M2.5-highspeed",
+        "openai:gpt-4o-mini"
+      ],
+      "notes": "Gov ablation route. Analyst order is identical to mini_order_a_openai_bookend; only Gov changes to MiniMax."
     }
   ],
-  "balance_rule": "Frontier configs use the same three analyst models exactly twice. Mini configs use all five locked mini analyst models, with one mini bookending each config because six turns cannot evenly divide five models. Run all five mini configs before making route-insensitive mini-Holo claims."
+  "balance_rule": "Frontier configs use the same three analyst models exactly twice. Mini order configs use all five locked mini analyst models, with one mini bookending each config because six turns cannot evenly divide five models. Mini Gov-ablation configs hold analyst order constant and change only Gov. Run all relevant configs before making route-insensitive or Gov-insensitive mini-Holo claims."
 }

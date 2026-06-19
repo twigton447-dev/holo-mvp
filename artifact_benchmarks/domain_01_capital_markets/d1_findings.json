@@ -1,8 +1,8 @@
 {
-  "generated_at_utc": "2026-06-19T19:45:52Z",
+  "generated_at_utc": "2026-06-19T20:21:27Z",
   "domain_id": "capital_markets_trade_shock_execution",
   "current_lock_run": "holo_factory_live_20260619T180210Z",
-  "decision": "Finish current-lock final judging and validity-adjusted rollup before running D2 or making a headline lift claim.",
+  "decision": "Rejudge current-lock D1 with outside-DNA blind solo judges before running D2 or making a headline lift claim.",
   "evidence_classes": [
     {
       "name": "current_lock_operational",
@@ -11,8 +11,8 @@
     },
     {
       "name": "current_lock_scoring",
-      "status": "incomplete",
-      "summary": "2 of 12 expected final judge scores are present."
+      "status": "diagnostic_only",
+      "summary": "2 of 12 legacy-panel final judge scores are present; proof-credit outside-DNA scores are still missing."
     },
     {
       "name": "historical_diagnostic_lift",
@@ -38,20 +38,47 @@
     ],
     "raw_observed_score_summary": {
       "rows": 2,
+      "proof_credit_rows": 0,
+      "diagnostic_rows": 2,
       "pairs_scored": [
         "solo_anthropic"
       ],
       "mean_gap": -0.03,
       "mean_percent_lift": -0.146,
+      "proof_credit_mean_gap": null,
+      "proof_credit_mean_percent_lift": null,
       "claimable": false
     },
     "validity_adjusted_observed_score_summary": {
       "rows": 2,
+      "proof_credit_rows": 0,
+      "diagnostic_rows": 2,
       "mean_raw_gap": -0.03,
       "mean_raw_percent_lift": -0.146,
       "mean_adjusted_gap": 0.68,
       "mean_adjusted_percent_lift": 8.5,
-      "policy_note": "Validity-adjusted scores preserve raw judge scores and apply deterministic caps only when revalidation flagged invalid finals."
+      "policy_note": "Validity-adjusted scores preserve raw judge scores and apply deterministic caps only when revalidation flagged invalid finals. Rows with same-DNA or historical-current-lock mismatch are diagnostic only."
+    },
+    "outside_dna_rejudge_summary": {
+      "current_lock_run": "holo_factory_live_20260619T180210Z",
+      "outside_dna_panel_size": 2,
+      "expected_proof_credit_scores": 6,
+      "observed_proof_credit_scores": 0,
+      "score_status_counts": {
+        "not_attempted": 6
+      },
+      "score_status_by_pair": {
+        "solo_anthropic": {
+          "not_attempted": 2
+        },
+        "solo_google": {
+          "not_attempted": 2
+        },
+        "solo_openai": {
+          "not_attempted": 2
+        }
+      },
+      "policy_note": "Proof-credit D1 scoring requires outside-DNA blind solo judges. Same-DNA frontier judges remain diagnostic only."
     }
   },
   "token_and_latency_state": {
@@ -63,16 +90,17 @@
   },
   "findings": [
     "D1 generation is operationally real: the current HoloFactory frontier run completed all four generation conditions and produced judge packets.",
-    "D1 current-lock quality scoring is not complete: only the Anthropic solo pair has any parsed judge scores, and only two judges are present.",
-    "The four-judge law changes the score gap: current D1 expects twelve final judge scores, not nine.",
+    "D1 current-lock quality scoring is not proof-credit complete: the only parsed final judge scores are same-DNA rows and must remain diagnostic.",
+    "The legacy four-judge frontier panel still has twelve diagnostic score slots, but proof credit now requires a separate outside-DNA rejudge panel.",
     "Raw current-lock scores presently show a near tie on the Anthropic pair, but the Anthropic solo final is deterministically invalid for missing the required risk/compliance/audit section.",
-    "Under the proposed deterministic validity cap, the existing Anthropic-pair sample flips from a raw near tie to a Holo advantage; this remains non-claimable until all pairs and judges are scored.",
+    "Under the proposed deterministic validity cap, the existing Anthropic-pair sample flips from a raw near tie to a Holo advantage; this remains non-claimable until outside-DNA rejudging is complete.",
     "Historical D1 evidence supports directional Holo lift, but it must be labeled diagnostic because it does not match the current run lock.",
     "For public or client-facing claims, report raw quality, validity-adjusted quality, and provider reliability as separate scores."
   ],
   "next_actions": [
-    "Score the remaining current-lock final judge queue.",
-    "Regenerate this D1 evidence board after scoring.",
+    "Rejudge current-lock D1 final packets with outside-DNA blind solo judges.",
+    "Regenerate this D1 evidence board after outside-DNA judging.",
+    "Keep same-DNA frontier judge rows diagnostic-only even if additional legacy-panel scores are added.",
     "Only then decide whether D1 is ready to promote from operational evidence to benchmark-credit evidence.",
     "Keep D2-D5 packet generation paused until D1 final scoring is closed or explicitly accepted as partial."
   ]

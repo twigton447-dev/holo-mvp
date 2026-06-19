@@ -1,12 +1,14 @@
 {
-  "generated_at_utc": "2026-06-19T19:45:52Z",
+  "generated_at_utc": "2026-06-19T20:21:27Z",
   "summary": {
     "rows": 2,
+    "proof_credit_rows": 0,
+    "diagnostic_rows": 2,
     "mean_raw_gap": -0.03,
     "mean_raw_percent_lift": -0.146,
     "mean_adjusted_gap": 0.68,
     "mean_adjusted_percent_lift": 8.5,
-    "policy_note": "Validity-adjusted scores preserve raw judge scores and apply deterministic caps only when revalidation flagged invalid finals."
+    "policy_note": "Validity-adjusted scores preserve raw judge scores and apply deterministic caps only when revalidation flagged invalid finals. Rows with same-DNA or historical-current-lock mismatch are diagnostic only."
   },
   "rows": [
     {
@@ -15,6 +17,11 @@
       "judge_id": "judge_frontier_01",
       "solo_condition": "solo_anthropic",
       "holo_condition": "holo_frontier_fixed_v1",
+      "judge_provider": "openai",
+      "judge_model": "gpt-5.5",
+      "proof_credit_eligible": false,
+      "score_credit_label": "diagnostic_same_dna_boundary_violation",
+      "score_use": "diagnostic_only",
       "raw_holo_score": 8.6,
       "raw_solo_score": 9.06,
       "raw_gap_holo_minus_solo": -0.46,
@@ -34,6 +41,11 @@
       "judge_id": "judge_frontier_02",
       "solo_condition": "solo_anthropic",
       "holo_condition": "holo_frontier_fixed_v1",
+      "judge_provider": "anthropic",
+      "judge_model": "claude-opus-4-8",
+      "proof_credit_eligible": false,
+      "score_credit_label": "diagnostic_same_dna_boundary_violation",
+      "score_use": "diagnostic_only",
       "raw_holo_score": 8.76,
       "raw_solo_score": 8.36,
       "raw_gap_holo_minus_solo": 0.4,

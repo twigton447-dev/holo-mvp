@@ -2,12 +2,21 @@ from __future__ import annotations
 
 import csv
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "harness"))
+from proof_credit_rules import (  # noqa: E402
+    annotate_judge_credit,
+    generation_dna_for_pair,
+    runtime_visibility_errors,
+    select_outside_dna_judges,
+)
+
 D1_DOMAIN = "capital_markets_trade_shock_execution"
 CURRENT_LOCK_RUN_ID = "holo_factory_live_20260619T180210Z"
 OUT = ROOT / "domain_01_capital_markets"
@@ -20,6 +29,10 @@ DEFAULT_JUDGE_PANEL = [
     {"judge_id": "judge_frontier_02", "provider": "anthropic", "model": "claude-opus-4-8", "outside_judge": False},
     {"judge_id": "judge_frontier_03", "provider": "google", "model": "gemini-3.1-pro-preview", "outside_judge": False},
     {"judge_id": "judge_frontier_04", "provider": "xai", "model": "grok-4.3", "outside_judge": True},
+]
+OUTSIDE_DNA_REJUDGE_PANEL = [
+    {"judge_id": "judge_outside_xai_01", "provider": "xai", "model": "grok-4.3"},
+    {"judge_id": "judge_outside_minimax_01", "provider": "minimax", "model": "MiniMax-M2.5-highspeed"},
 ]
 
 
@@ -47,7 +60,7 @@ def write_text(path: Path, text: str) -> None:
 def write_csv(path: Path, rows: list[dict[str, Any]], fields: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
+        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow({field: row.get(field, "") for field in fields})
@@ -66,6 +79,47 @@ def load_judge_panel(run_root: Path) -> list[dict[str, Any]]:
         if isinstance(panel, list) and panel:
             return panel
     return DEFAULT_JUDGE_PANEL
+
+
+def load_run_cohort_plans(run_root: Path) -> dict[str, dict[str, Any]]:
+    manifest_path = run_root / "suite_run_manifest.json"
+    if not manifest_path.exists():
+        return {}
+    manifest = read_json(manifest_path)
+    plans: dict[str, dict[str, Any]] = {}
+    for plan in manifest.get("cohorts", []) or []:
+        cohort = plan.get("cohort")
+        if cohort:
+            plans[str(cohort)] = plan
+    return plans
+
+
+def pair_generation_dna(run_root: Path, pair: dict[str, Any]) -> dict[str, Any]:
+    if isinstance(pair.get("generation_dna"), dict):
+        return pair["generation_dna"]
+    plans = load_run_cohort_plans(run_root)
+    cohort_plan = plans.get(str(pair.get("cohort") or ""))
+    if not cohort_plan:
+        return {}
+    return generation_dna_for_pair(
+        cohort_plan=cohort_plan,
+        solo_condition=pair.get("solo_condition"),
+        holo_condition=pair.get("holo_condition"),
+    )
+
+
+def judge_boundary_status(prompt_card_path: Path, trace_path: Path) -> dict[str, Any]:
+    errors: list[str] = []
+    for path, scope in ((prompt_card_path, "judge_prompt_card"), (trace_path, "judge_trace")):
+        if path.exists():
+            try:
+                errors.extend(runtime_visibility_errors(read_json(path), scope=scope))
+            except Exception as exc:
+                errors.append(f"{scope}:unreadable:{exc.__class__.__name__}")
+    return {
+        "judge_boundary_clean": not errors,
+        "judge_boundary_errors": ";".join(errors),
+    }
 
 
 def ms_to_minutes(ms: int | float | None) -> float | None:
@@ -281,6 +335,7 @@ def collect_missing_final_judge_queue() -> list[dict[str, Any]]:
         for packet_path in final_packets:
             packet_id = packet_path.stem
             pair = pair_map.get(packet_id, {})
+            generation_dna = pair_generation_dna(run_root, pair)
             if pair.get("domain_id") and pair.get("domain_id") != D1_DOMAIN:
                 continue
             for judge in panel:
@@ -288,6 +343,11 @@ def collect_missing_final_judge_queue() -> list[dict[str, Any]]:
                 score_path = run_root / "judge_scores" / packet_id / f"{judge_id}.json"
                 prompt_card_path = run_root / "prompt_cards" / "judges" / packet_id / f"{judge_id}.json"
                 trace_path = run_root / "traces" / "judges" / packet_id / f"{judge_id}.json"
+                credit = annotate_judge_credit(judge, generation_dna)
+                boundary = judge_boundary_status(prompt_card_path, trace_path)
+                proof_credit_eligible = credit["proof_credit_eligible"] and boundary["judge_boundary_clean"]
+                score_credit_label = credit["score_credit_label"] if boundary["judge_boundary_clean"] else f"{credit['score_credit_label']}_boundary_violation"
+                score_use = credit["score_use"] if proof_credit_eligible else "diagnostic_only"
                 if score_path.exists():
                     score_status = "scored"
                 elif prompt_card_path.exists() or trace_path.exists():
@@ -307,7 +367,16 @@ def collect_missing_final_judge_queue() -> list[dict[str, Any]]:
                         "judge_id": judge_id,
                         "judge_provider": judge.get("provider"),
                         "judge_model": judge.get("model"),
-                        "outside_judge": judge.get("outside_judge", False),
+                        "outside_judge": proof_credit_eligible,
+                        "panel_outside_judge_claim": judge.get("outside_judge", False),
+                        "proof_credit_eligible": proof_credit_eligible,
+                        "score_credit_label": score_credit_label,
+                        "score_use": score_use,
+                        "judge_dna_overlap": credit["judge_dna_overlap"],
+                        "generation_dna_providers": credit["generation_dna_providers"],
+                        "generation_dna_models": credit["generation_dna_models"],
+                        "judge_boundary_clean": boundary["judge_boundary_clean"],
+                        "judge_boundary_errors": boundary["judge_boundary_errors"],
                         "score_status": score_status,
                         "score_exists": score_path.exists(),
                         "prompt_card_exists": prompt_card_path.exists(),
@@ -318,6 +387,78 @@ def collect_missing_final_judge_queue() -> list[dict[str, Any]]:
                     }
                 )
     return rows
+
+
+def collect_outside_dna_rejudge_queue() -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    run_root = HOLO_FACTORY_RUNS / CURRENT_LOCK_RUN_ID
+    pair_map = load_anonymization_map(run_root)
+    final_packets = sorted(run_root.glob(f"judge_packets/final/{D1_DOMAIN}/**/*.json"))
+    for packet_path in final_packets:
+        packet_id = packet_path.stem
+        pair = pair_map.get(packet_id, {})
+        if pair.get("domain_id") and pair.get("domain_id") != D1_DOMAIN:
+            continue
+        generation_dna = pair_generation_dna(run_root, pair)
+        selected_judges = select_outside_dna_judges(OUTSIDE_DNA_REJUDGE_PANEL, generation_dna)
+        for judge in selected_judges:
+            judge_id = judge["judge_id"]
+            score_path = run_root / "judge_scores" / packet_id / f"{judge_id}.json"
+            prompt_card_path = run_root / "prompt_cards" / "judges" / packet_id / f"{judge_id}.json"
+            trace_path = run_root / "traces" / "judges" / packet_id / f"{judge_id}.json"
+            boundary = judge_boundary_status(prompt_card_path, trace_path)
+            score_status = "scored" if score_path.exists() else ("attempted_no_parsed_score" if prompt_card_path.exists() or trace_path.exists() else "not_attempted")
+            proof_credit_eligible = bool(judge["proof_credit_eligible"] and boundary["judge_boundary_clean"])
+            rows.append(
+                {
+                    "run_id": CURRENT_LOCK_RUN_ID,
+                    "judge_packet_id": packet_id,
+                    "packet_kind": "final",
+                    "domain_id": pair.get("domain_id") or D1_DOMAIN,
+                    "cohort": pair.get("cohort"),
+                    "turn": pair.get("turn"),
+                    "solo_condition": pair.get("solo_condition"),
+                    "holo_condition": pair.get("holo_condition"),
+                    "judge_id": judge_id,
+                    "judge_provider": judge.get("provider"),
+                    "judge_model": judge.get("model"),
+                    "proof_credit_eligible": proof_credit_eligible,
+                    "score_credit_label": judge["score_credit_label"] if proof_credit_eligible else f"{judge['score_credit_label']}_boundary_violation",
+                    "score_use": judge["score_use"] if proof_credit_eligible else "diagnostic_only",
+                    "judge_dna_overlap": judge["judge_dna_overlap"],
+                    "generation_dna_providers": judge["generation_dna_providers"],
+                    "generation_dna_models": judge["generation_dna_models"],
+                    "judge_boundary_clean": boundary["judge_boundary_clean"],
+                    "judge_boundary_errors": boundary["judge_boundary_errors"],
+                    "score_status": score_status,
+                    "score_exists": score_path.exists(),
+                    "prompt_card_exists": prompt_card_path.exists(),
+                    "trace_exists": trace_path.exists(),
+                    "score_path": str(score_path) if score_path.exists() else "",
+                    "prompt_card_path": str(prompt_card_path) if prompt_card_path.exists() else "",
+                    "trace_path": str(trace_path) if trace_path.exists() else "",
+                    "rejudge_reason": "outside_dna_required_for_proof_credit",
+                }
+            )
+
+    by_status: dict[str, int] = {}
+    by_pair: dict[str, dict[str, int]] = {}
+    for row in rows:
+        status = str(row.get("score_status") or "unknown")
+        by_status[status] = by_status.get(status, 0) + 1
+        pair = str(row.get("solo_condition") or row.get("judge_packet_id"))
+        by_pair.setdefault(pair, {})
+        by_pair[pair][status] = by_pair[pair].get(status, 0) + 1
+    summary = {
+        "current_lock_run": CURRENT_LOCK_RUN_ID,
+        "outside_dna_panel_size": len(OUTSIDE_DNA_REJUDGE_PANEL),
+        "expected_proof_credit_scores": len(rows),
+        "observed_proof_credit_scores": len([row for row in rows if row.get("score_status") == "scored" and row.get("proof_credit_eligible") is True]),
+        "score_status_counts": by_status,
+        "score_status_by_pair": by_pair,
+        "policy_note": "Proof-credit D1 scoring requires outside-DNA blind solo judges. Same-DNA frontier judges remain diagnostic only.",
+    }
+    return rows, summary
 
 
 def validity_cap_for_condition(condition_row: dict[str, Any] | None) -> tuple[float | None, str]:
@@ -376,6 +517,11 @@ def collect_validity_adjusted_scores(score_rows: list[dict[str, Any]], condition
                 "judge_id": row.get("judge_id"),
                 "solo_condition": solo_condition,
                 "holo_condition": holo_condition,
+                "judge_provider": row.get("judge_provider"),
+                "judge_model": row.get("judge_model"),
+                "proof_credit_eligible": row.get("proof_credit_eligible", False),
+                "score_credit_label": row.get("score_credit_label", ""),
+                "score_use": row.get("score_use", "diagnostic_only"),
                 "raw_holo_score": row.get("holo_score"),
                 "raw_solo_score": row.get("solo_score"),
                 "raw_gap_holo_minus_solo": row.get("gap_holo_minus_solo"),
@@ -396,11 +542,13 @@ def collect_validity_adjusted_scores(score_rows: list[dict[str, Any]], condition
 
     summary = {
         "rows": len(rows),
+        "proof_credit_rows": len([r for r in rows if r.get("proof_credit_eligible") is True]),
+        "diagnostic_rows": len([r for r in rows if r.get("proof_credit_eligible") is not True]),
         "mean_raw_gap": mean([r["raw_gap_holo_minus_solo"] for r in rows if isinstance(r.get("raw_gap_holo_minus_solo"), (int, float))]),
         "mean_raw_percent_lift": mean([r["raw_percent_lift"] for r in rows if isinstance(r.get("raw_percent_lift"), (int, float))]),
         "mean_adjusted_gap": mean([r["adjusted_gap_holo_minus_solo"] for r in rows if isinstance(r.get("adjusted_gap_holo_minus_solo"), (int, float))]),
         "mean_adjusted_percent_lift": mean([r["adjusted_percent_lift"] for r in rows if isinstance(r.get("adjusted_percent_lift"), (int, float))]),
-        "policy_note": "Validity-adjusted scores preserve raw judge scores and apply deterministic caps only when revalidation flagged invalid finals.",
+        "policy_note": "Validity-adjusted scores preserve raw judge scores and apply deterministic caps only when revalidation flagged invalid finals. Rows with same-DNA or historical-current-lock mismatch are diagnostic only.",
     }
     return rows, summary
 
@@ -417,6 +565,19 @@ def collect_judge_scores() -> list[dict[str, Any]]:
             pair = pair_map.get(judge_packet_id, {})
             if pair.get("domain_id") != D1_DOMAIN:
                 continue
+            harness = score.get("_harness") or {}
+            judge = {
+                "judge_id": score.get("judge_id"),
+                "provider": harness.get("judge_provider"),
+                "model": harness.get("judge_model"),
+            }
+            generation_dna = pair_generation_dna(run_root, pair)
+            credit = annotate_judge_credit(judge, generation_dna)
+            prompt_card_path = run_root / "prompt_cards" / "judges" / judge_packet_id / f"{score.get('judge_id')}.json"
+            trace_path = run_root / "traces" / "judges" / judge_packet_id / f"{score.get('judge_id')}.json"
+            boundary = judge_boundary_status(prompt_card_path, trace_path)
+            proof_credit_eligible = credit["proof_credit_eligible"] and boundary["judge_boundary_clean"]
+            score_credit_label = credit["score_credit_label"] if boundary["judge_boundary_clean"] else f"{credit['score_credit_label']}_boundary_violation"
             doc_x_condition = pair.get("document_x_condition")
             doc_y_condition = pair.get("document_y_condition")
             x_score = (score.get("document_x") or {}).get("weighted_score_1_10")
@@ -438,6 +599,16 @@ def collect_judge_scores() -> list[dict[str, Any]]:
                     "turn": pair.get("turn"),
                     "solo_condition": pair.get("solo_condition"),
                     "holo_condition": pair.get("holo_condition"),
+                    "judge_provider": harness.get("judge_provider"),
+                    "judge_model": harness.get("judge_model"),
+                    "proof_credit_eligible": proof_credit_eligible,
+                    "score_credit_label": score_credit_label,
+                    "score_use": credit["score_use"] if proof_credit_eligible else "diagnostic_only",
+                    "judge_dna_overlap": credit["judge_dna_overlap"],
+                    "generation_dna_providers": credit["generation_dna_providers"],
+                    "generation_dna_models": credit["generation_dna_models"],
+                    "judge_boundary_clean": boundary["judge_boundary_clean"],
+                    "judge_boundary_errors": boundary["judge_boundary_errors"],
                     "document_x_condition": doc_x_condition,
                     "document_y_condition": doc_y_condition,
                     "document_x_score": x_score,
@@ -465,6 +636,16 @@ def collect_judge_scores() -> list[dict[str, Any]]:
                         "turn": 6,
                         "solo_condition": pair.get("solo_condition"),
                         "holo_condition": "holo",
+                        "judge_provider": "",
+                        "judge_model": "",
+                        "proof_credit_eligible": False,
+                        "score_credit_label": "diagnostic_historical_non_current_lock",
+                        "score_use": "diagnostic_only",
+                        "judge_dna_overlap": "",
+                        "generation_dna_providers": "",
+                        "generation_dna_models": "",
+                        "judge_boundary_clean": "",
+                        "judge_boundary_errors": "",
                         "document_x_condition": "",
                         "document_y_condition": "",
                         "document_x_score": "",
@@ -485,13 +666,19 @@ def collect_judge_scores() -> list[dict[str, Any]]:
 
 def summarize_scores(score_rows: list[dict[str, Any]]) -> dict[str, Any]:
     current = [r for r in score_rows if r.get("source") == "holo_factory" and isinstance(r.get("gap_holo_minus_solo"), (int, float))]
+    current_proof = [r for r in current if r.get("proof_credit_eligible") is True]
+    current_diagnostic = [r for r in current if r.get("proof_credit_eligible") is not True]
     historical = [r for r in score_rows if r.get("source") == "legacy_hash_locked_lift_rollup" and isinstance(r.get("percent_lift"), (int, float))]
     def mean(values: list[float]) -> float | None:
         return round(sum(values) / len(values), 3) if values else None
     return {
         "current_holo_factory_scored_rows": len(current),
+        "current_holo_factory_proof_credit_rows": len(current_proof),
+        "current_holo_factory_diagnostic_rows": len(current_diagnostic),
         "current_holo_factory_mean_gap": mean([r["gap_holo_minus_solo"] for r in current]),
         "current_holo_factory_mean_percent_lift": mean([r["percent_lift"] for r in current if isinstance(r.get("percent_lift"), (int, float))]),
+        "current_holo_factory_proof_credit_mean_gap": mean([r["gap_holo_minus_solo"] for r in current_proof]),
+        "current_holo_factory_proof_credit_mean_percent_lift": mean([r["percent_lift"] for r in current_proof if isinstance(r.get("percent_lift"), (int, float))]),
         "current_holo_factory_pairs_scored": sorted(set(r.get("solo_condition") for r in current)),
         "historical_scored_pair_rows": len(historical),
         "historical_mean_percent_lift_all": mean([r["percent_lift"] for r in historical]),
@@ -511,7 +698,7 @@ def build_projections(run_rows: list[dict[str, Any]], condition_rows: list[dict[
     mini_latency = sum(int(r.get("latency_ms") or 0) for r in mini_conditions)
     current_missing_rows = [r for r in missing_rows if r.get("run_id") == CURRENT_LOCK_RUN_ID]
     expected_final_scores_per_domain_frontier = len(current_missing_rows)
-    current_final_scores = len([r for r in score_rows if r["source"] == "holo_factory" and r.get("packet_kind") == "final"])
+    current_final_scores = len([r for r in score_rows if r["source"] == "holo_factory" and r.get("run_id") == CURRENT_LOCK_RUN_ID and r.get("packet_kind") == "final"])
     return {
         "generated_at_utc": utc_iso(),
         "projection_basis": {
@@ -574,6 +761,8 @@ def summarize_missing_judging(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "current_lock_run": CURRENT_LOCK_RUN_ID,
         "expected_final_scores": len(current),
+        "proof_credit_eligible_rows": len([r for r in current if r.get("proof_credit_eligible") is True]),
+        "diagnostic_only_rows": len([r for r in current if r.get("proof_credit_eligible") is not True]),
         "score_status_counts": by_status,
         "score_status_by_pair": by_pair,
     }
@@ -586,6 +775,7 @@ def build_findings(
     missing_rows: list[dict[str, Any]],
     adjusted_summary: dict[str, Any],
     projections: dict[str, Any],
+    outside_rejudge_summary: dict[str, Any],
 ) -> dict[str, Any]:
     score_summary = summarize_scores(score_rows)
     missing_summary = summarize_missing_judging(missing_rows)
@@ -602,7 +792,7 @@ def build_findings(
         "generated_at_utc": utc_iso(),
         "domain_id": D1_DOMAIN,
         "current_lock_run": CURRENT_LOCK_RUN_ID,
-        "decision": "Finish current-lock final judging and validity-adjusted rollup before running D2 or making a headline lift claim.",
+        "decision": "Rejudge current-lock D1 with outside-DNA blind solo judges before running D2 or making a headline lift claim.",
         "evidence_classes": [
             {
                 "name": "current_lock_operational",
@@ -611,8 +801,8 @@ def build_findings(
             },
             {
                 "name": "current_lock_scoring",
-                "status": "incomplete",
-                "summary": f"{missing_summary['score_status_counts'].get('scored', 0)} of {missing_summary['expected_final_scores']} expected final judge scores are present.",
+                "status": "diagnostic_only",
+                "summary": f"{missing_summary['score_status_counts'].get('scored', 0)} of {missing_summary['expected_final_scores']} legacy-panel final judge scores are present; proof-credit outside-DNA scores are still missing.",
             },
             {
                 "name": "historical_diagnostic_lift",
@@ -630,12 +820,17 @@ def build_findings(
             ],
             "raw_observed_score_summary": {
                 "rows": score_summary["current_holo_factory_scored_rows"],
+                "proof_credit_rows": score_summary["current_holo_factory_proof_credit_rows"],
+                "diagnostic_rows": score_summary["current_holo_factory_diagnostic_rows"],
                 "pairs_scored": score_summary["current_holo_factory_pairs_scored"],
                 "mean_gap": score_summary["current_holo_factory_mean_gap"],
                 "mean_percent_lift": score_summary["current_holo_factory_mean_percent_lift"],
+                "proof_credit_mean_gap": score_summary["current_holo_factory_proof_credit_mean_gap"],
+                "proof_credit_mean_percent_lift": score_summary["current_holo_factory_proof_credit_mean_percent_lift"],
                 "claimable": False,
             },
             "validity_adjusted_observed_score_summary": adjusted_summary,
+            "outside_dna_rejudge_summary": outside_rejudge_summary,
         },
         "token_and_latency_state": {
             "holo_tokens": holo_tokens or None,
@@ -646,16 +841,17 @@ def build_findings(
         },
         "findings": [
             "D1 generation is operationally real: the current HoloFactory frontier run completed all four generation conditions and produced judge packets.",
-            "D1 current-lock quality scoring is not complete: only the Anthropic solo pair has any parsed judge scores, and only two judges are present.",
-            "The four-judge law changes the score gap: current D1 expects twelve final judge scores, not nine.",
+            "D1 current-lock quality scoring is not proof-credit complete: the only parsed final judge scores are same-DNA rows and must remain diagnostic.",
+            "The legacy four-judge frontier panel still has twelve diagnostic score slots, but proof credit now requires a separate outside-DNA rejudge panel.",
             "Raw current-lock scores presently show a near tie on the Anthropic pair, but the Anthropic solo final is deterministically invalid for missing the required risk/compliance/audit section.",
-            "Under the proposed deterministic validity cap, the existing Anthropic-pair sample flips from a raw near tie to a Holo advantage; this remains non-claimable until all pairs and judges are scored.",
+            "Under the proposed deterministic validity cap, the existing Anthropic-pair sample flips from a raw near tie to a Holo advantage; this remains non-claimable until outside-DNA rejudging is complete.",
             "Historical D1 evidence supports directional Holo lift, but it must be labeled diagnostic because it does not match the current run lock.",
             "For public or client-facing claims, report raw quality, validity-adjusted quality, and provider reliability as separate scores.",
         ],
         "next_actions": [
-            "Score the remaining current-lock final judge queue.",
-            "Regenerate this D1 evidence board after scoring.",
+            "Rejudge current-lock D1 final packets with outside-DNA blind solo judges.",
+            "Regenerate this D1 evidence board after outside-DNA judging.",
+            "Keep same-DNA frontier judge rows diagnostic-only even if additional legacy-panel scores are added.",
             "Only then decide whether D1 is ready to promote from operational evidence to benchmark-credit evidence.",
             "Keep D2-D5 packet generation paused until D1 final scoring is closed or explicitly accepted as partial.",
         ],
@@ -666,6 +862,7 @@ def build_findings_markdown(findings: dict[str, Any]) -> str:
     quality = findings["current_lock_quality_state"]
     token = findings["token_and_latency_state"]
     adjusted = quality["validity_adjusted_observed_score_summary"]
+    rejudge = quality["outside_dna_rejudge_summary"]
     next_actions = "\n".join(f"{index}. {item}" for index, item in enumerate(findings["next_actions"], start=1))
     return f"""# D1 Findings - Capital Markets
 
@@ -679,7 +876,7 @@ Domain: `{findings['domain_id']}`
 
 ## Bottom Line
 
-D1 is useful now, but it is not a finished public benchmark claim yet. The strongest current-lock fact is operational: HoloFactory completed the frontier D1 generation run and produced the trace/packet structure we need. The weakest current-lock fact is scoring completeness: only `{quality['raw_observed_score_summary']['rows']}` parsed final judge scores exist, all on `{', '.join(quality['raw_observed_score_summary']['pairs_scored']) or 'no pairs'}`.
+D1 is useful now, but it is not a finished public benchmark claim yet. The strongest current-lock fact is operational: HoloFactory completed the frontier D1 generation run and produced the trace/packet structure we need. The weakest current-lock fact is proof-credit scoring: `{quality['raw_observed_score_summary']['proof_credit_rows']}` outside-DNA final judge scores exist, while `{quality['raw_observed_score_summary']['diagnostic_rows']}` parsed final judge scores are diagnostic only.
 
 ## Current-Lock Quality
 
@@ -690,6 +887,7 @@ D1 is useful now, but it is not a finished public benchmark claim yet. The stron
 - Raw observed mean lift: `{quality['raw_observed_score_summary']['mean_percent_lift']}%`
 - Validity-adjusted observed mean gap: `{adjusted['mean_adjusted_gap']}`
 - Validity-adjusted observed mean lift: `{adjusted['mean_adjusted_percent_lift']}%`
+- Proof-credit final judge scores observed: `{rejudge['observed_proof_credit_scores']} / {rejudge['expected_proof_credit_scores']}`
 - Claimable now: `false`
 
 ## Invalid Finals
@@ -728,6 +926,8 @@ def build_board(
     condition_rows: list[dict[str, Any]],
     score_rows: list[dict[str, Any]],
     missing_rows: list[dict[str, Any]],
+    outside_rejudge_rows: list[dict[str, Any]],
+    outside_rejudge_summary: dict[str, Any],
     adjusted_rows: list[dict[str, Any]],
     adjusted_summary: dict[str, Any],
     projections: dict[str, Any],
@@ -758,7 +958,8 @@ D1 now has a real data map. The current-lock HoloFactory frontier run generated 
 The key split:
 
 - **Current-lock operational evidence:** HoloFactory live frontier run `{CURRENT_LOCK_RUN_ID}`.
-- **Current-lock scoring evidence:** incomplete; `{judging_gap['d1_observed_final_judge_scores']} / {judging_gap['d1_expected_final_judge_scores']}` expected final judge scores are present.
+- **Current-lock scoring evidence:** diagnostic only; `{judging_gap['d1_observed_final_judge_scores']} / {judging_gap['d1_expected_final_judge_scores']}` legacy frontier-panel final judge scores are present, but `0` proof-credit outside-DNA final scores are present.
+- **Proof-credit rejudge queue:** `{outside_rejudge_summary['observed_proof_credit_scores']} / {outside_rejudge_summary['expected_proof_credit_scores']}` outside-DNA final judge scores are present.
 - **Historical judged lift evidence:** legacy finance runs with measured Holo lift, but `matches_current_lock=false`.
 
 ## Current-Lock Frontier Snapshot
@@ -776,6 +977,7 @@ The key split:
 - Turn judge packets: `{hf_live['turn_judge_packets']}`
 - Final judge scores observed: `{judging_gap['d1_observed_final_judge_scores']} / {judging_gap['d1_expected_final_judge_scores']}`
 - Missing final judge scores: `{judging_gap['d1_missing_final_judge_scores']}`
+- Proof-credit outside-DNA judge scores observed: `{outside_rejudge_summary['observed_proof_credit_scores']} / {outside_rejudge_summary['expected_proof_credit_scores']}`
 - Final score status counts: `{missing_summary['score_status_counts']}`
 
 ## Current-Lock Condition Matrix
@@ -784,27 +986,39 @@ The key split:
 
 ## Current Judge Scores Seen
 
-{markdown_table(current_scores, ['run_id', 'judge_id', 'solo_condition', 'holo_score', 'solo_score', 'gap_holo_minus_solo', 'percent_lift'], limit=20)}
+{markdown_table(current_scores, ['run_id', 'judge_id', 'judge_provider', 'solo_condition', 'holo_score', 'solo_score', 'gap_holo_minus_solo', 'percent_lift', 'score_credit_label'], limit=20)}
 
-These scores are only for scored packets already present on disk. They are not enough for a full D1 claim.
+These scores are only for scored packets already present on disk. They are diagnostic because judge DNA overlaps generation DNA.
 
 ## Validity-Adjusted Score Lens
 
 Raw judge scores are preserved. This lens applies deterministic caps only when the artifact gate says a final is invalid.
 
 - Rows adjusted: `{adjusted_summary['rows']}`
+- Proof-credit rows adjusted: `{adjusted_summary['proof_credit_rows']}`
+- Diagnostic rows adjusted: `{adjusted_summary['diagnostic_rows']}`
 - Raw observed mean gap: `{adjusted_summary['mean_raw_gap']}`
 - Raw observed mean lift: `{adjusted_summary['mean_raw_percent_lift']}%`
 - Validity-adjusted observed mean gap: `{adjusted_summary['mean_adjusted_gap']}`
 - Validity-adjusted observed mean lift: `{adjusted_summary['mean_adjusted_percent_lift']}%`
 
-{markdown_table(adjusted_rows, ['judge_id', 'solo_condition', 'raw_holo_score', 'raw_solo_score', 'raw_gap_holo_minus_solo', 'adjusted_holo_score', 'adjusted_solo_score', 'adjusted_gap_holo_minus_solo', 'adjusted_percent_lift', 'solo_validity_cap_reason'], limit=20)}
+{markdown_table(adjusted_rows, ['judge_id', 'solo_condition', 'score_credit_label', 'raw_holo_score', 'raw_solo_score', 'raw_gap_holo_minus_solo', 'adjusted_holo_score', 'adjusted_solo_score', 'adjusted_gap_holo_minus_solo', 'adjusted_percent_lift', 'solo_validity_cap_reason'], limit=20)}
 
-This is still not a final claim because the current-lock score queue is incomplete.
+This is still not a final claim because the rows are diagnostic-only and the outside-DNA proof-credit queue is unscored.
 
 ## Missing Current-Lock Final Judging Queue
 
-{markdown_table(current_missing_not_scored, ['solo_condition', 'judge_id', 'judge_provider', 'judge_model', 'outside_judge', 'score_status', 'prompt_card_exists', 'trace_exists'], limit=20)}
+{markdown_table(current_missing_not_scored, ['solo_condition', 'judge_id', 'judge_provider', 'judge_model', 'proof_credit_eligible', 'score_credit_label', 'score_status', 'prompt_card_exists', 'trace_exists'], limit=20)}
+
+## Outside-DNA Rejudge Queue
+
+This queue is the proof-credit path for D1. It is not executed by this board builder.
+
+- Expected proof-credit outside-DNA final judge scores: `{outside_rejudge_summary['expected_proof_credit_scores']}`
+- Observed proof-credit outside-DNA final judge scores: `{outside_rejudge_summary['observed_proof_credit_scores']}`
+- Score status counts: `{outside_rejudge_summary['score_status_counts']}`
+
+{markdown_table(outside_rejudge_rows, ['solo_condition', 'judge_id', 'judge_provider', 'judge_model', 'proof_credit_eligible', 'score_status', 'rejudge_reason'], limit=20)}
 
 ## Historical Diagnostic Lift
 
@@ -848,17 +1062,17 @@ Mini-lane projection is available but should be treated as diagnostic because th
 
 ## Claim Boundaries
 
-- Do not claim current benchmark lift from D1 until current-lock final judge scoring is complete.
+- Do not claim current benchmark lift from D1 until outside-DNA final judging and proof-credit rollup are complete.
 - Do not merge historical judged lift with current-lock operational data as if they are the same benchmark.
 - Do not publish dollar cost projections until a model-pricing table is separately locked.
 - Current-lock D1 shows operational feasibility and validity gaps; historical D1 shows directional lift.
-- D1 has enough data to plan D2-D5, but not enough current-lock judging to make the headline claim.
+- D1 has enough data to plan D2-D5, but not enough outside-DNA proof-credit judging to make the headline claim.
 
 ## Immediate Data Gaps
 
-1. Score the remaining current-lock final judge packets.
-2. Build a current-lock judge rollup.
-3. Decide validity-penalty reporting: raw quality score, validity-adjusted score, and provider reliability score.
+1. Rejudge the current-lock final packets with outside-DNA blind solo judges.
+2. Build a current-lock proof-credit judge rollup separate from diagnostic same-DNA rows.
+3. Keep raw quality score, validity-adjusted score, and provider reliability score separate.
 4. Run or rebuild the current-lock mini lane cleanly if mini claims matter.
 5. Add dollar-cost estimates only after pricing assumptions are locked.
 """
@@ -869,11 +1083,12 @@ def main() -> int:
     condition_rows = collect_holo_factory_conditions() + collect_legacy_conditions()
     score_rows = collect_judge_scores()
     missing_rows = collect_missing_final_judge_queue()
+    outside_rejudge_rows, outside_rejudge_summary = collect_outside_dna_rejudge_queue()
     adjusted_rows, adjusted_summary = collect_validity_adjusted_scores(score_rows, condition_rows)
     projections = build_projections(run_rows, condition_rows, score_rows, missing_rows)
     score_summary = summarize_scores(score_rows)
     missing_summary = summarize_missing_judging(missing_rows)
-    findings = build_findings(run_rows, condition_rows, score_rows, missing_rows, adjusted_summary, projections)
+    findings = build_findings(run_rows, condition_rows, score_rows, missing_rows, adjusted_summary, projections, outside_rejudge_summary)
 
     run_fields = [
         "lane",
@@ -930,6 +1145,16 @@ def main() -> int:
         "turn",
         "solo_condition",
         "holo_condition",
+        "judge_provider",
+        "judge_model",
+        "proof_credit_eligible",
+        "score_credit_label",
+        "score_use",
+        "judge_dna_overlap",
+        "generation_dna_providers",
+        "generation_dna_models",
+        "judge_boundary_clean",
+        "judge_boundary_errors",
         "holo_score",
         "solo_score",
         "gap_holo_minus_solo",
@@ -953,6 +1178,15 @@ def main() -> int:
         "judge_provider",
         "judge_model",
         "outside_judge",
+        "panel_outside_judge_claim",
+        "proof_credit_eligible",
+        "score_credit_label",
+        "score_use",
+        "judge_dna_overlap",
+        "generation_dna_providers",
+        "generation_dna_models",
+        "judge_boundary_clean",
+        "judge_boundary_errors",
         "score_status",
         "score_exists",
         "prompt_card_exists",
@@ -967,6 +1201,11 @@ def main() -> int:
         "judge_id",
         "solo_condition",
         "holo_condition",
+        "judge_provider",
+        "judge_model",
+        "proof_credit_eligible",
+        "score_credit_label",
+        "score_use",
         "raw_holo_score",
         "raw_solo_score",
         "raw_gap_holo_minus_solo",
@@ -989,6 +1228,40 @@ def main() -> int:
     write_csv(OUT / "d1_judge_score_rollup.csv", score_rows, score_fields)
     write_json(OUT / "d1_missing_final_judge_queue.json", {"generated_at_utc": utc_iso(), "summary": missing_summary, "rows": missing_rows})
     write_csv(OUT / "d1_missing_final_judge_queue.csv", missing_rows, missing_fields)
+    write_json(OUT / "d1_outside_dna_rejudge_queue.json", {"generated_at_utc": utc_iso(), "summary": outside_rejudge_summary, "rows": outside_rejudge_rows})
+    write_csv(
+        OUT / "d1_outside_dna_rejudge_queue.csv",
+        outside_rejudge_rows,
+        [
+            "run_id",
+            "judge_packet_id",
+            "packet_kind",
+            "domain_id",
+            "cohort",
+            "turn",
+            "solo_condition",
+            "holo_condition",
+            "judge_id",
+            "judge_provider",
+            "judge_model",
+            "proof_credit_eligible",
+            "score_credit_label",
+            "score_use",
+            "judge_dna_overlap",
+            "generation_dna_providers",
+            "generation_dna_models",
+            "judge_boundary_clean",
+            "judge_boundary_errors",
+            "score_status",
+            "score_exists",
+            "prompt_card_exists",
+            "trace_exists",
+            "score_path",
+            "prompt_card_path",
+            "trace_path",
+            "rejudge_reason",
+        ],
+    )
     write_json(OUT / "d1_validity_adjusted_scores.json", {"generated_at_utc": utc_iso(), "summary": adjusted_summary, "rows": adjusted_rows})
     write_csv(OUT / "d1_validity_adjusted_scores.csv", adjusted_rows, adjusted_fields)
     write_json(OUT / "d1_projection_summary.json", projections)
@@ -1018,16 +1291,18 @@ def main() -> int:
     )
     write_json(OUT / "d1_findings.json", findings)
     write_text(OUT / "D1_FINDINGS.md", build_findings_markdown(findings))
-    write_text(OUT / "D1_EVIDENCE_BOARD.md", build_board(run_rows, condition_rows, score_rows, missing_rows, adjusted_rows, adjusted_summary, projections))
+    write_text(OUT / "D1_EVIDENCE_BOARD.md", build_board(run_rows, condition_rows, score_rows, missing_rows, outside_rejudge_rows, outside_rejudge_summary, adjusted_rows, adjusted_summary, projections))
     write_text(
         OUT / "d1_claim_boundaries.md",
         """# D1 Claim Boundaries
 
 - Current-lock D1 operational evidence exists, but full current-lock judging is incomplete.
+- Existing current-lock judge scores are diagnostic if judge DNA overlaps generation DNA.
+- Proof-credit D1 scoring requires outside-DNA blind solo judges and a clean judge-visible boundary.
 - Historical D1 judged lift exists, but the scored runs do not match the current execution lock.
 - Treat historical lift as diagnostic until reproduced under the current lock.
 - Keep raw scores, validity-adjusted scores, and provider reliability separate.
-- No public headline claim should be made from D1 until current-lock final judging and rollup are complete.
+- No public headline claim should be made from D1 until outside-DNA final judging and rollup are complete.
 """,
     )
     print(
@@ -1039,6 +1314,8 @@ def main() -> int:
                 "condition_rows": len(condition_rows),
                 "score_rows": len(score_rows),
                 "missing_final_judge_rows": len([r for r in missing_rows if r.get("run_id") == CURRENT_LOCK_RUN_ID and r.get("score_status") != "scored"]),
+                "outside_dna_rejudge_rows": len(outside_rejudge_rows),
+                "outside_dna_rejudge_summary": outside_rejudge_summary,
                 "score_summary": score_summary,
                 "validity_adjusted_summary": adjusted_summary,
                 "projection_basis": projections["projection_basis"],

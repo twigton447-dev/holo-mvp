@@ -3,6 +3,7 @@ import argparse, hashlib, json, os, re, shutil, sys, time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from artifact_validity import gov_artifact_validity_gate, require_valid_artifact
 PROVIDER_ENV = {'openai': 'OPENAI_API_KEY', 'anthropic': 'ANTHROPIC_API_KEY', 'google': 'GOOGLE_API_KEY', 'xai': 'XAI_API_KEY', 'minimax': 'MINIMAX_API_KEY'}
 SOLO = {'solo_openai': 'openai', 'solo_anthropic': 'anthropic', 'solo_google': 'google'}
 HOLO_ANALYSTS = ['openai', 'anthropic', 'google', 'openai', 'anthropic', 'google']
@@ -73,11 +74,27 @@ Execute this turn now."""
 def gov_prompt(context: dict[str, Any], gov: dict[str, Any], role_item: dict[str, Any], turn: int, outputs: list[dict[str, str]]) -> str:
     fields = '\n'.join('- ' + field for field in gov['mission_packet_required_fields'])
     final = 'This mission is for Turn 6, the final document. Pressure synthesis.\n' if turn == 6 else ''
+    validity = json.dumps(gov.get('artifact_validity_doctrine', {}), indent=2)
+    repair_ledger = json.dumps(gov.get('repair_ledger_doctrine', {}), indent=2)
+    hidden_probes = json.dumps(gov.get('hidden_failure_probe_bank', []), indent=2)
+    winning_rule = gov.get('winning_feature_feedback_rule', '')
     return f"""You are HoloGov. Create a focused mission packet for the next model. Do not write the artifact and do not judge the benchmark.
 
 Required fields:
 {fields}
 {final}
+ARTIFACT VALIDITY DOCTRINE:
+{validity}
+
+REPAIR LEDGER DOCTRINE:
+{repair_ledger}
+
+MANDATORY HIDDEN-FAILURE PROBES:
+{hidden_probes}
+
+WINNING FEATURE PRESERVATION RULE:
+{winning_rule}
+
 BRIEF:
 {context['brief']}
 
@@ -127,6 +144,7 @@ def call_provider(provider: str, model: str, system: str, user: str, temperature
     return {'text': text, 'input_tokens': int(in_tok or 0), 'output_tokens': int(out_tok or 0), 'latency_ms': int((time.time() - start) * 1000)}
 def run_condition(root: Path, context: dict[str, Any], roles: dict[str, Any], gov: dict[str, Any], models: dict[str, str], condition: str, turn_limit: int, max_words: int, temperature: float, max_output_tokens: int = 1500, gov_max_output_tokens: int = 1000, solo_providers: dict[str, str] | None = None, holo_analyst_sequence: list[str] | None = None, holo_gov_sequence: list[str | None] | None = None) -> dict[str, Any]:
     outputs = []; calls = []; domain = context['domain_id']
+    final_validity_report = None
     solo_providers = solo_providers or SOLO; holo_analyst_sequence = holo_analyst_sequence or HOLO_ANALYSTS; holo_gov_sequence = holo_gov_sequence or HOLO_GOVS
     for turn in range(1, turn_limit + 1):
         role_item = role(roles, turn); mission = None; gov_trace = None
@@ -137,8 +155,13 @@ def run_condition(root: Path, context: dict[str, Any], roles: dict[str, Any], go
         else: analyst = solo_providers[condition]
         sp = system_prompt(context, max_words); up = turn_prompt(context, role_item, turn, outputs, mission); result = call_provider(analyst, models[analyst], sp, up, temperature, max_output_tokens); kind = artifact_kind(turn); ap = root / 'artifacts' / domain / condition / f'turn_{turn}.md'; ap.parent.mkdir(parents=True, exist_ok=True); ap.write_text(result['text'], encoding='utf-8')
         if ap.stat().st_size <= 0: raise RuntimeError(f'artifact_write_failed path={ap}')
-        trace = {'call_type': 'analyst_turn', 'condition': condition, 'domain_id': domain, 'turn': turn, 'turn_limit': turn_limit, 'role': role_item['role'], 'artifact_kind': kind, 'provider': analyst, 'model': models[analyst], 'input_tokens': result['input_tokens'], 'output_tokens': result['output_tokens'], 'latency_ms': result['latency_ms'], 'system_sha256': sha(sp), 'user_sha256': sha(up), 'output_sha256': sha(result['text']), 'artifact_path': str(ap), 'governor_trace': gov_trace}; write(root / 'traces' / domain / condition / f'turn_{turn}.json', trace); calls.append(trace); outputs.append({'turn': turn, 'role': role_item['role'], 'kind': kind, 'text': result['text']})
-    return {'condition': condition, 'turns_completed': turn_limit, 'calls': calls, 'final_artifact_path': str(root / 'artifacts' / domain / condition / f'turn_{turn_limit}.md')}
+        validity_report = None
+        if kind == 'final':
+            validity_report = gov_artifact_validity_gate(ap, context=context, fallback_max_words=max_words)
+            require_valid_artifact(validity_report)
+            final_validity_report = validity_report
+        trace = {'call_type': 'analyst_turn', 'condition': condition, 'domain_id': domain, 'turn': turn, 'turn_limit': turn_limit, 'role': role_item['role'], 'artifact_kind': kind, 'provider': analyst, 'model': models[analyst], 'input_tokens': result['input_tokens'], 'output_tokens': result['output_tokens'], 'latency_ms': result['latency_ms'], 'system_sha256': sha(sp), 'user_sha256': sha(up), 'output_sha256': sha(result['text']), 'artifact_path': str(ap), 'governor_trace': gov_trace, 'artifact_validity_report': validity_report}; write(root / 'traces' / domain / condition / f'turn_{turn}.json', trace); calls.append(trace); outputs.append({'turn': turn, 'role': role_item['role'], 'kind': kind, 'text': result['text']})
+    return {'condition': condition, 'turns_completed': turn_limit, 'calls': calls, 'final_artifact_path': str(root / 'artifacts' / domain / condition / f'turn_{turn_limit}.md'), 'final_artifact_validity_report': final_validity_report}
 def backup_run(instance: Path, run_id: str, run_root: Path) -> str:
     backup = instance.parents[0] / 'backups' / run_id
     if backup.exists(): shutil.rmtree(backup)

@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from artifact_validity import gov_artifact_validity_gate, require_valid_artifact
 from tiny_live_smoke import THIRD_PROVIDERS, backup_run, condition_list, holo_analysts, holo_govs, load, model_lineup, preflight, redact, run_condition, solo_map, third_provider, write
 
 
@@ -28,13 +29,24 @@ def write_manifest(root: Path, payload: dict[str, Any]) -> None:
     write(root / 'run_manifest.json', payload)
 
 
-def validate_artifacts(calls: list[dict[str, Any]]) -> None:
+def validate_artifacts(
+    calls: list[dict[str, Any]],
+    *,
+    context: dict[str, Any],
+    max_words: int | None,
+) -> list[dict[str, Any]]:
+    reports: list[dict[str, Any]] = []
     for call in calls:
         if call.get('call_type') != 'analyst_turn':
             continue
         path = Path(call['artifact_path'])
         if not path.exists() or path.stat().st_size <= 0:
             raise RuntimeError(f'post_run_artifact_missing_or_empty path={path}')
+        if call.get('artifact_kind') == 'final':
+            report = gov_artifact_validity_gate(path, context=context, fallback_max_words=max_words)
+            reports.append(report)
+            require_valid_artifact(report)
+    return reports
 
 
 def main() -> int:
@@ -151,7 +163,11 @@ def main() -> int:
             expected_domain = expected_calls(turn_limit)
             if len(calls) != expected_domain:
                 raise RuntimeError(f'call_count_mismatch domain={domain_id} expected={expected_domain} observed={len(calls)}')
-            validate_artifacts(calls)
+            validity_reports = validate_artifacts(
+                calls,
+                context=context,
+                max_words=max_words,
+            )
             all_calls.extend(calls)
             completed_domains.append(domain_id)
             domain_summary = {
@@ -161,6 +177,7 @@ def main() -> int:
                 'completed_at_utc': datetime.now(timezone.utc).isoformat(),
                 'expected_call_count': expected_domain,
                 **totals(calls),
+                'artifact_validity_reports': validity_reports,
                 'condition_results': results,
             }
             domain_results.append(domain_summary)

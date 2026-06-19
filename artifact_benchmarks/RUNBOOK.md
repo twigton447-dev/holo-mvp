@@ -9,3 +9,5 @@ Tiny live smoke uses Python 3.11. The third substrate is configurable:
 - `--third-provider minimax --minimax-model MiniMax-Text-01`
 
 For current POC generation, prefer `--third-provider xai` while Gemini 2.5 Pro remains blocked. MiniMax is available as the alternate third substrate if xAI fails smoke or if the experiment calls for that provider family.
+
+Final artifacts pass through `GovArtifactValidityGate` before clean scoring: complete ending, target word band, no internal process residue, required brief items, brief-required disclaimers, and only source IDs from the provided context.

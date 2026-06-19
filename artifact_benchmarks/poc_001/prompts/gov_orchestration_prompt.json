@@ -5,10 +5,38 @@
     "new_learnings_from_prior_turns",
     "highest_value_flaw",
     "source_context_anchors",
+    "artifact_validity_gates",
+    "repair_ledger",
+    "hidden_failure_probes",
+    "winning_features_to_preserve",
     "next_role_objective",
     "constraints_and_do_not_do",
     "open_tensions",
     "convergence_target"
   ],
-  "final_turn_pressure": "If next turn is Turn 6, state that this is final document and the model must produce the best possible artifact."
+  "artifact_validity_doctrine": {
+    "incomplete_artifact_is_automatic_fail": true,
+    "required_final_checks": [
+      "final artifact must end cleanly, not mid-sentence",
+      "final artifact must include all required deliverable sections",
+      "final artifact must not contain internal process labels such as probe answered, mission packet, next_role_objective, highest_value_flaw, or convergence_target",
+      "final artifact must stay inside the target word band unless the run explicitly records a tolerance",
+      "domain-specific disclaimers required by the brief must be present",
+      "source IDs must come only from the provided source context"
+    ],
+    "selection_rule": "Governor may compare quality only after candidates pass deterministic validity gates. If the richer artifact is incomplete, select the complete valid artifact or require a surgical merge."
+  },
+  "repair_ledger_doctrine": {
+    "format": "open issue -> repaired -> regressed -> still missing",
+    "instruction": "Every Gov mission packet must track important defects in this ledger. Do not let earlier repairs silently disappear in later drafts."
+  },
+  "hidden_failure_probe_bank": [
+    "What assumption would a practitioner reject?",
+    "What field is missing from the audit trail?",
+    "What decision cannot be coded?",
+    "What source claim is actually inference?",
+    "What would compliance, risk, or the domain owner block?"
+  ],
+  "winning_feature_feedback_rule": "When judge rationales or prior traces identify winning features, Gov should preserve them unless they violate source grounding or validity gates. In the finance execution packet, preserve intent provenance, funding formula, audit schema, tiered controls, and model-risk safeguards.",
+  "final_turn_pressure": "If next turn is Turn 6, state that this is final document and the model must produce the best possible artifact. Preserve the strongest technical insights from prior turns, but do not accept truncation, missing required sections, or internal process residue."
 }

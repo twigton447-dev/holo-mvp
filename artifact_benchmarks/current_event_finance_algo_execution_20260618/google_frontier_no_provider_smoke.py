@@ -16,6 +16,7 @@ SOLO_CONDITIONS = {
     "solo_anthropic": "anthropic:claude-opus-4-8",
     "solo_google": "google:gemini-3.1-pro-preview",
 }
+STATE_OBJECT_VERSION = "patent_grade_holo_state_v1"
 
 
 def read_text(path: Path) -> str:
@@ -259,6 +260,53 @@ def word_gate(text: str, min_words: int, max_words: int) -> dict[str, Any]:
     }
 
 
+def smoke_state_object(
+    *,
+    report_brief: dict[str, Any],
+    routing_config: dict[str, Any],
+    role_item: dict[str, Any],
+    turn: int,
+    previous_holo: list[dict[str, Any]],
+) -> dict[str, Any]:
+    req = report_brief["deliverable_requirements"]
+    return {
+        "state_object_version": STATE_OBJECT_VERSION,
+        "USER_GOAL": report_brief["task"],
+        "LATEST_INPUT_SUMMARY": f"Prepare Turn {turn} for {role_item['role']}.",
+        "CRITICAL_CONSTRAINTS": [
+            *req["must_not_include"],
+            f"Target final length: {req['target_length_words'][0]}-{req['target_length_words'][1]} words.",
+            "No browsing during generation or judging.",
+        ],
+        "ROLLING_SUMMARY": [
+            {"turn": item["turn"], "artifact_sha256": item["sha256"]} for item in previous_holo
+        ],
+        "SETTLED_DECISIONS": [
+            "Fixed Gov for the session.",
+            f"Routing config: {routing_config['routing_config_id']}.",
+        ],
+        "ARTIFACTS_REGISTRY": [
+            {
+                "artifact_id": f"turn_{item['turn']}_draft_v1",
+                "status": "PINNED",
+                "turn": item["turn"],
+                "sha256": item["sha256"],
+                "pointer": item["path"],
+            }
+            for item in previous_holo
+        ],
+        "REQUIRED_TOOLS": "NONE",
+        "BATON_PASS": {
+            "next_turn": turn,
+            "next_model_instance": role_item["provider_model"],
+            "adversarial_cognitive_role": role_item["role"],
+            "role_instruction": role_item["instruction"],
+        },
+        "PRESERVED_INSIGHT_LEDGER": [],
+        "REPAIR_LEDGER": {"open_issue": [], "repaired": [], "regressed": [], "still_missing": []},
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--routing-config", default=None)
@@ -365,6 +413,15 @@ def main() -> int:
         turn = int(role_item["turn"])
         condition = "holo_frontier_gov"
         provider_model = role_item["provider_model"]
+        state_object = smoke_state_object(
+            report_brief=report_brief,
+            routing_config=routing_config,
+            role_item=role_item,
+            turn=turn,
+            previous_holo=previous_holo,
+        )
+        state_path = root / "state_objects" / condition / f"turn_{turn}_state_object.json"
+        write_json(state_path, state_object)
         mission_text = ""
         mission_path = None
         if turn > 1:
@@ -387,6 +444,7 @@ def main() -> int:
                     {
                         "turn": turn,
                         "role": role_item,
+                        "state_object_sha256": sha_file(state_path),
                         "previous_turns": [item["turn"] for item in previous_holo],
                         "gov_protocol_hash": hashes["gov_protocol"],
                     },
@@ -427,6 +485,7 @@ def main() -> int:
                 "turn": turn,
                 "role": role_item,
                 "mission_sha256": sha_text(mission_text) if mission_text else None,
+                "state_object_sha256": sha_file(state_path),
                 "source_pack_hash": hashes["source_pack"],
                 "brief_hash": hashes["report_brief"],
                 "previous_turns": [item["turn"] for item in previous_holo],
@@ -502,10 +561,31 @@ def main() -> int:
     artifact_count = len(list((root / "artifacts").glob("*/*.md")))
     trace_count = len(list((root / "traces").glob("*/*.json")))
     mission_count = len(list((root / "mission_packets").glob("*/*.md")))
+    state_object_count = len(list((root / "state_objects").glob("*/*.json")))
     final_gate_count = len(list((root / "final_selection").glob("*.json")))
+    final_state = read_json(root / "state_objects" / "holo_frontier_gov" / "turn_6_state_object.json")
     check("artifact_count_24", artifact_count == 24, artifact_count)
     check("trace_count_29", trace_count == 29, trace_count)
     check("mission_packet_count_5", mission_count == 5, mission_count)
+    check("state_object_count_6", state_object_count == 6, state_object_count)
+    check(
+        "state_object_required_fields",
+        all(
+            key in final_state
+            for key in [
+                "USER_GOAL",
+                "CRITICAL_CONSTRAINTS",
+                "ROLLING_SUMMARY",
+                "SETTLED_DECISIONS",
+                "ARTIFACTS_REGISTRY",
+                "BATON_PASS",
+                "PRESERVED_INSIGHT_LEDGER",
+                "REPAIR_LEDGER",
+            ]
+        ),
+        sorted(final_state.keys()),
+    )
+    check("state_object_version", final_state.get("state_object_version") == STATE_OBJECT_VERSION, final_state.get("state_object_version"))
     check("final_selection_count_1", final_gate_count == 1, final_gate_count)
     check("all_final_word_gates_pass", all(item["gate"]["passes"] for item in final_candidates.values()), final_candidates)
 
@@ -526,12 +606,14 @@ def main() -> int:
         "routing_config_label": routing_config.get("label"),
         "holo_role_flow": [item["provider_model"] for item in turns],
         "holo_governor_model": report_brief["holo_turn_design"]["governor_model"],
+        "holo_architecture_mode": STATE_OBJECT_VERSION,
         "word_count_band": [min_words, max_words],
         "hashes": hashes,
         "counts": {
             "artifacts": artifact_count,
             "traces": trace_count,
             "mission_packets": mission_count,
+            "state_objects": state_object_count,
             "final_selection_files": final_gate_count,
         },
         "word_gate_tests": word_gate_tests,

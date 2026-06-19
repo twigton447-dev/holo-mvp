@@ -47,6 +47,8 @@ SOLO_CONDITIONS = {
 FINAL_MIN_WORDS = 2800
 FINAL_TARGET_MAX_WORDS = 3400
 FINAL_MAX_WORDS = 3600
+STATE_OBJECT_VERSION = "patent_grade_holo_state_v1"
+MAX_PRIOR_ARTIFACT_CHARS = 18000
 
 
 class ProviderCallError(RuntimeError):
@@ -157,18 +159,48 @@ def packet_hashes() -> dict[str, str]:
     return {key: sha_file(PACKET_DIR / name) for key, name in files.items()}
 
 
-def frozen_generation_payload(*, role_flow: dict[str, Any], routing_config: dict[str, Any]) -> str:
+def model_visible_report_brief() -> dict[str, Any]:
+    brief = read_json(PACKET_DIR / "report_brief.json")
+    return {
+        "brief_id": brief["brief_id"],
+        "created_at_utc": brief["created_at_utc"],
+        "domain": brief["domain"],
+        "audience": brief["audience"],
+        "task": brief["task"],
+        "deliverable_requirements": brief["deliverable_requirements"],
+    }
+
+
+def frozen_base_generation_payload() -> str:
     payload = {
         "benchmark_credit": False,
         "public_claim": False,
         "internet_policy": "Do not browse. Use only this frozen packet.",
         "source_pack": read_json(PACKET_DIR / "source_pack.json"),
-        "report_brief": read_json(PACKET_DIR / "report_brief.json"),
-        "gov_technical_probe_protocol": read_json(PACKET_DIR / "gov_technical_probe_protocol.json"),
-        "role_flow": role_flow,
-        "holo_routing_config": routing_config,
+        "report_brief": model_visible_report_brief(),
     }
     return json.dumps(payload, indent=2, sort_keys=True)
+
+
+def frozen_holo_generation_payload(*, role_flow: dict[str, Any], routing_config: dict[str, Any]) -> str:
+    payload = json.loads(frozen_base_generation_payload())
+    payload.update(
+        {
+            "holo_architecture_mode": STATE_OBJECT_VERSION,
+            "holo_architecture_note": (
+                "Gov baton first; canonical STATE_OBJECT; pinned artifact registry; "
+                "preserved insight ledger; repair ledger; adversarial role; prior artifacts."
+            ),
+            "gov_technical_probe_protocol": read_json(PACKET_DIR / "gov_technical_probe_protocol.json"),
+            "role_flow": role_flow,
+            "holo_routing_config": routing_config,
+        }
+    )
+    return json.dumps(payload, indent=2, sort_keys=True)
+
+
+def frozen_generation_payload(*, role_flow: dict[str, Any], routing_config: dict[str, Any]) -> str:
+    return frozen_holo_generation_payload(role_flow=role_flow, routing_config=routing_config)
 
 
 def frozen_judge_payload() -> str:
@@ -177,11 +209,202 @@ def frozen_judge_payload() -> str:
         "public_claim": False,
         "internet_policy": "Do not browse. Use only this frozen packet and blind documents.",
         "source_pack": read_json(PACKET_DIR / "source_pack.json"),
-        "report_brief": read_json(PACKET_DIR / "report_brief.json"),
+        "report_brief": model_visible_report_brief(),
         "judge_rubric": read_json(PACKET_DIR / "judge_rubric_8criteria.json"),
         "judge_panel": read_json(PACKET_DIR / "judge_panel_frontier_blind.json"),
     }
     return json.dumps(payload, indent=2, sort_keys=True)
+
+
+def clean_ending(text: str) -> bool:
+    stripped = text.strip()
+    return bool(stripped) and stripped[-1] in ".!?)]`\"'"
+
+
+def source_ids_in_text(text: str) -> list[str]:
+    return sorted(set(re.findall(r"\[S\d+(?:_[A-Z0-9_]+)?\]", text)))
+
+
+def detect_preserved_insights(previous_artifacts: list[dict[str, str]]) -> list[dict[str, Any]]:
+    insight_specs = [
+        (
+            "arrival_price_spine",
+            "Arrival price / implementation shortfall as the benchmark spine",
+            ["arrival", "implementation shortfall"],
+        ),
+        (
+            "cost_of_acting_gate",
+            "Cost-of-acting / net-benefit gate before changing execution action",
+            ["cost of acting", "net-benefit"],
+        ),
+        (
+            "tiered_authority_boundaries",
+            "Tiered authority boundaries for automated, confirm, and human-only decisions",
+            ["tier a", "tier b", "tier c"],
+        ),
+        (
+            "post_kill_state_machine",
+            "Post-kill state machine, re-enable control, and audit aftermath",
+            ["post-kill", "state machine"],
+        ),
+        (
+            "offline_champion_challenger_learning",
+            "Offline batched learning with champion/challenger validation",
+            ["offline", "champion", "challenger"],
+        ),
+        (
+            "fact_vs_inference_labeling",
+            "Explicit source fact versus inference labeling",
+            ["inference", "source-grounded"],
+        ),
+        (
+            "time_scale_separation",
+            "Time-scale separation across event-time, clock-time, and clearing/funding clocks",
+            ["time-scale"],
+        ),
+        (
+            "tracking_error_urgency",
+            "Portfolio urgency as tracking-error or active-risk reduction versus impact cost",
+            ["tracking-error"],
+        ),
+        (
+            "funding_constraint_binds_first",
+            "Funding, settlement, and clearing constraints bind before execution micro-optimization",
+            ["funding", "settlement", "bind"],
+        ),
+        (
+            "benchmark_divergence_rule",
+            "Divergence rule when VWAP improves while arrival/IS worsens",
+            ["vwap", "implementation shortfall", "worsen"],
+        ),
+        (
+            "audit_intent_provenance",
+            "Audit ledger with order intent provenance and decision reconstruction",
+            ["audit", "intent provenance"],
+        ),
+    ]
+    found: list[dict[str, Any]] = []
+    for insight_id, label, terms in insight_specs:
+        turns = []
+        for item in previous_artifacts:
+            lowered = item["text"].lower()
+            if all(term in lowered for term in terms):
+                turns.append(int(item["turn"]))
+        if turns:
+            found.append(
+                {
+                    "insight_id": insight_id,
+                    "label": label,
+                    "evidence_turns": turns,
+                    "preservation_rule": "Preserve or explicitly reject with source-grounded rationale.",
+                }
+            )
+    return found
+
+
+def artifact_registry(previous_artifacts: list[dict[str, str]]) -> list[dict[str, Any]]:
+    registry = []
+    for item in previous_artifacts:
+        text = item["text"].strip() + "\n"
+        registry.append(
+            {
+                "artifact_id": f"turn_{item['turn']}_draft_v1",
+                "version": 1,
+                "status": "PINNED",
+                "turn": int(item["turn"]),
+                "role": item["role"],
+                "provider_model": item.get("provider_model"),
+                "sha256": sha_text(text),
+                "word_count": word_count(text),
+                "clean_ending": clean_ending(text),
+                "source_ids": source_ids_in_text(text),
+                "pointer": item.get("path"),
+                "description": excerpt(text, 260),
+            }
+        )
+    return registry
+
+
+def build_state_object(
+    *,
+    report_brief: dict[str, Any],
+    routing_config: dict[str, Any],
+    turn: int,
+    role_item: dict[str, Any],
+    previous_artifacts: list[dict[str, str]],
+) -> dict[str, Any]:
+    requirements = report_brief["deliverable_requirements"]
+    latest = previous_artifacts[-1] if previous_artifacts else None
+    latest_flags: list[str] = []
+    if latest:
+        if not clean_ending(latest["text"]):
+            latest_flags.append(f"turn_{latest['turn']}_does_not_end_cleanly")
+        if word_count(latest["text"]) < 1200 and int(latest["turn"]) >= 3:
+            latest_flags.append(f"turn_{latest['turn']}_likely_incomplete_by_word_count")
+    return {
+        "state_object_version": STATE_OBJECT_VERSION,
+        "USER_GOAL": report_brief["task"],
+        "LATEST_INPUT_SUMMARY": f"Prepare Turn {turn} for {role_item['role']}.",
+        "CRITICAL_CONSTRAINTS": [
+            *requirements["must_not_include"],
+            f"Target final length: {requirements['target_length_words'][0]}-{requirements['target_length_words'][1]} words.",
+            "Use only frozen source pack facts unless explicitly labeled as inference.",
+            "No browsing during generation or judging.",
+        ],
+        "ROLLING_SUMMARY": [
+            {"turn": int(item["turn"]), "role": item["role"], "summary": excerpt(item["text"], 500)}
+            for item in previous_artifacts
+        ],
+        "SETTLED_DECISIONS": [
+            "Fixed Opus Gov for this session.",
+            f"Routing config: {routing_config['routing_config_id']}.",
+            "Final artifact must be client-shareable and not a live trading or investment recommendation.",
+            "Gov must preserve winning insights and track regressions before synthesis.",
+        ],
+        "ARTIFACTS_REGISTRY": artifact_registry(previous_artifacts),
+        "REQUIRED_TOOLS": "NONE",
+        "BATON_PASS": {
+            "next_turn": turn,
+            "next_model_instance": role_item["provider_model"],
+            "adversarial_cognitive_role": role_item["role"],
+            "role_instruction": role_item["instruction"],
+            "specific_focus": "Challenge the current draft as an external hypothesis; preserve only source-grounded improvements.",
+            "unresolved_tensions": latest_flags,
+        },
+        "PRESERVED_INSIGHT_LEDGER": detect_preserved_insights(previous_artifacts),
+        "REPAIR_LEDGER": {
+            "open_issue": latest_flags,
+            "repaired": [],
+            "regressed": [],
+            "still_missing": [],
+        },
+    }
+
+
+def state_object_text(state_object: dict[str, Any]) -> str:
+    return json.dumps(state_object, indent=2, sort_keys=False)
+
+
+def pinned_artifact_text(previous_artifacts: list[dict[str, str]]) -> str:
+    if not previous_artifacts:
+        return "No prior artifacts. This is Turn 1."
+    blocks = []
+    for item in previous_artifacts:
+        text = item["text"].strip()
+        if len(text) > MAX_PRIOR_ARTIFACT_CHARS:
+            text = text[:MAX_PRIOR_ARTIFACT_CHARS] + "\n\n[TRUNCATED IN PROMPT: full artifact remains pinned by SHA/path in STATE_OBJECT]"
+        blocks.append(
+            f"## PINNED artifact turn_{item['turn']}_draft_v1 ({item['role']})\n"
+            f"provider_model: {item.get('provider_model')}\n"
+            f"sha256: {sha_text(item['text'].strip() + chr(10))}\n\n{text}"
+        )
+    return "\n\n".join(blocks)
+
+
+def latest_draft_text(previous_artifacts: list[dict[str, str]]) -> str:
+    if not previous_artifacts:
+        return "No prior draft. This is Turn 1."
+    return previous_artifacts[-1]["text"]
 
 
 def http_post_json(
@@ -443,16 +666,25 @@ def markdown_system(role: str) -> str:
 def gov_system() -> str:
     return (
         "You are HoloGov in a controlled HoloBuild benchmark run. "
-        "Use only the frozen packet and accumulated artifacts. Do not browse. "
-        "Your job is to create a concise but technically sharp mission packet for the next model. "
-        "Ask concrete finance-native probes. Output Markdown only."
+        "Use only the frozen packet, canonical STATE_OBJECT, and pinned artifacts. Do not browse. "
+        "Your job is to produce the Baton Pass for the next model: preserve winning insights, "
+        "name regressions, update the repair ledger, and ask concrete finance-native probes. "
+        "Output Markdown only."
     )
 
 
 def selector_system() -> str:
     return (
-        "You are HoloGov final selector. Use only the frozen packet and Turn 5/Turn 6 candidate finals. "
+        "You are HoloGov final selector and synthesis gate. Use only the frozen packet, STATE_OBJECT, "
+        "pinned artifacts, and Turn 5/Turn 6 candidate finals. "
         "Do not browse. Return strict JSON only."
+    )
+
+
+def synthesis_system() -> str:
+    return (
+        "You are HoloGov final synthesis. Use only the frozen packet, STATE_OBJECT, pinned artifacts, "
+        "and candidate finals. Do not browse. Produce one complete client-ready final report in Markdown."
     )
 
 
@@ -506,12 +738,19 @@ def gov_prompt(
     turn: int,
     role_item: dict[str, Any],
     previous_artifacts: list[dict[str, str]],
+    state_object: dict[str, Any],
 ) -> str:
     history = "\n\n".join(
         f"## Prior Turn {item['turn']} ({item['role']})\n{item['text']}"
         for item in previous_artifacts
     )
-    return f"""Frozen benchmark packet:
+    return f"""Canonical STATE_OBJECT:
+
+```json
+{state_object_text(state_object)}
+```
+
+Frozen benchmark packet:
 
 {payload}
 
@@ -523,6 +762,10 @@ Prior artifacts:
 {history}
 
 Create the Turn {turn} HoloGov mission packet. It must include:
+- updated_state_object_delta
+- baton_pass
+- preserved_insight_ledger
+- repair_ledger
 - current_best_state
 - new_learnings_from_prior_turns
 - highest_value_flaw
@@ -540,6 +783,7 @@ Create the Turn {turn} HoloGov mission packet. It must include:
 - convergence_target
 
 Make the next model uncomfortable in the useful way: specific, technical, source-grounded, and hard to hand-wave.
+Preserve any STATE_OBJECT.PRESERVED_INSIGHT_LEDGER item unless you explicitly reject it with a source-grounded rationale.
 """
 
 
@@ -548,12 +792,30 @@ def holo_prompt(
     payload: str,
     turn: int,
     role_item: dict[str, Any],
-    previous_text: str | None,
+    previous_artifacts: list[dict[str, str]],
+    state_object: dict[str, Any],
     mission: str | None,
 ) -> str:
-    previous_block = previous_text or "No prior draft. This is Turn 1."
     mission_block = mission or "No Gov mission for Turn 1. Build the initial complete draft."
-    return f"""Frozen benchmark packet:
+    return f"""HoloGov Baton Pass / Mission Packet:
+
+{mission_block}
+
+Canonical STATE_OBJECT:
+
+```json
+{state_object_text(state_object)}
+```
+
+Pinned prior artifacts, full-fidelity where budget allows:
+
+{pinned_artifact_text(previous_artifacts)}
+
+Latest draft state:
+
+{latest_draft_text(previous_artifacts)}
+
+Frozen benchmark packet:
 
 {payload}
 
@@ -563,13 +825,8 @@ Role: {role_item['role']}
 Turn instruction: {role_item['instruction']}
 Target length for this turn: {turn_word_target(turn)}.
 
-HoloGov mission packet:
-{mission_block}
-
-Previous draft state:
-{previous_block}
-
 Write the best possible updated report draft for this turn. Answer the Gov probes in the artifact or explicitly resolve why a probe does not apply. Preserve the strongest prior content, repair weaknesses, and improve source-grounded technical depth. Final turns must be client-shareable and within the word band.
+Treat prior artifacts as external hypotheses, not ground truth. Preserve STATE_OBJECT.PRESERVED_INSIGHT_LEDGER items unless you explicitly reject them with source-grounded rationale.
 """
 
 
@@ -641,10 +898,16 @@ Current final draft:
 """
 
 
-def selector_prompt(*, payload: str, turn5: str, turn6: str) -> str:
+def selector_prompt(*, payload: str, state_object: dict[str, Any], turn5: str, turn6: str) -> str:
     return f"""Frozen benchmark packet:
 
 {payload}
+
+Canonical STATE_OBJECT:
+
+```json
+{state_object_text(state_object)}
+```
 
 Candidate Turn 5 final:
 {turn5}
@@ -655,15 +918,60 @@ Candidate Turn 6 final:
 Compare Turn 5 and Turn 6 against the brief, source pack, rubric, and word-count band.
 Return strict JSON only with this schema:
 {{
-  "selected_artifact": "turn_5" or "turn_6",
+  "selected_artifact": "turn_5" or "turn_6" or "surgical_synthesis_required",
   "turn_6_degraded": true or false,
   "rationale": "short explanation",
   "strongest_turn_5_elements": ["..."],
   "strongest_turn_6_elements": ["..."],
+  "must_preserve_in_synthesis": ["..."],
   "unsupported_claim_flags": ["..."],
   "word_count_notes": "..."
 }}
-Do not select a surgical merge in this automated run; choose the stronger existing candidate.
+Select surgical_synthesis_required if the strongest Holo result requires merging non-overlapping valid strengths or preserving a ledger insight that one candidate dropped.
+"""
+
+
+def synthesis_prompt(
+    *,
+    payload: str,
+    state_object: dict[str, Any],
+    turn5: str,
+    turn6: str,
+    selector: dict[str, Any],
+) -> str:
+    return f"""Frozen benchmark packet:
+
+{payload}
+
+Canonical STATE_OBJECT:
+
+```json
+{state_object_text(state_object)}
+```
+
+HoloGov selector decision:
+
+```json
+{json.dumps(selector, indent=2, sort_keys=False)}
+```
+
+Candidate Turn 5 final:
+{turn5}
+
+Candidate Turn 6 final:
+{turn6}
+
+Produce the final Holo synthesis artifact in Markdown.
+
+Rules:
+- Use only the frozen source pack and the candidate artifacts.
+- Do not browse.
+- Preserve STATE_OBJECT.PRESERVED_INSIGHT_LEDGER items unless explicitly rejected with source-grounded rationale.
+- Merge the strongest valid elements from Turn 5 and Turn 6.
+- Remove process residue, analyst labels, mission-packet language, and internal benchmark commentary.
+- Include the required no-investment-advice and no-live-execution disclaimers.
+- Stay within 2,800-3,400 words if possible and never over 3,600 words.
+- End cleanly.
 """
 
 
@@ -1079,16 +1387,36 @@ def run_holo_condition(
     previous_artifacts: list[dict[str, str]] = []
     traces: list[dict[str, Any]] = []
     turn_texts: dict[int, str] = {}
+    state_objects: dict[int, dict[str, Any]] = {}
     gov_provider_model = report_brief["holo_turn_design"]["governor_model"]
     gov_provider, _ = provider_model(gov_provider_model)
     for role_item in role_flow["turns"]:
         turn = int(role_item["turn"])
         analyst_provider, _ = provider_model(role_item["provider_model"])
+        state_object = build_state_object(
+            report_brief=report_brief,
+            routing_config={
+                "routing_config_id": role_flow.get("routing_config_id", "unknown"),
+                "routing_config_label": role_flow.get("routing_config_label"),
+            },
+            turn=turn,
+            role_item=role_item,
+            previous_artifacts=previous_artifacts,
+        )
+        state_objects[turn] = state_object
+        state_path = run_root / "state_objects" / condition / f"turn_{turn}_state_object.json"
+        write_json(state_path, state_object)
         mission_text: str | None = None
         mission_path: Path | None = None
         if turn > 1:
             system = gov_system()
-            user = gov_prompt(payload=payload, turn=turn, role_item=role_item, previous_artifacts=previous_artifacts)
+            user = gov_prompt(
+                payload=payload,
+                turn=turn,
+                role_item=role_item,
+                previous_artifacts=previous_artifacts,
+                state_object=state_object,
+            )
             mission_path = run_root / "mission_packets" / condition / f"turn_{turn}_mission.md"
             cached_mission = existing_artifact_and_trace(
                 run_root=run_root,
@@ -1121,7 +1449,8 @@ def run_holo_condition(
             payload=payload,
             turn=turn,
             role_item=role_item,
-            previous_text=previous_text,
+            previous_artifacts=previous_artifacts,
+            state_object=state_object,
             mission=mission_text,
         )
         max_tokens = 7000 if turn >= 5 else 5200
@@ -1135,7 +1464,15 @@ def run_holo_condition(
             text, trace = cached
             traces.append(trace)
             previous_text = text
-            previous_artifacts.append({"turn": str(turn), "role": role_item["role"], "text": text})
+            previous_artifacts.append(
+                {
+                    "turn": str(turn),
+                    "role": role_item["role"],
+                    "provider_model": role_item["provider_model"],
+                    "path": str(artifact_path),
+                    "text": text,
+                }
+            )
             turn_texts[turn] = text
             continue
         text, trace = call_and_save(
@@ -1157,7 +1494,15 @@ def run_holo_condition(
         )
         traces.append(trace)
         previous_text = text
-        previous_artifacts.append({"turn": str(turn), "role": role_item["role"], "text": text})
+        previous_artifacts.append(
+            {
+                "turn": str(turn),
+                "role": role_item["role"],
+                "provider_model": role_item["provider_model"],
+                "path": str(artifact_path),
+                "text": text,
+            }
+        )
         turn_texts[turn] = text
 
     for turn in [5, 6]:
@@ -1179,13 +1524,28 @@ def run_holo_condition(
 
     selector_provider, _ = provider_model(gov_provider_model)
     system = selector_system()
-    user = selector_prompt(payload=payload, turn5=turn_texts[5], turn6=turn_texts[6])
+    final_state_object = build_state_object(
+        report_brief=report_brief,
+        routing_config={
+            "routing_config_id": role_flow.get("routing_config_id", "unknown"),
+            "routing_config_label": role_flow.get("routing_config_label"),
+        },
+        turn=6,
+        role_item=role_flow["turns"][-1],
+        previous_artifacts=previous_artifacts,
+    )
+    write_json(run_root / "state_objects" / condition / "final_state_object.json", final_state_object)
+    user = selector_prompt(payload=payload, state_object=final_state_object, turn5=turn_texts[5], turn6=turn_texts[6])
     selector_out_path = run_root / "final_selection" / f"{condition}_selector.json"
     final_path = run_root / "artifacts" / condition / "final_selected.md"
     selector_trace_path = run_root / "traces" / condition / "post_turn_6_selector.json"
     if selector_out_path.exists() and final_path.exists() and selector_trace_path.exists():
         selector_payload = read_json(selector_out_path)
-        selected_turn = int(selector_payload["selected_turn"])
+        selected_turn_raw = selector_payload["selected_turn"]
+        try:
+            selected_turn = int(selected_turn_raw)
+        except (TypeError, ValueError):
+            selected_turn = str(selected_turn_raw)
         selector_trace = read_json(selector_trace_path)
         traces.append(selector_trace)
     else:
@@ -1202,13 +1562,64 @@ def run_holo_condition(
         selector_text = selector_result["text"].strip()
         selector_json = extract_json_object(selector_text)
         selected = selector_json.get("selected_artifact")
-        if selected not in {"turn_5", "turn_6"}:
+        if selected not in {"turn_5", "turn_6", "surgical_synthesis_required"}:
             selected = "turn_6"
             selector_json["selected_artifact"] = selected
             selector_json.setdefault("validation_flags", []).append("invalid_selected_artifact_defaulted_turn_6")
-        selected_turn = 5 if selected == "turn_5" else 6
-        final_source = run_root / "artifacts" / condition / f"turn_{selected_turn}.md"
-        write_text(final_path, read_text(final_source))
+        selected_turn: int | str = 5 if selected == "turn_5" else 6
+        if selected == "surgical_synthesis_required":
+            synth_system = synthesis_system()
+            synth_user = synthesis_prompt(
+                payload=payload,
+                state_object=final_state_object,
+                turn5=turn_texts[5],
+                turn6=turn_texts[6],
+                selector=selector_json,
+            )
+            synth_card = save_prompt_card(
+                run_root,
+                rel=f"{condition}/post_turn_6_synthesis",
+                system=synth_system,
+                user=synth_user,
+                provider=selector_provider,
+                model=PROVIDERS[selector_provider]["model"],
+                call_type="post_turn_6_gov_synthesis",
+            )
+            synth_result = call_provider(selector_provider, system=synth_system, user=synth_user, max_tokens=9000, timeout=timeout)
+            synth_text = synth_result["text"].strip() + "\n"
+            write_text(final_path, synth_text)
+            selected_turn = "surgical_synthesis"
+            synthesis_trace = save_call(
+                run_root,
+                trace_rel=f"{condition}/post_turn_6_synthesis",
+                artifact_path=final_path,
+                artifact_text=synth_text,
+                prompt_card_path=synth_card,
+                call_type="post_turn_6_gov_synthesis",
+                condition=condition,
+                provider=selector_provider,
+                role="HoloGov final synthesis",
+                turn=None,
+                result=synth_result,
+                hashes=hashes,
+            )
+            traces.append(synthesis_trace)
+            final_text, repair_traces = maybe_repair_final_word_count(
+                run_root=run_root,
+                hashes=hashes,
+                payload=payload,
+                provider=selector_provider,
+                condition=condition,
+                role="HoloGov final synthesis",
+                turn=6,
+                text=synth_text,
+                artifact_path=final_path,
+                timeout=timeout,
+            )
+            traces.extend(repair_traces)
+        else:
+            final_source = run_root / "artifacts" / condition / f"turn_{selected_turn}.md"
+            write_text(final_path, read_text(final_source))
         selector_payload = {
             "selector_provider": selector_provider,
             "selector_model": PROVIDERS[selector_provider]["model"],
@@ -1254,6 +1665,7 @@ def build_judge_packets(
     run_root: Path,
     run_id: str,
     condition_results: dict[str, dict[str, Any]],
+    solo_conditions: dict[str, str],
 ) -> list[dict[str, Any]]:
     holo_text = read_text(Path(condition_results["holo_frontier_gov"]["final_artifact_path"]))
     packets: list[dict[str, Any]] = []
@@ -1261,7 +1673,7 @@ def build_judge_packets(
     source_pack = read_json(PACKET_DIR / "source_pack.json")
     report_brief = read_json(PACKET_DIR / "report_brief.json")
     rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
-    for solo_condition in SOLO_CONDITIONS:
+    for solo_condition in solo_conditions:
         solo_text = read_text(Path(condition_results[solo_condition]["final_artifact_path"]))
         pair_id = f"{run_id}_{solo_condition}_vs_holo_pair"
         flip = int(hashlib.sha256(pair_id.encode("utf-8")).hexdigest()[:2], 16) % 2 == 0
@@ -1555,14 +1967,17 @@ def run(args: argparse.Namespace) -> int:
     status = env_status()
     missing = [name for name, value in status.items() if value != "PRESENT"]
     if args.preflight:
+        solo_condition_count = 1 if args.solo_condition else len(SOLO_CONDITIONS)
         print(
             json.dumps(
                 {
                     "status": "PREFLIGHT_PASS" if not missing else "PREFLIGHT_MISSING_ENV",
                     "provider_env": status,
                     "models": {p: cfg["model"] for p, cfg in PROVIDERS.items()},
-                    "planned_generation_calls_minimum": 30,
-                    "planned_judge_calls": 9,
+                    "holo_architecture_mode": STATE_OBJECT_VERSION,
+                    "solo_condition_scope": [args.solo_condition] if args.solo_condition else list(SOLO_CONDITIONS),
+                    "planned_generation_calls_minimum": (solo_condition_count * 6) + 12,
+                    "planned_judge_calls": solo_condition_count * 3,
                 },
                 indent=2,
                 sort_keys=True,
@@ -1578,6 +1993,11 @@ def run(args: argparse.Namespace) -> int:
     base_role_flow = read_json(PACKET_DIR / "finance_algo_adversarial_role_flow.json")
     routing_config = load_routing_config(args.routing_config)
     role_flow = apply_holo_routing_config(base_role_flow, routing_config)
+    solo_conditions = (
+        {args.solo_condition: SOLO_CONDITIONS[args.solo_condition]}
+        if args.solo_condition
+        else dict(SOLO_CONDITIONS)
+    )
     judge_panel = read_json(PACKET_DIR / "judge_panel_frontier_blind.json")
     rubric = read_json(PACKET_DIR / "judge_rubric_8criteria.json")
     if len(role_flow["turns"]) != 6:
@@ -1590,7 +2010,8 @@ def run(args: argparse.Namespace) -> int:
     run_id = args.run_id or f"full_frontier_finance_algo_execution_{routing_config['routing_config_id']}_{utc_stamp()}"
     run_root = PACKET_DIR / "runs" / run_id
     run_root.mkdir(parents=True, exist_ok=True)
-    payload = frozen_generation_payload(role_flow=role_flow, routing_config=routing_config)
+    solo_payload = frozen_base_generation_payload()
+    holo_payload = frozen_holo_generation_payload(role_flow=role_flow, routing_config=routing_config)
     judge_payload_text = frozen_judge_payload()
     hashes = packet_hashes()
     all_traces: list[dict[str, Any]] = []
@@ -1610,20 +2031,22 @@ def run(args: argparse.Namespace) -> int:
         "holo_analyst_rotation": routing_config["analyst_rotation"],
         "holo_governor_model": report_brief["holo_turn_design"]["governor_model"],
         "hashes": hashes,
-        "conditions": [*SOLO_CONDITIONS.keys(), "holo_frontier_gov"],
+        "conditions": [*solo_conditions.keys(), "holo_frontier_gov"],
+        "solo_condition_scope": list(solo_conditions.keys()),
+        "holo_architecture_mode": STATE_OBJECT_VERSION,
         "judge_panel": judge_panel["judge_panel_id"],
         "condition_results": condition_results,
         "notes": "Full one-domain frontier run. Non-public and benchmark_credit=false until inspected.",
     }
     write_manifest(run_root, manifest)
     try:
-        for condition, model_name in SOLO_CONDITIONS.items():
+        for condition, model_name in solo_conditions.items():
             manifest["status"] = f"running_generation_{condition}"
             write_manifest(run_root, manifest)
             result, traces = run_solo_condition(
                 run_root=run_root,
                 hashes=hashes,
-                payload=payload,
+                payload=solo_payload,
                 role_flow=role_flow,
                 condition=condition,
                 provider_model_name=model_name,
@@ -1639,7 +2062,7 @@ def run(args: argparse.Namespace) -> int:
         holo_result, traces = run_holo_condition(
             run_root=run_root,
             hashes=hashes,
-            payload=payload,
+            payload=holo_payload,
             role_flow=role_flow,
             report_brief=report_brief,
             timeout=args.timeout,
@@ -1650,7 +2073,12 @@ def run(args: argparse.Namespace) -> int:
         manifest["status"] = "generation_complete_building_judge_packets"
         write_manifest(run_root, manifest)
 
-        packets = build_judge_packets(run_root=run_root, run_id=run_id, condition_results=condition_results)
+        packets = build_judge_packets(
+            run_root=run_root,
+            run_id=run_id,
+            condition_results=condition_results,
+            solo_conditions=solo_conditions,
+        )
         manifest["judge_packets"] = [packet["judge_packet_id"] for packet in packets]
         manifest["status"] = "running_frontier_judges"
         write_manifest(run_root, manifest)
@@ -1732,6 +2160,7 @@ def main() -> int:
     parser.add_argument("--run-id")
     parser.add_argument("--timeout", type=int, default=360)
     parser.add_argument("--routing-config", default=None)
+    parser.add_argument("--solo-condition", choices=sorted(SOLO_CONDITIONS), default=None)
     args = parser.parse_args()
     if not args.preflight and not args.run_live:
         print(

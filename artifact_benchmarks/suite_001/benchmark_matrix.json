@@ -1,0 +1,177 @@
+{
+  "suite_id": "artifact_suite_001_multi_domain_governed_artifact_benchmark",
+  "status": "design_ready_not_frozen",
+  "benchmark_credit": false,
+  "public_claim": false,
+  "purpose": "Compare solo recursive artifact generation against Holo Governor-orchestrated adversarial multi-model artifact generation across five complex artifact domains.",
+  "turn_budget": 6,
+  "final_word_band": {
+    "min": 2800,
+    "target": 3100,
+    "max": 3400,
+    "hard_tolerance_max": 3600
+  },
+  "common_controls": {
+    "internet_policy": "Models do not browse during generation or judging unless a future packet explicitly freezes a browsing protocol. Default is frozen source pack only.",
+    "same_context": true,
+    "same_turn_budget": true,
+    "same_role_flow": true,
+    "same_word_band": true,
+    "same_rubric_shape": true,
+    "blind_judging": true,
+    "judge_count": 3,
+    "deterministic_validity_gate_required": true,
+    "hash_lock_required": true,
+    "trace_autopsy_required": true
+  },
+  "cohort_lanes": [
+    {
+      "cohort_id": "frontier_3_model_main",
+      "purpose": "Primary headline lane: test Holo across three frontier models against the same three solo baselines.",
+      "solo_conditions": {
+        "solo_openai": "openai:gpt-5.5",
+        "solo_anthropic": "anthropic:claude-opus-4-8",
+        "solo_google": "google:gemini-3.1-pro-preview"
+      },
+      "holo_analyst_rotation": [
+        "openai:gpt-5.5",
+        "google:gemini-3.1-pro-preview",
+        "anthropic:claude-opus-4-8",
+        "google:gemini-3.1-pro-preview",
+        "anthropic:claude-opus-4-8",
+        "openai:gpt-5.5"
+      ],
+      "holo_governor_rotation": [
+        null,
+        "google:gemini-3.1-pro-preview",
+        "openai:gpt-5.5",
+        "anthropic:claude-opus-4-8",
+        "google:gemini-3.1-pro-preview",
+        "openai:gpt-5.5"
+      ],
+      "judge_panel": [
+        "openai:gpt-5.5",
+        "anthropic:claude-opus-4-8",
+        "google:gemini-3.1-pro-preview"
+      ]
+    },
+    {
+      "cohort_id": "frontier_2_model_ablation",
+      "purpose": "Ablation lane: test whether GPT plus Opus plus Gov is sufficient without the third frontier model.",
+      "solo_conditions": {
+        "solo_openai": "openai:gpt-5.5",
+        "solo_anthropic": "anthropic:claude-opus-4-8"
+      },
+      "holo_analyst_rotation": [
+        "openai:gpt-5.5",
+        "anthropic:claude-opus-4-8",
+        "openai:gpt-5.5",
+        "anthropic:claude-opus-4-8",
+        "anthropic:claude-opus-4-8",
+        "openai:gpt-5.5"
+      ],
+      "holo_governor_rotation": [
+        null,
+        "anthropic:claude-opus-4-8",
+        "openai:gpt-5.5",
+        "anthropic:claude-opus-4-8",
+        "openai:gpt-5.5",
+        "openai:gpt-5.5"
+      ],
+      "judge_panel": [
+        "openai:gpt-5.5",
+        "anthropic:claude-opus-4-8",
+        "google:gemini-3.1-pro-preview"
+      ]
+    },
+    {
+      "cohort_id": "mini_3_model_cost_lane",
+      "purpose": "Cost and scalability lane: test whether the Holo architecture creates lift with cheaper models.",
+      "solo_conditions": {
+        "solo_openai_mini": "openai:gpt-4o-mini",
+        "solo_xai_mini": "xai:grok-3-mini",
+        "solo_gemini_lite": "google:gemini-2.5-flash-lite"
+      },
+      "holo_analyst_rotation": [
+        "openai:gpt-4o-mini",
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini",
+        "google:gemini-2.5-flash-lite",
+        "xai:grok-3-mini",
+        "openai:gpt-4o-mini"
+      ],
+      "holo_governor_rotation": [
+        null,
+        "google:gemini-2.5-flash-lite",
+        "openai:gpt-4o-mini",
+        "xai:grok-3-mini",
+        "google:gemini-2.5-flash-lite",
+        "openai:gpt-4o-mini"
+      ],
+      "judge_panel": [
+        "openai:gpt-5.5",
+        "anthropic:claude-opus-4-8",
+        "google:gemini-3.1-pro-preview"
+      ]
+    }
+  ],
+  "domains": [
+    {
+      "domain_id": "finance_algorithmic_execution",
+      "status": "packet_built_hash_locked_frontier_3",
+      "packet_path": "artifact_benchmarks/current_event_finance_algo_execution_20260618",
+      "artifact_type": "institutional finance report",
+      "core_question": "Can a governed multi-model loop design a deeper adaptive execution-governor report than solo frontier models under the same source pack?",
+      "highest_value_hidden_failures": [
+        "benchmark gaming",
+        "venue-routing hand waving",
+        "portfolio-weight and funding conflict",
+        "T+1 settlement and clearing constraints",
+        "uncontrolled AI-agent recency bias"
+      ]
+    },
+    {
+      "domain_id": "healthcare_clinical_operations",
+      "status": "scenario_skeleton_ready_packet_not_frozen",
+      "packet_path": "artifact_benchmarks/suite_001/domain_skeletons/healthcare_clinical_operations.json",
+      "artifact_type": "hospital AI triage and care-routing governance report",
+      "core_question": "Can Holo discover operational, clinical-risk, equity, EHR-quality, and escalation failures that polished solo reports miss?"
+    },
+    {
+      "domain_id": "cyber_incident_response",
+      "status": "scenario_skeleton_ready_packet_not_frozen",
+      "packet_path": "artifact_benchmarks/suite_001/domain_skeletons/cyber_incident_response.json",
+      "artifact_type": "board-level incident response and containment packet",
+      "core_question": "Can Holo produce a stronger ransomware or supply-chain incident response artifact from partial evidence without overclaiming attribution?"
+    },
+    {
+      "domain_id": "legal_regulatory_vendor_risk",
+      "status": "scenario_skeleton_ready_packet_not_frozen",
+      "packet_path": "artifact_benchmarks/suite_001/domain_skeletons/legal_regulatory_vendor_risk.json",
+      "artifact_type": "AI vendor risk and regulatory strategy memo",
+      "core_question": "Can Holo identify contractual, jurisdictional, privilege, discovery, and compliance traps that solo models flatten?"
+    },
+    {
+      "domain_id": "energy_infrastructure_ai_datacenters",
+      "status": "scenario_skeleton_ready_packet_not_frozen",
+      "packet_path": "artifact_benchmarks/suite_001/domain_skeletons/energy_infrastructure_ai_datacenters.json",
+      "artifact_type": "AI data-center power and grid-risk strategy report",
+      "core_question": "Can Holo synthesize grid, interconnection, PPA, reliability, carbon-claim, and capex timing risks into a client-grade plan?"
+    }
+  ],
+  "required_outputs_per_run": [
+    "run_manifest.json",
+    "hash_lock.json",
+    "judge_packets",
+    "judge_scores",
+    "sealed/anonymization_map.json",
+    "analysis/analysis_summary.json",
+    "analysis/analysis_summary.md",
+    "analysis/scores.csv",
+    "analysis/judge_rows.csv",
+    "analysis/criterion_gaps.csv",
+    "analysis/condition_results.csv",
+    "autopsy/full_autopsy.json",
+    "autopsy/full_autopsy.md"
+  ]
+}

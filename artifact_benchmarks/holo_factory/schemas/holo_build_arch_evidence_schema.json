@@ -1,0 +1,499 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HoloBuild Architecture Evidence Schema V4.1",
+  "description": "Internal proof metadata schema for verifying that a HoloBuild run used the governed Context Governor -> structured state -> artifact registry -> BatonPass -> adversarial turn -> state audit -> synthesis architecture. This evidence is never judge-visible.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "architecture_policy_id",
+    "run_id",
+    "domain_id",
+    "condition_type",
+    "provider_calls_recorded",
+    "architecture_evidence_visible_to_judges",
+    "visible_surface_boundary",
+    "proof_credit_readiness",
+    "turns",
+    "final"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "holo_build_arch_evidence_schema_v4_1"
+    },
+    "architecture_policy_id": {
+      "const": "HOLOBUILD_PATENT_ALIGNMENT_POLICY_V4_1"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "condition_type": {
+      "const": "holo_build_arch"
+    },
+    "provider_calls_recorded": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "architecture_evidence_visible_to_judges": {
+      "const": false
+    },
+    "visible_surface_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_prompts_include_architecture_evidence",
+        "browser_packets_include_architecture_evidence",
+        "judge_packets_include_architecture_evidence",
+        "public_artifacts_include_architecture_evidence",
+        "benchmark_source_packets_include_architecture_evidence",
+        "judge_visible_allowed_fields"
+      ],
+      "properties": {
+        "model_prompts_include_architecture_evidence": {
+          "const": false
+        },
+        "browser_packets_include_architecture_evidence": {
+          "const": false
+        },
+        "judge_packets_include_architecture_evidence": {
+          "const": false
+        },
+        "public_artifacts_include_architecture_evidence": {
+          "const": false
+        },
+        "benchmark_source_packets_include_architecture_evidence": {
+          "const": false
+        },
+        "judge_visible_allowed_fields": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "anonymous_artifact",
+              "source_packet",
+              "task_brief",
+              "domain_card",
+              "frozen_rubric"
+            ]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "proof_credit_readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fail_closed_if_architecture_evidence_missing",
+        "proof_credit_allowed_if_architecture_evidence_missing",
+        "diagnostic_only_if_architecture_evidence_missing",
+        "required_evidence_validation_status"
+      ],
+      "properties": {
+        "fail_closed_if_architecture_evidence_missing": {
+          "const": true
+        },
+        "proof_credit_allowed_if_architecture_evidence_missing": {
+          "const": false
+        },
+        "diagnostic_only_if_architecture_evidence_missing": {
+          "const": true
+        },
+        "required_evidence_validation_status": {
+          "const": "validated"
+        }
+      }
+    },
+    "turns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "turn_index",
+          "state_object_hash",
+          "state_object_snapshot_path",
+          "critical_constraints_preserved",
+          "settled_decisions_if_present",
+          "artifact_registry_entries",
+          "artifact_registry_hash",
+          "pinned_source_hashes",
+          "pinned_artifact_hashes",
+          "retrieve_by_id_or_source_reference_behavior",
+          "token_budget_partial_injection_flags",
+          "baton_pass",
+          "selected_model",
+          "adversarial_role",
+          "role_compliance_result",
+          "state_audit_constraint_preservation_result",
+          "synthesis_trigger"
+        ],
+        "properties": {
+          "turn_index": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "state_object_hash": {
+            "type": "string",
+            "minLength": 16
+          },
+          "state_object_snapshot_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "critical_constraints_preserved": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "constraint_id",
+                "status",
+                "evidence_hash_or_location"
+              ],
+              "properties": {
+                "constraint_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "status": {
+                  "enum": [
+                    "preserved",
+                    "violated",
+                    "escalated",
+                    "not_applicable"
+                  ]
+                },
+                "evidence_hash_or_location": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "settled_decisions_if_present": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "present",
+              "settled_decisions"
+            ],
+            "properties": {
+              "present": {
+                "type": "boolean"
+              },
+              "settled_decisions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "decision_id",
+                    "decision_hash_or_location"
+                  ],
+                  "properties": {
+                    "decision_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "decision_hash_or_location": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "artifact_registry_entries": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "artifact_id",
+                "artifact_type",
+                "artifact_hash",
+                "source_refs"
+              ],
+              "properties": {
+                "artifact_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "artifact_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "artifact_hash": {
+                  "type": "string",
+                  "minLength": 16
+                },
+                "source_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "artifact_registry_hash": {
+            "type": "string",
+            "minLength": 16
+          },
+          "pinned_source_hashes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 16
+            }
+          },
+          "pinned_artifact_hashes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 16
+            }
+          },
+          "retrieve_by_id_or_source_reference_behavior": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "required",
+              "observed",
+              "evidence_hash_or_location"
+            ],
+            "properties": {
+              "required": {
+                "const": true
+              },
+              "observed": {
+                "type": "boolean"
+              },
+              "evidence_hash_or_location": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "token_budget_partial_injection_flags": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "present",
+              "token_budget_limit",
+              "tokens_used",
+              "partial_injection_used",
+              "partial_injection_reason"
+            ],
+            "properties": {
+              "present": {
+                "type": "boolean"
+              },
+              "token_budget_limit": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              },
+              "tokens_used": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "partial_injection_used": {
+                "type": "boolean"
+              },
+              "partial_injection_reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "baton_pass": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "baton_pass_hash",
+              "baton_pass_path",
+              "next_model_id",
+              "adversarial_role"
+            ],
+            "properties": {
+              "baton_pass_hash": {
+                "type": "string",
+                "minLength": 16
+              },
+              "baton_pass_path": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "next_model_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "adversarial_role": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "selected_model": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "provider",
+              "exact_model_id",
+              "endpoint"
+            ],
+            "properties": {
+              "provider": {
+                "type": "string",
+                "minLength": 1
+              },
+              "exact_model_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "endpoint": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "adversarial_role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role_compliance_result": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "evidence_hash_or_location"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "not_checked"
+                ]
+              },
+              "evidence_hash_or_location": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "state_audit_constraint_preservation_result": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "state_audit_status",
+              "constraint_preservation_status",
+              "evidence_hash_or_location"
+            ],
+            "properties": {
+              "state_audit_status": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "not_checked"
+                ]
+              },
+              "constraint_preservation_status": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "not_checked"
+                ]
+              },
+              "evidence_hash_or_location": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "synthesis_trigger": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "triggered",
+              "reason"
+            ],
+            "properties": {
+              "triggered": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "final": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "synthesis_trigger",
+        "final_artifact_hash",
+        "final_artifact_path",
+        "final_state_object_hash",
+        "final_artifact_registry_hash",
+        "architecture_evidence_visible_to_judges"
+      ],
+      "properties": {
+        "synthesis_trigger": {
+          "type": "string",
+          "minLength": 1
+        },
+        "final_artifact_hash": {
+          "type": "string",
+          "minLength": 16
+        },
+        "final_artifact_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "final_state_object_hash": {
+          "type": "string",
+          "minLength": 16
+        },
+        "final_artifact_registry_hash": {
+          "type": "string",
+          "minLength": 16
+        },
+        "architecture_evidence_visible_to_judges": {
+          "const": false
+        }
+      }
+    }
+  }
+}

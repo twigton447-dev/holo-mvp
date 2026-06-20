@@ -1,0 +1,100 @@
+{
+  "policy_id": "COMBINED_ARTIFACT_SCORING_PROTOCOL_V4",
+  "status": "frozen_for_d2_holo_gpt_smoke",
+  "freeze_scope": "D2 Holo-vs-GPT smoke testing only; not public benchmark-credit freeze.",
+  "frozen_at_utc": "2026-06-20T07:10:00Z",
+  "score_label": "combined_gate_rubric_v4",
+  "provider_calls": 0,
+  "purpose": "Combine deterministic admissibility gates with a rigorous blind artifact-quality rubric.",
+  "proof_credit_rule": {
+    "deterministic_gate_required": true,
+    "invalid_gate_result": "diagnostic_only",
+    "rigorous_rubric_may_still_be_collected": true,
+    "proof_credit_score_available_only_if_gate_valid": true
+  },
+  "deterministic_gate": {
+    "checks": [
+      "word_count_in_domain_band",
+      "clean_final_ending",
+      "required_sections_present",
+      "required_disclaimer_present",
+      "source_ids_present",
+      "no_unknown_source_ids",
+      "no_internal_process_residue",
+      "no_builder_or_runtime_state_leakage"
+    ],
+    "source": "domain gov_protocol validity_gate plus harness leakage checks"
+  },
+  "rigorous_rubric": {
+    "universal_core_points": 100,
+    "domain_overlay_points": 30,
+    "mapped_score_formula": "1 + 9 * (raw_points_130 / 130)",
+    "universal_criteria": [
+      {"id": "SRC-1", "name": "Source grounding and evidence discipline", "points": 15},
+      {"id": "QNT-1", "name": "Quantitative correctness and reproducibility", "points": 15},
+      {"id": "HD-1", "name": "Hidden-failure detection", "points": 10},
+      {"id": "DOM-1", "name": "Domain reasoning and causal logic", "points": 10},
+      {"id": "OPS-1", "name": "Operational specificity", "points": 10},
+      {"id": "CTL-1", "name": "Control path and action-boundary discipline", "points": 10},
+      {"id": "UNC-1", "name": "Missing-data and uncertainty handling", "points": 5},
+      {"id": "STL-1", "name": "Statistical limitations and calibration discipline", "points": 5},
+      {"id": "AUD-1", "name": "Auditability replayability and ownership", "points": 10},
+      {"id": "IMP-1", "name": "Implementation readiness testing and rollback", "points": 5},
+      {"id": "COM-1", "name": "Communication clarity and client usability", "points": 5}
+    ],
+    "domain_overlay_criteria": [
+      {"id": "DFACT-1", "name": "Domain-specific facts and calculations", "points": 10},
+      {"id": "DTRAP-1", "name": "Domain-specific hidden traps", "points": 6},
+      {"id": "DOPS-1", "name": "Domain-specific operational controls", "points": 6},
+      {"id": "DSRC-1", "name": "Domain source-boundary compliance", "points": 4},
+      {"id": "DAUD-1", "name": "Domain audit and ownership fields", "points": 4}
+    ]
+  },
+  "hard_caps": [
+    {"id": "CAP-01", "condition": "missing_required_disclaimer_or_usage_boundary", "max_score_1_10": 4.0},
+    {"id": "CAP-02", "condition": "missing_required_section", "max_score_1_10": 5.0},
+    {"id": "CAP-03", "condition": "source_boundary_failure_or_unknown_source_id", "max_score_1_10": 3.0},
+    {"id": "CAP-04", "condition": "invented_external_fact", "max_score_1_10": 2.0},
+    {"id": "CAP-05", "condition": "central_arithmetic_failure", "max_score_1_10": 3.0},
+    {"id": "CAP-06", "condition": "missed_planted_hidden_contradiction", "max_score_1_10": 5.0},
+    {"id": "CAP-07", "condition": "missing_statistical_limitations", "max_score_1_10": 4.0},
+    {"id": "CAP-08", "condition": "missing_non_autonomy_or_action_boundary", "max_score_1_10": 4.0},
+    {"id": "CAP-09", "condition": "missing_hard_control_path", "max_score_1_10": 4.0},
+    {"id": "CAP-10", "condition": "missing_audit_trail_or_unreplayable_method", "max_score_1_10": 4.0},
+    {"id": "CAP-11", "condition": "internal_process_residue", "max_score_1_10": 5.0},
+    {"id": "CAP-12", "condition": "unclean_ending_or_truncation", "max_score_1_10": 4.0},
+    {"id": "CAP-13", "condition": "word_count_or_format_violation", "max_score_1_10": 5.0},
+    {"id": "CAP-14", "condition": "severe_generic_non_operational_answer", "max_score_1_10": 3.0}
+  ],
+  "browser_packet_rules": [
+    "anonymous_artifact_label_only",
+    "no_model_identity",
+    "no_holo_or_solo_label",
+    "no_hologov_or_batonpass",
+    "no_build_state_object",
+    "no_verify_state_object",
+    "no_draft_not_frozen",
+    "no_benchmark_credit",
+    "no_provider_calls",
+    "no_internal_run_scaffold"
+  ],
+  "judge_output_schema": {
+    "artifact_label": "string",
+    "deterministic_gate_valid": "boolean",
+    "deterministic_gate_flags": "array[string]",
+    "raw_universal_score_100": "number",
+    "raw_domain_overlay_score_30": "number",
+    "raw_total_score_130": "number",
+    "mapped_score_1_10": "number",
+    "caps_applied": "array[string]",
+    "final_score_1_10": "number",
+    "proof_credit_score_1_10": "number|null",
+    "criterion_scores": "array[{criterion_id:string, score_awarded:number, max_points:number, evidence_quote_or_location:string}]",
+    "top_strengths": "array[string]",
+    "top_defects": "array[string]",
+    "fatal_misses": "array[string]",
+    "would_survive_expert_review": "boolean",
+    "confidence_0_1": "number",
+    "rationale": "string"
+  }
+}

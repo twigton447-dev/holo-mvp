@@ -1,9 +1,9 @@
 # Unified Artifact Scoring Protocol v5.2 - Structural + Epistemic Decision Matrix
 
-Status: candidate primary topline metric, not locked doctrine.
+Status: locked primary scoring candidate for trial use; not final benchmark doctrine.
 Protocol ID: `unified_artifact_scoring_protocol_v5_2_structural_epistemic`.
 
-This protocol replaces the broad v5.1 scoring front-end as the preferred candidate metric for cross-domain artifact scoring. It does not claim official benchmark proof from any manual probe. The D5 manual Gemini probe is used only as a regression fixture for math, bands, and validation behavior.
+This protocol is locked as the preferred trial metric over the broad v5.1 scoring front-end for cross-domain artifact scoring. It does not claim official benchmark proof from any manual probe. The D5 manual Gemini probe is used only as a regression fixture for math, bands, and validation behavior.
 
 ## Scoring Goal
 

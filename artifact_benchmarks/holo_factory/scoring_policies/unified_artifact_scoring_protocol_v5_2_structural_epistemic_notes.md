@@ -1,6 +1,6 @@
 # v5.2 Structural + Epistemic Notes
 
-Status: candidate notes, not locked doctrine.
+Status: locked candidate notes for trial scoring; not final benchmark doctrine.
 
 ## Relationship To v5.1
 

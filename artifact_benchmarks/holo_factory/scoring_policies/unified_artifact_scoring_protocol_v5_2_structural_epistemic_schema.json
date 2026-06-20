@@ -1,0 +1,185 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": true,
+  "definitions": {
+    "artifact_score": {
+      "additionalProperties": true,
+      "properties": {
+        "applicable_hard_caps": {
+          "items": {
+            "$ref": "#/definitions/hard_cap"
+          },
+          "type": "array"
+        },
+        "artifact_id": {
+          "type": "string"
+        },
+        "band": {
+          "type": "string"
+        },
+        "decision_reliance_risk": {
+          "type": "string"
+        },
+        "dimension_justifications": {
+          "type": [
+            "object",
+            "array",
+            "string"
+          ]
+        },
+        "epistemic_raw_15": {
+          "type": "number"
+        },
+        "epistemic_scores": {
+          "additionalProperties": false,
+          "properties": {
+            "claim_evidence_distance": {
+              "$ref": "#/definitions/dimension_score"
+            },
+            "conflicting_data_handling": {
+              "$ref": "#/definitions/dimension_score"
+            },
+            "insight_vs_summary": {
+              "$ref": "#/definitions/dimension_score"
+            },
+            "operational_reality_gap": {
+              "$ref": "#/definitions/dimension_score"
+            },
+            "source_weighting_validity": {
+              "$ref": "#/definitions/dimension_score"
+            }
+          },
+          "required": [
+            "claim_evidence_distance",
+            "conflicting_data_handling",
+            "insight_vs_summary",
+            "operational_reality_gap",
+            "source_weighting_validity"
+          ],
+          "type": "object"
+        },
+        "expert_reviewer_challenge": {
+          "type": "string"
+        },
+        "final_score_100": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        "normalized_total_100": {
+          "type": "number"
+        },
+        "raw_total_33": {
+          "type": "number"
+        },
+        "required_repairs_to_next_band": {
+          "type": [
+            "array",
+            "string"
+          ]
+        },
+        "strongest_dimensions": {
+          "type": "array"
+        },
+        "structural_raw_18": {
+          "type": "number"
+        },
+        "structural_scores": {
+          "additionalProperties": false,
+          "properties": {
+            "bluf": {
+              "$ref": "#/definitions/dimension_score"
+            },
+            "data_isolation": {
+              "$ref": "#/definitions/dimension_score"
+            },
+            "evidence_constraints": {
+              "$ref": "#/definitions/dimension_score"
+            },
+            "option_distinctness": {
+              "$ref": "#/definitions/dimension_score"
+            },
+            "risk_symmetry": {
+              "$ref": "#/definitions/dimension_score"
+            },
+            "scannability": {
+              "$ref": "#/definitions/dimension_score"
+            }
+          },
+          "required": [
+            "bluf",
+            "data_isolation",
+            "option_distinctness",
+            "evidence_constraints",
+            "risk_symmetry",
+            "scannability"
+          ],
+          "type": "object"
+        },
+        "weakest_dimensions": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "structural_scores",
+        "structural_raw_18",
+        "epistemic_scores",
+        "epistemic_raw_15",
+        "raw_total_33",
+        "normalized_total_100",
+        "applicable_hard_caps",
+        "final_score_100",
+        "band",
+        "dimension_justifications",
+        "strongest_dimensions",
+        "weakest_dimensions",
+        "required_repairs_to_next_band",
+        "expert_reviewer_challenge",
+        "decision_reliance_risk"
+      ],
+      "type": "object"
+    },
+    "dimension_score": {
+      "maximum": 3,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "hard_cap": {
+      "additionalProperties": true,
+      "properties": {
+        "cap_id": {
+          "type": "string"
+        },
+        "evidence": {
+          "type": "string"
+        },
+        "max_score_100": {
+          "type": "number"
+        }
+      },
+      "type": [
+        "object",
+        "string"
+      ]
+    }
+  },
+  "properties": {
+    "artifact_scores": {
+      "items": {
+        "$ref": "#/definitions/artifact_score"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "protocol_id": {
+      "const": "unified_artifact_scoring_protocol_v5_2_structural_epistemic"
+    }
+  },
+  "required": [
+    "protocol_id",
+    "artifact_scores"
+  ],
+  "title": "Unified Artifact Scoring Protocol v5.2 Structural Epistemic Score",
+  "type": "object"
+}

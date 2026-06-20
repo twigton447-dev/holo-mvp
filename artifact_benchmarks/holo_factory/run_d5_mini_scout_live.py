@@ -20,9 +20,11 @@ ARCH_POLICY_PATH = FACTORY_DIR / "architecture_policies/holobuild_patent_alignme
 RUNNER_ID = "d5_medtech_capacity_strain_001_live_adapter_v4_1"
 RUN_MODE = "d5_medtech_capacity_strain_001_corrected_v2_six_turn"
 RUN_MODE_FULL_GOV_V4 = "d5_medtech_capacity_strain_001_full_gov_v4"
+RUN_MODE_PATENT_ALIGNED_V4 = "d5_medtech_capacity_strain_001_patent_aligned_v4"
 HOLO_MODE_DIAGNOSTIC_V3 = "diagnostic_v3"
 HOLO_MODE_FULL_GOV_V4 = "full_gov_v4"
-HOLO_MODES = (HOLO_MODE_DIAGNOSTIC_V3, HOLO_MODE_FULL_GOV_V4)
+HOLO_MODE_PATENT_ALIGNED_V4 = "patent_aligned_v4"
+HOLO_MODES = (HOLO_MODE_DIAGNOSTIC_V3, HOLO_MODE_FULL_GOV_V4, HOLO_MODE_PATENT_ALIGNED_V4)
 LIVE_APPROVAL_ENV = "HOLO_ALLOW_LIVE"
 PROVIDER_CALLS = 0
 ATTEMPTED_PROVIDER_CALLS = 0
@@ -238,6 +240,8 @@ def provider_call_accounting() -> dict[str, int]:
 
 
 def run_mode_for_holo_mode(holo_mode: str) -> str:
+    if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4:
+        return RUN_MODE_PATENT_ALIGNED_V4
     return RUN_MODE_FULL_GOV_V4 if holo_mode == HOLO_MODE_FULL_GOV_V4 else RUN_MODE
 
 
@@ -356,16 +360,26 @@ def visible_surface_boundary() -> dict[str, Any]:
     }
 
 
-def proof_credit_readiness() -> dict[str, Any]:
+def proof_credit_readiness(holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3) -> dict[str, Any]:
     return {
         "fail_closed_if_architecture_evidence_missing": True,
         "proof_credit_allowed_if_architecture_evidence_missing": False,
         "diagnostic_only_if_architecture_evidence_missing": True,
         "required_evidence_validation_status": "validated",
+        "preferred_proof_eligible_holo_mode": HOLO_MODE_PATENT_ALIGNED_V4,
+        "current_holo_mode": holo_mode,
+        "external_governor_provider_calls_required_for_proof_credit": False,
+        "token_burn_policy": "reported_not_forced",
     }
 
 
-def smoke_arch_evidence(packet_dir: Path, run_id: str, condition_dir: Path) -> dict[str, Any]:
+def smoke_arch_evidence(
+    packet_dir: Path,
+    run_id: str,
+    condition_dir: Path,
+    *,
+    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+) -> dict[str, Any]:
     registry = base_registry(packet_dir)
     prior_artifact_ids: list[str] = []
     prior_hashes: list[str] = []
@@ -399,6 +413,8 @@ def smoke_arch_evidence(packet_dir: Path, run_id: str, condition_dir: Path) -> d
         state_hash = sha_text(json.dumps(state_payload, sort_keys=True))
         state_path = condition_dir / f"state_object_turn_{turn_index:03d}.json"
         write_json(state_path, state_payload)
+        registry_path = condition_dir / f"artifact_registry_turn_{turn_index:03d}.json"
+        write_json(registry_path, schema_registry_entries(registry))
         baton_payload = build_baton_pass(
             run_id=run_id,
             turn_index=turn_index,
@@ -493,6 +509,7 @@ def smoke_arch_evidence(packet_dir: Path, run_id: str, condition_dir: Path) -> d
                 "artifact_record": artifact_record,
                 "artifact_registry_entries": schema_registry_entries(registry),
                 "artifact_registry_hash": registry_hash(registry),
+                "artifact_registry_path": registry_path,
                 "artifact_registry_after_hash": registry_hash(final_registry) if final else registry_hash(registry),
                 "pinned_source_hashes": [item["artifact_hash"] for item in retrieved_entries if item["artifact_type"].startswith("frozen_")],
                 "pinned_artifact_hashes": pinned_artifact_hashes_from_retrieval(retrieved_entries),
@@ -519,6 +536,8 @@ def smoke_arch_evidence(packet_dir: Path, run_id: str, condition_dir: Path) -> d
         turn_records=turn_records,
         final_artifact_path=condition_dir / "artifact.md",
         final_artifact_text=(condition_dir / "artifact.md").read_text(encoding="utf-8"),
+        holo_mode=holo_mode,
+        synthetic_smoke_only=True,
     )
 
 
@@ -544,6 +563,14 @@ def validate_smoke_arch_evidence(evidence: dict[str, Any]) -> list[str]:
         errors.append("arch evidence is judge-visible")
     if evidence.get("condition_type") != "holo_build_arch":
         errors.append("arch evidence condition_type mismatch")
+    patent_mode = evidence.get("holo_mode") == HOLO_MODE_PATENT_ALIGNED_V4
+    if patent_mode:
+        if evidence.get("context_governor_implementation") != "internal_state_management_step":
+            errors.append("patent_aligned_v4 context governor is not internal state-management step")
+        if evidence.get("external_governor_provider_calls_required_for_proof_credit") is not False:
+            errors.append("patent_aligned_v4 incorrectly requires external Governor provider calls")
+        if evidence.get("token_burn_policy") != "reported_not_forced":
+            errors.append("patent_aligned_v4 token burn policy is not reported_not_forced")
     turns = evidence.get("turns") or []
     if len(turns) != EXPECTED_TURN_COUNT:
         errors.append(f"arch evidence turn count mismatch: expected {EXPECTED_TURN_COUNT}, got {len(turns)}")
@@ -557,6 +584,7 @@ def validate_smoke_arch_evidence(evidence: dict[str, Any]) -> list[str]:
             "settled_decisions_if_present",
             "artifact_registry_entries",
             "artifact_registry_hash",
+            "artifact_registry_snapshot_path",
             "pinned_source_hashes",
             "pinned_artifact_hashes",
             "retrieve_by_id_or_source_reference_behavior",
@@ -590,6 +618,23 @@ def validate_smoke_arch_evidence(evidence: dict[str, Any]) -> list[str]:
                     prompt_hash = sha_file(prompt_path)
                     if not prompt_hashes or any(item != prompt_hash for item in prompt_hashes):
                         errors.append(f"arch evidence turn {turn_index} prompt hash does not match saved prompt card")
+                    state_payload = read_json(Path(state_path_value))
+                    if patent_mode:
+                        required_state_fields = {
+                            "USER_GOAL",
+                            "LATEST_INPUT_SUMMARY",
+                            "CRITICAL_CONSTRAINTS",
+                            "ROLLING_SUMMARY",
+                            "SETTLED_DECISIONS",
+                            "ARTIFACTS_REGISTRY",
+                            "REQUIRED_TOOLS",
+                            "BATON_PASS",
+                        }
+                        missing_state_fields = sorted(required_state_fields - set(state_payload))
+                        if missing_state_fields:
+                            errors.append(f"arch evidence turn {turn_index} STATE_OBJECT missing patent fields: {missing_state_fields}")
+                        if state_payload.get("context_governor_source") != "internal_state_management_step":
+                            errors.append(f"arch evidence turn {turn_index} state not sourced from internal Context Governor")
                     prompt_card = read_json(prompt_path)
                     prompt_surface = f"{prompt_card.get('system', '')}\n{prompt_card.get('user', '')}"
                     required_markers = [
@@ -597,6 +642,8 @@ def validate_smoke_arch_evidence(evidence: dict[str, Any]) -> list[str]:
                         "STATE_OBJECT_SHA256",
                         "BATON_PASS",
                         "BATON_PASS_SHA256",
+                        "ARTIFACTS_REGISTRY",
+                        "ARTIFACTS_REGISTRY_SHA256",
                         "ARTIFACT_REGISTRY",
                         "ARTIFACT_REGISTRY_SHA256",
                         "RETRIEVED PINNED SOURCES AND ARTIFACTS",
@@ -653,6 +700,8 @@ def base_registry(packet_dir: Path) -> list[dict[str, Any]]:
             "artifact_type": "frozen_task_brief",
             "artifact_hash": sha_file(packet_dir / "task_brief.md"),
             "source_refs": ["task_brief.md"],
+            "status": "PINNED",
+            "version": "v1",
             "content_excerpt": excerpt(task_brief_text(packet_dir), 2200),
         },
         {
@@ -660,6 +709,8 @@ def base_registry(packet_dir: Path) -> list[dict[str, Any]]:
             "artifact_type": "frozen_source_packet_markdown",
             "artifact_hash": sha_file(packet_dir / "source_packet.md"),
             "source_refs": ["source_packet.md"],
+            "status": "PINNED",
+            "version": "v1",
             "content_excerpt": "Model-visible source packet rendered from frozen JSON.",
         },
     ]
@@ -670,6 +721,8 @@ def base_registry(packet_dir: Path) -> list[dict[str, Any]]:
                 "artifact_type": "frozen_source_excerpt",
                 "artifact_hash": item["source_hash"],
                 "source_refs": [item.get("url_or_citation", ""), item.get("publisher", "")],
+                "status": "PINNED",
+                "version": "v1",
                 "title": item.get("source_title", ""),
                 "publisher": item.get("publisher", ""),
                 "date": item.get("publication_or_content_date", ""),
@@ -693,6 +746,8 @@ def schema_registry_entries(registry: list[dict[str, Any]]) -> list[dict[str, An
             "artifact_type": item["artifact_type"],
             "artifact_hash": item["artifact_hash"],
             "source_refs": item.get("source_refs", []),
+            "status": item.get("status", "PINNED" if item["artifact_type"].startswith("frozen_") else "ACTIVE"),
+            "version": item.get("version", "v1"),
         }
         for item in registry
     ]
@@ -741,6 +796,8 @@ def artifact_entry(*, artifact_id: str, artifact_type: str, text: str, path: Pat
         "artifact_hash": sha_text(text),
         "source_refs": [str(path)],
         "role": role,
+        "status": "PINNED" if artifact_type == "final_artifact" else "ACTIVE",
+        "version": "v1",
         "content_excerpt": excerpt(text, 3000),
     }
 
@@ -798,42 +855,67 @@ def build_state_object(
     prior_audit_results: list[dict[str, Any]],
 ) -> dict[str, Any]:
     hashes = packet_hash_bundle(packet_dir)
+    constraints = critical_constraints()
+    source_boundaries = {
+        "allowed_source_ids": source_ids(packet_dir),
+        "no_external_sources": True,
+        "contestants_may_browse": False,
+        "forbidden_overclaims": list(FORBIDDEN_SOURCE_BOUNDARY_CLAIMS),
+    }
+    settled_decisions = [
+        {
+            "decision_id": "packet_frozen_before_generation",
+            "decision_hash_or_location": hashes["packet_lock"],
+        },
+        {
+            "decision_id": "d5_mini_word_gate_900_1300",
+            "decision_hash_or_location": sha_file(packet_dir / "deterministic_gate_policy.json"),
+        },
+        {
+            "decision_id": "architecture_evidence_internal_only",
+            "decision_hash_or_location": "architecture_evidence_visible_to_judges=false",
+        },
+    ]
+    registry_entries = schema_registry_entries(registry)
+    rolling_summary = {
+        "turn_index": turn_index,
+        "current_focus": objective,
+        "prior_artifact_hashes": prior_artifact_hashes,
+        "recent_audit_results": prior_audit_results[-3:],
+    }
+    gov_notes = gov_notes_for_turn(
+        turn_index=turn_index,
+        role=role,
+        objective=objective,
+        prior_audit_results=prior_audit_results,
+    )
+    tensions = unresolved_tensions_for_turn(prior_audit_results)
     return {
         "state_object_type": "BUILD_STATE_OBJECT",
+        "context_governor_source": "internal_state_management_step",
+        "USER_GOAL": "Produce a 900-1,300 word decision-grade D5 MedTech crisis brief from the frozen packet only.",
+        "LATEST_INPUT_SUMMARY": "Frozen D5 pulse-ox / hospital-capacity evidence uncertainty packet; no browsing; use registered source IDs only.",
+        "CRITICAL_CONSTRAINTS": constraints,
+        "ROLLING_SUMMARY": rolling_summary,
+        "SETTLED_DECISIONS": settled_decisions,
+        "ARTIFACTS_REGISTRY": registry_entries,
+        "REQUIRED_TOOLS": ["retrieve_registry_entries", "state_audit", "role_compliance", "deterministic_gate_precheck"],
+        "BATON_PASS": {
+            "status": "same-turn BATON_PASS is injected as the separate BATON_PASS block with SHA256",
+            "required": True,
+        },
         "run_id": run_id,
         "packet_id": read_json(packet_dir / "source_packet.json")["packet_id"],
         "turn_index": turn_index,
         "selected_role": role,
         "turn_objective": objective,
-        "gov_notes": gov_notes_for_turn(
-            turn_index=turn_index,
-            role=role,
-            objective=objective,
-            prior_audit_results=prior_audit_results,
-        ),
-        "critical_constraints": critical_constraints(),
-        "source_boundaries": {
-            "allowed_source_ids": source_ids(packet_dir),
-            "no_external_sources": True,
-            "contestants_may_browse": False,
-            "forbidden_overclaims": list(FORBIDDEN_SOURCE_BOUNDARY_CLAIMS),
-        },
-        "settled_decisions": [
-            {
-                "decision_id": "packet_frozen_before_generation",
-                "decision_hash_or_location": hashes["packet_lock"],
-            },
-            {
-                "decision_id": "d5_mini_word_gate_900_1300",
-                "decision_hash_or_location": sha_file(packet_dir / "deterministic_gate_policy.json"),
-            },
-            {
-                "decision_id": "architecture_evidence_internal_only",
-                "decision_hash_or_location": "architecture_evidence_visible_to_judges=false",
-            },
-        ],
-        "unresolved_tensions": unresolved_tensions_for_turn(prior_audit_results),
-        "artifact_registry": schema_registry_entries(registry),
+        "gov_notes": gov_notes,
+        "critical_constraints": constraints,
+        "source_boundaries": source_boundaries,
+        "settled_decisions": settled_decisions,
+        "unresolved_tensions": tensions,
+        "rolling_summary": rolling_summary,
+        "artifact_registry": registry_entries,
         "artifact_registry_hash": registry_hash(registry),
         "pinned_hashes": hashes,
         "prior_artifact_hashes": prior_artifact_hashes,
@@ -897,8 +979,9 @@ def holo_architecture_user_prompt(
         "==========\n"
         f"BATON_PASS_SHA256: {baton_hash}\n"
         f"{stable_json(baton_pass)}\n\n"
-        "ARTIFACT_REGISTRY\n"
-        "=================\n"
+        "ARTIFACTS_REGISTRY / ARTIFACT_REGISTRY\n"
+        "======================================\n"
+        f"ARTIFACTS_REGISTRY_SHA256: {registry_visible_hash}\n"
         f"ARTIFACT_REGISTRY_SHA256: {registry_visible_hash}\n"
         f"{stable_json(registry_visible_payload)}\n\n"
         "RETRIEVED PINNED SOURCES AND ARTIFACTS\n"
@@ -2040,14 +2123,36 @@ def state_audit(
     invented_ids = sorted(cited_ids - allowed_ids)
     lower = text.lower()
     defects: list[str] = []
+    required_state_fields = {
+        "USER_GOAL",
+        "LATEST_INPUT_SUMMARY",
+        "CRITICAL_CONSTRAINTS",
+        "ROLLING_SUMMARY",
+        "SETTLED_DECISIONS",
+        "ARTIFACTS_REGISTRY",
+        "REQUIRED_TOOLS",
+        "BATON_PASS",
+    }
+    missing_state_fields = sorted(required_state_fields - set(state_object))
+    if missing_state_fields:
+        defects.append("state_object_missing_patent_fields:" + ",".join(missing_state_fields))
     if invented_ids:
         defects.append("invented_source_ids:" + ",".join(invented_ids))
     if sha_file(packet_dir / "source_packet.json") not in stable_json(state_object):
         defects.append("packet_hash_missing_from_state_object")
     if not registry or not registry_hash(registry):
         defects.append("source_registry_missing")
+    malformed_pinned = [
+        item.get("artifact_id", "<missing>")
+        for item in registry
+        if item.get("status") == "PINNED" and (not item.get("artifact_hash") or not item.get("source_refs"))
+    ]
+    if malformed_pinned:
+        defects.append("pinned_artifact_registry_hash_or_ref_missing:" + ",".join(map(str, malformed_pinned[:5])))
     if "no_external_sources" not in stable_json(state_object):
         defects.append("source_boundary_missing_from_state_object")
+    if "SETTLED_DECISIONS" not in state_object or not state_object.get("SETTLED_DECISIONS"):
+        defects.append("settled_decisions_missing_from_state_object")
     forbidden_hits = [claim for claim in FORBIDDEN_SOURCE_BOUNDARY_CLAIMS if claim in lower]
     if forbidden_hits:
         defects.append("source_boundary_contradiction:" + ",".join(forbidden_hits))
@@ -2147,6 +2252,8 @@ def build_live_arch_evidence(
     turn_records: list[dict[str, Any]],
     final_artifact_path: Path,
     final_artifact_text: str,
+    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+    synthetic_smoke_only: bool = False,
 ) -> dict[str, Any]:
     hashes = packet_hash_bundle(packet_dir)
     evidence_turns: list[dict[str, Any]] = []
@@ -2188,6 +2295,7 @@ def build_live_arch_evidence(
                 },
                 "artifact_registry_entries": record["artifact_registry_entries"],
                 "artifact_registry_hash": record["artifact_registry_hash"],
+                "artifact_registry_snapshot_path": str(record.get("artifact_registry_path", "")),
                 "pinned_source_hashes": record["pinned_source_hashes"],
                 "pinned_artifact_hashes": record["pinned_artifact_hashes"],
                 "retrieve_by_id_or_source_reference_behavior": {
@@ -2220,10 +2328,28 @@ def build_live_arch_evidence(
         "run_id": run_id,
         "domain_id": "D5_healthcare_medtech_evidence_synthesis",
         "condition_type": "holo_build_arch",
+        "holo_mode": holo_mode,
+        "context_governor_implementation": "internal_state_management_step" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 else "runner_side_architecture_surface",
+        "state_object_source": "internal_context_governor_step" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 else "runner_constructed_diagnostic",
+        "baton_pass_source": "internal_context_governor_step" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 else "runner_constructed_diagnostic",
+        "artifact_registry_source": "internal_context_governor_step" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 else "runner_constructed_diagnostic",
+        "proof_credit_class": "patent_aligned_v4_proof_eligible" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 and not synthetic_smoke_only else "diagnostic_only",
+        "synthetic_smoke_only": synthetic_smoke_only,
+        "external_governor_provider_calls_required_for_proof_credit": False,
+        "token_burn_policy": "reported_not_forced",
         "provider_calls_recorded": PROVIDER_CALLS,
         "architecture_evidence_visible_to_judges": False,
         "visible_surface_boundary": visible_surface_boundary(),
-        "proof_credit_readiness": proof_credit_readiness(),
+        "proof_credit_readiness": proof_credit_readiness(holo_mode),
+        "proof_credit_fail_closed_rules": [
+            "no STATE_OBJECT injection = no proof credit",
+            "no BATON_PASS injection = no proof credit",
+            "no ARTIFACTS_REGISTRY injection = no proof credit",
+            "retrieved artifacts not from registry IDs = no proof credit",
+            "missing state audit = no proof credit",
+            "prompt-card hashes do not match evidence = no proof credit",
+            "architecture evidence visible to judges = no proof credit",
+        ],
         "turns": evidence_turns,
         "final": {
             "synthesis_trigger": "final_synthesis_turn_completed",
@@ -2256,9 +2382,11 @@ def build_full_gov_v4_arch_evidence(
         "domain_id": "D5_healthcare_medtech_evidence_synthesis",
         "condition_type": "holo_build_arch",
         "holo_mode": HOLO_MODE_FULL_GOV_V4,
-        "proof_credit_class": "no_provider_smoke_only" if synthetic_smoke_only else "full_gov_v4_proof_eligible",
+        "proof_credit_class": "no_provider_smoke_only" if synthetic_smoke_only else "external_provider_gov_v4_diagnostic",
         "synthetic_smoke_only": synthetic_smoke_only,
         "expected_holo_call_count": FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT,
+        "external_governor_provider_calls_required_for_proof_credit": False,
+        "diagnostic_note": "External provider-Governor mode is retained for diagnostics only; patent_aligned_v4 is the preferred proof-eligible mode.",
         "provider_calls_recorded": PROVIDER_CALLS,
         "state_object_source": "governor_output",
         "baton_pass_source": "governor_output",
@@ -2273,7 +2401,7 @@ def build_full_gov_v4_arch_evidence(
             "generation prompt hash not matching Gov-produced state/baton/registry = no proof credit",
             "Gov final audit fail = no proof credit",
             "architecture evidence visible to judges = no proof credit",
-            "synthetic smoke evidence is diagnostic-only and not proof-credit eligible",
+            "external provider-Governor v4 evidence is diagnostic-only unless explicitly reclassified by a future frozen policy",
         ],
         "gov_init_call": gov_init_record,
         "gov_update_calls": gov_update_records,
@@ -2349,6 +2477,8 @@ def validate_full_gov_v4_arch_evidence(evidence: dict[str, Any]) -> list[str]:
         "STATE_OBJECT_SHA256",
         "BATON_PASS",
         "BATON_PASS_SHA256",
+        "ARTIFACTS_REGISTRY",
+        "ARTIFACTS_REGISTRY_SHA256",
         "ARTIFACT_REGISTRY",
         "ARTIFACT_REGISTRY_SHA256",
         "RETRIEVED PINNED SOURCES AND ARTIFACTS",
@@ -2919,7 +3049,9 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
         "input_tokens": sum(int(trace.get("input_tokens") or 0) for trace in all_traces),
         "output_tokens": sum(int(trace.get("output_tokens") or 0) for trace in all_traces),
         "architecture_evidence_visible_to_judges": False,
-        "proof_credit_class": "no_provider_smoke_only" if not live else "full_gov_v4_proof_eligible",
+        "proof_credit_class": "no_provider_smoke_only" if not live else "external_provider_gov_v4_diagnostic",
+        "external_governor_provider_calls_required_for_proof_credit": False,
+        "preferred_proof_eligible_holo_mode": HOLO_MODE_PATENT_ALIGNED_V4,
     }
     write_json(condition_dir / "deterministic_gate_precheck.json", deterministic_gate_precheck(packet_dir, condition, final_text))
     write_json(condition_dir / "artifact_metadata.json", metadata)
@@ -3157,7 +3289,13 @@ def run_empty_gov_failure_accounting_smoke(packet_dir: Path, run_id: str) -> int
     return 0 if result["status"].endswith("_PASS") else 1
 
 
-def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str, Any]:
+def run_live_holobuild(
+    packet_dir: Path,
+    run_id: str,
+    timeout: int,
+    *,
+    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+) -> dict[str, Any]:
     condition = "holo_build_arch"
     condition_dir = packet_dir / "runs" / run_id / condition
     condition_dir.mkdir(parents=True, exist_ok=True)
@@ -3187,6 +3325,8 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
         state_hash = sha_text(json.dumps(state_payload, sort_keys=True))
         state_path = condition_dir / f"state_object_turn_{index:03d}.json"
         write_json(state_path, state_payload)
+        registry_path = condition_dir / f"artifact_registry_turn_{index:03d}.json"
+        write_json(registry_path, schema_registry_entries(registry))
         baton_payload = build_baton_pass(
             run_id=run_id,
             turn_index=index,
@@ -3274,6 +3414,7 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
                 "artifact_record": artifact_record,
                 "artifact_registry_entries": schema_registry_entries(registry),
                 "artifact_registry_hash": registry_hash(registry),
+                "artifact_registry_path": registry_path,
                 "pinned_source_hashes": [item["artifact_hash"] for item in retrieved_entries if item["artifact_type"].startswith("frozen_")],
                 "pinned_artifact_hashes": pinned_artifact_hashes_from_retrieval(retrieved_entries),
                 "retrieved_artifact_ids": retrieved_ids,
@@ -3300,6 +3441,8 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
     synthesis_state_hash = sha_text(json.dumps(synthesis_state, sort_keys=True))
     synthesis_state_path = condition_dir / f"state_object_turn_{synthesis_index:03d}.json"
     write_json(synthesis_state_path, synthesis_state)
+    synthesis_registry_path = condition_dir / f"artifact_registry_turn_{synthesis_index:03d}.json"
+    write_json(synthesis_registry_path, schema_registry_entries(registry))
     synthesis_baton = build_baton_pass(
         run_id=run_id,
         turn_index=synthesis_index,
@@ -3379,6 +3522,7 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
             "artifact_record": final_record,
             "artifact_registry_entries": schema_registry_entries(registry),
             "artifact_registry_hash": registry_hash(registry),
+            "artifact_registry_path": synthesis_registry_path,
             "artifact_registry_after_hash": registry_hash(final_registry),
             "pinned_source_hashes": [item["artifact_hash"] for item in retrieved_entries if item["artifact_type"].startswith("frozen_")],
             "pinned_artifact_hashes": pinned_artifact_hashes_from_retrieval(retrieved_entries),
@@ -3393,6 +3537,8 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
         turn_records=turn_records,
         final_artifact_path=artifact_path,
         final_artifact_text=final_text,
+        holo_mode=holo_mode,
+        synthetic_smoke_only=False,
     )
     arch_errors = validate_smoke_arch_evidence(arch_evidence)
     arch_path = condition_dir / "arch_evidence.json"
@@ -3407,6 +3553,13 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
         traces=traces,
         arch_evidence_path=arch_path,
     )
+    metadata["run_mode"] = run_mode_for_holo_mode(holo_mode)
+    metadata["holo_mode"] = holo_mode
+    metadata["proof_credit_class"] = (
+        "patent_aligned_v4_proof_eligible" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 else "architecture_surface_diagnostic_only"
+    )
+    metadata["external_governor_provider_calls_required_for_proof_credit"] = False
+    write_json(condition_dir / "artifact_metadata.json", metadata)
     return {
         "condition": condition,
         "condition_dir": str(condition_dir),
@@ -3418,6 +3571,8 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
         "architecture_evidence_errors": arch_errors,
         "architecture_evidence_path": str(arch_path),
         "provider_calls": len(traces),
+        "holo_mode": holo_mode,
+        "proof_credit_class": metadata["proof_credit_class"],
     }
 
 
@@ -3430,6 +3585,56 @@ def write_condition_smoke(
 ) -> dict[str, Any]:
     if condition == "holo_build_arch" and holo_mode == HOLO_MODE_FULL_GOV_V4:
         return run_holobuild_full_gov_v4(packet_dir, run_id, timeout=0, live=False)
+    if condition == "holo_build_arch" and holo_mode == HOLO_MODE_PATENT_ALIGNED_V4:
+        condition_dir = packet_dir / "runs" / run_id / condition
+        condition_dir.mkdir(parents=True, exist_ok=True)
+        evidence = smoke_arch_evidence(packet_dir, run_id, condition_dir, holo_mode=holo_mode)
+        arch_errors = validate_smoke_arch_evidence(evidence)
+        arch_path = condition_dir / "arch_evidence.json"
+        write_json(arch_path, evidence)
+        artifact_text = (condition_dir / "artifact.md").read_text(encoding="utf-8")
+        gate = deterministic_gate_precheck(packet_dir, condition, artifact_text)
+        write_json(condition_dir / "deterministic_gate_precheck.json", gate)
+        metadata = {
+            "runner_id": RUNNER_ID,
+            "run_id": run_id,
+            "condition": condition,
+            "condition_label": CONDITION_LABELS[condition],
+            "run_mode": run_mode_for_holo_mode(holo_mode),
+            "holo_mode": holo_mode,
+            "status": "planned_no_provider_patent_aligned_v4_smoke",
+            "created_at_utc": utc_iso(),
+            "provider_calls": PROVIDER_CALLS,
+            **provider_call_accounting(),
+            "packet_dir": str(packet_dir),
+            "packet_id": read_json(packet_dir / "packet_lock.json")["packet_id"],
+            "packet_hash": sha_file(packet_dir / "source_packet.json"),
+            "artifact_path": str(condition_dir / "artifact.md"),
+            "artifact_written": True,
+            "expected_turn_count": EXPECTED_TURN_COUNT,
+            "expected_holo_call_count": EXPECTED_TURN_COUNT,
+            "final_word_target": FINAL_WORD_TARGET,
+            "deterministic_gate_precheck_path": str(condition_dir / "deterministic_gate_precheck.json"),
+            "architecture_evidence_path": str(arch_path),
+            "architecture_evidence_status": "valid" if not arch_errors else "invalid",
+            "architecture_evidence_errors": arch_errors,
+            "proof_credit_class": "no_provider_smoke_only",
+            "external_governor_provider_calls_required_for_proof_credit": False,
+            "token_burn_policy": "reported_not_forced",
+        }
+        write_json(condition_dir / "artifact_metadata.json", metadata)
+        return {
+            "condition": condition,
+            "condition_dir": str(condition_dir),
+            "packet_hash": metadata["packet_hash"],
+            "deterministic_gate_precheck": gate["deterministic_gate_status"],
+            "artifact_slots_wired": ["artifact.md", "artifact_metadata.json", "deterministic_gate_precheck.json"],
+            "architecture_evidence_status": metadata["architecture_evidence_status"],
+            "architecture_evidence_errors": arch_errors,
+            "architecture_evidence_path": str(arch_path),
+            "provider_calls": PROVIDER_CALLS,
+            "holo_mode": holo_mode,
+        }
 
     run_dir = packet_dir / "runs" / run_id
     condition_dir = run_dir / condition
@@ -3633,6 +3838,8 @@ def run_live_guarded(
             elif condition == "holo_build_arch":
                 if holo_mode == HOLO_MODE_FULL_GOV_V4:
                     results.append(run_holobuild_full_gov_v4(packet_dir, run_id, timeout, live=True))
+                elif holo_mode == HOLO_MODE_PATENT_ALIGNED_V4:
+                    results.append(run_live_holobuild(packet_dir, run_id, timeout, holo_mode=holo_mode))
                 else:
                     results.append(run_live_holobuild(packet_dir, run_id, timeout))
             else:

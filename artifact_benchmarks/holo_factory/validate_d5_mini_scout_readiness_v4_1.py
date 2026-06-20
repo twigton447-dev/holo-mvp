@@ -31,6 +31,8 @@ REQUIRED_ARCH_TOKENS = [
     "BATON_PASS_SHA256",
     "ARTIFACT_REGISTRY",
     "ARTIFACT_REGISTRY_SHA256",
+    "ARTIFACTS_REGISTRY",
+    "ARTIFACTS_REGISTRY_SHA256",
     "RETRIEVED PINNED SOURCES AND ARTIFACTS",
     "gov_notes",
     "source_boundaries",
@@ -79,12 +81,12 @@ REQUIRED_FULL_GOV_V4_TOKENS = [
     "governor_output_or_governor_locked_update",
     "proof_credit_class",
     "no_provider_smoke_only",
-    "full_gov_v4_proof_eligible",
+    "external_provider_gov_v4_diagnostic",
     "synthetic_smoke_only",
     "expected_holo_call_count",
     "generation prompt hash not matching Gov-produced state/baton/registry = no proof credit",
     "Gov final audit fail = no proof credit",
-    "synthetic smoke evidence is diagnostic-only and not proof-credit eligible",
+    "external provider-Governor v4 evidence is diagnostic-only unless explicitly reclassified by a future frozen policy",
     "GOVERNOR_MAX_REPAIR_ATTEMPTS",
     "GOV_REPAIR_SMOKE_CASES",
     "validate_governor_output_contract",
@@ -118,6 +120,21 @@ REQUIRED_FULL_GOV_V4_TOKENS = [
     "provider returned no accepted visible Gov output; repair only applies to invalid Gov JSON/text",
     "no_artifact_created_after_failure",
     "counts_consistent",
+    "HOLO_MODE_PATENT_ALIGNED_V4",
+    "RUN_MODE_PATENT_ALIGNED_V4",
+    "patent_aligned_v4",
+    "internal_state_management_step",
+    "context_governor_implementation",
+    "external_governor_provider_calls_required_for_proof_credit",
+    "reported_not_forced",
+    "patent_aligned_v4_proof_eligible",
+    "USER_GOAL",
+    "LATEST_INPUT_SUMMARY",
+    "CRITICAL_CONSTRAINTS",
+    "ROLLING_SUMMARY",
+    "SETTLED_DECISIONS",
+    "ARTIFACTS_REGISTRY",
+    "REQUIRED_TOOLS",
 ]
 EXPECTED_SOLO_ROLES = [
     "initial_decision_brief_draft",
@@ -211,7 +228,9 @@ def main() -> int:
         require("D5_MINI_SCOUT_LIVE_FAIL_CLOSED" in runner_text, errors, "runner missing live fail-closed status")
         require(runner_assignments.get("RUN_MODE") == "d5_medtech_capacity_strain_001_corrected_v2_six_turn", errors, "runner missing corrected v2 run mode")
         require(runner_assignments.get("RUN_MODE_FULL_GOV_V4") == "d5_medtech_capacity_strain_001_full_gov_v4", errors, "runner missing full Gov v4 run mode")
+        require(runner_assignments.get("RUN_MODE_PATENT_ALIGNED_V4") == "d5_medtech_capacity_strain_001_patent_aligned_v4", errors, "runner missing patent-aligned v4 run mode")
         require(runner_assignments.get("HOLO_MODE_FULL_GOV_V4") == "full_gov_v4", errors, "runner missing full Gov v4 mode literal")
+        require(runner_assignments.get("HOLO_MODE_PATENT_ALIGNED_V4") == "patent_aligned_v4", errors, "runner missing patent-aligned v4 mode literal")
         require(runner_assignments.get("FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT") == EXPECTED_FULL_GOV_V4_CALL_COUNT, errors, "full Gov v4 expected call count is not 14")
         require(runner_assignments.get("GOVERNOR_MAX_REPAIR_ATTEMPTS") == EXPECTED_GOVERNOR_MAX_REPAIR_ATTEMPTS, errors, "Governor repair attempts are not bounded to one")
         require(runner_assignments.get("DEFAULT_GOVERNOR_PROVIDER_MODEL") == "openai:gpt-5.5", errors, "default Governor model is not a fixed model ID")
@@ -233,6 +252,10 @@ def main() -> int:
             require(token in runner_text, errors, f"runner missing full Gov v4 token: {token}")
         require("expected_holobuild_provider_models" in runner_text, errors, "runner missing full Gov model-count helper")
         require("GOVERNOR_PROVIDER_MODEL] + generation_models + [GOVERNOR_PROVIDER_MODEL] * (EXPECTED_TURN_COUNT + 1)" in runner_text, errors, "runner does not model 1 Gov init + 6 generation + 6 update + 1 final Gov call")
+        require("external_governor_provider_calls_required_for_proof_credit\": False" in runner_text, errors, "runner still appears to require external Governor provider calls for proof credit")
+        require("token_burn_policy\": \"reported_not_forced\"" in runner_text, errors, "runner does not record token burn as reported, not forced")
+        for state_field in ("USER_GOAL", "LATEST_INPUT_SUMMARY", "CRITICAL_CONSTRAINTS", "ROLLING_SUMMARY", "SETTLED_DECISIONS", "ARTIFACTS_REGISTRY", "REQUIRED_TOOLS"):
+            require(state_field in runner_text, errors, f"runner missing patent STATE_OBJECT field: {state_field}")
         require("synthetic_smoke_only\") and evidence.get(\"proof_credit_class\") != \"no_provider_smoke_only\"" in runner_text, errors, "validator does not fail smoke-as-proof")
         require("state_object_sha256\") not in prompt_surface" in runner_text, errors, "full Gov validator does not tie state hash to prompt")
         require("baton_pass_sha256\") not in prompt_surface" in runner_text, errors, "full Gov validator does not tie baton hash to prompt")
@@ -284,9 +307,10 @@ def main() -> int:
         "conditions_supported": sorted(EXPECTED_CONDITIONS),
         "expected_turn_count_per_condition": EXPECTED_TURN_COUNT,
         "expected_full_gov_v4_holo_call_count": EXPECTED_FULL_GOV_V4_CALL_COUNT,
-        "holobuild_modes": ["diagnostic_v3", "full_gov_v4"],
+        "holobuild_modes": ["diagnostic_v3", "full_gov_v4", "patent_aligned_v4"],
         "diagnostic_v3_status": "architecture_surface_diagnostic_only",
-        "full_gov_v4_status": "proof_eligible_if_live_evidence_validates",
+        "full_gov_v4_status": "external_provider_governor_diagnostic",
+        "patent_aligned_v4_status": "preferred_proof_eligible_if_live_evidence_validates",
         "final_word_target": EXPECTED_WORD_TARGET,
         "live_mode_fail_closed_by_default": True,
         "live_requires": ["--live", "HOLO_ALLOW_LIVE=1"],

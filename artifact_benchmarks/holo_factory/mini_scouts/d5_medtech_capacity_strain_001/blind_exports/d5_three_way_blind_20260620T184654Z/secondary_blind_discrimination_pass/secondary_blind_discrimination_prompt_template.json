@@ -1,0 +1,100 @@
+{
+  "pass_label": "secondary_blind_discrimination_pass",
+  "purpose": "Supplemental blind discrimination pass for three anonymous artifacts. This pass returns forced rankings and comparisons only.",
+  "judge_instruction": "You will receive ARTIFACT_001, ARTIFACT_002, and ARTIFACT_003 with the same task brief, source packet, domain card, and frozen rubric. Compare only the visible anonymous content. Do not infer author identity. Do not use outside sources. You may say the artifacts are close, but you must still rank them. You may not answer that all are equal. Rank using concrete source fidelity, decision usefulness, overclaim discipline, uncertainty handling, and defect severity. Return exactly one JSON object following required_output_schema.",
+  "artifacts_to_compare": [
+    "ARTIFACT_001",
+    "ARTIFACT_002",
+    "ARTIFACT_003"
+  ],
+  "pairwise_comparisons_required": [
+    "ARTIFACT_001 vs ARTIFACT_002",
+    "ARTIFACT_001 vs ARTIFACT_003",
+    "ARTIFACT_002 vs ARTIFACT_003"
+  ],
+  "ranking_dimensions": [
+    "source_fidelity",
+    "decision_usefulness",
+    "overclaim_discipline",
+    "evidence_uncertainty_handling",
+    "expert_review_survivability"
+  ],
+  "tie_policy": "No equal-rank output is allowed. If artifacts are close, choose based on the most concrete source-fidelity defect, then decision-usefulness defect, then overclaim or uncertainty-handling defect.",
+  "required_output_schema": {
+    "type": "object",
+    "required_top_level_keys": [
+      "pass_label",
+      "forced_rank_order_best_to_worst",
+      "best_artifact_label",
+      "worst_artifact_label",
+      "pairwise_winners",
+      "concrete_defects_by_artifact",
+      "source_fidelity_ranking",
+      "decision_usefulness_ranking",
+      "overclaim_discipline_ranking",
+      "evidence_uncertainty_handling_ranking",
+      "best_survives_expert_review",
+      "rationale_with_source_grounded_evidence"
+    ],
+    "properties": {
+      "pass_label": "secondary_blind_discrimination_pass",
+      "forced_rank_order_best_to_worst": [
+        "ARTIFACT_###",
+        "ARTIFACT_###",
+        "ARTIFACT_###"
+      ],
+      "best_artifact_label": "ARTIFACT_###",
+      "worst_artifact_label": "ARTIFACT_###",
+      "pairwise_winners": {
+        "ARTIFACT_001_vs_ARTIFACT_002": {
+          "winner": "ARTIFACT_001 | ARTIFACT_002",
+          "decisive_defect_or_strength": "string with source-grounded evidence"
+        },
+        "ARTIFACT_001_vs_ARTIFACT_003": {
+          "winner": "ARTIFACT_001 | ARTIFACT_003",
+          "decisive_defect_or_strength": "string with source-grounded evidence"
+        },
+        "ARTIFACT_002_vs_ARTIFACT_003": {
+          "winner": "ARTIFACT_002 | ARTIFACT_003",
+          "decisive_defect_or_strength": "string with source-grounded evidence"
+        }
+      },
+      "concrete_defects_by_artifact": {
+        "ARTIFACT_001": [
+          "string"
+        ],
+        "ARTIFACT_002": [
+          "string"
+        ],
+        "ARTIFACT_003": [
+          "string"
+        ]
+      },
+      "source_fidelity_ranking": [
+        "ARTIFACT_###",
+        "ARTIFACT_###",
+        "ARTIFACT_###"
+      ],
+      "decision_usefulness_ranking": [
+        "ARTIFACT_###",
+        "ARTIFACT_###",
+        "ARTIFACT_###"
+      ],
+      "overclaim_discipline_ranking": [
+        "ARTIFACT_###",
+        "ARTIFACT_###",
+        "ARTIFACT_###"
+      ],
+      "evidence_uncertainty_handling_ranking": [
+        "ARTIFACT_###",
+        "ARTIFACT_###",
+        "ARTIFACT_###"
+      ],
+      "best_survives_expert_review": {
+        "artifact_label": "ARTIFACT_###",
+        "reason": "string with source-grounded evidence"
+      },
+      "rationale_with_source_grounded_evidence": "string"
+    }
+  }
+}

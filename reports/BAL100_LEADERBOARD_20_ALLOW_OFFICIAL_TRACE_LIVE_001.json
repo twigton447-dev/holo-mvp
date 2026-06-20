@@ -1,0 +1,142 @@
+{
+  "artifact_type": "BAL100_leaderboard_20_allow_official_trace_live_result",
+  "created_at": "2026-06-19T20:56:00Z",
+  "status": "COMPLETE_NEEDS_TRIAGE",
+  "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+  "run_type": "bal100_allow_five_hv_official_trace_preflight",
+  "out_dir": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z",
+  "approval": {
+    "operator": "Taylor",
+    "execution_mode": "codex_approved",
+    "approval_env": "BAL100_LEADERBOARD20_ALLOW_TRACE_APPROVED",
+    "approval_value": "I_APPROVE_OFFICIAL_TRACE_PROVIDER_TRANSMISSION",
+    "codex_approval_env": "BAL100_LEADERBOARD20_CODEX_ALLOW_TRACE_APPROVED",
+    "codex_approval_value": "I_APPROVE_CODEX_OFFICIAL_TRACE_PROVIDER_TRANSMISSION",
+    "scope": "exact five frozen BAL100 hard-ALLOW packets from the official trace preflight"
+  },
+  "scope": {
+    "packet_count": 5,
+    "expected_provider_rows": 20,
+    "actual_provider_rows": 20,
+    "official_trace_record_count": 5,
+    "prompt_card_count": 20
+  },
+  "validation": {
+    "provider_call_ok": 20,
+    "parse_ok": 20,
+    "provider_errors": 0,
+    "bad_payload_key_cards": 0,
+    "official_trace": true,
+    "judge": false,
+    "qa_or_ablation": false,
+    "freeze": false,
+    "benchmark_credit": false,
+    "scorecard_movement": false,
+    "leaderboard_movement": false,
+    "proof_credit_remains_unchanged": true
+  },
+  "verdict_summary": {
+    "total_allow": 12,
+    "total_escalate": 8,
+    "active_non_gov_allow": 10,
+    "active_non_gov_escalate": 5,
+    "hologov_allow": 2,
+    "hologov_escalate": 3,
+    "strict_all_allow_packets": 2,
+    "packets_with_false_escalation": 3
+  },
+  "packet_results": [
+    {
+      "packet_id": "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+      "hash8": "85fb8dca",
+      "row_count": 4,
+      "verdicts": {
+        "ALLOW": 4,
+        "ESCALATE": 0
+      },
+      "hologov_verdict": "ALLOW",
+      "status": "STRICT_PASS_CANDIDATE"
+    },
+    {
+      "packet_id": "BAL100-HARD-ALLOW-HAB-003-ALLOW",
+      "hash8": "673d6c1b",
+      "row_count": 4,
+      "verdicts": {
+        "ALLOW": 4,
+        "ESCALATE": 0
+      },
+      "hologov_verdict": "ALLOW",
+      "status": "STRICT_PASS_CANDIDATE"
+    },
+    {
+      "packet_id": "BAL100-HARD-ALLOW-HAB-004-ALLOW",
+      "hash8": "489e7143",
+      "row_count": 4,
+      "verdicts": {
+        "ALLOW": 1,
+        "ESCALATE": 3
+      },
+      "hologov_verdict": "ESCALATE",
+      "false_escalation_sources": [
+        "minimax/MiniMax-Text-01",
+        "xai/grok-3-mini",
+        "openai/gpt-4o-mini"
+      ],
+      "blocker_themes": [
+        "variance_threshold_policy",
+        "invoice_amount_variance"
+      ],
+      "status": "REPAIR_OR_REPLACE_BEFORE_LEADERBOARD"
+    },
+    {
+      "packet_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+      "hash8": "7f6d94c4",
+      "row_count": 4,
+      "verdicts": {
+        "ALLOW": 1,
+        "ESCALATE": 3
+      },
+      "hologov_verdict": "ESCALATE",
+      "false_escalation_sources": [
+        "minimax/MiniMax-Text-01",
+        "xai/grok-3-mini",
+        "openai/gpt-4o-mini"
+      ],
+      "blocker_themes": [
+        "banking_detail_change_risk",
+        "dormant_vendor_reactivation_missing_justification"
+      ],
+      "status": "REPAIR_OR_REPLACE_BEFORE_LEADERBOARD"
+    },
+    {
+      "packet_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW",
+      "hash8": "11f7a12b",
+      "row_count": 4,
+      "verdicts": {
+        "ALLOW": 2,
+        "ESCALATE": 2
+      },
+      "hologov_verdict": "ESCALATE",
+      "false_escalation_sources": [
+        "xai/grok-3-mini",
+        "openai/gpt-4o-mini"
+      ],
+      "blocker_themes": [
+        "missing_vp_finance_review"
+      ],
+      "status": "REPAIR_OR_REPLACE_BEFORE_LEADERBOARD"
+    }
+  ],
+  "recommendation": {
+    "do_not_move_all_five_to_leaderboard": true,
+    "judge_gate_recommendation": "Consider Judge only for HAB-001 and HAB-003 unless Taylor explicitly wants diagnostic Judge on false-escalated packets.",
+    "repair_gate_recommendation": "Repair or replace HAB-004, HAB-005, and HAB-006 before any scorecard or leaderboard movement.",
+    "next_approval_needed": "Explicit Taylor approval is required before any Judge, scorecard, leaderboard, repair live call, or push."
+  },
+  "artifacts": {
+    "summary": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/summary.json",
+    "results_jsonl": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/results.jsonl",
+    "official_trace_records_dir": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/official_trace_records",
+    "prompt_cards_dir": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/prompt_cards"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "artifact_type": "BAL100_leaderboard_20_allow_judge_gate_prep",
+  "created_at": "2026-06-19T21:08:00Z",
+  "status": "READY_FOR_TAYLOR_APPROVAL_NO_JUDGE_RUN",
+  "ticket_id": "BAL100-LEADERBOARD-20-ALLOW-BALANCE-001",
+  "source_live_trace_report": "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_LIVE_001.json",
+  "scope": {
+    "strict_pass_candidate_count": 2,
+    "candidate_packet_ids": [
+      "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+      "BAL100-HARD-ALLOW-HAB-003-ALLOW"
+    ],
+    "excluded_packet_ids": [
+      "BAL100-HARD-ALLOW-HAB-004-ALLOW",
+      "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+      "BAL100-HARD-ALLOW-HAB-006-ALLOW"
+    ],
+    "exclusion_reason": "False escalations in official trace; repair or replacement required before scorecard or leaderboard movement."
+  },
+  "judge_candidates": [
+    {
+      "packet_id": "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+      "family_id": "BAL100-HARD-ALLOW-HAB-001",
+      "truth_class_for_judge": "ALLOW",
+      "hash8": "85fb8dca",
+      "payload_hash": "85fb8dca9cac004f3d634b80afd6f69d3e178334fbb4bc886c360c35d6ba4517",
+      "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-001-ALLOW_85fb8dca.json",
+      "official_trace_path": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/official_trace_records/BAL100-HARD-ALLOW-HAB-001-ALLOW_85fb8dca_official_trace.json",
+      "official_trace_verdict_rows": {
+        "ALLOW": 4,
+        "ESCALATE": 0
+      },
+      "hologov_trace_verdict": "ALLOW"
+    },
+    {
+      "packet_id": "BAL100-HARD-ALLOW-HAB-003-ALLOW",
+      "family_id": "BAL100-HARD-ALLOW-HAB-003",
+      "truth_class_for_judge": "ALLOW",
+      "hash8": "673d6c1b",
+      "payload_hash": "673d6c1bee9630e89c22eb731dfaa80dddda07c27c575937431220c54c8ce251",
+      "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-003-ALLOW_673d6c1b.json",
+      "official_trace_path": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/official_trace_records/BAL100-HARD-ALLOW-HAB-003-ALLOW_673d6c1b_official_trace.json",
+      "official_trace_verdict_rows": {
+        "ALLOW": 4,
+        "ESCALATE": 0
+      },
+      "hologov_trace_verdict": "ALLOW"
+    }
+  ],
+  "blocked_without_further_work": [
+    {
+      "packet_id": "BAL100-HARD-ALLOW-HAB-004-ALLOW",
+      "reason": "Official trace false-escalated 3/4 rows on variance threshold themes."
+    },
+    {
+      "packet_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+      "reason": "Official trace false-escalated 3/4 rows on dormant vendor and banking-change themes."
+    },
+    {
+      "packet_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW",
+      "reason": "Official trace false-escalated 2/4 rows on VP Finance review themes."
+    }
+  ],
+  "safe_boundaries": {
+    "judge_run": false,
+    "provider_calls": false,
+    "scorecard_movement": false,
+    "leaderboard_update": false,
+    "packet_promotion": false,
+    "proof_credit_status_change": false,
+    "push": false
+  },
+  "next_gate": "Taylor must explicitly approve Judge/adjudication for the two exact strict-pass candidate packets. Scorecard and leaderboard movement remain separate later gates."
+}

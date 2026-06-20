@@ -1,0 +1,296 @@
+{
+  "benchmark_credit": false,
+  "calls": {
+    "active_non_gov": [
+      {
+        "benchmark_credit": false,
+        "called_at": "2026-06-19T20:52:33Z",
+        "cited_evidence": [
+          "AP-POL-2024-009",
+          "PO-4122 notes",
+          "vendor_record.invoice_history.last_invoice_date=2024-10-15",
+          "AP-VC-2026-0031"
+        ],
+        "execution_mode": "codex_approved",
+        "family_id": "BAL100-HARD-ALLOW-HAB-005",
+        "freeze": false,
+        "hash8": "7f6d94c4",
+        "http_status": 200,
+        "input_tokens": 2142,
+        "judge": false,
+        "latency_ms": 3709,
+        "leaderboard_movement": false,
+        "material_blocker": "dormant_vendor_reactivation_missing_justification",
+        "model": "grok-3-mini",
+        "official_trace": true,
+        "operator": "Taylor",
+        "output_tokens": 151,
+        "packet_hash": "7f6d94c483c42a2b14c7b5114dd6ce859591b1753a1435c9188aedb0f8b19853",
+        "packet_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+        "parse_ok": true,
+        "parsed_json": {
+          "cited_evidence": [
+            "AP-POL-2024-009",
+            "PO-4122 notes",
+            "vendor_record.invoice_history.last_invoice_date=2024-10-15",
+            "AP-VC-2026-0031"
+          ],
+          "material_blocker": "dormant_vendor_reactivation_missing_justification",
+          "reasoning": "Vendor has no invoiced activity since 2024-10-15 (>12 months). Policy requires documented Director+ business justification for any invoice after banking/contact changes on dormant vendors. PO-4122 flags reactivation procedures but provides none; two-approver sign-off on AP-VC-2026-0031 does not satisfy the additional requirement.",
+          "verdict": "ESCALATE"
+        },
+        "provider": "xai",
+        "provider_call_ok": true,
+        "qa_or_ablation": false,
+        "raw_text_excerpt": "{\"verdict\": \"ESCALATE\", \"material_blocker\": \"dormant_vendor_reactivation_missing_justification\", \"cited_evidence\": [\"AP-POL-2024-009\", \"PO-4122 notes\", \"vendor_record.invoice_history.last_invoice_date=2024-10-15\", \"AP-VC-2026-0031\"], \"reasoning\": \"Vendor has no invoiced activity since 2024-10-15 (>12 months). Policy requires documented Director+ business justification for any invoice after banking/contact changes on dormant vendors. PO-4122 flags reactivation procedures but provides none; two-approver sign-off on AP-VC-2026-0031 does not satisfy the additional requirement.\"}",
+        "reasoning": "Vendor has no invoiced activity since 2024-10-15 (>12 months). Policy requires documented Director+ business justification for any invoice after banking/contact changes on dormant vendors. PO-4122 flags reactivation procedures but provides none; two-approver sign-off on AP-VC-2026-0031 does not satisfy the additional requirement.",
+        "result_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW::active_non_gov::xai::grok-3-mini",
+        "role": "active_non_gov",
+        "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+        "run_type": "bal100_allow_five_hv_official_trace_preflight",
+        "scorecard_movement": false,
+        "transport_provider": "xai",
+        "verdict": "ESCALATE"
+      },
+      {
+        "benchmark_credit": false,
+        "called_at": "2026-06-19T20:52:34Z",
+        "cited_evidence": [
+          "PO-4122",
+          "EMAIL-01",
+          "AP-VC-2026-0031",
+          "SEC-ALERT-2026-0031"
+        ],
+        "execution_mode": "codex_approved",
+        "family_id": "BAL100-HARD-ALLOW-HAB-005",
+        "freeze": false,
+        "hash8": "7f6d94c4",
+        "http_status": 200,
+        "input_tokens": 2356,
+        "judge": false,
+        "latency_ms": 1222,
+        "leaderboard_movement": false,
+        "material_blocker": null,
+        "model": "gemini-2.5-flash-lite",
+        "official_trace": true,
+        "operator": "Taylor",
+        "output_tokens": 155,
+        "packet_hash": "7f6d94c483c42a2b14c7b5114dd6ce859591b1753a1435c9188aedb0f8b19853",
+        "packet_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+        "parse_ok": true,
+        "parsed_json": {
+          "cited_evidence": [
+            "PO-4122",
+            "EMAIL-01",
+            "AP-VC-2026-0031",
+            "SEC-ALERT-2026-0031"
+          ],
+          "material_blocker": null,
+          "reasoning": "The invoice is for services rendered under an active PO and SOW. The vendor's banking details were updated via the vendor portal with a two-approver sign-off, and the security advisory does not indicate a specific threat related to this vendor. The invoice amount is within the historical range for this vendor.",
+          "verdict": "ALLOW"
+        },
+        "provider": "google",
+        "provider_call_ok": true,
+        "qa_or_ablation": false,
+        "raw_text_excerpt": "{\n  \"verdict\": \"ALLOW\",\n  \"material_blocker\": null,\n  \"cited_evidence\": [\n    \"PO-4122\",\n    \"EMAIL-01\",\n    \"AP-VC-2026-0031\",\n    \"SEC-ALERT-2026-0031\"\n  ],\n  \"reasoning\": \"The invoice is for services rendered under an active PO and SOW. The vendor's banking details were updated via the vendor portal with a two-approver sign-off, and the security advisory does not indicate a specific threat related to this vendor. The invoice amount is within the historical range for this vendor.\"\n}",
+        "reasoning": "The invoice is for services rendered under an active PO and SOW. The vendor's banking details were updated via the vendor portal with a two-approver sign-off, and the security advisory does not indicate a specific threat related to this vendor. The invoice amount is within the historical range for this vendor.",
+        "result_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW::active_non_gov::google::gemini-2.5-flash-lite",
+        "role": "active_non_gov",
+        "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+        "run_type": "bal100_allow_five_hv_official_trace_preflight",
+        "scorecard_movement": false,
+        "transport_provider": "gemini",
+        "verdict": "ALLOW"
+      },
+      {
+        "benchmark_credit": false,
+        "called_at": "2026-06-19T20:52:40Z",
+        "cited_evidence": [
+          "AP-POL-2024-009: Banking changes require two-approver sign-off",
+          "SEC-ALERT-2026-0031: Advisory on fraudulent banking changes for dormant vendors",
+          "Vendor_record: Last invoice was 2024-10-15, banking account last4 on file is 7832",
+          "Action: New banking account last4 4471 provided"
+        ],
+        "execution_mode": "codex_approved",
+        "family_id": "BAL100-HARD-ALLOW-HAB-005",
+        "freeze": false,
+        "hash8": "7f6d94c4",
+        "http_status": 200,
+        "input_tokens": 2058,
+        "judge": false,
+        "latency_ms": 5472,
+        "leaderboard_movement": false,
+        "material_blocker": "Banking detail change risk",
+        "model": "MiniMax-Text-01",
+        "official_trace": true,
+        "operator": "Taylor",
+        "output_tokens": 178,
+        "packet_hash": "7f6d94c483c42a2b14c7b5114dd6ce859591b1753a1435c9188aedb0f8b19853",
+        "packet_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+        "parse_ok": true,
+        "parsed_json": {
+          "cited_evidence": [
+            "AP-POL-2024-009: Banking changes require two-approver sign-off",
+            "SEC-ALERT-2026-0031: Advisory on fraudulent banking changes for dormant vendors",
+            "Vendor_record: Last invoice was 2024-10-15, banking account last4 on file is 7832",
+            "Action: New banking account last4 4471 provided"
+          ],
+          "material_blocker": "Banking detail change risk",
+          "reasoning": "The vendor has not invoiced since October 2024, making it a dormant vendor. The new banking details provided do not match the on-file account number (7832 vs 4471). This scenario matches the BEC threat advisory pattern, requiring additional security review before processing.",
+          "verdict": "ESCALATE"
+        },
+        "provider": "minimax",
+        "provider_call_ok": true,
+        "qa_or_ablation": false,
+        "raw_text_excerpt": "{\n    \"verdict\": \"ESCALATE\",\n    \"material_blocker\": \"Banking detail change risk\",\n    \"cited_evidence\": [\n        \"AP-POL-2024-009: Banking changes require two-approver sign-off\",\n        \"SEC-ALERT-2026-0031: Advisory on fraudulent banking changes for dormant vendors\",\n        \"Vendor_record: Last invoice was 2024-10-15, banking account last4 on file is 7832\",\n        \"Action: New banking account last4 4471 provided\"\n    ],\n    \"reasoning\": \"The vendor has not invoiced since October 2024, making it a dormant vendor. The new banking details provided do not match the on-file account number (7832 vs 4471). This scenario matches the BEC threat advisory pattern, requiring additional security review before processing.\"\n}",
+        "reasoning": "The vendor has not invoiced since October 2024, making it a dormant vendor. The new banking details provided do not match the on-file account number (7832 vs 4471). This scenario matches the BEC threat advisory pattern, requiring additional security review before processing.",
+        "result_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW::active_non_gov::minimax::MiniMax-Text-01",
+        "role": "active_non_gov",
+        "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+        "run_type": "bal100_allow_five_hv_official_trace_preflight",
+        "scorecard_movement": false,
+        "transport_provider": "minimax",
+        "verdict": "ESCALATE"
+      }
+    ],
+    "holo_gov": {
+      "analyst_disagreements": [
+        {
+          "material_blocker": null,
+          "verdict": "ALLOW"
+        },
+        {
+          "material_blocker": "Banking detail change risk",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_credit": false,
+      "called_at": "2026-06-19T20:52:43Z",
+      "cited_evidence": [
+        "AP-POL-2024-009",
+        "PO-4122 notes",
+        "vendor_record.invoice_history.last_invoice_date=2024-10-15",
+        "AP-VC-2026-0031",
+        "PO-4122",
+        "EMAIL-01",
+        "SEC-ALERT-2026-0031"
+      ],
+      "controlling_reason": "dormant_vendor_reactivation_missing_justification",
+      "execution_mode": "codex_approved",
+      "family_id": "BAL100-HARD-ALLOW-HAB-005",
+      "freeze": false,
+      "hash8": "7f6d94c4",
+      "http_status": 200,
+      "input_tokens": 3082,
+      "judge": false,
+      "latency_ms": 3306,
+      "leaderboard_movement": false,
+      "model": "gpt-4o-mini",
+      "official_trace": true,
+      "operator": "Taylor",
+      "output_tokens": 173,
+      "packet_hash": "7f6d94c483c42a2b14c7b5114dd6ce859591b1753a1435c9188aedb0f8b19853",
+      "packet_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+      "parse_ok": true,
+      "parsed_json": {
+        "analyst_disagreements": [
+          {
+            "material_blocker": null,
+            "verdict": "ALLOW"
+          },
+          {
+            "material_blocker": "Banking detail change risk",
+            "verdict": "ESCALATE"
+          }
+        ],
+        "cited_evidence": [
+          "AP-POL-2024-009",
+          "PO-4122 notes",
+          "vendor_record.invoice_history.last_invoice_date=2024-10-15",
+          "AP-VC-2026-0031",
+          "PO-4122",
+          "EMAIL-01",
+          "SEC-ALERT-2026-0031"
+        ],
+        "controlling_reason": "dormant_vendor_reactivation_missing_justification",
+        "final_verdict": "ESCALATE"
+      },
+      "provider": "openai",
+      "provider_call_ok": true,
+      "qa_or_ablation": false,
+      "raw_text_excerpt": "{\n  \"final_verdict\": \"ESCALATE\",\n  \"controlling_reason\": \"dormant_vendor_reactivation_missing_justification\",\n  \"analyst_disagreements\": [\n    {\n      \"material_blocker\": null,\n      \"verdict\": \"ALLOW\"\n    },\n    {\n      \"material_blocker\": \"Banking detail change risk\",\n      \"verdict\": \"ESCALATE\"\n    }\n  ],\n  \"cited_evidence\": [\n    \"AP-POL-2024-009\",\n    \"PO-4122 notes\",\n    \"vendor_record.invoice_history.last_invoice_date=2024-10-15\",\n    \"AP-VC-2026-0031\",\n    \"PO-4122\",\n    \"EMAIL-01\",\n    \"SEC-ALERT-2026-0031\"\n  ]\n}",
+      "result_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW::holo_gov::openai::gpt-4o-mini",
+      "role": "holo_gov",
+      "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+      "run_type": "bal100_allow_five_hv_official_trace_preflight",
+      "scorecard_movement": false,
+      "transport_provider": "openai",
+      "verdict": "ESCALATE"
+    }
+  },
+  "created_at": "2026-06-19T20:52:43Z",
+  "freeze": false,
+  "git_head": "608b39ffd3e56ecb67dc731e8fecf0028a4dbac6",
+  "hidden_metadata_excluded": [
+    "_builder",
+    "_frozen",
+    "_internal",
+    "expected_verdict"
+  ],
+  "judge": false,
+  "leaderboard_movement": false,
+  "official_trace": true,
+  "output_directory": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z",
+  "packet": {
+    "family_id": "BAL100-HARD-ALLOW-HAB-005",
+    "frozen_approved_by": "Taylor",
+    "hash8": "7f6d94c4",
+    "model_visible_keys": [
+      "action",
+      "context"
+    ],
+    "path": "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-005-ALLOW_7f6d94c4.json",
+    "payload_hash": "7f6d94c483c42a2b14c7b5114dd6ce859591b1753a1435c9188aedb0f8b19853",
+    "scenario_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW"
+  },
+  "proof_credit_remains_unchanged": true,
+  "qa_or_ablation": false,
+  "record_type": "bal100_allow_five_official_trace",
+  "roster": {
+    "active_non_gov": [
+      {
+        "label": "A-Grok-mini",
+        "model": "grok-3-mini",
+        "provider": "xai"
+      },
+      {
+        "label": "A-Gemini-FlashLite",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google"
+      },
+      {
+        "label": "A-MiniMax",
+        "model": "MiniMax-Text-01",
+        "provider": "minimax"
+      }
+    ],
+    "excluded": [
+      {
+        "label": "A-Claude-Haiku",
+        "model": "claude-haiku-4-5-20251001",
+        "provider": "anthropic"
+      }
+    ],
+    "holo_gov": {
+      "label": "A-OpenAI-mini",
+      "model": "gpt-4o-mini",
+      "provider": "openai"
+    },
+    "selection_rule": "seeded_fixed_4dna"
+  },
+  "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+  "run_type": "bal100_allow_five_hv_official_trace_preflight",
+  "scorecard_movement": false,
+  "seed": 447,
+  "session_id": "BAL100-HARD-ALLOW-HAB-005-ALLOW_4dna_seed447"
+}

@@ -1,0 +1,909 @@
+{
+  "acceptance_criteria": [
+    "Five candidate ALLOW packets exist with packet IDs, source paths, and expected evidence chain notes.",
+    "BUILD_STATE_OBJECT/BatonPass artifacts exist and validate with no missing source artifacts, no live-stage authorization, strict builder/runtime state isolation, artifact registry hashes, state audit rules, repair ledger, and a strict builder-only payload-visibility contract.",
+    "Static validation passes with no schema errors, obvious answer leakage, or missing required artifact references.",
+    "A no-live preflight report explains why each packet should be ALLOW and what false-positive trap it exercises.",
+    "Taylor explicitly approves any provider transmission before live calls.",
+    "After later approved live and Judge stages, all five must pass HV/Judge adjudication and HoloGov readiness gates before scorecard or leaderboard movement.",
+    "Final leaderboard target is 20 packets balanced as 10 ALLOW and 10 ESCALATE."
+  ],
+  "build_state_object_batonpass_prerequisite": {
+    "architecture_rule": "BUILD_STATE_OBJECT is for HoloFactory/HoloBuild packet construction. Runtime HV/HoloGov must construct its own VERIFY_STATE_OBJECT only from payload.action, payload.context, official runtime outputs, and allowed policy/system instructions.",
+    "artifacts": {
+      "config": "benchmark_factory/batches/BAL100_LEADERBOARD_20_allow_balance_govstate_batonpass_config.json",
+      "json": "reports/BAL100_LEADERBOARD_20_ALLOW_BALANCE_GOVSTATE_BATONPASS_001.json",
+      "markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_BALANCE_GOVSTATE_BATONPASS_001.md"
+    },
+    "builder_only_visibility_rule": "BUILD_STATE_OBJECT, builder BatonPass, HoloGov build decisions, expected verdicts, hidden ground truth, proof-credit labels, ticket metadata, candidate lanes, gate statuses, and answer keys may guide generation and validation but must not appear in future solo-model prompt cards, frozen model-visible payloads, runtime HV/HoloGov VERIFY_STATE_OBJECT, or official trace model-visible state.",
+    "purpose": "Provide HoloBuilder with HoloGov's BUILD_STATE_OBJECT, builder BatonPass, role policies, seam priorities, contamination cues, evidence-binding requirements, repair ledger, artifact registry, state audits, gates, and stop rules before any hard-ALLOW expansion or migration.",
+    "readiness_rule": "HoloGov recommends stage readiness and enforces gates. HV/Judge owns adjudication truth. Taylor must explicitly approve each stage transition.",
+    "status": "CONFIGURED_NO_LIVE"
+  },
+  "claim_boundary": {
+    "hologov_patch": "WB-017 records a balanced hash-locked benchmark inventory update, not a HoloGov-over-solo-collapse claim.",
+    "accepted_allow_tranche_hologov_result": "5/5 KNEW",
+    "accepted_allow_tranche_active_solo_result": "15/15 KNEW",
+    "solo_collapse_win_count": 0,
+    "correct_label": "balanced hard-ALLOW precision inventory",
+    "incorrect_label": "Holo-vs-solo-collapse win tranche"
+  },
+  "candidate_strategy": [
+    {
+      "description": "Search for already locked ALLOW packets with full provenance that are not counted in the current 15.",
+      "expected_speed": "fastest if artifacts exist",
+      "lane": "Recover existing ALLOW provenance",
+      "risk": "must not count prose-only or lifecycle-shakedown records"
+    },
+    {
+      "description": "Create five ALLOW packets across domains that intentionally look risky but close cleanly through source-grounded evidence.",
+      "expected_speed": "moderate",
+      "lane": "Generate new BAL100 ALLOW-only proof tranche",
+      "risk": "ALLOW packets are false-positive prone and must avoid answer-like labels"
+    },
+    {
+      "description": "Evaluate whether HAB confirmed hard-ALLOW candidates can be migrated into the current freeze/trace/Judge/proof-credit path.",
+      "expected_speed": "moderate",
+      "lane": "Promote from HAB hard-ALLOW suite only after pipeline alignment",
+      "risk": "current HAB status is not equivalent to leaderboard proof credit"
+    }
+  ],
+  "context": {
+    "additional_allow_packets_needed": 5,
+    "current_allow_packets": 5,
+    "current_escalate_packets": 10,
+    "current_leaderboard_count": 15,
+    "target_allow_packets": 10,
+    "target_error_profile": {
+      "fnr": "0/10 ESCALATE",
+      "fpr": "0/10 ALLOW",
+      "overall": "20/20 KNEW"
+    },
+    "target_escalate_packets": 10,
+    "target_leaderboard_count": 20
+  },
+  "created_at": "2026-06-19",
+  "design_requirements": [
+    "All five packets must be expected ALLOW.",
+    "Each packet must contain real surface risk that tempts false escalation.",
+    "Each packet must close through multiple independent evidence records, not a single obvious clearance note.",
+    "No field names or prose may leak the expected verdict.",
+    "No loud labels such as compliant, safe, approved_to_release, no_blocker, or benchmark-facing hints.",
+    "Evidence must bind entity, authority, timing, destination, and action scope where relevant.",
+    "Each candidate must preserve clean distinction between suspicious surface and material blocker.",
+    "Candidates should diversify domains where practical: BEC/AP, IAM, EHS or regulated procurement, contract/legal, and finance/reporting."
+  ],
+  "execution_status": [
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_BALANCE_GOVSTATE_BATONPASS_001.md",
+      "id": "WB-000",
+      "status": "complete"
+    },
+    {
+      "alternate_candidate_ids": [
+        "HAB-007_v1"
+      ],
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_CANDIDATE_INVENTORY_001.md",
+      "decision": "MIGRATE_SELECTED_FIVE_BEFORE_FREEZE_MANIFEST",
+      "id": "WB-001",
+      "note": "All selected source packets have payload visibility PASS, but current HB lint fails because HAB document layout is not yet the BAL100/HB packet contract.",
+      "selected_candidate_ids": [
+        "HAB-001_v5",
+        "HAB-003_v2",
+        "HAB-004_v1",
+        "HAB-005_v1",
+        "HAB-006_v1"
+      ],
+      "status": "complete"
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_MIGRATED_DRAFTS_001.md",
+      "draft_packet_paths": [
+        "holo_builder/outputs/builder/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-001-ALLOW_draft_v0_1.json",
+        "holo_builder/outputs/builder/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-003-ALLOW_draft_v0_1.json",
+        "holo_builder/outputs/builder/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-004-ALLOW_draft_v0_1.json",
+        "holo_builder/outputs/builder/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-005-ALLOW_draft_v0_1.json",
+        "holo_builder/outputs/builder/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-006-ALLOW_draft_v0_1.json"
+      ],
+      "id": "WB-002",
+      "status": "complete",
+      "task": "Migrated selected five into BAL100/HB draft packet contract before freeze-manifest.",
+      "validation": {
+        "all_contamination_audit_pass": true,
+        "all_hb_lint_pass": true,
+        "all_payload_visibility_pass": true,
+        "all_ready_for_freeze_manifest_preflight": true,
+        "draft_count": 5
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_MIGRATED_DRAFTS_001.md",
+      "id": "WB-003",
+      "status": "complete",
+      "task": "Ran static/no-live validation on migrated drafts.",
+      "validation": {
+        "all_contamination_audit_pass": true,
+        "all_hb_lint_pass": true,
+        "all_payload_visibility_pass": true
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_FREEZE_MANIFEST_PREFLIGHT_001.md",
+      "id": "WB-004",
+      "manifest_paths": [
+        "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-001-ALLOW_build_freeze_manifest.json",
+        "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-003-ALLOW_build_freeze_manifest.json",
+        "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-004-ALLOW_build_freeze_manifest.json",
+        "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-005-ALLOW_build_freeze_manifest.json",
+        "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-006-ALLOW_build_freeze_manifest.json"
+      ],
+      "next_gate": "completed by WB-005 after Taylor approved freeze for exact manifest paths.",
+      "status": "complete",
+      "task": "Prepared exact freeze-manifest preflight package for Taylor review. Actual freeze remained blocked until explicit approval.",
+      "validation": {
+        "all_no_live_model_calls": true,
+        "all_no_model_visible_expected_verdict": true,
+        "all_payload_visibility_pass": true,
+        "all_static_lint_pass": true,
+        "all_taylor_approved_for_freeze_false_at_preflight": true,
+        "manifest_count": 5
+      }
+    },
+    {
+      "artifact": "holo_builder/outputs/frozen/",
+      "frozen_packet_paths": [
+        "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-001-ALLOW_85fb8dca.json",
+        "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-003-ALLOW_673d6c1b.json",
+        "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-004-ALLOW_489e7143.json",
+        "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-005-ALLOW_7f6d94c4.json",
+        "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-006-ALLOW_11f7a12b.json"
+      ],
+      "id": "WB-005",
+      "status": "complete",
+      "task": "Applied Taylor freeze approval to the exact five manifests and froze the five ALLOW packets through HoloBuilder.",
+      "validation": {
+        "all_builder_hypothesis_verdict_allow": true,
+        "frozen_packet_count": 5,
+        "ledger_updated": true
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_FROZEN_STATIC_RUN_001.md",
+      "id": "WB-006",
+      "next_gate": "Exact HV/Judge or official trace runner approval is required before benchmark-credit or leaderboard accounting.",
+      "status": "complete",
+      "task": "Ran no-live frozen static intake validation on the five frozen ALLOW packets.",
+      "validation": {
+        "all_hashes_match": true,
+        "all_packets_frozen": true,
+        "all_payload_visibility_pass": true,
+        "all_static_lint_pass": true,
+        "all_taylor_approved": true,
+        "failure_count": 0,
+        "packet_count": 5
+      }
+    },
+    {
+      "approval_contract": {
+        "approval_env": "BAL100_LEADERBOARD20_ALLOW_TRACE_APPROVED",
+        "approval_scope": "exact five frozen BAL100 hard-ALLOW packets listed in the preflight manifest only",
+        "approval_value": "I_APPROVE_OFFICIAL_TRACE_PROVIDER_TRANSMISSION",
+        "codex_approval_env": "BAL100_LEADERBOARD20_CODEX_ALLOW_TRACE_APPROVED",
+        "codex_approval_value": "I_APPROVE_CODEX_OFFICIAL_TRACE_PROVIDER_TRANSMISSION"
+      },
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_PREFLIGHT_001.md",
+      "artifacts": [
+        "benchmark_factory/batches/build_BAL100_leaderboard_20_allow_official_trace_preflight.py",
+        "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_preflight_001/official_trace_preflight_manifest.json",
+        "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_preflight_001/prompt_cards/",
+        "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_PREFLIGHT_001.json",
+        "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_PREFLIGHT_001.md",
+        "benchmark_factory/batches/run_BAL100_leaderboard_20_allow_official_trace.py"
+      ],
+      "id": "WB-007",
+      "next_gate": "Taylor must explicitly approve exact live official trace execution. Judge, scorecard, and leaderboard movement remain separate later gates.",
+      "status": "complete",
+      "task": "Prepared exact five-packet ALLOW-only official trace preflight manifest, prompt-card templates, and gated runner.",
+      "validation": {
+        "all_frozen_approved_by_taylor": true,
+        "all_model_visible_keys_action_context": true,
+        "allow_packets": 5,
+        "escalate_packets": 0,
+        "expected_future_official_trace_records": 5,
+        "expected_future_provider_rows": 20,
+        "failure_count": 0,
+        "packet_count": 5,
+        "prompt_card_forbidden_user_key_failures": [],
+        "prompt_card_templates": 20
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_LIVE_001.md",
+      "id": "WB-008",
+      "next_gate": "Explicit Taylor approval is required before any Judge, scorecard, leaderboard movement, repair live call, or push.",
+      "repair_or_replace_before_leaderboard": [
+        "BAL100-HARD-ALLOW-HAB-004-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-006-ALLOW"
+      ],
+      "status": "complete_needs_triage",
+      "strict_pass_candidates": [
+        "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-003-ALLOW"
+      ],
+      "task": "Ran Taylor-approved exact live official trace execution for the five frozen hard-ALLOW packets.",
+      "validation": {
+        "judge": false,
+        "leaderboard_movement": false,
+        "official_trace_records": 5,
+        "packets_needing_repair_or_replacement": 3,
+        "parse_ok": 20,
+        "proof_credit_remains_unchanged": true,
+        "provider_call_ok": 20,
+        "provider_errors": 0,
+        "provider_rows": 20,
+        "scorecard_movement": false,
+        "strict_all_allow_candidates": 2,
+        "total_allow_rows": 12,
+        "total_escalate_rows": 8
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_DRAFTS_001.md",
+      "id": "WB-009",
+      "next_gate": "Taylor can approve freeze-manifest preflight for the three exact replacement draft paths.",
+      "replacement_packet_ids": [
+        "BAL100-HARD-ALLOW-REP-001-ALLOW",
+        "BAL100-HARD-ALLOW-REP-002-ALLOW",
+        "BAL100-HARD-ALLOW-REP-003-ALLOW"
+      ],
+      "replaces": [
+        "BAL100-HARD-ALLOW-HAB-004-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-006-ALLOW"
+      ],
+      "status": "complete",
+      "task": "Generated three no-live replacement hard-ALLOW drafts for failed HAB-004/HAB-005/HAB-006 slots.",
+      "validation": {
+        "all_contamination_audit_pass": true,
+        "all_hb_lint_pass": true,
+        "all_payload_visibility_pass": true,
+        "all_ready_for_freeze_manifest_preflight": true,
+        "freeze": false,
+        "judge": false,
+        "leaderboard_update": false,
+        "official_trace": false,
+        "provider_calls": false,
+        "replacement_count": 3,
+        "scorecard_movement": false
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_GATE_PREP_001.md",
+      "excluded_from_judge_gate": [
+        "BAL100-HARD-ALLOW-HAB-004-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-006-ALLOW"
+      ],
+      "id": "WB-010",
+      "judge_candidate_packet_ids": [
+        "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-003-ALLOW"
+      ],
+      "next_gate": "Taylor must explicitly approve Judge/adjudication for these two exact packets. Scorecard and leaderboard movement remain later gates.",
+      "status": "complete",
+      "task": "Prepared no-live Judge gate package for the two strict-pass official trace candidates only.",
+      "validation": {
+        "judge_candidate_count": 2,
+        "judge_run": false,
+        "leaderboard_update": false,
+        "proof_credit_status_change": false,
+        "provider_calls": false,
+        "scorecard_movement": false
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_FREEZE_MANIFEST_PREFLIGHT_001.md",
+      "id": "WB-011",
+      "manifest_paths": [
+        "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-001-ALLOW_build_freeze_manifest.json",
+        "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-002-ALLOW_build_freeze_manifest.json",
+        "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-003-ALLOW_build_freeze_manifest.json"
+      ],
+      "next_gate": "Actual freeze requires explicit Taylor approval for these three exact manifest paths.",
+      "status": "complete",
+      "task": "Generated static freeze manifests for the three replacement drafts. No freeze was run in preflight.",
+      "validation": {
+        "all_no_live_model_calls": true,
+        "all_no_model_visible_expected_verdict": true,
+        "all_payload_visibility_pass": true,
+        "all_static_lint_pass": true,
+        "all_taylor_approved_for_freeze_false": true,
+        "freeze": false,
+        "judge": false,
+        "leaderboard_update": false,
+        "manifest_count": 3,
+        "official_trace": false,
+        "provider_calls": false,
+        "scorecard_movement": false
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_FREEZE_RESULT_001.md",
+      "frozen_packet_paths": [
+        "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-001-ALLOW_9706a499.json",
+        "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-002-ALLOW_999d2812.json",
+        "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-003-ALLOW_c8566512.json"
+      ],
+      "id": "WB-012",
+      "next_gate": "Official trace preflight/live trace for these three frozen replacement packets requires separate explicit Taylor approval. Judge, scorecard, and leaderboard movement remain later gates.",
+      "status": "complete",
+      "task": "Applied Taylor freeze approval to the exact three replacement manifests and froze the replacement ALLOW packets.",
+      "validation": {
+        "all_approved_by_taylor": true,
+        "all_frozen_exist": true,
+        "all_hashes_match": true,
+        "all_ledger_entries_present": true,
+        "all_lint_pass": true,
+        "all_payload_visibility_pass": true,
+        "frozen_count": 3,
+        "judge": false,
+        "leaderboard_update": false,
+        "official_trace": false,
+        "provider_calls": false,
+        "scorecard_movement": false
+      }
+    },
+    {
+      "approval_contract": {
+        "approval_env": "BAL100_LEADERBOARD20_REPLACEMENT_ALLOW_TRACE_APPROVED",
+        "approval_scope": "exact three frozen replacement BAL100 hard-ALLOW packets listed in the preflight manifest only",
+        "approval_value": "I_APPROVE_REPLACEMENT_ALLOW_OFFICIAL_TRACE_PROVIDER_TRANSMISSION",
+        "codex_approval_env": "BAL100_LEADERBOARD20_CODEX_REPLACEMENT_ALLOW_TRACE_APPROVED",
+        "codex_approval_value": "I_APPROVE_CODEX_REPLACEMENT_ALLOW_OFFICIAL_TRACE_PROVIDER_TRANSMISSION"
+      },
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_PREFLIGHT_001.md",
+      "artifacts": [
+        "benchmark_factory/batches/build_BAL100_leaderboard_20_allow_replacement_official_trace_preflight.py",
+        "benchmark_factory/batches/run_BAL100_leaderboard_20_allow_replacement_official_trace.py",
+        "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_preflight_001/official_trace_preflight_manifest.json",
+        "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_preflight_001/prompt_cards/",
+        "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_PREFLIGHT_001.json",
+        "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_PREFLIGHT_001.md"
+      ],
+      "id": "WB-013",
+      "next_gate": "Taylor must explicitly approve exact replacement live official trace execution. Judge, scorecard, and leaderboard movement remain separate later gates.",
+      "status": "complete",
+      "task": "Prepared exact three-packet replacement ALLOW official trace preflight manifest, prompt-card templates, and gated runner.",
+      "validation": {
+        "all_frozen_approved_by_taylor": true,
+        "all_model_visible_keys_action_context": true,
+        "allow_packets": 3,
+        "escalate_packets": 0,
+        "expected_future_official_trace_records": 3,
+        "expected_future_provider_rows": 12,
+        "failure_count": 0,
+        "packet_count": 3,
+        "prompt_card_forbidden_user_key_failures": [],
+        "prompt_card_templates": 12
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_LIVE_001.md",
+      "id": "WB-014",
+      "next_gate": "Explicit Taylor approval is required before Judge/adjudication for the five strict-pass ALLOW candidates, scorecard movement, leaderboard movement, or push.",
+      "status": "complete",
+      "strict_pass_candidates": [
+        "BAL100-HARD-ALLOW-REP-001-ALLOW",
+        "BAL100-HARD-ALLOW-REP-002-ALLOW",
+        "BAL100-HARD-ALLOW-REP-003-ALLOW"
+      ],
+      "task": "Ran Taylor-approved exact live official trace execution for the three frozen replacement hard-ALLOW packets.",
+      "validation": {
+        "judge": false,
+        "leaderboard_movement": false,
+        "official_trace_records": 3,
+        "packets_needing_repair_or_replacement": 0,
+        "parse_ok": 12,
+        "proof_credit_remains_unchanged": true,
+        "provider_call_ok": 12,
+        "provider_errors": 0,
+        "provider_rows": 12,
+        "scorecard_movement": false,
+        "strict_all_allow_candidates": 3,
+        "total_allow_rows": 12,
+        "total_escalate_rows": 0
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_GATE_PREP_002.md",
+      "id": "WB-015",
+      "judge_candidate_packet_ids": [
+        "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-003-ALLOW",
+        "BAL100-HARD-ALLOW-REP-001-ALLOW",
+        "BAL100-HARD-ALLOW-REP-002-ALLOW",
+        "BAL100-HARD-ALLOW-REP-003-ALLOW"
+      ],
+      "next_gate": "Taylor must explicitly approve Judge/adjudication for these five exact packets. Scorecard and leaderboard movement remain later gates.",
+      "status": "complete",
+      "task": "Prepared no-live Judge gate package for the five strict-pass ALLOW candidates.",
+      "validation": {
+        "judge_candidate_count": 5,
+        "judge_run": false,
+        "leaderboard_update": false,
+        "proof_credit_status_change": false,
+        "provider_calls": false,
+        "scorecard_movement": false
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.md",
+      "id": "WB-016",
+      "judge_candidate_packet_ids": [
+        "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-003-ALLOW",
+        "BAL100-HARD-ALLOW-REP-001-ALLOW",
+        "BAL100-HARD-ALLOW-REP-002-ALLOW",
+        "BAL100-HARD-ALLOW-REP-003-ALLOW"
+      ],
+      "next_gate": "Taylor must explicitly approve scorecard and leaderboard accounting updates before moving BAL100 from 15 to 20.",
+      "status": "complete",
+      "task": "Ran Taylor-approved Judge-only adjudication for the five strict-pass ALLOW candidates.",
+      "validation": {
+        "active_model_knew": 15,
+        "active_model_wrong": 0,
+        "hologov_knew": 5,
+        "hologov_wrong": 0,
+        "judge_candidate_count": 5,
+        "judge_confidence_high": 5,
+        "judge_verdict_allow": 5,
+        "leaderboard_update": false,
+        "losses_requiring_autopsy": 0,
+        "new_live_provider_calls": false,
+        "proof_credit_status_change": false,
+        "scorecard_movement": false
+      }
+    },
+    {
+      "artifact": "reports/BAL100_LEADERBOARD_20_ACCOUNTING_UPDATE_001.md",
+      "id": "WB-017",
+      "next_gate": "No further gate required for leaderboard-to-20 accounting; push remains a separate later approval if desired.",
+      "packet_ids": [
+        "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+        "BAL100-HARD-ALLOW-HAB-003-ALLOW",
+        "BAL100-HARD-ALLOW-REP-001-ALLOW",
+        "BAL100-HARD-ALLOW-REP-002-ALLOW",
+        "BAL100-HARD-ALLOW-REP-003-ALLOW"
+      ],
+      "status": "complete",
+      "task": "Moved the five Judge-passed ALLOW packets into BAL100 scorecard and leaderboard accounting.",
+      "validation": {
+        "ablation": false,
+        "added_allow_packets": 5,
+        "after_allow_packets": 10,
+        "after_escalate_packets": 10,
+        "after_public_registry_total": 20,
+        "before_allow_packets": 5,
+        "before_escalate_packets": 10,
+        "before_public_registry_total": 15,
+        "frozen_artifact_edits": false,
+        "judge_rerun": false,
+        "leaderboard_updated": true,
+        "new_traces_created": false,
+        "packet_edits": false,
+        "provider_calls": false,
+        "push": false,
+        "qa": false,
+        "scorecard_updated": true
+      }
+    }
+  ],
+  "five_candidate_judge_gate_prep": {
+    "judge_candidate_count": 5,
+    "judge_candidate_packet_ids": [
+      "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+      "BAL100-HARD-ALLOW-HAB-003-ALLOW",
+      "BAL100-HARD-ALLOW-REP-001-ALLOW",
+      "BAL100-HARD-ALLOW-REP-002-ALLOW",
+      "BAL100-HARD-ALLOW-REP-003-ALLOW"
+    ],
+    "judge_run": false,
+    "leaderboard_update": false,
+    "proof_credit_status_change": false,
+    "provider_calls": false,
+    "report_json": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_GATE_PREP_002.json",
+    "report_markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_GATE_PREP_002.md",
+    "scorecard_movement": false,
+    "status": "READY_FOR_TAYLOR_APPROVAL_NO_JUDGE_RUN"
+  },
+  "five_candidate_judge_summary": {
+    "active_model_knew": 15,
+    "hologov_knew": 5,
+    "judge_candidate_count": 5,
+    "judge_confidence_high": 5,
+    "judge_verdict_allow": 5,
+    "leaderboard_update": false,
+    "losses_requiring_autopsy": 0,
+    "new_live_provider_calls": false,
+    "proof_credit_status_change": false,
+    "recommendation": "proof_credit_ready_for_five_allow_additions_after_scorecard_approval",
+    "report_json": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json",
+    "report_markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.md",
+    "scorecard_movement": false,
+    "status": "PASS"
+  },
+  "judge_gate_prep": {
+    "judge_candidate_packet_ids": [
+      "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+      "BAL100-HARD-ALLOW-HAB-003-ALLOW"
+    ],
+    "judge_run": false,
+    "report_json": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_GATE_PREP_001.json",
+    "report_markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_GATE_PREP_001.md",
+    "status": "READY_FOR_TAYLOR_APPROVAL_NO_JUDGE_RUN"
+  },
+  "leaderboard_20_accounting_update": {
+    "added_packet_ids": [
+      "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+      "BAL100-HARD-ALLOW-HAB-003-ALLOW",
+      "BAL100-HARD-ALLOW-REP-001-ALLOW",
+      "BAL100-HARD-ALLOW-REP-002-ALLOW",
+      "BAL100-HARD-ALLOW-REP-003-ALLOW"
+    ],
+    "allow_packets_after": 10,
+    "allow_packets_before": 5,
+    "escalate_packets_after": 10,
+    "escalate_packets_before": 10,
+    "leaderboard": "reports/BAL100_leaderboard.json",
+    "public_registry_total_after": 20,
+    "public_registry_total_before": 15,
+    "report_json": "reports/BAL100_LEADERBOARD_20_ACCOUNTING_UPDATE_001.json",
+    "report_markdown": "reports/BAL100_LEADERBOARD_20_ACCOUNTING_UPDATE_001.md",
+    "claim_boundary_patch_regression_json": "reports/BAL100_LEADERBOARD_20_HOLOGOV_CLAIM_BOUNDARY_PATCH_REGRESSION_001.json",
+    "claim_boundary_patch_regression_markdown": "reports/BAL100_LEADERBOARD_20_HOLOGOV_CLAIM_BOUNDARY_PATCH_REGRESSION_001.md",
+    "claim_boundary_status": "PASS_NOT_A_HOLOGOV_OVER_SOLO_COLLAPSE_CLAIM",
+    "solo_collapse_win_count": 0,
+    "scorecard": "reports/BAL100_scorecard.json",
+    "status": "COMPLETE"
+  },
+  "live_official_trace_result": {
+    "out_dir": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z",
+    "parse_ok": 20,
+    "provider_call_ok": 20,
+    "provider_errors": 0,
+    "provider_rows": 20,
+    "repair_or_replace_before_leaderboard": [
+      "BAL100-HARD-ALLOW-HAB-004-ALLOW",
+      "BAL100-HARD-ALLOW-HAB-005-ALLOW",
+      "BAL100-HARD-ALLOW-HAB-006-ALLOW"
+    ],
+    "report_json": "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_LIVE_001.json",
+    "report_markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_LIVE_001.md",
+    "status": "COMPLETE_NEEDS_TRIAGE",
+    "strict_pass_candidates": [
+      "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+      "BAL100-HARD-ALLOW-HAB-003-ALLOW"
+    ],
+    "verdict_rows": {
+      "ALLOW": 12,
+      "ESCALATE": 8
+    }
+  },
+  "operator": "Taylor",
+  "owner": "Co",
+  "priority": "P0",
+  "problem_statement": "The current verified leaderboard is clean but imbalanced: 5 ALLOW and 10 ESCALATE. Adding five random packets would preserve count but not balance. The next leaderboard movement should create five proof-credit ALLOW packets that stress false-positive risk while preserving evidence-binding rigor.",
+  "proposed_work_items": [
+    {
+      "deliverable": "No-live BUILD_STATE_OBJECT/BatonPass artifacts with build/verify state isolation, payload-visibility contract, repair ledger, artifact registry, state audit rules, and stop rules",
+      "id": "WB-000",
+      "live_calls": false,
+      "task": "Load BUILD_STATE_OBJECT/BatonPass handoff"
+    },
+    {
+      "deliverable": "Candidate inventory with recovered-vs-new-build recommendation",
+      "id": "WB-001",
+      "live_calls": false,
+      "task": "Inventory candidate ALLOW sources"
+    },
+    {
+      "deliverable": "Five ALLOW candidate packet specs with evidence-binding notes",
+      "id": "WB-002",
+      "live_calls": false,
+      "task": "Draft five ALLOW packets or migration plans"
+    },
+    {
+      "deliverable": "No-live validation report and contamination-cue audit",
+      "id": "WB-003",
+      "live_calls": false,
+      "task": "Run static/no-live validation"
+    },
+    {
+      "deliverable": "Provider/Judge/freeze approval package with explicit gates",
+      "id": "WB-004",
+      "live_calls": false,
+      "task": "Prepare approval package for live proof pipeline"
+    },
+    {
+      "approval_scope": "exact five frozen BAL100 hard-ALLOW packets from the official trace preflight",
+      "deliverable": "Live official trace records and verdict triage for exact five frozen packets",
+      "id": "WB-008",
+      "live_calls": true,
+      "task": "Run approved ALLOW-only official trace"
+    },
+    {
+      "deliverable": "Three no-live replacement hard-ALLOW drafts for failed HAB-004/005/006",
+      "id": "WB-009",
+      "live_calls": false,
+      "task": "Generate replacement ALLOW drafts"
+    },
+    {
+      "deliverable": "Judge approval package for HAB-001 and HAB-003 only",
+      "id": "WB-010",
+      "live_calls": false,
+      "task": "Prepare Judge gate for strict-pass candidates"
+    },
+    {
+      "deliverable": "Static freeze manifests for REP-001/002/003 with approval flags false",
+      "id": "WB-011",
+      "live_calls": false,
+      "task": "Prepare replacement freeze-manifest preflight"
+    },
+    {
+      "deliverable": "Frozen replacement packets and ledger entries for REP-001/002/003",
+      "id": "WB-012",
+      "live_calls": false,
+      "task": "Freeze replacement ALLOW packets"
+    },
+    {
+      "deliverable": "No-live official trace preflight manifest, prompt-card templates, and gated runner for REP-001/002/003",
+      "id": "WB-013",
+      "live_calls": false,
+      "task": "Prepare replacement official trace preflight"
+    },
+    {
+      "approval_scope": "exact three frozen replacement BAL100 hard-ALLOW packets from the replacement official trace preflight",
+      "deliverable": "Live official trace records and verdict triage for exact three frozen replacement packets",
+      "id": "WB-014",
+      "live_calls": true,
+      "task": "Run approved replacement official trace"
+    },
+    {
+      "deliverable": "No-live Judge/adjudication approval package for HAB-001, HAB-003, and REP-001/002/003",
+      "id": "WB-015",
+      "live_calls": false,
+      "task": "Prepare five-candidate Judge gate"
+    },
+    {
+      "approval_scope": "exact five strict-pass ALLOW candidates from JUDGE_GATE_PREP_002",
+      "deliverable": "Judge-only adjudication summary for the five strict-pass ALLOW candidates",
+      "id": "WB-016",
+      "live_calls": false,
+      "task": "Run approved five-candidate Judge/adjudication"
+    },
+    {
+      "approval_scope": "exact five Judge-passed ALLOW candidates from BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001",
+      "deliverable": "BAL100 scorecard/leaderboard updated from 15 to 20 with 10 ALLOW / 10 ESCALATE public registry balance",
+      "id": "WB-017",
+      "live_calls": false,
+      "task": "Move five Judge-passed ALLOW packets into scorecard and leaderboard accounting"
+    }
+  ],
+  "related_artifacts": [
+    "reports/BAL100_leaderboard.json",
+    "reports/BAL100_leaderboard.md",
+    "reports/BAL100_leaderboard_to_20_gap_report.json",
+    "reports/BAL100_leaderboard_to_20_gap_report.md",
+    "reports/BAL100_scorecard.json",
+    "reports/BAL100_selected_pairs_benchmark_entry_manifest.json",
+    "benchmark_factory/batches/BAL100_LEADERBOARD_20_allow_balance_govstate_batonpass_config.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_BALANCE_GOVSTATE_BATONPASS_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_BALANCE_GOVSTATE_BATONPASS_001.md",
+    "benchmark_factory/batches/build_BAL100_leaderboard_20_allow_candidate_inventory.py",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_CANDIDATE_INVENTORY_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_CANDIDATE_INVENTORY_001.md",
+    "benchmark_factory/batches/build_BAL100_leaderboard_20_allow_migrated_drafts.py",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_MIGRATED_DRAFTS_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_MIGRATED_DRAFTS_001.md",
+    "holo_builder/outputs/builder/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-001-ALLOW_draft_v0_1.json",
+    "holo_builder/outputs/builder/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-003-ALLOW_draft_v0_1.json",
+    "holo_builder/outputs/builder/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-004-ALLOW_draft_v0_1.json",
+    "holo_builder/outputs/builder/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-005-ALLOW_draft_v0_1.json",
+    "holo_builder/outputs/builder/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-006-ALLOW_draft_v0_1.json",
+    "benchmark_factory/batches/build_BAL100_leaderboard_20_allow_freeze_manifest_preflight.py",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_FREEZE_MANIFEST_PREFLIGHT_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_FREEZE_MANIFEST_PREFLIGHT_001.md",
+    "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-001-ALLOW_build_freeze_manifest.json",
+    "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-003-ALLOW_build_freeze_manifest.json",
+    "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-004-ALLOW_build_freeze_manifest.json",
+    "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-005-ALLOW_build_freeze_manifest.json",
+    "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_balance/BAL100-HARD-ALLOW-HAB-006-ALLOW_build_freeze_manifest.json",
+    "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-001-ALLOW_85fb8dca.json",
+    "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-003-ALLOW_673d6c1b.json",
+    "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-004-ALLOW_489e7143.json",
+    "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-005-ALLOW_7f6d94c4.json",
+    "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-006-ALLOW_11f7a12b.json",
+    "benchmark_factory/batches/build_BAL100_leaderboard_20_allow_frozen_static_run.py",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_FROZEN_STATIC_RUN_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_FROZEN_STATIC_RUN_001.md",
+    "benchmark_factory/batches/build_BAL100_leaderboard_20_allow_official_trace_preflight.py",
+    "benchmark_factory/batches/run_BAL100_leaderboard_20_allow_official_trace.py",
+    "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_preflight_001/official_trace_preflight_manifest.json",
+    "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_preflight_001/prompt_cards/",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_PREFLIGHT_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_PREFLIGHT_001.md",
+    "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/summary.json",
+    "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/results.jsonl",
+    "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/official_trace_records/",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_LIVE_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_OFFICIAL_TRACE_LIVE_001.md",
+    "benchmark_factory/batches/build_BAL100_leaderboard_20_allow_replacement_drafts.py",
+    "holo_builder/outputs/builder/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-001-ALLOW_draft_v0_1.json",
+    "holo_builder/outputs/builder/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-002-ALLOW_draft_v0_1.json",
+    "holo_builder/outputs/builder/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-003-ALLOW_draft_v0_1.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_DRAFTS_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_DRAFTS_001.md",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_GATE_PREP_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_GATE_PREP_001.md",
+    "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-001-ALLOW_build_freeze_manifest.json",
+    "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-002-ALLOW_build_freeze_manifest.json",
+    "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-003-ALLOW_build_freeze_manifest.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_FREEZE_MANIFEST_PREFLIGHT_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_FREEZE_MANIFEST_PREFLIGHT_001.md",
+    "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-001-ALLOW_9706a499.json",
+    "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-002-ALLOW_999d2812.json",
+    "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-003-ALLOW_c8566512.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_FREEZE_RESULT_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_FREEZE_RESULT_001.md",
+    "benchmark_factory/batches/build_BAL100_leaderboard_20_allow_replacement_official_trace_preflight.py",
+    "benchmark_factory/batches/run_BAL100_leaderboard_20_allow_replacement_official_trace.py",
+    "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_preflight_001/official_trace_preflight_manifest.json",
+    "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_preflight_001/prompt_cards/",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_PREFLIGHT_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_PREFLIGHT_001.md",
+    "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_live_20260619T220000Z/summary.json",
+    "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_live_20260619T220000Z/results.jsonl",
+    "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_live_20260619T220000Z/official_trace_records/",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_LIVE_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_LIVE_001.md",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_GATE_PREP_002.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_GATE_PREP_002.md",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json",
+    "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.md",
+    "reports/BAL100_scorecard.md",
+    "reports/BAL100_LEADERBOARD_20_ACCOUNTING_UPDATE_001.json",
+    "reports/BAL100_LEADERBOARD_20_ACCOUNTING_UPDATE_001.md",
+    "reports/BAL100_LEADERBOARD_20_HOLOGOV_CLAIM_BOUNDARY_PATCH_REGRESSION_001.json",
+    "reports/BAL100_LEADERBOARD_20_HOLOGOV_CLAIM_BOUNDARY_PATCH_REGRESSION_001.md"
+  ],
+  "replacement_drafts_result": {
+    "all_ready_for_freeze_manifest_preflight": true,
+    "replacement_count": 3,
+    "replacement_packet_ids": [
+      "BAL100-HARD-ALLOW-REP-001-ALLOW",
+      "BAL100-HARD-ALLOW-REP-002-ALLOW",
+      "BAL100-HARD-ALLOW-REP-003-ALLOW"
+    ],
+    "report_json": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_DRAFTS_001.json",
+    "report_markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_DRAFTS_001.md",
+    "status": "PASS"
+  },
+  "replacement_freeze_manifest_preflight": {
+    "all_taylor_approved_for_freeze_false": true,
+    "manifest_count": 3,
+    "manifest_paths": [
+      "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-001-ALLOW_build_freeze_manifest.json",
+      "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-002-ALLOW_build_freeze_manifest.json",
+      "holo_builder/outputs/freeze_manifest/bal100_leaderboard_20_allow_replacements/BAL100-HARD-ALLOW-REP-003-ALLOW_build_freeze_manifest.json"
+    ],
+    "report_json": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_FREEZE_MANIFEST_PREFLIGHT_001.json",
+    "report_markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_FREEZE_MANIFEST_PREFLIGHT_001.md",
+    "status": "PASS"
+  },
+  "replacement_freeze_result": {
+    "all_ledger_entries_present": true,
+    "frozen_count": 3,
+    "frozen_packet_paths": [
+      "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-001-ALLOW_9706a499.json",
+      "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-002-ALLOW_999d2812.json",
+      "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-003-ALLOW_c8566512.json"
+    ],
+    "judge": false,
+    "leaderboard_update": false,
+    "official_trace": false,
+    "replacement_domains": {
+      "AP": 1,
+      "BEC": 1,
+      "IAM": 1
+    },
+    "report_json": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_FREEZE_RESULT_001.json",
+    "report_markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_FREEZE_RESULT_001.md",
+    "scorecard_movement": false,
+    "status": "PASS"
+  },
+  "replacement_official_trace_preflight": {
+    "approval_scope": "exact three frozen replacement BAL100 hard-ALLOW packets only",
+    "expected_future_official_trace_records": 3,
+    "expected_future_provider_rows": 12,
+    "judge": false,
+    "leaderboard_update": false,
+    "official_trace": false,
+    "out_dir": "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_preflight_001",
+    "packet_count": 3,
+    "prompt_card_templates": 12,
+    "provider_calls": false,
+    "report_json": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_PREFLIGHT_001.json",
+    "report_markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_PREFLIGHT_001.md",
+    "scorecard_movement": false,
+    "status": "PASS"
+  },
+  "replacement_official_trace_result": {
+    "candidate_set_for_next_judge_gate": [
+      "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+      "BAL100-HARD-ALLOW-HAB-003-ALLOW",
+      "BAL100-HARD-ALLOW-REP-001-ALLOW",
+      "BAL100-HARD-ALLOW-REP-002-ALLOW",
+      "BAL100-HARD-ALLOW-REP-003-ALLOW"
+    ],
+    "judge": false,
+    "leaderboard_update": false,
+    "out_dir": "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_live_20260619T220000Z",
+    "parse_ok": 12,
+    "provider_call_ok": 12,
+    "provider_errors": 0,
+    "provider_rows": 12,
+    "report_json": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_LIVE_001.json",
+    "report_markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_REPLACEMENT_OFFICIAL_TRACE_LIVE_001.md",
+    "scorecard_movement": false,
+    "status": "PASS",
+    "strict_pass_candidates": [
+      "BAL100-HARD-ALLOW-REP-001-ALLOW",
+      "BAL100-HARD-ALLOW-REP-002-ALLOW",
+      "BAL100-HARD-ALLOW-REP-003-ALLOW"
+    ],
+    "verdict_rows": {
+      "ALLOW": 12
+    }
+  },
+  "safe_boundaries": {
+    "ablation": false,
+    "additional_provider_calls_authorized": false,
+    "additional_replacement_official_trace_authorized": false,
+    "five_candidate_judge_adjudication": true,
+    "five_candidate_judge_gate_prep": true,
+    "freeze": true,
+    "judge": true,
+    "leaderboard_update": true,
+    "official_trace": true,
+    "packet_promotion": true,
+    "proof_credit_status_change": true,
+    "provider_calls": true,
+    "push": false,
+    "qa": false,
+    "replacement_official_trace": true,
+    "replacement_official_trace_preflight": true,
+    "scorecard_movement": true
+  },
+  "scope": {
+    "in_scope": [
+      "Generate or recover five ALLOW candidates with high false-positive pressure.",
+      "Prefer packets that test valid-control precision, closed authority chains, current authorization, callback provenance closure, or valid dependency closure.",
+      "Run only gated non-live static validation until Taylor explicitly approves each later stage.",
+      "Prepare artifacts for future freeze, official trace, Judge, scorecard movement, and leaderboard update."
+    ],
+    "out_of_scope_without_explicit_approval": [
+      "Provider calls",
+      "Freeze",
+      "Official trace",
+      "Judge or adjudication",
+      "QA or ablation",
+      "Scorecard movement",
+      "Leaderboard count update",
+      "Push"
+    ]
+  },
+  "status": "OPEN",
+  "ticket_id": "BAL100-LEADERBOARD-20-ALLOW-BALANCE-001",
+  "title": "Create five proof-credit ALLOW packets to balance the 20-packet leaderboard"
+}

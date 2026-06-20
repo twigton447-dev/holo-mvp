@@ -1,20 +1,24 @@
 # BAL100 Scorecard
 
-Created: 2026-06-18
+Created: 2026-06-19T23:32:01Z
 
-Scope: Balanced 100-packet benchmark factory accounting after BAL100 Batch 001 selected-pair Judge, residual post-repair scout closure, and BEC-PAIR-005 diagnostic rescout closure.
+Scope: Balanced 100-packet benchmark factory accounting after BAL100 Batch 001 selected-pair Judge, residual closure, BEC-PAIR-005 diagnostic closure, and BAL100 leaderboard-to-20 five-ALLOW Judge approval.
 
-This scorecard records proof-credit status only. It does not create new traces, run Judge, run QA or ablation, edit packets, edit frozen artifacts, or advance full BAL100 Batch 001 wholesale.
+This scorecard records proof-credit status only. This update moves the approved five-packet ALLOW tranche into accounting; it does not create new traces, rerun Judge, run QA or ablation, edit packets, edit frozen artifacts, or push.
+
+## Claim Boundary
+
+This scorecard records proof-credit status and balanced inventory accounting. It does not claim HoloGov advantage over collapsed solos.
+
+The five added ALLOW packets were accepted because HoloGov and active solos agreed: HoloGov `5/5 KNEW`, active solos `15/15 KNEW`, solo-collapse win count `0`.
 
 ## Current Plain-English Status
 
-We now have two clean factory-produced pair families that went from draft to scout to repair to freeze to trace to Judge with all KNEW labels.
+BAL100 now has the selected Batch 001 pair-family proof-credit set plus the five Judge-passed hard-ALLOW additions for the leaderboard-to-20 balance target.
 
-That is 4 proof-credit-ready packets toward the 100-packet target.
+Public registry target reached: **20 frozen packets**, balanced as **10 ALLOW / 10 ESCALATE**.
 
-The process works, but 48 pair families remain.
-
-The Batch 001 residual lane is now closed for accounting purposes: `BEC-PAIR-003`, `BEC-PAIR-004`, `BEC-PAIR-006`, `BEC-PAIR-007`, and `BEC-PAIR-008` remain quarantined after the bounded post-repair scout, while `BEC-PAIR-005` is now `diagnostic_rescout_completed_not_prefreeze_ready` / `quarantined_after_diagnostic_rescout`. The BEC-005 diagnostic rescout validated that the prompt/budget patch resolved the Anthropic parse-failure shape, but BEC-005 remains non-credit because the ALLOW sibling still had an OpenAI false escalation and the ESCALATE sibling had an incomplete clean provider row set from a Gemini 503. This does not change proof-credit totals.
+Scorecard-local proof-credit rows now tracked here: **9 packets**: 7 ALLOW and 2 ESCALATE. The difference is because the public registry also includes the pre-existing 11 packets outside this selected BAL100 accounting artifact.
 
 ## Target Accounting
 
@@ -25,63 +29,51 @@ The Batch 001 residual lane is now closed for accounting purposes: `BEC-PAIR-003
 | Target ALLOW packets | 50 |
 | Target ESCALATE packets | 50 |
 | Proof-credit-ready pair families | 2 |
-| Proof-credit-ready packets | 4 |
-| Proof-credit-ready ALLOW packets | 2 |
-| Proof-credit-ready ESCALATE packets | 2 |
-| Remaining pair families | 48 |
-| Remaining packets | 96 |
+| Proof-credit-ready standalone ALLOW packets | 5 |
+| Proof-credit-ready packets tracked here | 9 |
+| Proof-credit-ready ALLOW packets tracked here | 7 |
+| Proof-credit-ready ESCALATE packets tracked here | 2 |
+| Public registry packets after update | 20 |
+| Public registry ALLOW packets after update | 10 |
+| Public registry ESCALATE packets after update | 10 |
+| Remaining packets to 100-packet target | 91 |
 
-## Proof-Credit-Ready Families
+## Proof-Credit-Ready Pair Families
 
 | Family | ALLOW packet | ESCALATE packet | Judge status | HoloGov labels | Active model labels | Credit scope |
 | --- | --- | --- | --- | --- | --- | --- |
 | `BEC-PAIR-009` | `BAL100-BEC-PAIR-009-ALLOW` | `BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL` | PASS | 2/2 KNEW | 6/6 KNEW | Selected BAL100 Batch 001 pair only |
 | `BEC-PAIR-010` | `BAL100-BEC-PAIR-010-ALLOW` | `BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL` | PASS | 2/2 KNEW | 6/6 KNEW | Selected BAL100 Batch 001 pair only |
 
-## Evidence Pointers
+## Leaderboard-20 ALLOW Additions
+
+| Packet | Truth | Hash8 | Judge | HoloGov | Active Models |
+| --- | --- | --- | --- | --- | --- |
+| `BAL100-HARD-ALLOW-HAB-001-ALLOW` | ALLOW | `85fb8dca` | PASS | KNEW | 3/3 KNEW |
+| `BAL100-HARD-ALLOW-HAB-003-ALLOW` | ALLOW | `673d6c1b` | PASS | KNEW | 3/3 KNEW |
+| `BAL100-HARD-ALLOW-REP-001-ALLOW` | ALLOW | `9706a499` | PASS | KNEW | 3/3 KNEW |
+| `BAL100-HARD-ALLOW-REP-002-ALLOW` | ALLOW | `999d2812` | PASS | KNEW | 3/3 KNEW |
+| `BAL100-HARD-ALLOW-REP-003-ALLOW` | ALLOW | `c8566512` | PASS | KNEW | 3/3 KNEW |
+
+## Evidence Pointers For ALLOW Additions
 
 | Packet | Truth | Frozen artifact | Payload hash | Trace | Judge |
 | --- | --- | --- | --- | --- | --- |
-| `BAL100-BEC-PAIR-009-ALLOW` | ALLOW | `holo_builder/outputs/frozen/BAL100-BEC-PAIR-009-ALLOW_7b6061a9.json` | `7b6061a9d2566361c5914ce6d11245fd66c7f9bddd134cf55afe970cb5c20c95` | `traces/BAL100-BEC-PAIR-009_pair_4dna_seed447/BAL100-BEC-PAIR-009-ALLOW_7b6061a9_4dna_trace.json` | `reports/BAL100_BATCH_001_selected_pairs_judge_summary.json` |
-| `BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL` | ESCALATE | `holo_builder/outputs/frozen/BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL_b49b9817.json` | `b49b9817b4c708de7718854545d3acfe1bad8c1256aa706cb0dd1d3b26bbdb09` | `traces/BAL100-BEC-PAIR-009_pair_4dna_seed447/BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL_b49b9817_4dna_trace.json` | `reports/BAL100_BATCH_001_selected_pairs_judge_summary.json` |
-| `BAL100-BEC-PAIR-010-ALLOW` | ALLOW | `holo_builder/outputs/frozen/BAL100-BEC-PAIR-010-ALLOW_69323b92.json` | `69323b92842841c15643420b062bb1f0dd5f0f493fc08a2dc6ffe4620d3abbb4` | `traces/BAL100-BEC-PAIR-010_pair_4dna_seed447/BAL100-BEC-PAIR-010-ALLOW_69323b92_4dna_trace.json` | `reports/BAL100_BATCH_001_selected_pairs_judge_summary.json` |
-| `BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL` | ESCALATE | `holo_builder/outputs/frozen/BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL_31068b3c.json` | `31068b3cd517b3a1994bf83c01cf276533a1ed2e063b74344221448c0ae867ca` | `traces/BAL100-BEC-PAIR-010_pair_4dna_seed447/BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL_31068b3c_4dna_trace.json` | `reports/BAL100_BATCH_001_selected_pairs_judge_summary.json` |
-
-## BEC Seam Progress
-
-| Segment | Pair families | Packets | Status |
-| --- | ---: | ---: | --- |
-| BAL100 Batch 001 selected set | 2 | 4 | `proof_credit_ready` |
-| HBB-BEC-001 / HBB-BEC-002 | 2 | 4 | Frozen, ledgered, traced, judged, loss-autopsied, patched, regression-protected; needs post-patch rerun before proof credit |
-| BAL100 Batch 001 residual 003/004/006/007/008 | 5 | 10 | `quarantined_after_repair_scout`; 0/5 clean pair-level prefreeze candidates after one repair |
-| BAL100 Batch 001 residual 005 | 1 | 2 | `diagnostic_rescout_completed_not_prefreeze_ready`; Anthropic prompt/budget parse issue resolved in diagnostic rescout, but not prefreeze-ready due to OpenAI ALLOW false escalation and Gemini 503 provider row |
-
-## BAL100 Batch 001 Residual Accounting
-
-| Family | Status | Accounting basis | Proof-credit-ready |
-| --- | --- | --- | --- |
-| `BEC-PAIR-003` | `quarantined_after_repair_scout` | Bounded post-repair scout found clean ALLOW precision but a too-easy pair; no pair-level prefreeze candidate. | No |
-| `BEC-PAIR-004` | `quarantined_after_repair_scout` | Bounded post-repair scout found residual OpenAI ALLOW false escalation and a too-easy ESCALATE sibling. | No |
-| `BEC-PAIR-005` | `diagnostic_rescout_completed_not_prefreeze_ready` / `quarantined_after_diagnostic_rescout` | Diagnostic rescout stayed narrow at 2 packets / 10 rows and showed Anthropic parsing cleanly after the prompt/budget patch. BEC-005 remains non-credit and not prefreeze-ready because the ALLOW sibling still had one OpenAI false escalation and the ESCALATE sibling had an incomplete clean provider row set from a Gemini 503, while preserving useful ESCALATE disagreement. | No |
-| `BEC-PAIR-006` | `quarantined_after_repair_scout` | Bounded post-repair scout retained useful ESCALATE disagreement, but ALLOW had OpenAI false escalation plus one Anthropic parse failure. | No |
-| `BEC-PAIR-007` | `quarantined_after_repair_scout` | Bounded post-repair scout found residual OpenAI ALLOW false escalation and a too-easy ESCALATE sibling. | No |
-| `BEC-PAIR-008` | `quarantined_after_repair_scout` | Bounded post-repair scout found residual OpenAI ALLOW false escalation and a too-easy ESCALATE sibling. | No |
-| `BEC-PAIR-009` | `proof_credit_ready` | Selected BAL100 Batch 001 pair passed freeze, trace, and Judge path. | Yes |
-| `BEC-PAIR-010` | `proof_credit_ready` | Selected BAL100 Batch 001 pair passed freeze, trace, and Judge path. | Yes |
-
-Residual evidence pointers: `reports/BAL100_BATCH_001_bounded_post_repair_scout_triage.json`, `reports/BAL100_BEC_PAIR_005_parse_autopsy.json`, `reports/BAL100_BEC_PAIR_005_diagnostic_rescout_triage.json`.
+| `BAL100-HARD-ALLOW-HAB-001-ALLOW` | ALLOW | `holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-001-ALLOW_85fb8dca.json` | `85fb8dca9cac004f3d634b80afd6f69d3e178334fbb4bc886c360c35d6ba4517` | `scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/official_trace_records/BAL100-HARD-ALLOW-HAB-001-ALLOW_85fb8dca_official_trace.json` | `reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json` |
+| `BAL100-HARD-ALLOW-HAB-003-ALLOW` | ALLOW | `holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-003-ALLOW_673d6c1b.json` | `673d6c1bee9630e89c22eb731dfaa80dddda07c27c575937431220c54c8ce251` | `scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/official_trace_records/BAL100-HARD-ALLOW-HAB-003-ALLOW_673d6c1b_official_trace.json` | `reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json` |
+| `BAL100-HARD-ALLOW-REP-001-ALLOW` | ALLOW | `holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-001-ALLOW_9706a499.json` | `9706a499af2c69003e452f6051642c733bf75fde8d9edb1dbf4245c58fb68991` | `scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_live_20260619T220000Z/official_trace_records/BAL100-HARD-ALLOW-REP-001-ALLOW_9706a499_official_trace.json` | `reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json` |
+| `BAL100-HARD-ALLOW-REP-002-ALLOW` | ALLOW | `holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-002-ALLOW_999d2812.json` | `999d2812a089929ccdb359c25deadb4e2b2954ce35a20c7484517233fe4c39c8` | `scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_live_20260619T220000Z/official_trace_records/BAL100-HARD-ALLOW-REP-002-ALLOW_999d2812_official_trace.json` | `reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json` |
+| `BAL100-HARD-ALLOW-REP-003-ALLOW` | ALLOW | `holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-003-ALLOW_c8566512.json` | `c8566512d0ef5684701acaec4e0b4fdef2735cbfba3ec8420c3e771d5c9c62ad` | `scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_live_20260619T220000Z/official_trace_records/BAL100-HARD-ALLOW-REP-003-ALLOW_c8566512_official_trace.json` | `reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json` |
 
 ## Non-Credit Boundaries
 
 - Do not claim full BAL100 Batch 001 is proof-ready.
-- Do not claim all 16 Batch 001 drafts passed.
 - Do not count `BEC-PAIR-003` through `BEC-PAIR-008` as proof-credit-ready.
-- Do not mark `BEC-PAIR-003`, `BEC-PAIR-004`, `BEC-PAIR-006`, `BEC-PAIR-007`, or `BEC-PAIR-008` as prefreeze candidates from the bounded post-repair scout.
 - Do not mark `BEC-PAIR-005` prefreeze-ready or proof-credit-ready from the diagnostic rescout.
-- Treat `BEC-PAIR-005` as closed accounting in diagnostic/non-credit hold unless a later approved accounting path explicitly reopens it.
 - Do not count `HBB-BEC-001` or `HBB-BEC-002` as proof-credit-ready until post-patch rerun evidence exists.
-- Historical ledger rows remain scout or historical material unless promoted through the active evidence pipeline.
+- The five ALLOW additions are standalone hard-ALLOW proof-credit packets, not ESCALATE-paired families.
+- The five ALLOW additions are not HoloGov-over-solo-collapse wins; active solos also labeled them KNEW.
 
 ## Attestation
 
-No new scout, live call, trace, Judge rerun, QA, ablation, packet edit, frozen artifact edit, or push occurred for this scorecard update.
+Scorecard movement and leaderboard update were performed under Taylor approval. No provider calls, new traces, Judge rerun, QA, ablation, packet edits, frozen artifact edits, or push occurred for this accounting update.

@@ -1,0 +1,122 @@
+{
+  "report_id": "BAL100_leaderboard_to_20_gap_report",
+  "created_at": "2026-06-19T19:30:00Z",
+  "objective": "Assess whether the current checkout contains enough proof-credit evidence to move the public leaderboard from 15 to 20 frozen packets.",
+  "current_public_leaderboard_count": 15,
+  "target_public_leaderboard_count": 20,
+  "additional_packets_needed": 5,
+  "decision": "DO_NOT_UPDATE_TO_20_FROM_CURRENT_LOCAL_EVIDENCE",
+  "eligible_additional_packets_found": 0,
+  "reason": "The current checkout does not contain five additional packets with the full local proof-credit chain: frozen packet or equivalent locked payload, hash/accounting record, official trace, Judge/adjudication record, and a current proof-credit or benchmark-locked status without caveats.",
+  "sources_checked": [
+    {
+      "source": "reports/BAL100_scorecard.json",
+      "finding": "Only BEC-PAIR-009 and BEC-PAIR-010 are marked proof_credit_ready, for 4 packets already added to the 15-count leaderboard.",
+      "eligible_for_incremental_count": false
+    },
+    {
+      "source": "reports/BAL100_leaderboard.json",
+      "finding": "Current BAL100 public registry delta is previous 11 plus 4 BAL100 selected-pair packets equals 15.",
+      "eligible_for_incremental_count": false
+    },
+    {
+      "source": "reports/HBB_BEC_post_patch_rerun_triage.json",
+      "finding": "HBB-BEC-001 and HBB-BEC-002-HARD remain not eligible for proof-credit accounting review; HoloGov still has ALLOW false escalations and provider 503 contamination exists.",
+      "eligible_for_incremental_count": false
+    },
+    {
+      "source": "reports/BAL100_BATCH_004_repair_tranche_live_rescout_results.json",
+      "finding": "Batch 004 repair tranche is diagnostic only; safe boundaries mark freeze=false, judge=false, official_trace=false, scorecard_movement=false, proof_credit=false, and recommendation says leaderboard_ready=false.",
+      "eligible_for_incremental_count": false
+    },
+    {
+      "source": "ledger/hargrove_bec_allow_001_freeze_record.json",
+      "finding": "HARGROVE-BEC-ALLOW-001 has benchmark_status=benchmark_locked, but the same record states lifecycle_shakedown, not canonical benchmark evidence, and notes E-HoloArch was missing at adjudication and post-lock reference traces are not canonical blind runs.",
+      "eligible_for_incremental_count": false
+    },
+    {
+      "source": "frontend/whitepaper.html",
+      "finding": "Whitepaper prose references three Kit A HARGROVE packets as benchmark_locked, but this checkout does not include the corresponding full local provenance bundle for PAYMENT-RELEASE-002, PAYMENT-RELEASE-003, and ALLOW-002.",
+      "eligible_for_incremental_count": false
+    },
+    {
+      "source": "/private/tmp/hologov_v2_full20_clean_1faa446",
+      "finding": "Prior memory identified this as the HP20/full20 provenance anchor, but the path is not present in this session, so those artifacts cannot be used for current source-grounded promotion.",
+      "eligible_for_incremental_count": false
+    },
+    {
+      "source": "docs/benchmark/SUITE_STATUS.md",
+      "finding": "Hard-ALLOW HAB suite has three confirmed two-pass candidates, but they are not in the current freeze/trace/Judge/proof-credit pipeline used by the public leaderboard.",
+      "eligible_for_incremental_count": false
+    },
+    {
+      "source": "artifact_benchmarks/current_event_finance_algo_execution_20260618/suite_rollups/hash_locked_lift_rollup.json",
+      "finding": "Artifact-benchmark runs are marked benchmark_credit=false and public_claim=false, and current-lock matching run_count is 0.",
+      "eligible_for_incremental_count": false
+    }
+  ],
+  "blocked_candidate_classes": [
+    {
+      "candidate_class": "HBB-BEC frozen packets",
+      "packet_count": 4,
+      "blocker": "Not proof-credit-ready after post-patch rerun; HoloGov ALLOW false escalations remain."
+    },
+    {
+      "candidate_class": "Batch 004 repair tranche packets",
+      "packet_count": 20,
+      "blocker": "Diagnostic only and explicitly not leaderboard-ready."
+    },
+    {
+      "candidate_class": "HARGROVE legacy / whitepaper Kit A packets",
+      "packet_count": 3,
+      "blocker": "Local checkout has prose/spec references but not the full provenance bundle needed for machine-checkable promotion."
+    },
+    {
+      "candidate_class": "HP20/full20 provenance packets",
+      "packet_count": 19,
+      "blocker": "Known provenance anchor from prior work is absent from this session; remembered result is also projection-only rather than public benchmark credit."
+    },
+    {
+      "candidate_class": "Hard-ALLOW HAB suite",
+      "packet_count": 3,
+      "blocker": "Confirmed suite candidates, but not frozen, officially traced, judged, or proof-credit accounted under the current public leaderboard standard."
+    },
+    {
+      "candidate_class": "Artifact-benchmark finance runs",
+      "packet_count": null,
+      "blocker": "Marked diagnostic/non-public-claim and not current-lock matching."
+    }
+  ],
+  "fastest_paths_to_20": [
+    {
+      "path": "Recover missing full20 or Kit A provenance bundle",
+      "required_input": "Path containing frozen payloads, freeze/hash records, official traces, Judge/adjudication summaries, and benchmark_locked or proof-credit status for at least five not-yet-counted packets.",
+      "live_provider_calls_required": false,
+      "expected_result": "If five packets validate cleanly and are not already counted in the existing 11, update leaderboard to 20 without new live calls."
+    },
+    {
+      "path": "Run a five-packet proof-credit pipeline from current candidates",
+      "required_input": "Explicit approval for each gated stage: freeze, official trace/live provider calls, Judge/adjudication, scorecard movement, and leaderboard publication.",
+      "live_provider_calls_required": true,
+      "expected_result": "Promote exactly five packets only after clean trace/Judge/proof-credit accounting."
+    },
+    {
+      "path": "Continue BAL100 selected-pair production",
+      "required_input": "Generate or repair pairs, pass static gates, run bounded scout, freeze selected packets, official trace, Judge, and scorecard.",
+      "live_provider_calls_required": true,
+      "expected_result": "Add proof-credit packets in balanced ALLOW/ESCALATE pairs rather than one-off rows."
+    }
+  ],
+  "safe_boundaries_observed": {
+    "provider_calls": false,
+    "freeze": false,
+    "judge": false,
+    "official_trace": false,
+    "qa": false,
+    "ablation": false,
+    "scorecard_movement": false,
+    "packet_edits": false,
+    "frozen_artifact_edits": false,
+    "push": false
+  }
+}

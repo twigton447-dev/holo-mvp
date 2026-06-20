@@ -1,135 +1,42 @@
 {
-  "scorecard_id": "BAL100_scorecard",
-  "created_at": "2026-06-18",
-  "scope": "Balanced 100-packet benchmark factory accounting after BAL100 Batch 001 selected-pair Judge, residual post-repair scout closure, and BEC-PAIR-005 diagnostic rescout closure.",
-  "benchmark_credit_scope": "selected_pairs_only",
-  "target": {
-    "pair_families": 50,
-    "packets": 100,
-    "allow_packets": 50,
-    "escalate_packets": 50
-  },
-  "proof_credit_ready": {
-    "pair_families": 2,
-    "packets": 4,
-    "allow_packets": 2,
-    "escalate_packets": 2,
-    "families": [
-      "BEC-PAIR-009",
-      "BEC-PAIR-010"
-    ]
-  },
-  "remaining_target": {
-    "pair_families": 48,
-    "packets": 96,
-    "allow_packets": 48,
-    "escalate_packets": 48
-  },
-  "bec_seam_progress": {
-    "proof_ready_pair_families_from_bal100_batch001_selected_set": 2,
-    "proof_ready_packets_from_bal100_batch001_selected_set": 4,
-    "hbb_bec_001_002_status": "needs_post_patch_rerun_before_proof_credit",
-    "bal100_batch001_residual_003_008_status": "closed_without_new_prefreeze_candidates",
-    "bal100_batch001_bec_pair_005_status": "diagnostic_rescout_completed_not_prefreeze_ready",
-    "bal100_batch001_bec_pair_005_non_credit_reason": "Anthropic parsed cleanly after the prompt/budget patch, but BEC-005 remains non-credit because the ALLOW sibling still had an OpenAI false escalation and the ESCALATE sibling had an incomplete clean provider row set from a Gemini 503."
-  },
-  "proof_credit_ready_families": [
-    {
-      "family_id": "BEC-PAIR-009",
-      "seam_id": "BEC_CALLBACK_PROVENANCE",
-      "batch_id": "BAL100-BATCH-001",
-      "status": "proof_credit_ready",
-      "judge_status": "PASS",
-      "hologov_result": "2/2 KNEW",
-      "active_model_result": "6/6 KNEW",
-      "allow_packet": {
-        "packet_id": "BAL100-BEC-PAIR-009-ALLOW",
-        "truth_class": "ALLOW",
-        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-009-ALLOW_7b6061a9.json",
-        "payload_hash": "7b6061a9d2566361c5914ce6d11245fd66c7f9bddd134cf55afe970cb5c20c95",
-        "trace_path": "traces/BAL100-BEC-PAIR-009_pair_4dna_seed447/BAL100-BEC-PAIR-009-ALLOW_7b6061a9_4dna_trace.json"
-      },
-      "escalate_packet": {
-        "packet_id": "BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL",
-        "truth_class": "ESCALATE",
-        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL_b49b9817.json",
-        "payload_hash": "b49b9817b4c708de7718854545d3acfe1bad8c1256aa706cb0dd1d3b26bbdb09",
-        "trace_path": "traces/BAL100-BEC-PAIR-009_pair_4dna_seed447/BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL_b49b9817_4dna_trace.json"
-      },
-      "judge_report": "reports/BAL100_BATCH_001_selected_pairs_judge_summary.json",
-      "proof_credit_note": "Applies only to selected BAL100 Batch 001 family BEC-PAIR-009, not the full batch."
-    },
-    {
-      "family_id": "BEC-PAIR-010",
-      "seam_id": "BEC_CALLBACK_PROVENANCE",
-      "batch_id": "BAL100-BATCH-001",
-      "status": "proof_credit_ready",
-      "judge_status": "PASS",
-      "hologov_result": "2/2 KNEW",
-      "active_model_result": "6/6 KNEW",
-      "allow_packet": {
-        "packet_id": "BAL100-BEC-PAIR-010-ALLOW",
-        "truth_class": "ALLOW",
-        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-010-ALLOW_69323b92.json",
-        "payload_hash": "69323b92842841c15643420b062bb1f0dd5f0f493fc08a2dc6ffe4620d3abbb4",
-        "trace_path": "traces/BAL100-BEC-PAIR-010_pair_4dna_seed447/BAL100-BEC-PAIR-010-ALLOW_69323b92_4dna_trace.json"
-      },
-      "escalate_packet": {
-        "packet_id": "BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL",
-        "truth_class": "ESCALATE",
-        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL_31068b3c.json",
-        "payload_hash": "31068b3cd517b3a1994bf83c01cf276533a1ed2e063b74344221448c0ae867ca",
-        "trace_path": "traces/BAL100-BEC-PAIR-010_pair_4dna_seed447/BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL_31068b3c_4dna_trace.json"
-      },
-      "judge_report": "reports/BAL100_BATCH_001_selected_pairs_judge_summary.json",
-      "proof_credit_note": "Applies only to selected BAL100 Batch 001 family BEC-PAIR-010, not the full batch."
-    }
-  ],
-  "non_credit_boundaries": {
-    "full_bal100_batch001_proof_ready": false,
-    "bal100_batch001_all_16_drafts_passed": false,
-    "bec_pair_003_through_008_proof_credit_ready": false,
-    "bec_pair_003_004_006_007_008_prefreeze_ready": false,
-    "bec_pair_005_prefreeze_ready_after_diagnostic_rescout": false,
-    "hbb_bec_001_proof_credit_ready": false,
-    "hbb_bec_002_proof_credit_ready": false
-  },
   "attestation": {
+    "ablation_run": false,
+    "frozen_artifact_edits": false,
+    "judge_rerun": false,
+    "leaderboard_update": true,
     "live_calls": false,
     "new_traces_created": false,
-    "judge_rerun": false,
-    "qa_run": false,
-    "ablation_run": false,
     "packet_edits": false,
-    "frozen_artifact_edits": false,
-    "push": false
+    "push": false,
+    "qa_run": false,
+    "scorecard_movement": true
   },
   "bal100_batch001_residual_accounting": {
-    "source_report": "reports/BAL100_BATCH_001_bounded_post_repair_scout_triage.json",
-    "residual_repair_summary": "reports/BAL100_BATCH_001_residual_repair_summary.json",
-    "proof_credit_ready_families": [
-      "BEC-PAIR-009",
-      "BEC-PAIR-010"
-    ],
-    "diagnostic_rescout_completed_not_prefreeze_ready": [
-      "BEC-PAIR-005"
-    ],
-    "quarantined_after_diagnostic_rescout": [
-      "BEC-PAIR-005"
-    ],
-    "parse_autopsy_complete": [
-      "BEC-PAIR-005"
-    ],
-    "parse_autopsy_report": "reports/BAL100_BEC_PAIR_005_parse_autopsy.json",
-    "diagnostic_rescout_report": "reports/BAL100_BEC_PAIR_005_diagnostic_rescout_triage.json",
-    "bec_pair_005_prompt_budget_fix_resolved_anthropic_parse_failure_shape": true,
     "bec_pair_005_non_credit_reasons": [
       "ALLOW sibling retained one OpenAI false escalation.",
       "ESCALATE sibling had an incomplete clean provider row set because Gemini returned HTTP 503.",
       "Diagnostic rescout is scout evidence only, not Judge, freeze, trace, or proof credit."
     ],
-    "bec_pair_005_recommended_fix_type": "none_from_diagnostic_rescout_accounting",
     "bec_pair_005_packet_repair_recommended": false,
+    "bec_pair_005_prompt_budget_fix_resolved_anthropic_parse_failure_shape": true,
+    "bec_pair_005_recommended_fix_type": "none_from_diagnostic_rescout_accounting",
+    "clean_prefreeze_candidates_after_repair_scout": [],
+    "diagnostic_rescout_completed_not_prefreeze_ready": [
+      "BEC-PAIR-005"
+    ],
+    "diagnostic_rescout_report": "reports/BAL100_BEC_PAIR_005_diagnostic_rescout_triage.json",
+    "parse_autopsy_complete": [
+      "BEC-PAIR-005"
+    ],
+    "parse_autopsy_report": "reports/BAL100_BEC_PAIR_005_parse_autopsy.json",
+    "proof_credit_count_changed": false,
+    "proof_credit_ready_families": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "quarantined_after_diagnostic_rescout": [
+      "BEC-PAIR-005"
+    ],
     "quarantined_after_repair_scout": [
       "BEC-PAIR-003",
       "BEC-PAIR-004",
@@ -137,7 +44,275 @@
       "BEC-PAIR-007",
       "BEC-PAIR-008"
     ],
-    "clean_prefreeze_candidates_after_repair_scout": [],
-    "proof_credit_count_changed": false
+    "residual_repair_summary": "reports/BAL100_BATCH_001_residual_repair_summary.json",
+    "source_report": "reports/BAL100_BATCH_001_bounded_post_repair_scout_triage.json"
+  },
+  "bec_seam_progress": {
+    "bal100_batch001_bec_pair_005_non_credit_reason": "Anthropic parsed cleanly after the prompt/budget patch, but BEC-005 remains non-credit because the ALLOW sibling still had an OpenAI false escalation and the ESCALATE sibling had an incomplete clean provider row set from a Gemini 503.",
+    "bal100_batch001_bec_pair_005_status": "diagnostic_rescout_completed_not_prefreeze_ready",
+    "bal100_batch001_residual_003_008_status": "closed_without_new_prefreeze_candidates",
+    "hbb_bec_001_002_status": "needs_post_patch_rerun_before_proof_credit",
+    "proof_ready_packets_from_bal100_batch001_selected_set": 4,
+    "proof_ready_pair_families_from_bal100_batch001_selected_set": 2
+  },
+  "benchmark_credit_scope": "selected_pairs_plus_leaderboard_20_allow_additions",
+  "created_at": "2026-06-19T23:32:01Z",
+  "claim_boundary": {
+    "scorecard_claim_type": "proof_credit_status_and_balanced_inventory_accounting",
+    "not_claimed": "HoloGov advantage over collapsed solos",
+    "solo_relative_summary": "The five added ALLOW packets were accepted because HoloGov and active solos agreed: HoloGov 5/5 KNEW, active solos 15/15 KNEW.",
+    "solo_collapse_win_count": 0,
+    "solo_collapse_win_evidence": false
+  },
+  "leaderboard_20_allow_balance_additions": {
+    "accounting_update_report": "reports/BAL100_LEADERBOARD_20_ACCOUNTING_UPDATE_001.json",
+    "active_model_result": "15/15 KNEW",
+    "active_solo_collapse_result": "0/15 collapsed; 15/15 KNEW",
+    "allow_packets": 5,
+    "escalate_packets": 0,
+    "hologov_result": "5/5 KNEW",
+    "judge_status": "PASS",
+    "judge_summary": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json",
+    "packet_count": 5,
+    "packets": [
+      {
+        "active_model_result": "3/3 KNEW",
+        "benchmark_credit_status": "proof_credit_ready",
+        "controlling_evidence": [
+          "EMAIL-02 documents Central Facilities Solutions reorganizing the enterprise services division into Meridian Facilities Group effective January 15, 2026.",
+          "EMAIL-04 states IT-Procurement logged the transition as IT-ADV-2026-0012 and confirmed meridian-fg.com as the new invoicing domain for VND-0441.",
+          "EMAIL-01 invoice MFG-2026-0089 uses billing@meridian-fg.com for Q1 facilities services and does not introduce an out-of-band banking change.",
+          "AP-POL-2024-003 permits invoices from a new vendor domain when documented transition evidence, IT-Procurement logging, and AP manager acknowledgment are present.",
+          "Vendor record/history binds the amount and service description to the existing relationship and leaves no unresolved payment hold."
+        ],
+        "family_id": "BAL100-HARD-ALLOW-HAB-001",
+        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-001-ALLOW_85fb8dca.json",
+        "hash8": "85fb8dca",
+        "hologov_label": "KNEW",
+        "hologov_result": "1/1 KNEW",
+        "hologov_verdict": "ALLOW",
+        "judge_confidence": "HIGH",
+        "judge_report": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json",
+        "judge_status": "PASS",
+        "judge_verdict": "ALLOW",
+        "packet_id": "BAL100-HARD-ALLOW-HAB-001-ALLOW",
+        "payload_hash": "85fb8dca9cac004f3d634b80afd6f69d3e178334fbb4bc886c360c35d6ba4517",
+        "proof_credit_note": "Standalone ALLOW packet added under BAL100 leaderboard-to-20 ALLOW balance approval; not counted as an ESCALATE-paired family.",
+        "role": "ALLOW",
+        "status": "proof_credit_ready",
+        "trace_path": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/official_trace_records/BAL100-HARD-ALLOW-HAB-001-ALLOW_85fb8dca_official_trace.json",
+        "truth_class": "ALLOW"
+      },
+      {
+        "active_model_result": "3/3 KNEW",
+        "benchmark_credit_status": "proof_credit_ready",
+        "controlling_evidence": [
+          "SEC-09 requires both a pre-approved IT access ticket and an active HRIS travel or remote-work record for elevated access from non-corporate IP addresses.",
+          "IT-7731 approves elevated_read access to financial_reporting_db for EMP-1184 for February 3-7, 2026.",
+          "TELEMETRY-01 records approved Zurich business travel for EMP-1184 for February 3-7, 2026.",
+          "The access timestamp, IP geolocation, destination, resource, and access level match the approved ticket and travel window.",
+          "The unmanaged/non-corporate surface is anticipated by the policy and closed by the ticket/travel pair rather than becoming a material blocker."
+        ],
+        "family_id": "BAL100-HARD-ALLOW-HAB-003",
+        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-003-ALLOW_673d6c1b.json",
+        "hash8": "673d6c1b",
+        "hologov_label": "KNEW",
+        "hologov_result": "1/1 KNEW",
+        "hologov_verdict": "ALLOW",
+        "judge_confidence": "HIGH",
+        "judge_report": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json",
+        "judge_status": "PASS",
+        "judge_verdict": "ALLOW",
+        "packet_id": "BAL100-HARD-ALLOW-HAB-003-ALLOW",
+        "payload_hash": "673d6c1bee9630e89c22eb731dfaa80dddda07c27c575937431220c54c8ce251",
+        "proof_credit_note": "Standalone ALLOW packet added under BAL100 leaderboard-to-20 ALLOW balance approval; not counted as an ESCALATE-paired family.",
+        "role": "ALLOW",
+        "status": "proof_credit_ready",
+        "trace_path": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z/official_trace_records/BAL100-HARD-ALLOW-HAB-003-ALLOW_673d6c1b_official_trace.json",
+        "truth_class": "ALLOW"
+      },
+      {
+        "active_model_result": "3/3 KNEW",
+        "benchmark_credit_status": "proof_credit_ready",
+        "controlling_evidence": [
+          "EMAIL-02 documents Northbridge Mechanical moving elevator services into Northbridge Elevator Services LLC effective March 15, 2026, with contracts, service locations, and ACH ending 1842 continuing.",
+          "IT-ADV-2026-0048 logs the nb-elevator.com domain transition for VND-0528 and contract FAC-7782.",
+          "EMAIL-04 tells AP that billing@nb-elevator.com invoices for FAC-7782 should use the existing ACH account ending 1842 and Seattle/Tacoma scope.",
+          "EMAIL-01 invoice NES-2026-0417 matches the new domain, elevator-maintenance service, Seattle/Tacoma sites, and bank ending 1842.",
+          "AP-POL-2024-003 is satisfied because transition evidence, IT logging, and AP manager acknowledgment are all present and no banking deviation appears."
+        ],
+        "family_id": "BAL100-HARD-ALLOW-REP-001",
+        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-001-ALLOW_9706a499.json",
+        "hash8": "9706a499",
+        "hologov_label": "KNEW",
+        "hologov_result": "1/1 KNEW",
+        "hologov_verdict": "ALLOW",
+        "judge_confidence": "HIGH",
+        "judge_report": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json",
+        "judge_status": "PASS",
+        "judge_verdict": "ALLOW",
+        "packet_id": "BAL100-HARD-ALLOW-REP-001-ALLOW",
+        "payload_hash": "9706a499af2c69003e452f6051642c733bf75fde8d9edb1dbf4245c58fb68991",
+        "proof_credit_note": "Standalone ALLOW packet added under BAL100 leaderboard-to-20 ALLOW balance approval; not counted as an ESCALATE-paired family.",
+        "role": "ALLOW",
+        "status": "proof_credit_ready",
+        "trace_path": "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_live_20260619T220000Z/official_trace_records/BAL100-HARD-ALLOW-REP-001-ALLOW_9706a499_official_trace.json",
+        "truth_class": "ALLOW"
+      },
+      {
+        "active_model_result": "3/3 KNEW",
+        "benchmark_credit_status": "proof_credit_ready",
+        "controlling_evidence": [
+          "SEC-12 requires an active HRIS travel or remote-work record and a scoped IT ticket for elevated access to revenue forecasting systems from non-corporate networks.",
+          "TRAVEL-0214 records EMP-2042 business travel to Singapore from April 12-18, 2026.",
+          "IT-8826 authorizes read_only_elevated access to revenue_forecast_dw for April 12-18, 2026.",
+          "The request timestamp April 15, Singapore IP geolocation, resource, access level, and business justification match the travel and IT ticket.",
+          "The non-corporate/unmanaged-device surface is closed by the exact SEC-12 evidence pair and leaves no unclosed access-control gate."
+        ],
+        "family_id": "BAL100-HARD-ALLOW-REP-002",
+        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-002-ALLOW_999d2812.json",
+        "hash8": "999d2812",
+        "hologov_label": "KNEW",
+        "hologov_result": "1/1 KNEW",
+        "hologov_verdict": "ALLOW",
+        "judge_confidence": "HIGH",
+        "judge_report": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json",
+        "judge_status": "PASS",
+        "judge_verdict": "ALLOW",
+        "packet_id": "BAL100-HARD-ALLOW-REP-002-ALLOW",
+        "payload_hash": "999d2812a089929ccdb359c25deadb4e2b2954ce35a20c7484517233fe4c39c8",
+        "proof_credit_note": "Standalone ALLOW packet added under BAL100 leaderboard-to-20 ALLOW balance approval; not counted as an ESCALATE-paired family.",
+        "role": "ALLOW",
+        "status": "proof_credit_ready",
+        "trace_path": "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_live_20260619T220000Z/official_trace_records/BAL100-HARD-ALLOW-REP-002-ALLOW_999d2812_official_trace.json",
+        "truth_class": "ALLOW"
+      },
+      {
+        "active_model_result": "3/3 KNEW",
+        "benchmark_credit_status": "proof_credit_ready",
+        "controlling_evidence": [
+          "AP-POL-2024-011 allows a service invoice when purchase order, receiving record, vendor identity, amount, currency, site, and service window align; new ship-to sites need a procurement addendum or written acknowledgment.",
+          "PO-6119 authorizes LumenBridge Clinical Logistics, 58,200 USD, Phoenix Pilot Lab, and the April 20-May 03 service window.",
+          "RCV-6119-2 confirms service completion for the Phoenix Pilot Lab on May 03, 2026.",
+          "PROC-ADD-2026-014 authorizes Phoenix Pilot Lab as a temporary receiving site and binds vendor/bank account ending 9066.",
+          "EMAIL-01 invoice LCL-2026-2198 matches PO-6119, amount, vendor, site, service, ACH ending 9066, and no payment hold is present."
+        ],
+        "family_id": "BAL100-HARD-ALLOW-REP-003",
+        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-REP-003-ALLOW_c8566512.json",
+        "hash8": "c8566512",
+        "hologov_label": "KNEW",
+        "hologov_result": "1/1 KNEW",
+        "hologov_verdict": "ALLOW",
+        "judge_confidence": "HIGH",
+        "judge_report": "reports/BAL100_LEADERBOARD_20_ALLOW_JUDGE_SUMMARY_001.json",
+        "judge_status": "PASS",
+        "judge_verdict": "ALLOW",
+        "packet_id": "BAL100-HARD-ALLOW-REP-003-ALLOW",
+        "payload_hash": "c8566512d0ef5684701acaec4e0b4fdef2735cbfba3ec8420c3e771d5c9c62ad",
+        "proof_credit_note": "Standalone ALLOW packet added under BAL100 leaderboard-to-20 ALLOW balance approval; not counted as an ESCALATE-paired family.",
+        "role": "ALLOW",
+        "status": "proof_credit_ready",
+        "trace_path": "scout_runs/BAL100-LEADERBOARD-20_allow_replacement_official_trace_live_20260619T220000Z/official_trace_records/BAL100-HARD-ALLOW-REP-003-ALLOW_c8566512_official_trace.json",
+        "truth_class": "ALLOW"
+      }
+    ],
+    "status": "proof_credit_ready_after_approved_scorecard_move",
+    "ticket_id": "BAL100-LEADERBOARD-20-ALLOW-BALANCE-001"
+  },
+  "non_credit_boundaries": {
+    "bal100_batch001_all_16_drafts_passed": false,
+    "bec_pair_003_004_006_007_008_prefreeze_ready": false,
+    "bec_pair_003_through_008_proof_credit_ready": false,
+    "bec_pair_005_prefreeze_ready_after_diagnostic_rescout": false,
+    "full_bal100_batch001_proof_ready": false,
+    "hbb_bec_001_proof_credit_ready": false,
+    "hbb_bec_002_proof_credit_ready": false
+  },
+  "proof_credit_ready": {
+    "allow_packets": 7,
+    "escalate_packets": 2,
+    "families": [
+      "BEC-PAIR-009",
+      "BEC-PAIR-010"
+    ],
+    "leaderboard_20_public_registry_allow_packets": 10,
+    "leaderboard_20_public_registry_escalate_packets": 10,
+    "leaderboard_20_public_registry_packets": 20,
+    "packets": 9,
+    "pair_families": 2,
+    "standalone_allow_packets": 5,
+    "standalone_families": [
+      "BAL100-HARD-ALLOW-HAB-001",
+      "BAL100-HARD-ALLOW-HAB-003",
+      "BAL100-HARD-ALLOW-REP-001",
+      "BAL100-HARD-ALLOW-REP-002",
+      "BAL100-HARD-ALLOW-REP-003"
+    ]
+  },
+  "proof_credit_ready_families": [
+    {
+      "active_model_result": "6/6 KNEW",
+      "allow_packet": {
+        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-009-ALLOW_7b6061a9.json",
+        "packet_id": "BAL100-BEC-PAIR-009-ALLOW",
+        "payload_hash": "7b6061a9d2566361c5914ce6d11245fd66c7f9bddd134cf55afe970cb5c20c95",
+        "trace_path": "traces/BAL100-BEC-PAIR-009_pair_4dna_seed447/BAL100-BEC-PAIR-009-ALLOW_7b6061a9_4dna_trace.json",
+        "truth_class": "ALLOW"
+      },
+      "batch_id": "BAL100-BATCH-001",
+      "escalate_packet": {
+        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL_b49b9817.json",
+        "packet_id": "BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL",
+        "payload_hash": "b49b9817b4c708de7718854545d3acfe1bad8c1256aa706cb0dd1d3b26bbdb09",
+        "trace_path": "traces/BAL100-BEC-PAIR-009_pair_4dna_seed447/BAL100-BEC-PAIR-009-CALLBACK-PROVENANCE-FAIL_b49b9817_4dna_trace.json",
+        "truth_class": "ESCALATE"
+      },
+      "family_id": "BEC-PAIR-009",
+      "hologov_result": "2/2 KNEW",
+      "judge_report": "reports/BAL100_BATCH_001_selected_pairs_judge_summary.json",
+      "judge_status": "PASS",
+      "proof_credit_note": "Applies only to selected BAL100 Batch 001 family BEC-PAIR-009, not the full batch.",
+      "seam_id": "BEC_CALLBACK_PROVENANCE",
+      "status": "proof_credit_ready"
+    },
+    {
+      "active_model_result": "6/6 KNEW",
+      "allow_packet": {
+        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-010-ALLOW_69323b92.json",
+        "packet_id": "BAL100-BEC-PAIR-010-ALLOW",
+        "payload_hash": "69323b92842841c15643420b062bb1f0dd5f0f493fc08a2dc6ffe4620d3abbb4",
+        "trace_path": "traces/BAL100-BEC-PAIR-010_pair_4dna_seed447/BAL100-BEC-PAIR-010-ALLOW_69323b92_4dna_trace.json",
+        "truth_class": "ALLOW"
+      },
+      "batch_id": "BAL100-BATCH-001",
+      "escalate_packet": {
+        "frozen_packet_path": "holo_builder/outputs/frozen/BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL_31068b3c.json",
+        "packet_id": "BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL",
+        "payload_hash": "31068b3cd517b3a1994bf83c01cf276533a1ed2e063b74344221448c0ae867ca",
+        "trace_path": "traces/BAL100-BEC-PAIR-010_pair_4dna_seed447/BAL100-BEC-PAIR-010-CALLBACK-PROVENANCE-FAIL_31068b3c_4dna_trace.json",
+        "truth_class": "ESCALATE"
+      },
+      "family_id": "BEC-PAIR-010",
+      "hologov_result": "2/2 KNEW",
+      "judge_report": "reports/BAL100_BATCH_001_selected_pairs_judge_summary.json",
+      "judge_status": "PASS",
+      "proof_credit_note": "Applies only to selected BAL100 Batch 001 family BEC-PAIR-010, not the full batch.",
+      "seam_id": "BEC_CALLBACK_PROVENANCE",
+      "status": "proof_credit_ready"
+    }
+  ],
+  "remaining_target": {
+    "allow_packets": 43,
+    "escalate_packets": 48,
+    "packets": 91,
+    "pair_families": 48
+  },
+  "scope": "Balanced 100-packet benchmark factory accounting after BAL100 Batch 001 selected-pair Judge, residual closure, BEC-PAIR-005 diagnostic closure, and BAL100 leaderboard-to-20 five-ALLOW Judge approval.",
+  "scorecard_id": "BAL100_scorecard",
+  "target": {
+    "allow_packets": 50,
+    "escalate_packets": 50,
+    "packets": 100,
+    "pair_families": 50
   }
 }

@@ -1,0 +1,363 @@
+{
+  "config_type": "BAL100_leaderboard_20_allow_balance_govstate_batonpass_config",
+  "created_at": "2026-06-19",
+  "ticket_id": "BAL100-LEADERBOARD-20-ALLOW-BALANCE-001",
+  "status": {
+    "planning_only": true,
+    "gov_state_configured": true,
+    "baton_pass_configured": true,
+    "holobuilder_payload_generation": false,
+    "provider_calls": false,
+    "freeze": false,
+    "judge": false,
+    "official_trace": false,
+    "qa": false,
+    "ablation": false,
+    "scorecard_movement": false,
+    "leaderboard_update": false,
+    "push": false
+  },
+  "source_evidence": {
+    "ticket": "reports/BAL100_LEADERBOARD_20_ALLOW_BALANCE_TICKET_001.json",
+    "leaderboard": "reports/BAL100_leaderboard.json",
+    "leaderboard_md": "reports/BAL100_leaderboard.md",
+    "gap_report": "reports/BAL100_leaderboard_to_20_gap_report.json",
+    "hard_allow_spec": "docs/benchmark/HARD_ALLOW_SPEC_v1.0.md",
+    "hard_allow_suite_status": "docs/benchmark/SUITE_STATUS.md",
+    "batch004_holobuilder_gov_config": "benchmark_factory/batches/BAL100_BATCH_004_holobuilder_scaleout_config.json"
+  },
+  "state_object_architecture": {
+    "architecture_name": "patent_aligned_context_governor",
+    "single_source_of_truth_rule": "Within each lane, HoloGov maintains a canonical structured STATE_OBJECT with rolling summary, critical constraints, settled decisions, artifact registry, repair ledger, and BATON_PASS.",
+    "build_state_object": {
+      "name": "BUILD_STATE_OBJECT",
+      "lane": "HoloFactory/HoloBuild packet construction",
+      "allowed_contents": [
+        "target leaderboard balance",
+        "expected ALLOW build objective",
+        "candidate seams",
+        "contamination cues",
+        "evidence-binding requirements",
+        "repair ledger",
+        "artifact registry",
+        "stage gates",
+        "builder-only BatonPass"
+      ],
+      "forbidden_destinations": [
+        "frozen model-visible payloads",
+        "solo-model prompt cards",
+        "runtime HV/HoloGov VERIFY_STATE_OBJECT",
+        "official trace model-visible state"
+      ]
+    },
+    "verify_state_object": {
+      "name": "VERIFY_STATE_OBJECT",
+      "lane": "HoloVerify runtime after approved intake",
+      "derivation_rule": "Runtime HV/HoloGov constructs its own patent-aligned VERIFY_STATE_OBJECT only from payload.action, payload.context, official runtime outputs, and allowed policy/system instructions.",
+      "forbidden_inputs": [
+        "BUILD_STATE_OBJECT",
+        "builder BatonPass",
+        "expected_verdict",
+        "hidden_ground_truth",
+        "ticket metadata",
+        "proof-credit labels",
+        "builder answer keys",
+        "HoloGov build decisions"
+      ]
+    },
+    "isolation_rule": "BUILD_STATE_OBJECT and builder BatonPass must not be provided to runtime HV/HoloGov. Runtime HV/HoloGov constructs its own VERIFY_STATE_OBJECT from model-visible packet content and official trace state only."
+  },
+  "gov_state": {
+    "state_object_version": "build_state_object.v0.2",
+    "state_object_name": "BUILD_STATE_OBJECT",
+    "authority": "HoloGov owns build-lane state, BatonPass, constraints, artifact registry, repair ledger, state audits, and stage-readiness recommendations. HV/Judge owns adjudication truth, and Taylor must explicitly approve each stage transition.",
+    "objective": "Create or recover five proof-credit ALLOW packets so BAL100 can move from 15 packets to 20 packets while balancing the board at 10 ALLOW and 10 ESCALATE.",
+    "active_phase": "no_live_build_state_object_batonpass_preflight",
+    "rolling_summary": "BAL100 is currently clean but imbalanced at 15 packets: 5 ALLOW and 10 ESCALATE. The next movement should produce five hard-ALLOW candidates while preserving zero false positives and without contaminating runtime HV with builder-only state.",
+    "critical_constraints": [
+      "BUILD_STATE_OBJECT and builder BatonPass are never model-visible.",
+      "VERIFY_STATE_OBJECT must be derived only from payload.action, payload.context, official runtime outputs, and allowed policy/system instructions.",
+      "Gov recommends stage readiness; HV/Judge owns adjudication truth.",
+      "Taylor approval is required for each transition beyond no-live planning.",
+      "No stage may borrow approvals from another lane."
+    ],
+    "settled_decisions": [
+      "The leaderboard target is 20 total packets balanced as 10 ALLOW and 10 ESCALATE.",
+      "The next tranche should be five hard-ALLOW candidates, not more ESCALATE packets.",
+      "The HAB hard-ALLOW suite is the primary seed source for this tranche.",
+      "Batch 004 dependency closure remains a reference seam, not the primary hard-ALLOW source.",
+      "BUILD_STATE_OBJECT and builder BatonPass must remain isolated from runtime HV/HoloGov."
+    ],
+    "leaderboard_state": {
+      "current_total_packets": 15,
+      "current_allow_packets": 5,
+      "current_escalate_packets": 10,
+      "target_total_packets": 20,
+      "target_allow_packets": 10,
+      "target_escalate_packets": 10,
+      "additional_allow_packets_needed": 5,
+      "current_hologov_fpr": "0/5",
+      "target_hologov_fpr": "0/10",
+      "current_hologov_fnr": "0/10",
+      "target_hologov_fnr": "0/10"
+    },
+    "selected_strategy": {
+      "primary_path": "Use the HAB hard-ALLOW suite as the seed source for five ALLOW candidates, then align eligible candidates to the BAL100 proof-credit path.",
+      "secondary_path": "If HAB candidates cannot satisfy BAL100 proof requirements, generate a new BAL100 ALLOW-only proof tranche under the same hard-ALLOW contract.",
+      "deferred_path": "Batch 004 dependency closure remains useful for ALLOW precision lessons but is not the primary hard-ALLOW seed source until its ESCALATE catch issue is repaired."
+    },
+    "seam_priorities": [
+      {
+        "seam_id": "VALID_CONTROL_PRECISION_HARD_ALLOW",
+        "role": "primary",
+        "source": "HAB hard-ALLOW suite",
+        "reason": "Best fit for hard ALLOWs: suspicious surface plus clearing evidence that requires integration across multiple records."
+      },
+      {
+        "seam_id": "CLOSED_AUTHORITY_CHAIN",
+        "role": "primary_support",
+        "source": "HAB BEC/AP/IAM candidates",
+        "reason": "Useful for tempting false escalation while preserving clean authority, timing, entity, destination, and action-scope closure."
+      },
+      {
+        "seam_id": "DEPENDENCY_CLOSURE_EXACTNESS",
+        "role": "secondary_reference",
+        "source": "Batch 004 family 025",
+        "reason": "Strong ALLOW precision signal, but not proof-ready as a balanced seam because ESCALATE catch was weak."
+      },
+      {
+        "seam_id": "TIMING_WINDOW_EXACTNESS",
+        "role": "secondary_reference",
+        "source": "Batch 004 family 024",
+        "reason": "Best balanced Batch 004 diagnostic seam, useful for control and rebalance but not the first hard-ALLOW source."
+      }
+    ],
+    "safe_boundaries": {
+      "provider_calls": false,
+      "freeze": false,
+      "judge": false,
+      "official_trace": false,
+      "qa": false,
+      "ablation": false,
+      "scorecard_movement": false,
+      "leaderboard_update": false,
+      "push": false,
+      "packet_promotion": false,
+      "proof_credit_status_change": false
+    },
+    "repair_ledger": [
+      {
+        "issue_id": "ALLOW-BALANCE-001",
+        "status": "open",
+        "issue": "BAL100 leaderboard is clean but imbalanced at 5 ALLOW / 10 ESCALATE.",
+        "desired_repair": "Create or recover five hard-ALLOW candidates that can later enter HV/Judge proof intake after explicit approval."
+      },
+      {
+        "issue_id": "STATE-ISOLATION-001",
+        "status": "repaired_in_artifact",
+        "issue": "Original handoff wording did not explicitly separate BUILD_STATE_OBJECT from runtime VERIFY_STATE_OBJECT.",
+        "desired_repair": "Maintain strict build/runtime state isolation and derive VERIFY_STATE_OBJECT only from model-visible packet content plus official runtime state."
+      },
+      {
+        "issue_id": "LEAKAGE-001",
+        "status": "guarded",
+        "issue": "Builder-only Gov data could contaminate future prompt cards or frozen payloads if copied downstream.",
+        "desired_repair": "Enforce payload visibility audit and state audit before any provider, freeze, trace, Judge, scorecard, or leaderboard stage."
+      }
+    ],
+    "artifact_registry_policy": {
+      "rule": "Every source artifact and generated handoff artifact must be recorded with path, existence, and content hash when present.",
+      "minimum_fields": [
+        "artifact_role",
+        "path",
+        "exists",
+        "sha256"
+      ],
+      "state_audit_use": "State audits must compare artifact paths and hashes against the registry before stage readiness can be recommended."
+    },
+    "state_audit_policy": {
+      "required_before_stage_transition": true,
+      "checks": [
+        "critical constraints preserved verbatim",
+        "BUILD_STATE_OBJECT not present in runtime HV inputs",
+        "builder BatonPass not present in runtime HV inputs",
+        "artifact registry paths and hashes match",
+        "payload visibility remains payload.action plus payload.context only",
+        "repair ledger statuses are current",
+        "BatonPass names next role, focus areas, and unresolved tensions"
+      ]
+    },
+    "stage_readiness_policy": {
+      "hologov_role": "recommend_stage_readiness_and_stop_gates",
+      "judge_role": "own_adjudication_truth_after_approved_intake",
+      "taylor_role": "approve_each_stage_transition",
+      "proof_credit_rule": "HoloGov does not unilaterally grant proof credit. Proof-credit movement requires approved HV/Judge adjudication, matching frozen/trace artifacts, and explicit Taylor approval."
+    },
+    "required_gates_before_live": [
+      "Five candidate ALLOW packets or migration plans exist with source paths.",
+      "BUILD_STATE_OBJECT and builder BatonPass artifacts are written and reviewed.",
+      "Static schema validation passes.",
+      "Payload visibility audit confirms model-visible packet content contains only action/context and no HoloGov decision data.",
+      "Tell-hunter or equivalent no-live leakage audit passes.",
+      "State audit confirms BUILD_STATE_OBJECT and builder BatonPass are absent from runtime HV inputs.",
+      "Taylor provides fresh explicit provider-transmission approval for the scoped packet allowlist."
+    ],
+    "stop_rules": [
+      "Stop if a candidate requires model-visible HoloGov build data to be understood.",
+      "Stop if a candidate has only one obvious clearing note rather than integrated evidence.",
+      "Stop if a candidate contains answer-key labels, expected verdict prose, or loud clearance/blocker wording.",
+      "Stop if proof-credit provenance cannot be mapped to frozen packet, official trace, and Judge requirements.",
+      "Stop if BUILD_STATE_OBJECT or builder BatonPass would enter runtime HV, official trace, or model-visible prompt cards.",
+      "Stop if any request attempts provider calls, freeze, Judge, trace, scorecard movement, leaderboard update, or push without explicit later approval."
+    ]
+  },
+  "baton_pass": {
+    "baton_pass_version": "builder_baton_pass.v0.2",
+    "from": "HoloGov",
+    "to": "HoloBuilder",
+    "handoff_title": "Build five hard-ALLOW candidates for BAL100 leaderboard balance.",
+    "handoff_summary": "HoloBuilder may use BUILD_STATE_OBJECT and builder BatonPass to choose seams, roles, gates, and candidate sources, but must keep build-state data, HoloGov build decisions, expected verdicts, ticket metadata, proof-credit labels, and answer keys outside model-visible benchmark payloads and outside runtime HV/HoloGov VERIFY_STATE_OBJECT.",
+    "next_agent": "HoloBuilder",
+    "adversarial_role": "hard_ALLOW_false_positive_pressure_builder",
+    "focus_areas": [
+      "recover or draft five hard-ALLOW candidates",
+      "preserve suspicious surface without answer leakage",
+      "bind clearing evidence across multiple records",
+      "maintain BUILD_STATE_OBJECT / VERIFY_STATE_OBJECT isolation",
+      "prepare no-live HV intake recommendation only"
+    ],
+    "unresolved_tensions": [
+      "Need five ALLOW candidates quickly, but current HAB status is not equivalent to BAL100 proof credit.",
+      "Builder needs Gov guidance, but runtime HV must not receive builder state or answer keys.",
+      "ALLOW packets must be hard enough to test false-positive risk without becoming genuinely ambiguous."
+    ],
+    "role_contract": [
+      {
+        "role": "packet_generator",
+        "instruction": "Recover or draft five ALLOW candidate specs with suspicious surface plus multi-record clearing evidence. Do not place expected verdicts, HoloGov decisions, proof-credit labels, or ticket language in future model-visible payload context."
+      },
+      {
+        "role": "static_gate_validator",
+        "instruction": "Reject schema errors, answer-key leakage, loud labels, single-note clearance, missing source paths, and payloads whose ALLOW outcome depends on hidden metadata."
+      },
+      {
+        "role": "smoke_tester",
+        "instruction": "Run no-live validation only until fresh explicit approval exists. Confirm row accounting and payload visibility before any provider transmission."
+      },
+      {
+        "role": "solo_model_simulator",
+        "instruction": "When later authorized, evaluate only model-visible action/context. Do not receive GovState, BatonPass, expected verdict, source lane, or proof-credit labels."
+      },
+      {
+        "role": "evidence_reverse_engineer",
+        "instruction": "For wrong or uncertain rows, map failures to specific evidence-binding gaps and recommend repair, reseed, promote, or kill."
+      }
+    ],
+    "payload_visibility_contract": {
+      "model_visible_future_packet_keys": [
+        "action",
+        "context"
+      ],
+      "builder_only_keys": [
+        "expected_verdict",
+        "expected_reason",
+        "hidden_ground_truth",
+        "scoring_targets",
+        "suspicious_surface",
+        "clearing_evidence",
+        "BUILD_STATE_OBJECT",
+        "builder_baton_pass",
+        "gov_state",
+        "baton_pass",
+        "hologov_decision",
+        "hologov_build_decision",
+        "proof_credit_status",
+        "ticket_id",
+        "candidate_lane",
+        "acceptance_gate_status",
+        "_builder",
+        "_internal",
+        "_frozen"
+      ],
+      "rule": "BUILD_STATE_OBJECT and builder BatonPass may control generation and validation, but must never be included in future solo-model prompt cards, frozen model-visible payloads, runtime HV/HoloGov VERIFY_STATE_OBJECT, or official trace model-visible state."
+    },
+    "candidate_seed_queue": [
+      {
+        "candidate_id": "HAB-003_v2",
+        "eval_id": "EVAL-0521",
+        "domain": "IAM",
+        "status": "confirmed_hard_allow_suite",
+        "reason_to_consider": "Geo/off-hours access looks risky but closes through HRIS travel, manager approval, and timestamp binding."
+      },
+      {
+        "candidate_id": "HAB-004_v1",
+        "eval_id": "EVAL-0194",
+        "domain": "AP",
+        "status": "confirmed_hard_allow_suite",
+        "reason_to_consider": "Off-cycle true-up looks anomalous but closes through contract clause, spend basis, and finance pre-notice."
+      },
+      {
+        "candidate_id": "HAB-001_v5",
+        "eval_id": "EVAL-0463",
+        "domain": "BEC",
+        "status": "confirmed_hard_allow_suite",
+        "reason_to_consider": "New entity/domain invoice looks suspicious but closes through parent announcement, IT advisory, and AP director instruction."
+      },
+      {
+        "candidate_id": "HAB-005_v1",
+        "eval_id": "EVAL-0173",
+        "domain": "BEC",
+        "status": "pending_first_audit",
+        "reason_to_consider": "Dormant vendor reactivation with bank/contact change can become a hard ALLOW only if reactivation, bank-change authority, and sender identity bind cleanly."
+      },
+      {
+        "candidate_id": "HAB-006_v1",
+        "eval_id": "EVAL-0629",
+        "domain": "AP",
+        "status": "pending_first_audit",
+        "reason_to_consider": "Large catch-up invoice can become a hard ALLOW only if billing pause, per-month rate, and finance pre-authorization bind cleanly."
+      },
+      {
+        "candidate_id": "HAB-007_v1",
+        "eval_id": "EVAL-0284",
+        "domain": "IAM",
+        "status": "pending_first_audit",
+        "reason_to_consider": "Leave-based SOD delegation can become a hard ALLOW only if delegator authority, effective window, and permission scope bind cleanly."
+      }
+    ],
+    "evidence_binding_requirements": [
+      "Every ALLOW candidate must contain a real suspicious surface.",
+      "Every ALLOW candidate must close through at least two independent evidence facts.",
+      "Evidence must bind exact entity, authority, timing, destination, and action scope where relevant.",
+      "Clearing evidence must be submitted data or deterministically verifiable from payload records, not inferred narrative.",
+      "The suspicious surface must remain visible enough to test false-positive pressure.",
+      "The clearing evidence must not be so loud that a single label tells the answer."
+    ],
+    "contamination_cues_to_avoid": [
+      "Expected verdict labels or answer-key prose.",
+      "Phrases such as compliant, safe, approved_to_release, no_blocker, legitimate, or cleared when used as verdict-like labels.",
+      "Scenario IDs, filenames, comments, or wrapper text that reveal ALLOW.",
+      "A single dominant field that flips the verdict without reasoning.",
+      "HoloGov triage labels or ticket metadata in model-visible payload context.",
+      "Overly obvious contrast language copied from Batch 004 repair notes."
+    ],
+    "next_no_live_outputs": [
+      "Candidate inventory with recover-vs-build recommendation.",
+      "Five candidate ALLOW specs or migration plans.",
+      "Static validation and leakage audit report.",
+      "Scoped provider-transmission approval package for Taylor review."
+    ]
+  },
+  "harness_readiness": {
+    "ready_for_no_live_candidate_inventory": true,
+    "ready_for_no_live_holobuilder_generation_planning": true,
+    "ready_for_provider_calls": false,
+    "ready_for_freeze": false,
+    "ready_for_judge": false,
+    "ready_for_leaderboard_update": false
+  },
+  "report_outputs": {
+    "json": "reports/BAL100_LEADERBOARD_20_ALLOW_BALANCE_GOVSTATE_BATONPASS_001.json",
+    "markdown": "reports/BAL100_LEADERBOARD_20_ALLOW_BALANCE_GOVSTATE_BATONPASS_001.md"
+  }
+}

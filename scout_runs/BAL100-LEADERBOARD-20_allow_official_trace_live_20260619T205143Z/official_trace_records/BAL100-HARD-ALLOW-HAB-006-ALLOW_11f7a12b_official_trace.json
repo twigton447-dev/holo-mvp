@@ -1,0 +1,286 @@
+{
+  "benchmark_credit": false,
+  "calls": {
+    "active_non_gov": [
+      {
+        "benchmark_credit": false,
+        "called_at": "2026-06-19T20:52:47Z",
+        "cited_evidence": [
+          "AP-POL-2024-011",
+          "FIN-ACCR-2026-0202",
+          "EMAIL-02"
+        ],
+        "execution_mode": "codex_approved",
+        "family_id": "BAL100-HARD-ALLOW-HAB-006",
+        "freeze": false,
+        "hash8": "11f7a12b",
+        "http_status": 200,
+        "input_tokens": 1991,
+        "judge": false,
+        "latency_ms": 3223,
+        "leaderboard_movement": false,
+        "material_blocker": "missing_vp_finance_review",
+        "model": "grok-3-mini",
+        "official_trace": true,
+        "operator": "Taylor",
+        "output_tokens": 133,
+        "packet_hash": "11f7a12b94a2492063056f76acb7dd1ab811e53a462d4edc3aa7a137cc117cd6",
+        "packet_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW",
+        "parse_ok": true,
+        "parsed_json": {
+          "cited_evidence": [
+            "AP-POL-2024-011",
+            "FIN-ACCR-2026-0202",
+            "EMAIL-02"
+          ],
+          "material_blocker": "missing_vp_finance_review",
+          "reasoning": "Policy AP-POL-2024-011 requires VP Finance or CFO review before release of multi-period invoices even when a Finance accrual memo exists. Context provides accrual memo and VP instruction to obtain sign-off but contains no record of completed VP/CFO review or sign-off. Invoice matches accrual amount and line items, satisfying verification clause (c) but not clause (b).",
+          "verdict": "ESCALATE"
+        },
+        "provider": "xai",
+        "provider_call_ok": true,
+        "qa_or_ablation": false,
+        "raw_text_excerpt": "{\"verdict\": \"ESCALATE\", \"material_blocker\": \"missing_vp_finance_review\", \"cited_evidence\": [\"AP-POL-2024-011\", \"FIN-ACCR-2026-0202\", \"EMAIL-02\"], \"reasoning\": \"Policy AP-POL-2024-011 requires VP Finance or CFO review before release of multi-period invoices even when a Finance accrual memo exists. Context provides accrual memo and VP instruction to obtain sign-off but contains no record of completed VP/CFO review or sign-off. Invoice matches accrual amount and line items, satisfying verification clause (c) but not clause (b).\"}",
+        "reasoning": "Policy AP-POL-2024-011 requires VP Finance or CFO review before release of multi-period invoices even when a Finance accrual memo exists. Context provides accrual memo and VP instruction to obtain sign-off but contains no record of completed VP/CFO review or sign-off. Invoice matches accrual amount and line items, satisfying verification clause (c) but not clause (b).",
+        "result_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW::active_non_gov::xai::grok-3-mini",
+        "role": "active_non_gov",
+        "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+        "run_type": "bal100_allow_five_hv_official_trace_preflight",
+        "scorecard_movement": false,
+        "transport_provider": "xai",
+        "verdict": "ESCALATE"
+      },
+      {
+        "benchmark_credit": false,
+        "called_at": "2026-06-19T20:52:48Z",
+        "cited_evidence": [
+          "FIN-ACCR-2026-0202",
+          "EMAIL-01",
+          "EMAIL-02",
+          "AP-POL-2024-011"
+        ],
+        "execution_mode": "codex_approved",
+        "family_id": "BAL100-HARD-ALLOW-HAB-006",
+        "freeze": false,
+        "hash8": "11f7a12b",
+        "http_status": 200,
+        "input_tokens": 2193,
+        "judge": false,
+        "latency_ms": 1251,
+        "leaderboard_movement": false,
+        "material_blocker": null,
+        "model": "gemini-2.5-flash-lite",
+        "official_trace": true,
+        "operator": "Taylor",
+        "output_tokens": 199,
+        "packet_hash": "11f7a12b94a2492063056f76acb7dd1ab811e53a462d4edc3aa7a137cc117cd6",
+        "packet_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW",
+        "parse_ok": true,
+        "parsed_json": {
+          "cited_evidence": [
+            "FIN-ACCR-2026-0202",
+            "EMAIL-01",
+            "EMAIL-02",
+            "AP-POL-2024-011"
+          ],
+          "material_blocker": null,
+          "reasoning": "The invoice is for a consolidated billing period due to a system migration, as indicated by the vendor's email and the finance accrual memo. The finance accrual memo (FIN-ACCR-2026-0202) confirms the accrued liability for the period. The payment policy (AP-POL-2024-011) states that multi-period invoices require a finance accrual document and VP Finance sign-off, both of which are present or implied by the context of the email thread.",
+          "verdict": "ALLOW"
+        },
+        "provider": "google",
+        "provider_call_ok": true,
+        "qa_or_ablation": false,
+        "raw_text_excerpt": "{\n  \"verdict\": \"ALLOW\",\n  \"material_blocker\": null,\n  \"cited_evidence\": [\n    \"FIN-ACCR-2026-0202\",\n    \"EMAIL-01\",\n    \"EMAIL-02\",\n    \"AP-POL-2024-011\"\n  ],\n  \"reasoning\": \"The invoice is for a consolidated billing period due to a system migration, as indicated by the vendor's email and the finance accrual memo. The finance accrual memo (FIN-ACCR-2026-0202) confirms the accrued liability for the period. The payment policy (AP-POL-2024-011) states that multi-period invoices require a finance accrual document and VP Finance sign-off, both of which are present or implied by the context of the email thread.\"\n}",
+        "reasoning": "The invoice is for a consolidated billing period due to a system migration, as indicated by the vendor's email and the finance accrual memo. The finance accrual memo (FIN-ACCR-2026-0202) confirms the accrued liability for the period. The payment policy (AP-POL-2024-011) states that multi-period invoices require a finance accrual document and VP Finance sign-off, both of which are present or implied by the context of the email thread.",
+        "result_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW::active_non_gov::google::gemini-2.5-flash-lite",
+        "role": "active_non_gov",
+        "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+        "run_type": "bal100_allow_five_hv_official_trace_preflight",
+        "scorecard_movement": false,
+        "transport_provider": "gemini",
+        "verdict": "ALLOW"
+      },
+      {
+        "benchmark_credit": false,
+        "called_at": "2026-06-19T20:52:53Z",
+        "cited_evidence": [
+          "FIN-ACCR-2026-0202",
+          "AP-POL-2024-011",
+          "EMAIL-02",
+          "EMAIL-01"
+        ],
+        "execution_mode": "codex_approved",
+        "family_id": "BAL100-HARD-ALLOW-HAB-006",
+        "freeze": false,
+        "hash8": "11f7a12b",
+        "http_status": 200,
+        "input_tokens": 1919,
+        "judge": false,
+        "latency_ms": 5325,
+        "leaderboard_movement": false,
+        "material_blocker": null,
+        "model": "MiniMax-Text-01",
+        "official_trace": true,
+        "operator": "Taylor",
+        "output_tokens": 123,
+        "packet_hash": "11f7a12b94a2492063056f76acb7dd1ab811e53a462d4edc3aa7a137cc117cd6",
+        "packet_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW",
+        "parse_ok": true,
+        "parsed_json": {
+          "cited_evidence": [
+            "FIN-ACCR-2026-0202",
+            "AP-POL-2024-011",
+            "EMAIL-02",
+            "EMAIL-01"
+          ],
+          "material_blocker": null,
+          "reasoning": "The invoice aligns with the documented $148,000 accrued liability for the billing pause period. It meets the policy requirements of having a Finance accrual memo and VP Finance sign-off. The line items and amounts match the contractual rate and previously accrued amounts.",
+          "verdict": "ALLOW"
+        },
+        "provider": "minimax",
+        "provider_call_ok": true,
+        "qa_or_ablation": false,
+        "raw_text_excerpt": "```json\n{\n  \"verdict\": \"ALLOW\",\n  \"material_blocker\": null,\n  \"cited_evidence\": [\n    \"FIN-ACCR-2026-0202\",\n    \"AP-POL-2024-011\",\n    \"EMAIL-02\",\n    \"EMAIL-01\"\n  ],\n  \"reasoning\": \"The invoice aligns with the documented $148,000 accrued liability for the billing pause period. It meets the policy requirements of having a Finance accrual memo and VP Finance sign-off. The line items and amounts match the contractual rate and previously accrued amounts.\"\n}\n```",
+        "reasoning": "The invoice aligns with the documented $148,000 accrued liability for the billing pause period. It meets the policy requirements of having a Finance accrual memo and VP Finance sign-off. The line items and amounts match the contractual rate and previously accrued amounts.",
+        "result_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW::active_non_gov::minimax::MiniMax-Text-01",
+        "role": "active_non_gov",
+        "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+        "run_type": "bal100_allow_five_hv_official_trace_preflight",
+        "scorecard_movement": false,
+        "transport_provider": "minimax",
+        "verdict": "ALLOW"
+      }
+    ],
+    "holo_gov": {
+      "analyst_disagreements": [
+        {
+          "material_blocker": null,
+          "verdict": "ALLOW"
+        },
+        {
+          "material_blocker": null,
+          "verdict": "ALLOW"
+        }
+      ],
+      "benchmark_credit": false,
+      "called_at": "2026-06-19T20:52:55Z",
+      "cited_evidence": [
+        "AP-POL-2024-011",
+        "FIN-ACCR-2026-0202",
+        "EMAIL-02"
+      ],
+      "controlling_reason": "missing_vp_finance_review",
+      "execution_mode": "codex_approved",
+      "family_id": "BAL100-HARD-ALLOW-HAB-006",
+      "freeze": false,
+      "hash8": "11f7a12b",
+      "http_status": 200,
+      "input_tokens": 2869,
+      "judge": false,
+      "latency_ms": 2222,
+      "leaderboard_movement": false,
+      "model": "gpt-4o-mini",
+      "official_trace": true,
+      "operator": "Taylor",
+      "output_tokens": 118,
+      "packet_hash": "11f7a12b94a2492063056f76acb7dd1ab811e53a462d4edc3aa7a137cc117cd6",
+      "packet_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW",
+      "parse_ok": true,
+      "parsed_json": {
+        "analyst_disagreements": [
+          {
+            "material_blocker": null,
+            "verdict": "ALLOW"
+          },
+          {
+            "material_blocker": null,
+            "verdict": "ALLOW"
+          }
+        ],
+        "cited_evidence": [
+          "AP-POL-2024-011",
+          "FIN-ACCR-2026-0202",
+          "EMAIL-02"
+        ],
+        "controlling_reason": "missing_vp_finance_review",
+        "final_verdict": "ESCALATE"
+      },
+      "provider": "openai",
+      "provider_call_ok": true,
+      "qa_or_ablation": false,
+      "raw_text_excerpt": "{\n  \"final_verdict\": \"ESCALATE\",\n  \"controlling_reason\": \"missing_vp_finance_review\",\n  \"analyst_disagreements\": [\n    {\n      \"material_blocker\": null,\n      \"verdict\": \"ALLOW\"\n    },\n    {\n      \"material_blocker\": null,\n      \"verdict\": \"ALLOW\"\n    }\n  ],\n  \"cited_evidence\": [\n    \"AP-POL-2024-011\",\n    \"FIN-ACCR-2026-0202\",\n    \"EMAIL-02\"\n  ]\n}",
+      "result_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW::holo_gov::openai::gpt-4o-mini",
+      "role": "holo_gov",
+      "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+      "run_type": "bal100_allow_five_hv_official_trace_preflight",
+      "scorecard_movement": false,
+      "transport_provider": "openai",
+      "verdict": "ESCALATE"
+    }
+  },
+  "created_at": "2026-06-19T20:52:55Z",
+  "freeze": false,
+  "git_head": "608b39ffd3e56ecb67dc731e8fecf0028a4dbac6",
+  "hidden_metadata_excluded": [
+    "_builder",
+    "_frozen",
+    "_internal",
+    "expected_verdict"
+  ],
+  "judge": false,
+  "leaderboard_movement": false,
+  "official_trace": true,
+  "output_directory": "scout_runs/BAL100-LEADERBOARD-20_allow_official_trace_live_20260619T205143Z",
+  "packet": {
+    "family_id": "BAL100-HARD-ALLOW-HAB-006",
+    "frozen_approved_by": "Taylor",
+    "hash8": "11f7a12b",
+    "model_visible_keys": [
+      "action",
+      "context"
+    ],
+    "path": "holo_builder/outputs/frozen/BAL100-HARD-ALLOW-HAB-006-ALLOW_11f7a12b.json",
+    "payload_hash": "11f7a12b94a2492063056f76acb7dd1ab811e53a462d4edc3aa7a137cc117cd6",
+    "scenario_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW"
+  },
+  "proof_credit_remains_unchanged": true,
+  "qa_or_ablation": false,
+  "record_type": "bal100_allow_five_official_trace",
+  "roster": {
+    "active_non_gov": [
+      {
+        "label": "A-Grok-mini",
+        "model": "grok-3-mini",
+        "provider": "xai"
+      },
+      {
+        "label": "A-Gemini-FlashLite",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google"
+      },
+      {
+        "label": "A-MiniMax",
+        "model": "MiniMax-Text-01",
+        "provider": "minimax"
+      }
+    ],
+    "excluded": [
+      {
+        "label": "A-Claude-Haiku",
+        "model": "claude-haiku-4-5-20251001",
+        "provider": "anthropic"
+      }
+    ],
+    "holo_gov": {
+      "label": "A-OpenAI-mini",
+      "model": "gpt-4o-mini",
+      "provider": "openai"
+    },
+    "selection_rule": "seeded_fixed_4dna"
+  },
+  "run_id": "BAL100-ALLOW-FIVE-FROZEN-HV-PREFLIGHT-001",
+  "run_type": "bal100_allow_five_hv_official_trace_preflight",
+  "scorecard_movement": false,
+  "seed": 447,
+  "session_id": "BAL100-HARD-ALLOW-HAB-006-ALLOW_4dna_seed447"
+}

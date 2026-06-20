@@ -21,6 +21,7 @@ SCORES_GENERATED = 0
 EXPECTED_PACKET_HASH = "b73292d9d2e4aac5f65a93ae168235d9d581ae17ebaf0a91aa16437018c527aa"
 EXPECTED_CONDITIONS = {"holo_build_arch", "solo_openai_gpt_5_5"}
 EXPECTED_TURN_COUNT = 6
+EXPECTED_FULL_GOV_V4_CALL_COUNT = 14
 EXPECTED_WORD_TARGET = 1100
 REQUIRED_ARCH_TOKENS = [
     "CANONICAL STATE_OBJECT",
@@ -56,6 +57,34 @@ REQUIRED_ARCH_TOKENS = [
     "semantic_role_checks",
     "invented_source_ids",
 ]
+REQUIRED_FULL_GOV_V4_TOKENS = [
+    "HOLO_MODE_FULL_GOV_V4",
+    "RUN_MODE_FULL_GOV_V4",
+    "FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT",
+    "GOVERNOR_PROVIDER_MODEL",
+    "--holo-mode",
+    "governor_system_prompt",
+    "governor_prompt",
+    "parse_governor_json",
+    "call_governor",
+    "run_holobuild_full_gov_v4",
+    "gov_init",
+    "gov_update_audit",
+    "gov_final_audit",
+    "state_object_source",
+    "governor_output",
+    "baton_pass_source",
+    "artifact_registry_source",
+    "governor_output_or_governor_locked_update",
+    "proof_credit_class",
+    "no_provider_smoke_only",
+    "full_gov_v4_proof_eligible",
+    "synthetic_smoke_only",
+    "expected_holo_call_count",
+    "generation prompt hash not matching Gov-produced state/baton/registry = no proof credit",
+    "Gov final audit fail = no proof credit",
+    "synthetic smoke evidence is diagnostic-only and not proof-credit eligible",
+]
 EXPECTED_SOLO_ROLES = [
     "initial_decision_brief_draft",
     "assumption_and_evidence_attack",
@@ -76,8 +105,8 @@ BLIND_EXPORT_FORBIDDEN_TOKENS = [
     "condition names",
     "generation traces",
     "prior scores",
-    "no_architecture_evidence",
-    "no_condition_identity",
+    "generator identity",
+    "benchmark metadata",
 ]
 
 
@@ -147,6 +176,10 @@ def main() -> int:
         require("HOLO_ALLOW_LIVE" in runner_text, errors, "runner missing second live approval guard")
         require("D5_MINI_SCOUT_LIVE_FAIL_CLOSED" in runner_text, errors, "runner missing live fail-closed status")
         require(runner_assignments.get("RUN_MODE") == "d5_medtech_capacity_strain_001_corrected_v2_six_turn", errors, "runner missing corrected v2 run mode")
+        require(runner_assignments.get("RUN_MODE_FULL_GOV_V4") == "d5_medtech_capacity_strain_001_full_gov_v4", errors, "runner missing full Gov v4 run mode")
+        require(runner_assignments.get("HOLO_MODE_FULL_GOV_V4") == "full_gov_v4", errors, "runner missing full Gov v4 mode literal")
+        require(runner_assignments.get("FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT") == EXPECTED_FULL_GOV_V4_CALL_COUNT, errors, "full Gov v4 expected call count is not 14")
+        require(runner_assignments.get("GOVERNOR_PROVIDER_MODEL") == "openai:gpt-5.5", errors, "Governor model is not a fixed model ID")
         require(runner_assignments.get("EXPECTED_PACKET_HASH") == EXPECTED_PACKET_HASH, errors, "runner does not pin expected packet hash")
         require(runner_assignments.get("EXPECTED_TURN_COUNT") == EXPECTED_TURN_COUNT, errors, "runner expected turn count is not 6")
         require(runner_assignments.get("FINAL_WORD_TARGET") == EXPECTED_WORD_TARGET, errors, "runner final word target is not 1100")
@@ -160,6 +193,16 @@ def main() -> int:
         require("If the draft exceeds" in runner_text and "revise shorter before final answer" in runner_text, errors, "runner missing hard final shortening instruction")
         for condition in EXPECTED_CONDITIONS:
             require(condition in runner_text, errors, f"runner missing condition {condition}")
+        for token in REQUIRED_FULL_GOV_V4_TOKENS:
+            require(token in runner_text, errors, f"runner missing full Gov v4 token: {token}")
+        require("expected_holobuild_provider_models" in runner_text, errors, "runner missing full Gov model-count helper")
+        require("GOVERNOR_PROVIDER_MODEL] + generation_models + [GOVERNOR_PROVIDER_MODEL] * (EXPECTED_TURN_COUNT + 1)" in runner_text, errors, "runner does not model 1 Gov init + 6 generation + 6 update + 1 final Gov call")
+        require("synthetic_smoke_only\") and evidence.get(\"proof_credit_class\") != \"no_provider_smoke_only\"" in runner_text, errors, "validator does not fail smoke-as-proof")
+        require("state_object_sha256\") not in prompt_surface" in runner_text, errors, "full Gov validator does not tie state hash to prompt")
+        require("baton_pass_sha256\") not in prompt_surface" in runner_text, errors, "full Gov validator does not tie baton hash to prompt")
+        require("artifact_registry_sha256\") not in prompt_surface" in runner_text, errors, "full Gov validator does not tie registry hash to prompt")
+        require("Gov final audit did not pass" in runner_text, errors, "full Gov validator does not fail missing/failed final audit")
+        require("if holo_mode == HOLO_MODE_FULL_GOV_V4" in runner_text, errors, "runner missing explicit full Gov v4 branch")
 
         for token in REQUIRED_ARCH_TOKENS:
             require(token in runner_text, errors, f"runner missing architecture evidence token: {token}")
@@ -200,6 +243,10 @@ def main() -> int:
         "packet_hash": packet_hash,
         "conditions_supported": sorted(EXPECTED_CONDITIONS),
         "expected_turn_count_per_condition": EXPECTED_TURN_COUNT,
+        "expected_full_gov_v4_holo_call_count": EXPECTED_FULL_GOV_V4_CALL_COUNT,
+        "holobuild_modes": ["diagnostic_v3", "full_gov_v4"],
+        "diagnostic_v3_status": "architecture_surface_diagnostic_only",
+        "full_gov_v4_status": "proof_eligible_if_live_evidence_validates",
         "final_word_target": EXPECTED_WORD_TARGET,
         "live_mode_fail_closed_by_default": True,
         "live_requires": ["--live", "HOLO_ALLOW_LIVE=1"],

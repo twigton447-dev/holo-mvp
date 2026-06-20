@@ -19,12 +19,17 @@ ARCH_POLICY_PATH = FACTORY_DIR / "architecture_policies/holobuild_patent_alignme
 
 RUNNER_ID = "d5_medtech_capacity_strain_001_live_adapter_v4_1"
 RUN_MODE = "d5_medtech_capacity_strain_001_corrected_v2_six_turn"
+RUN_MODE_FULL_GOV_V4 = "d5_medtech_capacity_strain_001_full_gov_v4"
+HOLO_MODE_DIAGNOSTIC_V3 = "diagnostic_v3"
+HOLO_MODE_FULL_GOV_V4 = "full_gov_v4"
+HOLO_MODES = (HOLO_MODE_DIAGNOSTIC_V3, HOLO_MODE_FULL_GOV_V4)
 LIVE_APPROVAL_ENV = "HOLO_ALLOW_LIVE"
 PROVIDER_CALLS = 0
 LIVE_ARTIFACTS_GENERATED = 0
 SCORES_GENERATED = 0
 EXPECTED_PACKET_HASH = "b73292d9d2e4aac5f65a93ae168235d9d581ae17ebaf0a91aa16437018c527aa"
 EXPECTED_TURN_COUNT = 6
+FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT = 14
 FINAL_WORD_MIN = 900
 FINAL_WORD_MAX = 1300
 FINAL_WORD_TARGET = 1100
@@ -35,6 +40,7 @@ CONDITION_LABELS = {
     "solo_openai_gpt_5_5": "GPT-5.5 solo condition",
 }
 SOLO_PROVIDER_MODEL = "openai:gpt-5.5"
+GOVERNOR_PROVIDER_MODEL = "openai:gpt-5.5"
 HOLO_PROVIDER_TURNS = (
     {
         "provider_model": "anthropic:claude-opus-4-8",
@@ -186,6 +192,21 @@ def endpoint_for_provider(provider: str) -> str:
     if provider == "anthropic":
         return "messages"
     return "chat/completions"
+
+
+def run_mode_for_holo_mode(holo_mode: str) -> str:
+    return RUN_MODE_FULL_GOV_V4 if holo_mode == HOLO_MODE_FULL_GOV_V4 else RUN_MODE
+
+
+def expected_holo_call_count(holo_mode: str) -> int:
+    return FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT if holo_mode == HOLO_MODE_FULL_GOV_V4 else EXPECTED_TURN_COUNT
+
+
+def expected_holobuild_provider_models(holo_mode: str) -> list[str]:
+    generation_models = [item["provider_model"] for item in HOLO_PROVIDER_TURNS] + [HOLO_SYNTHESIS_MODEL]
+    if holo_mode == HOLO_MODE_FULL_GOV_V4:
+        return [GOVERNOR_PROVIDER_MODEL] + generation_models + [GOVERNOR_PROVIDER_MODEL] * (EXPECTED_TURN_COUNT + 1)
+    return generation_models
 
 
 def require_packet(packet_dir: Path) -> dict[str, Any]:
@@ -818,8 +839,12 @@ def holo_architecture_user_prompt(
     retrieved_entries: list[dict[str, Any]],
     objective: str,
     final: bool,
+    registry_payload: Any | None = None,
+    registry_hash_override: str | None = None,
 ) -> str:
     output_instruction = final_artifact_instruction() if final else "This is an adversarial architecture turn. Do not write the final brief."
+    registry_visible_payload = registry_payload if registry_payload is not None else schema_registry_entries(registry)
+    registry_visible_hash = registry_hash_override or registry_hash(registry)
     return (
         "CANONICAL STATE_OBJECT\n"
         "======================\n"
@@ -831,8 +856,8 @@ def holo_architecture_user_prompt(
         f"{stable_json(baton_pass)}\n\n"
         "ARTIFACT_REGISTRY\n"
         "=================\n"
-        f"ARTIFACT_REGISTRY_SHA256: {registry_hash(registry)}\n"
-        f"{stable_json(schema_registry_entries(registry))}\n\n"
+        f"ARTIFACT_REGISTRY_SHA256: {registry_visible_hash}\n"
+        f"{stable_json(registry_visible_payload)}\n\n"
         "RETRIEVED PINNED SOURCES AND ARTIFACTS\n"
         "======================================\n"
         f"{retrieved_evidence_block(retrieved_entries)}\n\n"
@@ -846,13 +871,412 @@ def holo_architecture_user_prompt(
     )
 
 
-def required_env_for_conditions(conditions: list[str]) -> list[str]:
+def governor_system_prompt() -> str:
+    return (
+        "You are the HoloBuild Context Governor for a frozen D5 mini scout packet. "
+        "Return strict JSON only. You manage canonical state, artifact registry, baton passing, "
+        "role compliance, and state-audit evidence. Do not write the final artifact. "
+        "Use only frozen packet metadata and registered artifacts supplied in the prompt."
+    )
+
+
+def governor_prompt(
+    *,
+    packet_dir: Path,
+    call_type: str,
+    run_id: str,
+    turn_index: int | None,
+    next_turn: dict[str, Any] | None,
+    registry: list[dict[str, Any]],
+    prior_state: dict[str, Any] | None,
+    prior_baton: dict[str, Any] | None,
+    generation_artifact: dict[str, Any] | None,
+    role_result: dict[str, Any] | None,
+    audit_result: dict[str, Any] | None,
+    final: bool = False,
+) -> str:
+    return (
+        "FULL_GOV_V4 GOVERNOR CALL\n"
+        "=========================\n"
+        f"call_type: {call_type}\n"
+        f"run_id: {run_id}\n"
+        f"turn_index: {turn_index}\n"
+        f"packet_hash: {sha_file(packet_dir / 'source_packet.json')}\n\n"
+        "FROZEN PACKET HASH BUNDLE\n"
+        "=========================\n"
+        f"{stable_json(packet_hash_bundle(packet_dir))}\n\n"
+        "CURRENT LOCKED ARTIFACT REGISTRY STORE\n"
+        "======================================\n"
+        f"{stable_json(schema_registry_entries(registry))}\n\n"
+        "PRIOR GOVERNOR STATE\n"
+        "====================\n"
+        f"{stable_json(prior_state or {})}\n\n"
+        "PRIOR BATON_PASS\n"
+        "================\n"
+        f"{stable_json(prior_baton or {})}\n\n"
+        "GENERATION ARTIFACT FOR AUDIT\n"
+        "=============================\n"
+        f"{stable_json(generation_artifact or {})}\n\n"
+        "RUNNER-OBSERVED ROLE COMPLIANCE RESULT\n"
+        "======================================\n"
+        f"{stable_json(role_result or {})}\n\n"
+        "RUNNER-OBSERVED STATE AUDIT RESULT\n"
+        "==================================\n"
+        f"{stable_json(audit_result or {})}\n\n"
+        "NEXT TURN ROUTING REQUEST\n"
+        "=========================\n"
+        f"{stable_json(next_turn or {})}\n\n"
+        "REQUIRED JSON OUTPUT SCHEMA\n"
+        "===========================\n"
+        "{\n"
+        '  "governor_call_type": "init|update|final_audit",\n'
+        '  "mode": "full_gov_v4",\n'
+        '  "source": "provider_output",\n'
+        '  "proof_credit_eligible": true,\n'
+        '  "state_object_source": "governor_output",\n'
+        '  "baton_pass_source": "governor_output",\n'
+        '  "artifact_registry_source": "governor_output_or_governor_locked_update",\n'
+        '  "state_object": {},\n'
+        '  "artifact_registry": [],\n'
+        '  "pinned_registry_updates": [],\n'
+        '  "baton_pass": {},\n'
+        '  "gov_notes": {},\n'
+        '  "unresolved_tensions": [],\n'
+        '  "role_compliance_result": {},\n'
+        '  "state_audit_result": {},\n'
+        '  "next_turn_routing": {},\n'
+        '  "evidence_lock_result": {"status": "pass|fail", "reason": ""}\n'
+        "}\n\n"
+        "For init, produce the state and BATON_PASS for turn 1. "
+        "For update, audit the just-completed generation turn and produce the next-turn state/BATON_PASS unless final=true. "
+        "For final_audit, lock the evidence and fail if any Gov call, state, registry, baton, prompt hash, or final artifact hash is missing. "
+        f"final_audit_requested: {final}"
+    )
+
+
+def parse_governor_json(text: str) -> dict[str, Any]:
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        stripped = re.sub(r"^```(?:json)?\s*", "", stripped)
+        stripped = re.sub(r"\s*```$", "", stripped)
+    try:
+        payload = json.loads(stripped)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"governor_output_not_strict_json: {exc}") from exc
+    required = {
+        "governor_call_type",
+        "mode",
+        "source",
+        "proof_credit_eligible",
+        "state_object_source",
+        "baton_pass_source",
+        "artifact_registry_source",
+        "state_object",
+        "artifact_registry",
+        "baton_pass",
+        "gov_notes",
+        "unresolved_tensions",
+        "role_compliance_result",
+        "state_audit_result",
+        "next_turn_routing",
+        "evidence_lock_result",
+    }
+    missing = sorted(required - set(payload))
+    if missing:
+        raise RuntimeError(f"governor_output_missing_required_fields:{missing}")
+    if payload["mode"] != HOLO_MODE_FULL_GOV_V4:
+        raise RuntimeError("governor_output_wrong_mode")
+    if payload["state_object_source"] != "governor_output":
+        raise RuntimeError("governor_output_state_not_governor_sourced")
+    if payload["baton_pass_source"] != "governor_output":
+        raise RuntimeError("governor_output_baton_not_governor_sourced")
+    if payload["artifact_registry_source"] != "governor_output_or_governor_locked_update":
+        raise RuntimeError("governor_output_registry_not_governor_sourced")
+    return payload
+
+
+def synthetic_governor_output(
+    *,
+    packet_dir: Path,
+    run_id: str,
+    call_type: str,
+    turn_index: int | None,
+    next_turn: dict[str, Any] | None,
+    registry: list[dict[str, Any]],
+    prior_artifact_hashes: list[str],
+    prior_audit_results: list[dict[str, Any]],
+    generation_artifact: dict[str, Any] | None,
+    role_result: dict[str, Any] | None,
+    audit_result: dict[str, Any] | None,
+    final: bool = False,
+) -> dict[str, Any]:
+    if next_turn:
+        provider, model = provider_model(next_turn["provider_model"])
+        role = next_turn["role"]
+        objective = next_turn["objective"]
+        turn_number = int(next_turn["turn_index"])
+    else:
+        provider, model = provider_model(GOVERNOR_PROVIDER_MODEL)
+        role = "governor_final_audit"
+        objective = "Lock final architecture evidence."
+        turn_number = int(turn_index or EXPECTED_TURN_COUNT)
+    state_payload = build_state_object(
+        packet_dir=packet_dir,
+        run_id=run_id,
+        turn_index=turn_number,
+        role=role,
+        objective=objective,
+        registry=registry,
+        prior_artifact_hashes=prior_artifact_hashes,
+        prior_audit_results=prior_audit_results,
+    )
+    state_payload["state_object_source"] = "governor_output"
+    state_payload["full_gov_v4"] = {
+        "governor_call_type": call_type,
+        "governor_model_id": model,
+        "governor_provider": provider,
+        "synthetic_smoke_only": True,
+        "proof_credit_eligible": False,
+    }
+    state_hash = sha_text(json.dumps(state_payload, sort_keys=True))
+    retrieval_ids = ["TASK_BRIEF"] + source_ids(packet_dir) + [
+        item["artifact_id"]
+        for item in registry
+        if item["artifact_type"] in {"reviewer_turn_artifact", "final_artifact"}
+    ]
+    baton_payload = build_baton_pass(
+        run_id=run_id,
+        turn_index=turn_number,
+        next_model_id=model,
+        adversarial_role=role,
+        focus_area=objective,
+        unresolved_tensions=state_payload["unresolved_tensions"],
+        state_hash=state_hash,
+        retrieved_artifact_ids=retrieval_ids,
+        final=final,
+    )
+    baton_payload["baton_pass_source"] = "governor_output"
+    return {
+        "governor_call_type": call_type,
+        "mode": HOLO_MODE_FULL_GOV_V4,
+        "source": "no_provider_smoke_only",
+        "proof_credit_eligible": False,
+        "state_object_source": "governor_output",
+        "baton_pass_source": "governor_output",
+        "artifact_registry_source": "governor_output_or_governor_locked_update",
+        "state_object": state_payload,
+        "artifact_registry": schema_registry_entries(registry),
+        "pinned_registry_updates": schema_registry_entries(registry[-1:]) if generation_artifact else [],
+        "baton_pass": baton_payload,
+        "gov_notes": state_payload["gov_notes"],
+        "unresolved_tensions": state_payload["unresolved_tensions"],
+        "role_compliance_result": role_result or {"status": "not_applicable_init"},
+        "state_audit_result": audit_result or {"state_audit_status": "not_applicable_init"},
+        "next_turn_routing": {
+            "turn_index": turn_number,
+            "selected_model": model,
+            "provider": provider,
+            "adversarial_role": role,
+            "focus_area": objective,
+        },
+        "evidence_lock_result": {
+            "status": "pass" if final else "not_final",
+            "reason": "synthetic no-provider smoke evidence is diagnostic-only and never proof-credit eligible",
+        },
+    }
+
+
+def governor_output_hash(payload: dict[str, Any]) -> str:
+    return sha_text(json.dumps(payload, sort_keys=True))
+
+
+def governor_state_hash(payload: dict[str, Any]) -> str:
+    return sha_text(json.dumps(payload["state_object"], sort_keys=True))
+
+
+def governor_baton_hash(payload: dict[str, Any]) -> str:
+    return sha_text(json.dumps(payload["baton_pass"], sort_keys=True))
+
+
+def governor_registry_hash(payload: dict[str, Any]) -> str:
+    return sha_text(json.dumps(payload["artifact_registry"], sort_keys=True))
+
+
+def save_governor_output(condition_dir: Path, *, call_id: str, payload: dict[str, Any]) -> Path:
+    path = condition_dir / "gov_outputs" / f"{call_id}.json"
+    write_json(path, payload)
+    return path
+
+
+def save_governor_smoke_trace(
+    condition_dir: Path,
+    *,
+    call_id: str,
+    prompt_card_path: Path,
+    output_path: Path,
+    payload: dict[str, Any],
+    turn_index: int | None,
+) -> dict[str, Any]:
+    trace = {
+        "call_id": call_id,
+        "call_type": payload["governor_call_type"],
+        "role": "context_governor",
+        "turn_index": turn_index,
+        "provider": "no_provider_smoke",
+        "model": GOVERNOR_PROVIDER_MODEL,
+        "endpoint": "no_provider_smoke",
+        "prompt_card_path": str(prompt_card_path),
+        "artifact_path": str(output_path),
+        "artifact_sha256": governor_output_hash(payload),
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "latency_ms": 0,
+        "http_status": "no_provider_smoke",
+        "response_id": "no_provider_smoke_only",
+        "created_at_utc": utc_iso(),
+        "judge_visible": False,
+        "proof_credit_eligible": False,
+    }
+    write_json(condition_dir / "traces" / f"{call_id}.json", trace)
+    return trace
+
+
+def save_generation_smoke_trace(
+    condition_dir: Path,
+    *,
+    call_id: str,
+    provider_model_name: str,
+    call_type: str,
+    role: str,
+    turn_index: int,
+    prompt_card_path: Path,
+    artifact_path: Path,
+    artifact_text: str,
+) -> dict[str, Any]:
+    provider, model = provider_model(provider_model_name)
+    trace = {
+        "call_id": call_id,
+        "call_type": call_type,
+        "role": role,
+        "turn_index": turn_index,
+        "provider": "no_provider_smoke",
+        "planned_provider": provider,
+        "model": model,
+        "endpoint": "no_provider_smoke",
+        "prompt_card_path": str(prompt_card_path),
+        "artifact_path": str(artifact_path),
+        "artifact_sha256": sha_text(artifact_text),
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "latency_ms": 0,
+        "http_status": "no_provider_smoke",
+        "response_id": "no_provider_smoke_only",
+        "created_at_utc": utc_iso(),
+        "judge_visible": False,
+        "proof_credit_eligible": False,
+    }
+    write_json(condition_dir / "traces" / f"{call_id}.json", trace)
+    return trace
+
+
+def call_governor(
+    condition_dir: Path,
+    *,
+    packet_dir: Path,
+    run_id: str,
+    call_id: str,
+    call_type: str,
+    turn_index: int | None,
+    next_turn: dict[str, Any] | None,
+    registry: list[dict[str, Any]],
+    prior_state: dict[str, Any] | None,
+    prior_baton: dict[str, Any] | None,
+    prior_artifact_hashes: list[str],
+    prior_audit_results: list[dict[str, Any]],
+    generation_artifact: dict[str, Any] | None,
+    role_result: dict[str, Any] | None,
+    audit_result: dict[str, Any] | None,
+    timeout: int,
+    live: bool,
+    final: bool = False,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    prompt = governor_prompt(
+        packet_dir=packet_dir,
+        call_type=call_type,
+        run_id=run_id,
+        turn_index=turn_index,
+        next_turn=next_turn,
+        registry=registry,
+        prior_state=prior_state,
+        prior_baton=prior_baton,
+        generation_artifact=generation_artifact,
+        role_result=role_result,
+        audit_result=audit_result,
+        final=final,
+    )
+    if live:
+        raw_text, trace = call_live_model(
+            condition_dir,
+            provider_model_name=GOVERNOR_PROVIDER_MODEL,
+            system=governor_system_prompt(),
+            user=prompt,
+            max_tokens=3600,
+            timeout=timeout,
+            call_type=call_type,
+            role="context_governor",
+            turn_index=turn_index,
+            call_id=call_id,
+            artifact_path=condition_dir / "gov_outputs" / f"{call_id}.raw.txt",
+        )
+        payload = parse_governor_json(raw_text)
+        output_path = save_governor_output(condition_dir, call_id=call_id, payload=payload)
+        trace["artifact_path"] = str(output_path)
+        trace["artifact_sha256"] = governor_output_hash(payload)
+        write_json(condition_dir / "traces" / f"{call_id}.json", trace)
+        return payload, trace
+
+    payload = synthetic_governor_output(
+        packet_dir=packet_dir,
+        run_id=run_id,
+        call_type=call_type,
+        turn_index=turn_index,
+        next_turn=next_turn,
+        registry=registry,
+        prior_artifact_hashes=prior_artifact_hashes,
+        prior_audit_results=prior_audit_results,
+        generation_artifact=generation_artifact,
+        role_result=role_result,
+        audit_result=audit_result,
+        final=final,
+    )
+    prompt_card_path = save_prompt_card(
+        condition_dir,
+        call_id=call_id,
+        provider_model_name=GOVERNOR_PROVIDER_MODEL,
+        system=governor_system_prompt(),
+        user=prompt,
+        call_type=call_type,
+        role="context_governor",
+        turn_index=turn_index,
+    )
+    output_path = save_governor_output(condition_dir, call_id=call_id, payload=payload)
+    trace = save_governor_smoke_trace(
+        condition_dir,
+        call_id=call_id,
+        prompt_card_path=prompt_card_path,
+        output_path=output_path,
+        payload=payload,
+        turn_index=turn_index,
+    )
+    return payload, trace
+
+
+def required_env_for_conditions(conditions: list[str], *, holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3) -> list[str]:
     provider_models: list[str] = []
     if "solo_openai_gpt_5_5" in conditions:
         provider_models.append(SOLO_PROVIDER_MODEL)
     if "holo_build_arch" in conditions:
-        provider_models.extend(item["provider_model"] for item in HOLO_PROVIDER_TURNS)
-        provider_models.append(HOLO_SYNTHESIS_MODEL)
+        provider_models.extend(expected_holobuild_provider_models(holo_mode))
     envs: list[str] = []
     for provider_model_name in provider_models:
         provider, _ = provider_model(provider_model_name)
@@ -862,8 +1286,8 @@ def required_env_for_conditions(conditions: list[str]) -> list[str]:
     return envs
 
 
-def ensure_env_available(conditions: list[str]) -> None:
-    required = required_env_for_conditions(conditions)
+def ensure_env_available(conditions: list[str], *, holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3) -> None:
+    required = required_env_for_conditions(conditions, holo_mode=holo_mode)
     missing = [env for env in required if not os.getenv(env)]
     if missing:
         raise SystemExit(
@@ -1351,6 +1775,142 @@ def build_live_arch_evidence(
     }
 
 
+def build_full_gov_v4_arch_evidence(
+    *,
+    packet_dir: Path,
+    run_id: str,
+    condition_dir: Path,
+    gov_init_record: dict[str, Any],
+    gov_update_records: list[dict[str, Any]],
+    gov_final_record: dict[str, Any],
+    generation_records: list[dict[str, Any]],
+    final_artifact_path: Path,
+    final_artifact_text: str,
+    synthetic_smoke_only: bool,
+) -> dict[str, Any]:
+    return {
+        "schema_version": "holo_build_full_gov_arch_evidence_v4",
+        "architecture_policy_id": "HOLOBUILD_PATENT_ALIGNMENT_POLICY_V4_1",
+        "run_id": run_id,
+        "domain_id": "D5_healthcare_medtech_evidence_synthesis",
+        "condition_type": "holo_build_arch",
+        "holo_mode": HOLO_MODE_FULL_GOV_V4,
+        "proof_credit_class": "no_provider_smoke_only" if synthetic_smoke_only else "full_gov_v4_proof_eligible",
+        "synthetic_smoke_only": synthetic_smoke_only,
+        "expected_holo_call_count": FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT,
+        "provider_calls_recorded": PROVIDER_CALLS,
+        "state_object_source": "governor_output",
+        "baton_pass_source": "governor_output",
+        "artifact_registry_source": "governor_output_or_governor_locked_update",
+        "architecture_evidence_visible_to_judges": False,
+        "visible_surface_boundary": visible_surface_boundary(),
+        "proof_credit_fail_closed_rules": [
+            "missing Gov init call = no proof credit",
+            "missing any Gov update/audit call = no proof credit",
+            "missing Gov final audit = no proof credit",
+            "runner-created canonical state without Gov output = no proof credit",
+            "generation prompt hash not matching Gov-produced state/baton/registry = no proof credit",
+            "Gov final audit fail = no proof credit",
+            "architecture evidence visible to judges = no proof credit",
+            "synthetic smoke evidence is diagnostic-only and not proof-credit eligible",
+        ],
+        "gov_init_call": gov_init_record,
+        "gov_update_calls": gov_update_records,
+        "gov_final_audit_call": gov_final_record,
+        "generation_turns": generation_records,
+        "final": {
+            "final_artifact_hash": sha_text(final_artifact_text),
+            "final_artifact_path": str(final_artifact_path),
+            "final_artifact_word_count": word_count(final_artifact_text),
+            "final_architecture_evidence_lock_status": (
+                gov_final_record.get("output", {}).get("evidence_lock_result", {}).get("status")
+            ),
+            "architecture_evidence_visible_to_judges": False,
+        },
+    }
+
+
+def validate_full_gov_v4_arch_evidence(evidence: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    if evidence.get("holo_mode") != HOLO_MODE_FULL_GOV_V4:
+        errors.append("full_gov_v4 evidence missing holo_mode")
+    if evidence.get("architecture_evidence_visible_to_judges") is not False:
+        errors.append("architecture evidence is judge-visible")
+    if evidence.get("state_object_source") != "governor_output":
+        errors.append("state_object_source is not governor_output")
+    if evidence.get("baton_pass_source") != "governor_output":
+        errors.append("baton_pass_source is not governor_output")
+    if evidence.get("artifact_registry_source") != "governor_output_or_governor_locked_update":
+        errors.append("artifact_registry_source is not governor locked")
+    if evidence.get("expected_holo_call_count") != FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT:
+        errors.append("expected Holo call count is not 14")
+
+    gov_init = evidence.get("gov_init_call") or {}
+    gov_updates = evidence.get("gov_update_calls") or []
+    gov_final = evidence.get("gov_final_audit_call") or {}
+    generations = evidence.get("generation_turns") or []
+    if not gov_init:
+        errors.append("missing Gov init call")
+    if len(gov_updates) != EXPECTED_TURN_COUNT:
+        errors.append(f"missing Gov update calls: expected {EXPECTED_TURN_COUNT}, got {len(gov_updates)}")
+    if not gov_final:
+        errors.append("missing Gov final audit call")
+    if len(generations) != EXPECTED_TURN_COUNT:
+        errors.append(f"generation turn count mismatch: expected {EXPECTED_TURN_COUNT}, got {len(generations)}")
+
+    if evidence.get("synthetic_smoke_only") and evidence.get("proof_credit_class") != "no_provider_smoke_only":
+        errors.append("synthetic smoke evidence treated as proof-credit eligible")
+    if not evidence.get("synthetic_smoke_only"):
+        if gov_final.get("output", {}).get("evidence_lock_result", {}).get("status") != "pass":
+            errors.append("Gov final audit did not pass")
+
+    required_prompt_markers = [
+        "CANONICAL STATE_OBJECT",
+        "STATE_OBJECT_SHA256",
+        "BATON_PASS",
+        "BATON_PASS_SHA256",
+        "ARTIFACT_REGISTRY",
+        "ARTIFACT_REGISTRY_SHA256",
+        "RETRIEVED PINNED SOURCES AND ARTIFACTS",
+        "gov_notes",
+    ]
+    for turn in generations:
+        turn_index = int(turn.get("turn_index") or 0)
+        prompt_path = Path(turn.get("prompt_card_path", ""))
+        if not prompt_path.exists():
+            errors.append(f"generation turn {turn_index} missing prompt card")
+            continue
+        prompt_hash = sha_file(prompt_path)
+        if prompt_hash != turn.get("prompt_card_sha256"):
+            errors.append(f"generation turn {turn_index} prompt hash mismatch")
+        prompt_card = read_json(prompt_path)
+        prompt_surface = f"{prompt_card.get('system', '')}\n{prompt_card.get('user', '')}"
+        for marker in required_prompt_markers:
+            if marker not in prompt_surface:
+                errors.append(f"generation turn {turn_index} prompt card missing {marker}")
+        if prompt_card.get("judge_visible") is not False:
+            errors.append(f"generation turn {turn_index} prompt card is judge-visible")
+        if turn.get("state_object_source") != "governor_output":
+            errors.append(f"generation turn {turn_index} state not Gov-produced")
+        if turn.get("baton_pass_source") != "governor_output":
+            errors.append(f"generation turn {turn_index} baton not Gov-produced")
+        if turn.get("artifact_registry_source") != "governor_output_or_governor_locked_update":
+            errors.append(f"generation turn {turn_index} registry not Gov-produced")
+        if turn.get("state_object_sha256") not in prompt_surface:
+            errors.append(f"generation turn {turn_index} Gov state hash not in prompt")
+        if turn.get("baton_pass_sha256") not in prompt_surface:
+            errors.append(f"generation turn {turn_index} Gov baton hash not in prompt")
+        if turn.get("artifact_registry_sha256") not in prompt_surface:
+            errors.append(f"generation turn {turn_index} Gov registry hash not in prompt")
+        retrieved_ids = turn.get("retrieved_ids") or []
+        if not retrieved_ids:
+            errors.append(f"generation turn {turn_index} retrieved no pinned IDs")
+        if turn_index > 1 and not any(str(item).startswith("turn_001_") for item in retrieved_ids):
+            errors.append(f"generation turn {turn_index} missing previous registered artifact ID")
+
+    return errors
+
+
 def write_live_metadata(
     *,
     packet_dir: Path,
@@ -1368,6 +1928,7 @@ def write_live_metadata(
     metadata = {
         "runner_id": RUNNER_ID,
         "run_mode": RUN_MODE,
+        "holo_mode": HOLO_MODE_DIAGNOSTIC_V3 if condition == "holo_build_arch" else None,
         "run_id": run_id,
         "condition": condition,
         "condition_label": CONDITION_LABELS[condition],
@@ -1450,6 +2011,386 @@ def run_live_solo(packet_dir: Path, run_id: str, timeout: int) -> dict[str, Any]
         "deterministic_gate_precheck": metadata["deterministic_gate_status"],
         "architecture_evidence_status": "not_applicable",
         "provider_calls": len(traces),
+    }
+
+
+def full_gov_generation_turns() -> list[dict[str, Any]]:
+    turns = [dict(item) for item in HOLO_PROVIDER_TURNS]
+    turns.append(
+        {
+            "provider_model": HOLO_SYNTHESIS_MODEL,
+            "role": "final_synthesis_author",
+            "objective": "Synthesize the final 900-1,300 word decision-grade crisis brief from frozen sources and registered critique artifacts.",
+            "max_tokens": 3400,
+        }
+    )
+    for index, item in enumerate(turns, start=1):
+        item["turn_index"] = index
+        item["final"] = index == EXPECTED_TURN_COUNT
+    return turns
+
+
+def full_gov_smoke_generation_text(role: str, *, final: bool) -> str:
+    if final:
+        final_sentence = (
+            "What is happening: smoke brief cites S1_FDA_PULSE_OX_PAGE_2025 and treats pulse-ox evidence as bounded. "
+            "Why it matters now: leaders face capacity pressure but the packet does not prove capacity relief. "
+            "Strong evidence: frozen sources support safety and equity concerns. "
+            "Weak and contradictory evidence: stale, preprint, and vendor claims remain limited. "
+            "Calculation checks: subgroup and table interpretation matter. "
+            "Options: pilot, delay, adopt narrowly, or reject. "
+            "Risks of acting: unsupported scale and overclaiming. "
+            "Risks of waiting: missed monitoring workflow benefit. "
+            "Next steps: validate operations before adoption. "
+            "Claim boundaries: no capacity solution or regulatory approval claim. "
+        )
+        return " ".join([final_sentence] * 12)
+    return (
+        f"Smoke {role} output cites S1_FDA_PULSE_OX_PAGE_2025. "
+        "It names weak evidence, source limits, missing assumptions, contradictions, uncertainty, "
+        "operational options, risk tradeoffs, unsupported overclaim controls, and claim boundaries."
+    )
+
+
+def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, live: bool) -> dict[str, Any]:
+    condition = "holo_build_arch"
+    condition_dir = packet_dir / "runs" / run_id / condition
+    condition_dir.mkdir(parents=True, exist_ok=True)
+
+    registry = base_registry(packet_dir)
+    prior_hashes: list[str] = []
+    prior_audit_results: list[dict[str, Any]] = []
+    generation_records: list[dict[str, Any]] = []
+    generation_traces: list[dict[str, Any]] = []
+    governor_traces: list[dict[str, Any]] = []
+    gov_update_records: list[dict[str, Any]] = []
+    turns = full_gov_generation_turns()
+
+    current_gov, gov_init_trace = call_governor(
+        condition_dir,
+        packet_dir=packet_dir,
+        run_id=run_id,
+        call_id="gov_init",
+        call_type="gov_init",
+        turn_index=1,
+        next_turn=turns[0],
+        registry=registry,
+        prior_state=None,
+        prior_baton=None,
+        prior_artifact_hashes=prior_hashes,
+        prior_audit_results=prior_audit_results,
+        generation_artifact=None,
+        role_result=None,
+        audit_result=None,
+        timeout=timeout,
+        live=live,
+    )
+    governor_traces.append(gov_init_trace)
+    gov_init_record = {
+        "call_id": "gov_init",
+        "call_type": "gov_init",
+        "governor_model_id": provider_model(GOVERNOR_PROVIDER_MODEL)[1],
+        "prompt_card_path": gov_init_trace["prompt_card_path"],
+        "prompt_card_sha256": sha_file(Path(gov_init_trace["prompt_card_path"])),
+        "output_path": gov_init_trace["artifact_path"],
+        "output_sha256": governor_output_hash(current_gov),
+        "input_tokens": int(gov_init_trace.get("input_tokens") or 0),
+        "output_tokens": int(gov_init_trace.get("output_tokens") or 0),
+        "output": current_gov,
+    }
+
+    for turn in turns:
+        turn_index = int(turn["turn_index"])
+        final = bool(turn["final"])
+        provider_model_name = turn["provider_model"]
+        state_payload = current_gov["state_object"]
+        baton_payload = current_gov["baton_pass"]
+        gov_registry_payload = current_gov["artifact_registry"]
+        state_hash = governor_state_hash(current_gov)
+        baton_hash = governor_baton_hash(current_gov)
+        gov_registry_hash = governor_registry_hash(current_gov)
+        state_path = condition_dir / f"state_object_turn_{turn_index:03d}.json"
+        baton_path = condition_dir / f"baton_pass_turn_{turn_index:03d}.json"
+        write_json(state_path, state_payload)
+        write_json(baton_path, baton_payload)
+
+        retrieved_ids = baton_payload.get("retrieved_artifact_ids") or []
+        if not retrieved_ids:
+            raise RuntimeError(f"Gov BATON_PASS missing retrieved_artifact_ids for turn {turn_index}")
+        retrieved_entries = retrieve_registry_entries(registry, retrieved_ids)
+        call_id = "holo_final_synthesis" if final else f"holo_turn_{turn_index:03d}"
+        artifact_path = condition_dir / "artifact.md" if final else condition_dir / "turn_artifacts" / f"turn_{turn_index:03d}.md"
+        system = holo_synthesis_system_prompt() if final else holo_turn_system_prompt(turn["role"])
+        user = holo_architecture_user_prompt(
+            packet_dir=packet_dir,
+            state_object=state_payload,
+            state_hash=state_hash,
+            baton_pass=baton_payload,
+            baton_hash=baton_hash,
+            registry=registry,
+            retrieved_entries=retrieved_entries,
+            objective=turn["objective"],
+            final=final,
+            registry_payload=gov_registry_payload,
+            registry_hash_override=gov_registry_hash,
+        )
+
+        if live:
+            text, trace = call_live_model(
+                condition_dir,
+                provider_model_name=provider_model_name,
+                system=system,
+                user=user,
+                max_tokens=int(turn["max_tokens"]),
+                timeout=timeout,
+                call_type="holo_final_synthesis" if final else "holo_reviewer_turn",
+                role=turn["role"],
+                turn_index=turn_index,
+                call_id=call_id,
+                artifact_path=artifact_path,
+            )
+        else:
+            prompt_card_path = save_prompt_card(
+                condition_dir,
+                call_id=call_id,
+                provider_model_name=provider_model_name,
+                system=system,
+                user=user,
+                call_type="holo_final_synthesis" if final else "holo_reviewer_turn",
+                role=turn["role"],
+                turn_index=turn_index,
+            )
+            text = full_gov_smoke_generation_text(turn["role"], final=final) + "\n"
+            write_text(artifact_path, text)
+            trace = save_generation_smoke_trace(
+                condition_dir,
+                call_id=call_id,
+                provider_model_name=provider_model_name,
+                call_type="holo_final_synthesis" if final else "holo_reviewer_turn",
+                role=turn["role"],
+                turn_index=turn_index,
+                prompt_card_path=prompt_card_path,
+                artifact_path=artifact_path,
+                artifact_text=text,
+            )
+        generation_traces.append(trace)
+        prompt_card_hash = sha_file(Path(trace["prompt_card_path"]))
+        artifact_record = artifact_entry(
+            artifact_id="final_synthesis_artifact" if final else f"turn_{turn_index:03d}_{turn['role']}",
+            artifact_type="final_artifact" if final else "reviewer_turn_artifact",
+            text=text,
+            path=artifact_path,
+            role=turn["role"],
+        )
+        role_result = role_compliance(text, role=turn["role"], final=final)
+        audit_result = state_audit(
+            text,
+            packet_dir=packet_dir,
+            state_object=state_payload,
+            registry=registry,
+            prompt_card_hash=prompt_card_hash,
+        )
+        generation_records.append(
+            {
+                "turn_index": turn_index,
+                "call_id": call_id,
+                "provider_model": provider_model_name,
+                "state_object_source": current_gov["state_object_source"],
+                "baton_pass_source": current_gov["baton_pass_source"],
+                "artifact_registry_source": current_gov["artifact_registry_source"],
+                "state_object_sha256": state_hash,
+                "state_object_path": str(state_path),
+                "baton_pass_sha256": baton_hash,
+                "baton_pass_path": str(baton_path),
+                "artifact_registry_sha256": gov_registry_hash,
+                "prompt_card_path": trace["prompt_card_path"],
+                "prompt_card_sha256": prompt_card_hash,
+                "retrieved_ids": retrieved_ids,
+                "retrieved_hashes": [item["artifact_hash"] for item in retrieved_entries],
+                "artifact_record": artifact_record,
+                "role_compliance_result": role_result,
+                "state_audit_result": audit_result,
+                "synthesis_trigger": {"triggered": final, "reason": "full_gov_v4_final_turn" if final else None},
+                "trace": trace,
+            }
+        )
+        registry.append(artifact_record)
+        prior_hashes.append(artifact_record["artifact_hash"])
+        prior_audit_results.append(
+            {
+                "turn_index": turn_index,
+                "role": turn["role"],
+                "status": audit_result["state_audit_status"],
+                "evidence_hash_or_location": audit_result["evidence_hash_or_location"],
+            }
+        )
+        next_turn = turns[turn_index] if turn_index < EXPECTED_TURN_COUNT else None
+        update_output, update_trace = call_governor(
+            condition_dir,
+            packet_dir=packet_dir,
+            run_id=run_id,
+            call_id=f"gov_update_{turn_index:03d}",
+            call_type="gov_update_audit",
+            turn_index=turn_index,
+            next_turn=next_turn,
+            registry=registry,
+            prior_state=state_payload,
+            prior_baton=baton_payload,
+            prior_artifact_hashes=prior_hashes,
+            prior_audit_results=prior_audit_results,
+            generation_artifact=artifact_record,
+            role_result=role_result,
+            audit_result=audit_result,
+            timeout=timeout,
+            live=live,
+            final=final,
+        )
+        governor_traces.append(update_trace)
+        gov_update_records.append(
+            {
+                "call_id": f"gov_update_{turn_index:03d}",
+                "call_type": "gov_update_audit",
+                "turn_index": turn_index,
+                "governor_model_id": provider_model(GOVERNOR_PROVIDER_MODEL)[1],
+                "prompt_card_path": update_trace["prompt_card_path"],
+                "prompt_card_sha256": sha_file(Path(update_trace["prompt_card_path"])),
+                "output_path": update_trace["artifact_path"],
+                "output_sha256": governor_output_hash(update_output),
+                "input_tokens": int(update_trace.get("input_tokens") or 0),
+                "output_tokens": int(update_trace.get("output_tokens") or 0),
+                "state_diff": {
+                    "previous_state_sha256": state_hash,
+                    "next_state_sha256": governor_state_hash(update_output),
+                },
+                "registry_diff": {
+                    "previous_registry_sha256": gov_registry_hash,
+                    "next_registry_sha256": governor_registry_hash(update_output),
+                    "added_artifact_id": artifact_record["artifact_id"],
+                },
+                "baton_output_sha256": governor_baton_hash(update_output),
+                "audit_outputs": {
+                    "role_compliance_result": update_output.get("role_compliance_result"),
+                    "state_audit_result": update_output.get("state_audit_result"),
+                },
+                "output": update_output,
+            }
+        )
+        current_gov = update_output
+
+    final_artifact_path = condition_dir / "artifact.md"
+    final_text = final_artifact_path.read_text(encoding="utf-8")
+    final_output, final_trace = call_governor(
+        condition_dir,
+        packet_dir=packet_dir,
+        run_id=run_id,
+        call_id="gov_final_audit",
+        call_type="gov_final_audit",
+        turn_index=EXPECTED_TURN_COUNT,
+        next_turn=None,
+        registry=registry,
+        prior_state=current_gov["state_object"],
+        prior_baton=current_gov["baton_pass"],
+        prior_artifact_hashes=prior_hashes,
+        prior_audit_results=prior_audit_results,
+        generation_artifact={
+            "artifact_id": "final_synthesis_artifact",
+            "artifact_hash": sha_text(final_text),
+            "artifact_path": str(final_artifact_path),
+        },
+        role_result=role_compliance(final_text, role="final_synthesis_author", final=True),
+        audit_result=state_audit(
+            final_text,
+            packet_dir=packet_dir,
+            state_object=current_gov["state_object"],
+            registry=registry,
+            prompt_card_hash=sha_file(Path(generation_records[-1]["prompt_card_path"])),
+        ),
+        timeout=timeout,
+        live=live,
+        final=True,
+    )
+    governor_traces.append(final_trace)
+    gov_final_record = {
+        "call_id": "gov_final_audit",
+        "call_type": "gov_final_audit",
+        "governor_model_id": provider_model(GOVERNOR_PROVIDER_MODEL)[1],
+        "prompt_card_path": final_trace["prompt_card_path"],
+        "prompt_card_sha256": sha_file(Path(final_trace["prompt_card_path"])),
+        "output_path": final_trace["artifact_path"],
+        "output_sha256": governor_output_hash(final_output),
+        "input_tokens": int(final_trace.get("input_tokens") or 0),
+        "output_tokens": int(final_trace.get("output_tokens") or 0),
+        "state_diff": {
+            "previous_state_sha256": governor_state_hash(current_gov),
+            "locked_state_sha256": governor_state_hash(final_output),
+        },
+        "registry_diff": {
+            "previous_registry_sha256": governor_registry_hash(current_gov),
+            "locked_registry_sha256": governor_registry_hash(final_output),
+        },
+        "baton_output_sha256": governor_baton_hash(final_output),
+        "output": final_output,
+    }
+    evidence = build_full_gov_v4_arch_evidence(
+        packet_dir=packet_dir,
+        run_id=run_id,
+        condition_dir=condition_dir,
+        gov_init_record=gov_init_record,
+        gov_update_records=gov_update_records,
+        gov_final_record=gov_final_record,
+        generation_records=generation_records,
+        final_artifact_path=final_artifact_path,
+        final_artifact_text=final_text,
+        synthetic_smoke_only=not live,
+    )
+    arch_errors = validate_full_gov_v4_arch_evidence(evidence)
+    arch_path = condition_dir / "arch_evidence.json"
+    write_json(arch_path, evidence)
+    all_traces = generation_traces + governor_traces
+    metadata = {
+        "runner_id": RUNNER_ID,
+        "run_mode": RUN_MODE_FULL_GOV_V4,
+        "holo_mode": HOLO_MODE_FULL_GOV_V4,
+        "run_id": run_id,
+        "condition": condition,
+        "condition_label": CONDITION_LABELS[condition],
+        "status": "live_generation_complete" if live else "planned_no_provider_full_gov_v4_smoke",
+        "created_at_utc": utc_iso(),
+        "provider_calls": sum(1 for trace in all_traces if trace.get("provider") != "no_provider_smoke"),
+        "expected_holo_call_count": FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT,
+        "provider_models": expected_holobuild_provider_models(HOLO_MODE_FULL_GOV_V4),
+        "scores_generated": SCORES_GENERATED,
+        "packet_dir": str(packet_dir),
+        "packet_id": read_json(packet_dir / "packet_lock.json")["packet_id"],
+        "packet_hash": sha_file(packet_dir / "source_packet.json"),
+        "artifact_path": str(final_artifact_path),
+        "artifact_written": True,
+        "artifact_sha256": sha_text(final_text),
+        "artifact_word_count": word_count(final_text),
+        "deterministic_gate_status": deterministic_gate_precheck(packet_dir, condition, final_text)["deterministic_gate_status"],
+        "architecture_evidence_path": str(arch_path),
+        "architecture_evidence_status": "valid" if not arch_errors else "invalid",
+        "architecture_evidence_errors": arch_errors,
+        "input_tokens": sum(int(trace.get("input_tokens") or 0) for trace in all_traces),
+        "output_tokens": sum(int(trace.get("output_tokens") or 0) for trace in all_traces),
+        "architecture_evidence_visible_to_judges": False,
+        "proof_credit_class": "no_provider_smoke_only" if not live else "full_gov_v4_proof_eligible",
+    }
+    write_json(condition_dir / "deterministic_gate_precheck.json", deterministic_gate_precheck(packet_dir, condition, final_text))
+    write_json(condition_dir / "artifact_metadata.json", metadata)
+    return {
+        "condition": condition,
+        "condition_dir": str(condition_dir),
+        "packet_hash": metadata["packet_hash"],
+        "artifact_path": str(final_artifact_path),
+        "artifact_sha256": metadata["artifact_sha256"],
+        "deterministic_gate_precheck": metadata["deterministic_gate_status"],
+        "architecture_evidence_status": metadata["architecture_evidence_status"],
+        "architecture_evidence_errors": arch_errors,
+        "architecture_evidence_path": str(arch_path),
+        "provider_calls": metadata["provider_calls"],
+        "expected_holo_call_count": FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT,
+        "holo_mode": HOLO_MODE_FULL_GOV_V4,
     }
 
 
@@ -1717,7 +2658,16 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
     }
 
 
-def write_condition_smoke(packet_dir: Path, run_id: str, condition: str) -> dict[str, Any]:
+def write_condition_smoke(
+    packet_dir: Path,
+    run_id: str,
+    condition: str,
+    *,
+    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+) -> dict[str, Any]:
+    if condition == "holo_build_arch" and holo_mode == HOLO_MODE_FULL_GOV_V4:
+        return run_holobuild_full_gov_v4(packet_dir, run_id, timeout=0, live=False)
+
     run_dir = packet_dir / "runs" / run_id
     condition_dir = run_dir / condition
     condition_dir.mkdir(parents=True, exist_ok=True)
@@ -1729,6 +2679,8 @@ def write_condition_smoke(packet_dir: Path, run_id: str, condition: str) -> dict
         "run_id": run_id,
         "condition": condition,
         "condition_label": CONDITION_LABELS[condition],
+        "run_mode": RUN_MODE,
+        "holo_mode": HOLO_MODE_DIAGNOSTIC_V3 if condition == "holo_build_arch" else None,
         "status": "planned_no_provider_smoke",
         "created_at_utc": utc_iso(),
         "provider_calls": PROVIDER_CALLS,
@@ -1770,7 +2722,13 @@ def write_condition_smoke(packet_dir: Path, run_id: str, condition: str) -> dict
     return result
 
 
-def update_run_manifest(packet_dir: Path, run_id: str, condition_results: list[dict[str, Any]]) -> dict[str, Any]:
+def update_run_manifest(
+    packet_dir: Path,
+    run_id: str,
+    condition_results: list[dict[str, Any]],
+    *,
+    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+) -> dict[str, Any]:
     run_dir = packet_dir / "runs" / run_id
     manifest_path = run_dir / "run_manifest.json"
     previous: dict[str, Any] = {}
@@ -1781,7 +2739,8 @@ def update_run_manifest(packet_dir: Path, run_id: str, condition_results: list[d
         existing[item["condition"]] = item
     manifest = {
         "runner_id": RUNNER_ID,
-        "run_mode": RUN_MODE,
+        "run_mode": run_mode_for_holo_mode(holo_mode),
+        "holo_mode": holo_mode if any(item.get("condition") == "holo_build_arch" for item in condition_results) else None,
         "run_id": run_id,
         "status": "NO_PROVIDER_SMOKE_READY",
         "updated_at_utc": utc_iso(),
@@ -1795,13 +2754,20 @@ def update_run_manifest(packet_dir: Path, run_id: str, condition_results: list[d
         "live_requires_flag": "--live",
         "live_requires_env": f"{LIVE_APPROVAL_ENV}=1",
         "expected_turn_count_per_condition": EXPECTED_TURN_COUNT,
+        "expected_holo_call_count": expected_holo_call_count(holo_mode),
         "final_word_target": FINAL_WORD_TARGET,
     }
     write_json(manifest_path, manifest)
     return manifest
 
 
-def update_live_run_manifest(packet_dir: Path, run_id: str, condition_results: list[dict[str, Any]]) -> dict[str, Any]:
+def update_live_run_manifest(
+    packet_dir: Path,
+    run_id: str,
+    condition_results: list[dict[str, Any]],
+    *,
+    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+) -> dict[str, Any]:
     run_dir = packet_dir / "runs" / run_id
     manifest_path = run_dir / "run_manifest.json"
     previous: dict[str, Any] = {}
@@ -1812,7 +2778,8 @@ def update_live_run_manifest(packet_dir: Path, run_id: str, condition_results: l
         existing[item["condition"]] = item
     manifest = {
         "runner_id": RUNNER_ID,
-        "run_mode": RUN_MODE,
+        "run_mode": run_mode_for_holo_mode(holo_mode),
+        "holo_mode": holo_mode if any(item.get("condition") == "holo_build_arch" for item in condition_results) else None,
         "run_id": run_id,
         "status": "LIVE_GENERATION_COMPLETE",
         "updated_at_utc": utc_iso(),
@@ -1827,16 +2794,23 @@ def update_live_run_manifest(packet_dir: Path, run_id: str, condition_results: l
         "live_requires_env": f"{LIVE_APPROVAL_ENV}=1",
         "blind_export_ready_after_artifacts": set(existing) >= set(VALID_CONDITIONS),
         "expected_turn_count_per_condition": EXPECTED_TURN_COUNT,
+        "expected_holo_call_count": expected_holo_call_count(holo_mode),
         "final_word_target": FINAL_WORD_TARGET,
     }
     write_json(manifest_path, manifest)
     return manifest
 
 
-def run_no_provider_smoke(packet_dir: Path, run_id: str, conditions: list[str]) -> int:
+def run_no_provider_smoke(
+    packet_dir: Path,
+    run_id: str,
+    conditions: list[str],
+    *,
+    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+) -> int:
     require_packet(packet_dir)
-    results = [write_condition_smoke(packet_dir, run_id, condition) for condition in conditions]
-    manifest = update_run_manifest(packet_dir, run_id, results)
+    results = [write_condition_smoke(packet_dir, run_id, condition, holo_mode=holo_mode) for condition in conditions]
+    manifest = update_run_manifest(packet_dir, run_id, results, holo_mode=holo_mode)
     status = "D5_MINI_SCOUT_RUNNER_NO_PROVIDER_SMOKE_PASS"
     if any(item.get("architecture_evidence_errors") for item in results):
         status = "D5_MINI_SCOUT_RUNNER_NO_PROVIDER_SMOKE_FAIL"
@@ -1845,6 +2819,8 @@ def run_no_provider_smoke(packet_dir: Path, run_id: str, conditions: list[str]) 
             {
                 "status": status,
                 "runner_id": RUNNER_ID,
+                "run_mode": run_mode_for_holo_mode(holo_mode),
+                "holo_mode": holo_mode if "holo_build_arch" in conditions else None,
                 "run_id": run_id,
                 "packet_hash": manifest["packet_hash"],
                 "conditions": results,
@@ -1861,7 +2837,14 @@ def run_no_provider_smoke(packet_dir: Path, run_id: str, conditions: list[str]) 
     return 0 if status.endswith("_PASS") else 1
 
 
-def run_live_guarded(packet_dir: Path, run_id: str, conditions: list[str], timeout: int) -> int:
+def run_live_guarded(
+    packet_dir: Path,
+    run_id: str,
+    conditions: list[str],
+    timeout: int,
+    *,
+    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+) -> int:
     require_packet(packet_dir)
     if os.getenv(LIVE_APPROVAL_ENV) != "1":
         print(
@@ -1875,14 +2858,17 @@ def run_live_guarded(packet_dir: Path, run_id: str, conditions: list[str], timeo
             )
         )
         return 2
-    ensure_env_available(conditions)
+    ensure_env_available(conditions, holo_mode=holo_mode)
     results: list[dict[str, Any]] = []
     try:
         for condition in conditions:
             if condition == "solo_openai_gpt_5_5":
                 results.append(run_live_solo(packet_dir, run_id, timeout))
             elif condition == "holo_build_arch":
-                results.append(run_live_holobuild(packet_dir, run_id, timeout))
+                if holo_mode == HOLO_MODE_FULL_GOV_V4:
+                    results.append(run_holobuild_full_gov_v4(packet_dir, run_id, timeout, live=True))
+                else:
+                    results.append(run_live_holobuild(packet_dir, run_id, timeout))
             else:
                 raise RuntimeError(f"unknown condition: {condition}")
     except ProviderCallError as exc:
@@ -1900,11 +2886,13 @@ def run_live_guarded(packet_dir: Path, run_id: str, conditions: list[str], timeo
             )
         )
         return 1
-    manifest = update_live_run_manifest(packet_dir, run_id, results)
+    manifest = update_live_run_manifest(packet_dir, run_id, results, holo_mode=holo_mode)
     print(
         json.dumps(
             {
                 "status": "D5_MINI_SCOUT_LIVE_GENERATION_COMPLETE",
+                "run_mode": run_mode_for_holo_mode(holo_mode),
+                "holo_mode": holo_mode if "holo_build_arch" in conditions else None,
                 "run_id": run_id,
                 "conditions": results,
                 "timeout": timeout,
@@ -1925,6 +2913,7 @@ def main() -> int:
     parser.add_argument("--condition", action="append", choices=VALID_CONDITIONS, required=True)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--timeout", type=int, default=900)
+    parser.add_argument("--holo-mode", choices=HOLO_MODES, default=HOLO_MODE_DIAGNOSTIC_V3)
     parser.add_argument("--no-provider-smoke", action="store_true")
     parser.add_argument("--live", action="store_true")
     args = parser.parse_args()
@@ -1932,8 +2921,8 @@ def main() -> int:
     packet_dir = Path(args.packet_dir).resolve()
     conditions = list(dict.fromkeys(args.condition))
     if args.live:
-        return run_live_guarded(packet_dir, args.run_id, conditions, args.timeout)
-    return run_no_provider_smoke(packet_dir, args.run_id, conditions)
+        return run_live_guarded(packet_dir, args.run_id, conditions, args.timeout, holo_mode=args.holo_mode)
+    return run_no_provider_smoke(packet_dir, args.run_id, conditions, holo_mode=args.holo_mode)
 
 
 if __name__ == "__main__":

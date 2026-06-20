@@ -24,7 +24,10 @@ RUN_MODE_PATENT_ALIGNED_V4 = "d5_medtech_capacity_strain_001_patent_aligned_v4"
 HOLO_MODE_DIAGNOSTIC_V3 = "diagnostic_v3"
 HOLO_MODE_FULL_GOV_V4 = "full_gov_v4"
 HOLO_MODE_PATENT_ALIGNED_V4 = "patent_aligned_v4"
+PROOF_ELIGIBLE_HOLO_MODE = HOLO_MODE_PATENT_ALIGNED_V4
+LEGACY_HOLO_MODES = (HOLO_MODE_DIAGNOSTIC_V3, HOLO_MODE_FULL_GOV_V4)
 HOLO_MODES = (HOLO_MODE_DIAGNOSTIC_V3, HOLO_MODE_FULL_GOV_V4, HOLO_MODE_PATENT_ALIGNED_V4)
+LEGACY_MODE_DEPRECATION_NOTICE = "Legacy Holo modes are preserved for ablation/history only and are banned from proof-credit use."
 LIVE_APPROVAL_ENV = "HOLO_ALLOW_LIVE"
 PROVIDER_CALLS = 0
 ATTEMPTED_PROVIDER_CALLS = 0
@@ -245,6 +248,70 @@ def run_mode_for_holo_mode(holo_mode: str) -> str:
     return RUN_MODE_FULL_GOV_V4 if holo_mode == HOLO_MODE_FULL_GOV_V4 else RUN_MODE
 
 
+def holo_mode_status(holo_mode: str) -> str:
+    if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4:
+        return "proof_eligible_if_evidence_validates"
+    if holo_mode in LEGACY_HOLO_MODES:
+        return "diagnostic_only_no_proof_credit"
+    raise ValueError(f"unknown_holo_mode:{holo_mode}")
+
+
+def is_legacy_holo_mode(holo_mode: str) -> bool:
+    return holo_mode in LEGACY_HOLO_MODES
+
+
+def holo_mode_policy(holo_mode: str, *, evidence_valid: bool = False, deterministic_gate_pass: bool = False) -> dict[str, Any]:
+    legacy = is_legacy_holo_mode(holo_mode)
+    proof_eligible = (
+        holo_mode == HOLO_MODE_PATENT_ALIGNED_V4
+        and evidence_valid
+        and deterministic_gate_pass
+    )
+    return {
+        "holo_mode": holo_mode,
+        "holo_mode_status": holo_mode_status(holo_mode),
+        "preferred_proof_eligible_holo_mode": PROOF_ELIGIBLE_HOLO_MODE,
+        "proof_credit_eligible": proof_eligible,
+        "legacy_holo_mode": legacy,
+        "legacy_mode_reason": LEGACY_MODE_DEPRECATION_NOTICE if legacy else None,
+        "proof_credit_class": "patent_aligned_v4_proof_eligible" if proof_eligible else "diagnostic_only_no_proof_credit",
+    }
+
+
+def enforce_legacy_holo_mode_guard(holo_mode: str, *, diagnostic_legacy_holo_mode: bool) -> None:
+    if is_legacy_holo_mode(holo_mode) and not diagnostic_legacy_holo_mode:
+        raise SystemExit(
+            json.dumps(
+                {
+                    "status": "D5_MINI_SCOUT_LEGACY_HOLO_MODE_FAIL_CLOSED",
+                    "reason": "legacy_holo_mode_requires_explicit_diagnostic_flag",
+                    "holo_mode": holo_mode,
+                    "required_flag": "--diagnostic-legacy-holo-mode",
+                    "legacy_mode_reason": LEGACY_MODE_DEPRECATION_NOTICE,
+                    "proof_credit_eligible": False,
+                    "provider_calls": PROVIDER_CALLS,
+                    **provider_call_accounting(),
+                },
+                indent=2,
+            )
+        )
+
+
+def proof_credit_architecture_requirements() -> list[str]:
+    return [
+        "mode = patent_aligned_v4",
+        "STATE_OBJECT present and injected",
+        "BATON_PASS present and injected",
+        "ARTIFACTS_REGISTRY present and injected",
+        "retrieved pinned artifacts by registry ID",
+        "role compliance recorded",
+        "state audit recorded",
+        "prompt-card hash matching",
+        "architecture_evidence_visible_to_judges=false",
+        "deterministic gate pass",
+    ]
+
+
 def expected_holo_call_count(holo_mode: str) -> int:
     return FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT if holo_mode == HOLO_MODE_FULL_GOV_V4 else EXPECTED_TURN_COUNT
 
@@ -360,14 +427,19 @@ def visible_surface_boundary() -> dict[str, Any]:
     }
 
 
-def proof_credit_readiness(holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3) -> dict[str, Any]:
+def proof_credit_readiness(holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE) -> dict[str, Any]:
     return {
         "fail_closed_if_architecture_evidence_missing": True,
         "proof_credit_allowed_if_architecture_evidence_missing": False,
         "diagnostic_only_if_architecture_evidence_missing": True,
         "required_evidence_validation_status": "validated",
-        "preferred_proof_eligible_holo_mode": HOLO_MODE_PATENT_ALIGNED_V4,
+        "preferred_proof_eligible_holo_mode": PROOF_ELIGIBLE_HOLO_MODE,
         "current_holo_mode": holo_mode,
+        "current_holo_mode_status": holo_mode_status(holo_mode),
+        "proof_credit_eligible_before_validation": False,
+        "legacy_holo_mode": is_legacy_holo_mode(holo_mode),
+        "legacy_mode_reason": LEGACY_MODE_DEPRECATION_NOTICE if is_legacy_holo_mode(holo_mode) else None,
+        "proof_credit_architecture_requirements": proof_credit_architecture_requirements(),
         "external_governor_provider_calls_required_for_proof_credit": False,
         "token_burn_policy": "reported_not_forced",
     }
@@ -378,7 +450,7 @@ def smoke_arch_evidence(
     run_id: str,
     condition_dir: Path,
     *,
-    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+    holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE,
 ) -> dict[str, Any]:
     registry = base_registry(packet_dir)
     prior_artifact_ids: list[str] = []
@@ -1739,7 +1811,7 @@ def call_governor(
     return payload, trace, repair_records
 
 
-def required_env_for_conditions(conditions: list[str], *, holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3) -> list[str]:
+def required_env_for_conditions(conditions: list[str], *, holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE) -> list[str]:
     provider_models: list[str] = []
     if "solo_openai_gpt_5_5" in conditions:
         provider_models.append(SOLO_PROVIDER_MODEL)
@@ -1754,7 +1826,7 @@ def required_env_for_conditions(conditions: list[str], *, holo_mode: str = HOLO_
     return envs
 
 
-def ensure_env_available(conditions: list[str], *, holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3) -> None:
+def ensure_env_available(conditions: list[str], *, holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE) -> None:
     required = required_env_for_conditions(conditions, holo_mode=holo_mode)
     missing = [env for env in required if not os.getenv(env)]
     if missing:
@@ -2252,7 +2324,7 @@ def build_live_arch_evidence(
     turn_records: list[dict[str, Any]],
     final_artifact_path: Path,
     final_artifact_text: str,
-    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+    holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE,
     synthetic_smoke_only: bool = False,
 ) -> dict[str, Any]:
     hashes = packet_hash_bundle(packet_dir)
@@ -2333,8 +2405,14 @@ def build_live_arch_evidence(
         "state_object_source": "internal_context_governor_step" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 else "runner_constructed_diagnostic",
         "baton_pass_source": "internal_context_governor_step" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 else "runner_constructed_diagnostic",
         "artifact_registry_source": "internal_context_governor_step" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 else "runner_constructed_diagnostic",
-        "proof_credit_class": "patent_aligned_v4_proof_eligible" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 and not synthetic_smoke_only else "diagnostic_only",
+        **holo_mode_policy(
+            holo_mode,
+            evidence_valid=(holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 and not synthetic_smoke_only),
+            deterministic_gate_pass=False,
+        ),
+        "proof_credit_gate_dependency": "artifact_metadata must combine validated architecture evidence with deterministic_gate_status=pass",
         "synthetic_smoke_only": synthetic_smoke_only,
+        "legacy_mode_deprecation_notice": LEGACY_MODE_DEPRECATION_NOTICE,
         "external_governor_provider_calls_required_for_proof_credit": False,
         "token_burn_policy": "reported_not_forced",
         "provider_calls_recorded": PROVIDER_CALLS,
@@ -2382,8 +2460,10 @@ def build_full_gov_v4_arch_evidence(
         "domain_id": "D5_healthcare_medtech_evidence_synthesis",
         "condition_type": "holo_build_arch",
         "holo_mode": HOLO_MODE_FULL_GOV_V4,
-        "proof_credit_class": "no_provider_smoke_only" if synthetic_smoke_only else "external_provider_gov_v4_diagnostic",
+        **holo_mode_policy(HOLO_MODE_FULL_GOV_V4, evidence_valid=False, deterministic_gate_pass=False),
+        "proof_credit_class": "no_provider_smoke_only" if synthetic_smoke_only else "diagnostic_only_no_proof_credit",
         "synthetic_smoke_only": synthetic_smoke_only,
+        "legacy_mode_deprecation_notice": LEGACY_MODE_DEPRECATION_NOTICE,
         "expected_holo_call_count": FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT,
         "external_governor_provider_calls_required_for_proof_credit": False,
         "diagnostic_note": "External provider-Governor mode is retained for diagnostics only; patent_aligned_v4 is the preferred proof-eligible mode.",
@@ -3294,7 +3374,7 @@ def run_live_holobuild(
     run_id: str,
     timeout: int,
     *,
-    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+    holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE,
 ) -> dict[str, Any]:
     condition = "holo_build_arch"
     condition_dir = packet_dir / "runs" / run_id / condition
@@ -3555,10 +3635,16 @@ def run_live_holobuild(
     )
     metadata["run_mode"] = run_mode_for_holo_mode(holo_mode)
     metadata["holo_mode"] = holo_mode
-    metadata["proof_credit_class"] = (
-        "patent_aligned_v4_proof_eligible" if holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 else "architecture_surface_diagnostic_only"
+    metadata.update(
+        holo_mode_policy(
+            holo_mode,
+            evidence_valid=(holo_mode == HOLO_MODE_PATENT_ALIGNED_V4 and not arch_errors),
+            deterministic_gate_pass=(metadata["deterministic_gate_status"] == "pass"),
+        )
     )
     metadata["external_governor_provider_calls_required_for_proof_credit"] = False
+    metadata["proof_credit_architecture_requirements"] = proof_credit_architecture_requirements()
+    metadata["legacy_mode_deprecation_notice"] = LEGACY_MODE_DEPRECATION_NOTICE
     write_json(condition_dir / "artifact_metadata.json", metadata)
     return {
         "condition": condition,
@@ -3581,7 +3667,7 @@ def write_condition_smoke(
     run_id: str,
     condition: str,
     *,
-    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+    holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE,
 ) -> dict[str, Any]:
     if condition == "holo_build_arch" and holo_mode == HOLO_MODE_FULL_GOV_V4:
         return run_holobuild_full_gov_v4(packet_dir, run_id, timeout=0, live=False)
@@ -3618,9 +3704,11 @@ def write_condition_smoke(
             "architecture_evidence_path": str(arch_path),
             "architecture_evidence_status": "valid" if not arch_errors else "invalid",
             "architecture_evidence_errors": arch_errors,
+            **holo_mode_policy(holo_mode, evidence_valid=False, deterministic_gate_pass=(gate["deterministic_gate_status"] == "pass")),
             "proof_credit_class": "no_provider_smoke_only",
             "external_governor_provider_calls_required_for_proof_credit": False,
             "token_burn_policy": "reported_not_forced",
+            "legacy_mode_deprecation_notice": LEGACY_MODE_DEPRECATION_NOTICE,
         }
         write_json(condition_dir / "artifact_metadata.json", metadata)
         return {
@@ -3647,10 +3735,12 @@ def write_condition_smoke(
         "run_id": run_id,
         "condition": condition,
         "condition_label": CONDITION_LABELS[condition],
-        "run_mode": RUN_MODE,
-        "holo_mode": HOLO_MODE_DIAGNOSTIC_V3 if condition == "holo_build_arch" else None,
+        "run_mode": run_mode_for_holo_mode(holo_mode) if condition == "holo_build_arch" else RUN_MODE,
+        "holo_mode": holo_mode if condition == "holo_build_arch" else None,
         "status": "planned_no_provider_smoke",
         "created_at_utc": utc_iso(),
+        **(holo_mode_policy(holo_mode, evidence_valid=False, deterministic_gate_pass=False) if condition == "holo_build_arch" else {}),
+        "legacy_mode_deprecation_notice": LEGACY_MODE_DEPRECATION_NOTICE if condition == "holo_build_arch" else None,
         "provider_calls": PROVIDER_CALLS,
         "live_artifacts_generated": LIVE_ARTIFACTS_GENERATED,
         "scores_generated": SCORES_GENERATED,
@@ -3672,7 +3762,7 @@ def write_condition_smoke(
     arch_status = "not_applicable"
     arch_errors: list[str] = []
     if condition == "holo_build_arch":
-        evidence = smoke_arch_evidence(packet_dir, run_id, condition_dir)
+        evidence = smoke_arch_evidence(packet_dir, run_id, condition_dir, holo_mode=holo_mode)
         arch_errors = validate_smoke_arch_evidence(evidence)
         arch_status = "wired_and_schema_shape_valid" if not arch_errors else "invalid"
         write_json(condition_dir / "arch_evidence.json", evidence)
@@ -3695,7 +3785,7 @@ def update_run_manifest(
     run_id: str,
     condition_results: list[dict[str, Any]],
     *,
-    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+    holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE,
 ) -> dict[str, Any]:
     run_dir = packet_dir / "runs" / run_id
     manifest_path = run_dir / "run_manifest.json"
@@ -3709,6 +3799,10 @@ def update_run_manifest(
         "runner_id": RUNNER_ID,
         "run_mode": run_mode_for_holo_mode(holo_mode),
         "holo_mode": holo_mode if any(item.get("condition") == "holo_build_arch" for item in condition_results) else None,
+        "holo_mode_status": holo_mode_status(holo_mode) if any(item.get("condition") == "holo_build_arch" for item in condition_results) else None,
+        "proof_eligible_holo_mode": PROOF_ELIGIBLE_HOLO_MODE,
+        "legacy_holo_mode": is_legacy_holo_mode(holo_mode) if any(item.get("condition") == "holo_build_arch" for item in condition_results) else False,
+        "legacy_mode_deprecation_notice": LEGACY_MODE_DEPRECATION_NOTICE,
         "run_id": run_id,
         "status": "NO_PROVIDER_SMOKE_READY",
         "updated_at_utc": utc_iso(),
@@ -3735,7 +3829,7 @@ def update_live_run_manifest(
     run_id: str,
     condition_results: list[dict[str, Any]],
     *,
-    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+    holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE,
 ) -> dict[str, Any]:
     run_dir = packet_dir / "runs" / run_id
     manifest_path = run_dir / "run_manifest.json"
@@ -3749,6 +3843,10 @@ def update_live_run_manifest(
         "runner_id": RUNNER_ID,
         "run_mode": run_mode_for_holo_mode(holo_mode),
         "holo_mode": holo_mode if any(item.get("condition") == "holo_build_arch" for item in condition_results) else None,
+        "holo_mode_status": holo_mode_status(holo_mode) if any(item.get("condition") == "holo_build_arch" for item in condition_results) else None,
+        "proof_eligible_holo_mode": PROOF_ELIGIBLE_HOLO_MODE,
+        "legacy_holo_mode": is_legacy_holo_mode(holo_mode) if any(item.get("condition") == "holo_build_arch" for item in condition_results) else False,
+        "legacy_mode_deprecation_notice": LEGACY_MODE_DEPRECATION_NOTICE,
         "run_id": run_id,
         "status": "LIVE_GENERATION_COMPLETE",
         "updated_at_utc": utc_iso(),
@@ -3776,7 +3874,7 @@ def run_no_provider_smoke(
     run_id: str,
     conditions: list[str],
     *,
-    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+    holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE,
 ) -> int:
     require_packet(packet_dir)
     results = [write_condition_smoke(packet_dir, run_id, condition, holo_mode=holo_mode) for condition in conditions]
@@ -3813,7 +3911,7 @@ def run_live_guarded(
     conditions: list[str],
     timeout: int,
     *,
-    holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3,
+    holo_mode: str = PROOF_ELIGIBLE_HOLO_MODE,
 ) -> int:
     require_packet(packet_dir)
     if os.getenv(LIVE_APPROVAL_ENV) != "1":
@@ -3841,7 +3939,7 @@ def run_live_guarded(
                 elif holo_mode == HOLO_MODE_PATENT_ALIGNED_V4:
                     results.append(run_live_holobuild(packet_dir, run_id, timeout, holo_mode=holo_mode))
                 else:
-                    results.append(run_live_holobuild(packet_dir, run_id, timeout))
+                    results.append(run_live_holobuild(packet_dir, run_id, timeout, holo_mode=holo_mode))
             else:
                 raise RuntimeError(f"unknown condition: {condition}")
     except ProviderCallError as exc:
@@ -3899,7 +3997,8 @@ def main() -> int:
     parser.add_argument("--condition", action="append", choices=VALID_CONDITIONS)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--timeout", type=int, default=900)
-    parser.add_argument("--holo-mode", choices=HOLO_MODES, default=HOLO_MODE_DIAGNOSTIC_V3)
+    parser.add_argument("--holo-mode", choices=HOLO_MODES, default=PROOF_ELIGIBLE_HOLO_MODE)
+    parser.add_argument("--diagnostic-legacy-holo-mode", action="store_true", help="Required to run legacy Holo modes as diagnostic-only ablations/history. Legacy modes are banned from proof-credit use.")
     parser.add_argument("--gov-model", default=DEFAULT_GOVERNOR_PROVIDER_MODEL)
     parser.add_argument("--gov-repair-smoke-case", choices=GOV_REPAIR_SMOKE_CASES)
     parser.add_argument("--empty-gov-failure-smoke", action="store_true")
@@ -3910,6 +4009,7 @@ def main() -> int:
     packet_dir = Path(args.packet_dir).resolve()
     validate_provider_model_name(args.gov_model)
     GOVERNOR_PROVIDER_MODEL = args.gov_model
+    enforce_legacy_holo_mode_guard(args.holo_mode, diagnostic_legacy_holo_mode=args.diagnostic_legacy_holo_mode)
     if args.empty_gov_failure_smoke:
         if args.live:
             parser.error("--empty-gov-failure-smoke is no-provider only and cannot be used with --live")

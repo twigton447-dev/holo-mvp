@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import importlib.util
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +26,9 @@ EXPECTED_TURN_COUNT = 6
 EXPECTED_FULL_GOV_V4_CALL_COUNT = 14
 EXPECTED_GOVERNOR_MAX_REPAIR_ATTEMPTS = 1
 EXPECTED_WORD_TARGET = 1100
+PROOF_ELIGIBLE_HOLO_MODE = "patent_aligned_v4"
+LEGACY_HOLO_MODES = ("diagnostic_v3", "full_gov_v4")
+LEGACY_MODE_DEPRECATION_NOTICE = "Legacy Holo modes are preserved for ablation/history only and are banned from proof-credit use."
 REQUIRED_ARCH_TOKENS = [
     "CANONICAL STATE_OBJECT",
     "STATE_OBJECT_SHA256",
@@ -81,7 +86,7 @@ REQUIRED_FULL_GOV_V4_TOKENS = [
     "governor_output_or_governor_locked_update",
     "proof_credit_class",
     "no_provider_smoke_only",
-    "external_provider_gov_v4_diagnostic",
+    "diagnostic_only_no_proof_credit",
     "synthetic_smoke_only",
     "expected_holo_call_count",
     "generation prompt hash not matching Gov-produced state/baton/registry = no proof credit",
@@ -135,6 +140,16 @@ REQUIRED_FULL_GOV_V4_TOKENS = [
     "SETTLED_DECISIONS",
     "ARTIFACTS_REGISTRY",
     "REQUIRED_TOOLS",
+    "PROOF_ELIGIBLE_HOLO_MODE",
+    "LEGACY_HOLO_MODES",
+    "LEGACY_MODE_DEPRECATION_NOTICE",
+    "D5_MINI_SCOUT_LEGACY_HOLO_MODE_FAIL_CLOSED",
+    "--diagnostic-legacy-holo-mode",
+    "diagnostic_only_no_proof_credit",
+    "proof_credit_eligible",
+    "legacy_holo_mode",
+    "legacy_mode_reason",
+    "proof_credit_architecture_requirements",
 ]
 EXPECTED_SOLO_ROLES = [
     "initial_decision_brief_draft",
@@ -174,6 +189,17 @@ def require(condition: bool, errors: list[str], message: str) -> None:
         errors.append(message)
 
 
+def load_module_from_path(module_name: str, path: Path) -> Any:
+    if str(path.parent) not in sys.path:
+        sys.path.insert(0, str(path.parent))
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Cannot import {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def literal_assignments(source: str) -> dict[str, Any]:
     assignments: dict[str, Any] = {}
     tree = ast.parse(source)
@@ -207,6 +233,8 @@ def main() -> int:
         runner_text = RUNNER_PATH.read_text(encoding="utf-8")
         exporter_text = EXPORTER_PATH.read_text(encoding="utf-8")
         runner_assignments = literal_assignments(runner_text)
+        runner_module = load_module_from_path("d5_runner_guard_validation", RUNNER_PATH)
+        exporter_module = load_module_from_path("d5_exporter_guard_validation", EXPORTER_PATH)
 
         require(packet_hash == EXPECTED_PACKET_HASH, errors, "D5 packet hash mismatch")
         require(packet.get("real_public_sources_only") is True, errors, "packet is not real-public-sources-only")
@@ -231,6 +259,9 @@ def main() -> int:
         require(runner_assignments.get("RUN_MODE_PATENT_ALIGNED_V4") == "d5_medtech_capacity_strain_001_patent_aligned_v4", errors, "runner missing patent-aligned v4 run mode")
         require(runner_assignments.get("HOLO_MODE_FULL_GOV_V4") == "full_gov_v4", errors, "runner missing full Gov v4 mode literal")
         require(runner_assignments.get("HOLO_MODE_PATENT_ALIGNED_V4") == "patent_aligned_v4", errors, "runner missing patent-aligned v4 mode literal")
+        require(runner_assignments.get("PROOF_ELIGIBLE_HOLO_MODE") is None or "PROOF_ELIGIBLE_HOLO_MODE = HOLO_MODE_PATENT_ALIGNED_V4" in runner_text, errors, "runner does not lock proof mode to patent_aligned_v4")
+        require("LEGACY_HOLO_MODES = (HOLO_MODE_DIAGNOSTIC_V3, HOLO_MODE_FULL_GOV_V4)" in runner_text, errors, "runner does not hard-code legacy Holo modes")
+        require(LEGACY_MODE_DEPRECATION_NOTICE in runner_text, errors, "runner missing legacy deprecation notice")
         require(runner_assignments.get("FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT") == EXPECTED_FULL_GOV_V4_CALL_COUNT, errors, "full Gov v4 expected call count is not 14")
         require(runner_assignments.get("GOVERNOR_MAX_REPAIR_ATTEMPTS") == EXPECTED_GOVERNOR_MAX_REPAIR_ATTEMPTS, errors, "Governor repair attempts are not bounded to one")
         require(runner_assignments.get("DEFAULT_GOVERNOR_PROVIDER_MODEL") == "openai:gpt-5.5", errors, "default Governor model is not a fixed model ID")
@@ -253,6 +284,10 @@ def main() -> int:
         require("expected_holobuild_provider_models" in runner_text, errors, "runner missing full Gov model-count helper")
         require("GOVERNOR_PROVIDER_MODEL] + generation_models + [GOVERNOR_PROVIDER_MODEL] * (EXPECTED_TURN_COUNT + 1)" in runner_text, errors, "runner does not model 1 Gov init + 6 generation + 6 update + 1 final Gov call")
         require("external_governor_provider_calls_required_for_proof_credit\": False" in runner_text, errors, "runner still appears to require external Governor provider calls for proof credit")
+        require("default=PROOF_ELIGIBLE_HOLO_MODE" in runner_text, errors, "runner default Holo mode is not patent_aligned_v4")
+        require("--diagnostic-legacy-holo-mode" in runner_text, errors, "runner missing explicit diagnostic legacy flag")
+        require("enforce_legacy_holo_mode_guard(args.holo_mode" in runner_text, errors, "runner does not enforce legacy-mode guard")
+        require("D5_MINI_SCOUT_LEGACY_HOLO_MODE_FAIL_CLOSED" in runner_text, errors, "runner missing legacy mode fail-closed status")
         require("token_burn_policy\": \"reported_not_forced\"" in runner_text, errors, "runner does not record token burn as reported, not forced")
         for state_field in ("USER_GOAL", "LATEST_INPUT_SUMMARY", "CRITICAL_CONSTRAINTS", "ROLLING_SUMMARY", "SETTLED_DECISIONS", "ARTIFACTS_REGISTRY", "REQUIRED_TOOLS"):
             require(state_field in runner_text, errors, f"runner missing patent STATE_OBJECT field: {state_field}")
@@ -285,6 +320,66 @@ def main() -> int:
         require("neutral_domain_card" in exporter_text, errors, "blind exporter missing neutral domain card")
         require("neutral_rubric" in exporter_text, errors, "blind exporter missing neutral rubric")
         require("scan_text" in exporter_text, errors, "blind exporter missing contamination scan")
+        require("--export-purpose" in exporter_text, errors, "blind exporter missing explicit export purpose")
+        require("diagnostic_ablation" in exporter_text, errors, "blind exporter missing explicit diagnostic/ablation export purpose")
+        require("proof_export_guard" in exporter_text, errors, "blind exporter missing proof export guard")
+        require("D5_MINI_SCOUT_BLIND_EXPORT_FAIL_CLOSED_LEGACY_MODE" in exporter_text, errors, "blind exporter does not fail closed on legacy proof exports")
+        require("D5_MINI_SCOUT_BLIND_EXPORT_FAIL_CLOSED_PROOF_INELIGIBLE" in exporter_text, errors, "blind exporter does not fail closed on proof-ineligible Holo artifacts")
+        require("patent_aligned_v4_proof_eligible" in exporter_text, errors, "blind exporter does not require patent_aligned proof class")
+
+        # Dynamic guard checks: prove old modes cannot become proof-eligible and proof export refuses them.
+        for legacy_mode in LEGACY_HOLO_MODES:
+            policy = runner_module.holo_mode_policy(legacy_mode, evidence_valid=True, deterministic_gate_pass=True)
+            require(policy.get("proof_credit_eligible") is False, errors, f"{legacy_mode} unexpectedly proof-eligible")
+            require(policy.get("proof_credit_class") == "diagnostic_only_no_proof_credit", errors, f"{legacy_mode} proof class is not diagnostic-only")
+            try:
+                runner_module.enforce_legacy_holo_mode_guard(legacy_mode, diagnostic_legacy_holo_mode=False)
+                require(False, errors, f"{legacy_mode} did not fail closed without diagnostic flag")
+            except SystemExit:
+                pass
+            runner_module.enforce_legacy_holo_mode_guard(legacy_mode, diagnostic_legacy_holo_mode=True)
+        patent_policy = runner_module.holo_mode_policy(PROOF_ELIGIBLE_HOLO_MODE, evidence_valid=True, deterministic_gate_pass=True)
+        require(patent_policy.get("proof_credit_eligible") is True, errors, "patent_aligned_v4 is not proof-eligible after evidence and gate pass")
+        patent_without_evidence = runner_module.holo_mode_policy(PROOF_ELIGIBLE_HOLO_MODE, evidence_valid=False, deterministic_gate_pass=True)
+        require(patent_without_evidence.get("proof_credit_eligible") is False, errors, "patent_aligned_v4 proof eligible without evidence validation")
+
+        original_loader = exporter_module.load_condition_metadata
+        try:
+            exporter_module.load_condition_metadata = lambda packet_dir, run_id, condition: {
+                "holo_mode": "diagnostic_v3",
+                "legacy_holo_mode": True,
+                "proof_credit_eligible": False,
+                "proof_credit_class": "diagnostic_only_no_proof_credit",
+                "deterministic_gate_status": "pass",
+                "architecture_evidence_status": "valid",
+            }
+            legacy_export = exporter_module.proof_export_guard(PACKET_DIR, "synthetic", {"holo_build_arch": "body"}, "proof")
+            require(legacy_export.get("proof_export_allowed") is False, errors, "proof export allows legacy diagnostic_v3")
+            require(legacy_export.get("status") == "D5_MINI_SCOUT_BLIND_EXPORT_FAIL_CLOSED_LEGACY_MODE", errors, "legacy proof export does not fail with legacy-mode status")
+            diagnostic_export = exporter_module.proof_export_guard(PACKET_DIR, "synthetic", {"holo_build_arch": "body"}, "diagnostic_ablation")
+            require(diagnostic_export.get("proof_export_allowed") is True and diagnostic_export.get("diagnostic_export") is True, errors, "diagnostic export does not explicitly allow legacy ablation")
+            exporter_module.load_condition_metadata = lambda packet_dir, run_id, condition: {
+                "holo_mode": "patent_aligned_v4",
+                "legacy_holo_mode": False,
+                "proof_credit_eligible": True,
+                "proof_credit_class": "patent_aligned_v4_proof_eligible",
+                "deterministic_gate_status": "pass",
+                "architecture_evidence_status": "valid",
+            }
+            proof_export = exporter_module.proof_export_guard(PACKET_DIR, "synthetic", {"holo_build_arch": "body"}, "proof")
+            require(proof_export.get("proof_export_allowed") is True and proof_export.get("diagnostic_export") is False, errors, "proof export refuses valid patent_aligned_v4")
+            exporter_module.load_condition_metadata = lambda packet_dir, run_id, condition: {
+                "holo_mode": "patent_aligned_v4",
+                "legacy_holo_mode": False,
+                "proof_credit_eligible": False,
+                "proof_credit_class": "diagnostic_only_no_proof_credit",
+                "deterministic_gate_status": "pass",
+                "architecture_evidence_status": "valid",
+            }
+            ineligible_export = exporter_module.proof_export_guard(PACKET_DIR, "synthetic", {"holo_build_arch": "body"}, "proof")
+            require(ineligible_export.get("proof_export_allowed") is False, errors, "proof export allows patent mode without proof eligibility")
+        finally:
+            exporter_module.load_condition_metadata = original_loader
 
         runner_hash = sha_file(RUNNER_PATH)
         exporter_hash = sha_file(EXPORTER_PATH)
@@ -308,9 +403,11 @@ def main() -> int:
         "expected_turn_count_per_condition": EXPECTED_TURN_COUNT,
         "expected_full_gov_v4_holo_call_count": EXPECTED_FULL_GOV_V4_CALL_COUNT,
         "holobuild_modes": ["diagnostic_v3", "full_gov_v4", "patent_aligned_v4"],
-        "diagnostic_v3_status": "architecture_surface_diagnostic_only",
-        "full_gov_v4_status": "external_provider_governor_diagnostic",
-        "patent_aligned_v4_status": "preferred_proof_eligible_if_live_evidence_validates",
+        "diagnostic_v3_status": "diagnostic_only_no_proof_credit",
+        "full_gov_v4_status": "diagnostic_only_no_proof_credit",
+        "patent_aligned_v4_status": "proof_eligible_if_evidence_validates",
+        "proof_eligible_holobuild_mode": PROOF_ELIGIBLE_HOLO_MODE,
+        "legacy_mode_deprecation_notice": LEGACY_MODE_DEPRECATION_NOTICE,
         "final_word_target": EXPECTED_WORD_TARGET,
         "live_mode_fail_closed_by_default": True,
         "live_requires": ["--live", "HOLO_ALLOW_LIVE=1"],

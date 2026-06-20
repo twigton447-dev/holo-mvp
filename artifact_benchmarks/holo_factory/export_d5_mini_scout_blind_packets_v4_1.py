@@ -20,6 +20,16 @@ PROVIDER_CALLS = 0
 SCORES_GENERATED = 0
 VALID_CONDITIONS = ("holo_build_arch", "solo_openai_gpt_5_5")
 
+HOLO_MODE_DIAGNOSTIC_V3 = "diagnostic_v3"
+HOLO_MODE_FULL_GOV_V4 = "full_gov_v4"
+HOLO_MODE_PATENT_ALIGNED_V4 = "patent_aligned_v4"
+PROOF_ELIGIBLE_HOLO_MODE = HOLO_MODE_PATENT_ALIGNED_V4
+LEGACY_HOLO_MODES = (HOLO_MODE_DIAGNOSTIC_V3, HOLO_MODE_FULL_GOV_V4)
+EXPORT_PURPOSE_PROOF = "proof"
+EXPORT_PURPOSE_DIAGNOSTIC_ABLATION = "diagnostic_ablation"
+EXPORT_PURPOSES = (EXPORT_PURPOSE_PROOF, EXPORT_PURPOSE_DIAGNOSTIC_ABLATION)
+LEGACY_MODE_DEPRECATION_NOTICE = "Legacy Holo modes are preserved for ablation/history only and are banned from proof-credit use."
+
 HARD_FORBIDDEN_PATTERNS = {
     "Holo": re.compile(r"holo", re.IGNORECASE),
     "Gov": re.compile(r"(?<![a-z.])gov(?![a-z])", re.IGNORECASE),
@@ -78,6 +88,102 @@ def read_json(path: Path) -> Any:
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+
+def artifact_metadata_path(packet_dir: Path, run_id: str, condition: str) -> Path:
+    return packet_dir / "runs" / run_id / condition / "artifact_metadata.json"
+
+
+def load_condition_metadata(packet_dir: Path, run_id: str, condition: str) -> dict[str, Any] | None:
+    path = artifact_metadata_path(packet_dir, run_id, condition)
+    if not path.exists():
+        return None
+    return read_json(path)
+
+
+def proof_export_guard(packet_dir: Path, run_id: str, artifacts: dict[str, str], export_purpose: str) -> dict[str, Any]:
+    if export_purpose not in EXPORT_PURPOSES:
+        return {
+            "proof_export_allowed": False,
+            "status": "D5_MINI_SCOUT_BLIND_EXPORT_FAIL_CLOSED_PROOF_INELIGIBLE",
+            "reason": "unknown_export_purpose",
+            "export_purpose": export_purpose,
+        }
+    metadata = load_condition_metadata(packet_dir, run_id, "holo_build_arch") if "holo_build_arch" in artifacts else None
+    if metadata is None:
+        if "holo_build_arch" not in artifacts:
+            return {
+                "proof_export_allowed": True,
+                "diagnostic_export": export_purpose == EXPORT_PURPOSE_DIAGNOSTIC_ABLATION,
+                "export_purpose": export_purpose,
+                "holo_mode": None,
+                "proof_export_policy": "no_holobuild_artifact_in_export",
+            }
+        return {
+            "proof_export_allowed": export_purpose == EXPORT_PURPOSE_DIAGNOSTIC_ABLATION,
+            "status": "D5_MINI_SCOUT_BLIND_EXPORT_FAIL_CLOSED_PROOF_INELIGIBLE",
+            "reason": "missing_holobuild_artifact_metadata",
+            "export_purpose": export_purpose,
+            "holo_mode": None,
+            "diagnostic_export": export_purpose == EXPORT_PURPOSE_DIAGNOSTIC_ABLATION,
+        }
+    holo_mode = metadata.get("holo_mode")
+    legacy_holo_mode = bool(metadata.get("legacy_holo_mode")) or holo_mode in LEGACY_HOLO_MODES
+    deterministic_gate_pass = metadata.get("deterministic_gate_status") == "pass"
+    architecture_evidence_valid = metadata.get("architecture_evidence_status") == "valid"
+    proof_credit_eligible = bool(metadata.get("proof_credit_eligible"))
+    proof_credit_class = metadata.get("proof_credit_class")
+    if export_purpose == EXPORT_PURPOSE_DIAGNOSTIC_ABLATION:
+        return {
+            "proof_export_allowed": True,
+            "diagnostic_export": True,
+            "export_purpose": export_purpose,
+            "holo_mode": holo_mode,
+            "legacy_holo_mode": legacy_holo_mode,
+            "legacy_mode_reason": LEGACY_MODE_DEPRECATION_NOTICE if legacy_holo_mode else None,
+            "proof_credit_eligible": False,
+            "proof_export_policy": "diagnostic_ablation_export_explicitly_requested",
+        }
+    if legacy_holo_mode:
+        return {
+            "proof_export_allowed": False,
+            "status": "D5_MINI_SCOUT_BLIND_EXPORT_FAIL_CLOSED_LEGACY_MODE",
+            "reason": "legacy_holobuild_mode_banned_from_proof_export",
+            "export_purpose": export_purpose,
+            "holo_mode": holo_mode,
+            "legacy_holo_mode": True,
+            "legacy_mode_reason": LEGACY_MODE_DEPRECATION_NOTICE,
+            "proof_credit_eligible": False,
+        }
+    checks = {
+        "holo_mode_is_patent_aligned_v4": holo_mode == PROOF_ELIGIBLE_HOLO_MODE,
+        "proof_credit_eligible_true": proof_credit_eligible is True,
+        "proof_credit_class_patent_aligned": proof_credit_class == "patent_aligned_v4_proof_eligible",
+        "deterministic_gate_pass": deterministic_gate_pass,
+        "architecture_evidence_valid": architecture_evidence_valid,
+    }
+    if not all(checks.values()):
+        return {
+            "proof_export_allowed": False,
+            "status": "D5_MINI_SCOUT_BLIND_EXPORT_FAIL_CLOSED_PROOF_INELIGIBLE",
+            "reason": "holobuild_artifact_not_proof_eligible",
+            "export_purpose": export_purpose,
+            "holo_mode": holo_mode,
+            "legacy_holo_mode": False,
+            "proof_credit_eligible": proof_credit_eligible,
+            "proof_credit_class": proof_credit_class,
+            "eligibility_checks": checks,
+        }
+    return {
+        "proof_export_allowed": True,
+        "diagnostic_export": False,
+        "export_purpose": export_purpose,
+        "holo_mode": holo_mode,
+        "legacy_holo_mode": False,
+        "proof_credit_eligible": True,
+        "proof_export_policy": "patent_aligned_v4_only_if_gate_and_architecture_evidence_validate",
+        "eligibility_checks": checks,
+    }
 
 
 def scan_text(text: str) -> list[dict[str, str]]:
@@ -182,7 +288,7 @@ def build_packet(packet_dir: Path, run_id: str, condition: str, label: str, arti
     }
 
 
-def export_packets(packet_dir: Path, run_id: str, output_dir: Path) -> int:
+def export_packets(packet_dir: Path, run_id: str, output_dir: Path, *, export_purpose: str = EXPORT_PURPOSE_PROOF) -> int:
     artifacts = load_artifacts(packet_dir, run_id)
     if not artifacts:
         print(
@@ -197,6 +303,21 @@ def export_packets(packet_dir: Path, run_id: str, output_dir: Path) -> int:
             )
         )
         return 2
+
+    proof_guard = proof_export_guard(packet_dir, run_id, artifacts, export_purpose)
+    if not proof_guard.get("proof_export_allowed"):
+        print(
+            json.dumps(
+                {
+                    "status": proof_guard.get("status", "D5_MINI_SCOUT_BLIND_EXPORT_FAIL_CLOSED_PROOF_INELIGIBLE"),
+                    **proof_guard,
+                    "provider_calls": PROVIDER_CALLS,
+                    "scores_generated": SCORES_GENERATED,
+                },
+                indent=2,
+            )
+        )
+        return 3
 
     labels = artifact_label_order(run_id, sorted(artifacts))
     contamination: list[dict[str, Any]] = []
@@ -232,6 +353,7 @@ def export_packets(packet_dir: Path, run_id: str, output_dir: Path) -> int:
             "benchmark metadata",
             "prior scores",
         ],
+        "proof_export_guard": proof_guard,
         "contamination_scan_passed": not contamination,
         "contamination_findings": contamination,
         "provider_calls": PROVIDER_CALLS,
@@ -247,10 +369,11 @@ def main() -> int:
     parser.add_argument("--packet-dir", default=str(DEFAULT_PACKET_DIR))
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--output-dir")
+    parser.add_argument("--export-purpose", choices=EXPORT_PURPOSES, default=EXPORT_PURPOSE_PROOF)
     args = parser.parse_args()
     packet_dir = Path(args.packet_dir).resolve()
     output_dir = Path(args.output_dir).resolve() if args.output_dir else packet_dir / "runs" / args.run_id / "blind_judge_packets_v4_1"
-    return export_packets(packet_dir, args.run_id, output_dir)
+    return export_packets(packet_dir, args.run_id, output_dir, export_purpose=args.export_purpose)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,51 @@
+{
+  "accepted_judge": "heldout_xai_grok_4_3",
+  "accepted_pairwise": "all_tie",
+  "accepted_scores": {
+    "ARTIFACT_001": 89,
+    "ARTIFACT_003": 89
+  },
+  "anonymization_map_accessed": false,
+  "autopsy_id": "d5_v5_1_provider_judge_trial_claim_ledger_autopsy_20260620",
+  "claim_ledger_examples_to_force_review": [
+    "TASK_BRIEF cited as context but not source_packet source ID",
+    "S9 cited for capacity-pressure premise that is mostly task-brief context",
+    "pilot operational controls are inferences from constraints rather than direct source claims",
+    "FDA draft/advisory/press status should be audited as source-status claims",
+    "S6/S7/S8 weak or stale evidence must not be upgraded",
+    "capacity-benefit negative space must carry into final recommendation and stop/go logic"
+  ],
+  "failed_judge": "heldout_minimax_m3",
+  "minimax_failure_classification": [
+    "schema_difficulty",
+    "over_complex_prompt",
+    "invalid_ceiling_handling",
+    "missing_required_defect_field",
+    "repair_json_parse_failure_due_extra_data_and_think_prose"
+  ],
+  "provider_calls": 0,
+  "recommended_fix": "replace v5.1 with v5.2 claim-ledger candidate before future domain scoring",
+  "root_cause": {
+    "judge_behavior": "rubric-level impression scoring passed for xAI; MiniMax was more discriminating but not machine-valid",
+    "validator_weakness": "validator enforces self-consistency but not claim discovery"
+  },
+  "trial_folder": "artifact_benchmarks/holo_factory/mini_scouts/d5_medtech_capacity_strain_001/blind_exports/d5_three_way_blind_20260620T184654Z/v5_1_frontier_two_artifact_judging_20260620T211444Z",
+  "unblinding_accessed": false,
+  "v5_2_candidate_files": [
+    "artifact_benchmarks/holo_factory/scoring_policies/unified_artifact_scoring_protocol_v5_2_claim_ledger_candidate.md",
+    "artifact_benchmarks/holo_factory/scoring_policies/unified_artifact_scoring_protocol_v5_2_claim_ledger_schema.json",
+    "artifact_benchmarks/holo_factory/scoring_policies/unified_artifact_scoring_protocol_v5_2_validator_rule_changes.md",
+    "artifact_benchmarks/holo_factory/scoring_policies/validate_unified_v5_2_claim_ledger_score.py",
+    "artifact_benchmarks/holo_factory/scoring_policies/test_unified_v5_2_claim_ledger_scoring.py"
+  ],
+  "why_xai_accepted": [
+    "category scores summed to raw score",
+    "final score did not exceed raw score",
+    "judge reported no caps or ceilings",
+    "all gate booleans were true",
+    "defect audit fields were populated after repair",
+    "pairwise values used exact allowed labels",
+    "v5.1 did not require a claim ledger or independent source-to-claim proof"
+  ],
+  "xai_claim_level_verification": "not_demonstrated"
+}

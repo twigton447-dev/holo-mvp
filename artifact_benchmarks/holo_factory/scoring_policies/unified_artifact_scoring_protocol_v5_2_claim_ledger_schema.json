@@ -1,0 +1,170 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "artifact_scores": {
+      "items": {
+        "properties": {
+          "applicable_hard_caps": {
+            "type": "array"
+          },
+          "artifact_label": {
+            "type": "string"
+          },
+          "claim_ledger": {
+            "properties": {
+              "avoided_failure_modes": {
+                "type": "array"
+              },
+              "invented_or_false_source_attributions": {
+                "type": "array"
+              },
+              "major_claims": {
+                "items": {
+                  "properties": {
+                    "cap_trigger_if_any": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "cited_sources": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "claim_id": {
+                      "type": "string"
+                    },
+                    "claim_text": {
+                      "type": "string"
+                    },
+                    "claim_type": {
+                      "enum": [
+                        "factual",
+                        "causal",
+                        "regulatory",
+                        "operational",
+                        "statistical",
+                        "recommendation",
+                        "source_status"
+                      ]
+                    },
+                    "missing_caveat": {
+                      "type": "string"
+                    },
+                    "overclaim_issue": {
+                      "type": "boolean"
+                    },
+                    "severity": {
+                      "enum": [
+                        "none",
+                        "minor",
+                        "material",
+                        "fatal"
+                      ]
+                    },
+                    "source_boundary_issue": {
+                      "type": "boolean"
+                    },
+                    "source_support_status": {
+                      "enum": [
+                        "supported",
+                        "partially_supported",
+                        "unsupported",
+                        "contradicted",
+                        "not_in_packet"
+                      ]
+                    },
+                    "stale_or_limited_evidence_issue": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "claim_id",
+                    "claim_text",
+                    "claim_type",
+                    "cited_sources",
+                    "source_support_status",
+                    "source_boundary_issue",
+                    "overclaim_issue",
+                    "stale_or_limited_evidence_issue",
+                    "missing_caveat",
+                    "severity",
+                    "cap_trigger_if_any"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 15,
+                "minItems": 8,
+                "type": "array"
+              },
+              "negative_space_misses": {
+                "type": "array"
+              },
+              "source_laundering_findings": {
+                "type": "array"
+              },
+              "tempting_but_rejected_claims": {
+                "type": "array"
+              },
+              "unsupported_major_claims": {
+                "type": "array"
+              }
+            },
+            "required": [
+              "major_claims",
+              "invented_or_false_source_attributions",
+              "unsupported_major_claims",
+              "source_laundering_findings",
+              "negative_space_misses",
+              "tempting_but_rejected_claims",
+              "avoided_failure_modes"
+            ],
+            "type": "object"
+          },
+          "final_score_100": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "raw_evidence_score_100": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "artifact_label",
+          "final_score_100",
+          "raw_evidence_score_100",
+          "claim_ledger"
+        ],
+        "type": "object"
+      },
+      "minItems": 2,
+      "type": "array"
+    },
+    "pairwise_comparative_consistency": {
+      "type": "object"
+    },
+    "protocol_id": {
+      "const": "unified_artifact_scoring_protocol_v5_2_claim_ledger_candidate"
+    },
+    "source_packet_source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "protocol_id",
+    "source_packet_source_ids",
+    "artifact_scores",
+    "pairwise_comparative_consistency"
+  ],
+  "title": "Unified Artifact Scoring Protocol v5.2 Claim-Ledger Candidate",
+  "type": "object"
+}

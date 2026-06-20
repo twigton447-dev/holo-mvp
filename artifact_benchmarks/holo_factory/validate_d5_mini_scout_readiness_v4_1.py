@@ -99,6 +99,25 @@ REQUIRED_FULL_GOV_V4_TOKENS = [
     "invalid_init_missing_retrieved_ids_repair_fail",
     "The runner will not invent or backfill missing canonical Gov fields",
     "Proof credit is allowed only if final accepted Gov output is Governor-produced",
+    "ATTEMPTED_PROVIDER_CALLS",
+    "ACCEPTED_PROVIDER_CALLS",
+    "FAILED_PROVIDER_CALLS",
+    "attempted_provider_calls",
+    "accepted_provider_calls",
+    "failed_provider_calls",
+    "save_failed_provider_attempts",
+    "write_run_failure_report",
+    "run_empty_gov_failure_accounting_smoke",
+    "--empty-gov-failure-smoke",
+    "--gov-model",
+    "DEFAULT_GOVERNOR_PROVIDER_MODEL",
+    "selected_governor_model",
+    "raw_response_metadata",
+    "provider_adapter_did_not_expose_raw_response_metadata_on_exception",
+    "repair_retry_reason",
+    "provider returned no accepted visible Gov output; repair only applies to invalid Gov JSON/text",
+    "no_artifact_created_after_failure",
+    "counts_consistent",
 ]
 EXPECTED_SOLO_ROLES = [
     "initial_decision_brief_draft",
@@ -195,7 +214,8 @@ def main() -> int:
         require(runner_assignments.get("HOLO_MODE_FULL_GOV_V4") == "full_gov_v4", errors, "runner missing full Gov v4 mode literal")
         require(runner_assignments.get("FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT") == EXPECTED_FULL_GOV_V4_CALL_COUNT, errors, "full Gov v4 expected call count is not 14")
         require(runner_assignments.get("GOVERNOR_MAX_REPAIR_ATTEMPTS") == EXPECTED_GOVERNOR_MAX_REPAIR_ATTEMPTS, errors, "Governor repair attempts are not bounded to one")
-        require(runner_assignments.get("GOVERNOR_PROVIDER_MODEL") == "openai:gpt-5.5", errors, "Governor model is not a fixed model ID")
+        require(runner_assignments.get("DEFAULT_GOVERNOR_PROVIDER_MODEL") == "openai:gpt-5.5", errors, "default Governor model is not a fixed model ID")
+        require("GOVERNOR_PROVIDER_MODEL = DEFAULT_GOVERNOR_PROVIDER_MODEL" in runner_text, errors, "runner does not initialize Governor model from fixed default")
         require(runner_assignments.get("EXPECTED_PACKET_HASH") == EXPECTED_PACKET_HASH, errors, "runner does not pin expected packet hash")
         require(runner_assignments.get("EXPECTED_TURN_COUNT") == EXPECTED_TURN_COUNT, errors, "runner expected turn count is not 6")
         require(runner_assignments.get("FINAL_WORD_TARGET") == EXPECTED_WORD_TARGET, errors, "runner final word target is not 1100")

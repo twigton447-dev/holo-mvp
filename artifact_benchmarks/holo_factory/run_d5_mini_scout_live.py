@@ -25,6 +25,9 @@ HOLO_MODE_FULL_GOV_V4 = "full_gov_v4"
 HOLO_MODES = (HOLO_MODE_DIAGNOSTIC_V3, HOLO_MODE_FULL_GOV_V4)
 LIVE_APPROVAL_ENV = "HOLO_ALLOW_LIVE"
 PROVIDER_CALLS = 0
+ATTEMPTED_PROVIDER_CALLS = 0
+ACCEPTED_PROVIDER_CALLS = 0
+FAILED_PROVIDER_CALLS = 0
 LIVE_ARTIFACTS_GENERATED = 0
 SCORES_GENERATED = 0
 EXPECTED_PACKET_HASH = "b73292d9d2e4aac5f65a93ae168235d9d581ae17ebaf0a91aa16437018c527aa"
@@ -46,7 +49,8 @@ CONDITION_LABELS = {
     "solo_openai_gpt_5_5": "GPT-5.5 solo condition",
 }
 SOLO_PROVIDER_MODEL = "openai:gpt-5.5"
-GOVERNOR_PROVIDER_MODEL = "openai:gpt-5.5"
+DEFAULT_GOVERNOR_PROVIDER_MODEL = "openai:gpt-5.5"
+GOVERNOR_PROVIDER_MODEL = DEFAULT_GOVERNOR_PROVIDER_MODEL
 HOLO_PROVIDER_TURNS = (
     {
         "provider_model": "anthropic:claude-opus-4-8",
@@ -198,6 +202,39 @@ def endpoint_for_provider(provider: str) -> str:
     if provider == "anthropic":
         return "messages"
     return "chat/completions"
+
+
+def validate_provider_model_name(provider_model_name: str) -> None:
+    provider, model = provider_model(provider_model_name)
+    if provider not in PROVIDER_ENV:
+        raise SystemExit(
+            json.dumps(
+                {
+                    "status": "D5_MINI_SCOUT_LIVE_FAIL_CLOSED",
+                    "reason": "unknown_provider_for_model",
+                    "gov_model": provider_model_name,
+                    "provider": provider,
+                    "model": model,
+                    "provider_calls": PROVIDER_CALLS,
+                },
+                indent=2,
+            )
+        )
+
+
+def provider_attempt_count_for_error(exc: ProviderCallError) -> int:
+    if exc.error_type == "EmptyVisibleText" and "twice" in str(exc).lower():
+        return 2
+    return 1
+
+
+def provider_call_accounting() -> dict[str, int]:
+    return {
+        "attempted_provider_calls": ATTEMPTED_PROVIDER_CALLS,
+        "accepted_provider_calls": ACCEPTED_PROVIDER_CALLS,
+        "failed_provider_calls": FAILED_PROVIDER_CALLS,
+        "provider_calls": PROVIDER_CALLS,
+    }
 
 
 def run_mode_for_holo_mode(holo_mode: str) -> str:
@@ -1841,6 +1878,61 @@ def save_trace(
     return trace
 
 
+def save_failed_provider_attempts(
+    condition_dir: Path,
+    *,
+    call_id: str,
+    provider_model_name: str,
+    call_type: str,
+    role: str,
+    turn_index: int | None,
+    prompt_card_path: Path,
+    artifact_path: Path | None,
+    exc: ProviderCallError,
+    max_tokens: int,
+    timeout: int,
+) -> list[dict[str, Any]]:
+    provider, model = provider_model(provider_model_name)
+    attempt_count = provider_attempt_count_for_error(exc)
+    failures: list[dict[str, Any]] = []
+    prompt_hash = sha_file(prompt_card_path)
+    for attempt_number in range(1, attempt_count + 1):
+        failure = {
+            "call_id": call_id,
+            "failed_attempt_id": f"{call_id}_failed_attempt_{attempt_number:03d}",
+            "call_type": call_type,
+            "role": role,
+            "turn_index": turn_index,
+            "provider": provider,
+            "model": model,
+            "endpoint": endpoint_for_provider(provider),
+            "prompt_card_path": str(prompt_card_path),
+            "prompt_card_sha256": prompt_hash,
+            "artifact_path": str(artifact_path) if artifact_path else None,
+            "artifact_created": False,
+            "proof_credit_eligible": False,
+            "failure_reason": str(exc),
+            "error_type": exc.error_type,
+            "http_status": exc.http_status,
+            "attempt_number": attempt_number,
+            "attempts_reported_by_adapter": attempt_count,
+            "timestamp_utc": utc_iso(),
+            "raw_response_metadata": {
+                "available": False,
+                "reason": "provider_adapter_did_not_expose_raw_response_metadata_on_exception",
+            },
+            "request_metadata": {
+                "max_tokens_requested": max_tokens,
+                "timeout_seconds": timeout,
+            },
+            "judge_visible": False,
+        }
+        path = condition_dir / "traces" / f"{call_id}_failed_attempt_{attempt_number:03d}.json"
+        write_json(path, failure)
+        failures.append({**failure, "failure_trace_path": str(path)})
+    return failures
+
+
 def call_live_model(
     condition_dir: Path,
     *,
@@ -1855,7 +1947,7 @@ def call_live_model(
     call_id: str,
     artifact_path: Path | None,
 ) -> tuple[str, dict[str, Any]]:
-    global PROVIDER_CALLS
+    global PROVIDER_CALLS, ATTEMPTED_PROVIDER_CALLS, ACCEPTED_PROVIDER_CALLS, FAILED_PROVIDER_CALLS
     prompt_card_path = save_prompt_card(
         condition_dir,
         call_id=call_id,
@@ -1867,8 +1959,29 @@ def call_live_model(
         turn_index=turn_index,
     )
     provider, model = provider_model(provider_model_name)
-    result = call_provider(provider, system=system, user=user, max_tokens=max_tokens, timeout=timeout, model_override=model)
+    try:
+        result = call_provider(provider, system=system, user=user, max_tokens=max_tokens, timeout=timeout, model_override=model)
+    except ProviderCallError as exc:
+        failures = save_failed_provider_attempts(
+            condition_dir,
+            call_id=call_id,
+            provider_model_name=provider_model_name,
+            call_type=call_type,
+            role=role,
+            turn_index=turn_index,
+            prompt_card_path=prompt_card_path,
+            artifact_path=artifact_path,
+            exc=exc,
+            max_tokens=max_tokens,
+            timeout=timeout,
+        )
+        failed_count = len(failures)
+        FAILED_PROVIDER_CALLS += failed_count
+        ATTEMPTED_PROVIDER_CALLS += failed_count
+        raise
     PROVIDER_CALLS += 1
+    ACCEPTED_PROVIDER_CALLS += 1
+    ATTEMPTED_PROVIDER_CALLS += 1
     text = result["text"].strip() + "\n"
     if artifact_path:
         write_text(artifact_path, text)
@@ -2302,6 +2415,7 @@ def write_live_metadata(
         "status": "live_generation_complete",
         "created_at_utc": utc_iso(),
         "provider_calls": len(traces),
+        **provider_call_accounting(),
         "provider_models": provider_models,
         "scores_generated": SCORES_GENERATED,
         "packet_dir": str(packet_dir),
@@ -2324,6 +2438,62 @@ def write_live_metadata(
     }
     write_json(condition_dir / "artifact_metadata.json", metadata)
     return metadata
+
+
+def write_run_failure_report(
+    *,
+    packet_dir: Path,
+    run_id: str,
+    conditions: list[str],
+    exc: ProviderCallError,
+    holo_mode: str,
+) -> dict[str, Any]:
+    run_dir = packet_dir / "runs" / run_id
+    accounting = provider_call_accounting()
+    failure = {
+        "runner_id": RUNNER_ID,
+        "run_id": run_id,
+        "run_mode": run_mode_for_holo_mode(holo_mode),
+        "holo_mode": holo_mode if "holo_build_arch" in conditions else None,
+        "status": "D5_MINI_SCOUT_LIVE_PROVIDER_ERROR",
+        "failed_at_utc": utc_iso(),
+        "provider": exc.provider,
+        "error_type": exc.error_type,
+        "http_status": exc.http_status,
+        "message": str(exc),
+        **accounting,
+        "packet_dir": str(packet_dir),
+        "packet_hash": sha_file(packet_dir / "source_packet.json"),
+        "conditions": conditions,
+        "artifact_created": False,
+        "proof_credit_eligible": False,
+        "no_artifact_created_after_failure": True,
+        "repair_retry_applicable": False,
+        "repair_retry_reason": "provider returned no accepted visible Gov output; repair only applies to invalid Gov JSON/text",
+        "selected_governor_model": GOVERNOR_PROVIDER_MODEL,
+    }
+    write_json(run_dir / "run_failure.json", failure)
+    for condition in conditions:
+        condition_dir = run_dir / condition
+        condition_dir.mkdir(parents=True, exist_ok=True)
+        write_json(
+            condition_dir / "condition_metadata.json",
+            {
+                "runner_id": RUNNER_ID,
+                "run_id": run_id,
+                "run_mode": run_mode_for_holo_mode(holo_mode),
+                "holo_mode": holo_mode if condition == "holo_build_arch" else None,
+                "condition": condition,
+                "status": "provider_failure_before_artifact",
+                "artifact_created": False,
+                "proof_credit_eligible": False,
+                "architecture_evidence_created": False,
+                "selected_governor_model": GOVERNOR_PROVIDER_MODEL if condition == "holo_build_arch" else None,
+                **accounting,
+                "failure_report_path": str(run_dir / "run_failure.json"),
+            },
+        )
+    return failure
 
 
 def run_live_solo(packet_dir: Path, run_id: str, timeout: int) -> dict[str, Any]:
@@ -2730,7 +2900,9 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
         "status": "live_generation_complete" if live else "planned_no_provider_full_gov_v4_smoke",
         "created_at_utc": utc_iso(),
         "provider_calls": sum(1 for trace in all_traces if trace.get("provider") != "no_provider_smoke"),
+        **provider_call_accounting(),
         "expected_holo_call_count": FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT,
+        "selected_governor_model": GOVERNOR_PROVIDER_MODEL,
         "provider_models": expected_holobuild_provider_models(HOLO_MODE_FULL_GOV_V4),
         "scores_generated": SCORES_GENERATED,
         "packet_dir": str(packet_dir),
@@ -2762,6 +2934,9 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
         "architecture_evidence_errors": arch_errors,
         "architecture_evidence_path": str(arch_path),
         "provider_calls": metadata["provider_calls"],
+        "attempted_provider_calls": metadata["attempted_provider_calls"],
+        "accepted_provider_calls": metadata["accepted_provider_calls"],
+        "failed_provider_calls": metadata["failed_provider_calls"],
         "expected_holo_call_count": FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT,
         "holo_mode": HOLO_MODE_FULL_GOV_V4,
     }
@@ -2897,6 +3072,89 @@ def run_governor_repair_smoke_case(packet_dir: Path, run_id: str, case: str) -> 
     write_json(result_path, result)
     print(json.dumps({**result, "result_path": str(result_path)}, indent=2, sort_keys=False))
     return exit_code
+
+
+def run_empty_gov_failure_accounting_smoke(packet_dir: Path, run_id: str) -> int:
+    global ATTEMPTED_PROVIDER_CALLS, FAILED_PROVIDER_CALLS
+    require_packet(packet_dir)
+    condition = "holo_build_arch"
+    condition_dir = packet_dir / "runs" / run_id / condition
+    condition_dir.mkdir(parents=True, exist_ok=True)
+    registry = base_registry(packet_dir)
+    turn = full_gov_generation_turns()[0]
+    prompt = governor_prompt(
+        packet_dir=packet_dir,
+        call_type="gov_init",
+        run_id=run_id,
+        turn_index=1,
+        next_turn=turn,
+        registry=registry,
+        prior_state=None,
+        prior_baton=None,
+        generation_artifact=None,
+        role_result=None,
+        audit_result=None,
+    )
+    prompt_card_path = save_prompt_card(
+        condition_dir,
+        call_id="gov_init",
+        provider_model_name=GOVERNOR_PROVIDER_MODEL,
+        system=governor_system_prompt(),
+        user=prompt,
+        call_type="gov_init",
+        role="context_governor",
+        turn_index=1,
+    )
+    provider, model = provider_model(GOVERNOR_PROVIDER_MODEL)
+    exc = ProviderCallError(provider, "EmptyVisibleText", f"{provider}:{model} returned empty visible text twice")
+    failures = save_failed_provider_attempts(
+        condition_dir,
+        call_id="gov_init",
+        provider_model_name=GOVERNOR_PROVIDER_MODEL,
+        call_type="gov_init",
+        role="context_governor",
+        turn_index=1,
+        prompt_card_path=prompt_card_path,
+        artifact_path=condition_dir / "gov_outputs" / "gov_init.raw.txt",
+        exc=exc,
+        max_tokens=3600,
+        timeout=900,
+    )
+    FAILED_PROVIDER_CALLS += len(failures)
+    ATTEMPTED_PROVIDER_CALLS += len(failures)
+    failure = write_run_failure_report(
+        packet_dir=packet_dir,
+        run_id=run_id,
+        conditions=[condition],
+        exc=exc,
+        holo_mode=HOLO_MODE_FULL_GOV_V4,
+    )
+    result = {
+        "status": "EMPTY_GOV_FAILURE_ACCOUNTING_SMOKE_PASS",
+        "runner_id": RUNNER_ID,
+        "run_id": run_id,
+        "provider_calls": PROVIDER_CALLS,
+        **provider_call_accounting(),
+        "selected_governor_model": GOVERNOR_PROVIDER_MODEL,
+        "failed_attempt_count": len(failures),
+        "failure_trace_paths": [item["failure_trace_path"] for item in failures],
+        "run_failure_path": str(packet_dir / "runs" / run_id / "run_failure.json"),
+        "condition_metadata_path": str(condition_dir / "condition_metadata.json"),
+        "prompt_card_path": str(prompt_card_path),
+        "prompt_card_sha256": sha_file(prompt_card_path),
+        "artifact_created": (condition_dir / "artifact.md").exists(),
+        "architecture_evidence_created": (condition_dir / "arch_evidence.json").exists(),
+        "proof_credit_eligible": failure["proof_credit_eligible"],
+        "counts_consistent": ATTEMPTED_PROVIDER_CALLS == ACCEPTED_PROVIDER_CALLS + FAILED_PROVIDER_CALLS,
+        "synthetic_smoke_only": True,
+    }
+    if result["artifact_created"] or result["architecture_evidence_created"] or result["proof_credit_eligible"]:
+        result["status"] = "EMPTY_GOV_FAILURE_ACCOUNTING_SMOKE_FAIL"
+    if not result["counts_consistent"] or result["failed_attempt_count"] != 2:
+        result["status"] = "EMPTY_GOV_FAILURE_ACCOUNTING_SMOKE_FAIL"
+    write_json(condition_dir / "empty_gov_failure_accounting_smoke_result.json", result)
+    print(json.dumps(result, indent=2, sort_keys=False))
+    return 0 if result["status"].endswith("_PASS") else 1
 
 
 def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str, Any]:
@@ -3253,6 +3511,7 @@ def update_run_manifest(
         "packet_hash": sha_file(packet_dir / "source_packet.json"),
         "conditions": [existing[key] for key in VALID_CONDITIONS if key in existing],
         "provider_calls": PROVIDER_CALLS,
+        **provider_call_accounting(),
         "live_artifacts_generated": LIVE_ARTIFACTS_GENERATED,
         "scores_generated": SCORES_GENERATED,
         "live_mode_fail_closed": True,
@@ -3292,6 +3551,7 @@ def update_live_run_manifest(
         "packet_hash": sha_file(packet_dir / "source_packet.json"),
         "conditions": [existing[key] for key in VALID_CONDITIONS if key in existing],
         "provider_calls": sum(int(item.get("provider_calls") or 0) for item in existing.values()),
+        **provider_call_accounting(),
         "live_artifacts_generated": len([item for item in existing.values() if item.get("artifact_path")]),
         "scores_generated": SCORES_GENERATED,
         "live_mode_fail_closed": True,
@@ -3358,6 +3618,7 @@ def run_live_guarded(
                     "status": "D5_MINI_SCOUT_LIVE_FAIL_CLOSED",
                     "reason": f"live mode requires {LIVE_APPROVAL_ENV}=1 in addition to --live",
                     "provider_calls": PROVIDER_CALLS,
+                    **provider_call_accounting(),
                 },
                 indent=2,
             )
@@ -3377,6 +3638,13 @@ def run_live_guarded(
             else:
                 raise RuntimeError(f"unknown condition: {condition}")
     except ProviderCallError as exc:
+        failure_report = write_run_failure_report(
+            packet_dir=packet_dir,
+            run_id=run_id,
+            conditions=conditions,
+            exc=exc,
+            holo_mode=holo_mode,
+        )
         print(
             json.dumps(
                 {
@@ -3386,6 +3654,10 @@ def run_live_guarded(
                     "http_status": exc.http_status,
                     "message": str(exc),
                     "provider_calls": PROVIDER_CALLS,
+                    **provider_call_accounting(),
+                    "run_failure_path": str(packet_dir / "runs" / run_id / "run_failure.json"),
+                    "artifact_created": failure_report["artifact_created"],
+                    "proof_credit_eligible": failure_report["proof_credit_eligible"],
                 },
                 indent=2,
             )
@@ -3404,6 +3676,7 @@ def run_live_guarded(
                 "packet_hash": manifest["packet_hash"],
                 "run_manifest": str(packet_dir / "runs" / run_id / "run_manifest.json"),
                 "provider_calls": PROVIDER_CALLS,
+                **provider_call_accounting(),
                 "scores_generated": SCORES_GENERATED,
             },
             indent=2,
@@ -3413,18 +3686,27 @@ def run_live_guarded(
 
 
 def main() -> int:
+    global GOVERNOR_PROVIDER_MODEL
     parser = argparse.ArgumentParser(description="D5 mini scout HoloBuild vs GPT-5.5 adapter.")
     parser.add_argument("--packet-dir", default=str(DEFAULT_PACKET_DIR))
     parser.add_argument("--condition", action="append", choices=VALID_CONDITIONS)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--timeout", type=int, default=900)
     parser.add_argument("--holo-mode", choices=HOLO_MODES, default=HOLO_MODE_DIAGNOSTIC_V3)
+    parser.add_argument("--gov-model", default=DEFAULT_GOVERNOR_PROVIDER_MODEL)
     parser.add_argument("--gov-repair-smoke-case", choices=GOV_REPAIR_SMOKE_CASES)
+    parser.add_argument("--empty-gov-failure-smoke", action="store_true")
     parser.add_argument("--no-provider-smoke", action="store_true")
     parser.add_argument("--live", action="store_true")
     args = parser.parse_args()
 
     packet_dir = Path(args.packet_dir).resolve()
+    validate_provider_model_name(args.gov_model)
+    GOVERNOR_PROVIDER_MODEL = args.gov_model
+    if args.empty_gov_failure_smoke:
+        if args.live:
+            parser.error("--empty-gov-failure-smoke is no-provider only and cannot be used with --live")
+        return run_empty_gov_failure_accounting_smoke(packet_dir, args.run_id)
     if args.gov_repair_smoke_case:
         if args.live:
             parser.error("--gov-repair-smoke-case is no-provider only and cannot be used with --live")

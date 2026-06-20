@@ -23,6 +23,16 @@ EXPECTED_CONDITIONS = {"holo_build_arch", "solo_openai_gpt_5_5"}
 EXPECTED_TURN_COUNT = 6
 EXPECTED_WORD_TARGET = 1100
 REQUIRED_ARCH_TOKENS = [
+    "CANONICAL STATE_OBJECT",
+    "STATE_OBJECT_SHA256",
+    "BATON_PASS",
+    "BATON_PASS_SHA256",
+    "ARTIFACT_REGISTRY",
+    "ARTIFACT_REGISTRY_SHA256",
+    "RETRIEVED PINNED SOURCES AND ARTIFACTS",
+    "gov_notes",
+    "source_boundaries",
+    "unresolved_tensions",
     "state_object_hash",
     "state_object_snapshot_path",
     "critical_constraints_preserved",
@@ -41,6 +51,10 @@ REQUIRED_ARCH_TOKENS = [
     "synthesis_trigger",
     "final_artifact_hash",
     "architecture_evidence_visible_to_judges",
+    "prompt_card_sha256",
+    "retrieved_ids",
+    "semantic_role_checks",
+    "invented_source_ids",
 ]
 EXPECTED_SOLO_ROLES = [
     "initial_decision_brief_draft",
@@ -149,6 +163,14 @@ def main() -> int:
 
         for token in REQUIRED_ARCH_TOKENS:
             require(token in runner_text, errors, f"runner missing architecture evidence token: {token}")
+        require("holo_architecture_user_prompt" in runner_text, errors, "runner missing canonical Holo architecture prompt builder")
+        require("retrieve_registry_entries" in runner_text, errors, "runner missing registry retrieval by ID")
+        require("def role_compliance(text: str, *, role: str" in runner_text, errors, "runner still appears to use shallow role compliance")
+        require("generic_praise_only_pass" in runner_text, errors, "runner missing praise-only role compliance failure")
+        require("missing_required_sections" in runner_text, errors, "runner missing final required-section compliance check")
+        require("def state_audit(" in runner_text and "invented_source_ids" in runner_text, errors, "runner missing semantic state audit")
+        require("text.strip() else \"fail\"" not in runner_text, errors, "runner still appears to use non-empty-output state audit")
+        require("holo_turn_user_prompt(packet_dir, objective=turn[\"objective\"], previous_notes=reviewer_notes)" not in runner_text, errors, "runner still passes loose reviewer notes instead of registry artifacts")
         require(arch_schema["properties"]["architecture_evidence_visible_to_judges"]["const"] is False, errors, "architecture schema does not force judge-hidden evidence")
         require(arch_policy["architecture_evidence_visible_to_judges"] is False, errors, "architecture policy exposes evidence to judges")
 

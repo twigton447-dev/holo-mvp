@@ -108,6 +108,34 @@ REQUIRED_PACKET_FILES = (
     "freeze_manifest.json",
     "deterministic_gate_policy.json",
 )
+REQUIRED_FINAL_SECTION_MARKERS = (
+    "what is happening",
+    "why it matters now",
+    "strong evidence",
+    "weak",
+    "contradict",
+    "calculation",
+    "options",
+    "risks of acting",
+    "risks of waiting",
+    "next steps",
+    "claim boundaries",
+)
+ROLE_BEHAVIOR_TERMS = {
+    "initial_decision_brief_drafter": ("option", "evidence", "source"),
+    "assumption_and_evidence_attacker": ("assumption", "weak", "missing"),
+    "contradiction_uncertainty_source_fidelity_reviewer": ("contradict", "uncertain", "source"),
+    "options_operational_usefulness_reviewer": ("option", "risk", "operat"),
+    "claim_discipline_overclaim_reducer": ("overclaim", "claim", "unsupported"),
+    "final_synthesis_author": ("option", "risk", "source"),
+}
+FORBIDDEN_SOURCE_BOUNDARY_CLAIMS = (
+    "fda approved",
+    "final approval",
+    "solves hospital capacity",
+    "proves capacity relief",
+)
+SOURCE_ID_RE = re.compile(r"\bS\d+_[A-Z0-9_]+\b")
 
 
 def utc_iso() -> str:
@@ -146,6 +174,10 @@ def write_text(path: Path, text: str) -> None:
 
 def excerpt(text: str, limit: int = 1400) -> str:
     return re.sub(r"\s+", " ", text).strip()[:limit]
+
+
+def stable_json(payload: Any) -> str:
+    return json.dumps(payload, indent=2, sort_keys=True)
 
 
 def endpoint_for_provider(provider: str) -> str:
@@ -270,158 +302,160 @@ def proof_credit_readiness() -> dict[str, Any]:
 
 
 def smoke_arch_evidence(packet_dir: Path, run_id: str, condition_dir: Path) -> dict[str, Any]:
-    source_packet_hash = sha_file(packet_dir / "source_packet.json")
-    task_brief_hash = sha_file(packet_dir / "task_brief.md")
-    lock_hash = sha_file(packet_dir / "packet_lock.json")
-    registry_entries = [
+    registry = base_registry(packet_dir)
+    prior_artifact_ids: list[str] = []
+    prior_hashes: list[str] = []
+    prior_audit_results: list[dict[str, Any]] = []
+    source_retrieval_ids = ["TASK_BRIEF"] + source_ids(packet_dir)
+    turn_records: list[dict[str, Any]] = []
+    smoke_turns = list(HOLO_PROVIDER_TURNS) + [
         {
-            "artifact_id": "frozen_source_packet",
-            "artifact_type": "source_packet",
-            "artifact_hash": source_packet_hash,
-            "source_refs": ["source_packet.json"],
-        },
-        {
-            "artifact_id": "frozen_task_brief",
-            "artifact_type": "task_brief",
-            "artifact_hash": task_brief_hash,
-            "source_refs": ["task_brief.md"],
-        },
-        {
-            "artifact_id": "smoke_final_artifact_slot",
-            "artifact_type": "reserved_output_path",
-            "artifact_hash": sha_text(str(condition_dir / "artifact.md")),
-            "source_refs": ["artifact.md"],
-        },
+            "provider_model": HOLO_SYNTHESIS_MODEL,
+            "role": "final_synthesis_author",
+            "objective": "Synthesize final artifact under claim-boundary and source-fidelity constraints.",
+            "max_tokens": 3400,
+        }
     ]
-    registry_hash = sha_text(json.dumps(registry_entries, sort_keys=True))
-    final_artifact_hash = sha_text("NO_PROVIDER_SMOKE_FINAL_ARTIFACT_SLOT")
-    turns: list[dict[str, Any]] = []
-    final_state_hash = ""
-    for turn_index in range(1, EXPECTED_TURN_COUNT + 1):
-        role = "final_synthesis_author" if turn_index == EXPECTED_TURN_COUNT else f"no_provider_smoke_reviewer_turn_{turn_index:03d}"
-        state_payload = {
-            "run_id": run_id,
-            "packet_id": read_json(packet_dir / "source_packet.json")["packet_id"],
-            "mode": "no_provider_smoke",
-            "turn_index": turn_index,
-            "role": role,
-            "critical_constraints": [
-                "use only frozen packet sources",
-                "main artifact body must be 900-1300 words",
-                "target final artifact body length is 1100 words",
-                "if a draft exceeds 1300 body words, revise shorter before final answer",
-                "architecture evidence is not judge-visible",
-            ],
-        }
+    for turn_index, turn in enumerate(smoke_turns, start=1):
+        final = turn_index == EXPECTED_TURN_COUNT
+        provider_model_name = turn["provider_model"]
+        provider, model = provider_model(provider_model_name)
+        retrieved_ids = source_retrieval_ids + prior_artifact_ids
+        retrieved_entries = retrieve_registry_entries(registry, retrieved_ids)
+        state_payload = build_state_object(
+            packet_dir=packet_dir,
+            run_id=run_id,
+            turn_index=turn_index,
+            role=turn["role"],
+            objective=turn["objective"],
+            registry=registry,
+            prior_artifact_hashes=prior_hashes,
+            prior_audit_results=prior_audit_results,
+        )
         state_hash = sha_text(json.dumps(state_payload, sort_keys=True))
-        final_state_hash = state_hash
         state_path = condition_dir / f"state_object_turn_{turn_index:03d}.json"
-        baton_payload = {
-            "run_id": run_id,
-            "turn_index": turn_index,
-            "next_model_id": "no_provider_smoke",
-            "adversarial_role": role,
-            "state_object_hash": state_hash,
-        }
+        write_json(state_path, state_payload)
+        baton_payload = build_baton_pass(
+            run_id=run_id,
+            turn_index=turn_index,
+            next_model_id=model,
+            adversarial_role=turn["role"],
+            focus_area=turn["objective"],
+            unresolved_tensions=state_payload["unresolved_tensions"],
+            state_hash=state_hash,
+            retrieved_artifact_ids=retrieved_ids,
+            final=final,
+        )
         baton_hash = sha_text(json.dumps(baton_payload, sort_keys=True))
         baton_path = condition_dir / f"baton_pass_turn_{turn_index:03d}.json"
-        write_json(state_path, state_payload)
         write_json(baton_path, baton_payload)
-        turns.append(
+        prompt_card_path = save_prompt_card(
+            condition_dir,
+            call_id="holo_final_synthesis" if final else f"holo_turn_{turn_index:03d}",
+            provider_model_name=provider_model_name,
+            system=holo_synthesis_system_prompt() if final else holo_turn_system_prompt(turn["role"]),
+            user=holo_architecture_user_prompt(
+                packet_dir=packet_dir,
+                state_object=state_payload,
+                state_hash=state_hash,
+                baton_pass=baton_payload,
+                baton_hash=baton_hash,
+                registry=registry,
+                retrieved_entries=retrieved_entries,
+                objective=turn["objective"],
+                final=final,
+            ),
+            call_type="holo_final_synthesis" if final else "holo_reviewer_turn",
+            role=turn["role"],
+            turn_index=turn_index,
+        )
+        prompt_card_hash = sha_file(prompt_card_path)
+        text = (
+            f"Smoke {turn['role']} output cites S1_FDA_PULSE_OX_PAGE_2025. "
+            "It names evidence, source limits, weak assumptions, missing links, contradictory uncertainty, "
+            "operational options, risk tradeoffs, unsupported overclaim controls, and claim boundaries."
+        )
+        if final:
+            final_sentence = (
+                "What is happening: smoke brief cites S1_FDA_PULSE_OX_PAGE_2025. "
+                "Why it matters now: leaders face capacity pressure. "
+                "Strong evidence: source evidence is bounded. "
+                "Weak and contradictory evidence: uncertainty and stale claims remain. "
+                "Calculation checks: data interpretation is required. "
+                "Options: pilot, delay, adopt narrowly, or reject. "
+                "Risks of acting: unsupported scale. "
+                "Risks of waiting: missed monitoring benefit. "
+                "Next steps: validate workflow. "
+                "Claim boundaries: no capacity solution or regulatory clearance claim. "
+            )
+            text = " ".join([final_sentence] * 18)
+        artifact_path = condition_dir / ("artifact.md" if final else f"turn_artifacts/turn_{turn_index:03d}.md")
+        write_text(artifact_path, text + "\n")
+        artifact_record = artifact_entry(
+            artifact_id="final_synthesis_artifact" if final else f"turn_{turn_index:03d}_{turn['role']}",
+            artifact_type="final_artifact" if final else "reviewer_turn_artifact",
+            text=text,
+            path=artifact_path,
+            role=turn["role"],
+        )
+        role_result = role_compliance(text, role=turn["role"], final=final)
+        audit_result = state_audit(
+            text,
+            packet_dir=packet_dir,
+            state_object=state_payload,
+            registry=registry,
+            prompt_card_hash=prompt_card_hash,
+        )
+        final_registry = registry + [artifact_record]
+        turn_records.append(
             {
                 "turn_index": turn_index,
                 "state_object_hash": state_hash,
-                "state_object_snapshot_path": str(state_path),
-                "critical_constraints_preserved": [
-                    {
-                        "constraint_id": "frozen_source_packet_hash",
-                        "status": "preserved",
-                        "evidence_hash_or_location": source_packet_hash,
-                    },
-                    {
-                        "constraint_id": "six_turn_v2_shape",
-                        "status": "preserved",
-                        "evidence_hash_or_location": f"turn_count:{EXPECTED_TURN_COUNT}",
-                    },
-                    {
-                        "constraint_id": "architecture_evidence_hidden_from_judges",
-                        "status": "preserved",
-                        "evidence_hash_or_location": "visible_surface_boundary.judge_packets_include_architecture_evidence=false",
-                    },
-                ],
-                "settled_decisions_if_present": {
-                    "present": True,
-                    "settled_decisions": [
-                        {
-                            "decision_id": "scout_domain_and_packet_locked",
-                            "decision_hash_or_location": lock_hash,
-                        }
-                    ],
-                },
-                "artifact_registry_entries": registry_entries,
-                "artifact_registry_hash": registry_hash,
-                "pinned_source_hashes": [source_packet_hash, task_brief_hash, lock_hash],
-                "pinned_artifact_hashes": [final_artifact_hash],
-                "retrieve_by_id_or_source_reference_behavior": {
-                    "required": True,
-                    "observed": True,
-                    "evidence_hash_or_location": "source_packet.sources[].source_id",
-                },
+                "state_object_path": state_path,
+                "baton_pass_hash": baton_hash,
+                "baton_pass_path": baton_path,
+                "selected_model": {"provider": provider, "exact_model_id": model, "endpoint": endpoint_for_provider(provider)},
+                "adversarial_role": turn["role"],
+                "role_compliance_result": role_result,
+                "state_audit_constraint_preservation_result": audit_result,
+                "synthesis_trigger": {"triggered": final, "reason": "no_provider_smoke_final_turn_slot" if final else None},
                 "token_budget_partial_injection_flags": {
                     "present": True,
-                    "token_budget_limit": None,
+                    "token_budget_limit": int(turn["max_tokens"]),
                     "tokens_used": 0,
                     "partial_injection_used": False,
                     "partial_injection_reason": None,
                 },
-                "baton_pass": {
-                    "baton_pass_hash": baton_hash,
-                    "baton_pass_path": str(baton_path),
-                    "next_model_id": "no_provider_smoke",
-                    "adversarial_role": role,
-                },
-                "selected_model": {
-                    "provider": "no_provider_smoke",
-                    "exact_model_id": "no_provider_smoke",
-                    "endpoint": "none",
-                },
-                "adversarial_role": role,
-                "role_compliance_result": {
-                    "status": "not_checked",
-                    "evidence_hash_or_location": "no_provider_smoke_no_model_turn",
-                },
-                "state_audit_constraint_preservation_result": {
-                    "state_audit_status": "pass",
-                    "constraint_preservation_status": "pass",
-                    "evidence_hash_or_location": state_hash,
-                },
-                "synthesis_trigger": {
-                    "triggered": turn_index == EXPECTED_TURN_COUNT,
-                    "reason": "no_provider_smoke_final_turn_slot" if turn_index == EXPECTED_TURN_COUNT else None,
-                },
+                "artifact_record": artifact_record,
+                "artifact_registry_entries": schema_registry_entries(registry),
+                "artifact_registry_hash": registry_hash(registry),
+                "artifact_registry_after_hash": registry_hash(final_registry) if final else registry_hash(registry),
+                "pinned_source_hashes": [item["artifact_hash"] for item in retrieved_entries if item["artifact_type"].startswith("frozen_")],
+                "pinned_artifact_hashes": pinned_artifact_hashes_from_retrieval(retrieved_entries),
+                "retrieved_artifact_ids": retrieved_ids,
+                "prompt_card_hash": prompt_card_hash,
             }
         )
-    arch_evidence = {
-        "schema_version": "holo_build_arch_evidence_schema_v4_1",
-        "architecture_policy_id": "HOLOBUILD_PATENT_ALIGNMENT_POLICY_V4_1",
-        "run_id": run_id,
-        "domain_id": "D5_healthcare_medtech_evidence_synthesis",
-        "condition_type": "holo_build_arch",
-        "provider_calls_recorded": PROVIDER_CALLS,
-        "architecture_evidence_visible_to_judges": False,
-        "visible_surface_boundary": visible_surface_boundary(),
-        "proof_credit_readiness": proof_credit_readiness(),
-        "turns": turns,
-        "final": {
-            "synthesis_trigger": "no_provider_smoke_final_turn_slot",
-            "final_artifact_hash": final_artifact_hash,
-            "final_artifact_path": str(condition_dir / "artifact.md"),
-            "final_state_object_hash": final_state_hash,
-            "final_artifact_registry_hash": registry_hash,
-            "architecture_evidence_visible_to_judges": False,
-        },
-    }
-    return arch_evidence
+        if not final:
+            registry.append(artifact_record)
+            prior_artifact_ids.append(artifact_record["artifact_id"])
+            prior_hashes.append(artifact_record["artifact_hash"])
+            prior_audit_results.append(
+                {
+                    "turn_index": turn_index,
+                    "role": turn["role"],
+                    "status": audit_result["state_audit_status"],
+                    "evidence_hash_or_location": audit_result["evidence_hash_or_location"],
+                }
+            )
+    return build_live_arch_evidence(
+        packet_dir=packet_dir,
+        run_id=run_id,
+        condition_dir=condition_dir,
+        turn_records=turn_records,
+        final_artifact_path=condition_dir / "artifact.md",
+        final_artifact_text=(condition_dir / "artifact.md").read_text(encoding="utf-8"),
+    )
 
 
 def validate_smoke_arch_evidence(evidence: dict[str, Any]) -> list[str]:
@@ -474,6 +508,49 @@ def validate_smoke_arch_evidence(evidence: dict[str, Any]) -> list[str]:
             missing_turn = sorted(required_turn - set(turn))
             if missing_turn:
                 errors.append(f"arch evidence missing per-turn fields on turn {turn.get('turn_index')}: {missing_turn}")
+            retrieve_evidence = (turn.get("retrieve_by_id_or_source_reference_behavior") or {}).get("evidence_hash_or_location", "")
+            audit_evidence = (turn.get("state_audit_constraint_preservation_result") or {}).get("evidence_hash_or_location", "")
+            turn_index = int(turn.get("turn_index") or 0)
+            state_path_value = turn.get("state_object_snapshot_path")
+            prompt_hashes = re.findall(r"prompt_card_sha256:([a-f0-9]{64})", f"{retrieve_evidence};{audit_evidence}")
+            if "prompt_card_sha256:" not in retrieve_evidence:
+                errors.append(f"arch evidence turn {turn.get('turn_index')} missing prompt hash on retrieved IDs")
+            if "prompt_card_sha256:" not in audit_evidence:
+                errors.append(f"arch evidence turn {turn.get('turn_index')} missing prompt hash on state audit")
+            if state_path_value:
+                prompt_name = "holo_final_synthesis.json" if turn_index == EXPECTED_TURN_COUNT else f"holo_turn_{turn_index:03d}.json"
+                prompt_path = Path(state_path_value).parent / "prompt_cards" / prompt_name
+                if not prompt_path.exists():
+                    errors.append(f"arch evidence turn {turn_index} missing saved prompt card: {prompt_path}")
+                else:
+                    prompt_hash = sha_file(prompt_path)
+                    if not prompt_hashes or any(item != prompt_hash for item in prompt_hashes):
+                        errors.append(f"arch evidence turn {turn_index} prompt hash does not match saved prompt card")
+                    prompt_card = read_json(prompt_path)
+                    prompt_surface = f"{prompt_card.get('system', '')}\n{prompt_card.get('user', '')}"
+                    required_markers = [
+                        "CANONICAL STATE_OBJECT",
+                        "STATE_OBJECT_SHA256",
+                        "BATON_PASS",
+                        "BATON_PASS_SHA256",
+                        "ARTIFACT_REGISTRY",
+                        "ARTIFACT_REGISTRY_SHA256",
+                        "RETRIEVED PINNED SOURCES AND ARTIFACTS",
+                        "gov_notes",
+                    ]
+                    for marker in required_markers:
+                        if marker not in prompt_surface:
+                            errors.append(f"arch evidence turn {turn_index} saved prompt card missing {marker}")
+                    if turn_index > 1 and "turn_001_initial_decision_brief_drafter" not in prompt_surface:
+                        errors.append(f"arch evidence turn {turn_index} missing previous registered artifact ID in prompt card")
+                    if prompt_card.get("judge_visible") is not False:
+                        errors.append(f"arch evidence turn {turn_index} prompt card is judge-visible")
+            if (turn.get("role_compliance_result") or {}).get("status") == "not_checked":
+                errors.append(f"arch evidence turn {turn.get('turn_index')} used placeholder role compliance")
+            if audit_evidence.startswith(turn.get("state_object_hash", "")):
+                errors.append(f"arch evidence turn {turn.get('turn_index')} used shallow state hash audit only")
+            if "retrieved_ids:" not in retrieve_evidence:
+                errors.append(f"arch evidence turn {turn.get('turn_index')} missing retrieved artifact IDs")
         if turns and (turns[-1].get("synthesis_trigger") or {}).get("triggered") is not True:
             errors.append("final architecture turn does not trigger synthesis")
     final = evidence.get("final") or {}
@@ -497,6 +574,276 @@ def packet_hash_bundle(packet_dir: Path) -> dict[str, str]:
         "task_brief": sha_file(packet_dir / "task_brief.md"),
         "packet_lock": sha_file(packet_dir / "packet_lock.json"),
     }
+
+
+def source_ids(packet_dir: Path) -> list[str]:
+    packet = read_json(packet_dir / "source_packet.json")
+    return [item["source_id"] for item in packet.get("sources", [])]
+
+
+def base_registry(packet_dir: Path) -> list[dict[str, Any]]:
+    packet = read_json(packet_dir / "source_packet.json")
+    registry: list[dict[str, Any]] = [
+        {
+            "artifact_id": "TASK_BRIEF",
+            "artifact_type": "frozen_task_brief",
+            "artifact_hash": sha_file(packet_dir / "task_brief.md"),
+            "source_refs": ["task_brief.md"],
+            "content_excerpt": excerpt(task_brief_text(packet_dir), 2200),
+        },
+        {
+            "artifact_id": "SOURCE_PACKET_MD",
+            "artifact_type": "frozen_source_packet_markdown",
+            "artifact_hash": sha_file(packet_dir / "source_packet.md"),
+            "source_refs": ["source_packet.md"],
+            "content_excerpt": "Model-visible source packet rendered from frozen JSON.",
+        },
+    ]
+    for item in packet.get("sources", []):
+        registry.append(
+            {
+                "artifact_id": item["source_id"],
+                "artifact_type": "frozen_source_excerpt",
+                "artifact_hash": item["source_hash"],
+                "source_refs": [item.get("url_or_citation", ""), item.get("publisher", "")],
+                "title": item.get("source_title", ""),
+                "publisher": item.get("publisher", ""),
+                "date": item.get("publication_or_content_date", ""),
+                "provenance_note": item.get("provenance_note", ""),
+                "recency_status": item.get("recency_status", ""),
+                "contestant_use_note": item.get("contestant_use_note", ""),
+                "content_excerpt": item.get("excerpt_text", ""),
+            }
+        )
+    return registry
+
+
+def registry_hash(registry: list[dict[str, Any]]) -> str:
+    return sha_text(stable_json(registry))
+
+
+def schema_registry_entries(registry: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "artifact_id": item["artifact_id"],
+            "artifact_type": item["artifact_type"],
+            "artifact_hash": item["artifact_hash"],
+            "source_refs": item.get("source_refs", []),
+        }
+        for item in registry
+    ]
+
+
+def registry_lookup(registry: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    return {item["artifact_id"]: item for item in registry}
+
+
+def retrieve_registry_entries(registry: list[dict[str, Any]], artifact_ids: list[str]) -> list[dict[str, Any]]:
+    by_id = registry_lookup(registry)
+    missing = [artifact_id for artifact_id in artifact_ids if artifact_id not in by_id]
+    if missing:
+        raise RuntimeError(f"missing registry artifact ids: {missing}")
+    return [by_id[artifact_id] for artifact_id in artifact_ids]
+
+
+def retrieved_evidence_block(entries: list[dict[str, Any]]) -> str:
+    blocks = []
+    for item in entries:
+        blocks.append(
+            "\n".join(
+                [
+                    f"ID: {item['artifact_id']}",
+                    f"TYPE: {item['artifact_type']}",
+                    f"HASH: {item['artifact_hash']}",
+                    f"SOURCE_REFS: {', '.join(item.get('source_refs', []))}",
+                    f"TITLE: {item.get('title', '')}",
+                    f"PROVENANCE: {item.get('provenance_note', '')}",
+                    f"CONTENT: {item.get('content_excerpt', '')}",
+                ]
+            )
+        )
+    return "\n\n---\n\n".join(blocks)
+
+
+def pinned_artifact_hashes_from_retrieval(entries: list[dict[str, Any]]) -> list[str]:
+    hashes = [item["artifact_hash"] for item in entries if item["artifact_type"].endswith("_artifact")]
+    return hashes or [sha_text("NO_PRIOR_ARTIFACTS_RETRIEVED")]
+
+
+def artifact_entry(*, artifact_id: str, artifact_type: str, text: str, path: Path, role: str) -> dict[str, Any]:
+    return {
+        "artifact_id": artifact_id,
+        "artifact_type": artifact_type,
+        "artifact_hash": sha_text(text),
+        "source_refs": [str(path)],
+        "role": role,
+        "content_excerpt": excerpt(text, 3000),
+    }
+
+
+def critical_constraints() -> list[str]:
+    return [
+        "use only frozen packet sources",
+        "do not browse",
+        "cite source IDs for factual claims",
+        "main artifact body must be 900-1300 words",
+        "target final artifact body length is 1100 words",
+        "if a draft exceeds 1300 body words, revise shorter before final answer",
+        "do not overclaim capacity solution, FDA approval, or clinical proof",
+        "architecture evidence is not judge-visible",
+    ]
+
+
+def gov_notes_for_turn(
+    *,
+    turn_index: int,
+    role: str,
+    objective: str,
+    prior_audit_results: list[dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "turn_index": turn_index,
+        "governor_directive": "Preserve source boundaries, surface unresolved tensions, and force the assigned adversarial role to produce usable evidence for synthesis.",
+        "role_focus": role,
+        "objective": objective,
+        "prior_audit_results": prior_audit_results[-3:],
+    }
+
+
+def unresolved_tensions_for_turn(prior_audit_results: list[dict[str, Any]]) -> list[str]:
+    tensions = [
+        "remote pulse-ox monitoring may help triage, but the frozen packet does not prove it solves hospital capacity",
+        "FDA safety guidance and advisory material must not be overstated as final approval",
+        "stale, preprint, vendor, and limited evidence must be bounded",
+    ]
+    for item in prior_audit_results[-3:]:
+        if item.get("status") == "fail":
+            tensions.append(f"prior turn audit issue: {item.get('evidence_hash_or_location')}")
+    return tensions
+
+
+def build_state_object(
+    *,
+    packet_dir: Path,
+    run_id: str,
+    turn_index: int,
+    role: str,
+    objective: str,
+    registry: list[dict[str, Any]],
+    prior_artifact_hashes: list[str],
+    prior_audit_results: list[dict[str, Any]],
+) -> dict[str, Any]:
+    hashes = packet_hash_bundle(packet_dir)
+    return {
+        "state_object_type": "BUILD_STATE_OBJECT",
+        "run_id": run_id,
+        "packet_id": read_json(packet_dir / "source_packet.json")["packet_id"],
+        "turn_index": turn_index,
+        "selected_role": role,
+        "turn_objective": objective,
+        "gov_notes": gov_notes_for_turn(
+            turn_index=turn_index,
+            role=role,
+            objective=objective,
+            prior_audit_results=prior_audit_results,
+        ),
+        "critical_constraints": critical_constraints(),
+        "source_boundaries": {
+            "allowed_source_ids": source_ids(packet_dir),
+            "no_external_sources": True,
+            "contestants_may_browse": False,
+            "forbidden_overclaims": list(FORBIDDEN_SOURCE_BOUNDARY_CLAIMS),
+        },
+        "settled_decisions": [
+            {
+                "decision_id": "packet_frozen_before_generation",
+                "decision_hash_or_location": hashes["packet_lock"],
+            },
+            {
+                "decision_id": "d5_mini_word_gate_900_1300",
+                "decision_hash_or_location": sha_file(packet_dir / "deterministic_gate_policy.json"),
+            },
+            {
+                "decision_id": "architecture_evidence_internal_only",
+                "decision_hash_or_location": "architecture_evidence_visible_to_judges=false",
+            },
+        ],
+        "unresolved_tensions": unresolved_tensions_for_turn(prior_audit_results),
+        "artifact_registry": schema_registry_entries(registry),
+        "artifact_registry_hash": registry_hash(registry),
+        "pinned_hashes": hashes,
+        "prior_artifact_hashes": prior_artifact_hashes,
+    }
+
+
+def build_baton_pass(
+    *,
+    run_id: str,
+    turn_index: int,
+    next_model_id: str,
+    adversarial_role: str,
+    focus_area: str,
+    unresolved_tensions: list[str],
+    state_hash: str,
+    retrieved_artifact_ids: list[str],
+    final: bool,
+) -> dict[str, Any]:
+    return {
+        "baton_pass_type": "BATON_PASS",
+        "run_id": run_id,
+        "turn_index": turn_index,
+        "next_model": next_model_id,
+        "adversarial_role": adversarial_role,
+        "focus_area": focus_area,
+        "unresolved_tensions": unresolved_tensions,
+        "required_output_behavior": [
+            "cite frozen source IDs",
+            "produce role-specific critique or synthesis, not generic praise",
+            "preserve action boundaries and claim boundaries",
+            "return final 900-1300 word crisis brief only" if final else "do not write the final brief on this turn",
+        ],
+        "retrieved_artifact_ids": retrieved_artifact_ids,
+        "state_object_hash": state_hash,
+    }
+
+
+def holo_architecture_user_prompt(
+    *,
+    packet_dir: Path,
+    state_object: dict[str, Any],
+    state_hash: str,
+    baton_pass: dict[str, Any],
+    baton_hash: str,
+    registry: list[dict[str, Any]],
+    retrieved_entries: list[dict[str, Any]],
+    objective: str,
+    final: bool,
+) -> str:
+    output_instruction = final_artifact_instruction() if final else "This is an adversarial architecture turn. Do not write the final brief."
+    return (
+        "CANONICAL STATE_OBJECT\n"
+        "======================\n"
+        f"STATE_OBJECT_SHA256: {state_hash}\n"
+        f"{stable_json(state_object)}\n\n"
+        "BATON_PASS\n"
+        "==========\n"
+        f"BATON_PASS_SHA256: {baton_hash}\n"
+        f"{stable_json(baton_pass)}\n\n"
+        "ARTIFACT_REGISTRY\n"
+        "=================\n"
+        f"ARTIFACT_REGISTRY_SHA256: {registry_hash(registry)}\n"
+        f"{stable_json(schema_registry_entries(registry))}\n\n"
+        "RETRIEVED PINNED SOURCES AND ARTIFACTS\n"
+        "======================================\n"
+        f"{retrieved_evidence_block(retrieved_entries)}\n\n"
+        "FROZEN TASK BRIEF\n"
+        "=================\n"
+        f"{task_brief_text(packet_dir).strip()}\n\n"
+        "CURRENT TURN OBJECTIVE\n"
+        "======================\n"
+        f"{objective}\n\n"
+        f"{output_instruction}"
+    )
 
 
 def required_env_for_conditions(conditions: list[str]) -> list[str]:
@@ -768,28 +1115,65 @@ def call_live_model(
     return text, trace
 
 
-def role_compliance(text: str, *, final: bool = False) -> dict[str, str]:
-    has_source_ref = bool(re.search(r"\bS[1-9](_[A-Z0-9_]+)?\b", text))
+def role_compliance(text: str, *, role: str, final: bool = False) -> dict[str, str]:
+    lower = text.lower()
+    defects: list[str] = []
     if not text.strip():
-        status = "fail"
-        evidence = "empty_output"
-    elif final and not (FINAL_WORD_MIN <= word_count(text) <= FINAL_WORD_MAX):
-        status = "fail"
-        evidence = f"word_count:{word_count(text)}"
-    elif not has_source_ref:
-        status = "fail"
-        evidence = "missing_source_id_references"
-    else:
-        status = "pass"
-        evidence = f"source_refs_present_word_count:{word_count(text)}"
+        defects.append("empty_output")
+    if not SOURCE_ID_RE.search(text):
+        defects.append("missing_source_id_references")
+    required_terms = ROLE_BEHAVIOR_TERMS.get(role, ())
+    missing_terms = [term for term in required_terms if term not in lower]
+    if missing_terms:
+        defects.append(f"missing_role_behavior_terms:{','.join(missing_terms)}")
+    praise_terms = sum(lower.count(term) for term in ("strong", "useful", "excellent", "good"))
+    critique_terms = sum(lower.count(term) for term in ("weak", "risk", "contradict", "uncertain", "unsupported", "limit", "missing"))
+    if not final and praise_terms > 2 and critique_terms == 0:
+        defects.append("generic_praise_only_pass")
+    if final:
+        count = word_count(text)
+        if not (FINAL_WORD_MIN <= count <= FINAL_WORD_MAX):
+            defects.append(f"word_count:{count}")
+        missing_sections = [marker for marker in REQUIRED_FINAL_SECTION_MARKERS if marker not in lower]
+        if missing_sections:
+            defects.append("missing_required_sections:" + ",".join(missing_sections[:5]))
+    status = "fail" if defects else "pass"
+    evidence = "semantic_role_checks:" + (";".join(defects) if defects else f"source_refs_present_word_count:{word_count(text)}")
     return {"status": status, "evidence_hash_or_location": evidence}
 
 
-def state_audit(text: str, hashes: dict[str, str]) -> dict[str, str]:
+def state_audit(
+    text: str,
+    *,
+    packet_dir: Path,
+    state_object: dict[str, Any],
+    registry: list[dict[str, Any]],
+    prompt_card_hash: str,
+) -> dict[str, str]:
+    allowed_ids = set(source_ids(packet_dir))
+    cited_ids = set(SOURCE_ID_RE.findall(text))
+    invented_ids = sorted(cited_ids - allowed_ids)
+    lower = text.lower()
+    defects: list[str] = []
+    if invented_ids:
+        defects.append("invented_source_ids:" + ",".join(invented_ids))
+    if sha_file(packet_dir / "source_packet.json") not in stable_json(state_object):
+        defects.append("packet_hash_missing_from_state_object")
+    if not registry or not registry_hash(registry):
+        defects.append("source_registry_missing")
+    if "no_external_sources" not in stable_json(state_object):
+        defects.append("source_boundary_missing_from_state_object")
+    forbidden_hits = [claim for claim in FORBIDDEN_SOURCE_BOUNDARY_CLAIMS if claim in lower]
+    if forbidden_hits:
+        defects.append("source_boundary_contradiction:" + ",".join(forbidden_hits))
+    status = "fail" if defects else "pass"
     return {
-        "state_audit_status": "pass" if text.strip() else "fail",
-        "constraint_preservation_status": "pass" if hashes.get("source_packet_json") else "fail",
-        "evidence_hash_or_location": hashes["source_packet_json"],
+        "state_audit_status": status,
+        "constraint_preservation_status": status,
+        "evidence_hash_or_location": (
+            f"prompt_card_sha256:{prompt_card_hash};registry_sha256:{registry_hash(registry)};"
+            + ("defects:" + ";".join(defects) if defects else "semantic_checks:constraints_preserved")
+        ),
     }
 
 
@@ -881,11 +1265,7 @@ def build_live_arch_evidence(
 ) -> dict[str, Any]:
     hashes = packet_hash_bundle(packet_dir)
     evidence_turns: list[dict[str, Any]] = []
-    all_artifacts: list[dict[str, str]] = []
     for record in turn_records:
-        all_artifacts.append(record["artifact_record"])
-        entries = artifact_registry_entries(packet_dir, all_artifacts)
-        registry_hash = sha_text(json.dumps(entries, sort_keys=True))
         evidence_turns.append(
             {
                 "turn_index": record["turn_index"],
@@ -900,7 +1280,7 @@ def build_live_arch_evidence(
                     {
                         "constraint_id": "no_live_web_browsing",
                         "status": "preserved",
-                        "evidence_hash_or_location": "model_prompt_use_only_frozen_sources",
+                        "evidence_hash_or_location": f"prompt_card_sha256:{record['prompt_card_hash']}:use_only_frozen_sources",
                     },
                     {
                         "constraint_id": "architecture_evidence_hidden_from_judges",
@@ -921,14 +1301,17 @@ def build_live_arch_evidence(
                         },
                     ],
                 },
-                "artifact_registry_entries": entries,
-                "artifact_registry_hash": registry_hash,
-                "pinned_source_hashes": [hashes["source_packet_json"], hashes["source_packet_md"], hashes["task_brief"], hashes["packet_lock"]],
-                "pinned_artifact_hashes": [item["artifact_hash"] for item in all_artifacts],
+                "artifact_registry_entries": record["artifact_registry_entries"],
+                "artifact_registry_hash": record["artifact_registry_hash"],
+                "pinned_source_hashes": record["pinned_source_hashes"],
+                "pinned_artifact_hashes": record["pinned_artifact_hashes"],
                 "retrieve_by_id_or_source_reference_behavior": {
                     "required": True,
                     "observed": True,
-                    "evidence_hash_or_location": "source_packet.sources[].source_id",
+                    "evidence_hash_or_location": (
+                        f"prompt_card_sha256:{record['prompt_card_hash']};"
+                        f"retrieved_ids:{','.join(record['retrieved_artifact_ids'])}"
+                    ),
                 },
                 "token_budget_partial_injection_flags": record["token_budget_partial_injection_flags"],
                 "baton_pass": {
@@ -944,8 +1327,7 @@ def build_live_arch_evidence(
                 "synthesis_trigger": record["synthesis_trigger"],
             }
         )
-    final_registry_entries = artifact_registry_entries(packet_dir, all_artifacts)
-    final_registry_hash = sha_text(json.dumps(final_registry_entries, sort_keys=True))
+    final_registry_hash = turn_records[-1].get("artifact_registry_after_hash", turn_records[-1]["artifact_registry_hash"])
     final_state_hash = turn_records[-1]["state_object_hash"]
     return {
         "schema_version": "holo_build_arch_evidence_schema_v4_1",
@@ -1075,33 +1457,42 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
     condition = "holo_build_arch"
     condition_dir = packet_dir / "runs" / run_id / condition
     condition_dir.mkdir(parents=True, exist_ok=True)
-    reviewer_notes: list[dict[str, str]] = []
     turn_records: list[dict[str, Any]] = []
     traces: list[dict[str, Any]] = []
-    artifact_records: list[dict[str, str]] = []
+    registry = base_registry(packet_dir)
+    prior_artifact_ids: list[str] = []
     prior_hashes: list[str] = []
+    prior_audit_results: list[dict[str, Any]] = []
+    source_retrieval_ids = ["TASK_BRIEF"] + source_ids(packet_dir)
 
     for index, turn in enumerate(HOLO_PROVIDER_TURNS, start=1):
         provider_model_name = turn["provider_model"]
         provider, model = provider_model(provider_model_name)
-        state_payload = live_state_payload(
+        retrieved_ids = source_retrieval_ids + prior_artifact_ids
+        retrieved_entries = retrieve_registry_entries(registry, retrieved_ids)
+        state_payload = build_state_object(
             packet_dir=packet_dir,
             run_id=run_id,
             turn_index=index,
             role=turn["role"],
             objective=turn["objective"],
-            prior_hashes=prior_hashes,
+            registry=registry,
+            prior_artifact_hashes=prior_hashes,
+            prior_audit_results=prior_audit_results,
         )
         state_hash = sha_text(json.dumps(state_payload, sort_keys=True))
         state_path = condition_dir / f"state_object_turn_{index:03d}.json"
         write_json(state_path, state_payload)
-        baton_payload = live_baton_payload(
+        baton_payload = build_baton_pass(
             run_id=run_id,
             turn_index=index,
             next_model_id=model,
             adversarial_role=turn["role"],
-            objective=turn["objective"],
+            focus_area=turn["objective"],
+            unresolved_tensions=state_payload["unresolved_tensions"],
             state_hash=state_hash,
+            retrieved_artifact_ids=retrieved_ids,
+            final=False,
         )
         baton_hash = sha_text(json.dumps(baton_payload, sort_keys=True))
         baton_path = condition_dir / f"baton_pass_turn_{index:03d}.json"
@@ -1111,7 +1502,17 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
             condition_dir,
             provider_model_name=provider_model_name,
             system=holo_turn_system_prompt(turn["role"]),
-            user=holo_turn_user_prompt(packet_dir, objective=turn["objective"], previous_notes=reviewer_notes),
+            user=holo_architecture_user_prompt(
+                packet_dir=packet_dir,
+                state_object=state_payload,
+                state_hash=state_hash,
+                baton_pass=baton_payload,
+                baton_hash=baton_hash,
+                registry=registry,
+                retrieved_entries=retrieved_entries,
+                objective=turn["objective"],
+                final=False,
+            ),
             max_tokens=int(turn["max_tokens"]),
             timeout=timeout,
             call_type="holo_reviewer_turn",
@@ -1121,16 +1522,32 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
             artifact_path=turn_path,
         )
         traces.append(trace)
+        prompt_card_hash = sha_file(Path(trace["prompt_card_path"]))
         artifact_hash = sha_text(text)
         prior_hashes.append(artifact_hash)
-        reviewer_notes.append({"turn_index": str(index), "role": turn["role"], "text": excerpt(text, 3000)})
-        artifact_record = {
-            "artifact_id": f"turn_{index:03d}_{turn['role']}",
-            "artifact_type": "reviewer_turn_artifact",
-            "artifact_hash": artifact_hash,
-            "source_refs": [str(turn_path)],
-        }
-        artifact_records.append(artifact_record)
+        artifact_record = artifact_entry(
+            artifact_id=f"turn_{index:03d}_{turn['role']}",
+            artifact_type="reviewer_turn_artifact",
+            text=text,
+            path=turn_path,
+            role=turn["role"],
+        )
+        role_result = role_compliance(text, role=turn["role"])
+        audit_result = state_audit(
+            text,
+            packet_dir=packet_dir,
+            state_object=state_payload,
+            registry=registry,
+            prompt_card_hash=prompt_card_hash,
+        )
+        prior_audit_results.append(
+            {
+                "turn_index": index,
+                "role": turn["role"],
+                "status": audit_result["state_audit_status"],
+                "evidence_hash_or_location": audit_result["evidence_hash_or_location"],
+            }
+        )
         turn_records.append(
             {
                 "turn_index": index,
@@ -1140,8 +1557,8 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
                 "baton_pass_path": baton_path,
                 "selected_model": {"provider": provider, "exact_model_id": model, "endpoint": endpoint_for_provider(provider)},
                 "adversarial_role": turn["role"],
-                "role_compliance_result": role_compliance(text),
-                "state_audit_constraint_preservation_result": state_audit(text, packet_hash_bundle(packet_dir)),
+                "role_compliance_result": role_result,
+                "state_audit_constraint_preservation_result": audit_result,
                 "synthesis_trigger": {"triggered": False, "reason": None},
                 "token_budget_partial_injection_flags": {
                     "present": True,
@@ -1151,29 +1568,44 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
                     "partial_injection_reason": None,
                 },
                 "artifact_record": artifact_record,
+                "artifact_registry_entries": schema_registry_entries(registry),
+                "artifact_registry_hash": registry_hash(registry),
+                "pinned_source_hashes": [item["artifact_hash"] for item in retrieved_entries if item["artifact_type"].startswith("frozen_")],
+                "pinned_artifact_hashes": pinned_artifact_hashes_from_retrieval(retrieved_entries),
+                "retrieved_artifact_ids": retrieved_ids,
+                "prompt_card_hash": prompt_card_hash,
             }
         )
+        registry.append(artifact_record)
+        prior_artifact_ids.append(artifact_record["artifact_id"])
 
     synthesis_index = len(HOLO_PROVIDER_TURNS) + 1
     provider, model = provider_model(HOLO_SYNTHESIS_MODEL)
-    synthesis_state = live_state_payload(
+    retrieved_ids = source_retrieval_ids + prior_artifact_ids
+    retrieved_entries = retrieve_registry_entries(registry, retrieved_ids)
+    synthesis_state = build_state_object(
         packet_dir=packet_dir,
         run_id=run_id,
         turn_index=synthesis_index,
         role="final_synthesis_author",
         objective="Synthesize the final 900-1,300 word decision-grade crisis brief from frozen sources and reviewer notes.",
-        prior_hashes=prior_hashes,
+        registry=registry,
+        prior_artifact_hashes=prior_hashes,
+        prior_audit_results=prior_audit_results,
     )
     synthesis_state_hash = sha_text(json.dumps(synthesis_state, sort_keys=True))
     synthesis_state_path = condition_dir / f"state_object_turn_{synthesis_index:03d}.json"
     write_json(synthesis_state_path, synthesis_state)
-    synthesis_baton = live_baton_payload(
+    synthesis_baton = build_baton_pass(
         run_id=run_id,
         turn_index=synthesis_index,
         next_model_id=model,
         adversarial_role="final_synthesis_author",
-        objective="Synthesize final artifact under claim-boundary and source-fidelity constraints.",
+        focus_area="Synthesize final artifact under claim-boundary and source-fidelity constraints.",
+        unresolved_tensions=synthesis_state["unresolved_tensions"],
         state_hash=synthesis_state_hash,
+        retrieved_artifact_ids=retrieved_ids,
+        final=True,
     )
     synthesis_baton_hash = sha_text(json.dumps(synthesis_baton, sort_keys=True))
     synthesis_baton_path = condition_dir / f"baton_pass_turn_{synthesis_index:03d}.json"
@@ -1183,7 +1615,17 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
         condition_dir,
         provider_model_name=HOLO_SYNTHESIS_MODEL,
         system=holo_synthesis_system_prompt(),
-        user=holo_synthesis_user_prompt(packet_dir, reviewer_notes),
+        user=holo_architecture_user_prompt(
+            packet_dir=packet_dir,
+            state_object=synthesis_state,
+            state_hash=synthesis_state_hash,
+            baton_pass=synthesis_baton,
+            baton_hash=synthesis_baton_hash,
+            registry=registry,
+            retrieved_entries=retrieved_entries,
+            objective="Synthesize the final 900-1,300 word decision-grade crisis brief from frozen sources and registered critique artifacts.",
+            final=True,
+        ),
         max_tokens=3400,
         timeout=timeout,
         call_type="holo_final_synthesis",
@@ -1193,14 +1635,24 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
         artifact_path=artifact_path,
     )
     traces.append(final_trace)
+    final_prompt_hash = sha_file(Path(final_trace["prompt_card_path"]))
     final_hash = sha_text(final_text)
-    final_record = {
-        "artifact_id": "final_synthesis_artifact",
-        "artifact_type": "final_artifact",
-        "artifact_hash": final_hash,
-        "source_refs": [str(artifact_path)],
-    }
-    artifact_records.append(final_record)
+    final_record = artifact_entry(
+        artifact_id="final_synthesis_artifact",
+        artifact_type="final_artifact",
+        text=final_text,
+        path=artifact_path,
+        role="final_synthesis_author",
+    )
+    final_role_result = role_compliance(final_text, role="final_synthesis_author", final=True)
+    final_audit_result = state_audit(
+        final_text,
+        packet_dir=packet_dir,
+        state_object=synthesis_state,
+        registry=registry,
+        prompt_card_hash=final_prompt_hash,
+    )
+    final_registry = registry + [final_record]
     turn_records.append(
         {
             "turn_index": synthesis_index,
@@ -1210,8 +1662,8 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
             "baton_pass_path": synthesis_baton_path,
             "selected_model": {"provider": provider, "exact_model_id": model, "endpoint": endpoint_for_provider(provider)},
             "adversarial_role": "final_synthesis_author",
-            "role_compliance_result": role_compliance(final_text, final=True),
-            "state_audit_constraint_preservation_result": state_audit(final_text, packet_hash_bundle(packet_dir)),
+            "role_compliance_result": final_role_result,
+            "state_audit_constraint_preservation_result": final_audit_result,
             "synthesis_trigger": {"triggered": True, "reason": "final_synthesis_turn_completed"},
             "token_budget_partial_injection_flags": {
                 "present": True,
@@ -1221,6 +1673,13 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
                 "partial_injection_reason": None,
             },
             "artifact_record": final_record,
+            "artifact_registry_entries": schema_registry_entries(registry),
+            "artifact_registry_hash": registry_hash(registry),
+            "artifact_registry_after_hash": registry_hash(final_registry),
+            "pinned_source_hashes": [item["artifact_hash"] for item in retrieved_entries if item["artifact_type"].startswith("frozen_")],
+            "pinned_artifact_hashes": pinned_artifact_hashes_from_retrieval(retrieved_entries),
+            "retrieved_artifact_ids": retrieved_ids,
+            "prompt_card_hash": final_prompt_hash,
         }
     )
     arch_evidence = build_live_arch_evidence(

@@ -30,6 +30,12 @@ SCORES_GENERATED = 0
 EXPECTED_PACKET_HASH = "b73292d9d2e4aac5f65a93ae168235d9d581ae17ebaf0a91aa16437018c527aa"
 EXPECTED_TURN_COUNT = 6
 FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT = 14
+GOVERNOR_MAX_REPAIR_ATTEMPTS = 1
+GOV_REPAIR_SMOKE_CASES = (
+    "invalid_init_missing_retrieved_ids_no_repair",
+    "invalid_init_missing_retrieved_ids_repair_success",
+    "invalid_init_missing_retrieved_ids_repair_fail",
+)
 FINAL_WORD_MIN = 900
 FINAL_WORD_MAX = 1300
 FINAL_WORD_TARGET = 1100
@@ -939,17 +945,30 @@ def governor_prompt(
         '  "state_object": {},\n'
         '  "artifact_registry": [],\n'
         '  "pinned_registry_updates": [],\n'
-        '  "baton_pass": {},\n'
+        '  "baton_pass": {"retrieved_artifact_ids": []},\n'
         '  "gov_notes": {},\n'
         '  "unresolved_tensions": [],\n'
         '  "role_compliance_result": {},\n'
         '  "state_audit_result": {},\n'
+        '  "state_diff": {},\n'
+        '  "registry_diff": {},\n'
         '  "next_turn_routing": {},\n'
-        '  "evidence_lock_result": {"status": "pass|fail", "reason": ""}\n'
+        '  "evidence_lock_result": {"status": "pass|fail", "reason": ""},\n'
+        '  "final_artifact_hash": "required only for final_audit",\n'
+        '  "final_word_gate_result": "required only for final_audit",\n'
+        '  "source_boundary_result": "required only for final_audit",\n'
+        '  "registry_consistency_result": "required only for final_audit",\n'
+        '  "prompt_card_hash_matching_result": "required only for final_audit",\n'
+        '  "architecture_evidence_visible_to_judges": false,\n'
+        '  "proof_credit_architecture_status": "required only for final_audit"\n'
         "}\n\n"
-        "For init, produce the state and BATON_PASS for turn 1. "
-        "For update, audit the just-completed generation turn and produce the next-turn state/BATON_PASS unless final=true. "
+        "For init, produce the canonical STATE_OBJECT, Artifact Registry, pinned source/artifact registry entries, "
+        "BATON_PASS, BATON_PASS.retrieved_artifact_ids, gov_notes, unresolved tensions, and exact source markers. "
+        "For update, audit the just-completed generation turn and produce updated STATE_OBJECT, updated Artifact Registry "
+        "or explicit no-change registry, role-compliance result, state-audit result, next BATON_PASS, "
+        "next BATON_PASS.retrieved_artifact_ids, gov_notes, state_diff, and registry_diff. "
         "For final_audit, lock the evidence and fail if any Gov call, state, registry, baton, prompt hash, or final artifact hash is missing. "
+        "The runner will not invent or backfill missing canonical Gov fields. Missing required fields will trigger one bounded repair request, then fail closed. "
         f"final_audit_requested: {final}"
     )
 
@@ -993,6 +1012,165 @@ def parse_governor_json(text: str) -> dict[str, Any]:
     if payload["artifact_registry_source"] != "governor_output_or_governor_locked_update":
         raise RuntimeError("governor_output_registry_not_governor_sourced")
     return payload
+
+
+def required_registry_ids(packet_dir: Path) -> set[str]:
+    return {"TASK_BRIEF", "SOURCE_PACKET_MD", *source_ids(packet_dir)}
+
+
+def registry_ids_from_governor(payload: dict[str, Any]) -> set[str]:
+    ids: set[str] = set()
+    for item in payload.get("artifact_registry") or []:
+        if isinstance(item, dict) and item.get("artifact_id"):
+            ids.add(str(item["artifact_id"]))
+    return ids
+
+
+def governor_call_type_ok(requested_call_type: str, observed: str) -> bool:
+    aliases = {
+        "gov_init": {"gov_init", "init"},
+        "gov_update_audit": {"gov_update_audit", "update", "update_audit"},
+        "gov_final_audit": {"gov_final_audit", "final_audit"},
+    }
+    return observed in aliases.get(requested_call_type, {requested_call_type})
+
+
+def validate_governor_output_contract(
+    payload: dict[str, Any],
+    *,
+    packet_dir: Path,
+    requested_call_type: str,
+    final: bool,
+    registry: list[dict[str, Any]],
+) -> list[str]:
+    errors: list[str] = []
+    required_top = {
+        "governor_call_type",
+        "mode",
+        "source",
+        "proof_credit_eligible",
+        "state_object_source",
+        "baton_pass_source",
+        "artifact_registry_source",
+        "state_object",
+        "artifact_registry",
+        "baton_pass",
+        "gov_notes",
+        "unresolved_tensions",
+        "role_compliance_result",
+        "state_audit_result",
+        "next_turn_routing",
+        "evidence_lock_result",
+    }
+    missing_top = sorted(required_top - set(payload))
+    if missing_top:
+        errors.append("missing_top_level_fields:" + ",".join(missing_top))
+        return errors
+    if not governor_call_type_ok(requested_call_type, str(payload.get("governor_call_type"))):
+        errors.append(f"governor_call_type_mismatch:{payload.get('governor_call_type')} expected {requested_call_type}")
+    if payload.get("mode") != HOLO_MODE_FULL_GOV_V4:
+        errors.append("mode_not_full_gov_v4")
+    if payload.get("state_object_source") != "governor_output":
+        errors.append("state_object_source_not_governor_output")
+    if payload.get("baton_pass_source") != "governor_output":
+        errors.append("baton_pass_source_not_governor_output")
+    if payload.get("artifact_registry_source") != "governor_output_or_governor_locked_update":
+        errors.append("artifact_registry_source_not_governor_locked_update")
+    if not isinstance(payload.get("state_object"), dict) or not payload["state_object"]:
+        errors.append("missing_canonical_state_object")
+    if not isinstance(payload.get("artifact_registry"), list) or not payload["artifact_registry"]:
+        errors.append("missing_artifact_registry")
+    else:
+        missing_registry = sorted(required_registry_ids(packet_dir) - registry_ids_from_governor(payload))
+        if missing_registry:
+            errors.append("artifact_registry_missing_pinned_ids:" + ",".join(missing_registry[:5]))
+        malformed_registry = [
+            str(item.get("artifact_id", "<missing>"))
+            for item in payload["artifact_registry"]
+            if not isinstance(item, dict) or not item.get("artifact_id") or not item.get("artifact_hash")
+        ]
+        if malformed_registry:
+            errors.append("artifact_registry_entries_missing_id_or_hash:" + ",".join(malformed_registry[:5]))
+    if not payload.get("gov_notes"):
+        errors.append("missing_gov_notes")
+    if not isinstance(payload.get("unresolved_tensions"), list):
+        errors.append("unresolved_tensions_not_list")
+
+    baton = payload.get("baton_pass")
+    if not isinstance(baton, dict) or not baton:
+        errors.append("missing_baton_pass")
+    else:
+        retrieved_ids = baton.get("retrieved_artifact_ids")
+        if requested_call_type in {"gov_init", "gov_update_audit"}:
+            if not isinstance(retrieved_ids, list) or not retrieved_ids:
+                errors.append("BATON_PASS.missing_retrieved_artifact_ids")
+            else:
+                registry_ids = {item["artifact_id"] for item in registry}
+                unknown = sorted(str(item) for item in retrieved_ids if item not in registry_ids)
+                if unknown:
+                    errors.append("BATON_PASS.unknown_retrieved_artifact_ids:" + ",".join(unknown[:5]))
+
+    if requested_call_type == "gov_update_audit":
+        if not payload.get("role_compliance_result"):
+            errors.append("missing_role_compliance_result")
+        if not payload.get("state_audit_result"):
+            errors.append("missing_state_audit_result")
+        if "state_diff" not in payload:
+            errors.append("missing_state_diff")
+        if "registry_diff" not in payload:
+            errors.append("missing_registry_diff")
+
+    if requested_call_type == "gov_final_audit":
+        for field in (
+            "final_artifact_hash",
+            "final_word_gate_result",
+            "source_boundary_result",
+            "registry_consistency_result",
+            "prompt_card_hash_matching_result",
+            "architecture_evidence_visible_to_judges",
+            "proof_credit_architecture_status",
+        ):
+            if field not in payload:
+                errors.append(f"missing_final_audit_field:{field}")
+        if payload.get("architecture_evidence_visible_to_judges") is not False:
+            errors.append("architecture_evidence_visible_to_judges_not_false")
+        lock_result = payload.get("evidence_lock_result") or {}
+        if lock_result.get("status") != "pass":
+            errors.append("final_evidence_lock_not_pass")
+    return errors
+
+
+def governor_contract_text() -> str:
+    return (
+        "Required Gov init output: canonical STATE_OBJECT, Artifact Registry, pinned source/artifact registry entries, "
+        "BATON_PASS, BATON_PASS.retrieved_artifact_ids, gov_notes, unresolved tensions, "
+        "state_object_source=governor_output, baton_pass_source=governor_output, "
+        "artifact_registry_source=governor_output_or_governor_locked_update. "
+        "Required Gov update/audit output: updated STATE_OBJECT, updated Artifact Registry or explicit no-change registry, "
+        "role-compliance result, state-audit result, next BATON_PASS, next BATON_PASS.retrieved_artifact_ids, "
+        "gov_notes, state_diff, registry_diff. "
+        "Required Gov final audit output: final_artifact_hash, final_word_gate_result, source_boundary_result, "
+        "registry_consistency_result, prompt_card_hash_matching_result, architecture_evidence_visible_to_judges=false, "
+        "proof_credit_architecture_status. Return corrected Gov JSON only."
+    )
+
+
+def governor_repair_prompt(*, invalid_output: str, validation_errors: list[str]) -> str:
+    return (
+        "GOVERNOR OUTPUT REPAIR REQUEST\n"
+        "==============================\n"
+        "The previous Governor output failed the strict full_gov_v4 contract. "
+        "You must return corrected Governor JSON only. Do not add prose, markdown, comments, or analysis.\n\n"
+        "VALIDATION ERRORS\n"
+        "=================\n"
+        f"{stable_json(validation_errors)}\n\n"
+        "REQUIRED CONTRACT\n"
+        "=================\n"
+        f"{governor_contract_text()}\n\n"
+        "PRIOR INVALID GOVERNOR OUTPUT\n"
+        "=============================\n"
+        f"{invalid_output}\n"
+    )
 
 
 def synthetic_governor_output(
@@ -1072,6 +1250,16 @@ def synthetic_governor_output(
         "unresolved_tensions": state_payload["unresolved_tensions"],
         "role_compliance_result": role_result or {"status": "not_applicable_init"},
         "state_audit_result": audit_result or {"state_audit_status": "not_applicable_init"},
+        "state_diff": {
+            "status": "synthetic_no_provider_smoke",
+            "previous_state_sha256": sha_text(stable_json({})),
+            "next_state_sha256": state_hash,
+        },
+        "registry_diff": {
+            "status": "synthetic_no_provider_smoke",
+            "registry_sha256": sha_text(stable_json(schema_registry_entries(registry))),
+            "added_artifact_id": generation_artifact.get("artifact_id") if generation_artifact else None,
+        },
         "next_turn_routing": {
             "turn_index": turn_number,
             "selected_model": model,
@@ -1083,6 +1271,13 @@ def synthetic_governor_output(
             "status": "pass" if final else "not_final",
             "reason": "synthetic no-provider smoke evidence is diagnostic-only and never proof-credit eligible",
         },
+        "final_artifact_hash": generation_artifact.get("artifact_hash") if final and generation_artifact else None,
+        "final_word_gate_result": {"status": "not_evaluated_no_provider_smoke" if not final else "pass"},
+        "source_boundary_result": {"status": "pass", "reason": "synthetic no-provider smoke"},
+        "registry_consistency_result": {"status": "pass", "reason": "synthetic no-provider smoke"},
+        "prompt_card_hash_matching_result": {"status": "pass", "reason": "synthetic no-provider smoke"},
+        "architecture_evidence_visible_to_judges": False,
+        "proof_credit_architecture_status": "diagnostic_only_no_provider_smoke",
     }
 
 
@@ -1179,6 +1374,108 @@ def save_generation_smoke_trace(
     return trace
 
 
+def remove_retrieved_artifact_ids(payload: dict[str, Any]) -> dict[str, Any]:
+    clone = json.loads(json.dumps(payload))
+    if isinstance(clone.get("baton_pass"), dict):
+        clone["baton_pass"].pop("retrieved_artifact_ids", None)
+    return clone
+
+
+def repair_governor_output(
+    condition_dir: Path,
+    *,
+    packet_dir: Path,
+    call_id: str,
+    requested_call_type: str,
+    turn_index: int | None,
+    invalid_output_text: str,
+    validation_errors: list[str],
+    registry: list[dict[str, Any]],
+    timeout: int,
+    live: bool,
+    smoke_repair_behavior: str | None,
+    synthetic_repair_payload: dict[str, Any] | None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    repair_call_id = f"{call_id}_repair_001"
+    repair_system = governor_system_prompt()
+    repair_user = governor_repair_prompt(invalid_output=invalid_output_text, validation_errors=validation_errors)
+    if live:
+        raw_text, trace = call_live_model(
+            condition_dir,
+            provider_model_name=GOVERNOR_PROVIDER_MODEL,
+            system=repair_system,
+            user=repair_user,
+            max_tokens=3600,
+            timeout=timeout,
+            call_type=f"{requested_call_type}_repair",
+            role="context_governor_repair",
+            turn_index=turn_index,
+            call_id=repair_call_id,
+            artifact_path=condition_dir / "gov_outputs" / f"{repair_call_id}.raw.txt",
+        )
+        payload = parse_governor_json(raw_text)
+    else:
+        prompt_card_path = save_prompt_card(
+            condition_dir,
+            call_id=repair_call_id,
+            provider_model_name=GOVERNOR_PROVIDER_MODEL,
+            system=repair_system,
+            user=repair_user,
+            call_type=f"{requested_call_type}_repair",
+            role="context_governor_repair",
+            turn_index=turn_index,
+        )
+        if smoke_repair_behavior == "success" and synthetic_repair_payload is not None:
+            payload = synthetic_repair_payload
+        else:
+            payload = remove_retrieved_artifact_ids(synthetic_repair_payload or {})
+        output_path = save_governor_output(condition_dir, call_id=repair_call_id, payload=payload)
+        trace = save_governor_smoke_trace(
+            condition_dir,
+            call_id=repair_call_id,
+            prompt_card_path=prompt_card_path,
+            output_path=output_path,
+            payload=payload if payload else {
+                "governor_call_type": requested_call_type,
+                "mode": HOLO_MODE_FULL_GOV_V4,
+                "source": "no_provider_smoke_only",
+            },
+            turn_index=turn_index,
+        )
+    repair_errors = validate_governor_output_contract(
+        payload,
+        packet_dir=packet_dir,
+        requested_call_type=requested_call_type,
+        final=requested_call_type == "gov_final_audit",
+        registry=registry,
+    )
+    output_path = save_governor_output(condition_dir, call_id=repair_call_id, payload=payload)
+    trace["artifact_path"] = str(output_path)
+    trace["artifact_sha256"] = governor_output_hash(payload)
+    write_json(condition_dir / "traces" / f"{repair_call_id}.json", trace)
+    repair_record = {
+        "repair_call_id": repair_call_id,
+        "repair_attempt_index": 1,
+        "bounded_max_attempts": GOVERNOR_MAX_REPAIR_ATTEMPTS,
+        "validation_errors_before_repair": validation_errors,
+        "repair_prompt_card_path": trace["prompt_card_path"],
+        "repair_prompt_card_sha256": sha_file(Path(trace["prompt_card_path"])),
+        "repair_output_path": str(output_path),
+        "repair_output_sha256": governor_output_hash(payload),
+        "repair_validation_errors": repair_errors,
+        "repair_status": "accepted" if not repair_errors else "failed",
+        "input_tokens": int(trace.get("input_tokens") or 0),
+        "output_tokens": int(trace.get("output_tokens") or 0),
+        "provider": trace.get("provider"),
+        "model": trace.get("model"),
+        "trace": trace,
+        "proof_credit_note": "Proof credit is allowed only if final accepted Gov output is Governor-produced; no runner backfill is allowed",
+    }
+    if repair_errors:
+        raise RuntimeError("governor_repair_failed:" + ";".join(repair_errors))
+    return payload, repair_record
+
+
 def call_governor(
     condition_dir: Path,
     *,
@@ -1199,7 +1496,10 @@ def call_governor(
     timeout: int,
     live: bool,
     final: bool = False,
-) -> tuple[dict[str, Any], dict[str, Any]]:
+    repair_enabled: bool = True,
+    force_invalid_missing_retrieved_ids: bool = False,
+    smoke_repair_behavior: str | None = None,
+) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
     prompt = governor_prompt(
         packet_dir=packet_dir,
         call_type=call_type,
@@ -1228,47 +1528,95 @@ def call_governor(
             call_id=call_id,
             artifact_path=condition_dir / "gov_outputs" / f"{call_id}.raw.txt",
         )
-        payload = parse_governor_json(raw_text)
+        invalid_output_text = raw_text
+        try:
+            payload = parse_governor_json(raw_text)
+            validation_errors = validate_governor_output_contract(
+                payload,
+                packet_dir=packet_dir,
+                requested_call_type=call_type,
+                final=final,
+                registry=registry,
+            )
+        except RuntimeError as exc:
+            payload = {}
+            validation_errors = [str(exc)]
+    else:
+        synthetic_valid_payload = synthetic_governor_output(
+            packet_dir=packet_dir,
+            run_id=run_id,
+            call_type=call_type,
+            turn_index=turn_index,
+            next_turn=next_turn,
+            registry=registry,
+            prior_artifact_hashes=prior_artifact_hashes,
+            prior_audit_results=prior_audit_results,
+            generation_artifact=generation_artifact,
+            role_result=role_result,
+            audit_result=audit_result,
+            final=final,
+        )
+        payload = remove_retrieved_artifact_ids(synthetic_valid_payload) if force_invalid_missing_retrieved_ids else synthetic_valid_payload
+        prompt_card_path = save_prompt_card(
+            condition_dir,
+            call_id=call_id,
+            provider_model_name=GOVERNOR_PROVIDER_MODEL,
+            system=governor_system_prompt(),
+            user=prompt,
+            call_type=call_type,
+            role="context_governor",
+            turn_index=turn_index,
+        )
         output_path = save_governor_output(condition_dir, call_id=call_id, payload=payload)
-        trace["artifact_path"] = str(output_path)
-        trace["artifact_sha256"] = governor_output_hash(payload)
-        write_json(condition_dir / "traces" / f"{call_id}.json", trace)
-        return payload, trace
+        trace = save_governor_smoke_trace(
+            condition_dir,
+            call_id=call_id,
+            prompt_card_path=prompt_card_path,
+            output_path=output_path,
+            payload=payload,
+            turn_index=turn_index,
+        )
+        invalid_output_text = stable_json(payload)
+        validation_errors = validate_governor_output_contract(
+            payload,
+            packet_dir=packet_dir,
+            requested_call_type=call_type,
+            final=final,
+            registry=registry,
+        )
+        synthetic_repair_payload = synthetic_valid_payload
 
-    payload = synthetic_governor_output(
-        packet_dir=packet_dir,
-        run_id=run_id,
-        call_type=call_type,
-        turn_index=turn_index,
-        next_turn=next_turn,
-        registry=registry,
-        prior_artifact_hashes=prior_artifact_hashes,
-        prior_audit_results=prior_audit_results,
-        generation_artifact=generation_artifact,
-        role_result=role_result,
-        audit_result=audit_result,
-        final=final,
-    )
-    prompt_card_path = save_prompt_card(
-        condition_dir,
-        call_id=call_id,
-        provider_model_name=GOVERNOR_PROVIDER_MODEL,
-        system=governor_system_prompt(),
-        user=prompt,
-        call_type=call_type,
-        role="context_governor",
-        turn_index=turn_index,
-    )
+    repair_records: list[dict[str, Any]] = []
+    if validation_errors:
+        invalid_path = condition_dir / "gov_outputs" / f"{call_id}.invalid.json"
+        if payload:
+            write_json(invalid_path, payload)
+        if not repair_enabled:
+            raise RuntimeError("governor_output_contract_failed:" + ";".join(validation_errors))
+        repair_payload, repair_record = repair_governor_output(
+            condition_dir,
+            packet_dir=packet_dir,
+            call_id=call_id,
+            requested_call_type=call_type,
+            turn_index=turn_index,
+            invalid_output_text=invalid_output_text,
+            validation_errors=validation_errors,
+            registry=registry,
+            timeout=timeout,
+            live=live,
+            smoke_repair_behavior=smoke_repair_behavior,
+            synthetic_repair_payload=None if live else synthetic_repair_payload,
+        )
+        repair_records.append(repair_record)
+        payload = repair_payload
+
     output_path = save_governor_output(condition_dir, call_id=call_id, payload=payload)
-    trace = save_governor_smoke_trace(
-        condition_dir,
-        call_id=call_id,
-        prompt_card_path=prompt_card_path,
-        output_path=output_path,
-        payload=payload,
-        turn_index=turn_index,
-    )
-    return payload, trace
+    trace["artifact_path"] = str(output_path)
+    trace["artifact_sha256"] = governor_output_hash(payload)
+    trace["governor_validation_status"] = "accepted_after_repair" if repair_records else "accepted"
+    trace["repair_attempt_count"] = len(repair_records)
+    write_json(condition_dir / "traces" / f"{call_id}.json", trace)
+    return payload, trace, repair_records
 
 
 def required_env_for_conditions(conditions: list[str], *, holo_mode: str = HOLO_MODE_DIAGNOSTIC_V3) -> list[str]:
@@ -1864,6 +2212,25 @@ def validate_full_gov_v4_arch_evidence(evidence: dict[str, Any]) -> list[str]:
         if gov_final.get("output", {}).get("evidence_lock_result", {}).get("status") != "pass":
             errors.append("Gov final audit did not pass")
 
+    for gov_record in [gov_init, *gov_updates, gov_final]:
+        if not gov_record:
+            continue
+        repairs = gov_record.get("repair_attempts") or []
+        if len(repairs) > GOVERNOR_MAX_REPAIR_ATTEMPTS:
+            errors.append(f"Gov call {gov_record.get('call_id')} exceeded one repair attempt")
+        for repair in repairs:
+            for field in ("repair_prompt_card_path", "repair_prompt_card_sha256", "repair_output_path", "repair_output_sha256"):
+                if not repair.get(field):
+                    errors.append(f"Gov repair {repair.get('repair_call_id')} missing {field}")
+            prompt_path = Path(repair.get("repair_prompt_card_path", ""))
+            output_path = Path(repair.get("repair_output_path", ""))
+            if prompt_path.exists() and sha_file(prompt_path) != repair.get("repair_prompt_card_sha256"):
+                errors.append(f"Gov repair {repair.get('repair_call_id')} prompt hash mismatch")
+            if output_path.exists() and sha_file(output_path) != repair.get("repair_output_sha256"):
+                errors.append(f"Gov repair {repair.get('repair_call_id')} output hash mismatch")
+            if repair.get("repair_status") != "accepted":
+                errors.append(f"Gov repair {repair.get('repair_call_id')} not accepted")
+
     required_prompt_markers = [
         "CANONICAL STATE_OBJECT",
         "STATE_OBJECT_SHA256",
@@ -2066,7 +2433,7 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
     gov_update_records: list[dict[str, Any]] = []
     turns = full_gov_generation_turns()
 
-    current_gov, gov_init_trace = call_governor(
+    current_gov, gov_init_trace, gov_init_repairs = call_governor(
         condition_dir,
         packet_dir=packet_dir,
         run_id=run_id,
@@ -2086,6 +2453,7 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
         live=live,
     )
     governor_traces.append(gov_init_trace)
+    governor_traces.extend(item["trace"] for item in gov_init_repairs)
     gov_init_record = {
         "call_id": "gov_init",
         "call_type": "gov_init",
@@ -2096,6 +2464,7 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
         "output_sha256": governor_output_hash(current_gov),
         "input_tokens": int(gov_init_trace.get("input_tokens") or 0),
         "output_tokens": int(gov_init_trace.get("output_tokens") or 0),
+        "repair_attempts": gov_init_repairs,
         "output": current_gov,
     }
 
@@ -2225,7 +2594,7 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
             }
         )
         next_turn = turns[turn_index] if turn_index < EXPECTED_TURN_COUNT else None
-        update_output, update_trace = call_governor(
+        update_output, update_trace, update_repairs = call_governor(
             condition_dir,
             packet_dir=packet_dir,
             run_id=run_id,
@@ -2246,6 +2615,7 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
             final=final,
         )
         governor_traces.append(update_trace)
+        governor_traces.extend(item["trace"] for item in update_repairs)
         gov_update_records.append(
             {
                 "call_id": f"gov_update_{turn_index:03d}",
@@ -2258,6 +2628,7 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
                 "output_sha256": governor_output_hash(update_output),
                 "input_tokens": int(update_trace.get("input_tokens") or 0),
                 "output_tokens": int(update_trace.get("output_tokens") or 0),
+                "repair_attempts": update_repairs,
                 "state_diff": {
                     "previous_state_sha256": state_hash,
                     "next_state_sha256": governor_state_hash(update_output),
@@ -2279,7 +2650,7 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
 
     final_artifact_path = condition_dir / "artifact.md"
     final_text = final_artifact_path.read_text(encoding="utf-8")
-    final_output, final_trace = call_governor(
+    final_output, final_trace, final_repairs = call_governor(
         condition_dir,
         packet_dir=packet_dir,
         run_id=run_id,
@@ -2310,6 +2681,7 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
         final=True,
     )
     governor_traces.append(final_trace)
+    governor_traces.extend(item["trace"] for item in final_repairs)
     gov_final_record = {
         "call_id": "gov_final_audit",
         "call_type": "gov_final_audit",
@@ -2320,6 +2692,7 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
         "output_sha256": governor_output_hash(final_output),
         "input_tokens": int(final_trace.get("input_tokens") or 0),
         "output_tokens": int(final_trace.get("output_tokens") or 0),
+        "repair_attempts": final_repairs,
         "state_diff": {
             "previous_state_sha256": governor_state_hash(current_gov),
             "locked_state_sha256": governor_state_hash(final_output),
@@ -2392,6 +2765,138 @@ def run_holobuild_full_gov_v4(packet_dir: Path, run_id: str, timeout: int, *, li
         "expected_holo_call_count": FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT,
         "holo_mode": HOLO_MODE_FULL_GOV_V4,
     }
+
+
+def run_governor_repair_smoke_case(packet_dir: Path, run_id: str, case: str) -> int:
+    require_packet(packet_dir)
+    condition_dir = packet_dir / "runs" / run_id / "gov_repair_smoke" / case
+    condition_dir.mkdir(parents=True, exist_ok=True)
+    registry = base_registry(packet_dir)
+    turn = full_gov_generation_turns()[0]
+    result: dict[str, Any] = {
+        "runner_id": RUNNER_ID,
+        "run_mode": RUN_MODE_FULL_GOV_V4,
+        "holo_mode": HOLO_MODE_FULL_GOV_V4,
+        "smoke_case": case,
+        "provider_calls": PROVIDER_CALLS,
+        "synthetic_smoke_only": True,
+        "proof_credit_class": "no_provider_smoke_only",
+        "repair_max_attempts": GOVERNOR_MAX_REPAIR_ATTEMPTS,
+    }
+    try:
+        if case == "invalid_init_missing_retrieved_ids_no_repair":
+            call_governor(
+                condition_dir,
+                packet_dir=packet_dir,
+                run_id=run_id,
+                call_id="gov_init",
+                call_type="gov_init",
+                turn_index=1,
+                next_turn=turn,
+                registry=registry,
+                prior_state=None,
+                prior_baton=None,
+                prior_artifact_hashes=[],
+                prior_audit_results=[],
+                generation_artifact=None,
+                role_result=None,
+                audit_result=None,
+                timeout=0,
+                live=False,
+                repair_enabled=False,
+                force_invalid_missing_retrieved_ids=True,
+            )
+            result["status"] = "GOV_REPAIR_SMOKE_FAIL"
+            result["reason"] = "invalid Gov init unexpectedly passed without repair"
+            exit_code = 1
+        elif case == "invalid_init_missing_retrieved_ids_repair_success":
+            payload, trace, repairs = call_governor(
+                condition_dir,
+                packet_dir=packet_dir,
+                run_id=run_id,
+                call_id="gov_init",
+                call_type="gov_init",
+                turn_index=1,
+                next_turn=turn,
+                registry=registry,
+                prior_state=None,
+                prior_baton=None,
+                prior_artifact_hashes=[],
+                prior_audit_results=[],
+                generation_artifact=None,
+                role_result=None,
+                audit_result=None,
+                timeout=0,
+                live=False,
+                repair_enabled=True,
+                force_invalid_missing_retrieved_ids=True,
+                smoke_repair_behavior="success",
+            )
+            errors = validate_governor_output_contract(
+                payload,
+                packet_dir=packet_dir,
+                requested_call_type="gov_init",
+                final=False,
+                registry=registry,
+            )
+            result.update(
+                {
+                    "status": "GOV_REPAIR_SMOKE_PASS" if not errors and len(repairs) == 1 else "GOV_REPAIR_SMOKE_FAIL",
+                    "repair_attempts": len(repairs),
+                    "accepted_trace": trace,
+                    "validation_errors": errors,
+                    "accepted_has_retrieved_artifact_ids": bool((payload.get("baton_pass") or {}).get("retrieved_artifact_ids")),
+                }
+            )
+            exit_code = 0 if result["status"].endswith("_PASS") else 1
+        elif case == "invalid_init_missing_retrieved_ids_repair_fail":
+            call_governor(
+                condition_dir,
+                packet_dir=packet_dir,
+                run_id=run_id,
+                call_id="gov_init",
+                call_type="gov_init",
+                turn_index=1,
+                next_turn=turn,
+                registry=registry,
+                prior_state=None,
+                prior_baton=None,
+                prior_artifact_hashes=[],
+                prior_audit_results=[],
+                generation_artifact=None,
+                role_result=None,
+                audit_result=None,
+                timeout=0,
+                live=False,
+                repair_enabled=True,
+                force_invalid_missing_retrieved_ids=True,
+                smoke_repair_behavior="fail",
+            )
+            result["status"] = "GOV_REPAIR_SMOKE_FAIL"
+            result["reason"] = "invalid repair unexpectedly passed"
+            exit_code = 1
+        else:
+            result["status"] = "GOV_REPAIR_SMOKE_FAIL"
+            result["reason"] = f"unknown smoke case: {case}"
+            exit_code = 1
+    except RuntimeError as exc:
+        message = str(exc)
+        expected_no_repair = case == "invalid_init_missing_retrieved_ids_no_repair" and "BATON_PASS.missing_retrieved_artifact_ids" in message
+        expected_repair_fail = case == "invalid_init_missing_retrieved_ids_repair_fail" and "governor_repair_failed" in message
+        result.update(
+            {
+                "status": "GOV_REPAIR_SMOKE_PASS" if expected_no_repair or expected_repair_fail else "GOV_REPAIR_SMOKE_FAIL",
+                "fail_closed_error": message,
+                "repair_attempted": case != "invalid_init_missing_retrieved_ids_no_repair",
+            }
+        )
+        exit_code = 0 if result["status"].endswith("_PASS") else 1
+
+    result["provider_calls"] = PROVIDER_CALLS
+    result_path = condition_dir / "gov_repair_smoke_result.json"
+    write_json(result_path, result)
+    print(json.dumps({**result, "result_path": str(result_path)}, indent=2, sort_keys=False))
+    return exit_code
 
 
 def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str, Any]:
@@ -2910,15 +3415,22 @@ def run_live_guarded(
 def main() -> int:
     parser = argparse.ArgumentParser(description="D5 mini scout HoloBuild vs GPT-5.5 adapter.")
     parser.add_argument("--packet-dir", default=str(DEFAULT_PACKET_DIR))
-    parser.add_argument("--condition", action="append", choices=VALID_CONDITIONS, required=True)
+    parser.add_argument("--condition", action="append", choices=VALID_CONDITIONS)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--timeout", type=int, default=900)
     parser.add_argument("--holo-mode", choices=HOLO_MODES, default=HOLO_MODE_DIAGNOSTIC_V3)
+    parser.add_argument("--gov-repair-smoke-case", choices=GOV_REPAIR_SMOKE_CASES)
     parser.add_argument("--no-provider-smoke", action="store_true")
     parser.add_argument("--live", action="store_true")
     args = parser.parse_args()
 
     packet_dir = Path(args.packet_dir).resolve()
+    if args.gov_repair_smoke_case:
+        if args.live:
+            parser.error("--gov-repair-smoke-case is no-provider only and cannot be used with --live")
+        return run_governor_repair_smoke_case(packet_dir, args.run_id, args.gov_repair_smoke_case)
+    if not args.condition:
+        parser.error("--condition is required unless --gov-repair-smoke-case is set")
     conditions = list(dict.fromkeys(args.condition))
     if args.live:
         return run_live_guarded(packet_dir, args.run_id, conditions, args.timeout, holo_mode=args.holo_mode)

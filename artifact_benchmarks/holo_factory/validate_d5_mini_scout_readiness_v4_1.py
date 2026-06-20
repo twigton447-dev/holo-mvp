@@ -22,6 +22,7 @@ EXPECTED_PACKET_HASH = "b73292d9d2e4aac5f65a93ae168235d9d581ae17ebaf0a91aa164370
 EXPECTED_CONDITIONS = {"holo_build_arch", "solo_openai_gpt_5_5"}
 EXPECTED_TURN_COUNT = 6
 EXPECTED_FULL_GOV_V4_CALL_COUNT = 14
+EXPECTED_GOVERNOR_MAX_REPAIR_ATTEMPTS = 1
 EXPECTED_WORD_TARGET = 1100
 REQUIRED_ARCH_TOKENS = [
     "CANONICAL STATE_OBJECT",
@@ -84,6 +85,20 @@ REQUIRED_FULL_GOV_V4_TOKENS = [
     "generation prompt hash not matching Gov-produced state/baton/registry = no proof credit",
     "Gov final audit fail = no proof credit",
     "synthetic smoke evidence is diagnostic-only and not proof-credit eligible",
+    "GOVERNOR_MAX_REPAIR_ATTEMPTS",
+    "GOV_REPAIR_SMOKE_CASES",
+    "validate_governor_output_contract",
+    "governor_repair_prompt",
+    "repair_governor_output",
+    "run_governor_repair_smoke_case",
+    "--gov-repair-smoke-case",
+    "BATON_PASS.missing_retrieved_artifact_ids",
+    "governor_repair_failed",
+    "invalid_init_missing_retrieved_ids_no_repair",
+    "invalid_init_missing_retrieved_ids_repair_success",
+    "invalid_init_missing_retrieved_ids_repair_fail",
+    "The runner will not invent or backfill missing canonical Gov fields",
+    "Proof credit is allowed only if final accepted Gov output is Governor-produced",
 ]
 EXPECTED_SOLO_ROLES = [
     "initial_decision_brief_draft",
@@ -179,6 +194,7 @@ def main() -> int:
         require(runner_assignments.get("RUN_MODE_FULL_GOV_V4") == "d5_medtech_capacity_strain_001_full_gov_v4", errors, "runner missing full Gov v4 run mode")
         require(runner_assignments.get("HOLO_MODE_FULL_GOV_V4") == "full_gov_v4", errors, "runner missing full Gov v4 mode literal")
         require(runner_assignments.get("FULL_GOV_V4_EXPECTED_HOLO_CALL_COUNT") == EXPECTED_FULL_GOV_V4_CALL_COUNT, errors, "full Gov v4 expected call count is not 14")
+        require(runner_assignments.get("GOVERNOR_MAX_REPAIR_ATTEMPTS") == EXPECTED_GOVERNOR_MAX_REPAIR_ATTEMPTS, errors, "Governor repair attempts are not bounded to one")
         require(runner_assignments.get("GOVERNOR_PROVIDER_MODEL") == "openai:gpt-5.5", errors, "Governor model is not a fixed model ID")
         require(runner_assignments.get("EXPECTED_PACKET_HASH") == EXPECTED_PACKET_HASH, errors, "runner does not pin expected packet hash")
         require(runner_assignments.get("EXPECTED_TURN_COUNT") == EXPECTED_TURN_COUNT, errors, "runner expected turn count is not 6")
@@ -203,6 +219,10 @@ def main() -> int:
         require("artifact_registry_sha256\") not in prompt_surface" in runner_text, errors, "full Gov validator does not tie registry hash to prompt")
         require("Gov final audit did not pass" in runner_text, errors, "full Gov validator does not fail missing/failed final audit")
         require("if holo_mode == HOLO_MODE_FULL_GOV_V4" in runner_text, errors, "runner missing explicit full Gov v4 branch")
+        require("repair_enabled=False" in runner_text, errors, "runner missing no-repair fail-closed smoke case")
+        require("force_invalid_missing_retrieved_ids=True" in runner_text, errors, "runner missing invalid Gov output smoke injection")
+        require("repair_attempts\": len(repairs)" in runner_text, errors, "runner does not record repair attempts in smoke result")
+        require("repair_attempts" in runner_text and "bounded_max_attempts" in runner_text, errors, "runner does not record bounded repair evidence")
 
         for token in REQUIRED_ARCH_TOKENS:
             require(token in runner_text, errors, f"runner missing architecture evidence token: {token}")

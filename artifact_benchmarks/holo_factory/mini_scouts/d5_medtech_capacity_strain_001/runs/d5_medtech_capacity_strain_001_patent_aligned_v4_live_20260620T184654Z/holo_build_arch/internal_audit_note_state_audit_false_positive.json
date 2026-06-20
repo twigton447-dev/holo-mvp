@@ -1,0 +1,35 @@
+{
+  "record_type": "internal_state_audit_review_note",
+  "visibility": "internal_only_not_judge_visible",
+  "provider_calls": 0,
+  "run_id": "d5_medtech_capacity_strain_001_patent_aligned_v4_live_20260620T184654Z",
+  "condition": "holo_build_arch",
+  "state_audit_flag": "source_boundary_contradiction: final approval",
+  "finding": "false_positive_non_blocking",
+  "proof_credit_recommendation": "proof_credit_clear_with_audit_note",
+  "reason": "The final artifact and intermediate turns reject the final-approval overclaim rather than assert it.",
+  "future_code_patch_recommended": "Make state audit negation/context-aware for phrases like \u201cnot final approval\u201d.",
+  "evidence_locations": [
+    {
+      "artifact": "final artifact",
+      "location": "line 53",
+      "summary": "states FDA draft/press/advisory materials are not final approval or clearance"
+    },
+    {
+      "artifact": "turn 2",
+      "location": "lines 25-28",
+      "summary": "attacks overclaim and says not to overstate FDA activity as final approval"
+    },
+    {
+      "artifact": "turn 4",
+      "location": "line 27",
+      "summary": "says procurement/labeling may not describe FDA material as approval, clearance, or finalized standard"
+    },
+    {
+      "artifact": "turn 5",
+      "location": "lines 10-12",
+      "summary": "states there is zero evidence of final FDA approval, clearance, or finalized new regulatory standards"
+    }
+  ],
+  "created_at_utc": "2026-06-20T18:58:46Z"
+}

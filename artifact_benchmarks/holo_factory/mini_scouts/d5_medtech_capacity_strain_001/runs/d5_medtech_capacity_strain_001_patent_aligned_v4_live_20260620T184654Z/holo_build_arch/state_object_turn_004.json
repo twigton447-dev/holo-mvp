@@ -1,0 +1,494 @@
+{
+  "state_object_type": "BUILD_STATE_OBJECT",
+  "context_governor_source": "internal_state_management_step",
+  "USER_GOAL": "Produce a 900-1,300 word decision-grade D5 MedTech crisis brief from the frozen packet only.",
+  "LATEST_INPUT_SUMMARY": "Frozen D5 pulse-ox / hospital-capacity evidence uncertainty packet; no browsing; use registered source IDs only.",
+  "CRITICAL_CONSTRAINTS": [
+    "use only frozen packet sources",
+    "do not browse",
+    "cite source IDs for factual claims",
+    "main artifact body must be 900-1300 words",
+    "target final artifact body length is 1100 words",
+    "if a draft exceeds 1300 body words, revise shorter before final answer",
+    "do not overclaim capacity solution, FDA approval, or clinical proof",
+    "architecture evidence is not judge-visible"
+  ],
+  "ROLLING_SUMMARY": {
+    "turn_index": 4,
+    "current_focus": "Stress-test practical options, risks of acting, risks of waiting, operating gates, and usefulness for leadership under capacity pressure.",
+    "prior_artifact_hashes": [
+      "584682bd9a96cca9d8650c3bc06b13766dcc74cc836d76b3b18e8107f8302e84",
+      "d4254a2f6ccc1ebac179ad967fc89a81b5127a98a5c954ae23e9762a8333878e",
+      "c78523a899a3e3c9fcb68c83bcb5517a331e308ed3922aa28babdcf2d2b395ee"
+    ],
+    "recent_audit_results": [
+      {
+        "turn_index": 1,
+        "role": "initial_decision_brief_drafter",
+        "status": "pass",
+        "evidence_hash_or_location": "prompt_card_sha256:e16d51364f9ff2f68dd254ef541aefc792ec1ada25cd2f289de65bfb007c345f;registry_sha256:6cf6391125d1ed7e992c35f69887b16b4f793c12b3142f4691fa7d83fe8b0ff8;semantic_checks:constraints_preserved"
+      },
+      {
+        "turn_index": 2,
+        "role": "assumption_and_evidence_attacker",
+        "status": "fail",
+        "evidence_hash_or_location": "prompt_card_sha256:84ff61d5fd4c7646ee7d6db46d816bd6f5f0b7411706c85dabd29f83e881dc04;registry_sha256:54803c57167d12da61813425671a6b78d10dd78a030e2eb1204e78bae852523e;defects:source_boundary_contradiction:final approval"
+      },
+      {
+        "turn_index": 3,
+        "role": "contradiction_uncertainty_source_fidelity_reviewer",
+        "status": "pass",
+        "evidence_hash_or_location": "prompt_card_sha256:c867daf442dd9fd98f1993505b88604f2ab2910d5688e403bc60b0933475ed9f;registry_sha256:58c343f7b7084da54c3fe73a4f6789a64a7015526f51cdccbdd0276d337ccaed;semantic_checks:constraints_preserved"
+      }
+    ]
+  },
+  "SETTLED_DECISIONS": [
+    {
+      "decision_id": "packet_frozen_before_generation",
+      "decision_hash_or_location": "211a67112f1ce8a37a2d514028ac30d8a798762df0c610679e84b5d538fa19ca"
+    },
+    {
+      "decision_id": "d5_mini_word_gate_900_1300",
+      "decision_hash_or_location": "527228f26dd456cdb98c375c2a70884b90ac5d53a5dba26386c13bd033ec806f"
+    },
+    {
+      "decision_id": "architecture_evidence_internal_only",
+      "decision_hash_or_location": "architecture_evidence_visible_to_judges=false"
+    }
+  ],
+  "ARTIFACTS_REGISTRY": [
+    {
+      "artifact_id": "TASK_BRIEF",
+      "artifact_type": "frozen_task_brief",
+      "artifact_hash": "98a1e03d77a60de2d4c490a6f1b9bdca87a2f41b6009dbf6d28c945cd2af6114",
+      "source_refs": [
+        "task_brief.md"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "SOURCE_PACKET_MD",
+      "artifact_type": "frozen_source_packet_markdown",
+      "artifact_hash": "a572e13cf1cc8c52395b96413f76aa130fc51cc501a0972658121a5ab801e468",
+      "source_refs": [
+        "source_packet.md"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S1_FDA_PULSE_OX_PAGE_2025",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "86506649f048f0909c6cdfae0cbc3ddee278a3c576db9b120d9a823a18bd9e3b",
+      "source_refs": [
+        "https://www.fda.gov/medical-devices/products-and-medical-procedures/pulse-oximeters",
+        "U.S. Food and Drug Administration"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S2_FDA_DRAFT_GUIDANCE_2025",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "0c22770e92ce8c6d7ef7d527a23881269fcff6fe2ef37612c29d207753a343db",
+      "source_refs": [
+        "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/pulse-oximeters-medical-purposes-non-clinical-and-clinical-performance-testing-labeling-and",
+        "U.S. Food and Drug Administration"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S3_CDC_SEPSIS_CONTEXT_2026",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "7b2c7f2e57919cf8a6de4da42da5df7333648a59918df1f079e134808582d131",
+      "source_refs": [
+        "https://www.cdc.gov/sepsis/about/index.html",
+        "U.S. Centers for Disease Control and Prevention"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S4_FDA_PRESS_RELEASE_2025",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "54963215ea22494f01f35c702ac8b09a9f97f2ea3838834326990aeb81ba6f56",
+      "source_refs": [
+        "https://www.fda.gov/news-events/press-announcements/fda-proposes-updated-recommendations-help-improve-performance-pulse-oximeters-across-skin-tones",
+        "U.S. Food and Drug Administration"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S5_FDA_ADVISORY_MEETING_2024",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "db4f4e318098f6f236f63688175fcedb71c9c13668a9d35be7ae77adef93e160",
+      "source_refs": [
+        "https://www.fda.gov/advisory-committees/advisory-committee-calendar/february-2-2024-anesthesiology-and-respiratory-therapy-devices-panel-medical-devices-advisory",
+        "U.S. Food and Drug Administration"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S6_DAVIES_ARXIV_EAR_OX_2020",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "ba943d3edee73c981f08ce1d189fc942c5a2922f723b9cd3e444a92ad6f4f999",
+      "source_refs": [
+        "https://arxiv.org/abs/2006.04231",
+        "arXiv preprint"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "8105b10c64019de9cc51d7ba54a590b4313e5ad0c24b381e57fe3259fad845aa",
+      "source_refs": [
+        "https://www.health.com/news/pulse-oximeter-home-covid-recovery",
+        "Health.com"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S8_VERYWELL_LIMITED_EXPLAINER_2024",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "1c53078ac2a5d52ef06d1e0b6a220fccd2d55d88d7d365125f87bde776512eaa",
+      "source_refs": [
+        "https://www.verywellhealth.com/pulse-oximeter-racial-bias-8728633",
+        "Verywell Health"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S9_DERIVED_EVIDENCE_PRESSURE_TABLE",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "1501df6a271bf3382f5e4f063076efbe8a7979679f3c8089df2352148618246a",
+      "source_refs": [
+        "Derived from S1-S8 in this frozen packet; no independent URL.",
+        "Packet author derived from frozen public-source excerpts"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "turn_001_initial_decision_brief_drafter",
+      "artifact_type": "reviewer_turn_artifact",
+      "artifact_hash": "584682bd9a96cca9d8650c3bc06b13766dcc74cc836d76b3b18e8107f8302e84",
+      "source_refs": [
+        "/Users/taylorwigton/Desktop/holo-mvp/artifact_benchmarks/holo_factory/mini_scouts/d5_medtech_capacity_strain_001/runs/d5_medtech_capacity_strain_001_patent_aligned_v4_live_20260620T184654Z/holo_build_arch/turn_artifacts/turn_001.md"
+      ],
+      "status": "ACTIVE",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "turn_002_assumption_and_evidence_attacker",
+      "artifact_type": "reviewer_turn_artifact",
+      "artifact_hash": "d4254a2f6ccc1ebac179ad967fc89a81b5127a98a5c954ae23e9762a8333878e",
+      "source_refs": [
+        "/Users/taylorwigton/Desktop/holo-mvp/artifact_benchmarks/holo_factory/mini_scouts/d5_medtech_capacity_strain_001/runs/d5_medtech_capacity_strain_001_patent_aligned_v4_live_20260620T184654Z/holo_build_arch/turn_artifacts/turn_002.md"
+      ],
+      "status": "ACTIVE",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "turn_003_contradiction_uncertainty_source_fidelity_reviewer",
+      "artifact_type": "reviewer_turn_artifact",
+      "artifact_hash": "c78523a899a3e3c9fcb68c83bcb5517a331e308ed3922aa28babdcf2d2b395ee",
+      "source_refs": [
+        "/Users/taylorwigton/Desktop/holo-mvp/artifact_benchmarks/holo_factory/mini_scouts/d5_medtech_capacity_strain_001/runs/d5_medtech_capacity_strain_001_patent_aligned_v4_live_20260620T184654Z/holo_build_arch/turn_artifacts/turn_003.md"
+      ],
+      "status": "ACTIVE",
+      "version": "v1"
+    }
+  ],
+  "REQUIRED_TOOLS": [
+    "retrieve_registry_entries",
+    "state_audit",
+    "role_compliance",
+    "deterministic_gate_precheck"
+  ],
+  "BATON_PASS": {
+    "status": "same-turn BATON_PASS is injected as the separate BATON_PASS block with SHA256",
+    "required": true
+  },
+  "run_id": "d5_medtech_capacity_strain_001_patent_aligned_v4_live_20260620T184654Z",
+  "packet_id": "d5_medtech_capacity_strain_001",
+  "turn_index": 4,
+  "selected_role": "options_operational_usefulness_reviewer",
+  "turn_objective": "Stress-test practical options, risks of acting, risks of waiting, operating gates, and usefulness for leadership under capacity pressure.",
+  "gov_notes": {
+    "turn_index": 4,
+    "governor_directive": "Preserve source boundaries, surface unresolved tensions, and force the assigned adversarial role to produce usable evidence for synthesis.",
+    "role_focus": "options_operational_usefulness_reviewer",
+    "objective": "Stress-test practical options, risks of acting, risks of waiting, operating gates, and usefulness for leadership under capacity pressure.",
+    "prior_audit_results": [
+      {
+        "turn_index": 1,
+        "role": "initial_decision_brief_drafter",
+        "status": "pass",
+        "evidence_hash_or_location": "prompt_card_sha256:e16d51364f9ff2f68dd254ef541aefc792ec1ada25cd2f289de65bfb007c345f;registry_sha256:6cf6391125d1ed7e992c35f69887b16b4f793c12b3142f4691fa7d83fe8b0ff8;semantic_checks:constraints_preserved"
+      },
+      {
+        "turn_index": 2,
+        "role": "assumption_and_evidence_attacker",
+        "status": "fail",
+        "evidence_hash_or_location": "prompt_card_sha256:84ff61d5fd4c7646ee7d6db46d816bd6f5f0b7411706c85dabd29f83e881dc04;registry_sha256:54803c57167d12da61813425671a6b78d10dd78a030e2eb1204e78bae852523e;defects:source_boundary_contradiction:final approval"
+      },
+      {
+        "turn_index": 3,
+        "role": "contradiction_uncertainty_source_fidelity_reviewer",
+        "status": "pass",
+        "evidence_hash_or_location": "prompt_card_sha256:c867daf442dd9fd98f1993505b88604f2ab2910d5688e403bc60b0933475ed9f;registry_sha256:58c343f7b7084da54c3fe73a4f6789a64a7015526f51cdccbdd0276d337ccaed;semantic_checks:constraints_preserved"
+      }
+    ]
+  },
+  "critical_constraints": [
+    "use only frozen packet sources",
+    "do not browse",
+    "cite source IDs for factual claims",
+    "main artifact body must be 900-1300 words",
+    "target final artifact body length is 1100 words",
+    "if a draft exceeds 1300 body words, revise shorter before final answer",
+    "do not overclaim capacity solution, FDA approval, or clinical proof",
+    "architecture evidence is not judge-visible"
+  ],
+  "source_boundaries": {
+    "allowed_source_ids": [
+      "S1_FDA_PULSE_OX_PAGE_2025",
+      "S2_FDA_DRAFT_GUIDANCE_2025",
+      "S3_CDC_SEPSIS_CONTEXT_2026",
+      "S4_FDA_PRESS_RELEASE_2025",
+      "S5_FDA_ADVISORY_MEETING_2024",
+      "S6_DAVIES_ARXIV_EAR_OX_2020",
+      "S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022",
+      "S8_VERYWELL_LIMITED_EXPLAINER_2024",
+      "S9_DERIVED_EVIDENCE_PRESSURE_TABLE"
+    ],
+    "no_external_sources": true,
+    "contestants_may_browse": false,
+    "forbidden_overclaims": [
+      "fda approved",
+      "final approval",
+      "solves hospital capacity",
+      "proves capacity relief"
+    ]
+  },
+  "settled_decisions": [
+    {
+      "decision_id": "packet_frozen_before_generation",
+      "decision_hash_or_location": "211a67112f1ce8a37a2d514028ac30d8a798762df0c610679e84b5d538fa19ca"
+    },
+    {
+      "decision_id": "d5_mini_word_gate_900_1300",
+      "decision_hash_or_location": "527228f26dd456cdb98c375c2a70884b90ac5d53a5dba26386c13bd033ec806f"
+    },
+    {
+      "decision_id": "architecture_evidence_internal_only",
+      "decision_hash_or_location": "architecture_evidence_visible_to_judges=false"
+    }
+  ],
+  "unresolved_tensions": [
+    "remote pulse-ox monitoring may help triage, but the frozen packet does not prove it solves hospital capacity",
+    "FDA safety guidance and advisory material must not be overstated as final approval",
+    "stale, preprint, vendor, and limited evidence must be bounded",
+    "prior turn audit issue: prompt_card_sha256:84ff61d5fd4c7646ee7d6db46d816bd6f5f0b7411706c85dabd29f83e881dc04;registry_sha256:54803c57167d12da61813425671a6b78d10dd78a030e2eb1204e78bae852523e;defects:source_boundary_contradiction:final approval"
+  ],
+  "rolling_summary": {
+    "turn_index": 4,
+    "current_focus": "Stress-test practical options, risks of acting, risks of waiting, operating gates, and usefulness for leadership under capacity pressure.",
+    "prior_artifact_hashes": [
+      "584682bd9a96cca9d8650c3bc06b13766dcc74cc836d76b3b18e8107f8302e84",
+      "d4254a2f6ccc1ebac179ad967fc89a81b5127a98a5c954ae23e9762a8333878e",
+      "c78523a899a3e3c9fcb68c83bcb5517a331e308ed3922aa28babdcf2d2b395ee"
+    ],
+    "recent_audit_results": [
+      {
+        "turn_index": 1,
+        "role": "initial_decision_brief_drafter",
+        "status": "pass",
+        "evidence_hash_or_location": "prompt_card_sha256:e16d51364f9ff2f68dd254ef541aefc792ec1ada25cd2f289de65bfb007c345f;registry_sha256:6cf6391125d1ed7e992c35f69887b16b4f793c12b3142f4691fa7d83fe8b0ff8;semantic_checks:constraints_preserved"
+      },
+      {
+        "turn_index": 2,
+        "role": "assumption_and_evidence_attacker",
+        "status": "fail",
+        "evidence_hash_or_location": "prompt_card_sha256:84ff61d5fd4c7646ee7d6db46d816bd6f5f0b7411706c85dabd29f83e881dc04;registry_sha256:54803c57167d12da61813425671a6b78d10dd78a030e2eb1204e78bae852523e;defects:source_boundary_contradiction:final approval"
+      },
+      {
+        "turn_index": 3,
+        "role": "contradiction_uncertainty_source_fidelity_reviewer",
+        "status": "pass",
+        "evidence_hash_or_location": "prompt_card_sha256:c867daf442dd9fd98f1993505b88604f2ab2910d5688e403bc60b0933475ed9f;registry_sha256:58c343f7b7084da54c3fe73a4f6789a64a7015526f51cdccbdd0276d337ccaed;semantic_checks:constraints_preserved"
+      }
+    ]
+  },
+  "artifact_registry": [
+    {
+      "artifact_id": "TASK_BRIEF",
+      "artifact_type": "frozen_task_brief",
+      "artifact_hash": "98a1e03d77a60de2d4c490a6f1b9bdca87a2f41b6009dbf6d28c945cd2af6114",
+      "source_refs": [
+        "task_brief.md"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "SOURCE_PACKET_MD",
+      "artifact_type": "frozen_source_packet_markdown",
+      "artifact_hash": "a572e13cf1cc8c52395b96413f76aa130fc51cc501a0972658121a5ab801e468",
+      "source_refs": [
+        "source_packet.md"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S1_FDA_PULSE_OX_PAGE_2025",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "86506649f048f0909c6cdfae0cbc3ddee278a3c576db9b120d9a823a18bd9e3b",
+      "source_refs": [
+        "https://www.fda.gov/medical-devices/products-and-medical-procedures/pulse-oximeters",
+        "U.S. Food and Drug Administration"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S2_FDA_DRAFT_GUIDANCE_2025",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "0c22770e92ce8c6d7ef7d527a23881269fcff6fe2ef37612c29d207753a343db",
+      "source_refs": [
+        "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/pulse-oximeters-medical-purposes-non-clinical-and-clinical-performance-testing-labeling-and",
+        "U.S. Food and Drug Administration"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S3_CDC_SEPSIS_CONTEXT_2026",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "7b2c7f2e57919cf8a6de4da42da5df7333648a59918df1f079e134808582d131",
+      "source_refs": [
+        "https://www.cdc.gov/sepsis/about/index.html",
+        "U.S. Centers for Disease Control and Prevention"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S4_FDA_PRESS_RELEASE_2025",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "54963215ea22494f01f35c702ac8b09a9f97f2ea3838834326990aeb81ba6f56",
+      "source_refs": [
+        "https://www.fda.gov/news-events/press-announcements/fda-proposes-updated-recommendations-help-improve-performance-pulse-oximeters-across-skin-tones",
+        "U.S. Food and Drug Administration"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S5_FDA_ADVISORY_MEETING_2024",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "db4f4e318098f6f236f63688175fcedb71c9c13668a9d35be7ae77adef93e160",
+      "source_refs": [
+        "https://www.fda.gov/advisory-committees/advisory-committee-calendar/february-2-2024-anesthesiology-and-respiratory-therapy-devices-panel-medical-devices-advisory",
+        "U.S. Food and Drug Administration"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S6_DAVIES_ARXIV_EAR_OX_2020",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "ba943d3edee73c981f08ce1d189fc942c5a2922f723b9cd3e444a92ad6f4f999",
+      "source_refs": [
+        "https://arxiv.org/abs/2006.04231",
+        "arXiv preprint"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "8105b10c64019de9cc51d7ba54a590b4313e5ad0c24b381e57fe3259fad845aa",
+      "source_refs": [
+        "https://www.health.com/news/pulse-oximeter-home-covid-recovery",
+        "Health.com"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S8_VERYWELL_LIMITED_EXPLAINER_2024",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "1c53078ac2a5d52ef06d1e0b6a220fccd2d55d88d7d365125f87bde776512eaa",
+      "source_refs": [
+        "https://www.verywellhealth.com/pulse-oximeter-racial-bias-8728633",
+        "Verywell Health"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "S9_DERIVED_EVIDENCE_PRESSURE_TABLE",
+      "artifact_type": "frozen_source_excerpt",
+      "artifact_hash": "1501df6a271bf3382f5e4f063076efbe8a7979679f3c8089df2352148618246a",
+      "source_refs": [
+        "Derived from S1-S8 in this frozen packet; no independent URL.",
+        "Packet author derived from frozen public-source excerpts"
+      ],
+      "status": "PINNED",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "turn_001_initial_decision_brief_drafter",
+      "artifact_type": "reviewer_turn_artifact",
+      "artifact_hash": "584682bd9a96cca9d8650c3bc06b13766dcc74cc836d76b3b18e8107f8302e84",
+      "source_refs": [
+        "/Users/taylorwigton/Desktop/holo-mvp/artifact_benchmarks/holo_factory/mini_scouts/d5_medtech_capacity_strain_001/runs/d5_medtech_capacity_strain_001_patent_aligned_v4_live_20260620T184654Z/holo_build_arch/turn_artifacts/turn_001.md"
+      ],
+      "status": "ACTIVE",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "turn_002_assumption_and_evidence_attacker",
+      "artifact_type": "reviewer_turn_artifact",
+      "artifact_hash": "d4254a2f6ccc1ebac179ad967fc89a81b5127a98a5c954ae23e9762a8333878e",
+      "source_refs": [
+        "/Users/taylorwigton/Desktop/holo-mvp/artifact_benchmarks/holo_factory/mini_scouts/d5_medtech_capacity_strain_001/runs/d5_medtech_capacity_strain_001_patent_aligned_v4_live_20260620T184654Z/holo_build_arch/turn_artifacts/turn_002.md"
+      ],
+      "status": "ACTIVE",
+      "version": "v1"
+    },
+    {
+      "artifact_id": "turn_003_contradiction_uncertainty_source_fidelity_reviewer",
+      "artifact_type": "reviewer_turn_artifact",
+      "artifact_hash": "c78523a899a3e3c9fcb68c83bcb5517a331e308ed3922aa28babdcf2d2b395ee",
+      "source_refs": [
+        "/Users/taylorwigton/Desktop/holo-mvp/artifact_benchmarks/holo_factory/mini_scouts/d5_medtech_capacity_strain_001/runs/d5_medtech_capacity_strain_001_patent_aligned_v4_live_20260620T184654Z/holo_build_arch/turn_artifacts/turn_003.md"
+      ],
+      "status": "ACTIVE",
+      "version": "v1"
+    }
+  ],
+  "artifact_registry_hash": "c9c4502da3c3dc5add31b2c968d755c7bcc27bc5757c529bf8f18091f2645991",
+  "pinned_hashes": {
+    "source_packet_json": "b73292d9d2e4aac5f65a93ae168235d9d581ae17ebaf0a91aa16437018c527aa",
+    "source_packet_md": "a572e13cf1cc8c52395b96413f76aa130fc51cc501a0972658121a5ab801e468",
+    "task_brief": "98a1e03d77a60de2d4c490a6f1b9bdca87a2f41b6009dbf6d28c945cd2af6114",
+    "packet_lock": "211a67112f1ce8a37a2d514028ac30d8a798762df0c610679e84b5d538fa19ca"
+  },
+  "prior_artifact_hashes": [
+    "584682bd9a96cca9d8650c3bc06b13766dcc74cc836d76b3b18e8107f8302e84",
+    "d4254a2f6ccc1ebac179ad967fc89a81b5127a98a5c954ae23e9762a8333878e",
+    "c78523a899a3e3c9fcb68c83bcb5517a331e308ed3922aa28babdcf2d2b395ee"
+  ]
+}

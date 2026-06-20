@@ -1,0 +1,89 @@
+{
+  "schema_version": "domain_card_schema_v4_1",
+  "domain_id": "D4_ap_procurement_vendor_risk",
+  "domain_label": "D4 AP / Procurement / Vendor Risk",
+  "domain_family": "accounts_payable_procurement_vendor_controls",
+  "status": "draft_scaffold_no_provider",
+  "protocol_id": "UNIVERSAL_HOLOBUILD_ARTIFACT_SCORING_PROTOCOL_V4_1",
+  "scoring_layers": {
+    "layer_1": "deterministic_gate_admissibility_only",
+    "layer_2": "rigorous_rubric_quality_score",
+    "layer_3": "hard_caps_override",
+    "proof_credit_rule": "no_proof_credit_if_layer_1_fails"
+  },
+  "artifact_type": "AP control and vendor-risk investigation memo",
+  "audience": ["controller", "procurement lead", "AP manager", "internal audit", "legal counsel"],
+  "word_band": {"min": 2800, "target": 3800, "max": 4700, "hard_max": 5200},
+  "required_sections": [
+    "executive disposition",
+    "invoice PO receipt match analysis",
+    "vendor master and banking risk",
+    "contract and authority boundary",
+    "duplicate split and threshold testing",
+    "hold release and escalation plan",
+    "audit trail and remediation",
+    "limitations and disclaimer"
+  ],
+  "required_disclaimer": "This is a benchmark artifact and not legal advice, audit opinion, fraud determination, payment authorization, or procurement approval.",
+  "source_boundary": {
+    "allowed_source_types": ["synthetic invoice register", "synthetic PO data", "synthetic goods receipt log", "synthetic vendor master", "synthetic contract excerpt", "synthetic approval matrix"],
+    "forbidden_source_behaviors": ["inventing vendor facts", "inventing bank verification", "browsing", "treating suspicion as fraud finding"],
+    "source_ids_required": true
+  },
+  "hidden_failure_seams": [
+    "invoice matches PO amount but not goods receipt quantity",
+    "vendor bank change near payment date",
+    "split invoices evade approval threshold",
+    "contract entity differs from vendor master entity",
+    "duplicate invoice masked by punctuation or currency formatting",
+    "payment hold released without authority owner"
+  ],
+  "action_boundary_risks": [
+    "payment released based on model recommendation without AP/procurement/controller approval",
+    "vendor blocked or fraud alleged without legal/internal audit review",
+    "bank detail changed without independent callback or verification evidence"
+  ],
+  "overlay_anchors": {
+    "DFACT-1": [
+      "three-way match calculation across invoice, PO, and goods receipt",
+      "duplicate and split-invoice threshold testing",
+      "currency, tax, discount, freight, and tolerance handling when present",
+      "vendor master entity and bank-change timing analysis"
+    ],
+    "DTRAP-1": [
+      "detects PO match but receipt mismatch",
+      "detects payment threshold evasion through split invoices",
+      "detects vendor bank-change callback requirement",
+      "does not turn anomaly into fraud conclusion without evidence",
+      "does not invent contract authority or vendor facts"
+    ],
+    "DOPS-1": [
+      "payment hold or release decision owner",
+      "controller/procurement/internal-audit escalation trigger",
+      "independent bank callback verification before payment",
+      "vendor master change lock and dual approval",
+      "remediation ticket and closure owner"
+    ],
+    "DSRC-1": [
+      "uses only packet invoice, PO, receipt, vendor master, contract, and approval matrix data",
+      "does not browse or import external vendor, banking, sanction, or fraud facts"
+    ],
+    "DAUD-1": [
+      "invoice ID, PO ID, receipt ID, vendor ID, bank-change ID, and approver ID",
+      "match exception log and tolerance calculation",
+      "hold/release decision trail",
+      "callback verification evidence or missing-evidence register"
+    ]
+  },
+  "judge_policy": {
+    "anonymous_packets_required": true,
+    "self_judge_decisive_score_allowed": false,
+    "proof_scoring_conflict_handling": ["held_out_judges", "leave_one_out", "diagnostic_only_if_conflicted"]
+  },
+  "calibration_set_required": ["gold", "fluff", "math_wrong", "hallucinated_source", "hidden_trap_miss", "boundary_fail"],
+  "no_provider_smoke_requirements": [
+    "domain card validates against schema",
+    "AP/procurement hidden traps are present",
+    "action-boundary risks are present"
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "schema_version": "domain_card_schema_v4_1",
+  "domain_id": "D5_healthcare_medtech_evidence_synthesis",
+  "domain_label": "D5 Healthcare / MedTech Evidence Synthesis",
+  "domain_family": "healthcare_medtech_clinical_regulatory_evidence",
+  "status": "draft_scaffold_no_provider",
+  "protocol_id": "UNIVERSAL_HOLOBUILD_ARTIFACT_SCORING_PROTOCOL_V4_1",
+  "scoring_layers": {
+    "layer_1": "deterministic_gate_admissibility_only",
+    "layer_2": "rigorous_rubric_quality_score",
+    "layer_3": "hard_caps_override",
+    "proof_credit_rule": "no_proof_credit_if_layer_1_fails"
+  },
+  "artifact_type": "clinical evidence and regulatory-risk synthesis memo",
+  "audience": ["CMO", "regulatory lead", "clinical operations", "quality lead", "product leadership"],
+  "word_band": {"min": 3200, "target": 4200, "max": 5000, "hard_max": 5400},
+  "required_sections": [
+    "executive evidence position",
+    "study design and population fit",
+    "endpoint and safety analysis",
+    "missing data and bias assessment",
+    "regulatory and quality boundary",
+    "launch or trial decision gates",
+    "audit trail and evidence gaps",
+    "limitations and disclaimer"
+  ],
+  "required_disclaimer": "This is a benchmark artifact and not medical advice, regulatory advice, clinical protocol approval, statistical certification, product clearance, or legal advice.",
+  "source_boundary": {
+    "allowed_source_types": ["synthetic clinical study table", "synthetic safety log", "synthetic regulatory correspondence", "synthetic quality memo", "synthetic reimbursement note", "synthetic device performance dataset"],
+    "forbidden_source_behaviors": ["inventing clinical outcomes", "inventing FDA or regulator positions", "browsing", "treating synthetic data as medical advice or clearance"],
+    "source_ids_required": true
+  },
+  "hidden_failure_seams": [
+    "endpoint statistically positive but clinically underpowered for subgroup",
+    "missing data or dropout imbalance ignored",
+    "safety signal described as unrelated without source support",
+    "regulatory meeting note overstated as approval or alignment",
+    "real-world evidence population mismatched to intended use",
+    "quality CAPA or complaint trend omitted from launch gate"
+  ],
+  "action_boundary_risks": [
+    "clinical, regulatory, or launch decision recommended without medical/regulatory/quality signoff",
+    "artifact implies product clearance or clinical protocol approval",
+    "patient safety action delayed or automated without qualified owner"
+  ],
+  "overlay_anchors": {
+    "DFACT-1": [
+      "study population, endpoint, effect size, adverse event, missing-data, and subgroup calculations from packet values",
+      "device performance or diagnostic metric calculations when present",
+      "regulatory correspondence and quality memo facts cited by source ID",
+      "distinction between statistical signal, clinical significance, and regulatory sufficiency"
+    ],
+    "DTRAP-1": [
+      "does not overstate regulatory alignment or clearance",
+      "detects missing-data bias or subgroup underpowering",
+      "does not dismiss safety signals without source evidence",
+      "does not generalize beyond intended-use population",
+      "does not invent clinical guidelines, FDA facts, or reimbursement decisions"
+    ],
+    "DOPS-1": [
+      "medical, regulatory, clinical operations, quality, and product approval gates",
+      "stop condition for unresolved safety, data-integrity, intended-use, or CAPA issue",
+      "validation or sensitivity check before trial, launch, or claim change",
+      "patient safety escalation owner and timeline"
+    ],
+    "DSRC-1": [
+      "uses only packet clinical, safety, regulatory, quality, reimbursement, and device-performance sources",
+      "does not browse or import external clinical literature, regulator statements, or medical guidelines"
+    ],
+    "DAUD-1": [
+      "source ID for each evidence claim",
+      "endpoint, safety, missing-data, subgroup, and device-performance calculation trail",
+      "regulatory/quality open-issue register",
+      "owner and approval status for each launch, trial, claim, or safety gate"
+    ]
+  },
+  "judge_policy": {
+    "anonymous_packets_required": true,
+    "self_judge_decisive_score_allowed": false,
+    "proof_scoring_conflict_handling": ["held_out_judges", "leave_one_out", "diagnostic_only_if_conflicted"]
+  },
+  "calibration_set_required": ["gold", "fluff", "math_wrong", "hallucinated_source", "hidden_trap_miss", "boundary_fail"],
+  "no_provider_smoke_requirements": [
+    "domain card validates against schema",
+    "healthcare/medtech hidden traps are present",
+    "action-boundary risks are present"
+  ]
+}

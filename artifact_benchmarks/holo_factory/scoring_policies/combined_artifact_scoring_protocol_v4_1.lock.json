@@ -1,0 +1,152 @@
+{
+  "policy_id": "UNIVERSAL_HOLOBUILD_ARTIFACT_SCORING_PROTOCOL_V4_1",
+  "status": "scaffold_locked_no_provider",
+  "lock_scope": "five-domain HoloBuild benchmark scaffold only; not wired; not a live run; not public benchmark-credit freeze",
+  "locked_at_utc": "2026-06-20T00:00:00Z",
+  "score_label": "holobuild_combined_gate_rubric_v4_1",
+  "provider_calls": 0,
+  "live_artifacts_generated": 0,
+  "scores_generated": 0,
+  "builder_wiring_status": "not_wired",
+  "runner_status": "unchanged",
+  "scoring_architecture": {
+    "layer_1": {
+      "name": "deterministic_gate",
+      "purpose": "admissibility_only",
+      "proof_credit_rule": "no proof credit if Layer 1 fails"
+    },
+    "layer_2": {
+      "name": "rigorous_rubric",
+      "purpose": "quality_score",
+      "proof_credit_rule": "diagnostic scoring may exist when Layer 1 fails, but proof_credit_score_1_10 must be null"
+    },
+    "layer_3": {
+      "name": "hard_caps",
+      "purpose": "override",
+      "precedence": "if multiple caps trigger, apply the lowest maximum score"
+    }
+  },
+  "word_count_gate": {
+    "applies_to": "main_artifact_body_only",
+    "mini_test_artifact_body_words": {
+      "min": 900,
+      "max": 1300
+    },
+    "full_benchmark_artifact_body_words": {
+      "min": 1200,
+      "max": 1800
+    },
+    "excluded_from_count": [
+      "source_appendix",
+      "citation_list",
+      "machine_readable_metadata",
+      "separated_audit_trail"
+    ],
+    "failure_result": "deterministic_gate_invalid_diagnostic_only_unless_explicit_packet_override",
+    "proof_credit_if_failed": false
+  },
+  "judge_policy": {
+    "policy_path": "artifact_benchmarks/holo_factory/judge_policies/holobuild_generation_judge_separation_policy_v4_1.json",
+    "policy_hash": "8a160d1b42e5a4c4bc35f33fa7343a4230684dc42f9d7d2b20e9eea017b2d3ab",
+    "anonymous_packets_required": true,
+    "anonymous_blind_judge_packets_only": true,
+    "self_judge_decisive_score_allowed": false,
+    "contestants_cannot_be_decisive_judges_of_own_artifacts": true,
+    "generation_cohort": [
+      "HoloBuild",
+      "GPT-5.5 solo",
+      "Opus 4.8 solo",
+      "Gemini 3.1 Pro solo"
+    ],
+    "held_out_judge_cohort": [
+      "Grok 4.3",
+      "MiniMax M3 or MiniMax M2.7",
+      "one additional fixed-ID non-generation judge if available"
+    ],
+    "fixed_model_ids_only": true,
+    "latest_aliases_allowed": false,
+    "scoring_order": [
+      "deterministic_gate_first",
+      "held_out_median_score_second",
+      "hard_caps_applied"
+    ],
+    "contested_policy": {
+      "label": "CONTESTED",
+      "judge_spread_threshold_points": 1.5,
+      "hard_cap_disagreement_triggers_contested": true,
+      "route": "human_or_expert_adjudication"
+    },
+    "proof_scoring_conflict_handling": [
+      "held_out_judges",
+      "leave_one_out",
+      "diagnostic_only_if_conflicted"
+    ]
+  },
+  "contamination_scanner_policy": {
+    "scanner_id": "contamination_readiness_scanner_v4_1",
+    "hard_forbidden_visible_labels": [
+      "Holo",
+      "Gov",
+      "Governor",
+      "draft_not_frozen",
+      "benchmark_credit",
+      "proof_credit",
+      "candidate_not_frozen",
+      "holo_frontier_fixed_v1",
+      "solo_openai",
+      "ablation",
+      "Context Governor",
+      "STATE_OBJECT",
+      "Artifact Registry",
+      "Model Router",
+      "BATON_PASS",
+      "adversarial role",
+      "role compliance",
+      "state audit",
+      "synthesis trigger"
+    ],
+    "context_sensitive_terms": [
+      "condition",
+      "internal"
+    ],
+    "context_sensitive_fail_policy": "ordinary domain uses of condition/internal do not fail; harness/process metadata usages fail"
+  },
+  "domain_cards": [
+    "D1_capital_markets_execution_risk",
+    "D2_oil_gas_middle_east_jv_accounting",
+    "D3_insurance_reinsurance_catastrophe_risk",
+    "D4_ap_procurement_vendor_risk",
+    "D5_healthcare_medtech_evidence_synthesis"
+  ],
+  "required_calibration_set": [
+    "gold",
+    "fluff",
+    "math_wrong",
+    "hallucinated_source",
+    "hidden_trap_miss",
+    "boundary_fail"
+  ],
+  "no_provider_smoke_command": "python3 -B artifact_benchmarks/holo_factory/smoke_test_holobuild_scaffold_v4_1.py",
+  "locked_files": {
+    "artifact_benchmarks/holo_factory/scoring_policies/combined_artifact_scoring_protocol_v4_1.md": "35090213af06b76f8a62616d3f807a23ddc421c13179998473cb65864fb10ef8",
+    "artifact_benchmarks/holo_factory/judge_policies/holobuild_generation_judge_separation_policy_v4_1.json": "8a160d1b42e5a4c4bc35f33fa7343a4230684dc42f9d7d2b20e9eea017b2d3ab",
+    "artifact_benchmarks/holo_factory/schemas/domain_card_schema.json": "cd584149ccbc4dd252ea9aa590c07ea93e3201d9773b9e52e612afb5c96eef14",
+    "artifact_benchmarks/holo_factory/schemas/blind_packet_schema.json": "34038672329adf476c69458f610652cc8fdb33c9ad6590437d05640da2bc452b",
+    "artifact_benchmarks/holo_factory/domain_cards/D1_capital_markets_execution_risk.v4_1.json": "f73101d5c2bdbd14ef468e7f111ab04fe06d81c38551d4bbd92be2cd15fcdbd5",
+    "artifact_benchmarks/holo_factory/domain_cards/D2_oil_gas_middle_east_jv_accounting.v4_1.json": "4cd0f6123d8368675976c57edf1cbdf1f3a9e05ec50cd0036e6884fef86c11bc",
+    "artifact_benchmarks/holo_factory/domain_cards/D3_insurance_reinsurance_catastrophe_risk.v4_1.json": "6e4e68050a333c26070abb57dc3e28591d6003ab82e59a30cf47599ad3eeab84",
+    "artifact_benchmarks/holo_factory/domain_cards/D4_ap_procurement_vendor_risk.v4_1.json": "e9ae16c415bfacbd0dcb55dfc4c03a343a02927f663f21001df2916574573f14",
+    "artifact_benchmarks/holo_factory/domain_cards/D5_healthcare_medtech_evidence_synthesis.v4_1.json": "affffe654d989d7737ae09134e5bb11746b3868401eadbe499b1fe22d79ee1b5",
+    "artifact_benchmarks/holo_factory/contamination_readiness_scanner_v4_1.py": "09e398f20a4ed6490727aebd9d3acae6946810e6d44af1098a953e0972aba894",
+    "artifact_benchmarks/holo_factory/smoke_test_holobuild_scaffold_v4_1.py": "1847f2f810c4e010a47940e5124e6426045876325cb2b00e6cd94fdf685369d9"
+  },
+  "explicit_non_mutation": {
+    "existing_v4_files_modified": false,
+    "builder_modified": false,
+    "runner_modified": false,
+    "prompts_modified": false,
+    "payload_generation_modified": false,
+    "scoring_outputs_modified": false,
+    "readiness_report_logic_modified": false
+  }
+}

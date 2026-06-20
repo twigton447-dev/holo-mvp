@@ -1,0 +1,184 @@
+{
+  "policy_id": "HOLOBUILD_GENERATION_JUDGE_SEPARATION_POLICY_V4_1",
+  "status": "scaffold_no_provider",
+  "provider_calls": 0,
+  "purpose": "Keep generation and judging separate for the five-domain HoloBuild benchmark.",
+  "fixed_model_ids_only": true,
+  "latest_aliases_allowed": false,
+  "generation_cohort_summary": [
+    "HoloBuild",
+    "GPT-5.5 solo",
+    "Opus 4.8 solo",
+    "Gemini 3.1 Pro solo"
+  ],
+  "held_out_judge_cohort_summary": [
+    "Grok 4.3",
+    "MiniMax M3 or MiniMax M2.7",
+    "one additional fixed-ID non-generation judge if available"
+  ],
+  "decisive_self_judging_allowed": false,
+  "anonymous_blind_judge_packets_only": true,
+  "scoring_order": [
+    "deterministic_gate_first",
+    "held_out_median_score_second",
+    "hard_caps_applied"
+  ],
+  "contested_policy": {
+    "label": "CONTESTED",
+    "judge_spread_threshold_points": 1.5,
+    "hard_cap_disagreement_triggers_contested": true,
+    "route": "human_or_expert_adjudication"
+  },
+  "benchmark_conditions_supported": [
+    "solo_one_shot",
+    "solo_self_refine_same_budget",
+    "holo_build_arch"
+  ],
+  "generation_cohort": {
+    "conditions": [
+      {
+        "condition_id": "holo_build_arch",
+        "architecture_policy_id": "HOLOBUILD_ARCHITECTURE_POLICY_V4_1",
+        "label_visibility": "hidden_from_judges",
+        "allowed_generation_model_pool": [
+          {
+            "provider": "openai",
+            "exact_model_id": "gpt-5.5",
+            "endpoint": "https://api.openai.com/v1/chat/completions"
+          },
+          {
+            "provider": "anthropic",
+            "exact_model_id": "claude-opus-4-8",
+            "endpoint": "https://api.anthropic.com/v1/messages"
+          },
+          {
+            "provider": "google",
+            "exact_model_id": "gemini-3.1-pro-preview",
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent"
+          }
+        ]
+      },
+      {
+        "condition_id": "solo_openai_gpt_5_5",
+        "provider": "openai",
+        "exact_model_id": "gpt-5.5",
+        "endpoint": "https://api.openai.com/v1/chat/completions",
+        "label_visibility": "hidden_from_judges"
+      },
+      {
+        "condition_id": "solo_anthropic_opus_4_8",
+        "provider": "anthropic",
+        "exact_model_id": "claude-opus-4-8",
+        "endpoint": "https://api.anthropic.com/v1/messages",
+        "label_visibility": "hidden_from_judges"
+      },
+      {
+        "condition_id": "solo_google_gemini_3_1_pro",
+        "provider": "google",
+        "exact_model_id": "gemini-3.1-pro-preview",
+        "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent",
+        "label_visibility": "hidden_from_judges"
+      }
+    ],
+    "excluded_from_holobuild_generation_when_on_judge_panel": [
+      {
+        "provider": "xai",
+        "exact_model_id": "grok-4.3"
+      },
+      {
+        "provider": "minimax",
+        "exact_model_id": "MiniMax-M3"
+      },
+      {
+        "provider": "minimax",
+        "exact_model_id": "MiniMax-M2.7"
+      }
+    ]
+  },
+  "held_out_judge_cohort": {
+    "required_judges": [
+      {
+        "provider": "xai",
+        "exact_model_id": "grok-4.3",
+        "endpoint": "https://api.x.ai/v1/chat/completions",
+        "must_not_generate_for_this_benchmark": true
+      },
+      {
+        "provider": "minimax",
+        "exact_model_id_primary": "MiniMax-M3",
+        "exact_model_id_fallback": "MiniMax-M2.7",
+        "endpoint": "https://api.minimax.io/v1/chat/completions",
+        "must_not_generate_for_this_benchmark": true,
+        "selection_rule": "choose one fixed exact model ID before live scoring; record selected ID in run manifest"
+      }
+    ],
+    "additional_judge_slot": {
+      "required_if_available": true,
+      "must_not_be_used_in_holobuild_generation": true,
+      "must_not_be_generation_solo_model": true,
+      "exact_model_id_required_before_live": true,
+      "latest_alias_allowed": false,
+      "status": "unassigned_in_scaffold"
+    }
+  },
+  "self_judge_policy": {
+    "no_model_may_be_decisive_judge_of_artifact_it_generated": true,
+    "no_model_may_be_decisive_judge_of_artifact_it_helped_generate": true,
+    "proof_scoring_requires": [
+      "held_out_judges",
+      "leave_one_out_conflict_handling"
+    ],
+    "conflicted_score_use": "diagnostic_only"
+  },
+  "required_run_metadata_per_generation_and_judging_call": [
+    "provider",
+    "exact_model_id",
+    "endpoint",
+    "date",
+    "reasoning_setting",
+    "temperature",
+    "max_tokens",
+    "rubric_version_hash",
+    "domain_card_hash",
+    "packet_hash"
+  ],
+  "blind_judge_packet_rules": {
+    "anonymous_required": true,
+    "forbidden_visible_labels": [
+      "Holo",
+      "GPT",
+      "Opus",
+      "Gemini",
+      "condition names",
+      "generation trace",
+      "benchmark metadata",
+      "prior score",
+      "state object",
+      "artifact registry",
+      "model router",
+      "BATON_PASS",
+      "adversarial role",
+      "role compliance",
+      "state audit",
+      "synthesis trigger",
+      "architecture evidence"
+    ],
+    "allowed_visible_content": [
+      "anonymous artifact label",
+      "artifact text",
+      "task brief",
+      "domain card",
+      "source packet",
+      "frozen rubric"
+    ]
+  },
+  "final_score_rule": {
+    "step_1": "run deterministic gate first",
+    "step_2": "compute held-out judge median second",
+    "step_3": "apply hard caps",
+    "contested_if_judge_spread_gt_points": 1.5,
+    "contested_if_hard_cap_disagreement": true,
+    "contested_route": "human_or_expert_adjudication",
+    "no_proof_credit_if_layer_1_fails": true
+  }
+}

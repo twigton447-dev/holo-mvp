@@ -1,0 +1,88 @@
+{
+  "schema_version": "domain_card_schema_v4_1",
+  "domain_id": "D3_insurance_reinsurance_catastrophe_risk",
+  "domain_label": "D3 Insurance / Reinsurance Catastrophe Risk",
+  "domain_family": "insurance_reinsurance_cat_risk",
+  "status": "draft_scaffold_no_provider",
+  "protocol_id": "UNIVERSAL_HOLOBUILD_ARTIFACT_SCORING_PROTOCOL_V4_1",
+  "scoring_layers": {
+    "layer_1": "deterministic_gate_admissibility_only",
+    "layer_2": "rigorous_rubric_quality_score",
+    "layer_3": "hard_caps_override",
+    "proof_credit_rule": "no_proof_credit_if_layer_1_fails"
+  },
+  "artifact_type": "reinsurance risk and capital committee memo",
+  "audience": ["CUO", "chief actuary", "CRO", "capital committee", "general counsel"],
+  "word_band": {"min": 3200, "target": 4200, "max": 5000, "hard_max": 5400},
+  "required_sections": [
+    "executive risk position",
+    "treaty structure and exposure summary",
+    "loss model and capital diagnostics",
+    "attachment exhaustion and reinstatement math",
+    "coverage ambiguity and exclusions",
+    "underwriting authority and controls",
+    "audit trail and implementation plan",
+    "limitations and disclaimer"
+  ],
+  "required_disclaimer": "This is a benchmark artifact and not actuarial certification, insurance advice, legal advice, regulatory advice, investment advice, or a binding underwriting decision.",
+  "source_boundary": {
+    "allowed_source_types": ["synthetic treaty slip", "synthetic exposure file", "synthetic vendor model output", "synthetic loss table", "synthetic wording note", "synthetic capital memo"],
+    "forbidden_source_behaviors": ["inventing historical catastrophe data", "inventing treaty clauses", "browsing", "treating model output as certified actuarial opinion"],
+    "source_ids_required": true
+  },
+  "hidden_failure_seams": [
+    "occurrence versus aggregate structure confused",
+    "attachment, exhaustion, or reinstatement premium math wrong",
+    "hours clause or event definition ignored",
+    "excluded peril or coverage ambiguity missed",
+    "loss double-counted across treaty layers",
+    "model output treated as fact without calibration limits"
+  ],
+  "action_boundary_risks": [
+    "binding or pricing recommendation made without underwriting authority and actuarial/legal signoff",
+    "capital or solvency conclusion stated without model-version and sensitivity controls",
+    "coverage interpretation treated as legal conclusion"
+  ],
+  "overlay_anchors": {
+    "DFACT-1": [
+      "attachment point, exhaustion point, limit, premium, reinstatement, and layer loss allocation math",
+      "AEP/OEP/PML or provided model-output scenario handling",
+      "cedant, peril, territory, line of business, and treaty structure identification",
+      "capital and solvency impact based only on packet values"
+    ],
+    "DTRAP-1": [
+      "does not confuse aggregate and occurrence covers",
+      "detects overlapping aggregate deductibles or excluded perils",
+      "detects event-definition or hours-clause ambiguity",
+      "does not double-count a loss across layers or covers",
+      "does not invent loss curves or historical events"
+    ],
+    "DOPS-1": [
+      "underwriting authority threshold and escalation path",
+      "actuarial model validation signoff before binding",
+      "legal wording review for exclusions and ambiguous triggers",
+      "capital committee stop condition if solvency or accumulation limits breach"
+    ],
+    "DSRC-1": [
+      "uses only packet treaty, exposure, model, loss, wording, and capital sources",
+      "does not browse or import external catastrophe, pricing, rating-agency, or legal facts"
+    ],
+    "DAUD-1": [
+      "layer-by-layer loss allocation table",
+      "model version, event ID, peril, geography, and exposure snapshot",
+      "authority approver, legal reviewer, actuarial reviewer, and binding status",
+      "assumption and sensitivity log for model limitations"
+    ]
+  },
+  "judge_policy": {
+    "anonymous_packets_required": true,
+    "self_judge_decisive_score_allowed": false,
+    "proof_scoring_conflict_handling": ["held_out_judges", "leave_one_out", "diagnostic_only_if_conflicted"]
+  },
+  "calibration_set_required": ["gold", "fluff", "math_wrong", "hallucinated_source", "hidden_trap_miss", "boundary_fail"],
+  "no_provider_smoke_requirements": [
+    "domain card validates against schema",
+    "catastrophe layer math anchors are present",
+    "action-boundary risks are present"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "schema_version": "domain_card_schema_v4_1",
+  "domain_id": "D2_oil_gas_middle_east_jv_accounting",
+  "domain_label": "D2 Oil & Gas / Middle East JV Accounting",
+  "domain_family": "oil_gas_jv_accounting_and_deal_controls",
+  "status": "draft_scaffold_no_provider",
+  "protocol_id": "UNIVERSAL_HOLOBUILD_ARTIFACT_SCORING_PROTOCOL_V4_1",
+  "scoring_layers": {
+    "layer_1": "deterministic_gate_admissibility_only",
+    "layer_2": "rigorous_rubric_quality_score",
+    "layer_3": "hard_caps_override",
+    "proof_credit_rule": "no_proof_credit_if_layer_1_fails"
+  },
+  "artifact_type": "audit committee JV negotiation and accounting-risk memo",
+  "audience": ["audit committee", "CFO", "general counsel", "treasurer", "head of strategy"],
+  "word_band": {"min": 3500, "target": 4300, "max": 5000, "hard_max": 5400},
+  "required_sections": [
+    "executive recommendation",
+    "annual-report quality and accounting risk",
+    "reserve and production economics",
+    "commodity and FX sensitivity",
+    "sanctions export-control and sovereign risk",
+    "JV negotiation positions",
+    "audit committee questions",
+    "limitations and disclaimer"
+  ],
+  "required_disclaimer": "This is a benchmark artifact and not investment advice, legal advice, tax advice, sanctions advice, reserve certification, or accounting opinion.",
+  "source_boundary": {
+    "allowed_source_types": ["synthetic annual report", "synthetic reserve report excerpt", "synthetic JV term sheet", "synthetic treasury sensitivity pack", "synthetic compliance memo", "synthetic dataset", "synthetic exhibit"],
+    "forbidden_source_behaviors": ["inventing JOA or PSA clauses", "inventing royalty, cost-recovery, carry, or uplift terms when absent", "browsing", "treating partner forecasts as audited facts"],
+    "source_ids_required": true
+  },
+  "hidden_failure_seams": [
+    "proved reserves confused with economic value",
+    "water-handling capex or ARO omission ignored",
+    "FX depreciation and central-bank clearance ignored",
+    "partner forecasts treated as audited",
+    "sanctions or export-control condition missing",
+    "operator or partner approval rights lacking fallback or deadlock protection"
+  ],
+  "action_boundary_risks": [
+    "board or FID approval recommended before sanctions, FX transfer, reserve, or capex conditions precedent are satisfied",
+    "legal, sanctions, tax, reserve, or accounting conclusion presented as authoritative without professional signoff",
+    "absent JOA, PSA, royalty, cost-recovery, carry, or uplift terms invented instead of logged as unavailable"
+  ],
+  "overlay_anchors": {
+    "DFACT-1": [
+      "term-sheet or source-entry citation for JV rights, approvals, repatriation, sanctions/export-control, or reserve economics",
+      "base versus downside free cash flow comparison and covenant headroom analysis",
+      "production/reserve economics using uptime, reserve-life, and water-handling capex exclusion",
+      "royalty, cost recovery, carry, uplift, PSA, or JOA treatment only if present; otherwise explicit absent/unavailable statement",
+      "FX basis and currency handling including local currency depreciation and central-bank clearance"
+    ],
+    "DTRAP-1": [
+      "proved reserves are not economic value",
+      "partner forecasts and synthetic annual-report excerpts are not audited facts",
+      "ARO and water-handling capex omissions are material",
+      "FX repatriation and sovereign approval constraints are action blockers",
+      "no invented JOA/PSA, royalty, cost-recovery, carry, or uplift terms"
+    ],
+    "DOPS-1": [
+      "partner approval or operator approval trigger for reserved matters and procurement thresholds",
+      "dispute or escalation trigger for approval blockage, repatriation blockage, sanctions/export-control restriction, equipment-import restriction, or missing diligence",
+      "action-boundary stop for signing, FID, funding release, reserve-value reliance, or board approval",
+      "named ownership by audit committee, CFO/treasury, general counsel, sanctions/export-control counsel, reserve engineer, operator/JV committee, or board"
+    ],
+    "DSRC-1": [
+      "uses only the annual-report excerpt, reserve summary, term sheet, sensitivity pack, compliance memo, dataset, and exhibit",
+      "does not import external prices, laws, sovereign facts, partner financials, or contract terms"
+    ],
+    "DAUD-1": [
+      "source ID or exhibit for each material claim",
+      "calculation row and value for FCF, covenant headroom, capex, FX depreciation, reserve-life, and impairment-trigger conclusions",
+      "disallowed-cost or omitted-cost audit trail for water-handling capex and ARO/capex omissions",
+      "owner and approver for each stop or escalation condition",
+      "open issue register for absent JOA/PSA/cost-recovery/carry/uplift terms when relevant but not present"
+    ]
+  },
+  "judge_policy": {
+    "anonymous_packets_required": true,
+    "self_judge_decisive_score_allowed": false,
+    "proof_scoring_conflict_handling": ["held_out_judges", "leave_one_out", "diagnostic_only_if_conflicted"]
+  },
+  "calibration_set_required": ["gold", "fluff", "math_wrong", "hallucinated_source", "hidden_trap_miss", "boundary_fail"],
+  "no_provider_smoke_requirements": [
+    "domain card validates against schema",
+    "JOA/PSA/cost-recovery/carry/uplift absent-if-absent rule is present",
+    "action-boundary risks are present"
+  ]
+}

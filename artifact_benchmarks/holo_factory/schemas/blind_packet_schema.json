@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HoloBuild Blind Judge Packet Schema V4.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "packet_id",
+    "packet_type",
+    "artifact_label",
+    "artifact_text",
+    "task_brief",
+    "domain_card",
+    "source_packet",
+    "frozen_rubric",
+    "judge_instructions",
+    "anonymity_attestation"
+  ],
+  "properties": {
+    "schema_version": {"const": "blind_packet_schema_v4_1"},
+    "packet_id": {"type": "string"},
+    "packet_type": {"const": "anonymous_single_artifact_judge_packet"},
+    "artifact_label": {"type": "string", "pattern": "^ARTIFACT_[0-9]{3}$"},
+    "artifact_text": {"type": "string"},
+    "task_brief": {"type": "object"},
+    "domain_card": {"type": "object"},
+    "source_packet": {"type": "object"},
+    "frozen_rubric": {"type": "object"},
+    "deterministic_gate_report": {"type": "object"},
+    "judge_instructions": {
+      "type": "array",
+      "minItems": 3,
+      "items": {"type": "string"}
+    },
+    "anonymity_attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "no_model_identity",
+        "no_architecture_identity",
+        "no_condition_identity",
+        "no_builder_state",
+        "no_runtime_state",
+        "no_generation_trace",
+        "no_benchmark_metadata",
+        "no_prior_score",
+        "no_architecture_evidence",
+        "no_proof_expectation"
+      ],
+      "properties": {
+        "no_model_identity": {"const": true},
+        "no_architecture_identity": {"const": true},
+        "no_condition_identity": {"const": true},
+        "no_builder_state": {"const": true},
+        "no_runtime_state": {"const": true},
+        "no_generation_trace": {"const": true},
+        "no_benchmark_metadata": {"const": true},
+        "no_prior_score": {"const": true},
+        "no_architecture_evidence": {"const": true},
+        "no_proof_expectation": {"const": true}
+      }
+    }
+  }
+}

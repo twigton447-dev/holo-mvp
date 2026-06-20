@@ -13,6 +13,17 @@
     "scoring_layers",
     "artifact_type",
     "audience",
+    "domain_crisis_context",
+    "intended_reader",
+    "decision_report_type",
+    "public_value_question",
+    "crisis_specific_source_requirements",
+    "crisis_specific_hidden_traps",
+    "required_data_or_calculation_checks",
+    "affected_stakeholders",
+    "practical_response_options_required",
+    "claim_boundaries",
+    "evidence_uncertainty_requirements",
     "word_band",
     "required_sections",
     "required_disclaimer",
@@ -25,60 +36,189 @@
     "no_provider_smoke_requirements"
   ],
   "properties": {
-    "schema_version": {"const": "domain_card_schema_v4_1"},
-    "domain_id": {"type": "string", "pattern": "^D[1-5]_[a-z0-9_]+$"},
-    "domain_label": {"type": "string"},
-    "domain_family": {"type": "string"},
-    "status": {"enum": ["draft_scaffold_no_provider", "locked_no_provider", "retired"]},
-    "protocol_id": {"const": "UNIVERSAL_HOLOBUILD_ARTIFACT_SCORING_PROTOCOL_V4_1"},
+    "schema_version": {
+      "const": "domain_card_schema_v4_1"
+    },
+    "domain_id": {
+      "type": "string",
+      "pattern": "^D[1-5]_[a-z0-9_]+$"
+    },
+    "domain_label": {
+      "type": "string"
+    },
+    "domain_family": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft_scaffold_no_provider",
+        "locked_no_provider",
+        "retired"
+      ]
+    },
+    "protocol_id": {
+      "const": "UNIVERSAL_HOLOBUILD_ARTIFACT_SCORING_PROTOCOL_V4_1"
+    },
     "scoring_layers": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["layer_1", "layer_2", "layer_3", "proof_credit_rule"],
+      "required": [
+        "layer_1",
+        "layer_2",
+        "layer_3",
+        "proof_credit_rule"
+      ],
       "properties": {
-        "layer_1": {"const": "deterministic_gate_admissibility_only"},
-        "layer_2": {"const": "rigorous_rubric_quality_score"},
-        "layer_3": {"const": "hard_caps_override"},
-        "proof_credit_rule": {"const": "no_proof_credit_if_layer_1_fails"}
+        "layer_1": {
+          "const": "deterministic_gate_admissibility_only"
+        },
+        "layer_2": {
+          "const": "rigorous_rubric_quality_score"
+        },
+        "layer_3": {
+          "const": "hard_caps_override"
+        },
+        "proof_credit_rule": {
+          "const": "no_proof_credit_if_layer_1_fails"
+        }
       }
     },
-    "artifact_type": {"type": "string"},
-    "audience": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "artifact_type": {
+      "type": "string"
+    },
+    "audience": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
     "word_band": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["min", "target", "max", "hard_max"],
+      "required": [
+        "min",
+        "target",
+        "max",
+        "hard_max"
+      ],
       "properties": {
-        "min": {"type": "integer", "minimum": 1},
-        "target": {"type": "integer", "minimum": 1},
-        "max": {"type": "integer", "minimum": 1},
-        "hard_max": {"type": "integer", "minimum": 1}
+        "min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "target": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "hard_max": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
-    "required_sections": {"type": "array", "minItems": 4, "items": {"type": "string"}},
-    "required_disclaimer": {"type": "string"},
+    "required_sections": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_disclaimer": {
+      "type": "string"
+    },
     "source_boundary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["allowed_source_types", "forbidden_source_behaviors", "source_ids_required"],
+      "required": [
+        "allowed_source_types",
+        "forbidden_source_behaviors",
+        "source_ids_required"
+      ],
       "properties": {
-        "allowed_source_types": {"type": "array", "minItems": 1, "items": {"type": "string"}},
-        "forbidden_source_behaviors": {"type": "array", "minItems": 1, "items": {"type": "string"}},
-        "source_ids_required": {"type": "boolean"}
+        "allowed_source_types": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "forbidden_source_behaviors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_ids_required": {
+          "type": "boolean"
+        }
       }
     },
-    "hidden_failure_seams": {"type": "array", "minItems": 4, "items": {"type": "string"}},
-    "action_boundary_risks": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+    "hidden_failure_seams": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "string"
+      }
+    },
+    "action_boundary_risks": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "string"
+      }
+    },
     "overlay_anchors": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["DFACT-1", "DTRAP-1", "DOPS-1", "DSRC-1", "DAUD-1"],
+      "required": [
+        "DFACT-1",
+        "DTRAP-1",
+        "DOPS-1",
+        "DSRC-1",
+        "DAUD-1"
+      ],
       "properties": {
-        "DFACT-1": {"type": "array", "minItems": 3, "items": {"type": "string"}},
-        "DTRAP-1": {"type": "array", "minItems": 3, "items": {"type": "string"}},
-        "DOPS-1": {"type": "array", "minItems": 3, "items": {"type": "string"}},
-        "DSRC-1": {"type": "array", "minItems": 2, "items": {"type": "string"}},
-        "DAUD-1": {"type": "array", "minItems": 3, "items": {"type": "string"}}
+        "DFACT-1": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "string"
+          }
+        },
+        "DTRAP-1": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "string"
+          }
+        },
+        "DOPS-1": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "string"
+          }
+        },
+        "DSRC-1": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string"
+          }
+        },
+        "DAUD-1": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "judge_policy": {
@@ -90,20 +230,113 @@
         "proof_scoring_conflict_handling"
       ],
       "properties": {
-        "anonymous_packets_required": {"const": true},
-        "self_judge_decisive_score_allowed": {"const": false},
+        "anonymous_packets_required": {
+          "const": true
+        },
+        "self_judge_decisive_score_allowed": {
+          "const": false
+        },
         "proof_scoring_conflict_handling": {
           "type": "array",
           "minItems": 1,
-          "items": {"enum": ["held_out_judges", "leave_one_out", "diagnostic_only_if_conflicted"]}
+          "items": {
+            "enum": [
+              "held_out_judges",
+              "leave_one_out",
+              "diagnostic_only_if_conflicted"
+            ]
+          }
         }
       }
     },
     "calibration_set_required": {
       "type": "array",
       "minItems": 6,
-      "items": {"enum": ["gold", "fluff", "math_wrong", "hallucinated_source", "hidden_trap_miss", "boundary_fail"]}
+      "items": {
+        "enum": [
+          "gold",
+          "fluff",
+          "math_wrong",
+          "hallucinated_source",
+          "hidden_trap_miss",
+          "boundary_fail"
+        ]
+      }
     },
-    "no_provider_smoke_requirements": {"type": "array", "minItems": 3, "items": {"type": "string"}}
+    "no_provider_smoke_requirements": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "domain_crisis_context": {
+      "type": "string",
+      "minLength": 20
+    },
+    "intended_reader": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "decision_report_type": {
+      "type": "string",
+      "minLength": 10
+    },
+    "public_value_question": {
+      "type": "string",
+      "minLength": 20
+    },
+    "crisis_specific_source_requirements": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "crisis_specific_hidden_traps": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_data_or_calculation_checks": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "affected_stakeholders": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "practical_response_options_required": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "claim_boundaries": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_uncertainty_requirements": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    }
   }
 }

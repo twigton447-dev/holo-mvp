@@ -11,23 +11,48 @@
     "layer_3": "hard_caps_override",
     "proof_credit_rule": "no_proof_credit_if_layer_1_fails"
   },
-  "artifact_type": "clinical evidence and regulatory-risk synthesis memo",
-  "audience": ["CMO", "regulatory lead", "clinical operations", "quality lead", "product leadership"],
-  "word_band": {"min": 3200, "target": 4200, "max": 5000, "hard_max": 5400},
+  "artifact_type": "decision-grade crisis brief",
+  "audience": [
+    "CMO",
+    "regulatory lead",
+    "clinical operations",
+    "quality lead",
+    "product leadership"
+  ],
+  "word_band": {
+    "min": 1200,
+    "target": 1500,
+    "max": 1800,
+    "hard_max": 1800
+  },
   "required_sections": [
-    "executive evidence position",
-    "study design and population fit",
-    "endpoint and safety analysis",
-    "missing data and bias assessment",
-    "regulatory and quality boundary",
-    "launch or trial decision gates",
-    "audit trail and evidence gaps",
-    "limitations and disclaimer"
+    "what is happening",
+    "why it matters now",
+    "strong evidence",
+    "weak stale or contradictory evidence",
+    "calculations and data interpretation that matter",
+    "response options",
+    "risks of acting",
+    "risks of waiting",
+    "practical next steps",
+    "claim boundaries and disclaimer"
   ],
   "required_disclaimer": "This is a benchmark artifact and not medical advice, regulatory advice, clinical protocol approval, statistical certification, product clearance, or legal advice.",
   "source_boundary": {
-    "allowed_source_types": ["synthetic clinical study table", "synthetic safety log", "synthetic regulatory correspondence", "synthetic quality memo", "synthetic reimbursement note", "synthetic device performance dataset"],
-    "forbidden_source_behaviors": ["inventing clinical outcomes", "inventing FDA or regulator positions", "browsing", "treating synthetic data as medical advice or clearance"],
+    "allowed_source_types": [
+      "synthetic clinical study table",
+      "synthetic safety log",
+      "synthetic regulatory correspondence",
+      "synthetic quality memo",
+      "synthetic reimbursement note",
+      "synthetic device performance dataset"
+    ],
+    "forbidden_source_behaviors": [
+      "inventing clinical outcomes",
+      "inventing FDA or regulator positions",
+      "browsing",
+      "treating synthetic data as medical advice or clearance"
+    ],
     "source_ids_required": true
   },
   "hidden_failure_seams": [
@@ -77,12 +102,79 @@
   "judge_policy": {
     "anonymous_packets_required": true,
     "self_judge_decisive_score_allowed": false,
-    "proof_scoring_conflict_handling": ["held_out_judges", "leave_one_out", "diagnostic_only_if_conflicted"]
+    "proof_scoring_conflict_handling": [
+      "held_out_judges",
+      "leave_one_out",
+      "diagnostic_only_if_conflicted"
+    ]
   },
-  "calibration_set_required": ["gold", "fluff", "math_wrong", "hallucinated_source", "hidden_trap_miss", "boundary_fail"],
+  "calibration_set_required": [
+    "gold",
+    "fluff",
+    "math_wrong",
+    "hallucinated_source",
+    "hidden_trap_miss",
+    "boundary_fail"
+  ],
   "no_provider_smoke_requirements": [
     "domain card validates against schema",
-    "healthcare/medtech hidden traps are present",
+    "crisis-report fields are present and non-empty",
+    "decision-grade crisis brief framing is present",
     "action-boundary risks are present"
+  ],
+  "domain_crisis_context": "Hospital capacity strain, medical device or drug shortage, evidence-quality failure, and rushed adoption of clinical or operational technology.",
+  "intended_reader": [
+    "CMO",
+    "regulatory lead",
+    "clinical operations",
+    "quality lead",
+    "product leadership"
+  ],
+  "decision_report_type": "decision-grade crisis brief for near-term action under uncertainty",
+  "public_value_question": "What can clinical, quality, regulatory, and operations leaders responsibly do now to protect patients while acting under evidence constraints?",
+  "crisis_specific_source_requirements": [
+    "Use only packet clinical study tables, safety logs, regulatory correspondence, quality memos, reimbursement notes, and device-performance datasets.",
+    "Cite source IDs for every endpoint, safety, subgroup, missing-data, device-performance, capacity, shortage, regulatory, and quality claim.",
+    "Do not import external clinical guidelines, regulator positions, literature, or market availability facts.",
+    "Separate evidence synthesis from medical advice, regulatory clearance, clinical protocol approval, and product claims."
+  ],
+  "crisis_specific_hidden_traps": [
+    "A statistically positive endpoint may be clinically weak, underpowered, or not applicable to the strained population.",
+    "Dropout, missing data, complaint trends, CAPA issues, or safety signals can block rushed adoption.",
+    "Regulatory correspondence can be overstated as clearance or alignment.",
+    "Shortage or capacity pressure can encourage unsupported deployment claims."
+  ],
+  "required_data_or_calculation_checks": [
+    "Calculate endpoint, subgroup, adverse-event, dropout, missing-data, and device-performance metrics from packet values.",
+    "Check intended-use population, hospital capacity relevance, shortage assumptions, and operational feasibility.",
+    "Compare evidence quality, safety signal, quality/CAPA status, and regulatory correspondence.",
+    "Identify what evidence supports emergency use, limited pilot, delay, or further study."
+  ],
+  "affected_stakeholders": [
+    "patients",
+    "clinicians",
+    "hospital operations",
+    "quality team",
+    "regulators",
+    "product team",
+    "payers"
+  ],
+  "practical_response_options_required": [
+    "Delay adoption pending safety, quality, or regulatory clarification.",
+    "Approve only a bounded pilot, monitoring plan, or shortage-contingency pathway with qualified owner signoff.",
+    "Escalate safety or CAPA concerns before changing clinical use or product claims.",
+    "Request targeted additional evidence before launch, trial change, or operational deployment."
+  ],
+  "claim_boundaries": [
+    "Do not claim medical advice, clinical protocol approval, product clearance, regulatory advice, or statistical certification.",
+    "Do not claim the hospital-capacity or shortage crisis is solved by an unsupported technology action.",
+    "Do not invent clinical outcomes, guidelines, FDA/regulator facts, reimbursement decisions, or shortage data.",
+    "Do not generalize beyond the source-supported intended-use population and operational setting."
+  ],
+  "evidence_uncertainty_requirements": [
+    "Identify strong evidence in clinical, safety, regulatory, quality, reimbursement, and device-performance sources separately.",
+    "Flag weak, stale, contradictory, underpowered, missing, or biased evidence before recommending action.",
+    "Describe risks of acting too quickly for patients and operations, and risks of waiting during capacity strain or shortage.",
+    "Use sensitivity and evidence-quality grading rather than broad certainty claims."
   ]
 }

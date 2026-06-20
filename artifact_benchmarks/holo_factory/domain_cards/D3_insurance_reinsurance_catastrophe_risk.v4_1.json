@@ -11,23 +11,48 @@
     "layer_3": "hard_caps_override",
     "proof_credit_rule": "no_proof_credit_if_layer_1_fails"
   },
-  "artifact_type": "reinsurance risk and capital committee memo",
-  "audience": ["CUO", "chief actuary", "CRO", "capital committee", "general counsel"],
-  "word_band": {"min": 3200, "target": 4200, "max": 5000, "hard_max": 5400},
+  "artifact_type": "decision-grade crisis brief",
+  "audience": [
+    "CUO",
+    "chief actuary",
+    "CRO",
+    "capital committee",
+    "general counsel"
+  ],
+  "word_band": {
+    "min": 1200,
+    "target": 1500,
+    "max": 1800,
+    "hard_max": 1800
+  },
   "required_sections": [
-    "executive risk position",
-    "treaty structure and exposure summary",
-    "loss model and capital diagnostics",
-    "attachment exhaustion and reinstatement math",
-    "coverage ambiguity and exclusions",
-    "underwriting authority and controls",
-    "audit trail and implementation plan",
-    "limitations and disclaimer"
+    "what is happening",
+    "why it matters now",
+    "strong evidence",
+    "weak stale or contradictory evidence",
+    "calculations and data interpretation that matter",
+    "response options",
+    "risks of acting",
+    "risks of waiting",
+    "practical next steps",
+    "claim boundaries and disclaimer"
   ],
   "required_disclaimer": "This is a benchmark artifact and not actuarial certification, insurance advice, legal advice, regulatory advice, investment advice, or a binding underwriting decision.",
   "source_boundary": {
-    "allowed_source_types": ["synthetic treaty slip", "synthetic exposure file", "synthetic vendor model output", "synthetic loss table", "synthetic wording note", "synthetic capital memo"],
-    "forbidden_source_behaviors": ["inventing historical catastrophe data", "inventing treaty clauses", "browsing", "treating model output as certified actuarial opinion"],
+    "allowed_source_types": [
+      "synthetic treaty slip",
+      "synthetic exposure file",
+      "synthetic vendor model output",
+      "synthetic loss table",
+      "synthetic wording note",
+      "synthetic capital memo"
+    ],
+    "forbidden_source_behaviors": [
+      "inventing historical catastrophe data",
+      "inventing treaty clauses",
+      "browsing",
+      "treating model output as certified actuarial opinion"
+    ],
     "source_ids_required": true
   },
   "hidden_failure_seams": [
@@ -77,12 +102,79 @@
   "judge_policy": {
     "anonymous_packets_required": true,
     "self_judge_decisive_score_allowed": false,
-    "proof_scoring_conflict_handling": ["held_out_judges", "leave_one_out", "diagnostic_only_if_conflicted"]
+    "proof_scoring_conflict_handling": [
+      "held_out_judges",
+      "leave_one_out",
+      "diagnostic_only_if_conflicted"
+    ]
   },
-  "calibration_set_required": ["gold", "fluff", "math_wrong", "hallucinated_source", "hidden_trap_miss", "boundary_fail"],
+  "calibration_set_required": [
+    "gold",
+    "fluff",
+    "math_wrong",
+    "hallucinated_source",
+    "hidden_trap_miss",
+    "boundary_fail"
+  ],
   "no_provider_smoke_requirements": [
     "domain card validates against schema",
-    "catastrophe layer math anchors are present",
+    "crisis-report fields are present and non-empty",
+    "decision-grade crisis brief framing is present",
     "action-boundary risks are present"
+  ],
+  "domain_crisis_context": "Catastrophe-loss stress, reinsurance capacity shortage, insurance affordability pressure, and excluded-peril or aggregate-limit disputes after severe events.",
+  "intended_reader": [
+    "CUO",
+    "chief actuary",
+    "CRO",
+    "capital committee",
+    "general counsel"
+  ],
+  "decision_report_type": "decision-grade crisis brief for near-term action under uncertainty",
+  "public_value_question": "What should underwriting, actuarial, capital, and legal leaders do now to protect solvency, coverage integrity, and policyholder fairness?",
+  "crisis_specific_source_requirements": [
+    "Use only packet treaty slips, exposure files, vendor model outputs, loss tables, wording notes, and capital memos.",
+    "Cite source IDs for every layer, peril, territory, loss, attachment, exhaustion, reinstatement, and capital claim.",
+    "Do not import external catastrophe history, rating-agency criteria, or legal interpretations.",
+    "Separate model output, wording interpretation, underwriting judgment, and capital committee decision points."
+  ],
+  "crisis_specific_hidden_traps": [
+    "Occurrence and aggregate structures may be confused under catastrophe stress.",
+    "Excluded peril, hours clause, event-definition, or aggregate-limit disputes can dominate the decision.",
+    "Capacity shortage can create affordability pressure but does not justify unsupported coverage claims.",
+    "Losses can be double-counted across layers, covers, or events."
+  ],
+  "required_data_or_calculation_checks": [
+    "Calculate attachment, exhaustion, limit, reinstatement premium, and layer-by-layer loss allocation.",
+    "Check aggregate versus occurrence treatment, hours clause, event definition, and excluded peril language.",
+    "Compare modeled loss, PML/AEP/OEP or packet scenario output, and capital headroom.",
+    "Identify capacity, affordability, and coverage-dispute implications without inventing market data."
+  ],
+  "affected_stakeholders": [
+    "policyholders",
+    "cedant",
+    "reinsurers",
+    "underwriters",
+    "actuaries",
+    "regulators",
+    "capital providers"
+  ],
+  "practical_response_options_required": [
+    "Hold binding or renewal changes pending wording, loss, and capital reconciliation.",
+    "Escalate ambiguous coverage or excluded-peril disputes to legal and claims leadership.",
+    "Set bounded underwriting, reserve, or capital committee actions based on packet evidence.",
+    "Request targeted additional data before changing pricing, capacity, or treaty terms."
+  ],
+  "claim_boundaries": [
+    "Do not claim actuarial certification, coverage determination, legal advice, or binding underwriting decision.",
+    "Do not claim the capacity or affordability crisis is solved by a single treaty action.",
+    "Do not invent catastrophe history, loss curves, market capacity, or treaty wording.",
+    "Do not overgeneralize model output beyond packet scenarios and calibration limits."
+  ],
+  "evidence_uncertainty_requirements": [
+    "Identify strong evidence in treaty, loss, model, wording, and capital sources separately.",
+    "Flag stale exposure snapshots, model uncertainty, wording ambiguity, and disputed peril status.",
+    "Describe risks of acting before coverage/capital validation and risks of waiting under accumulating losses.",
+    "State scenario sensitivity and model calibration limits without pretending certainty."
   ]
 }

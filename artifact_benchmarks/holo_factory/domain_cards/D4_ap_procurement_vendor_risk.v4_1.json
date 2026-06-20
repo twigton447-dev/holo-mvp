@@ -11,23 +11,48 @@
     "layer_3": "hard_caps_override",
     "proof_credit_rule": "no_proof_credit_if_layer_1_fails"
   },
-  "artifact_type": "AP control and vendor-risk investigation memo",
-  "audience": ["controller", "procurement lead", "AP manager", "internal audit", "legal counsel"],
-  "word_band": {"min": 2800, "target": 3800, "max": 4700, "hard_max": 5200},
+  "artifact_type": "decision-grade crisis brief",
+  "audience": [
+    "controller",
+    "procurement lead",
+    "AP manager",
+    "internal audit",
+    "legal counsel"
+  ],
+  "word_band": {
+    "min": 1200,
+    "target": 1500,
+    "max": 1800,
+    "hard_max": 1800
+  },
   "required_sections": [
-    "executive disposition",
-    "invoice PO receipt match analysis",
-    "vendor master and banking risk",
-    "contract and authority boundary",
-    "duplicate split and threshold testing",
-    "hold release and escalation plan",
-    "audit trail and remediation",
-    "limitations and disclaimer"
+    "what is happening",
+    "why it matters now",
+    "strong evidence",
+    "weak stale or contradictory evidence",
+    "calculations and data interpretation that matter",
+    "response options",
+    "risks of acting",
+    "risks of waiting",
+    "practical next steps",
+    "claim boundaries and disclaimer"
   ],
   "required_disclaimer": "This is a benchmark artifact and not legal advice, audit opinion, fraud determination, payment authorization, or procurement approval.",
   "source_boundary": {
-    "allowed_source_types": ["synthetic invoice register", "synthetic PO data", "synthetic goods receipt log", "synthetic vendor master", "synthetic contract excerpt", "synthetic approval matrix"],
-    "forbidden_source_behaviors": ["inventing vendor facts", "inventing bank verification", "browsing", "treating suspicion as fraud finding"],
+    "allowed_source_types": [
+      "synthetic invoice register",
+      "synthetic PO data",
+      "synthetic goods receipt log",
+      "synthetic vendor master",
+      "synthetic contract excerpt",
+      "synthetic approval matrix"
+    ],
+    "forbidden_source_behaviors": [
+      "inventing vendor facts",
+      "inventing bank verification",
+      "browsing",
+      "treating suspicion as fraud finding"
+    ],
     "source_ids_required": true
   },
   "hidden_failure_seams": [
@@ -78,12 +103,79 @@
   "judge_policy": {
     "anonymous_packets_required": true,
     "self_judge_decisive_score_allowed": false,
-    "proof_scoring_conflict_handling": ["held_out_judges", "leave_one_out", "diagnostic_only_if_conflicted"]
+    "proof_scoring_conflict_handling": [
+      "held_out_judges",
+      "leave_one_out",
+      "diagnostic_only_if_conflicted"
+    ]
   },
-  "calibration_set_required": ["gold", "fluff", "math_wrong", "hallucinated_source", "hidden_trap_miss", "boundary_fail"],
+  "calibration_set_required": [
+    "gold",
+    "fluff",
+    "math_wrong",
+    "hallucinated_source",
+    "hidden_trap_miss",
+    "boundary_fail"
+  ],
   "no_provider_smoke_requirements": [
     "domain card validates against schema",
-    "AP/procurement hidden traps are present",
+    "crisis-report fields are present and non-empty",
+    "decision-grade crisis brief framing is present",
     "action-boundary risks are present"
+  ],
+  "domain_crisis_context": "Supplier fraud, critical vendor failure, payment redirection, and public-sector or enterprise procurement disruption under time pressure.",
+  "intended_reader": [
+    "controller",
+    "procurement lead",
+    "AP manager",
+    "internal audit",
+    "legal counsel"
+  ],
+  "decision_report_type": "decision-grade crisis brief for near-term action under uncertainty",
+  "public_value_question": "What should finance, procurement, audit, and legal teams do now to prevent harm while keeping critical supply moving?",
+  "crisis_specific_source_requirements": [
+    "Use only packet invoice registers, PO data, receipt logs, vendor master records, contract excerpts, and approval matrices.",
+    "Cite source IDs for every payment, PO, receipt, bank-change, contract, threshold, and authority claim.",
+    "Do not browse or import external vendor, bank, sanctions, fraud, or public-record facts.",
+    "Separate anomaly evidence from fraud conclusions, legal findings, and payment authorization."
+  ],
+  "crisis_specific_hidden_traps": [
+    "Invoice amount may match the PO while goods receipt quantity, entity, or contract authority fails.",
+    "Bank detail changes near payment date can create payment-redirection risk.",
+    "Split invoices can evade approval thresholds under time pressure.",
+    "Critical-vendor urgency can pressure release before callback, authority, or legal review."
+  ],
+  "required_data_or_calculation_checks": [
+    "Run three-way match checks across invoice, PO, receipt, tolerance, tax, discount, freight, and currency where present.",
+    "Test duplicate invoices, split invoices, threshold evasion, and vendor-master changes.",
+    "Check entity, contract authority, approval matrix, payment hold, and callback-verification evidence.",
+    "Quantify payment exposure, criticality, delay impact, and unreconciled exception count."
+  ],
+  "affected_stakeholders": [
+    "AP team",
+    "procurement",
+    "critical vendor",
+    "business operations",
+    "internal audit",
+    "legal",
+    "public or enterprise customers"
+  ],
+  "practical_response_options_required": [
+    "Hold payment pending independent callback, receipt reconciliation, or authority confirmation.",
+    "Release only uncontested amounts through approved emergency controls if supply continuity requires it.",
+    "Lock vendor-master changes and escalate anomalies to controller, procurement, audit, and legal owners.",
+    "Document remediation tickets, supply-continuity alternatives, and communication plan."
+  ],
+  "claim_boundaries": [
+    "Do not claim fraud, legal liability, audit opinion, or payment authorization from packet evidence alone.",
+    "Do not claim the supplier crisis is solved if only a payment hold or triage path is supported.",
+    "Do not invent vendor facts, bank verification, contract authority, or external sanctions information.",
+    "Do not release payment based solely on model-generated recommendation."
+  ],
+  "evidence_uncertainty_requirements": [
+    "Identify strong evidence in invoice, PO, receipt, vendor-master, contract, and approval data separately.",
+    "Flag weak, missing, stale, or contradictory proof before any hold or release recommendation.",
+    "Describe risks of acting too fast, including wrongful block or supply disruption, and risks of waiting, including loss or critical-vendor failure.",
+    "Calibrate anomaly severity without converting suspicion into fact."
   ]
 }

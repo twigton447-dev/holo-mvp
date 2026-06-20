@@ -18,6 +18,8 @@ Runner status: `unchanged`
 
 This protocol is the universal scoring scaffold for a five-domain HoloBuild benchmark system. It is model-agnostic, blind, and evidence-bound. It measures whether an artifact can survive expert review as a source-grounded, operationally bounded, auditable deliverable.
 
+Every domain is framed as a real-world crisis research-to-report task. The expected artifact is a **decision-grade crisis brief**, not a generic essay, white paper, or polished memo. The report is scored on whether it helps a real reader make a better decision under uncertainty: what is happening, why it matters now, what evidence is strong, what evidence is weak/stale/contradictory, what calculations or data interpretation matter, what options exist, risks of acting, risks of waiting, practical next steps, and claim boundaries.
+
 This is not a live run. It does not generate artifacts, call providers, score outputs, update a leaderboard, or make a proof-credit claim.
 
 ## Three-Layer Scoring Architecture
@@ -156,6 +158,25 @@ Full credit requires a test or validation step, go/no-go criteria, rollback or s
 
 Full credit requires precise, non-contradictory, client-usable communication. Clarity does not compensate for missing source, math, boundary, or audit evidence.
 
+## Crisis-Report Scoring Requirement
+
+Judges must treat each artifact as a crisis decision brief. Award no credit for generic paper-writing, broad narrative polish, or unsupported declarations of resolution.
+
+The artifact must answer:
+
+- what is happening;
+- why it matters now;
+- what evidence is strong;
+- what evidence is weak, stale, or contradictory;
+- what calculations or data interpretation matter;
+- what practical response options exist;
+- risks of acting;
+- risks of waiting;
+- practical next steps;
+- what cannot responsibly be claimed from the packet.
+
+A report that claims to solve the crisis, eliminate the crisis, certify a legal/clinical/financial conclusion, or authorize action when the source packet only supports narrower interventions triggers CAP-15 for unsupported major crisis-resolution claim.
+
 ## Hard Caps
 
 Lowest maximum score wins when multiple caps trigger.
@@ -176,6 +197,7 @@ Lowest maximum score wins when multiple caps trigger.
 | CAP-12 | Unclean ending or truncation | 4.0 |
 | CAP-13 | Word count or format violation | 5.0 |
 | CAP-14 | Severe generic or non-operational answer | 3.0 |
+| CAP-15 | Unsupported major crisis-resolution claim, including claiming to solve a crisis when the source packet supports only narrower interventions | 4.0 |
 
 ## Judge Policy
 
@@ -223,8 +245,17 @@ Final score rule:
 Each domain card supplies:
 
 - domain identity and version;
+- crisis context and intended reader;
+- decision-report type and public-value question;
 - audience and artifact type;
 - required sections, disclaimer, source boundary, word band;
+- crisis-specific source requirements;
+- crisis-specific hidden traps;
+- required data or calculation checks;
+- affected stakeholders;
+- practical response options;
+- claim boundaries;
+- evidence and uncertainty requirements;
 - hidden-failure seams;
 - action-boundary risks;
 - overlay anchors for DFACT-1, DTRAP-1, DOPS-1, DSRC-1, and DAUD-1;

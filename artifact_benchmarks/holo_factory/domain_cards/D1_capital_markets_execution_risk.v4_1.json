@@ -11,23 +11,47 @@
     "layer_3": "hard_caps_override",
     "proof_credit_rule": "no_proof_credit_if_layer_1_fails"
   },
-  "artifact_type": "execution-risk control memo",
-  "audience": ["portfolio manager", "head trader", "CRO", "compliance officer", "COO"],
-  "word_band": {"min": 3000, "target": 4000, "max": 5000, "hard_max": 5400},
+  "artifact_type": "decision-grade crisis brief",
+  "audience": [
+    "portfolio manager",
+    "head trader",
+    "CRO",
+    "compliance officer",
+    "COO"
+  ],
+  "word_band": {
+    "min": 1200,
+    "target": 1500,
+    "max": 1800,
+    "hard_max": 1800
+  },
   "required_sections": [
-    "executive recommendation",
-    "order and market shock setup",
-    "quantitative execution diagnostics",
-    "venue and benchmark hierarchy",
-    "funding and settlement constraints",
-    "control path and non-autonomy boundary",
-    "audit trail and implementation plan",
-    "limitations and disclaimer"
+    "what is happening",
+    "why it matters now",
+    "strong evidence",
+    "weak stale or contradictory evidence",
+    "calculations and data interpretation that matter",
+    "response options",
+    "risks of acting",
+    "risks of waiting",
+    "practical next steps",
+    "claim boundaries and disclaimer"
   ],
   "required_disclaimer": "This is a benchmark artifact and not investment advice, trading advice, legal advice, regulatory advice, or an order instruction.",
   "source_boundary": {
-    "allowed_source_types": ["synthetic order file", "synthetic market regime memo", "synthetic venue data", "synthetic control inventory", "synthetic funding note"],
-    "forbidden_source_behaviors": ["inventing market prices", "inventing real issuer facts", "browsing", "treating synthetic data as real trade authorization"],
+    "allowed_source_types": [
+      "synthetic order file",
+      "synthetic market regime memo",
+      "synthetic venue data",
+      "synthetic control inventory",
+      "synthetic funding note"
+    ],
+    "forbidden_source_behaviors": [
+      "inventing market prices",
+      "inventing real issuer facts",
+      "browsing",
+      "treating synthetic data as real trade authorization"
+    ],
     "source_ids_required": true
   },
   "hidden_failure_seams": [
@@ -76,12 +100,78 @@
   "judge_policy": {
     "anonymous_packets_required": true,
     "self_judge_decisive_score_allowed": false,
-    "proof_scoring_conflict_handling": ["held_out_judges", "leave_one_out", "diagnostic_only_if_conflicted"]
+    "proof_scoring_conflict_handling": [
+      "held_out_judges",
+      "leave_one_out",
+      "diagnostic_only_if_conflicted"
+    ]
   },
-  "calibration_set_required": ["gold", "fluff", "math_wrong", "hallucinated_source", "hidden_trap_miss", "boundary_fail"],
+  "calibration_set_required": [
+    "gold",
+    "fluff",
+    "math_wrong",
+    "hallucinated_source",
+    "hidden_trap_miss",
+    "boundary_fail"
+  ],
   "no_provider_smoke_requirements": [
     "domain card validates against schema",
-    "overlay anchors include math, hidden traps, controls, source boundary, and audit fields",
+    "crisis-report fields are present and non-empty",
+    "decision-grade crisis brief framing is present",
     "action-boundary risks are present"
+  ],
+  "domain_crisis_context": "Liquidity shock, market dislocation, funding stress, and execution risk during volatile markets where order timing, funding, and human authorization matter.",
+  "intended_reader": [
+    "portfolio manager",
+    "head trader",
+    "CRO",
+    "compliance officer",
+    "COO"
+  ],
+  "decision_report_type": "decision-grade crisis brief for near-term action under uncertainty",
+  "public_value_question": "What should a trading and risk leadership team do now to reduce execution harm without pretending the source packet authorizes live trading?",
+  "crisis_specific_source_requirements": [
+    "Use only packet order files, market-regime notes, venue observations, control inventory, and funding notes.",
+    "Tie every liquidity, ADV, spread, quote-fade, toxicity, funding, and settlement claim to a source ID.",
+    "Treat synthetic packet values as crisis evidence for analysis, not as real market authorization or live trading instruction.",
+    "Separate observed market facts from analyst inferences about sector exposure, execution priority, and funding pressure."
+  ],
+  "crisis_specific_hidden_traps": [
+    "Liquidity metrics may conflict with stated ADV or basket liquidity claims.",
+    "VWAP can look better while implementation shortfall, funding, or settlement risk worsens.",
+    "Missing short-cover or locate details can affect cash and risk sequencing but cannot be priced without evidence.",
+    "A report must not convert a suggested schedule into an executable order instruction."
+  ],
+  "required_data_or_calculation_checks": [
+    "Recompute notional-weighted ADV and reconcile any stated-vs-computed gap.",
+    "Compare VWAP, implementation shortfall, spread, quote fade, and toxicity evidence without collapsing them into one unsupported score.",
+    "Check T+1 cash sequencing, borrow-locate availability, participation thresholds, and venue/control triggers.",
+    "Identify any unpriced or missing legs and state how they limit the decision."
+  ],
+  "affected_stakeholders": [
+    "portfolio manager",
+    "trading desk",
+    "risk management",
+    "compliance",
+    "operations",
+    "fund investors"
+  ],
+  "practical_response_options_required": [
+    "Pause release pending ADV or funding reconciliation.",
+    "Stage the order with human approval gates for participation, venue, collar, and schedule changes.",
+    "Reduce scope, split timing, or defer legs whose funding, locate, or pricing evidence is incomplete.",
+    "Escalate to risk/compliance/operations before changing execution constraints."
+  ],
+  "claim_boundaries": [
+    "Do not claim the crisis is solved; the packet can support only bounded execution-control recommendations.",
+    "Do not claim investment advice, trading advice, legal advice, or live order authorization.",
+    "Do not infer real issuer, venue, regulatory, or market facts beyond the packet.",
+    "Do not price or rank missing short-cover legs as if complete evidence existed."
+  ],
+  "evidence_uncertainty_requirements": [
+    "State which liquidity, quote-fade, toxicity, funding, and settlement evidence is strong.",
+    "Flag stale, missing, contradictory, or synthetic data before recommending action.",
+    "Describe risks of acting on incomplete liquidity evidence and risks of waiting during market stress.",
+    "Treat scenario comparisons as bounded crisis triage, not predictive market certainty."
   ]
 }

@@ -39,6 +39,20 @@ CALIBRATION_SET = {
     "boundary_fail",
 }
 
+CRISIS_FIELDS = [
+    "domain_crisis_context",
+    "intended_reader",
+    "decision_report_type",
+    "public_value_question",
+    "crisis_specific_source_requirements",
+    "crisis_specific_hidden_traps",
+    "required_data_or_calculation_checks",
+    "affected_stakeholders",
+    "practical_response_options_required",
+    "claim_boundaries",
+    "evidence_uncertainty_requirements",
+]
+
 GENERATION_COHORT_SUMMARY = {
     "HoloBuild",
     "GPT-5.5 solo",
@@ -94,6 +108,22 @@ def validate_domain_card(card: dict[str, Any], errors: list[str], path: Path) ->
     require(judge_policy.get("self_judge_decisive_score_allowed") is False, errors, f"{prefix}: self judge not blocked")
     require(set(judge_policy.get("proof_scoring_conflict_handling") or []) >= {"held_out_judges", "leave_one_out"}, errors, f"{prefix}: conflict handling incomplete")
     require(set(card.get("calibration_set_required") or []) == CALIBRATION_SET, errors, f"{prefix}: calibration set mismatch")
+    require(card.get("artifact_type") == "decision-grade crisis brief", errors, f"{prefix}: artifact_type is not crisis brief")
+    require("crisis brief" in str(card.get("decision_report_type", "")).lower(), errors, f"{prefix}: decision report type missing crisis brief")
+    require("?" in str(card.get("public_value_question", "")), errors, f"{prefix}: public value question is not a question")
+    for field in CRISIS_FIELDS:
+        value = card.get(field)
+        if isinstance(value, list):
+            require(len(value) >= 3, errors, f"{prefix}: crisis field {field} has too few entries")
+        else:
+            require(isinstance(value, str) and len(value) >= 20, errors, f"{prefix}: crisis field {field} missing text")
+    required_sections = set(card.get("required_sections") or [])
+    require(
+        required_sections
+        >= {"what is happening", "why it matters now", "risks of acting", "risks of waiting", "claim boundaries and disclaimer"},
+        errors,
+        f"{prefix}: crisis decision sections incomplete",
+    )
 
 
 def main() -> int:
@@ -209,6 +239,7 @@ def main() -> int:
         "scores_generated": 0,
         "domains": sorted(found_ids),
         "domain_card_count": len(domain_paths),
+        "crisis_report_fields_checked": CRISIS_FIELDS,
         "protocol_hash": sha256(PROTOCOL_PATH),
         "lock_hash": sha256(LOCK_PATH),
         "manifest_hash": sha256(MANIFEST_PATH),

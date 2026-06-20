@@ -11,23 +11,49 @@
     "layer_3": "hard_caps_override",
     "proof_credit_rule": "no_proof_credit_if_layer_1_fails"
   },
-  "artifact_type": "audit committee JV negotiation and accounting-risk memo",
-  "audience": ["audit committee", "CFO", "general counsel", "treasurer", "head of strategy"],
-  "word_band": {"min": 3500, "target": 4300, "max": 5000, "hard_max": 5400},
+  "artifact_type": "decision-grade crisis brief",
+  "audience": [
+    "audit committee",
+    "CFO",
+    "general counsel",
+    "treasurer",
+    "head of strategy"
+  ],
+  "word_band": {
+    "min": 1200,
+    "target": 1500,
+    "max": 1800,
+    "hard_max": 1800
+  },
   "required_sections": [
-    "executive recommendation",
-    "annual-report quality and accounting risk",
-    "reserve and production economics",
-    "commodity and FX sensitivity",
-    "sanctions export-control and sovereign risk",
-    "JV negotiation positions",
-    "audit committee questions",
-    "limitations and disclaimer"
+    "what is happening",
+    "why it matters now",
+    "strong evidence",
+    "weak stale or contradictory evidence",
+    "calculations and data interpretation that matter",
+    "response options",
+    "risks of acting",
+    "risks of waiting",
+    "practical next steps",
+    "claim boundaries and disclaimer"
   ],
   "required_disclaimer": "This is a benchmark artifact and not investment advice, legal advice, tax advice, sanctions advice, reserve certification, or accounting opinion.",
   "source_boundary": {
-    "allowed_source_types": ["synthetic annual report", "synthetic reserve report excerpt", "synthetic JV term sheet", "synthetic treasury sensitivity pack", "synthetic compliance memo", "synthetic dataset", "synthetic exhibit"],
-    "forbidden_source_behaviors": ["inventing JOA or PSA clauses", "inventing royalty, cost-recovery, carry, or uplift terms when absent", "browsing", "treating partner forecasts as audited facts"],
+    "allowed_source_types": [
+      "synthetic annual report",
+      "synthetic reserve report excerpt",
+      "synthetic JV term sheet",
+      "synthetic treasury sensitivity pack",
+      "synthetic compliance memo",
+      "synthetic dataset",
+      "synthetic exhibit"
+    ],
+    "forbidden_source_behaviors": [
+      "inventing JOA or PSA clauses",
+      "inventing royalty, cost-recovery, carry, or uplift terms when absent",
+      "browsing",
+      "treating partner forecasts as audited facts"
+    ],
     "source_ids_required": true
   },
   "hidden_failure_seams": [
@@ -79,12 +105,79 @@
   "judge_policy": {
     "anonymous_packets_required": true,
     "self_judge_decisive_score_allowed": false,
-    "proof_scoring_conflict_handling": ["held_out_judges", "leave_one_out", "diagnostic_only_if_conflicted"]
+    "proof_scoring_conflict_handling": [
+      "held_out_judges",
+      "leave_one_out",
+      "diagnostic_only_if_conflicted"
+    ]
   },
-  "calibration_set_required": ["gold", "fluff", "math_wrong", "hallucinated_source", "hidden_trap_miss", "boundary_fail"],
+  "calibration_set_required": [
+    "gold",
+    "fluff",
+    "math_wrong",
+    "hallucinated_source",
+    "hidden_trap_miss",
+    "boundary_fail"
+  ],
   "no_provider_smoke_requirements": [
     "domain card validates against schema",
-    "JOA/PSA/cost-recovery/carry/uplift absent-if-absent rule is present",
+    "crisis-report fields are present and non-empty",
+    "decision-grade crisis brief framing is present",
     "action-boundary risks are present"
+  ],
+  "domain_crisis_context": "Geopolitical energy disruption, Middle East JV exposure, sanctions or export-control constraints, FX and repatriation risk, and partner economics under urgent board scrutiny.",
+  "intended_reader": [
+    "audit committee",
+    "CFO",
+    "general counsel",
+    "treasurer",
+    "head of strategy"
+  ],
+  "decision_report_type": "decision-grade crisis brief for near-term action under uncertainty",
+  "public_value_question": "What can the board responsibly decide now about JV exposure, cash protection, and escalation without inventing unavailable contract or sovereign facts?",
+  "crisis_specific_source_requirements": [
+    "Use only packet annual-report excerpts, reserve summaries, JV term sheets, treasury sensitivity packs, compliance memos, datasets, and exhibits.",
+    "Cite source IDs for every production, revenue, cost recovery, royalty, carry, uplift, FX, sanctions, approval, or repatriation statement.",
+    "If JOA, PSA, royalty, cost-recovery, carry, or uplift terms are absent, explicitly mark them absent and do not invent them.",
+    "Separate audited facts, partner forecasts, reserve assumptions, and legal or sanctions questions."
+  ],
+  "crisis_specific_hidden_traps": [
+    "Reserve quantities can be confused with economic value during disruption.",
+    "FX depreciation, trapped cash, or central-bank clearance can change the decision even when production economics look positive.",
+    "Sanctions or export-control constraints can be hard stops, not generic risks.",
+    "Partner approval, dispute, or deadlock rights may be absent from the packet and must not be fabricated."
+  ],
+  "required_data_or_calculation_checks": [
+    "Calculate production, revenue, cost recovery, royalty, carry, uplift, and partner economics only where packet terms support them.",
+    "Show FX basis, currency conversion, repatriation assumptions, and trapped-cash sensitivity.",
+    "Check lifting schedule, entitlement, partner share, approval thresholds, and dispute triggers.",
+    "Build a disallowed-cost or omitted-cost trail for water-handling capex, ARO, logistics, or compliance costs."
+  ],
+  "affected_stakeholders": [
+    "audit committee",
+    "operator",
+    "JV partners",
+    "host government",
+    "lenders",
+    "employees",
+    "public energy customers"
+  ],
+  "practical_response_options_required": [
+    "Pause FID, funding, or signing pending sanctions/export-control, FX, reserve, or partner-approval clearance.",
+    "Approve only a bounded bridge action such as diligence, cash ring-fencing, or committee escalation.",
+    "Negotiate protective conditions precedent, dispute triggers, audit rights, or repatriation safeguards.",
+    "Escalate to legal, sanctions, tax, reserve engineering, treasury, and audit owners before board reliance."
+  ],
+  "claim_boundaries": [
+    "Do not claim legal, sanctions, tax, reserve, accounting, or investment conclusions as final opinions.",
+    "Do not claim the JV crisis is solved when the packet supports only bounded intervention choices.",
+    "Do not invent JOA, PSA, royalty, cost-recovery, carry, uplift, sovereign, or partner-financial facts.",
+    "Do not treat partner forecasts or unaudited exhibits as audited facts."
+  ],
+  "evidence_uncertainty_requirements": [
+    "Identify strong evidence on production, economics, FX, approvals, and compliance separately.",
+    "Flag weak, stale, contradictory, unaudited, or absent terms before recommending a board action.",
+    "Explain risks of acting before legal/FX/partner diligence and risks of waiting during energy disruption.",
+    "Use sensitivity and assumption calibration instead of unsupported probability claims."
   ]
 }

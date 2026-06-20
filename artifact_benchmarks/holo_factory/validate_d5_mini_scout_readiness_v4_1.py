@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 from pathlib import Path
@@ -19,6 +20,8 @@ LIVE_ARTIFACTS_GENERATED = 0
 SCORES_GENERATED = 0
 EXPECTED_PACKET_HASH = "b73292d9d2e4aac5f65a93ae168235d9d581ae17ebaf0a91aa16437018c527aa"
 EXPECTED_CONDITIONS = {"holo_build_arch", "solo_openai_gpt_5_5"}
+EXPECTED_TURN_COUNT = 6
+EXPECTED_WORD_TARGET = 1100
 REQUIRED_ARCH_TOKENS = [
     "state_object_hash",
     "state_object_snapshot_path",
@@ -38,6 +41,21 @@ REQUIRED_ARCH_TOKENS = [
     "synthesis_trigger",
     "final_artifact_hash",
     "architecture_evidence_visible_to_judges",
+]
+EXPECTED_SOLO_ROLES = [
+    "initial_decision_brief_draft",
+    "assumption_and_evidence_attack",
+    "contradiction_uncertainty_source_fidelity_pass",
+    "options_risks_operational_usefulness_pass",
+    "claim_discipline_overclaim_reduction_pass",
+    "final_synthesis_900_1300_words",
+]
+EXPECTED_HOLO_REVIEWER_ROLES = [
+    "initial_decision_brief_drafter",
+    "assumption_and_evidence_attacker",
+    "contradiction_uncertainty_source_fidelity_reviewer",
+    "options_operational_usefulness_reviewer",
+    "claim_discipline_overclaim_reducer",
 ]
 BLIND_EXPORT_FORBIDDEN_TOKENS = [
     "architecture evidence",
@@ -62,6 +80,19 @@ def require(condition: bool, errors: list[str], message: str) -> None:
         errors.append(message)
 
 
+def literal_assignments(source: str) -> dict[str, Any]:
+    assignments: dict[str, Any] = {}
+    tree = ast.parse(source)
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            name = node.targets[0].id
+            try:
+                assignments[name] = ast.literal_eval(node.value)
+            except (ValueError, SyntaxError):
+                continue
+    return assignments
+
+
 def main() -> int:
     errors: list[str] = []
     require(PACKET_DIR.exists(), errors, f"missing packet dir: {PACKET_DIR}")
@@ -81,6 +112,7 @@ def main() -> int:
         arch_policy = read_json(ARCH_POLICY_PATH)
         runner_text = RUNNER_PATH.read_text(encoding="utf-8")
         exporter_text = EXPORTER_PATH.read_text(encoding="utf-8")
+        runner_assignments = literal_assignments(runner_text)
 
         require(packet_hash == EXPECTED_PACKET_HASH, errors, "D5 packet hash mismatch")
         require(packet.get("real_public_sources_only") is True, errors, "packet is not real-public-sources-only")
@@ -100,6 +132,18 @@ def main() -> int:
         require("--no-provider-smoke" in runner_text, errors, "runner missing --no-provider-smoke support")
         require("HOLO_ALLOW_LIVE" in runner_text, errors, "runner missing second live approval guard")
         require("D5_MINI_SCOUT_LIVE_FAIL_CLOSED" in runner_text, errors, "runner missing live fail-closed status")
+        require(runner_assignments.get("RUN_MODE") == "d5_medtech_capacity_strain_001_corrected_v2_six_turn", errors, "runner missing corrected v2 run mode")
+        require(runner_assignments.get("EXPECTED_PACKET_HASH") == EXPECTED_PACKET_HASH, errors, "runner does not pin expected packet hash")
+        require(runner_assignments.get("EXPECTED_TURN_COUNT") == EXPECTED_TURN_COUNT, errors, "runner expected turn count is not 6")
+        require(runner_assignments.get("FINAL_WORD_TARGET") == EXPECTED_WORD_TARGET, errors, "runner final word target is not 1100")
+        require(runner_assignments.get("FINAL_WORD_MIN") == 900 and runner_assignments.get("FINAL_WORD_MAX") == 1300, errors, "runner final word range mismatch")
+        solo_turns = runner_assignments.get("SOLO_SELF_REFINE_TURNS") or ()
+        holo_turns = runner_assignments.get("HOLO_PROVIDER_TURNS") or ()
+        require(len(solo_turns) == EXPECTED_TURN_COUNT, errors, "solo self-refine turn count is not 6")
+        require(len(holo_turns) + 1 == EXPECTED_TURN_COUNT, errors, "HoloBuild reviewer plus synthesis turn count is not 6")
+        require([item.get("role") for item in solo_turns] == EXPECTED_SOLO_ROLES, errors, "solo self-refine roles do not match required sequence")
+        require([item.get("role") for item in holo_turns] == EXPECTED_HOLO_REVIEWER_ROLES, errors, "HoloBuild reviewer roles do not match corrected v2 sequence")
+        require("If the draft exceeds" in runner_text and "revise shorter before final answer" in runner_text, errors, "runner missing hard final shortening instruction")
         for condition in EXPECTED_CONDITIONS:
             require(condition in runner_text, errors, f"runner missing condition {condition}")
 
@@ -133,6 +177,8 @@ def main() -> int:
         "packet_dir": str(PACKET_DIR),
         "packet_hash": packet_hash,
         "conditions_supported": sorted(EXPECTED_CONDITIONS),
+        "expected_turn_count_per_condition": EXPECTED_TURN_COUNT,
+        "final_word_target": EXPECTED_WORD_TARGET,
         "live_mode_fail_closed_by_default": True,
         "live_requires": ["--live", "HOLO_ALLOW_LIVE=1"],
         "holobuild_architecture_evidence_path_wired": RUNNER_PATH.exists(),

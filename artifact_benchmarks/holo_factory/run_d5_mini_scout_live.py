@@ -18,10 +18,16 @@ ARCH_SCHEMA_PATH = FACTORY_DIR / "schemas/holo_build_arch_evidence_schema.json"
 ARCH_POLICY_PATH = FACTORY_DIR / "architecture_policies/holobuild_patent_alignment_policy_v4_1.json"
 
 RUNNER_ID = "d5_medtech_capacity_strain_001_live_adapter_v4_1"
+RUN_MODE = "d5_medtech_capacity_strain_001_corrected_v2_six_turn"
 LIVE_APPROVAL_ENV = "HOLO_ALLOW_LIVE"
 PROVIDER_CALLS = 0
 LIVE_ARTIFACTS_GENERATED = 0
 SCORES_GENERATED = 0
+EXPECTED_PACKET_HASH = "b73292d9d2e4aac5f65a93ae168235d9d581ae17ebaf0a91aa16437018c527aa"
+EXPECTED_TURN_COUNT = 6
+FINAL_WORD_MIN = 900
+FINAL_WORD_MAX = 1300
+FINAL_WORD_TARGET = 1100
 
 VALID_CONDITIONS = ("holo_build_arch", "solo_openai_gpt_5_5")
 CONDITION_LABELS = {
@@ -32,24 +38,68 @@ SOLO_PROVIDER_MODEL = "openai:gpt-5.5"
 HOLO_PROVIDER_TURNS = (
     {
         "provider_model": "anthropic:claude-opus-4-8",
-        "role": "clinical_safety_and_equity_reviewer",
-        "objective": "Stress-test patient safety, equity, skin-pigmentation accuracy concerns, and clinical escalation boundaries.",
-        "max_tokens": 4500,
+        "role": "initial_decision_brief_drafter",
+        "objective": "Draft a source-grounded initial decision frame covering what is happening, why it matters, and the main adopt/pilot/delay/reject options. This is not the final artifact.",
+        "max_tokens": 3200,
     },
     {
         "provider_model": "google:gemini-3.1-pro-preview",
-        "role": "regulatory_and_source_fidelity_reviewer",
-        "objective": "Stress-test FDA draft/advisory/press-source interpretation, source fidelity, and overclaiming risk.",
-        "max_tokens": 4500,
+        "role": "assumption_and_evidence_attacker",
+        "objective": "Attack assumptions, weak evidence, sample/source limits, stale claims, and missing links between monitoring and hospital capacity relief.",
+        "max_tokens": 3200,
     },
     {
         "provider_model": "openai:gpt-5.5",
-        "role": "operations_and_capacity_decision_reviewer",
-        "objective": "Stress-test capacity-pressure claims, pilot/adopt/delay/reject options, and risks of acting versus waiting.",
-        "max_tokens": 4500,
+        "role": "contradiction_uncertainty_source_fidelity_reviewer",
+        "objective": "Stress-test contradictory evidence, FDA draft/advisory/press interpretation, source fidelity, and uncertainty boundaries.",
+        "max_tokens": 3200,
+    },
+    {
+        "provider_model": "anthropic:claude-opus-4-8",
+        "role": "options_operational_usefulness_reviewer",
+        "objective": "Stress-test practical options, risks of acting, risks of waiting, operating gates, and usefulness for leadership under capacity pressure.",
+        "max_tokens": 3200,
+    },
+    {
+        "provider_model": "google:gemini-3.1-pro-preview",
+        "role": "claim_discipline_overclaim_reducer",
+        "objective": "Reduce unsupported claims, identify exact overclaim risks, and prepare final-brief constraints so the final answer stays within 900-1,300 body words.",
+        "max_tokens": 3200,
     },
 )
 HOLO_SYNTHESIS_MODEL = "openai:gpt-5.5"
+SOLO_SELF_REFINE_TURNS = (
+    {
+        "role": "initial_decision_brief_draft",
+        "objective": "Write an initial source-grounded decision brief draft. This is not final.",
+        "max_tokens": 3400,
+    },
+    {
+        "role": "assumption_and_evidence_attack",
+        "objective": "Attack the prior draft for unsupported assumptions, weak evidence, missing calculations, and unsupported capacity claims. Produce a revised draft or detailed revision plan.",
+        "max_tokens": 3400,
+    },
+    {
+        "role": "contradiction_uncertainty_source_fidelity_pass",
+        "objective": "Revise for contradictory evidence, uncertainty, stale source handling, FDA draft/advisory limits, and source-fidelity problems.",
+        "max_tokens": 3400,
+    },
+    {
+        "role": "options_risks_operational_usefulness_pass",
+        "objective": "Revise for adopt/pilot/delay/reject options, risks of acting, risks of waiting, and operational usefulness for leadership.",
+        "max_tokens": 3400,
+    },
+    {
+        "role": "claim_discipline_overclaim_reduction_pass",
+        "objective": "Cut unsupported claims, reduce overclaiming, tighten source citations, and prepare a concise final version.",
+        "max_tokens": 3400,
+    },
+    {
+        "role": "final_synthesis_900_1300_words",
+        "objective": "Return only the final decision-grade crisis brief, 900-1,300 body words, target 1,100.",
+        "max_tokens": 3400,
+    },
+)
 REQUIRED_PACKET_FILES = (
     "task_brief.md",
     "source_packet.json",
@@ -143,6 +193,20 @@ def require_packet(packet_dir: Path) -> dict[str, Any]:
                 indent=2,
             )
         )
+    packet_hash = sha_file(packet_dir / "source_packet.json")
+    if packet_hash != EXPECTED_PACKET_HASH:
+        raise SystemExit(
+            json.dumps(
+                {
+                    "status": "D5_MINI_SCOUT_RUNNER_FAIL",
+                    "error": "unexpected_packet_hash",
+                    "expected_packet_hash": EXPECTED_PACKET_HASH,
+                    "actual_packet_hash": packet_hash,
+                    "provider_calls": PROVIDER_CALLS,
+                },
+                indent=2,
+            )
+        )
     return lock
 
 
@@ -209,17 +273,6 @@ def smoke_arch_evidence(packet_dir: Path, run_id: str, condition_dir: Path) -> d
     source_packet_hash = sha_file(packet_dir / "source_packet.json")
     task_brief_hash = sha_file(packet_dir / "task_brief.md")
     lock_hash = sha_file(packet_dir / "packet_lock.json")
-    state_payload = {
-        "run_id": run_id,
-        "packet_id": read_json(packet_dir / "source_packet.json")["packet_id"],
-        "mode": "no_provider_smoke",
-        "critical_constraints": [
-            "use only frozen packet sources",
-            "main artifact body must be 900-1300 words",
-            "architecture evidence is not judge-visible",
-        ],
-    }
-    state_hash = sha_text(json.dumps(state_payload, sort_keys=True))
     registry_entries = [
         {
             "artifact_id": "frozen_source_packet",
@@ -241,34 +294,54 @@ def smoke_arch_evidence(packet_dir: Path, run_id: str, condition_dir: Path) -> d
         },
     ]
     registry_hash = sha_text(json.dumps(registry_entries, sort_keys=True))
-    baton_payload = {
-        "run_id": run_id,
-        "turn_index": 1,
-        "next_model_id": "no_provider_smoke",
-        "adversarial_role": "evidence_uncertainty_and_claim_boundary_reviewer",
-    }
-    baton_hash = sha_text(json.dumps(baton_payload, sort_keys=True))
     final_artifact_hash = sha_text("NO_PROVIDER_SMOKE_FINAL_ARTIFACT_SLOT")
-    arch_evidence = {
-        "schema_version": "holo_build_arch_evidence_schema_v4_1",
-        "architecture_policy_id": "HOLOBUILD_PATENT_ALIGNMENT_POLICY_V4_1",
-        "run_id": run_id,
-        "domain_id": "D5_healthcare_medtech_evidence_synthesis",
-        "condition_type": "holo_build_arch",
-        "provider_calls_recorded": PROVIDER_CALLS,
-        "architecture_evidence_visible_to_judges": False,
-        "visible_surface_boundary": visible_surface_boundary(),
-        "proof_credit_readiness": proof_credit_readiness(),
-        "turns": [
+    turns: list[dict[str, Any]] = []
+    final_state_hash = ""
+    for turn_index in range(1, EXPECTED_TURN_COUNT + 1):
+        role = "final_synthesis_author" if turn_index == EXPECTED_TURN_COUNT else f"no_provider_smoke_reviewer_turn_{turn_index:03d}"
+        state_payload = {
+            "run_id": run_id,
+            "packet_id": read_json(packet_dir / "source_packet.json")["packet_id"],
+            "mode": "no_provider_smoke",
+            "turn_index": turn_index,
+            "role": role,
+            "critical_constraints": [
+                "use only frozen packet sources",
+                "main artifact body must be 900-1300 words",
+                "target final artifact body length is 1100 words",
+                "if a draft exceeds 1300 body words, revise shorter before final answer",
+                "architecture evidence is not judge-visible",
+            ],
+        }
+        state_hash = sha_text(json.dumps(state_payload, sort_keys=True))
+        final_state_hash = state_hash
+        state_path = condition_dir / f"state_object_turn_{turn_index:03d}.json"
+        baton_payload = {
+            "run_id": run_id,
+            "turn_index": turn_index,
+            "next_model_id": "no_provider_smoke",
+            "adversarial_role": role,
+            "state_object_hash": state_hash,
+        }
+        baton_hash = sha_text(json.dumps(baton_payload, sort_keys=True))
+        baton_path = condition_dir / f"baton_pass_turn_{turn_index:03d}.json"
+        write_json(state_path, state_payload)
+        write_json(baton_path, baton_payload)
+        turns.append(
             {
-                "turn_index": 1,
+                "turn_index": turn_index,
                 "state_object_hash": state_hash,
-                "state_object_snapshot_path": str(condition_dir / "state_object_turn_001.json"),
+                "state_object_snapshot_path": str(state_path),
                 "critical_constraints_preserved": [
                     {
                         "constraint_id": "frozen_source_packet_hash",
                         "status": "preserved",
                         "evidence_hash_or_location": source_packet_hash,
+                    },
+                    {
+                        "constraint_id": "six_turn_v2_shape",
+                        "status": "preserved",
+                        "evidence_hash_or_location": f"turn_count:{EXPECTED_TURN_COUNT}",
                     },
                     {
                         "constraint_id": "architecture_evidence_hidden_from_judges",
@@ -303,16 +376,16 @@ def smoke_arch_evidence(packet_dir: Path, run_id: str, condition_dir: Path) -> d
                 },
                 "baton_pass": {
                     "baton_pass_hash": baton_hash,
-                    "baton_pass_path": str(condition_dir / "baton_pass_turn_001.json"),
+                    "baton_pass_path": str(baton_path),
                     "next_model_id": "no_provider_smoke",
-                    "adversarial_role": "evidence_uncertainty_and_claim_boundary_reviewer",
+                    "adversarial_role": role,
                 },
                 "selected_model": {
                     "provider": "no_provider_smoke",
                     "exact_model_id": "no_provider_smoke",
                     "endpoint": "none",
                 },
-                "adversarial_role": "evidence_uncertainty_and_claim_boundary_reviewer",
+                "adversarial_role": role,
                 "role_compliance_result": {
                     "status": "not_checked",
                     "evidence_hash_or_location": "no_provider_smoke_no_model_turn",
@@ -323,22 +396,31 @@ def smoke_arch_evidence(packet_dir: Path, run_id: str, condition_dir: Path) -> d
                     "evidence_hash_or_location": state_hash,
                 },
                 "synthesis_trigger": {
-                    "triggered": True,
-                    "reason": "no_provider_smoke_wires_final_artifact_slot",
+                    "triggered": turn_index == EXPECTED_TURN_COUNT,
+                    "reason": "no_provider_smoke_final_turn_slot" if turn_index == EXPECTED_TURN_COUNT else None,
                 },
             }
-        ],
+        )
+    arch_evidence = {
+        "schema_version": "holo_build_arch_evidence_schema_v4_1",
+        "architecture_policy_id": "HOLOBUILD_PATENT_ALIGNMENT_POLICY_V4_1",
+        "run_id": run_id,
+        "domain_id": "D5_healthcare_medtech_evidence_synthesis",
+        "condition_type": "holo_build_arch",
+        "provider_calls_recorded": PROVIDER_CALLS,
+        "architecture_evidence_visible_to_judges": False,
+        "visible_surface_boundary": visible_surface_boundary(),
+        "proof_credit_readiness": proof_credit_readiness(),
+        "turns": turns,
         "final": {
-            "synthesis_trigger": "no_provider_smoke_wires_final_artifact_slot",
+            "synthesis_trigger": "no_provider_smoke_final_turn_slot",
             "final_artifact_hash": final_artifact_hash,
             "final_artifact_path": str(condition_dir / "artifact.md"),
-            "final_state_object_hash": state_hash,
+            "final_state_object_hash": final_state_hash,
             "final_artifact_registry_hash": registry_hash,
             "architecture_evidence_visible_to_judges": False,
         },
     }
-    write_json(condition_dir / "state_object_turn_001.json", state_payload)
-    write_json(condition_dir / "baton_pass_turn_001.json", baton_payload)
     return arch_evidence
 
 
@@ -365,10 +447,11 @@ def validate_smoke_arch_evidence(evidence: dict[str, Any]) -> list[str]:
     if evidence.get("condition_type") != "holo_build_arch":
         errors.append("arch evidence condition_type mismatch")
     turns = evidence.get("turns") or []
+    if len(turns) != EXPECTED_TURN_COUNT:
+        errors.append(f"arch evidence turn count mismatch: expected {EXPECTED_TURN_COUNT}, got {len(turns)}")
     if not turns:
         errors.append("arch evidence has no turns")
     else:
-        turn = turns[0]
         required_turn = {
             "state_object_hash",
             "state_object_snapshot_path",
@@ -387,9 +470,12 @@ def validate_smoke_arch_evidence(evidence: dict[str, Any]) -> list[str]:
             "state_audit_constraint_preservation_result",
             "synthesis_trigger",
         }
-        missing_turn = sorted(required_turn - set(turn))
-        if missing_turn:
-            errors.append(f"arch evidence missing per-turn fields: {missing_turn}")
+        for turn in turns:
+            missing_turn = sorted(required_turn - set(turn))
+            if missing_turn:
+                errors.append(f"arch evidence missing per-turn fields on turn {turn.get('turn_index')}: {missing_turn}")
+        if turns and (turns[-1].get("synthesis_trigger") or {}).get("triggered") is not True:
+            errors.append("final architecture turn does not trigger synthesis")
     final = evidence.get("final") or {}
     if final.get("architecture_evidence_visible_to_judges") is not False:
         errors.append("final arch evidence visibility is not false")
@@ -464,6 +550,15 @@ def model_visible_payload(packet_dir: Path) -> str:
     )
 
 
+def final_artifact_instruction() -> str:
+    return (
+        f"Final artifact body requirement: {FINAL_WORD_MIN}-{FINAL_WORD_MAX} body words, "
+        f"target {FINAL_WORD_TARGET}. If the draft exceeds {FINAL_WORD_MAX} body words, "
+        "revise shorter before final answer. Return only the final crisis brief body plus required disclaimer; "
+        "do not include process notes, metadata, hidden analysis, or appendices."
+    )
+
+
 def solo_system_prompt() -> str:
     return (
         "You are a healthcare and MedTech evidence-synthesis writer. "
@@ -476,9 +571,41 @@ def solo_system_prompt() -> str:
 def solo_user_prompt(packet_dir: Path) -> str:
     return (
         f"{model_visible_payload(packet_dir)}\n\n"
-        "Return the final 900-1,300 word crisis brief only. "
+        f"{final_artifact_instruction()} "
         "Include the required disclaimer from the task brief. "
         "Do not include process notes, metadata, or hidden analysis."
+    )
+
+
+def solo_self_refine_system_prompt(role: str) -> str:
+    return (
+        "You are a single-model healthcare and MedTech evidence-synthesis writer performing a disciplined self-refinement pass. "
+        f"Current pass: {role}. "
+        "Use only source IDs from the frozen source packet. Do not browse or use outside facts. "
+        "Do not discuss model identity, scoring, judges, or generation process."
+    )
+
+
+def solo_self_refine_user_prompt(
+    packet_dir: Path,
+    *,
+    turn_index: int,
+    objective: str,
+    previous_outputs: list[dict[str, str]],
+) -> str:
+    previous_block = "\n\n".join(
+        f"Prior pass {item['turn_index']} ({item['role']}):\n{item['text']}" for item in previous_outputs
+    )
+    if not previous_block:
+        previous_block = "No prior draft."
+    final_line = final_artifact_instruction() if turn_index == EXPECTED_TURN_COUNT else "This is an intermediate self-refinement pass, not the final artifact."
+    return (
+        f"{model_visible_payload(packet_dir)}\n\n"
+        f"SELF-REFINE PASS {turn_index} OF {EXPECTED_TURN_COUNT}\n"
+        "====================\n"
+        f"{objective}\n\n"
+        f"PRIOR DRAFT / REVISION HISTORY\n==============================\n{previous_block}\n\n"
+        f"{final_line}"
     )
 
 
@@ -524,8 +651,7 @@ def holo_synthesis_user_prompt(packet_dir: Path, reviewer_notes: list[dict[str, 
         f"{model_visible_payload(packet_dir)}\n\n"
         "REVIEWER NOTES\n==============\n"
         f"{notes}\n\n"
-        "Synthesize the final 900-1,300 word crisis brief only. Include the required disclaimer. "
-        "Do not include process notes, metadata, or hidden analysis."
+        f"Synthesize the final crisis brief only. {final_artifact_instruction()} Include the required disclaimer."
     )
 
 
@@ -647,7 +773,7 @@ def role_compliance(text: str, *, final: bool = False) -> dict[str, str]:
     if not text.strip():
         status = "fail"
         evidence = "empty_output"
-    elif final and not (900 <= word_count(text) <= 1300):
+    elif final and not (FINAL_WORD_MIN <= word_count(text) <= FINAL_WORD_MAX):
         status = "fail"
         evidence = f"word_count:{word_count(text)}"
     elif not has_source_ref:
@@ -687,6 +813,8 @@ def live_state_payload(
             "use only frozen packet sources",
             "do not browse",
             "main artifact body must be 900-1300 words",
+            "target final artifact body length is 1100 words",
+            "if a draft exceeds 1300 body words, revise shorter before final answer",
             "do not overclaim capacity solution, FDA approval, or clinical proof",
             "architecture evidence is not judge-visible",
         ],
@@ -857,6 +985,7 @@ def write_live_metadata(
     write_json(condition_dir / "deterministic_gate_precheck.json", gate)
     metadata = {
         "runner_id": RUNNER_ID,
+        "run_mode": RUN_MODE,
         "run_id": run_id,
         "condition": condition,
         "condition_label": CONDITION_LABELS[condition],
@@ -874,6 +1003,8 @@ def write_live_metadata(
         "artifact_written": True,
         "artifact_sha256": sha_text(artifact_text),
         "artifact_word_count": word_count(artifact_text),
+        "expected_turn_count": EXPECTED_TURN_COUNT,
+        "final_word_target": FINAL_WORD_TARGET,
         "deterministic_gate_precheck_path": str(condition_dir / "deterministic_gate_precheck.json"),
         "deterministic_gate_status": gate["deterministic_gate_status"],
         "architecture_evidence_path": str(arch_evidence_path) if arch_evidence_path else None,
@@ -889,28 +1020,43 @@ def run_live_solo(packet_dir: Path, run_id: str, timeout: int) -> dict[str, Any]
     condition = "solo_openai_gpt_5_5"
     condition_dir = packet_dir / "runs" / run_id / condition
     condition_dir.mkdir(parents=True, exist_ok=True)
+    traces: list[dict[str, Any]] = []
+    prior_outputs: list[dict[str, str]] = []
+    final_text = ""
     artifact_path = condition_dir / "artifact.md"
-    text, trace = call_live_model(
-        condition_dir,
-        provider_model_name=SOLO_PROVIDER_MODEL,
-        system=solo_system_prompt(),
-        user=solo_user_prompt(packet_dir),
-        max_tokens=5200,
-        timeout=timeout,
-        call_type="solo_final_artifact",
-        role="single_model_crisis_brief_author",
-        turn_index=1,
-        call_id="solo_final_artifact",
-        artifact_path=artifact_path,
-    )
+    for turn_index, turn in enumerate(SOLO_SELF_REFINE_TURNS, start=1):
+        is_final = turn_index == EXPECTED_TURN_COUNT
+        output_path = artifact_path if is_final else condition_dir / "turn_artifacts" / f"turn_{turn_index:03d}.md"
+        text, trace = call_live_model(
+            condition_dir,
+            provider_model_name=SOLO_PROVIDER_MODEL,
+            system=solo_self_refine_system_prompt(turn["role"]),
+            user=solo_self_refine_user_prompt(
+                packet_dir,
+                turn_index=turn_index,
+                objective=turn["objective"],
+                previous_outputs=prior_outputs,
+            ),
+            max_tokens=int(turn["max_tokens"]),
+            timeout=timeout,
+            call_type="solo_self_refine_final" if is_final else "solo_self_refine_turn",
+            role=turn["role"],
+            turn_index=turn_index,
+            call_id="solo_final_artifact" if is_final else f"solo_turn_{turn_index:03d}",
+            artifact_path=output_path,
+        )
+        traces.append(trace)
+        prior_outputs.append({"turn_index": str(turn_index), "role": turn["role"], "text": excerpt(text, 3000)})
+        if is_final:
+            final_text = text
     metadata = write_live_metadata(
         packet_dir=packet_dir,
         condition_dir=condition_dir,
         run_id=run_id,
         condition=condition,
-        artifact_text=text,
-        provider_models=[SOLO_PROVIDER_MODEL],
-        traces=[trace],
+        artifact_text=final_text,
+        provider_models=[SOLO_PROVIDER_MODEL for _ in SOLO_SELF_REFINE_TURNS],
+        traces=traces,
         arch_evidence_path=None,
     )
     return {
@@ -921,7 +1067,7 @@ def run_live_solo(packet_dir: Path, run_id: str, timeout: int) -> dict[str, Any]
         "artifact_sha256": metadata["artifact_sha256"],
         "deterministic_gate_precheck": metadata["deterministic_gate_status"],
         "architecture_evidence_status": "not_applicable",
-        "provider_calls": len([trace]),
+        "provider_calls": len(traces),
     }
 
 
@@ -1038,7 +1184,7 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
         provider_model_name=HOLO_SYNTHESIS_MODEL,
         system=holo_synthesis_system_prompt(),
         user=holo_synthesis_user_prompt(packet_dir, reviewer_notes),
-        max_tokens=5200,
+        max_tokens=3400,
         timeout=timeout,
         call_type="holo_final_synthesis",
         role="final_synthesis_author",
@@ -1069,7 +1215,7 @@ def run_live_holobuild(packet_dir: Path, run_id: str, timeout: int) -> dict[str,
             "synthesis_trigger": {"triggered": True, "reason": "final_synthesis_turn_completed"},
             "token_budget_partial_injection_flags": {
                 "present": True,
-                "token_budget_limit": 5200,
+                "token_budget_limit": 3400,
                 "tokens_used": int(final_trace.get("output_tokens") or 0),
                 "partial_injection_used": False,
                 "partial_injection_reason": None,
@@ -1136,6 +1282,8 @@ def write_condition_smoke(packet_dir: Path, run_id: str, condition: str) -> dict
         "frozen_source_packet_hash": source_packet_hash,
         "artifact_path": str(condition_dir / "artifact.md"),
         "artifact_written": False,
+        "expected_turn_count": EXPECTED_TURN_COUNT,
+        "final_word_target": FINAL_WORD_TARGET,
         "deterministic_gate_precheck_path": str(condition_dir / "deterministic_gate_precheck.json"),
         "architecture_evidence_path": str(condition_dir / "arch_evidence.json") if condition == "holo_build_arch" else None,
     }
@@ -1174,6 +1322,7 @@ def update_run_manifest(packet_dir: Path, run_id: str, condition_results: list[d
         existing[item["condition"]] = item
     manifest = {
         "runner_id": RUNNER_ID,
+        "run_mode": RUN_MODE,
         "run_id": run_id,
         "status": "NO_PROVIDER_SMOKE_READY",
         "updated_at_utc": utc_iso(),
@@ -1186,6 +1335,8 @@ def update_run_manifest(packet_dir: Path, run_id: str, condition_results: list[d
         "live_mode_fail_closed": True,
         "live_requires_flag": "--live",
         "live_requires_env": f"{LIVE_APPROVAL_ENV}=1",
+        "expected_turn_count_per_condition": EXPECTED_TURN_COUNT,
+        "final_word_target": FINAL_WORD_TARGET,
     }
     write_json(manifest_path, manifest)
     return manifest
@@ -1202,6 +1353,7 @@ def update_live_run_manifest(packet_dir: Path, run_id: str, condition_results: l
         existing[item["condition"]] = item
     manifest = {
         "runner_id": RUNNER_ID,
+        "run_mode": RUN_MODE,
         "run_id": run_id,
         "status": "LIVE_GENERATION_COMPLETE",
         "updated_at_utc": utc_iso(),
@@ -1215,6 +1367,8 @@ def update_live_run_manifest(packet_dir: Path, run_id: str, condition_results: l
         "live_requires_flag": "--live",
         "live_requires_env": f"{LIVE_APPROVAL_ENV}=1",
         "blind_export_ready_after_artifacts": set(existing) >= set(VALID_CONDITIONS),
+        "expected_turn_count_per_condition": EXPECTED_TURN_COUNT,
+        "final_word_target": FINAL_WORD_TARGET,
     }
     write_json(manifest_path, manifest)
     return manifest

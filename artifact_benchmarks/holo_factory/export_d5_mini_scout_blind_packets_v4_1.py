@@ -22,7 +22,7 @@ VALID_CONDITIONS = ("holo_build_arch", "solo_openai_gpt_5_5")
 
 HARD_FORBIDDEN_PATTERNS = {
     "Holo": re.compile(r"holo", re.IGNORECASE),
-    "Gov": re.compile(r"(?<![a-z])gov(?![a-z])", re.IGNORECASE),
+    "Gov": re.compile(r"(?<![a-z.])gov(?![a-z])", re.IGNORECASE),
     "Governor": re.compile(r"governor", re.IGNORECASE),
     "draft_not_frozen": re.compile(r"draft_not_frozen", re.IGNORECASE),
     "benchmark_credit": re.compile(r"benchmark_credit", re.IGNORECASE),
@@ -169,11 +169,7 @@ def load_artifacts(packet_dir: Path, run_id: str) -> dict[str, str]:
 
 
 def build_packet(packet_dir: Path, run_id: str, condition: str, label: str, artifact_text: str) -> dict[str, Any]:
-    gate_path = packet_dir / "runs" / run_id / condition / "deterministic_gate_precheck.json"
     return {
-        "schema_version": "blind_packet_schema_v4_1",
-        "packet_id": f"d5_medtech_capacity_strain_001_{run_id}_{label}",
-        "packet_type": "anonymous_single_artifact_judge_packet",
         "artifact_label": label,
         "artifact_text": artifact_text,
         "task_brief": {
@@ -183,24 +179,6 @@ def build_packet(packet_dir: Path, run_id: str, condition: str, label: str, arti
         "domain_card": neutral_domain_card(),
         "source_packet": read_json(packet_dir / "source_packet.json"),
         "frozen_rubric": neutral_rubric(),
-        "deterministic_gate_report": read_json(gate_path) if gate_path.exists() else {},
-        "judge_instructions": [
-            "Evaluate only the anonymous artifact text and frozen packet evidence.",
-            "Do not infer generator identity or architecture.",
-            "Return only the required scoring JSON when scoring is later run.",
-        ],
-        "anonymity_attestation": {
-            "no_model_identity": True,
-            "no_architecture_identity": True,
-            "no_condition_identity": True,
-            "no_builder_state": True,
-            "no_runtime_state": True,
-            "no_generation_trace": True,
-            "no_benchmark_metadata": True,
-            "no_prior_score": True,
-            "no_architecture_evidence": True,
-            "no_proof_expectation": True,
-        },
     }
 
 

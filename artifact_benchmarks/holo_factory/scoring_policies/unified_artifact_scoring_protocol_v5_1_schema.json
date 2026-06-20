@@ -1,0 +1,454 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Unified Artifact Scoring Protocol v5.1 Judge Output Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_id",
+    "judge_id",
+    "source_packet_present",
+    "artifact_scores",
+    "pairwise_comparative_consistency",
+    "ranking_score_consistency_check",
+    "overall_rationale"
+  ],
+  "properties": {
+    "protocol_id": {
+      "const": "unified_artifact_scoring_protocol_v5_1"
+    },
+    "judge_id": {
+      "type": "string"
+    },
+    "source_packet_present": {
+      "type": "boolean"
+    },
+    "artifact_scores": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/definitions/artifact_score"
+      }
+    },
+    "pairwise_comparative_consistency": {
+      "$ref": "#/definitions/pairwise"
+    },
+    "ranking_score_consistency_check": {
+      "type": "string"
+    },
+    "overall_rationale": {
+      "type": "string"
+    },
+    "raw_judge_text": {
+      "type": "string"
+    }
+  },
+  "definitions": {
+    "cap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cap_id",
+        "max_score_100",
+        "evidence"
+      ],
+      "properties": {
+        "cap_id": {
+          "type": "string"
+        },
+        "max_score_100": {
+          "type": "number"
+        },
+        "evidence": {
+          "type": "string"
+        }
+      }
+    },
+    "ceiling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ceiling_id",
+        "max_score_100",
+        "reason"
+      ],
+      "properties": {
+        "ceiling_id": {
+          "type": "string"
+        },
+        "max_score_100": {
+          "type": "number"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "artifact_score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_label",
+        "admission_status",
+        "raw_evidence_score_100",
+        "applicable_hard_caps",
+        "applicable_expert_ceilings",
+        "final_score_100",
+        "final_score_10",
+        "ceiling_band",
+        "passes_source_fidelity_gate",
+        "passes_source_to_claim_traceability_gate",
+        "passes_decision_logic_gate",
+        "passes_operational_specificity_gate",
+        "passes_uncertainty_gate",
+        "passes_contradiction_negative_space_gate",
+        "passes_risk_suppression_gate",
+        "passes_expert_review_gate",
+        "source_fidelity_score_15",
+        "source_to_claim_traceability_score_10",
+        "contradiction_handling_score_10",
+        "uncertainty_limitations_score_10",
+        "data_stat_chart_score_8",
+        "decision_usefulness_score_12",
+        "operational_actionability_score_10",
+        "risk_suppression_blindspot_score_15",
+        "expert_review_survivability_score_10",
+        "hallucination_resistance_findings",
+        "source_boundary_findings",
+        "blindspots_caught",
+        "blindspots_missed",
+        "tempting_but_rejected_claims",
+        "overclaim_risks_suppressed",
+        "unsupported_or_weak_claims",
+        "avoided_failure_modes",
+        "expert_review_survivability_rationale",
+        "why_not_100",
+        "weakest_source_to_claim_link",
+        "missing_or_underdeveloped_caveat",
+        "unresolved_uncertainty",
+        "biggest_overclaim_risk",
+        "risk_if_leader_relied_on_it",
+        "expert_reviewer_challenge",
+        "needed_to_move_above_83",
+        "needed_to_move_above_90",
+        "needed_to_move_above_95",
+        "material_repairs_required",
+        "most_dangerous_failure_if_relied_on",
+        "required_repairs_to_clear_next_band"
+      ],
+      "properties": {
+        "artifact_label": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003"
+          ]
+        },
+        "admission_status": {
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "raw_evidence_score_100": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "applicable_hard_caps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cap"
+          }
+        },
+        "applicable_expert_ceilings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ceiling"
+          }
+        },
+        "final_score_100": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "final_score_10": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "ceiling_band": {
+          "enum": [
+            "0_69_unreliable",
+            "70_82_competent_not_decision_grade",
+            "83_ceiling_gate_failure",
+            "84_89_decision_useful",
+            "90_94_expert_survivable",
+            "95_100_expert_ready"
+          ]
+        },
+        "passes_source_fidelity_gate": {
+          "type": "boolean"
+        },
+        "passes_source_to_claim_traceability_gate": {
+          "type": "boolean"
+        },
+        "passes_decision_logic_gate": {
+          "type": "boolean"
+        },
+        "passes_operational_specificity_gate": {
+          "type": "boolean"
+        },
+        "passes_uncertainty_gate": {
+          "type": "boolean"
+        },
+        "passes_contradiction_negative_space_gate": {
+          "type": "boolean"
+        },
+        "passes_risk_suppression_gate": {
+          "type": "boolean"
+        },
+        "passes_expert_review_gate": {
+          "type": "boolean"
+        },
+        "source_fidelity_score_15": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "source_to_claim_traceability_score_10": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "contradiction_handling_score_10": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "uncertainty_limitations_score_10": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "data_stat_chart_score_8": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "decision_usefulness_score_12": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 12
+        },
+        "operational_actionability_score_10": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "risk_suppression_blindspot_score_15": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "expert_review_survivability_score_10": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "hallucination_resistance_findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_boundary_findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blindspots_caught": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blindspots_missed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tempting_but_rejected_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "overclaim_risks_suppressed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unsupported_or_weak_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "avoided_failure_modes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "material_repairs_required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expert_review_survivability_rationale": {
+          "type": "string"
+        },
+        "why_not_100": {
+          "type": "string"
+        },
+        "weakest_source_to_claim_link": {
+          "type": "string"
+        },
+        "missing_or_underdeveloped_caveat": {
+          "type": "string"
+        },
+        "unresolved_uncertainty": {
+          "type": "string"
+        },
+        "biggest_overclaim_risk": {
+          "type": "string"
+        },
+        "risk_if_leader_relied_on_it": {
+          "type": "string"
+        },
+        "expert_reviewer_challenge": {
+          "type": "string"
+        },
+        "needed_to_move_above_83": {
+          "type": "string"
+        },
+        "needed_to_move_above_90": {
+          "type": "string"
+        },
+        "needed_to_move_above_95": {
+          "type": "string"
+        },
+        "most_dangerous_failure_if_relied_on": {
+          "type": "string"
+        },
+        "required_repairs_to_clear_next_band": {
+          "type": "string"
+        }
+      }
+    },
+    "pairwise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "more_source_faithful",
+        "more_decision_useful",
+        "safer_to_rely_on",
+        "better_uncertainty_handling",
+        "better_contradiction_handling",
+        "better_blindspot_detection",
+        "better_hallucination_resistance",
+        "better_overclaim_suppression",
+        "more_operationally_actionable",
+        "more_expert_survivable",
+        "overall_winner",
+        "numeric_pairwise_consistency_rationale"
+      ],
+      "properties": {
+        "more_source_faithful": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "more_decision_useful": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "safer_to_rely_on": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "better_uncertainty_handling": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "better_contradiction_handling": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "better_blindspot_detection": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "better_hallucination_resistance": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "better_overclaim_suppression": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "more_operationally_actionable": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "more_expert_survivable": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "overall_winner": {
+          "enum": [
+            "ARTIFACT_001",
+            "ARTIFACT_003",
+            "TIE"
+          ]
+        },
+        "numeric_pairwise_consistency_rationale": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

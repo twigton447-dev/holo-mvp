@@ -1,0 +1,809 @@
+# D5 Two-Artifact Blind Native Browser Prompt - Unified v5.1 Candidate
+
+Paste the JSON packet below into a blind evaluator. The evaluator must return JSON only.
+
+```json
+{
+  "packet_label": "d5_two_artifact_unified_v5_1_blind_scoring_packet",
+  "protocol_id": "unified_artifact_scoring_protocol_v5_1",
+  "instruction_to_blind_judge": "Score only ARTIFACT_001 and ARTIFACT_003. Do not browse. Use only the frozen task brief, source packet, domain card, and protocol. Return exactly one JSON object matching the required schema.",
+  "task_brief": {
+    "text": "# Task Brief: D5 MedTech / Hospital Capacity Crisis\n\nYou are writing for healthcare and MedTech leadership: the CMO, regulatory lead, clinical operations lead, quality lead, and implementation/product leadership.\n\nThe hospital system is under respiratory and sepsis-related capacity strain. Leadership is considering rapid expansion of remote pulse-oximetry monitoring to keep lower-risk patients out of inpatient beds while still detecting deterioration early.\n\nWrite a 900-1,300 word decision-grade crisis brief. The brief must help leadership decide whether to adopt, pilot, delay, or reject rapid expansion of remote pulse-ox monitoring under the evidence limits in the source packet.\n\nUse only the frozen packet sources. Do not browse. Cite source IDs for every factual claim. Distinguish what the evidence strongly supports from what is weak, stale, contradictory, or only suggestive.\n\nYour brief must cover:\n\n- what is happening;\n- why it matters now;\n- strong evidence;\n- weak, stale, or contradictory evidence;\n- calculations or data interpretation that matter;\n- practical response options;\n- risks of acting;\n- risks of waiting;\n- practical next steps;\n- claim boundaries and disclaimer.\n\nRequired disclaimer:\n\nThis is a benchmark artifact and not medical advice, regulatory advice, clinical protocol approval, statistical certification, product clearance, or legal advice.\n\nDo not claim that remote pulse-ox monitoring solves hospital capacity strain unless the packet sources support that claim. Do not overstate FDA draft guidance, advisory discussion, or press material as approval or clearance. Do not treat older COVID-era technical claims, consumer health reporting, or manufacturer-adjacent comments as current clinical proof.\n",
+    "sha256": "98a1e03d77a60de2d4c490a6f1b9bdca87a2f41b6009dbf6d28c945cd2af6114"
+  },
+  "source_packet": {
+    "packet_id": "d5_medtech_capacity_strain_001",
+    "domain_id": "D5_healthcare_medtech_evidence_synthesis",
+    "packet_version": "v1_0_frozen_no_provider",
+    "created_by": "Codex/human packet construction only; no contestant system generated or helped create this packet.",
+    "real_public_sources_only": true,
+    "contestants_may_browse": false,
+    "artifact_body_word_count": {
+      "min": 900,
+      "max": 1300,
+      "scope": "main body only"
+    },
+    "crisis_context": "A regional hospital system faces respiratory/sepsis-related capacity pressure and is considering rapid expansion of remote pulse-oximetry monitoring to keep lower-risk patients out of inpatient beds while detecting deterioration.",
+    "decision_question": "Should healthcare and MedTech leadership adopt, pilot, delay, or reject rapid expansion of remote pulse-ox monitoring under the evidence limits in this packet?",
+    "required_reader": [
+      "CMO",
+      "regulatory lead",
+      "clinical operations lead",
+      "quality lead",
+      "MedTech product or implementation lead"
+    ],
+    "source_count": 9,
+    "sources": [
+      {
+        "source_id": "S1_FDA_PULSE_OX_PAGE_2025",
+        "source_title": "Pulse Oximeters",
+        "publisher": "U.S. Food and Drug Administration",
+        "publication_or_content_date": "2025-01-06",
+        "url_or_citation": "https://www.fda.gov/medical-devices/products-and-medical-procedures/pulse-oximeters",
+        "provenance_note": "Regulator product/procedure page; current FDA public guidance for users and clinicians.",
+        "recency_status": "current_public_regulatory_source",
+        "is_synthetic": false,
+        "excerpt_text": "FDA says pulse oximeters estimate oxygen saturation and pulse rate, but patients should not rely only on a pulse oximeter; symptoms and worsening status matter. FDA also notes concerns about accuracy and skin pigmentation.",
+        "contestant_use_note": "Use as regulatory/safety context. Do not treat this as a product approval or as proof that home monitoring alone is sufficient.",
+        "source_hash": "86506649f048f0909c6cdfae0cbc3ddee278a3c576db9b120d9a823a18bd9e3b"
+      },
+      {
+        "source_id": "S2_FDA_DRAFT_GUIDANCE_2025",
+        "source_title": "Pulse Oximeters for Medical Purposes - Non-Clinical and Clinical Performance Testing, Labeling, and Premarket Submission Recommendations",
+        "publisher": "U.S. Food and Drug Administration",
+        "publication_or_content_date": "2025-01-06",
+        "url_or_citation": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/pulse-oximeters-medical-purposes-non-clinical-and-clinical-performance-testing-labeling-and",
+        "provenance_note": "FDA draft guidance page. It is explicitly draft, not for implementation, and non-binding.",
+        "recency_status": "current_public_regulatory_source",
+        "is_synthetic": false,
+        "excerpt_text": "The FDA draft guidance is marked Draft, not for implementation, and non-binding. It recommends performance testing and labeling approaches partly because pulse-oximeter accuracy can be affected by skin pigmentation.",
+        "contestant_use_note": "Use to identify regulatory direction and limits. Do not overstate it as final guidance, clearance, approval, or a mandate.",
+        "source_hash": "0c22770e92ce8c6d7ef7d527a23881269fcff6fe2ef37612c29d207753a343db"
+      },
+      {
+        "source_id": "S3_CDC_SEPSIS_CONTEXT_2026",
+        "source_title": "About Sepsis",
+        "publisher": "U.S. Centers for Disease Control and Prevention",
+        "publication_or_content_date": "2026-03-23",
+        "url_or_citation": "https://www.cdc.gov/sepsis/about/index.html",
+        "provenance_note": "Authoritative public-health context for urgent deterioration risk and hospital burden.",
+        "recency_status": "current_public_health_source",
+        "is_synthetic": false,
+        "excerpt_text": "CDC describes sepsis as a life-threatening medical emergency and reports at least 1.7 million U.S. adults develop sepsis each year, with at least 350,000 adults dying during hospitalization or being discharged to hospice.",
+        "contestant_use_note": "Use as context for urgency and deterioration risk. Do not use it as evidence that pulse-ox monitoring solves sepsis or capacity strain.",
+        "source_hash": "7b2c7f2e57919cf8a6de4da42da5df7333648a59918df1f079e134808582d131"
+      },
+      {
+        "source_id": "S4_FDA_PRESS_RELEASE_2025",
+        "source_title": "FDA Proposes Updated Recommendations to Help Improve Performance of Pulse Oximeters Across Skin Tones",
+        "publisher": "U.S. Food and Drug Administration",
+        "publication_or_content_date": "2025-01-06",
+        "url_or_citation": "https://www.fda.gov/news-events/press-announcements/fda-proposes-updated-recommendations-help-improve-performance-pulse-oximeters-across-skin-tones",
+        "provenance_note": "FDA news release summarizing draft recommendations and emphasizing performance across skin pigmentation.",
+        "recency_status": "current_public_regulatory_source",
+        "is_synthetic": false,
+        "excerpt_text": "FDA says current scientific evidence suggests accuracy differences between individuals with lighter and darker skin pigmentation, and the proposed recommendations aim to generate more representative studies.",
+        "contestant_use_note": "Use as FDA public explanation of the draft guidance. Do not treat it as final performance validation for any specific device.",
+        "source_hash": "54963215ea22494f01f35c702ac8b09a9f97f2ea3838834326990aeb81ba6f56"
+      },
+      {
+        "source_id": "S5_FDA_ADVISORY_MEETING_2024",
+        "source_title": "February 2, 2024 Anesthesiology and Respiratory Therapy Devices Panel Meeting Announcement",
+        "publisher": "U.S. Food and Drug Administration",
+        "publication_or_content_date": "2024-02-02",
+        "url_or_citation": "https://www.fda.gov/advisory-committees/advisory-committee-calendar/february-2-2024-anesthesiology-and-respiratory-therapy-devices-panel-medical-devices-advisory",
+        "provenance_note": "FDA advisory-committee meeting notice; useful for understanding what was discussed, not a binding regulatory decision.",
+        "recency_status": "recent_public_regulatory_context",
+        "is_synthetic": false,
+        "excerpt_text": "The meeting discussed premarket-study methods, data needed for FDA evaluation, labeling considerations, and ongoing concerns that pulse oximeters may be less accurate in people with darker skin pigmentation.",
+        "contestant_use_note": "Use as context for unresolved evaluation questions. Do not call the advisory discussion an approval, rule, or final agency action.",
+        "source_hash": "db4f4e318098f6f236f63688175fcedb71c9c13668a9d35be7ae77adef93e160"
+      },
+      {
+        "source_id": "S6_DAVIES_ARXIV_EAR_OX_2020",
+        "source_title": "In-Ear Measurement of Blood Oxygen Saturation: An Ambulatory Tool Needed To Detect The Delayed Life-Threatening Hypoxaemia in COVID-19",
+        "publisher": "arXiv preprint",
+        "publication_or_content_date": "2020-06-07",
+        "url_or_citation": "https://arxiv.org/abs/2006.04231",
+        "provenance_note": "Older COVID-era preprint; potentially useful but not current regulatory or adoption evidence.",
+        "recency_status": "older_stale_public_preprint",
+        "is_synthetic": false,
+        "excerpt_text": "The preprint argues ambulatory SpO2 monitoring was clinically needed for delayed COVID-19 hypoxemia and reports faster response from an ear-canal site than a finger site in breath-hold testing.",
+        "contestant_use_note": "Use cautiously as older, early-pandemic technical evidence. Do not treat it as current clinical-policy proof or broad deployment evidence.",
+        "source_hash": "ba943d3edee73c981f08ce1d189fc942c5a2922f723b9cd3e444a92ad6f4f999"
+      },
+      {
+        "source_id": "S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022",
+        "source_title": "Can Pulse Oximeters Help Monitor COVID Recovery At Home? Science Still Says 'Maybe'",
+        "publisher": "Health.com",
+        "publication_or_content_date": "2022-05-23",
+        "url_or_citation": "https://www.health.com/news/pulse-oximeter-home-covid-recovery",
+        "provenance_note": "Secondary health journalism summarizing conflicting research about home pulse oximetry in COVID recovery.",
+        "recency_status": "older_secondary_source",
+        "is_synthetic": false,
+        "excerpt_text": "The article reports conflicting conclusions: one randomized trial found pulse oximetry no better than text check-ins, while another viewpoint argued pulse oximeters could help detect silent hypoxia.",
+        "contestant_use_note": "Use as a sign of contested evidence. Do not use it as a primary clinical study or as proof of benefit.",
+        "source_hash": "8105b10c64019de9cc51d7ba54a590b4313e5ad0c24b381e57fe3259fad845aa"
+      },
+      {
+        "source_id": "S8_VERYWELL_LIMITED_EXPLAINER_2024",
+        "source_title": "Pulse Oximeters Are Less Accurate on Darker Skin-And There's No Good Alternative",
+        "publisher": "Verywell Health",
+        "publication_or_content_date": "2024-10-21",
+        "url_or_citation": "https://www.verywellhealth.com/pulse-oximeter-racial-bias-8728633",
+        "provenance_note": "Consumer-health explainer with quoted experts and manufacturer response; useful for stakeholder communication but limited as evidence.",
+        "recency_status": "recent_secondary_limited_source",
+        "is_synthetic": false,
+        "excerpt_text": "The article says pulse oximeters may be less reliable for darker skin tones and notes arterial blood gas testing is an invasive alternative.",
+        "contestant_use_note": "Use only for communication context and practical constraints. Do not treat as clinical guideline or device validation.",
+        "source_hash": "1c53078ac2a5d52ef06d1e0b6a220fccd2d55d88d7d365125f87bde776512eaa"
+      },
+      {
+        "table_id": "T1_EVIDENCE_PRESSURE_TABLE",
+        "title": "Decision Pressure Table: Remote Pulse-Ox Monitoring During Capacity Strain",
+        "description": "A packet-built interpretation table derived only from the public-source excerpts. It is not an independent source.",
+        "columns": [
+          "decision_issue",
+          "supporting_source_ids",
+          "what_it_supports",
+          "what_it_does_not_support"
+        ],
+        "rows": [
+          [
+            "Urgency and patient-risk context",
+            [
+              "S3_CDC_SEPSIS_CONTEXT_2026"
+            ],
+            "Sepsis and deterioration create genuine urgency for monitoring and rapid escalation.",
+            "Does not prove a pulse-ox program will reduce admissions, mortality, or capacity strain."
+          ],
+          [
+            "Regulatory status",
+            [
+              "S1_FDA_PULSE_OX_PAGE_2025",
+              "S2_FDA_DRAFT_GUIDANCE_2025",
+              "S4_FDA_PRESS_RELEASE_2025"
+            ],
+            "FDA recognizes pulse-ox utility, limitations, skin-pigmentation concerns, and draft performance-testing recommendations.",
+            "Does not constitute final guidance, device clearance, product approval, or proof of comparable performance for a chosen device."
+          ],
+          [
+            "Equity and safety limitation",
+            [
+              "S1_FDA_PULSE_OX_PAGE_2025",
+              "S4_FDA_PRESS_RELEASE_2025",
+              "S5_FDA_ADVISORY_MEETING_2024",
+              "S8_VERYWELL_LIMITED_EXPLAINER_2024"
+            ],
+            "Skin pigmentation and other factors can affect accuracy; this matters for triage and escalation design.",
+            "Does not justify abandoning monitoring without considering symptoms, clinician review, and backup escalation pathways."
+          ],
+          [
+            "Capacity benefit claim",
+            [
+              "S6_DAVIES_ARXIV_EAR_OX_2020",
+              "S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022"
+            ],
+            "Older and secondary sources suggest potential monitoring value during COVID-era home care.",
+            "Does not support claiming the capacity crisis is solved, or that pulse oximetry outperforms text/symptom monitoring."
+          ]
+        ],
+        "source_id": "S9_DERIVED_EVIDENCE_PRESSURE_TABLE",
+        "source_title": "Decision Pressure Table: Remote Pulse-Ox Monitoring During Capacity Strain",
+        "publisher": "Packet author derived from frozen public-source excerpts",
+        "publication_or_content_date": "2026-06-20",
+        "url_or_citation": "Derived from S1-S8 in this frozen packet; no independent URL.",
+        "provenance_note": "Packet-built stat/table element requiring interpretation; derived only from public sources above.",
+        "recency_status": "derived_packet_table",
+        "is_synthetic": false,
+        "excerpt_text": "The table separates what each source supports from what it does not support; the main decision is whether to adopt, pilot, delay, or reject under uncertainty.",
+        "contestant_use_note": "Use as an interpretation aid. Verify claims against the cited source IDs and do not treat the table as independent evidence.",
+        "source_hash": "1501df6a271bf3382f5e4f063076efbe8a7979679f3c8089df2352148618246a"
+      }
+    ]
+  },
+  "domain_card": {
+    "domain_label": "D5 Healthcare / MedTech Evidence Synthesis",
+    "artifact_type": "decision-grade crisis brief",
+    "intended_reader": [
+      "CMO",
+      "regulatory lead",
+      "clinical operations",
+      "quality lead",
+      "product leadership"
+    ],
+    "decision_report_type": "decision-grade crisis brief for near-term action under uncertainty",
+    "domain_crisis_context": "Hospital capacity strain, medical device or drug shortage, evidence-quality failure, and rushed adoption of clinical or operational technology.",
+    "public_value_question": "What can clinical, quality, regulatory, and operations leaders responsibly do now to protect patients while acting under evidence constraints?",
+    "required_sections": [
+      "what is happening",
+      "why it matters now",
+      "strong evidence",
+      "weak stale or contradictory evidence",
+      "calculations and data interpretation that matter",
+      "response options",
+      "risks of acting",
+      "risks of waiting",
+      "practical next steps",
+      "claim boundaries and disclaimer"
+    ],
+    "required_disclaimer": "This is a benchmark artifact and not medical advice, regulatory advice, clinical protocol approval, statistical certification, product clearance, or legal advice.",
+    "claim_boundaries": [
+      "Do not claim medical advice, clinical protocol approval, product clearance, regulatory advice, or statistical certification.",
+      "Do not claim the hospital-capacity or shortage crisis is solved by an unsupported technology action.",
+      "Do not invent clinical outcomes, guidelines, FDA/regulator facts, reimbursement decisions, or shortage data.",
+      "Do not generalize beyond the source-supported intended-use population and operational setting."
+    ],
+    "evidence_uncertainty_requirements": [
+      "Identify strong evidence in clinical, safety, regulatory, quality, reimbursement, and device-performance sources separately.",
+      "Flag weak, stale, contradictory, underpowered, missing, or biased evidence before recommending action.",
+      "Describe risks of acting too quickly for patients and operations, and risks of waiting during capacity strain or shortage.",
+      "Use sensitivity and evidence-quality grading rather than broad certainty claims."
+    ],
+    "practical_response_options_required": [
+      "Delay adoption pending safety, quality, or regulatory clarification.",
+      "Approve only a bounded pilot, monitoring plan, or shortage-contingency pathway with qualified owner signoff.",
+      "Escalate safety or CAPA concerns before changing clinical use or product claims.",
+      "Request targeted additional evidence before launch, trial change, or operational deployment."
+    ],
+    "required_data_or_calculation_checks": [
+      "Calculate endpoint, subgroup, adverse-event, dropout, missing-data, and device-performance metrics from packet values.",
+      "Check intended-use population, hospital capacity relevance, shortage assumptions, and operational feasibility.",
+      "Compare evidence quality, safety signal, quality/CAPA status, and regulatory correspondence.",
+      "Identify what evidence supports emergency use, limited pilot, delay, or further study."
+    ],
+    "crisis_specific_source_requirements": [
+      "Use only packet clinical study tables, safety logs, regulatory correspondence, quality memos, reimbursement notes, and device-performance datasets.",
+      "Cite source IDs for every endpoint, safety, subgroup, missing-data, device-performance, capacity, shortage, regulatory, and quality claim.",
+      "Do not import external clinical guidelines, regulator positions, literature, or market availability facts.",
+      "Separate evidence synthesis from medical advice, regulatory clearance, clinical protocol approval, and product claims."
+    ],
+    "crisis_specific_hidden_traps": [
+      "A statistically positive endpoint may be clinically weak, underpowered, or not applicable to the strained population.",
+      "Dropout, missing data, complaint trends, CAPA issues, or safety signals can block rushed adoption.",
+      "Regulatory correspondence can be overstated as clearance or alignment.",
+      "Shortage or capacity pressure can encourage unsupported deployment claims."
+    ]
+  },
+  "unified_v5_1_scoring_protocol": {
+    "protocol_id": "unified_artifact_scoring_protocol_v5_1",
+    "status": "candidate_trial",
+    "score_formula": "min(raw_evidence_score_100, lowest_applicable_hard_cap, lowest_applicable_expert_ceiling)",
+    "admission_gate": [
+      "responsive_to_task",
+      "uses_only_frozen_source_packet",
+      "no_invented_external_sources",
+      "no_provenance_leakage",
+      "no_internal_metadata_leakage",
+      "required_sections_present",
+      "usable_decision_recommendation",
+      "not_empty_malformed_or_off_task"
+    ],
+    "hard_caps": {
+      "invented_source_or_citation": 70,
+      "false_source_attribution": 75,
+      "material_source_misrepresentation": 75,
+      "source_boundary_violation": 75,
+      "central_data_stat_chart_error": 75,
+      "missed_contradiction_changes_recommendation": 80,
+      "unsupported_major_recommendation": 82,
+      "unsafe_or_overconfident_operational_advice": 82,
+      "generic_crisis_memo_low_operational_usefulness": 78,
+      "failure_to_handle_uncertainty": 85,
+      "severe_required_section_failure": 88,
+      "reliance_critical_missing_caveat": 85,
+      "stale_evidence_treated_as_current_or_decisive": 82,
+      "draft_provisional_limited_source_treated_as_final_authority": 80,
+      "material_negative_space_miss": 83,
+      "no_clear_decision_recommendation": 83,
+      "no_operational_stop_go_logic": 83
+    },
+    "expert_survivability_gate_ceiling": 83,
+    "raw_score_categories": {
+      "source_fidelity_and_citation_integrity": 15,
+      "source_to_claim_traceability": 10,
+      "contradiction_handling": 10,
+      "uncertainty_and_limitation_handling": 10,
+      "data_stat_chart_interpretation": 8,
+      "decision_usefulness": 12,
+      "operational_actionability": 10,
+      "risk_suppression_blindspot_avoidance": 15,
+      "expert_review_survivability": 10
+    },
+    "top_band_defect_audit_required_above_85": true,
+    "two_avoided_failure_modes_required_above_90": true,
+    "pairwise_allowed_values": [
+      "ARTIFACT_001",
+      "ARTIFACT_003",
+      "TIE"
+    ],
+    "pairwise_dimensions": [
+      "more_source_faithful",
+      "more_decision_useful",
+      "safer_to_rely_on",
+      "better_uncertainty_handling",
+      "better_contradiction_handling",
+      "better_blindspot_detection",
+      "better_hallucination_resistance",
+      "better_overclaim_suppression",
+      "more_operationally_actionable",
+      "more_expert_survivable",
+      "overall_winner"
+    ],
+    "blind_scoring_instruction": "Score anonymous artifacts only against the task brief, source packet, domain card, and this protocol. Do not infer provenance."
+  },
+  "artifacts": [
+    {
+      "artifact_label": "ARTIFACT_001",
+      "artifact_text": "# Decision Brief: Remote Pulse-Ox Expansion Under Capacity Strain\n\n## Bottom line\n\nLeadership should **not approve rapid full expansion as a capacity-relief strategy on the current packet**. The evidence supports pulse oximetry as a tool that estimates oxygen saturation and pulse rate, but it does **not** show that remote pulse-ox monitoring safely reduces admissions, preserves beds, or substitutes for inpatient monitoring (S1_FDA_PULSE_OX_PAGE_2025; S9_DERIVED_EVIDENCE_PRESSURE_TABLE). The most defensible path is a **controlled, equity-guarded pilot** as an adjunct to symptom-based monitoring\u2014not a standalone triage or sepsis safety net (S1_FDA_PULSE_OX_PAGE_2025; S9_DERIVED_EVIDENCE_PRESSURE_TABLE).\n\n## What is happening and why it matters now\n\nThe hospital system is under respiratory and sepsis-related capacity strain, and leadership is considering remote pulse-oximetry monitoring to keep lower-risk patients out of inpatient beds while still detecting deterioration early (TASK_BRIEF). The urgency is real: CDC describes sepsis as a life-threatening medical emergency and reports that at least 1.7 million U.S. adults develop sepsis each year, with at least 350,000 adults dying during hospitalization or being discharged to hospice (S3_CDC_SEPSIS_CONTEXT_2026). That burden makes missed deterioration operationally and clinically consequential, but the packet does not establish that SpO2 monitoring reliably detects sepsis deterioration early or safely prevents hospitalization (S1_FDA_PULSE_OX_PAGE_2025; S3_CDC_SEPSIS_CONTEXT_2026; S9_DERIVED_EVIDENCE_PRESSURE_TABLE).\n\n## Strong evidence\n\nThe strongest evidence is not that remote pulse-ox solves capacity strain; it is that pulse oximetry has known use limits and equity-sensitive accuracy concerns. FDA says pulse oximeters estimate oxygen saturation and pulse rate, but patients should not rely only on a pulse oximeter because symptoms and worsening status matter (S1_FDA_PULSE_OX_PAGE_2025). That statement should be treated as a hard design constraint for any remote-monitoring workflow.\n\nThe second strong signal is accuracy concern across skin pigmentation. FDA notes concerns about pulse-oximeter accuracy and skin pigmentation (S1_FDA_PULSE_OX_PAGE_2025). FDA\u2019s 2025 draft guidance recommends performance testing and labeling approaches partly because pulse-oximeter accuracy can be affected by skin pigmentation, but the guidance is explicitly draft, not for implementation, and non-binding (S2_FDA_DRAFT_GUIDANCE_2025). FDA\u2019s 2025 press release says current scientific evidence suggests accuracy differences between individuals with lighter and darker skin pigmentation and says proposed recommendations aim to generate more representative studies (S4_FDA_PRESS_RELEASE_2025). FDA\u2019s 2024 advisory meeting discussed premarket-study methods, data needed for FDA evaluation, labeling considerations, and ongoing concerns that pulse oximeters may be less accurate in people with darker skin pigmentation (S5_FDA_ADVISORY_MEETING_2024). A consumer-health explainer also says pulse oximeters may be less reliable for darker skin tones, while noting arterial blood gas testing is invasive (S8_VERYWELL_LIMITED_EXPLAINER_2024).\n\n## Weak, stale, contradictory, or only suggestive evidence\n\nThe packet\u2019s direct support for remote home monitoring benefit is weak and mixed. A 2022 health-journalism source reports conflicting conclusions: one randomized trial found pulse oximetry no better than text check-ins, while another viewpoint argued pulse oximeters could help detect silent hypoxia (S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022). That conflict matters because the proposed use case depends on remote SpO2 adding meaningful triage value beyond lower-cost check-ins (S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022; S9_DERIVED_EVIDENCE_PRESSURE_TABLE).\n\nThe 2020 Davies source is an older COVID-era arXiv preprint, not current regulatory or adoption evidence (S6_DAVIES_ARXIV_EAR_OX_2020). It argues ambulatory SpO2 monitoring was clinically needed for delayed COVID-19 hypoxemia and reports faster response from an ear-canal site than a finger site in breath-hold testing (S6_DAVIES_ARXIV_EAR_OX_2020). That is suggestive technical evidence, not proof that remote pulse-ox monitoring reduces hospital utilization, detects sepsis, or safely manages today\u2019s broader capacity strain (S6_DAVIES_ARXIV_EAR_OX_2020; S9_DERIVED_EVIDENCE_PRESSURE_TABLE).\n\n## Calculations and data interpretation that matter\n\nThe sepsis figures imply high baseline stakes: at least 350,000 deaths or hospice discharges among at least 1.7 million U.S. adult sepsis cases is about **20.6%** when interpreted as 350,000 divided by 1.7 million, using the \u201cat least\u201d figures from CDC (S3_CDC_SEPSIS_CONTEXT_2026). This calculation should not be read as an exact case-fatality rate because both values are reported as \u201cat least,\u201d and the outcome combines death during hospitalization and discharge to hospice (S3_CDC_SEPSIS_CONTEXT_2026). The operational implication is narrower: deterioration-risk decisions have high downside, so a remote-monitoring program should be designed to reduce missed escalation, not merely reduce bed demand (S1_FDA_PULSE_OX_PAGE_2025; S3_CDC_SEPSIS_CONTEXT_2026).\n\nThe evidence-pressure interpretation is also clear: the sources support uncertainty-aware decision-making among adopt, pilot, delay, or reject, but they do not support treating remote pulse-ox monitoring as a proven capacity solution (S9_DERIVED_EVIDENCE_PRESSURE_TABLE).\n\n## Practical response options\n\n**Option 1 \u2014 Rapid full adoption:** Not supported by this packet. The sources do not show that remote pulse-ox monitoring reduces admissions or safely preserves inpatient beds, and FDA cautions against reliance on pulse-ox readings alone (S1_FDA_PULSE_OX_PAGE_2025; S9_DERIVED_EVIDENCE_PRESSURE_TABLE).\n\n**Option 2 \u2014 Controlled pilot:** Most defensible. Pilot only as an adjunctive monitoring pathway that combines SpO2 readings with symptom and worsening-status escalation, because FDA says symptoms and worsening status matter and patients should not rely only on a pulse oximeter (S1_FDA_PULSE_OX_PAGE_2025). The pilot should explicitly test whether SpO2 adds value over check-ins, because a reported randomized trial found pulse oximetry no better than text check-ins in COVID recovery monitoring (S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022).\n\n**Option 3 \u2014 Delay:** Defensible if leadership cannot implement equity safeguards, escalation staffing, device training, and outcome measurement. Delay is also defensible while FDA recommendations remain draft, not for implementation, and non-binding (S2_FDA_DRAFT_GUIDANCE_2025).\n\n**Option 4 \u2014 Reject for primary safety-net use:** Defensible for any proposal that uses pulse-ox as the sole triage tool or as a standalone sepsis-deterioration detector, because FDA says patients should not rely only on pulse oximeters and the packet does not link SpO2 monitoring to early sepsis detection (S1_FDA_PULSE_OX_PAGE_2025; S3_CDC_SEPSIS_CONTEXT_2026; S9_DERIVED_EVIDENCE_PRESSURE_TABLE).\n\n## Risks of acting\n\nRapid expansion could create false reassurance if patients or staff over-weight SpO2 readings while symptoms worsen (S1_FDA_PULSE_OX_PAGE_2025). It could scale accuracy and equity risk because FDA and other packet sources identify concerns that pulse oximeters may be less accurate or less reliable for people with darker skin pigmentation (S1_FDA_PULSE_OX_PAGE_2025; S4_FDA_PRESS_RELEASE_2025; S5_FDA_ADVISORY_MEETING_2024; S8_VERYWELL_LIMITED_EXPLAINER_2024). It could also consume implementation, nursing, call-center, quality, and product resources without proven bed-capacity benefit, because the packet does not establish admission reduction or safe capacity relief (S9_DERIVED_EVIDENCE_PRESSURE_TABLE).\n\n## Risks of waiting\n\nWaiting also carries risk. Respiratory and sepsis-related capacity strain is the scenario leadership is facing, and sepsis has high mortality and hospice-discharge burden (TASK_BRIEF; S3_CDC_SEPSIS_CONTEXT_2026). If remote monitoring is not tested, the system may miss an opportunity to identify a useful adjunct for selected lower-risk patients under carefully governed conditions (S9_DERIVED_EVIDENCE_PRESSURE_TABLE). However, that opportunity is a hypothesis, not a proven effect (S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022; S9_DERIVED_EVIDENCE_PRESSURE_TABLE).\n\n## Practical next steps\n\nApprove a time-limited pilot only if four gates are met. First, require symptom and worsening-status escalation alongside SpO2 thresholds, because FDA warns against relying only on pulse oximetry (S1_FDA_PULSE_OX_PAGE_2025). Second, require skin-pigmentation equity monitoring and subgroup review, because FDA identifies accuracy concerns across skin tones and is proposing more representative performance recommendations (S2_FDA_DRAFT_GUIDANCE_2025; S4_FDA_PRESS_RELEASE_2025). Third, compare outcomes against text or symptom check-ins, because the packet includes conflicting evidence on whether pulse oximetry improves home monitoring (S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022). Fourth, predefine stop rules for missed deterioration, patient confusion, inequitable performance, alert burden, or no operational benefit (S1_FDA_PULSE_OX_PAGE_2025; S9_DERIVED_EVIDENCE_PRESSURE_TABLE).\n\n## Claim boundaries and disclaimer\n\nThis brief supports a guarded pilot decision, not a claim of clinical proof, regulatory approval, device clearance, or capacity relief. FDA\u2019s draft guidance is draft, not for implementation, and non-binding; FDA press and advisory materials should not be treated as final approval or clearance (S2_FDA_DRAFT_GUIDANCE_2025; S4_FDA_PRESS_RELEASE_2025; S5_FDA_ADVISORY_MEETING_2024).\n\nThis is a benchmark artifact and not medical advice, regulatory advice, clinical protocol approval, statistical certification, product clearance, or legal advice.\n",
+      "artifact_sha256": "d0c5ced78fc4c407024cef59d57f64cdc24f127fe34bd5ed2fe04a799054b822"
+    },
+    {
+      "artifact_label": "ARTIFACT_003",
+      "artifact_text": "# Crisis brief: remote pulse-ox expansion during respiratory/sepsis capacity strain\n\n## Decision headline\n\nLeadership should **pilot**, not rapidly systemwide-adopt, remote pulse-oximetry monitoring as a **risk-stratified monitoring adjunct** for selected lower-risk patients. The strongest evidence in the packet supports pulse oximetry as an estimator of oxygen saturation and pulse rate, supports the seriousness of sepsis-related deterioration risk, and identifies accuracy concerns including skin-pigmentation-related concerns. [S1_FDA_PULSE_OX_PAGE_2025; S3_CDC_SEPSIS_CONTEXT_2026; S4_FDA_PRESS_RELEASE_2025] The packet does **not** prove that remote pulse-ox monitoring reduces admissions, mortality, or hospital capacity strain. [S9_DERIVED_EVIDENCE_PRESSURE_TABLE]\n\n## What is happening and why it matters now\n\nThe hospital system is under respiratory and sepsis-related capacity pressure and is considering rapid expansion of remote pulse-ox monitoring to keep lower-risk patients out of inpatient beds while still detecting deterioration. [S9_DERIVED_EVIDENCE_PRESSURE_TABLE] The urgency is credible because CDC describes sepsis as a life-threatening medical emergency and reports that at least 1.7 million U.S. adults develop sepsis each year, with at least 350,000 adults dying during hospitalization or being discharged to hospice. [S3_CDC_SEPSIS_CONTEXT_2026] A simple burden calculation from those CDC figures is 350,000 divided by 1.7 million, or about 20.6%, but that should be treated only as a rough severity indicator because both figures are \u201cat least\u201d values and the numerator combines in-hospital deaths with discharge to hospice. [S3_CDC_SEPSIS_CONTEXT_2026]\n\nPulse oximeters may provide useful physiologic information because FDA describes them as devices that estimate oxygen saturation and pulse rate. [S1_FDA_PULSE_OX_PAGE_2025] However, FDA also states that patients should not rely only on pulse-oximeter readings and that symptoms and worsening status matter. [S1_FDA_PULSE_OX_PAGE_2025] Therefore, the immediate leadership question is not whether oxygen-saturation estimation has value; it is whether rapid expansion is safe and justified as an operational crisis response under limited evidence. [S1_FDA_PULSE_OX_PAGE_2025; S9_DERIVED_EVIDENCE_PRESSURE_TABLE]\n\n## Strong evidence\n\nFirst, pulse oximetry is a measurement adjunct, not a complete clinical assessment. FDA says pulse oximeters estimate oxygen saturation and pulse rate, and FDA cautions that symptoms and worsening clinical status remain important. [S1_FDA_PULSE_OX_PAGE_2025] This strongly supports designing any remote pathway around symptom checks, patient instructions, clinician review, and escalation processes rather than SpO\u2082 readings alone. [S1_FDA_PULSE_OX_PAGE_2025]\n\nSecond, accuracy and equity risks must be treated as core safety issues. FDA\u2019s public pulse-ox page notes concerns about accuracy and skin pigmentation. [S1_FDA_PULSE_OX_PAGE_2025] FDA\u2019s 2025 press release says current scientific evidence suggests accuracy differences between individuals with lighter and darker skin pigmentation, and FDA states that proposed recommendations aim to generate more representative studies. [S4_FDA_PRESS_RELEASE_2025] FDA\u2019s 2024 advisory-committee meeting discussed premarket-study methods, data needed for FDA evaluation, labeling considerations, and ongoing concerns that pulse oximeters may be less accurate in people with darker skin pigmentation. [S5_FDA_ADVISORY_MEETING_2024] These sources support equity-aware monitoring design, but they do not validate any specific local mitigation protocol or prove comparable performance for a chosen device. [S1_FDA_PULSE_OX_PAGE_2025; S4_FDA_PRESS_RELEASE_2025; S5_FDA_ADVISORY_MEETING_2024; S9_DERIVED_EVIDENCE_PRESSURE_TABLE]\n\nThird, current regulatory materials point toward closer scrutiny, not blanket reassurance. FDA\u2019s 2025 draft guidance is explicitly marked Draft, not for implementation, and non-binding. [S2_FDA_DRAFT_GUIDANCE_2025] The draft recommends performance-testing and labeling approaches partly because pulse-oximeter accuracy can be affected by skin pigmentation. [S2_FDA_DRAFT_GUIDANCE_2025] The FDA press release similarly frames the recommendations as proposed updates, not final validation for any specific device. [S4_FDA_PRESS_RELEASE_2025]\n\n## Weak, stale, or contradictory evidence\n\nThe packet\u2019s capacity-benefit evidence is weak. The derived evidence table states that the packet does not support claims that remote pulse-ox monitoring reduces admissions, mortality, or capacity strain. [S9_DERIVED_EVIDENCE_PRESSURE_TABLE] Older COVID-era material suggests possible monitoring value but is not current proof of broad deployment benefit. [S6_DAVIES_ARXIV_EAR_OX_2020; S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022] The 2020 arXiv preprint argued that ambulatory SpO\u2082 monitoring was clinically needed for delayed COVID-19 hypoxemia and reported faster response from an ear-canal site than a finger site in breath-hold testing, but it is an older preprint and should not be treated as current clinical-policy proof. [S6_DAVIES_ARXIV_EAR_OX_2020] The 2022 Health.com article reported conflicting conclusions, including one randomized trial finding pulse oximetry no better than text check-ins and another viewpoint arguing that pulse oximeters could help detect silent hypoxia, but that article is secondary health journalism rather than primary clinical evidence. [S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022] A 2024 consumer-health explainer states that pulse oximeters may be less reliable for darker skin tones and notes arterial blood gas testing as an invasive alternative, but it should be used only for communication context and practical constraints, not as a clinical guideline or device validation. [S8_VERYWELL_LIMITED_EXPLAINER_2024]\n\n## Practical response options\n\n**Option 1: Rapid systemwide adoption.** This is not recommended because the packet does not prove reductions in admissions, mortality, or hospital capacity strain, and because FDA-recognized accuracy concerns require safeguards before broad deployment. [S1_FDA_PULSE_OX_PAGE_2025; S4_FDA_PRESS_RELEASE_2025; S9_DERIVED_EVIDENCE_PRESSURE_TABLE]\n\n**Option 2: Controlled pilot.** This is the recommended path. A pilot should restrict enrollment to clinically selected lower-risk patients, combine SpO\u2082 readings with symptom and worsening-status checks, define escalation responsibilities, track safety events and utilization outcomes, and monitor whether performance or escalation patterns differ across patient groups affected by known accuracy concerns. [S1_FDA_PULSE_OX_PAGE_2025; S4_FDA_PRESS_RELEASE_2025; S5_FDA_ADVISORY_MEETING_2024; S9_DERIVED_EVIDENCE_PRESSURE_TABLE]\n\n**Option 3: Delay.** Delay is reasonable if the system cannot staff clinician review, cannot provide clear patient instructions, cannot define escalation pathways, or cannot evaluate equity and safety signals during implementation; FDA cautions against reliance on pulse oximeter readings alone. [S1_FDA_PULSE_OX_PAGE_2025]\n\n**Option 4: Reject.** Rejection is defensible only if leadership concludes that local operational controls are not feasible or that the equity and accuracy risks cannot be responsibly managed; the packet does not require rejection because FDA recognizes pulse oximeters as estimating oxygen saturation and pulse rate, while also cautioning about limitations. [S1_FDA_PULSE_OX_PAGE_2025; S9_DERIVED_EVIDENCE_PRESSURE_TABLE]\n\n## Risks of acting and risks of waiting\n\nThe main risk of acting is false confidence: patients, staff, or leaders may treat home SpO\u2082 readings as sufficient evidence of safety despite FDA\u2019s warning that symptoms and worsening status matter. [S1_FDA_PULSE_OX_PAGE_2025] A second risk is inequitable triage if device accuracy differs by skin pigmentation and the pathway lacks backup escalation processes. [S1_FDA_PULSE_OX_PAGE_2025; S4_FDA_PRESS_RELEASE_2025; S5_FDA_ADVISORY_MEETING_2024] A third risk is operational overclaiming: if the program is communicated as a capacity solution, it would exceed the packet evidence. [S9_DERIVED_EVIDENCE_PRESSURE_TABLE]\n\nThe main risk of waiting is that the system may miss an opportunity to add a structured monitoring adjunct during a period when sepsis-related deterioration is clinically serious and respiratory/sepsis capacity pressure is present. [S3_CDC_SEPSIS_CONTEXT_2026; S9_DERIVED_EVIDENCE_PRESSURE_TABLE] Waiting may also leave lower-risk patients managed with less physiologic information than a carefully designed pilot could provide, although the packet does not prove that added pulse-ox data improves outcomes compared with symptom or text-based monitoring. [S1_FDA_PULSE_OX_PAGE_2025; S7_HEALTH_HOME_PULSE_OX_CONFLICT_2022; S9_DERIVED_EVIDENCE_PRESSURE_TABLE]\n\n## Practical next steps\n\nAuthorize a time-limited pilot rather than broad adoption. Define eligible patients narrowly, require symptom co-monitoring, specify escalation triggers, and instruct patients not to rely only on pulse-ox readings. [S1_FDA_PULSE_OX_PAGE_2025] Select devices and labeling review with explicit attention to FDA\u2019s accuracy and skin-pigmentation concerns, while recognizing that the 2025 FDA guidance is draft, non-binding, and not for implementation. [S1_FDA_PULSE_OX_PAGE_2025; S2_FDA_DRAFT_GUIDANCE_2025; S4_FDA_PRESS_RELEASE_2025] Track outcomes that leadership actually needs for a scale decision: avoided or delayed admissions, escalations, deterioration events, patient adherence, clinician workload, false reassurance concerns, and subgroup safety signals. [S1_FDA_PULSE_OX_PAGE_2025; S4_FDA_PRESS_RELEASE_2025; S9_DERIVED_EVIDENCE_PRESSURE_TABLE] Predefine a stop, revise, or scale decision after the pilot, because the current evidence supports cautious testing, not assuming capacity relief. [S9_DERIVED_EVIDENCE_PRESSURE_TABLE]\n\n## Claim boundaries and disclaimer\n\nThis brief supports a controlled pilot as a risk-managed response under uncertainty. It does not establish that remote pulse-ox monitoring reduces mortality, admissions, or capacity strain; it does not validate any specific device; and it does not convert FDA draft guidance, advisory discussion, or press material into approval, clearance, final guidance, or a mandate. [S2_FDA_DRAFT_GUIDANCE_2025; S4_FDA_PRESS_RELEASE_2025; S5_FDA_ADVISORY_MEETING_2024; S9_DERIVED_EVIDENCE_PRESSURE_TABLE]\n\nThis is a benchmark artifact and not medical advice, regulatory advice, clinical protocol approval, statistical certification, product clearance, or legal advice.\n",
+      "artifact_sha256": "cf375de8e16db32832886520dc04768b9db341149975fd50ef6f31d246385b3d"
+    }
+  ],
+  "required_output_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Unified Artifact Scoring Protocol v5.1 Judge Output Schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "protocol_id",
+      "judge_id",
+      "source_packet_present",
+      "artifact_scores",
+      "pairwise_comparative_consistency",
+      "ranking_score_consistency_check",
+      "overall_rationale"
+    ],
+    "properties": {
+      "protocol_id": {
+        "const": "unified_artifact_scoring_protocol_v5_1"
+      },
+      "judge_id": {
+        "type": "string"
+      },
+      "source_packet_present": {
+        "type": "boolean"
+      },
+      "artifact_scores": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+          "$ref": "#/definitions/artifact_score"
+        }
+      },
+      "pairwise_comparative_consistency": {
+        "$ref": "#/definitions/pairwise"
+      },
+      "ranking_score_consistency_check": {
+        "type": "string"
+      },
+      "overall_rationale": {
+        "type": "string"
+      },
+      "raw_judge_text": {
+        "type": "string"
+      }
+    },
+    "definitions": {
+      "cap": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cap_id",
+          "max_score_100",
+          "evidence"
+        ],
+        "properties": {
+          "cap_id": {
+            "type": "string"
+          },
+          "max_score_100": {
+            "type": "number"
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      },
+      "ceiling": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ceiling_id",
+          "max_score_100",
+          "reason"
+        ],
+        "properties": {
+          "ceiling_id": {
+            "type": "string"
+          },
+          "max_score_100": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "artifact_score": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifact_label",
+          "admission_status",
+          "raw_evidence_score_100",
+          "applicable_hard_caps",
+          "applicable_expert_ceilings",
+          "final_score_100",
+          "final_score_10",
+          "ceiling_band",
+          "passes_source_fidelity_gate",
+          "passes_source_to_claim_traceability_gate",
+          "passes_decision_logic_gate",
+          "passes_operational_specificity_gate",
+          "passes_uncertainty_gate",
+          "passes_contradiction_negative_space_gate",
+          "passes_risk_suppression_gate",
+          "passes_expert_review_gate",
+          "source_fidelity_score_15",
+          "source_to_claim_traceability_score_10",
+          "contradiction_handling_score_10",
+          "uncertainty_limitations_score_10",
+          "data_stat_chart_score_8",
+          "decision_usefulness_score_12",
+          "operational_actionability_score_10",
+          "risk_suppression_blindspot_score_15",
+          "expert_review_survivability_score_10",
+          "hallucination_resistance_findings",
+          "source_boundary_findings",
+          "blindspots_caught",
+          "blindspots_missed",
+          "tempting_but_rejected_claims",
+          "overclaim_risks_suppressed",
+          "unsupported_or_weak_claims",
+          "avoided_failure_modes",
+          "expert_review_survivability_rationale",
+          "why_not_100",
+          "weakest_source_to_claim_link",
+          "missing_or_underdeveloped_caveat",
+          "unresolved_uncertainty",
+          "biggest_overclaim_risk",
+          "risk_if_leader_relied_on_it",
+          "expert_reviewer_challenge",
+          "needed_to_move_above_83",
+          "needed_to_move_above_90",
+          "needed_to_move_above_95",
+          "material_repairs_required",
+          "most_dangerous_failure_if_relied_on",
+          "required_repairs_to_clear_next_band"
+        ],
+        "properties": {
+          "artifact_label": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003"
+            ]
+          },
+          "admission_status": {
+            "enum": [
+              "pass",
+              "fail"
+            ]
+          },
+          "raw_evidence_score_100": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "applicable_hard_caps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/cap"
+            }
+          },
+          "applicable_expert_ceilings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/ceiling"
+            }
+          },
+          "final_score_100": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "final_score_10": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "ceiling_band": {
+            "enum": [
+              "0_69_unreliable",
+              "70_82_competent_not_decision_grade",
+              "83_ceiling_gate_failure",
+              "84_89_decision_useful",
+              "90_94_expert_survivable",
+              "95_100_expert_ready"
+            ]
+          },
+          "passes_source_fidelity_gate": {
+            "type": "boolean"
+          },
+          "passes_source_to_claim_traceability_gate": {
+            "type": "boolean"
+          },
+          "passes_decision_logic_gate": {
+            "type": "boolean"
+          },
+          "passes_operational_specificity_gate": {
+            "type": "boolean"
+          },
+          "passes_uncertainty_gate": {
+            "type": "boolean"
+          },
+          "passes_contradiction_negative_space_gate": {
+            "type": "boolean"
+          },
+          "passes_risk_suppression_gate": {
+            "type": "boolean"
+          },
+          "passes_expert_review_gate": {
+            "type": "boolean"
+          },
+          "source_fidelity_score_15": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 15
+          },
+          "source_to_claim_traceability_score_10": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "contradiction_handling_score_10": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "uncertainty_limitations_score_10": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "data_stat_chart_score_8": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 8
+          },
+          "decision_usefulness_score_12": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 12
+          },
+          "operational_actionability_score_10": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "risk_suppression_blindspot_score_15": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 15
+          },
+          "expert_review_survivability_score_10": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "hallucination_resistance_findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_boundary_findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blindspots_caught": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blindspots_missed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tempting_but_rejected_claims": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "overclaim_risks_suppressed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unsupported_or_weak_claims": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "avoided_failure_modes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "material_repairs_required": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "expert_review_survivability_rationale": {
+            "type": "string"
+          },
+          "why_not_100": {
+            "type": "string"
+          },
+          "weakest_source_to_claim_link": {
+            "type": "string"
+          },
+          "missing_or_underdeveloped_caveat": {
+            "type": "string"
+          },
+          "unresolved_uncertainty": {
+            "type": "string"
+          },
+          "biggest_overclaim_risk": {
+            "type": "string"
+          },
+          "risk_if_leader_relied_on_it": {
+            "type": "string"
+          },
+          "expert_reviewer_challenge": {
+            "type": "string"
+          },
+          "needed_to_move_above_83": {
+            "type": "string"
+          },
+          "needed_to_move_above_90": {
+            "type": "string"
+          },
+          "needed_to_move_above_95": {
+            "type": "string"
+          },
+          "most_dangerous_failure_if_relied_on": {
+            "type": "string"
+          },
+          "required_repairs_to_clear_next_band": {
+            "type": "string"
+          }
+        }
+      },
+      "pairwise": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "more_source_faithful",
+          "more_decision_useful",
+          "safer_to_rely_on",
+          "better_uncertainty_handling",
+          "better_contradiction_handling",
+          "better_blindspot_detection",
+          "better_hallucination_resistance",
+          "better_overclaim_suppression",
+          "more_operationally_actionable",
+          "more_expert_survivable",
+          "overall_winner",
+          "numeric_pairwise_consistency_rationale"
+        ],
+        "properties": {
+          "more_source_faithful": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "more_decision_useful": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "safer_to_rely_on": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "better_uncertainty_handling": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "better_contradiction_handling": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "better_blindspot_detection": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "better_hallucination_resistance": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "better_overclaim_suppression": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "more_operationally_actionable": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "more_expert_survivable": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "overall_winner": {
+            "enum": [
+              "ARTIFACT_001",
+              "ARTIFACT_003",
+              "TIE"
+            ]
+          },
+          "numeric_pairwise_consistency_rationale": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "packet_integrity": {
+    "artifact_hashes_preserved": true,
+    "source_packet_sha256": "b73292d9d2e4aac5f65a93ae168235d9d581ae17ebaf0a91aa16437018c527aa",
+    "task_brief_sha256": "98a1e03d77a60de2d4c490a6f1b9bdca87a2f41b6009dbf6d28c945cd2af6114",
+    "protocol_sha256": "933cd69aa00ce64f251c3bdee63101515734163fff3f15bacf0fd3fe3cef338f",
+    "schema_sha256": "8ac8e6c809815ed33f6b27cbfbbf6cd3610f33deb55ae25ca888dacb7c265d55"
+  }
+}
+```

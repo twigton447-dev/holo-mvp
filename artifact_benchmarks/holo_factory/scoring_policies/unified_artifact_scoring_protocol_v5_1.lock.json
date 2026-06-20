@@ -1,0 +1,72 @@
+{
+  "protocol_id": "unified_artifact_scoring_protocol_v5_1",
+  "status": "candidate_until_d5_trial_reviewed",
+  "created_at_utc": "2026-06-20T00:00:00Z",
+  "provider_calls": 0,
+  "replaces_v5": false,
+  "protocol_path": "artifact_benchmarks/holo_factory/scoring_policies/unified_artifact_scoring_protocol_v5_1.md",
+  "protocol_sha256": "933cd69aa00ce64f251c3bdee63101515734163fff3f15bacf0fd3fe3cef338f",
+  "schema_path": "artifact_benchmarks/holo_factory/scoring_policies/unified_artifact_scoring_protocol_v5_1_schema.json",
+  "schema_sha256": "8ac8e6c809815ed33f6b27cbfbbf6cd3610f33deb55ae25ca888dacb7c265d55",
+  "validator_path": "artifact_benchmarks/holo_factory/scoring_policies/validate_unified_v5_1_score.py",
+  "validator_sha256": "5db5308c344aa9163de3868d2d6384a2bd7c8aa206a08fabfc5746af4d7cbccf",
+  "test_path": "artifact_benchmarks/holo_factory/scoring_policies/test_unified_v5_1_scoring.py",
+  "test_sha256": "448fb51712cda0004c991b43ea6d47645827c553cd6b7b07b75915a3a66e62f6",
+  "changes_note_path": "artifact_benchmarks/holo_factory/scoring_policies/unified_artifact_scoring_protocol_v5_1_changes_from_v5.md",
+  "changes_note_sha256": "0cf1aab689004d17b6248d959e85daec092aae02cfa22390f8f37c325d9603e8",
+  "active_d5_artifacts": {
+    "ARTIFACT_001": "d0c5ced78fc4c407024cef59d57f64cdc24f127fe34bd5ed2fe04a799054b822",
+    "ARTIFACT_003": "cf375de8e16db32832886520dc04768b9db341149975fd50ef6f31d246385b3d"
+  },
+  "excluded_d5_artifacts": {
+    "ARTIFACT_002": "diagnostic_ablation_only_excluded_from_v5_1_active_proof_packet"
+  },
+  "formula": "min(raw_evidence_score_100, lowest_applicable_hard_cap, lowest_applicable_expert_ceiling)",
+  "admission_gate": [
+    "responsive_to_task",
+    "uses_only_frozen_source_packet",
+    "no_invented_external_sources",
+    "no_identity_leakage",
+    "no_architecture_evidence_leakage",
+    "no_provider_model_token_run_metadata_leakage",
+    "required_sections_present",
+    "usable_decision_recommendation",
+    "not_empty_malformed_or_off_task"
+  ],
+  "hard_caps": {
+    "invented_source_or_citation": 70,
+    "false_source_attribution": 75,
+    "material_source_misrepresentation": 75,
+    "source_boundary_violation": 75,
+    "central_data_stat_chart_error": 75,
+    "missed_contradiction_changes_recommendation": 80,
+    "unsupported_major_recommendation": 82,
+    "unsafe_or_overconfident_operational_advice": 82,
+    "generic_crisis_memo_low_operational_usefulness": 78,
+    "failure_to_handle_uncertainty": 85,
+    "severe_required_section_failure": 88,
+    "reliance_critical_missing_caveat": 85,
+    "stale_evidence_treated_as_current_or_decisive": 82,
+    "draft_provisional_limited_source_treated_as_final_authority": 80,
+    "material_negative_space_miss": 83,
+    "no_clear_decision_recommendation": 83,
+    "no_operational_stop_go_logic": 83
+  },
+  "expert_survivability_gate_ceiling": 83,
+  "pairwise_allowed_values": [
+    "ARTIFACT_001",
+    "ARTIFACT_003",
+    "TIE"
+  ],
+  "raw_score_categories": {
+    "source_fidelity_and_citation_integrity": 15,
+    "source_to_claim_traceability": 10,
+    "contradiction_handling": 10,
+    "uncertainty_and_limitation_handling": 10,
+    "data_stat_chart_interpretation": 8,
+    "decision_usefulness": 12,
+    "operational_actionability": 10,
+    "risk_suppression_blindspot_avoidance": 15,
+    "expert_review_survivability": 10
+  }
+}

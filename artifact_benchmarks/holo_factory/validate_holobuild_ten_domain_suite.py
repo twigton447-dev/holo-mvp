@@ -149,8 +149,14 @@ def main() -> int:
             errors.append("runner must pin Holo final synthesis to a preferred final writer model")
         if "MAX_HOLO_FINAL_REPAIR_ATTEMPTS = 1" not in runner_text:
             errors.append("runner must bound Holo final word-band repair to one attempt")
-        if "FINAL_ARTIFACT_WORD_BAND_REPAIR" not in runner_text:
-            errors.append("runner must include an auditable final artifact word-band repair prompt")
+        if "FINAL_SYNTHESIS_MAX_TOKENS = 6000" not in runner_text:
+            errors.append("runner must give final synthesis enough token headroom to avoid induced truncation")
+        if "final_artifact_completeness" not in runner_text:
+            errors.append("runner must audit final artifact completeness and clean ending")
+        if "FINAL_ARTIFACT_COMPLETENESS_REPAIR" not in runner_text:
+            errors.append("runner must include an auditable final artifact completeness repair prompt")
+        if "final_artifact_completeness_pass" not in runner_text:
+            errors.append("architecture proof must require final_artifact_completeness_pass")
         if "--holo-session-template" not in runner_text or "d3_success_v1" not in runner_text:
             errors.append("runner must support the locked d3_success_v1 Holo session template")
     if not SCORING_LOCK.exists():

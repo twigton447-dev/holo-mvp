@@ -27,6 +27,9 @@ HOLO_MODES = ("diagnostic_v3", "full_gov_v4", "patent_aligned_v4")
 HOLO_CONTEXT_PROFILES = ("full_registry", "latest_only")
 DEFAULT_HOLO_CONTEXT_PROFILE = "full_registry"
 MAX_HOLO_FINAL_REPAIR_ATTEMPTS = 1
+DEFAULT_TURN_MAX_TOKENS = 3800
+FINAL_SYNTHESIS_MAX_TOKENS = 6000
+FINAL_REPAIR_MAX_TOKENS = 5200
 HOLO_SESSION_TEMPLATES = ("random", "d3_success_v1")
 D3_SUCCESS_HOLO_TURN_MODELS = (
     "google:gemini-3.1-pro-preview",
@@ -90,6 +93,14 @@ FINAL_SYNTHESIS_TRIGGER_TAXONOMY = (
     "narrow/conditional go, hold/escalate, revoke/rollback/stop, and post-action review or follow-up where relevant. "
     "Use packet-specific names when the packet supplies required practical response options."
 )
+FINAL_REQUIRED_SECTION_PATTERNS = {
+    "bottom_line": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:bottom line|recommendation|bottom-line)"),
+    "risks_of_acting": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?risks?\s+of\s+acting"),
+    "risks_of_waiting": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?risks?\s+of\s+waiting"),
+    "next_steps": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:recommended\s+)?next\s+steps|trigger\s+taxonomy"),
+    "claim_boundaries": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:claim\s+boundaries|disclaimer|claim\s+boundaries\s*/\s*disclaimer)"),
+}
+FINAL_CLEAN_ENDING_RE = re.compile(r"[.!?][\"')\]]*$")
 SOURCE_ID_RE = re.compile(r"\bS\d+_[A-Z0-9_]+\b")
 ACTIVE_SCORING_LOCK_PATH = FACTORY_DIR / "scoring_policies/ACTIVE_SCORING_PROTOCOL.lock.json"
 HARD_FORBIDDEN_JUDGE_VISIBLE_PATTERNS = {
@@ -188,6 +199,11 @@ def architecture_evidence_summary(evidence_turns: list[dict[str, Any]], precheck
         for item in evidence_turns
         if not item.get("prompt_card_hash")
     ]
+    final_completeness_failures = [
+        {"turn": item.get("turn"), "final_artifact_completeness": (item.get("role_compliance") or {}).get("final_artifact_completeness")}
+        for item in evidence_turns
+        if ((item.get("role_compliance") or {}).get("final_artifact_completeness") or {}).get("status") == "fail"
+    ]
     deterministic_gate_pass = precheck.get("deterministic_gate_status") in {"pass", "pass_with_word_overage_penalty"}
     proof_eligible = (
         holo_mode == PROOF_ELIGIBLE_HOLO_MODE
@@ -195,6 +211,7 @@ def architecture_evidence_summary(evidence_turns: list[dict[str, Any]], precheck
         and not role_failures
         and not state_failures
         and not prompt_hash_missing
+        and not final_completeness_failures
     )
     return {
         "proof_credit_eligible": proof_eligible,
@@ -202,9 +219,11 @@ def architecture_evidence_summary(evidence_turns: list[dict[str, Any]], precheck
         "role_compliance_all_pass": not role_failures,
         "state_audit_all_pass": not state_failures,
         "prompt_card_hashes_present": not prompt_hash_missing,
+        "final_artifact_completeness_pass": not final_completeness_failures,
         "role_compliance_failures": role_failures,
         "state_audit_failures": state_failures,
         "prompt_hash_missing_turns": prompt_hash_missing,
+        "final_artifact_completeness_failures": final_completeness_failures,
     }
 
 
@@ -221,6 +240,50 @@ def scan_judge_visible_text(text: str) -> list[dict[str, str]]:
 
 def word_count(text: str) -> int:
     return len(re.findall(r"\b[\w'-]+\b", text))
+
+
+def final_artifact_completeness(output_text: str, output_meta: dict[str, Any] | None = None) -> dict[str, Any]:
+    stripped = output_text.strip()
+    failures: list[str] = []
+    if not stripped:
+        failures.append("empty_final_artifact")
+
+    clean_ending = bool(FINAL_CLEAN_ENDING_RE.search(stripped))
+    if not clean_ending:
+        failures.append("unclean_or_mid_sentence_ending")
+
+    section_presence = {
+        name: bool(pattern.search(stripped))
+        for name, pattern in FINAL_REQUIRED_SECTION_PATTERNS.items()
+    }
+    missing_sections = [name for name, present in section_presence.items() if not present]
+    failures.extend(f"missing_final_section:{name}" for name in missing_sections)
+
+    claim_boundary_tail_words = 0
+    claim_boundary_match = FINAL_REQUIRED_SECTION_PATTERNS["claim_boundaries"].search(stripped)
+    if claim_boundary_match:
+        claim_boundary_tail = stripped[claim_boundary_match.end():]
+        claim_boundary_tail_words = word_count(claim_boundary_tail)
+        if claim_boundary_tail_words < 20:
+            failures.append("claim_boundary_section_too_short_or_truncated")
+
+    output_tokens = int((output_meta or {}).get("output_tokens") or 0)
+    max_tokens_requested = int((output_meta or {}).get("max_tokens_requested") or 0)
+    hit_requested_token_ceiling = bool(output_tokens and max_tokens_requested and output_tokens >= max_tokens_requested)
+    if hit_requested_token_ceiling and not clean_ending:
+        failures.append("provider_output_hit_max_tokens_with_unclean_ending")
+
+    return {
+        "status": "pass" if not failures else "fail",
+        "clean_ending": clean_ending,
+        "section_presence": section_presence,
+        "missing_sections": missing_sections,
+        "claim_boundary_tail_words": claim_boundary_tail_words,
+        "output_tokens": output_tokens,
+        "max_tokens_requested": max_tokens_requested,
+        "hit_requested_token_ceiling": hit_requested_token_ceiling,
+        "failures": failures,
+    }
 
 
 def excerpt(text: str, limit: int = 900) -> str:
@@ -700,7 +763,7 @@ def run_solo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
     return metadata
 
 
-def role_compliance(role: str, output_text: str, final: bool) -> dict[str, Any]:
+def role_compliance(role: str, output_text: str, final: bool, output_meta: dict[str, Any] | None = None) -> dict[str, Any]:
     lowered = output_text.lower()
     praise_only = len(re.findall(r"\b(strong|excellent|good|solid)\b", lowered)) >= 3 and not re.search(r"\b(missing|unsupported|risk|weak|contradict|uncertain|revise|option)\b", lowered)
     role_behaviors: dict[str, dict[str, str]] = {
@@ -752,6 +815,10 @@ def role_compliance(role: str, output_text: str, final: bool) -> dict[str, Any]:
             result["word_count_penalty_points"] = round((wc - FINAL_WORD_MAX) * 0.03, 4)
         else:
             result["final_word_band_status"] = "fail"
+        completeness = final_artifact_completeness(output_text, output_meta)
+        result["final_artifact_completeness"] = completeness
+        if completeness["status"] != "pass":
+            result["status"] = "fail"
     return result
 
 
@@ -933,28 +1000,38 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                 f"{required_options_text}\n"
             )
         prompt_text = f"SYSTEM:\n{build_base_system()}\n\nUSER:\n{user}"
-        out = call_model(model, system=build_base_system(), user=user, max_tokens=3800, timeout=timeout)
+        max_tokens = FINAL_SYNTHESIS_MAX_TOKENS if final else DEFAULT_TURN_MAX_TOKENS
+        out = call_model(model, system=build_base_system(), user=user, max_tokens=max_tokens, timeout=timeout)
         io = write_prompt_and_output(condition_dir, index, prompt_text, out)
         output_text = out["text"].strip()
         artifact_source_io = io
+        artifact_output_meta = out
         repair_turn_records: list[dict[str, Any]] = []
         turn_repair_attempts: list[dict[str, Any]] = []
         if final:
             initial_final_word_count = word_count(output_text)
+            initial_completeness = final_artifact_completeness(output_text, out)
+            final_quality_failures = []
             if not (FINAL_WORD_MIN <= initial_final_word_count <= FINAL_WORD_PERSUASIVE_MAX):
+                final_quality_failures.append("word_band_failure")
+            final_quality_failures.extend(initial_completeness["failures"])
+            if final_quality_failures:
                 for repair_attempt in range(1, MAX_HOLO_FINAL_REPAIR_ATTEMPTS + 1):
                     repair_user = (
-                        "FINAL_ARTIFACT_WORD_BAND_REPAIR\n"
-                        "===============================\n"
-                        "The final synthesis output failed the required body word band. "
+                        "FINAL_ARTIFACT_COMPLETENESS_REPAIR\n"
+                        "==================================\n"
+                        "The final synthesis output failed final artifact quality checks. "
                         "Return only a corrected final decision-grade crisis/action brief, 900-1,500 body words, target 1,250. "
                         "Words over 1,300 are allowed only when they materially improve argument strength, persuasion, trigger taxonomy, or insight density. "
                         "Do not add commentary about this repair. Use only the frozen packet and registered artifacts below. "
-                        "Preserve source boundaries, calculations, practical options, risks of acting, risks of waiting, next steps, and claim boundaries.\n\n"
+                        "Preserve source boundaries, calculations, practical options, risks of acting, risks of waiting, next steps, and claim boundaries. "
+                        "The final answer must end cleanly with a complete sentence and a complete claim-boundary/disclaimer section.\n\n"
                         f"{V6_1_ARGUMENT_POWER_GUIDANCE}\n"
                         f"{FINAL_SYNTHESIS_TRIGGER_TAXONOMY}\n"
                         "Keep exact required practical response option labels if supplied, and retain the strongest counterargument handling.\n\n"
                         f"FAILED_FINAL_WORD_COUNT: {initial_final_word_count}\n\n"
+                        f"FINAL_QUALITY_FAILURES: {stable_json(final_quality_failures)}\n\n"
+                        f"FINAL_COMPLETENESS_AUDIT: {stable_json(initial_completeness)}\n\n"
                         "CONTEXT_GOVERNOR_INSTRUCTIONS\n=============================\n"
                         f"{context_governor_instructions}\n\n"
                         "CANONICAL STATE_OBJECT\n======================\n"
@@ -973,16 +1050,19 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         f"{output_text}\n"
                     )
                     repair_prompt_text = f"SYSTEM:\n{build_base_system()}\n\nUSER:\n{repair_user}"
-                    repair_out = call_model(model, system=build_base_system(), user=repair_user, max_tokens=3200, timeout=timeout)
+                    repair_out = call_model(model, system=build_base_system(), user=repair_user, max_tokens=FINAL_REPAIR_MAX_TOKENS, timeout=timeout)
                     repair_io = write_named_prompt_and_output(condition_dir, f"turn_{index:03d}_final_repair_{repair_attempt:03d}", repair_prompt_text, repair_out)
                     repaired_text = repair_out["text"].strip()
                     repaired_word_count = word_count(repaired_text)
+                    repaired_completeness = final_artifact_completeness(repaired_text, repair_out)
                     repair_record = {
                         "attempt": repair_attempt,
                         "model": model,
                         "previous_word_count": initial_final_word_count,
+                        "previous_final_completeness": initial_completeness,
                         "repaired_word_count": repaired_word_count,
-                        "accepted": FINAL_WORD_MIN <= repaired_word_count <= FINAL_WORD_PERSUASIVE_MAX,
+                        "repaired_final_completeness": repaired_completeness,
+                        "accepted": FINAL_WORD_MIN <= repaired_word_count <= FINAL_WORD_PERSUASIVE_MAX and repaired_completeness["status"] == "pass",
                         **repair_io,
                     }
                     turn_repair_attempts.append(repair_record)
@@ -997,6 +1077,7 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                     })
                     output_text = repaired_text
                     artifact_source_io = repair_io
+                    artifact_output_meta = repair_out
                     if repair_record["accepted"]:
                         break
         artifact_id = "FINAL_ARTIFACT" if final else f"TURN_{index:03d}_{role.upper()}"
@@ -1006,7 +1087,7 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
             "source_reference": artifact_source_io["raw_output_path"],
             "content": output_text,
         }
-        compliance = role_compliance(role, output_text, final)
+        compliance = role_compliance(role, output_text, final, artifact_output_meta)
         audit = state_audit(output_text, state, allowed_ids, packet_hash, registry)
         state["ROLLING_SUMMARY"] = excerpt(output_text, 650)
         if final:

@@ -20,6 +20,7 @@ REPO_ROOT = FACTORY_DIR.parents[1]
 DEFAULT_SUITE_MANIFEST = FACTORY_DIR / "mini_scouts/TEN_DOMAIN_PACKET_SUITE_MANIFEST.json"
 CONFIG_DIR = FACTORY_DIR / "configs"
 D3_SUCCESS_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_d3_success_v1.lock.json"
+GROK_SWAP_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_grok_swap_v1.lock.json"
 LIVE_APPROVAL_ENV = "HOLO_ALLOW_LIVE"
 PROOF_ELIGIBLE_HOLO_MODE = "patent_aligned_v4"
 LEGACY_HOLO_MODES = {"diagnostic_v3", "full_gov_v4"}
@@ -30,7 +31,7 @@ MAX_HOLO_FINAL_REPAIR_ATTEMPTS = 1
 DEFAULT_TURN_MAX_TOKENS = 3800
 FINAL_SYNTHESIS_MAX_TOKENS = 6000
 FINAL_REPAIR_MAX_TOKENS = 5200
-HOLO_SESSION_TEMPLATES = ("random", "d3_success_v1")
+HOLO_SESSION_TEMPLATES = ("random", "d3_success_v1", "grok_swap_v1")
 D3_SUCCESS_HOLO_TURN_MODELS = (
     "google:gemini-3.1-pro-preview",
     "openai:gpt-5.5",
@@ -40,15 +41,30 @@ D3_SUCCESS_HOLO_TURN_MODELS = (
     "anthropic:claude-opus-4-8",
 )
 D3_SUCCESS_GOV_MODEL = "openai:gpt-5.5"
+GROK_SWAP_HOLO_TURN_MODELS = (
+    "google:gemini-3.1-pro-preview",
+    "xai:grok-4.3",
+    "anthropic:claude-opus-4-8",
+    "google:gemini-3.1-pro-preview",
+    "xai:grok-4.3",
+    "anthropic:claude-opus-4-8",
+)
+GROK_SWAP_GOV_MODEL = "xai:grok-4.3"
 VALID_CONDITIONS = (
     "HoloFull",
+    "HoloFullGrokSwap",
     "HoloMini",
     "SoloFull",
+    "SoloFullGrok",
     "SoloMini",
     "holo_build_arch",
+    "holo_build_arch_grok_swap",
     "solo_openai_gpt_5_5",
+    "solo_xai_grok_4_3",
     "frontier_solo_v1",
+    "frontier_solo_grok_4_3_v1",
     "frontier_holo_v1",
+    "frontier_holo_grok_swap_v1",
     "mini_solo_v1",
     "mini_holo_v1",
 )
@@ -428,29 +444,34 @@ def governor_model_pool(config: dict[str, Any]) -> list[str]:
 
 
 def session_template_lock_info(template_id: str) -> dict[str, Any] | None:
-    if template_id != "d3_success_v1":
+    lock_path_by_template = {
+        "d3_success_v1": D3_SUCCESS_TEMPLATE_LOCK,
+        "grok_swap_v1": GROK_SWAP_TEMPLATE_LOCK,
+    }
+    lock_path = lock_path_by_template.get(template_id)
+    if not lock_path:
         return None
-    if not D3_SUCCESS_TEMPLATE_LOCK.exists():
+    if not lock_path.exists():
         raise SystemExit(json.dumps({
             "status": "HOLOBUILD_MINI_SCOUT_FAIL_CLOSED",
             "reason": "holo_session_template_lock_missing",
             "template_id": template_id,
-            "expected_lock_path": repo_rel(D3_SUCCESS_TEMPLATE_LOCK),
+            "expected_lock_path": repo_rel(lock_path),
             "provider_calls": 0,
         }, indent=2))
-    lock = read_json(D3_SUCCESS_TEMPLATE_LOCK)
+    lock = read_json(lock_path)
     if lock.get("template_id") != template_id:
         raise SystemExit(json.dumps({
             "status": "HOLOBUILD_MINI_SCOUT_FAIL_CLOSED",
             "reason": "holo_session_template_lock_id_mismatch",
             "template_id": template_id,
             "lock_template_id": lock.get("template_id"),
-            "lock_path": repo_rel(D3_SUCCESS_TEMPLATE_LOCK),
+            "lock_path": repo_rel(lock_path),
             "provider_calls": 0,
         }, indent=2))
     return {
-        "holo_session_template_lock_path": repo_rel(D3_SUCCESS_TEMPLATE_LOCK),
-        "holo_session_template_lock_hash": sha_file(D3_SUCCESS_TEMPLATE_LOCK),
+        "holo_session_template_lock_path": repo_rel(lock_path),
+        "holo_session_template_lock_hash": sha_file(lock_path),
     }
 
 
@@ -471,22 +492,46 @@ def validate_fixed_holo_models(config: dict[str, Any], *, turn_models: tuple[str
 
 
 def randomized_holo_session_plan(config: dict[str, Any], *, run_id: str, packet_hash: str, turn_count: int, session_template: str = "random") -> dict[str, Any]:
-    if session_template == "d3_success_v1":
-        if turn_count != len(D3_SUCCESS_HOLO_TURN_MODELS):
+    fixed_templates = {
+        "d3_success_v1": {
+            "turn_models": D3_SUCCESS_HOLO_TURN_MODELS,
+            "governor_model": D3_SUCCESS_GOV_MODEL,
+            "selection_seed": "d3_success_v1_fixed_template",
+            "selection_source": "fixed_successful_d3_holo_choreography",
+            "agent_policy": "fixed_d3_success_v1_turn_order",
+            "governor_policy": "fixed_d3_success_v1_governor",
+            "final_policy": "fixed_d3_success_v1_final_writer",
+        },
+        "grok_swap_v1": {
+            "turn_models": GROK_SWAP_HOLO_TURN_MODELS,
+            "governor_model": GROK_SWAP_GOV_MODEL,
+            "selection_seed": "grok_swap_v1_fixed_template",
+            "selection_source": "fixed_d3_success_v1_choreography_with_openai_replaced_by_xai_grok_4_3",
+            "agent_policy": "fixed_grok_swap_v1_turn_order",
+            "governor_policy": "fixed_grok_swap_v1_governor",
+            "final_policy": "fixed_grok_swap_v1_final_writer",
+        },
+    }
+    if session_template in fixed_templates:
+        fixed = fixed_templates[session_template]
+        turn_models = fixed["turn_models"]
+        governor_model = fixed["governor_model"]
+        if turn_count != len(turn_models):
             raise SystemExit(json.dumps({
                 "status": "HOLOBUILD_MINI_SCOUT_FAIL_CLOSED",
-                "reason": "d3_success_template_turn_count_mismatch",
-                "expected_turns": len(D3_SUCCESS_HOLO_TURN_MODELS),
+                "reason": "fixed_holo_session_template_turn_count_mismatch",
+                "template_id": session_template,
+                "expected_turns": len(turn_models),
                 "actual_turns": turn_count,
                 "provider_calls": 0,
             }, indent=2))
-        validate_fixed_holo_models(config, turn_models=D3_SUCCESS_HOLO_TURN_MODELS, governor_model=D3_SUCCESS_GOV_MODEL)
+        validate_fixed_holo_models(config, turn_models=turn_models, governor_model=governor_model)
         agents = holo_agent_models(config)
         gov_pool = governor_model_pool(config)
         lock_info = session_template_lock_info(session_template) or {}
         return {
-            "selection_seed": "d3_success_v1_fixed_template",
-            "selection_source": "fixed_successful_d3_holo_choreography",
+            "selection_seed": fixed["selection_seed"],
+            "selection_source": fixed["selection_source"],
             **lock_info,
             "run_id": run_id,
             "packet_hash": packet_hash,
@@ -495,10 +540,10 @@ def randomized_holo_session_plan(config: dict[str, Any], *, run_id: str, packet_
             "hologov_profile": config.get("hologov_profile"),
             "holo_session_template": session_template,
             "holo_agent_pool": agents,
-            "holo_agent_selection_policy": "fixed_d3_success_v1_turn_order",
-            "holo_agent_turn_models": list(D3_SUCCESS_HOLO_TURN_MODELS),
+            "holo_agent_selection_policy": fixed["agent_policy"],
+            "holo_agent_turn_models": list(turn_models),
             "hologov_model_pool": gov_pool,
-            "hologov_selection_policy": "fixed_d3_success_v1_governor",
+            "hologov_selection_policy": fixed["governor_policy"],
             "hologov_tenure_policy": {
                 "min_turns": HOLOGOV_C_TENURE_MIN,
                 "max_turns": HOLOGOV_C_TENURE_MAX,
@@ -509,11 +554,11 @@ def randomized_holo_session_plan(config: dict[str, Any], *, run_id: str, packet_
                     "start_turn": 1,
                     "end_turn": turn_count,
                     "selected_tenure_turns": 7,
-                    "governor_model": D3_SUCCESS_GOV_MODEL,
+                    "governor_model": governor_model,
                 }
             ],
-            "final_synthesis_model": D3_SUCCESS_HOLO_TURN_MODELS[-1],
-            "final_synthesis_model_policy": "fixed_d3_success_v1_final_writer",
+            "final_synthesis_model": turn_models[-1],
+            "final_synthesis_model_policy": fixed["final_policy"],
         }
     seed = secrets.token_hex(16)
     rng = random.Random(seed)
@@ -723,7 +768,13 @@ def write_named_prompt_and_output(condition_dir: Path, name: str, prompt_text: s
 
 
 def run_solo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int) -> dict[str, Any]:
-    condition = "solo_openai_gpt_5_5" if "solo_openai_gpt_5_5" in config.get("condition_aliases", []) else config["config_id"]
+    aliases = config.get("condition_aliases", [])
+    if "solo_openai_gpt_5_5" in aliases:
+        condition = "solo_openai_gpt_5_5"
+    elif "solo_xai_grok_4_3" in aliases:
+        condition = "solo_xai_grok_4_3"
+    else:
+        condition = config["config_id"]
     condition_dir = condition_dir_for(packet_dir, run_id, condition)
     surfaces = load_packet_surfaces(packet_dir)
     model = config["model_pool"][0]["provider_model"]

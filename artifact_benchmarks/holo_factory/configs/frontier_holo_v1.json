@@ -1,0 +1,51 @@
+{
+  "config_id": "frontier_holo_v1",
+  "condition_aliases": [
+    "holo_build_arch",
+    "frontier_holo_v1"
+  ],
+  "condition_type": "holo",
+  "architecture_mode": "patent_aligned_v4",
+  "model_pool": [
+    {
+      "role": "initial_drafter",
+      "provider_model": "anthropic:claude-opus-4-8"
+    },
+    {
+      "role": "evidence_attacker",
+      "provider_model": "google:gemini-3.1-pro-preview"
+    },
+    {
+      "role": "source_fidelity_reviewer",
+      "provider_model": "openai:gpt-5.5"
+    },
+    {
+      "role": "operational_reviewer",
+      "provider_model": "anthropic:claude-opus-4-8"
+    },
+    {
+      "role": "claim_discipline_reducer",
+      "provider_model": "google:gemini-3.1-pro-preview"
+    },
+    {
+      "role": "final_synthesis",
+      "provider_model": "openai:gpt-5.5"
+    }
+  ],
+  "model_selection_policy": "fixed_six_turn_adversarial_sequence",
+  "turn_policy": {
+    "turn_count": 6,
+    "context_governor": "internal_deterministic_state_management_layer",
+    "requires_state_object_injection": true,
+    "requires_baton_pass_injection": true,
+    "requires_artifact_registry_injection": true,
+    "requires_retrieve_by_id": true
+  },
+  "provider_call_budget": 6,
+  "proof_credit_eligible": "only_if_patent_aligned_v4_architecture_evidence_validates_and_deterministic_gate_passes",
+  "blind_export_required": true,
+  "no_unblind_policy": "scores_must_lock_before_anonymization_map_access",
+  "scoring_protocol_target": "unified_artifact_scoring_protocol_v5_2_structural_epistemic",
+  "live_ready": true,
+  "provider_calls_in_config_creation": 0
+}

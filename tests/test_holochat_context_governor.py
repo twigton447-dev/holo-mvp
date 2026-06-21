@@ -1,16 +1,22 @@
 from holochat_context_governor import (
     HOLOCHAT_STATE_CONTEXT_KEY,
+    HoloBrainInjectionMode,
     audit_canonical_state_object,
     build_baton_pass,
+    build_holobrain_injection_plan,
+    build_holobrain_injection_payload,
     build_holochat_state,
     generate_auto_reseed_payload,
+    has_meaningful_holobrain_delta,
     load_state_from_capsule_context,
     merge_artifact_registry,
+    retrieve_holobrain_artifact_body,
+    select_holobrain_injection_mode,
     should_auto_compact,
     state_context_value,
     update_rolling_summary,
 )
-from holo_state import HoloState, RequiredTools
+from holo_state import HoloState, RequiredTools, StateAudit
 
 
 def test_state_object_schema_creation():
@@ -140,3 +146,185 @@ def test_state_context_round_trips_through_capsule_context():
 
     assert restored is not None
     assert restored.state_id == state.state_id
+
+
+def test_holobrain_baton_only_on_normal_turn():
+    state = build_holochat_state(
+        session_id="session-1",
+        turn_number=3,
+        user_message="New goal: keep the HoloGov-C patch narrow.",
+    )
+
+    mode = select_holobrain_injection_mode(
+        state,
+        thread_status="HEALTHY",
+        context_budget={"budget_status": "within_budget"},
+        fresh_thread=False,
+        recovery_needed=False,
+        topic_shift=False,
+        artifact_needed=False,
+    )
+
+    assert mode == HoloBrainInjectionMode.BATON_ONLY
+
+
+def test_holobrain_full_reseed_on_recovery():
+    state = build_holochat_state(
+        session_id="session-1",
+        turn_number=3,
+        user_message="New goal: preserve continuity.",
+    )
+
+    mode = select_holobrain_injection_mode(
+        state,
+        thread_status="HEALTHY",
+        context_budget={"budget_status": "within_budget"},
+        fresh_thread=False,
+        recovery_needed=True,
+        topic_shift=False,
+        artifact_needed=False,
+    )
+
+    assert mode == HoloBrainInjectionMode.FULL_RESEED
+
+
+def test_unrelated_topic_shift_does_not_inject_full_reseed():
+    state = build_holochat_state(
+        session_id="session-1",
+        turn_number=3,
+        user_message="New goal: preserve continuity.",
+    )
+
+    mode = select_holobrain_injection_mode(
+        state,
+        thread_status="unrelated topic shift",
+        context_budget={"budget_status": "within_budget"},
+        fresh_thread=False,
+        recovery_needed=False,
+        topic_shift=True,
+        artifact_needed=False,
+    )
+
+    assert mode == HoloBrainInjectionMode.HASHES_ONLY
+
+
+def test_untrusted_state_audit_uses_hashes_only():
+    state = build_holochat_state(
+        session_id="session-1",
+        turn_number=3,
+        user_message="New goal: preserve continuity.",
+    )
+    state.state_audit = StateAudit(trusted=False, state_hash="hash-1")
+
+    mode = select_holobrain_injection_mode(
+        state,
+        thread_status="HEALTHY",
+        context_budget={"budget_status": "within_budget"},
+        fresh_thread=True,
+        recovery_needed=True,
+        topic_shift=False,
+        artifact_needed=False,
+    )
+
+    assert mode == HoloBrainInjectionMode.HASHES_ONLY
+
+
+def test_holobrain_injected_chars_stay_under_configured_budget(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_HOLOBRAIN_INJECTION_MAX_CHARS", "420")
+    state = build_holochat_state(
+        session_id="session-1",
+        turn_number=3,
+        user_message="New goal: preserve a very long continuity packet. Do not call providers.",
+        response_text="x" * 2000,
+    )
+
+    plan = build_holobrain_injection_plan(
+        state,
+        thread_status="HEALTHY",
+        context_budget={"budget_status": "within_budget"},
+        fresh_thread=True,
+        recovery_needed=False,
+        topic_shift=False,
+        artifact_needed=False,
+    )
+
+    assert plan.mode == HoloBrainInjectionMode.FULL_RESEED
+    assert plan.char_count <= 420
+    assert plan.token_estimate == (plan.char_count + 3) // 4
+
+
+def test_holobrain_artifacts_are_refs_by_default():
+    ref = merge_artifact_registry(
+        [],
+        [{
+            "artifact_id": "artifact-1",
+            "title": "Continuity Doc",
+            "type": "html",
+            "content": "<html><body>FULL BODY SHOULD NOT ENTER PROMPT</body></html>",
+            "summary": "Short artifact summary.",
+            "status": "available_by_id",
+        }],
+    )[0]
+
+    payload = build_holobrain_injection_payload(
+        HoloState(
+            session_id="session-1",
+            artifact_registry=[ref],
+            state_audit=StateAudit(
+                trusted=True,
+                state_hash="state-hash",
+                artifact_registry_hash="registry-hash",
+            ),
+        ),
+        HoloBrainInjectionMode.ARTIFACT_REFS,
+    )
+
+    assert "artifact-1" in payload
+    assert "Short artifact summary." in payload
+    assert "FULL BODY SHOULD NOT ENTER PROMPT" not in payload
+
+
+def test_full_artifact_body_is_retrieved_only_when_needed():
+    class ArtifactBrain:
+        def __init__(self):
+            self.calls = 0
+
+        def get_artifact(self, capsule_id, artifact_id):
+            self.calls += 1
+            return {"content": "full artifact body"}
+
+    brain = ArtifactBrain()
+
+    assert retrieve_holobrain_artifact_body(
+        brain,
+        "capsule-1",
+        "artifact-1",
+        full_body_needed=False,
+    ) is None
+    assert brain.calls == 0
+    assert retrieve_holobrain_artifact_body(
+        brain,
+        "capsule-1",
+        "artifact-1",
+        full_body_needed=True,
+    ) == "full artifact body"
+    assert brain.calls == 1
+
+
+def test_meaningful_delta_ignores_routine_turn_without_durable_change():
+    previous = build_holochat_state(
+        session_id="session-1",
+        turn_number=1,
+        user_message="New goal: keep the state gate narrow.",
+        response_text="ok",
+    )
+    candidate = build_holochat_state(
+        session_id="session-1",
+        turn_number=2,
+        user_message="Continue.",
+        response_text="ok",
+        previous_state=previous,
+    )
+
+    assert has_meaningful_holobrain_delta(previous, candidate) is False
+    assert candidate.rolling_summary == previous.rolling_summary

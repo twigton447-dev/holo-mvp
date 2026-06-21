@@ -30,8 +30,11 @@ from holo_context import (
 from holo_router import HoloRouter, PreviousRoute, RouteDecision
 from holochat_context_governor import (
     HOLOCHAT_STATE_CONTEXT_KEY,
+    HoloBrainInjectionMode,
+    HoloBrainInjectionPlan,
+    build_holobrain_injection_plan,
     build_holochat_state,
-    generate_auto_reseed_payload,
+    has_meaningful_holobrain_delta,
     load_state_from_capsule_context,
     should_auto_compact,
     stable_hash,
@@ -440,13 +443,21 @@ def _apply_handoff_transition_to_session(
     return safe
 
 
-def _holochat_state_seed_block(state: Optional[HoloState]) -> str:
-    if not state:
-        return ""
-    return generate_auto_reseed_payload(state)
+def _holochat_state_seed_block(plan: Optional[HoloBrainInjectionPlan]) -> str:
+    return plan.payload if plan else ""
 
 
-def _holochat_state_runtime_metadata(state: Optional[HoloState]) -> dict[str, Any]:
+def _holochat_state_runtime_metadata(
+    state: Optional[HoloState],
+    *,
+    holobrain_injection_plan: Optional[HoloBrainInjectionPlan] = None,
+    holobrain_state_persisted: bool = False,
+) -> dict[str, Any]:
+    plan = holobrain_injection_plan or HoloBrainInjectionPlan(
+        mode=HoloBrainInjectionMode.NONE,
+        payload="",
+        reason="not_evaluated",
+    )
     if not state:
         return {
             "state_object_present": False,
@@ -456,6 +467,13 @@ def _holochat_state_runtime_metadata(state: Optional[HoloState]) -> dict[str, An
             "artifact_registry_hash": None,
             "state_audit_trusted": False,
             "state_audit_warnings": ["state_not_available_yet"],
+            "hologov_c_mode": "active",
+            "holobrain_injection_mode": plan.mode.value,
+            "holobrain_injection_reason": plan.reason,
+            "holobrain_injected": False,
+            "holobrain_injected_chars": 0,
+            "holobrain_injected_token_estimate": 0,
+            "holobrain_state_persisted": holobrain_state_persisted,
         }
     audit = state.state_audit
     warnings = list(audit.notes or [])
@@ -476,6 +494,13 @@ def _holochat_state_runtime_metadata(state: Optional[HoloState]) -> dict[str, An
         "state_audit_trusted": audit.trusted,
         "state_audit_warnings": warnings,
         "artifact_registry_count": len(state.artifact_registry),
+        "hologov_c_mode": "active",
+        "holobrain_injection_mode": plan.mode.value,
+        "holobrain_injection_reason": plan.reason,
+        "holobrain_injected": bool(plan.payload),
+        "holobrain_injected_chars": plan.char_count,
+        "holobrain_injected_token_estimate": plan.token_estimate,
+        "holobrain_state_persisted": holobrain_state_persisted,
     }
 
 
@@ -486,6 +511,46 @@ def _persist_holochat_state(brain: Any, capsule_id: Optional[str], state: Option
     if not setter:
         return
     setter(capsule_id, HOLOCHAT_STATE_CONTEXT_KEY, state_context_value(state))
+
+
+def _holobrain_recovery_needed(user_message: str) -> bool:
+    lowered = (user_message or "").lower()
+    return any(
+        marker in lowered
+        for marker in (
+            "recover",
+            "reseed",
+            "pick up where",
+            "restore context",
+            "continue from the last thread",
+            "continue from prior",
+            "lost context",
+        )
+    )
+
+
+def _holobrain_topic_shift(user_message: str) -> bool:
+    lowered = (user_message or "").lower()
+    return any(
+        marker in lowered
+        for marker in (
+            "new topic",
+            "unrelated topic",
+            "different project",
+            "switch topics",
+            "new project",
+            "context discontinuity",
+        )
+    )
+
+
+def _holobrain_artifact_needed(user_message: str) -> bool:
+    lowered = (user_message or "").lower()
+    artifact_markers = ("artifact", "file", "doc", "document", "html", "packet")
+    need_markers = ("open", "retrieve", "pull", "use", "inspect", "show", "refer")
+    return any(marker in lowered for marker in artifact_markers) and any(
+        marker in lowered for marker in need_markers
+    )
 
 
 def _claim_autocompact_for_context_window(
@@ -893,11 +958,17 @@ def _turn_runtime_metadata(
     handoff_transition: Optional[dict[str, Any]] = None,
     holochat_state: Optional[HoloState] = None,
     auto_reseed_present: bool = False,
+    holobrain_injection_plan: Optional[HoloBrainInjectionPlan] = None,
+    holobrain_state_persisted: bool = False,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
     handoff_seed_present = bool(_safe_handoff_transition(handoff_transition))
-    state_meta = _holochat_state_runtime_metadata(holochat_state)
+    state_meta = _holochat_state_runtime_metadata(
+        holochat_state,
+        holobrain_injection_plan=holobrain_injection_plan,
+        holobrain_state_persisted=holobrain_state_persisted,
+    )
     metadata.update(
         {
             "analyst_pool_role": "analyst",
@@ -1132,16 +1203,16 @@ class HoloChatEngine:
             durable_state   = load_state_from_capsule_context(capsule_context)
             if durable_state and session.turn_count == 0:
                 session.holochat_state = durable_state
+        fresh_thread = session.turn_count == 0
         _add_timing(timings, "memory_context_ms", memory_timer)
 
         auto_reseed_present = False
         holochat_state_block = ""
-        if not incognito and session.holochat_state:
-            holochat_state_block = _holochat_state_seed_block(session.holochat_state)
-            if session.turn_count == 0:
-                auto_reseed_present = bool(holochat_state_block)
-                session.auto_reseed_applied = auto_reseed_present
-                session.auto_reseed_hash = stable_hash(holochat_state_block) if holochat_state_block else None
+        holobrain_injection_plan = HoloBrainInjectionPlan(
+            mode=HoloBrainInjectionMode.NONE,
+            payload="",
+            reason="not_evaluated",
+        )
 
         active_handoff_transition = None if incognito else _apply_handoff_transition_to_session(
             session,
@@ -1245,6 +1316,40 @@ class HoloChatEngine:
             capsule_attached=bool(capsule_id and not incognito),
         )
 
+        pre_gate_context_budget = _runtime_context_budget(
+            session=session,
+            user_message=user_message,
+            capsule_context=capsule_context,
+            life_context=life_context,
+            last_session=last_session,
+            tenor=tenor,
+            search_results=search_results,
+            images=images,
+            incognito=incognito,
+            runtime_identity=runtime_identity,
+            handoff_transition=active_handoff_transition,
+            holochat_state_block="",
+            holobrain_injection_plan=holobrain_injection_plan,
+        )
+        if not incognito and session.holochat_state:
+            holobrain_injection_plan = build_holobrain_injection_plan(
+                session.holochat_state,
+                thread_status=session.thread_status,
+                context_budget=pre_gate_context_budget,
+                fresh_thread=fresh_thread,
+                recovery_needed=_holobrain_recovery_needed(user_message),
+                topic_shift=_holobrain_topic_shift(user_message),
+                artifact_needed=_holobrain_artifact_needed(user_message),
+            )
+            holochat_state_block = _holochat_state_seed_block(holobrain_injection_plan)
+            auto_reseed_present = (
+                holobrain_injection_plan.mode == HoloBrainInjectionMode.FULL_RESEED
+                and bool(holochat_state_block)
+            )
+            if auto_reseed_present:
+                session.auto_reseed_applied = True
+                session.auto_reseed_hash = stable_hash(holochat_state_block)
+
         # Inject runtime identity + thread-health context + portrait + working memory + Governor brief.
         # Incognito: keeps runtime identity but strips memory context.
         system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
@@ -1273,6 +1378,7 @@ class HoloChatEngine:
             runtime_identity=runtime_identity,
             handoff_transition=active_handoff_transition,
             holochat_state_block=holochat_state_block,
+            holobrain_injection_plan=holobrain_injection_plan,
         )
 
         holo4dna_shadow = None
@@ -1505,8 +1611,10 @@ class HoloChatEngine:
             thread_health_level=session.thread_health_level,
             thread_health_score=session.thread_health_score,
         )
+        holobrain_state_persisted = False
         if not incognito:
-            session.holochat_state = build_holochat_state(
+            previous_holobrain_state = session.holochat_state
+            next_holobrain_state = build_holochat_state(
                 session_id=session.session_id,
                 capsule_id=capsule_id,
                 turn_number=session.turn_count,
@@ -1520,7 +1628,13 @@ class HoloChatEngine:
                 thread_status=session.thread_status,
                 auto_compact=state_auto_compact,
             )
-            _persist_holochat_state(self._brain, capsule_id, session.holochat_state)
+            holobrain_state_persisted = has_meaningful_holobrain_delta(
+                previous_holobrain_state,
+                next_holobrain_state,
+            )
+            session.holochat_state = next_holobrain_state
+            if holobrain_state_persisted:
+                _persist_holochat_state(self._brain, capsule_id, session.holochat_state)
 
         usage = _turn_usage_metadata(
             analyst_adapter=adapter,
@@ -1558,6 +1672,8 @@ class HoloChatEngine:
             handoff_transition=active_handoff_transition,
             holochat_state=session.holochat_state,
             auto_reseed_present=auto_reseed_present,
+            holobrain_injection_plan=holobrain_injection_plan,
+            holobrain_state_persisted=holobrain_state_persisted,
         )
 
         return {
@@ -1622,16 +1738,16 @@ class HoloChatEngine:
             durable_state   = load_state_from_capsule_context(capsule_context)
             if durable_state and session.turn_count == 0:
                 session.holochat_state = durable_state
+        fresh_thread = session.turn_count == 0
         _add_timing(timings, "memory_context_ms", memory_timer)
 
         auto_reseed_present = False
         holochat_state_block = ""
-        if not incognito and session.holochat_state:
-            holochat_state_block = _holochat_state_seed_block(session.holochat_state)
-            if session.turn_count == 0:
-                auto_reseed_present = bool(holochat_state_block)
-                session.auto_reseed_applied = auto_reseed_present
-                session.auto_reseed_hash = stable_hash(holochat_state_block) if holochat_state_block else None
+        holobrain_injection_plan = HoloBrainInjectionPlan(
+            mode=HoloBrainInjectionMode.NONE,
+            payload="",
+            reason="not_evaluated",
+        )
 
         active_handoff_transition = None if incognito else _apply_handoff_transition_to_session(
             session,
@@ -1713,6 +1829,40 @@ class HoloChatEngine:
             capsule_attached=bool(capsule_id and not incognito),
         )
 
+        pre_gate_context_budget = _runtime_context_budget(
+            session=session,
+            user_message=user_message,
+            capsule_context=capsule_context,
+            life_context=life_context,
+            last_session=last_session,
+            tenor=tenor,
+            search_results=search_results,
+            images=images,
+            incognito=incognito,
+            runtime_identity=runtime_identity,
+            handoff_transition=active_handoff_transition,
+            holochat_state_block="",
+            holobrain_injection_plan=holobrain_injection_plan,
+        )
+        if not incognito and session.holochat_state:
+            holobrain_injection_plan = build_holobrain_injection_plan(
+                session.holochat_state,
+                thread_status=session.thread_status,
+                context_budget=pre_gate_context_budget,
+                fresh_thread=fresh_thread,
+                recovery_needed=_holobrain_recovery_needed(user_message),
+                topic_shift=_holobrain_topic_shift(user_message),
+                artifact_needed=_holobrain_artifact_needed(user_message),
+            )
+            holochat_state_block = _holochat_state_seed_block(holobrain_injection_plan)
+            auto_reseed_present = (
+                holobrain_injection_plan.mode == HoloBrainInjectionMode.FULL_RESEED
+                and bool(holochat_state_block)
+            )
+            if auto_reseed_present:
+                session.auto_reseed_applied = True
+                session.auto_reseed_hash = stable_hash(holochat_state_block)
+
         system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
         if not incognito:
             system_prompt += (
@@ -1739,6 +1889,7 @@ class HoloChatEngine:
             runtime_identity=runtime_identity,
             handoff_transition=active_handoff_transition,
             holochat_state_block=holochat_state_block,
+            holobrain_injection_plan=holobrain_injection_plan,
         )
 
         holo4dna_shadow = None
@@ -1939,8 +2090,10 @@ class HoloChatEngine:
             thread_health_level=session.thread_health_level,
             thread_health_score=session.thread_health_score,
         )
+        holobrain_state_persisted = False
         if not incognito:
-            session.holochat_state = build_holochat_state(
+            previous_holobrain_state = session.holochat_state
+            next_holobrain_state = build_holochat_state(
                 session_id=session.session_id,
                 capsule_id=capsule_id,
                 turn_number=session.turn_count,
@@ -1954,7 +2107,13 @@ class HoloChatEngine:
                 thread_status=session.thread_status,
                 auto_compact=state_auto_compact,
             )
-            _persist_holochat_state(self._brain, capsule_id, session.holochat_state)
+            holobrain_state_persisted = has_meaningful_holobrain_delta(
+                previous_holobrain_state,
+                next_holobrain_state,
+            )
+            session.holochat_state = next_holobrain_state
+            if holobrain_state_persisted:
+                _persist_holochat_state(self._brain, capsule_id, session.holochat_state)
 
         usage = _turn_usage_metadata(
             analyst_adapter=adapter,
@@ -1992,6 +2151,8 @@ class HoloChatEngine:
             handoff_transition=active_handoff_transition,
             holochat_state=session.holochat_state,
             auto_reseed_present=auto_reseed_present,
+            holobrain_injection_plan=holobrain_injection_plan,
+            holobrain_state_persisted=holobrain_state_persisted,
         )
 
         yield {
@@ -2123,7 +2284,13 @@ def _runtime_context_budget(
     runtime_identity: str,
     handoff_transition: Optional[dict[str, Any]] = None,
     holochat_state_block: Optional[str] = None,
+    holobrain_injection_plan: Optional[HoloBrainInjectionPlan] = None,
 ) -> dict[str, Any]:
+    plan = holobrain_injection_plan or HoloBrainInjectionPlan(
+        mode=HoloBrainInjectionMode.NONE,
+        payload="",
+        reason="not_evaluated",
+    )
     blocks: list[dict[str, Any]] = [
         {
             "block_name": "base_holochat_prompt",
@@ -2298,7 +2465,23 @@ def _runtime_context_budget(
         }
     )
 
-    return build_context_budget_ledger(blocks).model_dump(mode="json")
+    ledger = build_context_budget_ledger(blocks).model_dump(mode="json")
+    for row in ledger.get("rows", []):
+        if row.get("block_name") == "holochat_state_object":
+            row["injection_mode"] = plan.mode.value
+            row["injection_reason"] = plan.reason
+            row["state_hash"] = plan.state_hash
+            row["char_count"] = plan.char_count
+            row["token_estimate"] = plan.token_estimate
+    ledger["holobrain_injection"] = {
+        "mode": plan.mode.value,
+        "reason": plan.reason,
+        "state_hash": plan.state_hash,
+        "included": bool(plan.payload),
+        "char_count": plan.char_count,
+        "token_estimate": plan.token_estimate,
+    }
+    return ledger
 
 
 def _memory_presence_summary(

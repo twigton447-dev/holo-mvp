@@ -18,7 +18,12 @@ from chat_engine import (
     _runtime_metadata,
     _select_runtime_pools,
 )
-from holochat_context_governor import HOLOCHAT_STATE_CONTEXT_KEY, build_holochat_state, state_context_value
+from holochat_context_governor import (
+    HOLOCHAT_STATE_CONTEXT_KEY,
+    HoloBrainInjectionMode,
+    build_holochat_state,
+    state_context_value,
+)
 from holo_state import GovArcState
 from llm_adapters import AnthropicAdapter, GOVERNOR_SYSTEM_PROMPT, HOLO_CHAT_SYSTEM_PROMPT
 
@@ -66,6 +71,11 @@ class FakeGovernor:
             "Map exactly what Gov sees before the analyst responds",
             "Decide which Gov actions must stay deterministic",
         ]
+
+
+class NoPathGovernor(FakeGovernor):
+    def generate_conversation_paths(self, **kwargs):
+        return []
 
 
 class FakeBrain:
@@ -136,6 +146,29 @@ class DurableStateBrain(FakeBrain):
     def set_capsule_context(self, capsule_id, key, value):
         self.persisted_context[key] = value
 
+
+class SecretStateBrain(DurableStateBrain):
+    def __init__(self):
+        super().__init__()
+        self.seed_state = build_holochat_state(
+            session_id="prior-session",
+            capsule_id="capsule-1",
+            turn_number=8,
+            user_message="New goal: keep continuity. Use OPENAI_API_KEY=sk-testsecret123456789 but do not leak it.",
+            response_text="Next action is validate redaction.",
+        )
+
+
+class StableStateBrain(DurableStateBrain):
+    def __init__(self):
+        super().__init__()
+        self.seed_state = build_holochat_state(
+            session_id="prior-session",
+            capsule_id="capsule-1",
+            turn_number=8,
+            user_message="New goal: keep the state gate narrow.",
+            response_text="ok",
+        )
 
 class CapturingAdapter(FakeAdapter):
     last_system_prompt: str = ""
@@ -466,6 +499,9 @@ def test_durable_state_auto_reseed_reaches_first_turn_prompt(monkeypatch):
     assert result["runtime"]["reseed_present"] is True
     assert result["runtime"]["reseed_mode"] == "durable_state_auto_reseed"
     assert result["runtime"]["durable_state_auto_reseed_present"] is True
+    assert result["runtime"]["holobrain_injection_mode"] == HoloBrainInjectionMode.FULL_RESEED.value
+    assert result["runtime"]["holobrain_injected_chars"] > 0
+    assert result["runtime"]["holobrain_injected_token_estimate"] > 0
     assert result["runtime"]["state_object_present"] is True
     assert HOLOCHAT_STATE_CONTEXT_KEY in brain.persisted_context
     reseed_rows = [
@@ -473,6 +509,93 @@ def test_durable_state_auto_reseed_reaches_first_turn_prompt(monkeypatch):
         if row["block_name"] == "holochat_state_object"
     ]
     assert reseed_rows and reseed_rows[0]["included"] is True
+    assert reseed_rows[0]["injection_mode"] == HoloBrainInjectionMode.FULL_RESEED.value
+    assert reseed_rows[0]["char_count"] == result["runtime"]["holobrain_injected_chars"]
+    assert reseed_rows[0]["token_estimate"] == result["runtime"]["holobrain_injected_token_estimate"]
+    assert result["context_budget"]["holobrain_injection"]["mode"] == HoloBrainInjectionMode.FULL_RESEED.value
+
+
+def test_holobrain_baton_only_on_normal_turn_reaches_prompt(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+    session_id = str(uuid4())
+
+    first = engine.send_message(session_id, "New goal: preserve HoloBrain baton state.")
+    second = engine.send_message(session_id, "Continue.")
+
+    assert first["runtime"]["holobrain_injection_mode"] == HoloBrainInjectionMode.NONE.value
+    assert "HOLOGOV-C HOLOBRAIN BATON" in adapter.last_system_prompt
+    assert "HOLOCHAT AUTO-RESEED" not in adapter.last_system_prompt
+    assert second["runtime"]["holobrain_injection_mode"] == HoloBrainInjectionMode.BATON_ONLY.value
+    assert second["runtime"]["reseed_present"] is False
+    assert second["runtime"]["durable_state_auto_reseed_present"] is False
+    row = next(
+        row for row in second["context_budget"]["rows"]
+        if row["block_name"] == "holochat_state_object"
+    )
+    assert row["included"] is True
+    assert row["injection_mode"] == HoloBrainInjectionMode.BATON_ONLY.value
+
+
+def test_holobrain_private_state_not_user_visible(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = DurableStateBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    result = engine.send_message(str(uuid4()), "Continue.", capsule_id="capsule-1")
+
+    assert "HOLOGOV-C HOLOBRAIN" in adapter.last_system_prompt or "HOLOCHAT AUTO-RESEED" in adapter.last_system_prompt
+    assert "HOLOGOV-C HOLOBRAIN" not in result["response"]
+    assert "HOLOCHAT AUTO-RESEED" not in result["response"]
+    assert "_holochat_state_object" not in result["response"]
+
+
+def test_holobrain_secret_patterns_do_not_enter_prompt_capture(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = SecretStateBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    engine.send_message(str(uuid4()), "Continue.", capsule_id="capsule-1")
+
+    assert "sk-testsecret" not in adapter.last_system_prompt
+    assert "OPENAI_API_KEY=sk" not in adapter.last_system_prompt
+
+
+def test_durable_holobrain_state_persists_only_on_meaningful_delta(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    brain = StableStateBrain()
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = NoPathGovernor()
+    engine._brain = brain
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    result = engine.send_message(str(uuid4()), "Continue.", capsule_id="capsule-1")
+
+    assert result["runtime"]["holobrain_state_persisted"] is False
+    assert HOLOCHAT_STATE_CONTEXT_KEY not in brain.persisted_context
 
 
 def test_streaming_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):

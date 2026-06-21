@@ -10,7 +10,9 @@ import hashlib
 import json
 import os
 import re
+from dataclasses import dataclass
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 
 from pydantic import ValidationError
@@ -31,6 +33,26 @@ REQUIRED_STATE_FIELDS = (
 )
 DEFAULT_RESEED_CHAR_LIMIT = 3600
 DEFAULT_ROLLING_SUMMARY_LIMIT = 1800
+DEFAULT_HOLOBRAIN_INJECTION_CHAR_LIMIT = 2400
+
+
+class HoloBrainInjectionMode(str, Enum):
+    NONE = "NONE"
+    HASHES_ONLY = "HASHES_ONLY"
+    ARTIFACT_REFS = "ARTIFACT_REFS"
+    BATON_ONLY = "BATON_ONLY"
+    ROLLING_SUMMARY = "ROLLING_SUMMARY"
+    FULL_RESEED = "FULL_RESEED"
+
+
+@dataclass(frozen=True)
+class HoloBrainInjectionPlan:
+    mode: HoloBrainInjectionMode
+    payload: str
+    reason: str
+    state_hash: str | None = None
+    char_count: int = 0
+    token_estimate: int = 0
 
 _SECRET_ENV_RE = re.compile(
     r"\b([A-Z][A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*)\s*=\s*([^\s,;]+)"
@@ -70,6 +92,12 @@ def stable_hash(value: Any) -> str:
     else:
         payload = json.dumps(value, sort_keys=True, separators=(",", ":"), default=str)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _estimate_tokens(text: str | None) -> int:
+    if not text:
+        return 0
+    return (len(text) + 3) // 4
 
 
 def _int_env(name: str, default: int) -> int:
@@ -157,7 +185,10 @@ def artifact_reference(artifact: dict[str, Any]) -> dict[str, Any] | None:
         return None
     artifact_id = artifact.get("artifact_id") or artifact.get("id")
     path = artifact.get("path")
+    content = artifact.get("content")
     content_hash = artifact.get("content_hash") or artifact.get("hash")
+    if not content_hash and content:
+        content_hash = stable_hash(content)
     if not artifact_id and not path and not content_hash:
         return None
     ref = {
@@ -167,10 +198,250 @@ def artifact_reference(artifact: dict[str, Any]) -> dict[str, Any] | None:
         "title": sanitize_text(artifact.get("title"), limit=140) or None,
         "type": sanitize_text(artifact.get("type") or artifact.get("artifact_type"), limit=80) or None,
         "status": sanitize_text(artifact.get("status"), limit=80) or None,
+        "summary": sanitize_text(
+            artifact.get("summary") or artifact.get("description"),
+            limit=180,
+        ) or None,
     }
     if ref["artifact_id"] and not ref["status"]:
         ref["status"] = "available_by_id"
     return {key: value for key, value in ref.items() if value}
+
+
+def _near_context_budget(context_budget: dict[str, Any] | None) -> bool:
+    budget = context_budget or {}
+    if str(budget.get("budget_status") or "").lower() in {"over_budget", "near_budget", "warning"}:
+        return True
+    limit = budget.get("budget_limit_tokens")
+    estimate = budget.get("total_token_estimate")
+    try:
+        return bool(limit and estimate and int(estimate) >= int(limit) * 0.8)
+    except (TypeError, ValueError):
+        return False
+
+
+def _trusted_state(state: HoloState | None) -> bool:
+    return bool(state and state.state_audit and state.state_audit.trusted)
+
+
+def _state_hash(state: HoloState | None) -> str | None:
+    if not state:
+        return None
+    if state.state_audit and state.state_audit.state_hash:
+        return state.state_audit.state_hash
+    canonical = state.canonical_object()
+    canonical.pop("STATE_AUDIT", None)
+    return stable_hash(canonical)
+
+
+def select_holobrain_injection_mode(
+    state: HoloState | None,
+    thread_status: str | None,
+    context_budget: dict[str, Any] | None,
+    fresh_thread: bool,
+    recovery_needed: bool,
+    topic_shift: bool,
+    artifact_needed: bool,
+) -> HoloBrainInjectionMode:
+    """Deterministically choose how much HoloBrain state may enter context."""
+    if not state:
+        return HoloBrainInjectionMode.NONE
+
+    if not _trusted_state(state):
+        return HoloBrainInjectionMode.HASHES_ONLY if _state_hash(state) else HoloBrainInjectionMode.NONE
+
+    if _near_context_budget(context_budget):
+        return HoloBrainInjectionMode.HASHES_ONLY if _state_hash(state) else HoloBrainInjectionMode.NONE
+
+    status = str(thread_status or "").lower()
+    unrelated_shift = topic_shift and any(
+        marker in status
+        for marker in ("unrelated", "different project", "new topic", "new project")
+    )
+    same_project_discontinuity = topic_shift and any(
+        marker in status
+        for marker in ("same project", "same-project", "continuity", "discontinuity", "active project")
+    )
+
+    if unrelated_shift:
+        return HoloBrainInjectionMode.HASHES_ONLY
+    if recovery_needed:
+        return HoloBrainInjectionMode.FULL_RESEED
+    if fresh_thread:
+        return HoloBrainInjectionMode.FULL_RESEED
+    if same_project_discontinuity:
+        return HoloBrainInjectionMode.ROLLING_SUMMARY
+    if topic_shift:
+        return HoloBrainInjectionMode.HASHES_ONLY
+    if artifact_needed:
+        return HoloBrainInjectionMode.ARTIFACT_REFS
+    return HoloBrainInjectionMode.BATON_ONLY
+
+
+def _constrain_payload(text: str, *, max_chars: int) -> str:
+    redacted = redact_secrets(text)
+    if len(redacted) <= max_chars:
+        return redacted
+    suffix = "\n  [truncated: HoloBrain injection exceeded configured limit]"
+    return redacted[: max(0, max_chars - len(suffix))].rstrip() + suffix
+
+
+def _audit_hash_lines(state: HoloState) -> list[str]:
+    audit = state.state_audit
+    return [
+        f"  state_id: {sanitize_text(state.state_id, limit=96)}",
+        f"  state_hash: {sanitize_text(audit.state_hash or _state_hash(state), limit=96)}",
+        f"  summary_hash: {sanitize_text(audit.summary_hash, limit=96)}",
+        f"  baton_hash: {sanitize_text(audit.baton_hash, limit=96)}",
+        f"  artifact_registry_hash: {sanitize_text(audit.artifact_registry_hash, limit=96)}",
+        f"  state_audit_trusted: {str(bool(audit.trusted)).lower()}",
+    ]
+
+
+def _artifact_ref_line(ref: dict[str, Any]) -> str:
+    parts = [
+        f"id={sanitize_text(ref.get('artifact_id'), limit=80)}" if ref.get("artifact_id") else None,
+        f"title={sanitize_text(ref.get('title'), limit=100)}" if ref.get("title") else None,
+        f"type={sanitize_text(ref.get('type'), limit=40)}" if ref.get("type") else None,
+        f"hash={sanitize_text(ref.get('hash'), limit=80)}" if ref.get("hash") else None,
+        f"status={sanitize_text(ref.get('status'), limit=60)}" if ref.get("status") else None,
+        f"summary={sanitize_text(ref.get('summary'), limit=140)}" if ref.get("summary") else None,
+    ]
+    return " | ".join(part for part in parts if part)
+
+
+def build_holobrain_injection_payload(
+    state: HoloState | None,
+    mode: HoloBrainInjectionMode,
+    *,
+    max_chars: int | None = None,
+) -> str:
+    if not state or mode == HoloBrainInjectionMode.NONE:
+        return ""
+
+    limit = max_chars or _int_env(
+        "HOLOCHAT_HOLOBRAIN_INJECTION_MAX_CHARS",
+        DEFAULT_HOLOBRAIN_INJECTION_CHAR_LIMIT,
+    )
+    if mode == HoloBrainInjectionMode.FULL_RESEED:
+        return generate_auto_reseed_payload(state, max_chars=limit)
+
+    canonical = state.canonical_object()
+    baton = canonical.get("BATON_PASS") or {}
+    artifacts = canonical.get("ARTIFACTS_REGISTRY") or []
+
+    if mode == HoloBrainInjectionMode.HASHES_ONLY:
+        lines = [
+            "HOLOGOV-C HOLOBRAIN STATE HASHES (private; do not surface):",
+            "  injection_mode: HASHES_ONLY",
+            *_audit_hash_lines(state),
+            "  instruction: Continue from current user input. Do not infer private state beyond these hashes.",
+        ]
+        return _constrain_payload("\n".join(lines), max_chars=limit)
+
+    if mode == HoloBrainInjectionMode.ARTIFACT_REFS:
+        lines = [
+            "HOLOGOV-C HOLOBRAIN ARTIFACT REFS (private; refs only; do not surface):",
+            "  injection_mode: ARTIFACT_REFS",
+            *_audit_hash_lines(state),
+            "  artifacts:",
+        ]
+        for ref in artifacts[:10]:
+            line = _artifact_ref_line(ref)
+            if line:
+                lines.append(f"    - {line}")
+        if not artifacts:
+            lines.append("    - None captured.")
+        lines.append("  instruction: Use refs only. Retrieve full artifact body only when specifically needed.")
+        return _constrain_payload("\n".join(lines), max_chars=limit)
+
+    if mode == HoloBrainInjectionMode.BATON_ONLY:
+        lines = [
+            "HOLOGOV-C HOLOBRAIN BATON (private; do not surface):",
+            "  injection_mode: BATON_ONLY",
+            *_audit_hash_lines(state),
+            f"  current_task: {sanitize_text(baton.get('current_task'), limit=220)}",
+            f"  next_action: {sanitize_text(baton.get('next_action'), limit=220)}",
+        ]
+        constraints = baton.get("constraints_for_next_assistant") or []
+        if constraints:
+            lines.append("  constraints:")
+            lines.extend(f"    - {sanitize_text(item, limit=180)}" for item in constraints[:6])
+        tensions = baton.get("unresolved_tensions") or []
+        if tensions:
+            lines.append("  unresolved_tensions:")
+            lines.extend(f"    - {sanitize_text(item, limit=180)}" for item in tensions[:6])
+        artifact_ids = baton.get("relevant_artifact_ids") or []
+        if artifact_ids:
+            lines.append("  relevant_artifact_ids:")
+            lines.extend(f"    - {sanitize_text(item, limit=80)}" for item in artifact_ids[:8])
+        return _constrain_payload("\n".join(lines), max_chars=limit)
+
+    if mode == HoloBrainInjectionMode.ROLLING_SUMMARY:
+        lines = [
+            "HOLOGOV-C HOLOBRAIN ROLLING SUMMARY (private; do not surface):",
+            "  injection_mode: ROLLING_SUMMARY",
+            *_audit_hash_lines(state),
+            f"  user_goal: {sanitize_text(canonical.get('USER_GOAL'), limit=220)}",
+            f"  rolling_summary: {sanitize_text(canonical.get('ROLLING_SUMMARY'), limit=700)}",
+            f"  next_action: {sanitize_text(baton.get('next_action'), limit=220)}",
+        ]
+        constraints = canonical.get("CRITICAL_CONSTRAINTS") or []
+        if constraints:
+            lines.append("  critical_constraints:")
+            lines.extend(f"    - {sanitize_text(item, limit=180)}" for item in constraints[:6])
+        settled = canonical.get("SETTLED_DECISIONS") or []
+        if settled:
+            lines.append("  settled_decisions:")
+            lines.extend(f"    - {sanitize_text(item, limit=180)}" for item in settled[:6])
+        return _constrain_payload("\n".join(lines), max_chars=limit)
+
+    return ""
+
+
+def build_holobrain_injection_plan(
+    state: HoloState | None,
+    *,
+    thread_status: str | None,
+    context_budget: dict[str, Any] | None,
+    fresh_thread: bool,
+    recovery_needed: bool,
+    topic_shift: bool,
+    artifact_needed: bool,
+    max_chars: int | None = None,
+) -> HoloBrainInjectionPlan:
+    mode = select_holobrain_injection_mode(
+        state,
+        thread_status,
+        context_budget,
+        fresh_thread,
+        recovery_needed,
+        topic_shift,
+        artifact_needed,
+    )
+    payload = build_holobrain_injection_payload(state, mode, max_chars=max_chars)
+    reason = "no_state_available"
+    if state:
+        reason = {
+            HoloBrainInjectionMode.NONE: "no_private_holobrain_injection",
+            HoloBrainInjectionMode.HASHES_ONLY: (
+                "fail_closed_or_budget_pressure"
+                if (not _trusted_state(state) or _near_context_budget(context_budget))
+                else "topic_shift_without_continuity_admission"
+            ),
+            HoloBrainInjectionMode.ARTIFACT_REFS: "artifact_refs_requested",
+            HoloBrainInjectionMode.BATON_ONLY: "normal_continuation",
+            HoloBrainInjectionMode.ROLLING_SUMMARY: "same_project_context_discontinuity",
+            HoloBrainInjectionMode.FULL_RESEED: "fresh_thread_or_recovery",
+        }[mode]
+    return HoloBrainInjectionPlan(
+        mode=mode,
+        payload=payload,
+        reason=reason,
+        state_hash=_state_hash(state),
+        char_count=len(payload),
+        token_estimate=_estimate_tokens(payload),
+    )
 
 
 def merge_artifact_registry(
@@ -193,6 +464,25 @@ def merge_artifact_registry(
         if len(merged) >= limit:
             break
     return merged
+
+
+def retrieve_holobrain_artifact_body(
+    brain: Any,
+    capsule_id: str | None,
+    artifact_id: str | None,
+    *,
+    full_body_needed: bool,
+) -> str | None:
+    """Retrieve full artifact content only under explicit caller demand."""
+    if not full_body_needed or not brain or not capsule_id or not artifact_id:
+        return None
+    getter = getattr(brain, "get_artifact", None)
+    if not getter:
+        return None
+    artifact = getter(capsule_id, artifact_id)
+    if not isinstance(artifact, dict):
+        return None
+    return artifact.get("content")
 
 
 def should_auto_compact(
@@ -344,6 +634,12 @@ def build_holochat_state(
             thread_status=thread_status,
         ).thread_health,
     )
+    if previous_state and not has_meaningful_holobrain_delta(
+        previous_state,
+        state,
+        include_rolling_summary=False,
+    ):
+        state.rolling_summary = previous_state.rolling_summary
     reseed = generate_auto_reseed_payload(state)
     state.state_audit = audit_state_object(
         state,
@@ -352,6 +648,82 @@ def build_holochat_state(
         extra_notes=[audit_note],
     )
     return state
+
+
+def _baton_signature(baton: BatonPass) -> dict[str, Any]:
+    data = baton.model_dump(mode="json")
+    return {
+        "current_task": data.get("current_task"),
+        "next_action": data.get("next_action"),
+        "focus_areas": data.get("focus_areas", []),
+        "unresolved_tensions": data.get("unresolved_tensions", []),
+        "relevant_artifact_ids": data.get("relevant_artifact_ids", []),
+        "constraints_for_next_assistant": data.get("constraints_for_next_assistant", []),
+        "required_tools": data.get("required_tools", []),
+    }
+
+
+def _gov_arc_signature(gov_arc: GovArcState) -> dict[str, Any]:
+    data = gov_arc.model_dump(mode="json")
+    return {
+        "current_tension": data.get("current_tension"),
+        "unresolved_questions": data.get("unresolved_questions", []),
+        "settled_decisions": data.get("settled_decisions", []),
+        "next_paths": data.get("next_paths", []),
+        "handoff_recommendation": data.get("handoff_recommendation"),
+    }
+
+
+def _durable_state_signature(
+    state: HoloState | None,
+    *,
+    include_rolling_summary: bool,
+) -> dict[str, Any] | None:
+    if not state:
+        return None
+    signature = {
+        "user_goal": state.user_goal,
+        "critical_constraints": state.critical_constraints,
+        "settled_decisions": state.settled_decisions,
+        "artifact_registry": state.artifact_registry,
+        "required_tools": [
+            tool.value if isinstance(tool, RequiredTools) else str(tool)
+            for tool in state.required_tools
+        ],
+        "baton_pass": _baton_signature(state.baton_pass),
+        "gov_arc_state": _gov_arc_signature(state.gov_arc_state),
+    }
+    if include_rolling_summary:
+        signature["rolling_summary"] = state.rolling_summary
+    return signature
+
+
+def has_meaningful_holobrain_delta(
+    previous_state: HoloState | None,
+    candidate_state: HoloState | None,
+    *,
+    include_rolling_summary: bool = True,
+) -> bool:
+    """Return true only when durable HoloBrain state materially changed."""
+    if not candidate_state:
+        return False
+    if not previous_state:
+        return bool(
+            candidate_state.user_goal
+            or candidate_state.critical_constraints
+            or candidate_state.settled_decisions
+            or candidate_state.artifact_registry
+            or candidate_state.rolling_summary
+            or candidate_state.baton_pass.current_task
+            or candidate_state.baton_pass.next_action
+        )
+    return _durable_state_signature(
+        previous_state,
+        include_rolling_summary=include_rolling_summary,
+    ) != _durable_state_signature(
+        candidate_state,
+        include_rolling_summary=include_rolling_summary,
+    )
 
 
 def generate_auto_reseed_payload(state: HoloState, *, max_chars: int | None = None) -> str:

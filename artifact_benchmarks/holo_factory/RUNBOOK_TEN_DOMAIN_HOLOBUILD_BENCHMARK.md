@@ -68,5 +68,13 @@ unset HOLO_ALLOW_LIVE
 - No push unless explicitly approved.
 - Scoring protocol lives separately under `artifact_benchmarks/holo_factory/scoring_policies/`; packets carry deterministic admission gates only.
 - Active scoring lock for all tests: `artifact_benchmarks/holo_factory/scoring_policies/ACTIVE_SCORING_PROTOCOL.lock.json`.
-- Current active protocol: `unified_artifact_scoring_protocol_v6_structural_epistemic`.
+- Current active protocol: `unified_artifact_scoring_protocol_v6_1_structural_epistemic_argument_power`.
 - Do not score new benchmark outputs with older v4/v5/v5.1/v5.2 protocols unless the run is explicitly labeled historical/regression/autopsy.
+
+
+## Active Scoring Note
+
+- v6.1 adds Argument and Insight Power as a required second layer.
+- Final score uses `0.60 * structural_epistemic_score_100 + 0.40 * argument_power_score_100`, then applies word overage deduction and caps/ceilings.
+- Word overage deduction is `-3 points per 100 words over the packet maximum`, prorated by word.
+- Every score must include the final forced expert judgment: which artifact shows better thinking and the stronger argument.

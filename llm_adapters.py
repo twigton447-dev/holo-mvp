@@ -7,7 +7,7 @@ standardized TurnResult so the Context Governor can treat all
 three providers identically.
 
 Model defaults (override via .env):
-  OPENAI_MODEL    = gpt-5.4
+  OPENAI_MODEL    = gpt-5.5
   ANTHROPIC_MODEL = claude-sonnet-4-6
   GOOGLE_MODEL    = gemini-2.5-pro
   GOVERNOR_MODEL  = rotates across same 3-model pool as analysts (never shares DNA with analyst on the same turn)
@@ -3279,7 +3279,7 @@ class OpenAIAdapter(BaseAdapter):
     def __init__(self):
         from openai import OpenAI
         self.provider   = "openai"
-        self.model_id   = os.getenv("OPENAI_MODEL", "gpt-5.4")
+        self.model_id   = os.getenv("OPENAI_MODEL", "gpt-5.5")
         self._api_style = "openai"
         self._client    = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -3635,14 +3635,14 @@ class OpenAICompatibleAdapter(OpenAIAdapter):
 #
 _MODEL_REGISTRY = [
     # ── Primaries (active) ──────────────────────────────────────────────────
-    ("active", "openai",    "OPENAI_MODEL",    "gpt-5.4",               "OPENAI_API_KEY",    None),
+    ("active", "openai",    "OPENAI_MODEL",    "gpt-5.5",               "OPENAI_API_KEY",    None),
     ("active", "anthropic", "ANTHROPIC_MODEL", "claude-sonnet-4-6",     "ANTHROPIC_API_KEY", None),
     ("active", "google",    "GOOGLE_MODEL",    "gemini-2.5-pro",        "GOOGLE_API_KEY",    None),
     # ── Bench (earns rotation via benchmark performance) ────────────────────
-    ("bench",  "xai",       "XAI_MODEL",       "grok-3",                "XAI_API_KEY",       "https://api.x.ai/v1"),
+    ("bench",  "xai",       "XAI_MODEL",       "grok-4.3",              "XAI_API_KEY",       "https://api.x.ai/v1"),
     ("bench",  "mistral",   "MISTRAL_MODEL",   "mistral-large-latest",  "MISTRAL_API_KEY",   "https://api.mistral.ai/v1"),
     ("bench",  "deepseek",  "DEEPSEEK_MODEL",  "deepseek-chat",         "DEEPSEEK_API_KEY",  "https://api.deepseek.com/v1"),
-    ("bench",  "minimax",   "MINIMAX_MODEL",   "MiniMax-Text-01",       "MINIMAX_API_KEY",   "https://api.minimax.chat/v1"),
+    ("bench",  "minimax",   "MINIMAX_MODEL",   "MiniMax-M2.5-highspeed", "MINIMAX_API_KEY",   "https://api.minimax.chat/v1"),
 ]
 
 
@@ -3650,14 +3650,32 @@ _MODEL_REGISTRY = [
 # Adapter registry
 # ---------------------------------------------------------------------------
 
-def load_adapters(skip_providers=None) -> tuple[list[BaseAdapter], list[BaseAdapter]]:
+def _normalized_provider_allowlist(provider_allowlist=None) -> set[str] | None:
+    if provider_allowlist is None:
+        return None
+    if isinstance(provider_allowlist, str):
+        values = provider_allowlist.split(",")
+    else:
+        values = provider_allowlist
+    normalized = {
+        str(value).strip().lower()
+        for value in values
+        if str(value).strip()
+    }
+    return normalized or None
+
+
+def load_adapters(skip_providers=None, provider_allowlist=None) -> tuple[list[BaseAdapter], list[BaseAdapter]]:
     """
     Build active and bench pools from _MODEL_REGISTRY.
     Silently skips any entry whose API key env var is not set.
     skip_providers: optional set/list of provider names to exclude (e.g. {"google"}).
+    provider_allowlist: optional provider names to include. When set, selected
+    providers are promoted into the active pool for the caller's rotation policy.
     Returns (active_pool, bench_pool).
     """
     skip = set(skip_providers or [])
+    allow = _normalized_provider_allowlist(provider_allowlist)
     _vendor_sdk = {
         "openai":    lambda e, m: OpenAIAdapter(),
         "anthropic": lambda e, m: AnthropicAdapter(),
@@ -3667,6 +3685,9 @@ def load_adapters(skip_providers=None) -> tuple[list[BaseAdapter], list[BaseAdap
     for status, provider, model_env, model_default, key_env, base_url in _MODEL_REGISTRY:
         if provider in skip:
             logger.info(f"Skipping {provider} — excluded via skip_providers")
+            continue
+        if allow is not None and provider not in allow:
+            logger.info(f"Skipping {provider} — excluded via provider_allowlist")
             continue
         api_key = os.getenv(key_env)
         if not api_key:
@@ -3678,7 +3699,8 @@ def load_adapters(skip_providers=None) -> tuple[list[BaseAdapter], list[BaseAdap
             )
         else:
             adapter = _vendor_sdk[provider](key_env, model_env)
-        (active if status == "active" else bench).append(adapter)
+        target_status = "active" if allow is not None else status
+        (active if target_status == "active" else bench).append(adapter)
 
     logger.info("Active pool: " + ", ".join(f"{a.provider}={a.model_id}" for a in active))
     if bench:
@@ -3687,26 +3709,27 @@ def load_adapters(skip_providers=None) -> tuple[list[BaseAdapter], list[BaseAdap
 
 
 # ---------------------------------------------------------------------------
-# Fast adapter pool — lightweight models for low-stakes evaluations (<$10k)
-# Falls back to the standard active pool if fast-tier keys are not set.
+# HoloChat adapter pool — historically "fast"; now selected by HoloChat's
+# provider allowlist and model env vars while preserving the public function name.
 # ---------------------------------------------------------------------------
 
 _FAST_MODEL_REGISTRY = [
-    # Primary fast-tier models (1 per provider family)
-    # Same API keys as primaries — just cheaper/faster model variants.
-    # Override via env vars if you want dedicated fast-tier keys.
-    ("openai",    "OPENAI_FAST_MODEL",    "gpt-4o-mini",               "OPENAI_API_KEY"),
+    # HoloChat defaults (1 per provider family). Override via env vars.
+    ("openai",    "OPENAI_FAST_MODEL",    "gpt-5.5",                  "OPENAI_API_KEY"),
     ("anthropic", "ANTHROPIC_FAST_MODEL", "claude-haiku-4-5-20251001", "ANTHROPIC_API_KEY"),
     ("google",    "GOOGLE_FAST_MODEL",    "gemini-2.5-flash-lite",     "GOOGLE_API_KEY"),
     # Backup 1 — independent DNA (xAI)
-    ("xai",       "XAI_FAST_MODEL",       "grok-3-mini",               "XAI_API_KEY"),
+    ("xai",       "XAI_FAST_MODEL",       "grok-4.3",                 "XAI_API_KEY"),
     # Backup 2 — independent DNA (Mistral)
     ("mistral",   "MISTRAL_FAST_MODEL",   "mistral-small-latest",      "MISTRAL_API_KEY"),
+    # Backup 3 — independent DNA (MiniMax)
+    ("minimax",   "MINIMAX_FAST_MODEL",   "MiniMax-M2.5-highspeed",    "MINIMAX_API_KEY"),
 ]
 
 _FAST_BASE_URLS = {
     "xai":     "https://api.x.ai/v1",
     "mistral": "https://api.mistral.ai/v1",
+    "minimax": "https://api.minimax.chat/v1",
 }
 
 _VENDOR_SDK_FAST = {
@@ -3715,14 +3738,15 @@ _VENDOR_SDK_FAST = {
     "google":    lambda provider, model, key: GoogleAdapter(),
     "xai":       lambda provider, model, key: OpenAICompatibleAdapter(provider, model, key, _FAST_BASE_URLS["xai"]),
     "mistral":   lambda provider, model, key: OpenAICompatibleAdapter(provider, model, key, _FAST_BASE_URLS["mistral"]),
+    "minimax":   lambda provider, model, key: OpenAICompatibleAdapter(provider, model, key, _FAST_BASE_URLS["minimax"]),
 }
 
 
-def load_fast_adapters(skip_providers=None) -> list:
+def load_fast_adapters(skip_providers=None, provider_allowlist=None) -> list:
     """
-    Build the fast adapter pool using lighter models.
+    Build the HoloChat adapter pool using the historical fast-loader seam.
     Each adapter is constructed normally but its model_id is overridden
-    to the fast-tier variant before being added to the pool.
+    to the HoloChat-selected variant before being added to the pool.
 
     Falls back gracefully: if a key isn't set, that provider is skipped.
     skip_providers: optional set/list of provider names to exclude (e.g. {"google"}).
@@ -3730,10 +3754,14 @@ def load_fast_adapters(skip_providers=None) -> list:
     standard active pool.
     """
     skip = set(skip_providers or [])
+    allow = _normalized_provider_allowlist(provider_allowlist)
     fast = []
     for provider, model_env, model_default, key_env in _FAST_MODEL_REGISTRY:
         if provider in skip:
             logger.info(f"Fast pool: skipping {provider} — excluded via skip_providers")
+            continue
+        if allow is not None and provider not in allow:
+            logger.info(f"Fast pool: skipping {provider} — excluded via provider_allowlist")
             continue
         api_key = os.getenv(key_env)
         if not api_key:
@@ -3741,7 +3769,7 @@ def load_fast_adapters(skip_providers=None) -> list:
             continue
         model_id = os.getenv(model_env, model_default)
         adapter  = _VENDOR_SDK_FAST[provider](provider, model_id, api_key)
-        # Override model_id to the fast variant (vendor SDKs set their own default)
+        # Override model_id to the HoloChat variant (vendor SDKs set their own default).
         adapter.model_id = model_id
         fast.append(adapter)
 

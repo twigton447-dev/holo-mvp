@@ -25,7 +25,14 @@ from holochat_context_governor import (
     state_context_value,
 )
 from holo_state import GovArcState
-from llm_adapters import AnthropicAdapter, GOVERNOR_SYSTEM_PROMPT, HOLO_CHAT_SYSTEM_PROMPT
+from llm_adapters import (
+    AnthropicAdapter,
+    GOVERNOR_SYSTEM_PROMPT,
+    HOLO_CHAT_SYSTEM_PROMPT,
+    _FAST_MODEL_REGISTRY,
+    _MODEL_REGISTRY,
+    _normalized_provider_allowlist,
+)
 
 
 @dataclass
@@ -197,11 +204,9 @@ class FailingAdapter(FakeAdapter):
 
 def _mini_pool():
     return [
-        FakeAdapter("openai", "gpt-4o-mini"),
-        FakeAdapter("anthropic", "claude-haiku-4-5-20251001"),
-        FakeAdapter("google", "gemini-2.5-flash-lite"),
-        FakeAdapter("xai", "grok-3-mini"),
-        FakeAdapter("mistral", "mistral-small-latest"),
+        FakeAdapter("openai", "gpt-5.5"),
+        FakeAdapter("xai", "grok-4.3"),
+        FakeAdapter("minimax", "MiniMax-M2.5-highspeed"),
     ]
 
 
@@ -215,13 +220,73 @@ def test_default_runtime_profile_is_mini_only(monkeypatch):
 
     assert profile == "mini_only"
     assert [adapter.model_id for adapter in active] == [
-        "gpt-4o-mini",
-        "claude-haiku-4-5-20251001",
-        "gemini-2.5-flash-lite",
-        "grok-3-mini",
-        "mistral-small-latest",
+        "gpt-5.5",
+        "grok-4.3",
+        "MiniMax-M2.5-highspeed",
     ]
     assert bench == []
+
+
+def test_holochat_default_model_provider_allowlist_is_openai_xai_minimax(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_RUNTIME_PROFILE", raising=False)
+    monkeypatch.delenv("HOLOCHAT_MODEL_PROVIDERS", raising=False)
+    seen = {}
+
+    def filtered_fast_loader(provider_allowlist=None):
+        seen["provider_allowlist"] = provider_allowlist
+        return [
+            FakeAdapter(provider, f"{provider}-model")
+            for provider in provider_allowlist
+        ]
+
+    profile, active, bench = _select_runtime_pools(
+        fast_loader=filtered_fast_loader,
+        frontier_loader=lambda: pytest.fail("frontier loader should not run by default"),
+    )
+
+    assert profile == "mini_only"
+    assert seen["provider_allowlist"] == ("openai", "xai", "minimax")
+    assert [adapter.provider for adapter in active] == ["openai", "xai", "minimax"]
+    assert bench == []
+
+
+def test_holochat_model_provider_allowlist_can_be_overridden(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_MODEL_PROVIDERS", "xai, openai")
+
+    def filtered_fast_loader(provider_allowlist=None):
+        return [
+            FakeAdapter(provider, f"{provider}-model")
+            for provider in provider_allowlist
+        ]
+
+    _, active, _ = _select_runtime_pools(
+        fast_loader=filtered_fast_loader,
+        frontier_loader=lambda: pytest.fail("frontier loader should not run by default"),
+    )
+
+    assert [adapter.provider for adapter in active] == ["xai", "openai"]
+
+
+def test_holochat_registry_supports_openai_xai_minimax_models():
+    standard = {entry[1]: entry[3] for entry in _MODEL_REGISTRY}
+    fast = {entry[0]: entry[2] for entry in _FAST_MODEL_REGISTRY}
+
+    assert standard["openai"] == "gpt-5.5"
+    assert standard["xai"] == "grok-4.3"
+    assert standard["minimax"] == "MiniMax-M2.5-highspeed"
+    assert fast["openai"] == "gpt-5.5"
+    assert fast["xai"] == "grok-4.3"
+    assert fast["minimax"] == "MiniMax-M2.5-highspeed"
+
+
+def test_holochat_provider_allowlist_normalizes_csv_and_sequences():
+    assert _normalized_provider_allowlist("OpenAI, xAI, minimax") == {
+        "openai",
+        "xai",
+        "minimax",
+    }
+    assert _normalized_provider_allowlist([" openai ", ""]) == {"openai"}
+    assert _normalized_provider_allowlist(None) is None
 
 
 def test_mini_only_does_not_fall_back_to_frontier_when_empty():
@@ -234,8 +299,8 @@ def test_mini_only_does_not_fall_back_to_frontier_when_empty():
 
 
 def test_explicit_frontier_profile_uses_legacy_loader():
-    frontier_active = [FakeAdapter("openai", "gpt-5.4")]
-    frontier_bench = [FakeAdapter("xai", "grok-3")]
+    frontier_active = [FakeAdapter("openai", "gpt-5.5")]
+    frontier_bench = [FakeAdapter("xai", "grok-4.3")]
 
     profile, active, bench = _select_runtime_pools(
         "frontier_active",
@@ -250,8 +315,8 @@ def test_explicit_frontier_profile_uses_legacy_loader():
 
 def test_balanced_profile_uses_mini_pool_with_frontier_assist_pool():
     mini_pool = _mini_pool()
-    frontier_active = [FakeAdapter("openai", "gpt-5.4")]
-    frontier_bench = [FakeAdapter("xai", "grok-3")]
+    frontier_active = [FakeAdapter("openai", "gpt-5.5")]
+    frontier_bench = [FakeAdapter("xai", "grok-4.3")]
 
     profile, active, bench = _select_runtime_pools(
         "balanced",
@@ -280,14 +345,14 @@ def test_runtime_metadata_reports_balanced_frontier_assist():
     metadata = _runtime_metadata(
         "balanced",
         _mini_pool(),
-        [FakeAdapter("openai", "gpt-5.4"), FakeAdapter("xai", "grok-3")],
+        [FakeAdapter("openai", "gpt-5.5"), FakeAdapter("xai", "grok-4.3")],
     )
 
     assert metadata["runtime_profile"] == "balanced"
     assert metadata["frontier_enabled"] is True
     assert metadata["frontier_assist_enabled"] is True
     assert metadata["fallback_policy"] == "gov_triggered_frontier_assist"
-    assert len(metadata["active_pool"]) == 5
+    assert len(metadata["active_pool"]) == 3
     assert len(metadata["bench_pool"]) == 2
 
 
@@ -306,11 +371,9 @@ def test_holochat_engine_init_uses_mini_loader(monkeypatch):
 
     assert engine._runtime_profile == "mini_only"
     assert [adapter.model_id for adapter in engine._adapters] == [
-        "gpt-4o-mini",
-        "claude-haiku-4-5-20251001",
-        "gemini-2.5-flash-lite",
-        "grok-3-mini",
-        "mistral-small-latest",
+        "gpt-5.5",
+        "grok-4.3",
+        "MiniMax-M2.5-highspeed",
     ]
     assert engine._bench == []
 
@@ -347,10 +410,10 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["active_pool_count"] == len(result["runtime"]["active_pool"])
     assert result["runtime"]["selected_analyst"] == {
         "provider": "openai",
-        "model": "gpt-4o-mini",
+        "model": "gpt-5.5",
     }
     assert result["runtime"]["selected_provider"] == "openai"
-    assert result["runtime"]["selected_model"] == "gpt-4o-mini"
+    assert result["runtime"]["selected_model"] == "gpt-5.5"
     assert result["runtime"]["governor_present"] is True
     assert result["runtime"]["governor_checked_this_turn"] is True
     assert result["runtime"]["governor_mode"] == "active"
@@ -750,7 +813,7 @@ def test_balanced_runtime_uses_frontier_assist_for_complex_turn(monkeypatch):
     engine._runtime_profile = "balanced"
     engine._adapters = _mini_pool()
     engine._bench = [
-        FakeAdapter("openai", "gpt-5.4"),
+        FakeAdapter("openai", "gpt-5.5"),
         FakeAdapter("anthropic", "claude-sonnet-4-6"),
     ]
     engine._governor = FakeGovernor()

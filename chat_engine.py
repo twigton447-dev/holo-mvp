@@ -10,6 +10,7 @@ All providers speak as Holo using the unified persona prompt.
 """
 
 import logging
+import inspect
 import os
 import random
 import re as _re
@@ -132,6 +133,7 @@ class ChatSession:
 DEFAULT_RUNTIME_PROFILE = "mini_only"
 BALANCED_RUNTIME_PROFILE = "balanced"
 FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
+DEFAULT_HOLOCHAT_MODEL_PROVIDERS = ("openai", "xai", "minimax")
 DEFAULT_THREAD_HANDOFF_MIN_TURNS = 24
 THREAD_HANDOFF_FORCE_SCORE = 5
 
@@ -198,6 +200,25 @@ THREAD_HANDOFF_MESSAGE = "This thread is getting long. Start a fresh thread to k
 
 def _holochat_runtime_profile() -> str:
     return (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
+
+
+def _holochat_model_providers() -> tuple[str, ...]:
+    raw = os.getenv("HOLOCHAT_MODEL_PROVIDERS")
+    if raw is None:
+        return DEFAULT_HOLOCHAT_MODEL_PROVIDERS
+    providers = tuple(
+        provider.strip().lower()
+        for provider in raw.split(",")
+        if provider.strip()
+    )
+    return providers or DEFAULT_HOLOCHAT_MODEL_PROVIDERS
+
+
+def _call_pool_loader(loader: Any, provider_allowlist: tuple[str, ...]) -> Any:
+    params = inspect.signature(loader).parameters
+    if "provider_allowlist" in params:
+        return loader(provider_allowlist=provider_allowlist)
+    return loader()
 
 
 def _contains_any(text: str, terms: tuple[str, ...]) -> bool:
@@ -1053,8 +1074,9 @@ def _select_runtime_pools(
     fast_loader = fast_loader or load_fast_adapters
     frontier_loader = frontier_loader or load_adapters
     runtime_profile = (profile or _holochat_runtime_profile()).strip().lower()
+    provider_allowlist = _holochat_model_providers()
     if runtime_profile == "mini_only":
-        active_pool = fast_loader()
+        active_pool = _call_pool_loader(fast_loader, provider_allowlist)
         if not active_pool:
             raise RuntimeError(
                 "HoloChat mini_only runtime has no mini adapters; "
@@ -1062,14 +1084,20 @@ def _select_runtime_pools(
             )
         return runtime_profile, active_pool, []
     if runtime_profile == BALANCED_RUNTIME_PROFILE:
-        active_pool = fast_loader()
+        active_pool = _call_pool_loader(fast_loader, provider_allowlist)
         if not active_pool:
             raise RuntimeError("HoloChat balanced runtime has no mini adapters.")
-        frontier_active, frontier_bench = frontier_loader()
+        frontier_active, frontier_bench = _call_pool_loader(
+            frontier_loader,
+            provider_allowlist,
+        )
         frontier_pool = [*frontier_active, *frontier_bench]
         return runtime_profile, active_pool, frontier_pool
     if runtime_profile in FRONTIER_RUNTIME_PROFILES:
-        active_pool, bench_pool = frontier_loader()
+        active_pool, bench_pool = _call_pool_loader(
+            frontier_loader,
+            provider_allowlist,
+        )
         if not active_pool:
             raise RuntimeError("HoloChat frontier runtime has no active adapters.")
         return runtime_profile, active_pool, bench_pool

@@ -10,10 +10,34 @@ from typing import Any
 FACTORY_DIR = Path(__file__).resolve().parent
 REPO_ROOT = FACTORY_DIR.parents[1]
 MANIFEST_PATH = FACTORY_DIR / "mini_scouts/TEN_DOMAIN_PACKET_SUITE_MANIFEST.json"
-SCORING_LOCK = FACTORY_DIR / "scoring_policies/unified_artifact_scoring_protocol_v5_2_structural_epistemic.lock.json"
+SCORING_LOCK = FACTORY_DIR / "scoring_policies/ACTIVE_SCORING_PROTOCOL.lock.json"
 RUNNER_PATH = FACTORY_DIR / "run_holobuild_mini_scout.py"
 CONFIG_DIR = FACTORY_DIR / "configs"
+D3_SUCCESS_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_d3_success_v1.lock.json"
 EXPECTED_DOMAINS = {f"D{i}" for i in range(1, 11)}
+EXPECTED_MINI_SOLO_MODELS = ["openai:gpt-4o-mini"]
+EXPECTED_HOLO_AGENT_MODELS = {
+    "frontier_holo_v1": [
+        "anthropic:claude-opus-4-8",
+        "google:gemini-3.1-pro-preview",
+        "openai:gpt-5.5",
+    ],
+    "mini_holo_v1": [
+        "xai:grok-3-mini",
+        "minimax:MiniMax-M2.5-highspeed",
+        "openai:gpt-4o-mini",
+    ],
+}
+EXPECTED_COHORT_NAMES = {
+    "frontier_holo_v1": "HoloFull",
+    "frontier_solo_v1": "SoloFull",
+    "mini_holo_v1": "HoloMini",
+    "mini_solo_v1": "SoloMini",
+}
+EXPECTED_HOLOGOV_PROFILE = {
+    "frontier_holo_v1": "HoloGov-C",
+    "mini_holo_v1": "HoloGov-C",
+}
 
 
 def sha_file(path: Path) -> str:
@@ -43,6 +67,56 @@ def run_packet_validator(path: Path) -> dict[str, Any]:
     return payload
 
 
+def provider_models(cfg: dict[str, Any]) -> list[str]:
+    return [item["provider_model"] for item in cfg.get("model_pool", []) if item.get("provider_model")]
+
+
+def governor_models(cfg: dict[str, Any]) -> list[str]:
+    return list(cfg.get("governor_model_pool") or [])
+
+
+def validate_config(cfg: dict[str, Any], errors: list[str]) -> None:
+    config_id = cfg.get("config_id")
+    models = provider_models(cfg)
+    condition_type = cfg.get("condition_type")
+    live_ready = cfg.get("live_ready")
+    if config_id in EXPECTED_COHORT_NAMES:
+        expected_name = EXPECTED_COHORT_NAMES[config_id]
+        if cfg.get("cohort_name") != expected_name:
+            errors.append(f"{config_id} cohort_name must be {expected_name}")
+        if expected_name not in cfg.get("condition_aliases", []):
+            errors.append(f"{config_id} condition_aliases must include {expected_name}")
+    if config_id in EXPECTED_HOLOGOV_PROFILE:
+        expected_profile = EXPECTED_HOLOGOV_PROFILE[config_id]
+        if cfg.get("hologov_profile") != expected_profile:
+            errors.append(f"{config_id} hologov_profile must be {expected_profile}")
+    if config_id in EXPECTED_HOLO_AGENT_MODELS:
+        expected_models = EXPECTED_HOLO_AGENT_MODELS[config_id]
+        if models != expected_models:
+            errors.append(f"{config_id} model_pool must be the three HoloAgent candidates {expected_models}")
+        if governor_models(cfg) != expected_models:
+            errors.append(f"{config_id} governor_model_pool must match the three HoloAgent candidates")
+        if cfg.get("model_selection_policy") != "session_random_three_model_permutation_repeated_for_turn_budget":
+            errors.append(f"{config_id} model_selection_policy must be session-randomized")
+    if live_ready:
+        if cfg.get("provider_call_budget") != 6:
+            errors.append(f"{config_id} live_ready requires provider_call_budget=6")
+        if condition_type == "holo" and len(models) != 3:
+            errors.append(f"{config_id} live_ready holo config requires exactly 3 HoloAgent models")
+        if condition_type == "solo" and len(models) != 1:
+            errors.append(f"{config_id} live_ready solo config requires exactly 1 provider model")
+    if config_id == "mini_holo_v1":
+        if cfg.get("architecture_mode") != "patent_aligned_v4":
+            errors.append("mini_holo_v1 must use patent_aligned_v4")
+        if not live_ready:
+            errors.append("mini_holo_v1 must be live_ready")
+    if config_id == "mini_solo_v1":
+        if models != EXPECTED_MINI_SOLO_MODELS:
+            errors.append("mini_solo_v1 model_pool must be openai:gpt-4o-mini")
+        if not live_ready:
+            errors.append("mini_solo_v1 must be live_ready")
+
+
 def main() -> int:
     errors: list[str] = []
     if not MANIFEST_PATH.exists():
@@ -56,8 +130,59 @@ def main() -> int:
         errors.append(f"expected D1-D10 domains, got {sorted(domain_ids)}")
     if not RUNNER_PATH.exists():
         errors.append(f"missing runner: {repo_rel(RUNNER_PATH)}")
+        runner_text = ""
+    else:
+        runner_text = RUNNER_PATH.read_text(encoding="utf-8")
+        if 'DEFAULT_HOLO_CONTEXT_PROFILE = "full_registry"' not in runner_text:
+            errors.append("runner must default proof-eligible Holo context to full_registry")
+        if "retrieved_ids_for_holo_turn" not in runner_text:
+            errors.append("runner must retrieve Holo pinned artifacts through retrieved_ids_for_holo_turn")
+        if '"full_registry"' not in runner_text or '"latest_only"' not in runner_text:
+            errors.append("runner must expose full_registry and latest_only Holo context profiles")
+        if "CONTEXT_GOVERNOR_INSTRUCTIONS" not in runner_text:
+            errors.append("runner must inject CONTEXT_GOVERNOR_INSTRUCTIONS into Holo prompt cards")
+        if "GOV_NOTES" not in runner_text:
+            errors.append("runner must inject GOV_NOTES into Holo prompt cards and state")
+        if "context_governor_instructions_hash" not in runner_text or "gov_notes_hash" not in runner_text:
+            errors.append("runner must record Gov instruction and Gov note hashes in architecture evidence")
+        if "preferred_holo_final_model" not in runner_text:
+            errors.append("runner must pin Holo final synthesis to a preferred final writer model")
+        if "MAX_HOLO_FINAL_REPAIR_ATTEMPTS = 1" not in runner_text:
+            errors.append("runner must bound Holo final word-band repair to one attempt")
+        if "FINAL_ARTIFACT_WORD_BAND_REPAIR" not in runner_text:
+            errors.append("runner must include an auditable final artifact word-band repair prompt")
+        if "--holo-session-template" not in runner_text or "d3_success_v1" not in runner_text:
+            errors.append("runner must support the locked d3_success_v1 Holo session template")
     if not SCORING_LOCK.exists():
         errors.append(f"missing scoring lock: {repo_rel(SCORING_LOCK)}")
+    template_lock_result = None
+    if not D3_SUCCESS_TEMPLATE_LOCK.exists():
+        errors.append(f"missing D3 success Holo session template lock: {repo_rel(D3_SUCCESS_TEMPLATE_LOCK)}")
+    else:
+        template_lock = read_json(D3_SUCCESS_TEMPLATE_LOCK)
+        expected_turns = [
+            "google:gemini-3.1-pro-preview",
+            "openai:gpt-5.5",
+            "anthropic:claude-opus-4-8",
+            "google:gemini-3.1-pro-preview",
+            "openai:gpt-5.5",
+            "anthropic:claude-opus-4-8",
+        ]
+        if template_lock.get("template_id") != "d3_success_v1":
+            errors.append("D3 success Holo session template lock has wrong template_id")
+        if template_lock.get("holo_agent_turn_models") != expected_turns:
+            errors.append("D3 success Holo session template lock has wrong turn model order")
+        schedule = template_lock.get("hologov_schedule") or []
+        if not schedule or schedule[0].get("governor_model") != "openai:gpt-5.5":
+            errors.append("D3 success Holo session template lock must use openai:gpt-5.5 governor")
+        if template_lock.get("final_synthesis_model") != "anthropic:claude-opus-4-8":
+            errors.append("D3 success Holo session template lock must use Anthropic final synthesis")
+        template_lock_result = {
+            "path": repo_rel(D3_SUCCESS_TEMPLATE_LOCK),
+            "hash": sha_file(D3_SUCCESS_TEMPLATE_LOCK),
+            "template_id": template_lock.get("template_id"),
+            "holo_context_profile_required": template_lock.get("holo_context_profile_required"),
+        }
     config_results = {}
     for name in ["frontier_solo_v1.json", "frontier_holo_v1.json", "mini_solo_v1.stub.json", "mini_holo_v1.stub.json"]:
         path = CONFIG_DIR / name
@@ -65,13 +190,19 @@ def main() -> int:
             errors.append(f"missing config: {repo_rel(path)}")
             continue
         cfg = read_json(path)
+        validate_config(cfg, errors)
         config_results[cfg["config_id"]] = {
             "path": repo_rel(path),
             "hash": sha_file(path),
+            "cohort_name": cfg.get("cohort_name"),
             "live_ready": cfg.get("live_ready"),
             "condition_type": cfg.get("condition_type"),
             "architecture_mode": cfg.get("architecture_mode"),
+            "hologov_profile": cfg.get("hologov_profile"),
+            "governor_model_pool": governor_models(cfg),
             "proof_credit_eligible": cfg.get("proof_credit_eligible"),
+            "provider_call_budget": cfg.get("provider_call_budget"),
+            "model_pool": provider_models(cfg),
         }
     holo_cfg = config_results.get("frontier_holo_v1", {})
     if holo_cfg.get("architecture_mode") != "patent_aligned_v4":
@@ -110,6 +241,10 @@ def main() -> int:
         "packet_results": packet_results,
         "runner_path": repo_rel(RUNNER_PATH),
         "runner_hash": sha_file(RUNNER_PATH) if RUNNER_PATH.exists() else None,
+        "holo_context_profile_default": "full_registry",
+        "context_governor_prompt_surface_required": True,
+        "holo_final_synthesis_policy": "preferred_final_model_with_one_bounded_word_band_repair",
+        "d3_success_holo_session_template_lock": template_lock_result,
         "scoring_lock_path": repo_rel(SCORING_LOCK),
         "scoring_lock_hash": sha_file(SCORING_LOCK) if SCORING_LOCK.exists() else None,
         "proof_holo_mode": "patent_aligned_v4",

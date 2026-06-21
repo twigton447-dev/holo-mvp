@@ -1,41 +1,46 @@
 {
   "config_id": "frontier_holo_v1",
+  "cohort_name": "HoloFull",
   "condition_aliases": [
+    "HoloFull",
     "holo_build_arch",
     "frontier_holo_v1"
   ],
   "condition_type": "holo",
   "architecture_mode": "patent_aligned_v4",
+  "hologov_profile": "HoloGov-C",
+  "governor_model_pool": [
+    "anthropic:claude-opus-4-8",
+    "google:gemini-3.1-pro-preview",
+    "openai:gpt-5.5"
+  ],
   "model_pool": [
     {
-      "role": "initial_drafter",
+      "role": "holo_agent_candidate",
       "provider_model": "anthropic:claude-opus-4-8"
     },
     {
-      "role": "evidence_attacker",
+      "role": "holo_agent_candidate",
       "provider_model": "google:gemini-3.1-pro-preview"
     },
     {
-      "role": "source_fidelity_reviewer",
-      "provider_model": "openai:gpt-5.5"
-    },
-    {
-      "role": "operational_reviewer",
-      "provider_model": "anthropic:claude-opus-4-8"
-    },
-    {
-      "role": "claim_discipline_reducer",
-      "provider_model": "google:gemini-3.1-pro-preview"
-    },
-    {
-      "role": "final_synthesis",
+      "role": "holo_agent_candidate",
       "provider_model": "openai:gpt-5.5"
     }
   ],
-  "model_selection_policy": "fixed_six_turn_adversarial_sequence",
+  "model_selection_policy": "session_random_three_model_permutation_repeated_for_turn_budget",
   "turn_policy": {
     "turn_count": 6,
+    "holo_agent_rotation": "random_permutation_of_three_agents_repeated_for_six_turn_session",
     "context_governor": "internal_deterministic_state_management_layer",
+    "hologov_profile": "HoloGov-C",
+    "hologov_selection_policy": "random_governor_from_governor_model_pool",
+    "hologov_tenure_policy": {
+      "min_turns": 7,
+      "max_turns": 11,
+      "swap_policy": "after_tenure_select_random_different_model_from_pool_when_possible",
+      "six_turn_effect": "selected_governor_remains_for_entire_session"
+    },
     "requires_state_object_injection": true,
     "requires_baton_pass_injection": true,
     "requires_artifact_registry_injection": true,

@@ -1,0 +1,220 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": true,
+  "definitions": {
+    "artifact_score": {
+      "additionalProperties": true,
+      "properties": {
+        "artifact_label": {
+          "type": "string"
+        },
+        "avoided_failure_modes": {
+          "type": "array"
+        },
+        "caps_or_ceilings_applied": {
+          "type": "array"
+        },
+        "claim_ledger": {
+          "items": {
+            "$ref": "#/definitions/claim"
+          },
+          "maxItems": 15,
+          "minItems": 8,
+          "type": "array"
+        },
+        "epistemic_score_50": {
+          "maximum": 50,
+          "minimum": 0,
+          "type": "number"
+        },
+        "invented_or_false_source_attributions": {
+          "type": "array"
+        },
+        "major_defects": {
+          "type": "array"
+        },
+        "major_strengths": {
+          "type": "array"
+        },
+        "negative_space_misses": {
+          "type": "array"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "raw_score_0_100": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        "score_0_100": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        "source_laundering_findings": {
+          "type": "array"
+        },
+        "structural_score_50": {
+          "maximum": 50,
+          "minimum": 0,
+          "type": "number"
+        },
+        "tempting_but_rejected_claims": {
+          "type": "array"
+        },
+        "unsupported_major_claims": {
+          "type": "array"
+        },
+        "verified_word_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "word_band_pass": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "would_survive_expert_review": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "artifact_label",
+        "verified_word_count",
+        "word_band_pass",
+        "structural_score_50",
+        "epistemic_score_50",
+        "raw_score_0_100",
+        "score_0_100",
+        "claim_ledger",
+        "caps_or_ceilings_applied",
+        "invented_or_false_source_attributions",
+        "unsupported_major_claims",
+        "source_laundering_findings",
+        "negative_space_misses",
+        "avoided_failure_modes",
+        "major_strengths",
+        "major_defects",
+        "would_survive_expert_review",
+        "rationale"
+      ],
+      "type": "object"
+    },
+    "claim": {
+      "additionalProperties": true,
+      "properties": {
+        "cap_or_ceiling_trigger_if_any": {
+          "type": "string"
+        },
+        "cited_sources": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "claim_text": {
+          "type": "string"
+        },
+        "claim_type": {
+          "enum": [
+            "factual",
+            "causal",
+            "regulatory",
+            "operational",
+            "statistical",
+            "recommendation",
+            "source-status"
+          ]
+        },
+        "exact_source_id_quality": {
+          "enum": [
+            "exact_full_ids",
+            "abbreviated_ids",
+            "vague_reference",
+            "no_source_reference"
+          ]
+        },
+        "missing_caveat": {
+          "type": "string"
+        },
+        "overclaim_issue": {
+          "type": "boolean"
+        },
+        "severity": {
+          "enum": [
+            "none",
+            "minor",
+            "material",
+            "fatal"
+          ]
+        },
+        "source_boundary_issue": {
+          "type": "boolean"
+        },
+        "source_support_status": {
+          "enum": [
+            "supported",
+            "partially_supported",
+            "unsupported",
+            "contradicted",
+            "not_in_packet"
+          ]
+        },
+        "stale_or_limited_evidence_issue": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "claim_text",
+        "claim_type",
+        "cited_sources",
+        "exact_source_id_quality",
+        "source_support_status",
+        "source_boundary_issue",
+        "overclaim_issue",
+        "stale_or_limited_evidence_issue",
+        "missing_caveat",
+        "severity",
+        "cap_or_ceiling_trigger_if_any"
+      ],
+      "type": "object"
+    }
+  },
+  "properties": {
+    "artifact_scores": {
+      "items": {
+        "$ref": "#/definitions/artifact_score"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "dimension_rankings": {
+      "type": "object"
+    },
+    "forced_rank_order_best_to_worst": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pairwise_winners": {
+      "type": "object"
+    },
+    "protocol_id": {
+      "const": "unified_artifact_scoring_protocol_v6_structural_epistemic"
+    },
+    "score_spread_explanation": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "protocol_id",
+    "artifact_scores"
+  ],
+  "title": "Unified Artifact Scoring Protocol v6 Structural Epistemic Score",
+  "type": "object"
+}

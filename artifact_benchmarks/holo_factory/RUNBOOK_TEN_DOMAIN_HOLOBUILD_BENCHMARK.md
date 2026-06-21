@@ -67,3 +67,6 @@ unset HOLO_ALLOW_LIVE
 - No provider calls unless `--live` and `HOLO_ALLOW_LIVE=1` are both present.
 - No push unless explicitly approved.
 - Scoring protocol lives separately under `artifact_benchmarks/holo_factory/scoring_policies/`; packets carry deterministic admission gates only.
+- Active scoring lock for all tests: `artifact_benchmarks/holo_factory/scoring_policies/ACTIVE_SCORING_PROTOCOL.lock.json`.
+- Current active protocol: `unified_artifact_scoring_protocol_v6_structural_epistemic`.
+- Do not score new benchmark outputs with older v4/v5/v5.1/v5.2 protocols unless the run is explicitly labeled historical/regression/autopsy.

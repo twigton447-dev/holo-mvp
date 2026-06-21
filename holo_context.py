@@ -591,10 +591,11 @@ class HoloContextBuilder:
             "settled_decisions": data.get("settled_decisions", []),
             "artifact_registry": data.get("artifact_registry", []),
             "required_tools": data.get("required_tools", []),
+            "baton_pass": data.get("baton_pass", {}),
             "thread_health": data.get("thread_health"),
             "state_audit": data.get("state_audit"),
         }
-        return "HOLOSTATE v0.1:\n" + json.dumps(compact, sort_keys=True, separators=(",", ":"))
+        return f"HOLOSTATE {holo_state.schema_version}:\n" + json.dumps(compact, sort_keys=True, separators=(",", ":"))
 
     @staticmethod
     def _route_block(route_decision: RouteDecision) -> str:

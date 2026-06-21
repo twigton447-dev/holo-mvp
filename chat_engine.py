@@ -28,6 +28,15 @@ from holo_context import (
     estimate_context_tokens,
 )
 from holo_router import HoloRouter, PreviousRoute, RouteDecision
+from holochat_context_governor import (
+    HOLOCHAT_STATE_CONTEXT_KEY,
+    build_holochat_state,
+    generate_auto_reseed_payload,
+    load_state_from_capsule_context,
+    should_auto_compact,
+    stable_hash,
+    state_context_value,
+)
 from holo_state import GovArcState, HoloState, RequiredTools
 from holo_trace import HoloTraceRecord, log_trace
 from llm_adapters import (
@@ -69,9 +78,12 @@ class ChatSession:
     )
     holo4dna_previous_route: Optional[PreviousRoute] = None
     gov_arc_state: GovArcState = field(default_factory=GovArcState)
+    holochat_state: Optional[HoloState] = None
     handoff_artifact_saved: bool = False
     handoff_suggested: bool = False
     autocompact_attempted: bool = False
+    auto_reseed_applied: bool = False
+    auto_reseed_hash: Optional[str] = None
 
     @property
     def thread_health_score(self) -> int:
@@ -428,14 +440,72 @@ def _apply_handoff_transition_to_session(
     return safe
 
 
+def _holochat_state_seed_block(state: Optional[HoloState]) -> str:
+    if not state:
+        return ""
+    return generate_auto_reseed_payload(state)
+
+
+def _holochat_state_runtime_metadata(state: Optional[HoloState]) -> dict[str, Any]:
+    if not state:
+        return {
+            "state_object_present": False,
+            "state_object_hash": None,
+            "rolling_summary_hash": None,
+            "baton_hash": None,
+            "artifact_registry_hash": None,
+            "state_audit_trusted": False,
+            "state_audit_warnings": ["state_not_available_yet"],
+        }
+    audit = state.state_audit
+    warnings = list(audit.notes or [])
+    warnings.extend(audit.missing_required_fields or [])
+    warnings.extend(audit.contradiction_warnings or [])
+    if audit.overlarge_reseed:
+        warnings.append("overlarge_reseed")
+    if audit.missing_artifact_references:
+        warnings.append("missing_artifact_references")
+    return {
+        "state_object_present": True,
+        "state_object_id": state.state_id,
+        "state_object_hash": audit.state_hash,
+        "rolling_summary_hash": audit.summary_hash,
+        "baton_hash": audit.baton_hash,
+        "artifact_registry_hash": audit.artifact_registry_hash,
+        "reseed_hash": audit.reseed_hash,
+        "state_audit_trusted": audit.trusted,
+        "state_audit_warnings": warnings,
+        "artifact_registry_count": len(state.artifact_registry),
+    }
+
+
+def _persist_holochat_state(brain: Any, capsule_id: Optional[str], state: Optional[HoloState]) -> None:
+    if not capsule_id or not state:
+        return
+    setter = getattr(brain, "set_capsule_context", None)
+    if not setter:
+        return
+    setter(capsule_id, HOLOCHAT_STATE_CONTEXT_KEY, state_context_value(state))
+
+
 def _claim_autocompact_for_context_window(
     session: "ChatSession",
     *,
     capsule_id: Optional[str],
     incognito: bool,
+    context_budget: Optional[dict[str, Any]] = None,
 ) -> bool:
     """Allow one consolidation/reseed attempt per session/context window."""
-    if not capsule_id or incognito or not _thread_handoff_ready(session):
+    if not capsule_id or incognito:
+        return False
+    compact_ready = _thread_handoff_ready(session)
+    if context_budget is not None:
+        compact_ready = compact_ready or should_auto_compact(
+            context_budget=context_budget,
+            thread_health_level=session.thread_health_level,
+            thread_health_score=session.thread_health_score,
+        )
+    if not compact_ready:
         return False
     if session.autocompact_attempted:
         return False
@@ -821,10 +891,13 @@ def _turn_runtime_metadata(
     frontier_assist: Optional[dict[str, Any]] = None,
     timing_breakdown: Optional[dict[str, Any]] = None,
     handoff_transition: Optional[dict[str, Any]] = None,
+    holochat_state: Optional[HoloState] = None,
+    auto_reseed_present: bool = False,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
     handoff_seed_present = bool(_safe_handoff_transition(handoff_transition))
+    state_meta = _holochat_state_runtime_metadata(holochat_state)
     metadata.update(
         {
             "analyst_pool_role": "analyst",
@@ -837,16 +910,22 @@ def _turn_runtime_metadata(
             "context_delivery_mode": "capped_ranked_prompt_slice",
             "lossless_memory_store": "HoloBrain/capsule",
             "analyst_receives_full_memory": False,
-            "structured_state_object_mode": "shadow",
-            "gov_arc_state_mode": "explicit_shadow",
-            "baton_pass_mode": "shadow",
+            "structured_state_object_mode": "active",
+            "gov_arc_state_mode": "active_private",
+            "baton_pass_mode": "active",
             "holo4dna_mode": "enabled"
             if _holo4dna_enabled()
             else ("shadow" if _holo4dna_shadow_enabled() else "off"),
-            "reseed_present": handoff_seed_present,
-            "reseed_mode": "thread_handoff_seed" if handoff_seed_present else "off",
+            "reseed_present": bool(handoff_seed_present or auto_reseed_present),
+            "reseed_mode": (
+                "thread_handoff_seed"
+                if handoff_seed_present
+                else ("durable_state_auto_reseed" if auto_reseed_present else "off")
+            ),
             "thread_handoff_seed_present": handoff_seed_present,
-            "autoreseed_enabled": False,
+            "durable_state_auto_reseed_present": bool(auto_reseed_present),
+            "autoreseed_enabled": True,
+            **state_meta,
         }
     )
     if usage is not None:
@@ -1050,7 +1129,19 @@ class HoloChatEngine:
             capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
+            durable_state   = load_state_from_capsule_context(capsule_context)
+            if durable_state and session.turn_count == 0:
+                session.holochat_state = durable_state
         _add_timing(timings, "memory_context_ms", memory_timer)
+
+        auto_reseed_present = False
+        holochat_state_block = ""
+        if not incognito and session.holochat_state:
+            holochat_state_block = _holochat_state_seed_block(session.holochat_state)
+            if session.turn_count == 0:
+                auto_reseed_present = bool(holochat_state_block)
+                session.auto_reseed_applied = auto_reseed_present
+                session.auto_reseed_hash = stable_hash(holochat_state_block) if holochat_state_block else None
 
         active_handoff_transition = None if incognito else _apply_handoff_transition_to_session(
             session,
@@ -1161,6 +1252,7 @@ class HoloChatEngine:
             system_prompt += (
                 "\n\n" + _health_context(session)
                 + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
+                + ("\n\n" + holochat_state_block if holochat_state_block else "")
                 + ("\n\n" + _thread_handoff_transition_block(active_handoff_transition) if active_handoff_transition else "")
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
@@ -1180,6 +1272,7 @@ class HoloChatEngine:
             incognito=incognito,
             runtime_identity=runtime_identity,
             handoff_transition=active_handoff_transition,
+            holochat_state_block=holochat_state_block,
         )
 
         holo4dna_shadow = None
@@ -1336,6 +1429,7 @@ class HoloChatEngine:
             session,
             capsule_id=capsule_id,
             incognito=incognito,
+            context_budget=context_budget,
         ):
             def _consolidate():
                 try:
@@ -1406,6 +1500,27 @@ class HoloChatEngine:
             memory_writes_count=memory_writes_count,
             handoff=handoff,
         )
+        state_auto_compact = should_auto_compact(
+            context_budget=context_budget,
+            thread_health_level=session.thread_health_level,
+            thread_health_score=session.thread_health_score,
+        )
+        if not incognito:
+            session.holochat_state = build_holochat_state(
+                session_id=session.session_id,
+                capsule_id=capsule_id,
+                turn_number=session.turn_count,
+                user_message=user_message,
+                response_text=response_text,
+                previous_state=session.holochat_state,
+                artifacts_saved=artifacts_saved,
+                required_tools=_required_tools_for_turn(search_query, search_results),
+                gov_arc_state=session.gov_arc_state,
+                thread_health_score=session.thread_health_score,
+                thread_status=session.thread_status,
+                auto_compact=state_auto_compact,
+            )
+            _persist_holochat_state(self._brain, capsule_id, session.holochat_state)
 
         usage = _turn_usage_metadata(
             analyst_adapter=adapter,
@@ -1441,6 +1556,8 @@ class HoloChatEngine:
                 turn_started_at=turn_started_at,
             ),
             handoff_transition=active_handoff_transition,
+            holochat_state=session.holochat_state,
+            auto_reseed_present=auto_reseed_present,
         )
 
         return {
@@ -1502,7 +1619,19 @@ class HoloChatEngine:
             capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
+            durable_state   = load_state_from_capsule_context(capsule_context)
+            if durable_state and session.turn_count == 0:
+                session.holochat_state = durable_state
         _add_timing(timings, "memory_context_ms", memory_timer)
+
+        auto_reseed_present = False
+        holochat_state_block = ""
+        if not incognito and session.holochat_state:
+            holochat_state_block = _holochat_state_seed_block(session.holochat_state)
+            if session.turn_count == 0:
+                auto_reseed_present = bool(holochat_state_block)
+                session.auto_reseed_applied = auto_reseed_present
+                session.auto_reseed_hash = stable_hash(holochat_state_block) if holochat_state_block else None
 
         active_handoff_transition = None if incognito else _apply_handoff_transition_to_session(
             session,
@@ -1589,6 +1718,7 @@ class HoloChatEngine:
             system_prompt += (
                 "\n\n" + _health_context(session)
                 + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
+                + ("\n\n" + holochat_state_block if holochat_state_block else "")
                 + ("\n\n" + _thread_handoff_transition_block(active_handoff_transition) if active_handoff_transition else "")
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
@@ -1608,6 +1738,7 @@ class HoloChatEngine:
             incognito=incognito,
             runtime_identity=runtime_identity,
             handoff_transition=active_handoff_transition,
+            holochat_state_block=holochat_state_block,
         )
 
         holo4dna_shadow = None
@@ -1757,6 +1888,7 @@ class HoloChatEngine:
                         session,
                         capsule_id=capsule_id,
                         incognito=incognito,
+                        context_budget=context_budget,
                     ):
                         result = self._governor.consolidate_session(session.history, capsule_context, session.session_id)
                         if result.get("session_note"):
@@ -1802,6 +1934,27 @@ class HoloChatEngine:
             memory_writes_count=0,
             handoff=handoff,
         )
+        state_auto_compact = should_auto_compact(
+            context_budget=context_budget,
+            thread_health_level=session.thread_health_level,
+            thread_health_score=session.thread_health_score,
+        )
+        if not incognito:
+            session.holochat_state = build_holochat_state(
+                session_id=session.session_id,
+                capsule_id=capsule_id,
+                turn_number=session.turn_count,
+                user_message=user_message,
+                response_text=response_text,
+                previous_state=session.holochat_state,
+                artifacts_saved=artifacts_saved,
+                required_tools=_required_tools_for_turn(search_query, search_results),
+                gov_arc_state=session.gov_arc_state,
+                thread_health_score=session.thread_health_score,
+                thread_status=session.thread_status,
+                auto_compact=state_auto_compact,
+            )
+            _persist_holochat_state(self._brain, capsule_id, session.holochat_state)
 
         usage = _turn_usage_metadata(
             analyst_adapter=adapter,
@@ -1837,6 +1990,8 @@ class HoloChatEngine:
                 turn_started_at=turn_started_at,
             ),
             handoff_transition=active_handoff_transition,
+            holochat_state=session.holochat_state,
+            auto_reseed_present=auto_reseed_present,
         )
 
         yield {
@@ -1967,6 +2122,7 @@ def _runtime_context_budget(
     incognito: bool,
     runtime_identity: str,
     handoff_transition: Optional[dict[str, Any]] = None,
+    holochat_state_block: Optional[str] = None,
 ) -> dict[str, Any]:
     blocks: list[dict[str, Any]] = [
         {
@@ -2011,6 +2167,13 @@ def _runtime_context_budget(
                 },
                 {
                     "block_name": "thread_handoff_seed",
+                    "content": "",
+                    "included": False,
+                    "source_type": "system",
+                    "reason": "incognito mode",
+                },
+                {
+                    "block_name": "holochat_state_object",
                     "content": "",
                     "included": False,
                     "source_type": "system",
@@ -2062,6 +2225,15 @@ def _runtime_context_budget(
                 "included": bool(handoff_transition),
                 "source_type": "system",
                 "reason": "empty" if not handoff_transition else None,
+            }
+        )
+        blocks.append(
+            {
+                "block_name": "holochat_state_object",
+                "content": holochat_state_block or "",
+                "included": bool(holochat_state_block),
+                "source_type": "system",
+                "reason": "empty" if not holochat_state_block else None,
             }
         )
         blocks.append(
@@ -2347,7 +2519,13 @@ def _extract_and_save_artifacts(
         title = title_match.group(1).strip() if title_match else "Artifact"
         aid = brain.save_artifact(capsule_id, session_id, turn_number, title, content)
         if aid:
-            saved.append({"artifact_id": aid, "title": title, "type": "html"})
+            saved.append({
+                "artifact_id": aid,
+                "title": title,
+                "type": "html",
+                "content_hash": stable_hash(content),
+                "status": "available_by_id",
+            })
     return saved
 
 

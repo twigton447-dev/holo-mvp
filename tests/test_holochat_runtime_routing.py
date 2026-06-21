@@ -18,6 +18,7 @@ from chat_engine import (
     _runtime_metadata,
     _select_runtime_pools,
 )
+from holochat_context_governor import HOLOCHAT_STATE_CONTEXT_KEY, build_holochat_state, state_context_value
 from holo_state import GovArcState
 from llm_adapters import AnthropicAdapter, GOVERNOR_SYSTEM_PROMPT, HOLO_CHAT_SYSTEM_PROMPT
 
@@ -115,6 +116,25 @@ class MemoryHeavyBrain(FakeBrain):
             }
             for idx in range(30)
         ]
+
+
+class DurableStateBrain(FakeBrain):
+    def __init__(self):
+        super().__init__()
+        self.persisted_context = {}
+        self.seed_state = build_holochat_state(
+            session_id="prior-session",
+            capsule_id="capsule-1",
+            turn_number=8,
+            user_message="New goal: recover HoloChat auto-reseed. Do not leak env vars.",
+            response_text="Next action is validate the first prompt seed.",
+        )
+
+    def get_capsule_context(self, capsule_id):
+        return {HOLOCHAT_STATE_CONTEXT_KEY: state_context_value(self.seed_state)}
+
+    def set_capsule_context(self, capsule_id, key, value):
+        self.persisted_context[key] = value
 
 
 class CapturingAdapter(FakeAdapter):
@@ -308,12 +328,16 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["context_delivery_mode"] == "capped_ranked_prompt_slice"
     assert result["runtime"]["lossless_memory_store"] == "HoloBrain/capsule"
     assert result["runtime"]["analyst_receives_full_memory"] is False
-    assert result["runtime"]["structured_state_object_mode"] == "shadow"
-    assert result["runtime"]["baton_pass_mode"] == "shadow"
+    assert result["runtime"]["structured_state_object_mode"] == "active"
+    assert result["runtime"]["baton_pass_mode"] == "active"
     assert result["runtime"]["holo4dna_mode"] == "off"
     assert result["runtime"]["reseed_present"] is False
     assert result["runtime"]["reseed_mode"] == "off"
-    assert result["runtime"]["autoreseed_enabled"] is False
+    assert result["runtime"]["autoreseed_enabled"] is True
+    assert result["runtime"]["state_object_present"] is True
+    assert result["runtime"]["state_object_hash"]
+    assert result["runtime"]["baton_hash"]
+    assert result["runtime"]["state_audit_trusted"] is True
     assert result["runtime"]["failover"]["attempted"] is False
     assert result["runtime"]["failover"]["count"] == 0
     assert result["runtime"]["governor_trace"]["temperature"] == "checked"
@@ -322,7 +346,7 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["governor_trace"]["web_search"]["provider"] == "tavily"
     assert result["runtime"]["governor_trace"]["claim_check"] == "checked"
     assert result["runtime"]["governor_trace"]["conversation_paths"] == "generated"
-    assert result["runtime"]["gov_arc_state_mode"] == "explicit_shadow"
+    assert result["runtime"]["gov_arc_state_mode"] == "active_private"
     assert result["runtime"]["gov_arc_state"]["current_topic"] == "Stay mini."
     assert result["runtime"]["gov_arc_state"]["next_paths"] == result["conversation_paths"]
     assert result["usage"] == result["runtime"]["usage"]
@@ -412,7 +436,7 @@ def test_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
     assert result["runtime"]["reseed_present"] is True
     assert result["runtime"]["reseed_mode"] == "thread_handoff_seed"
     assert result["runtime"]["thread_handoff_seed_present"] is True
-    assert result["runtime"]["autoreseed_enabled"] is False
+    assert result["runtime"]["autoreseed_enabled"] is True
     assert result["runtime"]["gov_arc_state"]["current_tension"] == transition["tension"]
     assert result["runtime"]["gov_arc_state"]["user_goal"] == transition["goal"]
     handoff_rows = [
@@ -420,6 +444,35 @@ def test_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
         if row["block_name"] == "thread_handoff_seed"
     ]
     assert handoff_rows and handoff_rows[0]["included"] is True
+
+
+def test_durable_state_auto_reseed_reaches_first_turn_prompt(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    brain = DurableStateBrain()
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = brain
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    result = engine.send_message(str(uuid4()), "Continue.", capsule_id="capsule-1")
+
+    assert "HOLOCHAT AUTO-RESEED" in adapter.last_system_prompt
+    assert "recover HoloChat auto-reseed" in adapter.last_system_prompt
+    assert "OPENAI_API_KEY" not in adapter.last_system_prompt
+    assert result["runtime"]["reseed_present"] is True
+    assert result["runtime"]["reseed_mode"] == "durable_state_auto_reseed"
+    assert result["runtime"]["durable_state_auto_reseed_present"] is True
+    assert result["runtime"]["state_object_present"] is True
+    assert HOLOCHAT_STATE_CONTEXT_KEY in brain.persisted_context
+    reseed_rows = [
+        row for row in result["context_budget"]["rows"]
+        if row["block_name"] == "holochat_state_object"
+    ]
+    assert reseed_rows and reseed_rows[0]["included"] is True
 
 
 def test_streaming_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):

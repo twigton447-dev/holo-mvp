@@ -35,10 +35,14 @@ class CouncilRole(str, Enum):
 
 
 class BatonPass(BaseModel):
+    current_task: str | None = None
+    next_action: str | None = None
     next_model_policy: str = "serial_one_model_at_a_time"
     assigned_role: CouncilRole = CouncilRole.DIRECT_SYNTHESIS
     focus_areas: list[str] = Field(default_factory=list)
     unresolved_tensions: list[str] = Field(default_factory=list)
+    relevant_artifact_ids: list[str] = Field(default_factory=list)
+    constraints_for_next_assistant: list[str] = Field(default_factory=list)
     required_tools: list[RequiredTools] = Field(default_factory=lambda: [RequiredTools.NONE])
     route_reason: str = "default_direct_synthesis"
     mode: str = "serial"
@@ -85,9 +89,21 @@ class ThreadHealth(BaseModel):
 
 
 class StateAudit(BaseModel):
+    trusted: bool = True
     critical_constraints_preserved: bool = True
     pinned_artifacts_preserved: bool = True
     settled_decisions_preserved: bool = True
+    missing_required_fields: list[str] = Field(default_factory=list)
+    stale_state: bool = False
+    overlarge_reseed: bool = False
+    missing_artifact_references: list[str] = Field(default_factory=list)
+    contradiction_warnings: list[str] = Field(default_factory=list)
+    state_hash: str | None = None
+    summary_hash: str | None = None
+    baton_hash: str | None = None
+    artifact_registry_hash: str | None = None
+    reseed_hash: str | None = None
+    reseed_chars: int = 0
     notes: list[str] = Field(default_factory=list)
 
 
@@ -128,6 +144,20 @@ class HoloState(BaseModel):
     memory_candidates: list[dict[str, Any]] = Field(default_factory=list)
     state_audit: StateAudit = Field(default_factory=StateAudit)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    def canonical_object(self) -> dict[str, Any]:
+        """Return the inspectable HoloChat State Object with doctrine names."""
+        return {
+            "USER_GOAL": self.user_goal,
+            "LATEST_INPUT_SUMMARY": self.latest_input_summary,
+            "CRITICAL_CONSTRAINTS": self.critical_constraints,
+            "ROLLING_SUMMARY": self.rolling_summary,
+            "SETTLED_DECISIONS": self.settled_decisions,
+            "ARTIFACTS_REGISTRY": self.artifact_registry,
+            "REQUIRED_TOOLS": [tool.value if isinstance(tool, RequiredTools) else str(tool) for tool in self.required_tools],
+            "BATON_PASS": self.baton_pass.model_dump(mode="json"),
+            "STATE_AUDIT": self.state_audit.model_dump(mode="json"),
+        }
 
     @field_validator("required_tools")
     @classmethod

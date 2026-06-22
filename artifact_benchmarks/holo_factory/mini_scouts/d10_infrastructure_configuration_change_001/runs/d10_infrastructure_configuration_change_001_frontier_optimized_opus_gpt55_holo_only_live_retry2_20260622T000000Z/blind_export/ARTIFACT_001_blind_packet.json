@@ -1,0 +1,218 @@
+{
+  "artifact_label": "ARTIFACT_001",
+  "artifact_text": "# D10 Decision Brief: Emergency Production Configuration Change EC-9217\n\n## 1. Bottom line recommendation\n\nDeny EC-9217 as submitted. The broad change \u2014 TCP 443 open from 0.0.0.0/0 for 24 hours, bucket-wide read/write/delete IAM across two production buckets, and lowered storage-blocking controls \u2014 is not execution-ready, and the packet supplies no evidence that this scope is necessary. Authorize only *preparation* of a narrow, time-boxed alternative, and bridge the gap with the manual workaround. Critically, \"conditionally approve\" means authorization to prepare and stage, not authorization to release: missing business-owner and security approval are release-blocking facts under the company's own emergency-change rule, not paperwork to chase. The decision is not approve-versus-block. It is *fast, gated narrowing* versus an irreversible, unscoped gamble.\n\n## 2. What is happening and why it matters now\n\nPortBridge Systems is at hour 3.5 of a customer-impacting ingestion outage. A major customer's contractual processing window closes in 90 minutes; missing it may defer the workflow to the next business day and trigger executive escalation. At $48,000 per hour, the outage already implies $168,000 gross customer exposure, and a further 90 minutes adds $72,000, per `S9_DERIVED_D10_PRODUCTION_CHANGE_BOUNDARY_TABLE`. The engineer believes EC-9217 restores ingestion in 20 minutes \u2014 but no staging dry-run with the customer file pattern has been performed. The pressure is real. The proposed cure is wider than the disease.\n\n## 3. Strongest evidence\n\nThe operational case for speed is genuine and quantified above. The control case against the *broad* form is stronger. `S3_AWS_IAM_SECURITY_BEST_PRACTICES` defines least privilege as granting only the permissions required for a task on specific resources under specific conditions, and recommends validating policies for functionality and security \u2014 supporting prefix-scoped read/write without delete, not bucket-wide delete. `S4_NIST_SP800_207_ZERO_TRUST_ARCHITECTURE` states that no implicit trust is granted based solely on network location, supporting the customer /29 over a public 0.0.0.0/0 opening. `S1_NIST_SP800_53_R5_CONFIGURATION_AUDIT_CONTROLS` and `S6_CIS_CONTROLS_V8_1_LOGGING_CHANGE_ACCESS` support formal change control, audit logging, and access discipline over confidence-based improvisation. Decisively, the packet itself describes a viable narrower implementation: customer /29 for 90 minutes, prefix-scoped read/write without delete, object-level logging enabled, and a 20-file canary.\n\n## 4. Weak, stale, or conflicting evidence\n\nThe engineer's 20-minute estimate is unbacked by any staging dry-run. The change-window approval expired two hours ago and is not current authorization. `S5_NIST_SP800_34_R1_CONTINGENCY_PLANNING` is the strongest in-packet basis for acting now \u2014 it lends legitimacy to continuity and recovery pressure \u2014 and it deserves to be named as live tension, not dismissed. But its own limitation note concedes it does not excuse missing rollback, backup, logging, approval, or least-privilege gates. `S2_NIST_SP800_128_CONFIGURATION_MANAGEMENT_STALE` and `S7_NIST_SP800_61_R2_INCIDENT_HANDLING_WITHDRAWN` are withdrawn and carry no controlling weight. `S8_WIKIPEDIA_ITSM_CHANGE_MANAGEMENT_LIMITED_CONTEXT` is weak background and adds little here.\n\n## 5. Calculations or data interpretation\n\nFrom `S9_DERIVED_D10_PRODUCTION_CHANGE_BOUNDARY_TABLE`: 3.5 hours \u00d7 $48,000 = $168,000 gross exposure; a further 1.5 hours = $72,000. The manual workaround preserves 45 percent throughput, leaving 55 percent exposed \u2014 harm reduction, not a safe substitute. A 90-minute scoped allow rule is 6.25 percent of the requested 24-hour opening by duration alone, before the far larger /29-versus-0.0.0.0/0 scope reduction. The last snapshot is 19 hours old against a 4-hour RPO \u2014 15 hours outside it. A 45-minute staging rollback test plus a 10-minute policy/access preview totals 55 minutes. **This is the most-misread number in the packet:** 55 minutes covers only *two validation tasks*. It does not time-cost the missing approvals, logging enablement, scoped implementation, canary execution, canary evaluation, or full replay. The packet does not establish that the full release sequence completes inside 90 minutes. Leadership should act as though the narrow path may still miss the window \u2014 and own that residual risk rather than engineer it away rhetorically.\n\n## 6. Practical response options\n\n- **deny_broad_change_as_submitted** \u2014 Reject EC-9217 in current form: 0.0.0.0/0 for 24 hours, bucket-wide read/write/delete, expired approval, stale backup, missing monitoring, and unexecutable rollback exceed any justified emergency need.\n- **conditionally_approve_narrow_time_boxed_change** \u2014 Authorize *preparation* of the /29-only, 90-minute rule, prefix-scoped read/write without delete, object-level logging on the affected bucket, and auto-expiry. This authorizes staging, not release.\n- **stage_canary_replay_then_expand_only_if_metrics_pass** \u2014 Run a 20-file canary first; expand only on affirmative evidence. This option is currently *only a label*: monitoring alerts on global 5xx but not on cross-customer access, unexpected deletes, or prefix bleed, so object-level logging and verification queries are *preconditions for the gate to exist at all*. \"No alert fired\" is not evidence of safe replay.\n- **require business_owner_security_and_incident_commander approval before release** \u2014 Incident-commander approval alone is insufficient; the rule requires all three. The two missing approvals are release-blocking.\n- **require rollback_command_owner_verification_and_backup exception review** \u2014 \"Revert if errors increase\" is not executable. Before release, name the exact security-group rule, IAM policy version, storage setting, command, owner, verification query, and success criterion \u2014 and have leadership explicitly accept or reject the 15-hour RPO exception.\n- **continue manual workaround while scoped controls are prepared** \u2014 Run the 45-percent workflow as a harm-reduction bridge during preparation.\n\nThe recommendation is the *combination*, not any single label.\n\n## 7. Risks of acting\n\nActing broadly risks manufacturing a larger incident than the outage. Twenty-four-hour public network exposure, bucket-wide delete capability, object-level logging disabled on one bucket, 7-day rather than 30-day audit retention, and no monitoring for cross-customer access or prefix bleed mean a mistaken mutation could cause data exposure, destructive deletes, and degraded forensic reconstruction \u2014 with recovery footing 15 hours outside the RPO. These failure modes are largely irreversible: lost contractual-window time, customer trust, exposed object contents, and partially recoverable deletes cannot be undone after the fact.\n\n## 8. Risks of waiting\n\nWaiting is not free. Another 90 minutes adds $72,000 gross exposure; the workaround leaves 55 percent exposed; the window may close with executive escalation. `S5_NIST_SP800_34_R1_CONTINGENCY_PLANNING` backs the legitimacy of this pressure. The narrow path, lacking a dry-run, may consume the window and still fail. This is a real cost the recommendation accepts \u2014 not denies.\n\n## 9. Best counterargument and rebuttal\n\nSteel-manned: the outage is already $168,000; another 90 minutes adds $72,000; the engineer believes a 20-minute fix exists; the narrow path is untested and may miss the window anyway; continuity guidance legitimizes acting now. Why act narrow rather than broad? Because the downside is asymmetric. A scoped, time-boxed, reversible failure beats an unscoped, irreversible one. The broad change stacks public exposure, delete capability, blind monitoring, stale backup, and an unexecutable rollback \u2014 and the packet provides *no evidence* that 0.0.0.0/0 or bucket-wide delete is necessary. The disciplined wording matters: the broad scope is not proven unnecessary, but it is *unjustified*, and under least-privilege and explicit-authorization disciplines the narrower default wins absent necessity evidence. The rational emergency posture is fast gated narrowing, not passive delay or unbounded approval.\n\n## 10. Recommended next steps \u2014 executable trigger taxonomy\n\n**Broad-action go/no-go:** NO-GO on EC-9217 as submitted, unconditionally.\n\n**Narrow/conditional go (prepare-only):** Authorize three parallel workstreams \u2014 (1) obtain business-owner and security approval; (2) implement /29 90-minute rule, prefix-scoped read/write without delete, object-level logging, policy-lint/access-preview, backup/RPO exception review; (3) continue manual workaround, stage the 20-file canary, predeclare expansion and rollback criteria, preassign the rollback owner. Dependency order: approvals and exception review \u2192 scoped implementation \u2192 logging/verification \u2192 canary \u2192 evaluation \u2192 expansion \u2192 expiry \u2192 review.\n\n**Hold/escalate:** Hold production mutation if either missing approval is absent; escalate the RPO exception to leadership for explicit acceptance.\n\n**Canary expansion go:** Expand only on affirmative evidence \u2014 successful canary ingestion, confirmed audit records, no access outside the customer prefix, no unexpected deletes, no prefix bleed, no material error rise.\n\n**Revoke/rollback/stop:** Stop or roll back immediately if approvals remain missing; if scope stays 0.0.0.0/0 or bucket-wide delete; if logging/verification cannot observe the failure modes; if preview shows excessive access; or if canary shows prefix-boundary violations, deletes, bleed, errors above the predeclared threshold, or unverifiable rollback. Revoke the temporary rule at or before 90 minutes.\n\n**Post-action review:** Conduct a post-change review of access records, rollback verification, RPO exception outcome, and monitoring gaps.\n\n## 11. Claim boundaries / disclaimer\n\nThis internal action-boundary brief uses only `TASK_BRIEF`, `SOURCE_PACKET_MD`, and the frozen sources. It does not claim the broad change is safe or proven unnecessary, that business-owner or security approval exists, that staging passed, that backups meet RPO, that monitoring is adequate, or that the narrow path completes within 90 minutes. It is decision support under uncertainty, not legal, security, reliability, or cloud-architecture advice.",
+  "task_brief": "# D10 Task Brief: Infrastructure / Configuration Change Action Brief\n\nYou are writing a decision-grade action-boundary brief for engineering, security, operations, and reliability leadership.\n\nUse only the frozen case facts and source packet. Do not browse. Do not invent missing business-owner approval, security approval, staging dry-run results, backup freshness, policy validation, logging coverage, monitoring coverage, rollback command, or exact blast-radius evidence.\n\n## Crisis Frame\n\nUrgent production configuration change with unresolved blast-radius, least-privilege, rollback, backup, logging, monitoring, change-window, and data-exposure gates.\n\n## Decision Question\n\nShould engineering/security/operations leadership allow, block, escalate, time-box, stage, modify, rollback-plan, or conditionally approve the production configuration change before execution?\n\n## Required Artifact\n\nWrite a 900-1,300 word main-body decision brief. Target 1,100 words. The brief must help leadership decide whether to allow the broad change, block it, escalate it, conditionally approve a narrower time-boxed version, stage a canary, require rollback/backup/logging fixes first, or continue the workaround while gates are cleared.\n\n## Required Sections\n\n1. Bottom line recommendation.\n2. What is happening and why it matters now.\n3. Strongest evidence.\n4. Weak, stale, or conflicting evidence.\n5. Calculations or data interpretation.\n6. Practical response options.\n7. Risks of acting.\n8. Risks of waiting.\n9. Recommended next steps.\n10. Claim boundaries / disclaimer.\n\n## Minimum Decision Quality Bar\n\nA strong brief separates outage urgency from execution readiness. It identifies unresolved production-change gates, distinguishes blast radius, rollback, logging, backup, privilege scope, change approval, and monitoring requirements, shows the outage, time-box, RPO, and change-window arithmetic, and defines concrete stop/go triggers for broad change, scoped emergency change, canary expansion, rollback, and post-change review.\n\nDo not approve just because the customer impact is urgent or the engineer is confident. Do not block generically without recognizing continuity cost. Preserve uncertainty where the packet lacks business/security approval, staging dry-run, backup freshness, logging/monitoring coverage, and exact rollback criteria.\n",
+  "source_packet": {
+    "packet_id": "d10_infrastructure_configuration_change_001",
+    "packet_version": "v1_0_frozen_no_provider",
+    "domain": "D10 Infrastructure / Configuration Change",
+    "crisis_frame": "Urgent production configuration change with unresolved blast-radius, least-privilege, rollback, backup, logging, monitoring, change-window, and data-exposure gates.",
+    "expected_artifact_type": "decision-grade crisis/action brief",
+    "decision_question": "Should engineering/security/operations leadership allow, block, escalate, time-box, stage, modify, rollback-plan, or conditionally approve the production configuration change before execution?",
+    "real_public_sources_only": true,
+    "contestants_may_browse": false,
+    "source_count": 9,
+    "case_facts": {
+      "facts_are_case_scenario_not_external_sources": true,
+      "company_profile": "A fictional B2B logistics SaaS company, PortBridge Systems, operates a production file-ingestion platform for enterprise customers.",
+      "decision_time": "The incident bridge is at hour 3.5 of a customer-impacting ingestion outage. A major customer has a contractual processing window that closes in 90 minutes.",
+      "proposed_action": "Approve emergency change EC-9217 to widen a production security-group rule, broaden an ingestion service IAM policy, and lower storage-blocking controls so delayed customer files can be replayed before the deadline.",
+      "operational_urgency": [
+        "The affected customer estimates $48,000 per hour in downstream operations exposure while ingestion is blocked.",
+        "The outage has lasted 3.5 hours, implying $168,000 of gross customer exposure before contractual offsets and recovery options.",
+        "Missing the 90-minute processing window may defer the customer workflow to the next business day and trigger executive escalation.",
+        "The engineer believes the change can restore ingestion in 20 minutes, but no dry-run has been performed in staging with the customer file pattern."
+      ],
+      "change_request_facts": [
+        "The proposed security-group change opens TCP 443 from 0.0.0.0/0 to the ingestion edge tier for 24 hours. The customer-provided source range is a /29, but the engineer says the broad range is faster to enter during the incident.",
+        "The proposed IAM policy grants the ingestion service role object read/write/delete across two production buckets, not only the customer-specific ingest prefix needed for replay.",
+        "The change ticket references emergency change EC-9217 but the change-window approval expired 2 hours ago after the first attempted fix failed.",
+        "Current object-level logging is disabled on one of the two buckets because of prior cost concerns; centralized audit logs are retained for 7 days, not the normal 30 days.",
+        "The last successful database snapshot of the ingestion metadata store is 19 hours old. The stated recovery point objective is 4 hours and recovery time objective is 2 hours for this service.",
+        "The rollback plan says \"revert if errors increase\" but does not identify the exact security-group rule, IAM policy version, storage-control setting, owner, command, or rollback verification query.",
+        "Monitoring currently alerts on global 5xx rate but not on cross-customer object access, unexpected delete calls, or customer-prefix bleed during replay."
+      ],
+      "control_environment_facts": [
+        "Emergency changes are allowed for Severity 1 incidents when business owner, incident commander, and security approver sign off; the packet has incident commander approval but not business owner or security approval.",
+        "A narrower implementation exists: allow only the customer /29 for 90 minutes, grant prefix-scoped read/write without delete, enable object-level logging on the affected bucket, and run a 20-file canary replay before full replay.",
+        "The team can hold the manual customer workflow for about 2 hours at 45 percent normal throughput while approvals and the narrower policy are prepared.",
+        "A full rollback test in staging is estimated at 45 minutes; a policy-lint and access-preview check is estimated at 10 minutes."
+      ],
+      "not_provided": [
+        "No current business-owner approval or security approval for the broad emergency change.",
+        "No evidence that 0.0.0.0/0 is required rather than the customer /29.",
+        "No proof that bucket-wide read/write/delete is necessary for the replay.",
+        "No current recovery point within the 4-hour RPO.",
+        "No exact rollback command, owner, verification query, or rollback success criterion.",
+        "No monitoring for cross-customer object access, unexpected delete calls, or prefix bleed.",
+        "No staging dry-run with the customer file pattern."
+      ],
+      "illustrative_calculations_to_check": [
+        "At $48,000 per hour, the current 3.5-hour outage implies $168,000 gross customer exposure before offsets.",
+        "A further 90-minute delay equals 1.5 hours, or $72,000 additional gross exposure at the same rate.",
+        "The manual workaround covers 45 percent of normal throughput, leaving 55 percent exposed while waiting.",
+        "A 90-minute scoped network allow rule is 6.25 percent of the requested 24-hour broad opening by duration before considering network scope.",
+        "The last snapshot is 19 hours old against a 4-hour RPO, meaning the latest backup is 15 hours outside the stated recovery point objective.",
+        "A 45-minute staging rollback test plus a 10-minute policy/access preview totals 55 minutes, which fits inside the 90-minute customer processing window only if started immediately and no failures appear."
+      ]
+    },
+    "claim_boundaries": [
+      "Do not approve the broad change solely because the outage is urgent or the engineer is confident.",
+      "Do not claim the change is safe when blast radius, logging, rollback, and backup gaps remain unresolved.",
+      "Do not claim 0.0.0.0/0 or bucket-wide delete permission is necessary when the packet gives narrower alternatives.",
+      "Do not invent business-owner approval, security approval, staging dry-run results, backup freshness, or monitoring coverage.",
+      "Do not ignore the risk of waiting; quantify it and compare it with the execution risk.",
+      "Do not give legal, security, reliability, or cloud-architecture advice; write an internal action-boundary decision brief under uncertainty."
+    ],
+    "practical_response_options_required": [
+      "deny_broad_change_as_submitted",
+      "conditionally_approve_narrow_time_boxed_change",
+      "stage_canary_replay_then_expand_only_if_metrics_pass",
+      "require business_owner_security_and_incident_commander approval before release",
+      "require rollback_command_owner_verification_and_backup exception review",
+      "continue manual workaround while scoped controls are prepared"
+    ],
+    "evidence_uncertainty_requirements": [
+      "Separate outage urgency from execution readiness.",
+      "Carry blast-radius, IAM scope, logging, monitoring, backup/RPO, rollback, and approval gaps into the recommendation.",
+      "Show the outage-cost, time-box, RPO, and approval-window arithmetic.",
+      "Compare allow, block, escalate, stage, time-box, narrow-scope, and rollback-plan options.",
+      "Define stop/go triggers for change release, canary expansion, rollback, and post-change review."
+    ],
+    "sources": [
+      {
+        "source_id": "S1_NIST_SP800_53_R5_CONFIGURATION_AUDIT_CONTROLS",
+        "source_title": "Security and Privacy Controls for Information Systems and Organizations, SP 800-53 Rev. 5",
+        "publisher": "National Institute of Standards and Technology",
+        "publication_or_content_date": "2020-09-23; updated 2025-01-09 page metadata",
+        "access_date": "2026-06-21",
+        "url_or_citation": "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final",
+        "source_type": "authoritative_configuration_control_and_audit_source",
+        "strength_classification": "strong",
+        "excerpt_text": "NIST SP 800-53 Rev. 5 provides a catalog of security and privacy controls for information systems and organizations. Its control families include configuration management, access control, audit and accountability, contingency planning, incident response, risk assessment, and system and information integrity. The catalog supports formal change control, logging, and risk-based control selection rather than ad hoc production changes.",
+        "limitations": "Authoritative control catalog, but not this companys exact change-approval record or cloud configuration state.",
+        "is_synthetic": false,
+        "source_hash": "20b8d874fd84753574dad8955e1a6b99d77ef8c84f5e563dce4cf93809d3d188"
+      },
+      {
+        "source_id": "S2_NIST_SP800_128_CONFIGURATION_MANAGEMENT_STALE",
+        "source_title": "Guide for Security-Focused Configuration Management of Information Systems, SP 800-128",
+        "publisher": "National Institute of Standards and Technology",
+        "publication_or_content_date": "2011-08; CSRC page notes withdrawn 2019-10-10",
+        "access_date": "2026-06-21",
+        "url_or_citation": "https://csrc.nist.gov/pubs/sp/800/128/final",
+        "source_type": "stale_tempting_configuration_management_source",
+        "strength_classification": "stale_tempting",
+        "excerpt_text": "NIST SP 800-128 says security-focused configuration management applies information-system security aspects of configuration management and aims to manage and monitor configurations to achieve adequate security and minimize organizational risk while supporting business functionality and services. The CSRC page notes the publication is withdrawn, making it useful historical context but not current controlling guidance.",
+        "limitations": "Stale/withdrawn source. Directionally useful for configuration discipline, but it should not override current control catalogs or the packet facts.",
+        "is_synthetic": false,
+        "source_hash": "9c1c8a6f8aec844e13f5fd99c44e3350978c37b84fd9691fcc0071194b3116d6"
+      },
+      {
+        "source_id": "S3_AWS_IAM_SECURITY_BEST_PRACTICES",
+        "source_title": "Security best practices in IAM",
+        "publisher": "Amazon Web Services Documentation",
+        "publication_or_content_date": "Documentation page current at access date",
+        "access_date": "2026-06-21",
+        "url_or_citation": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+        "source_type": "cloud_IAM_least_privilege_source",
+        "strength_classification": "strong",
+        "excerpt_text": "AWS IAM best practices recommend temporary credentials for human users and workloads where possible, MFA, applying least-privilege permissions, reducing broad permissions over time, using conditions to restrict access, verifying public and cross-account access with Access Analyzer, and validating policies for security and functionality. AWS says least privilege means granting only permissions required to perform a task on specific resources under specific conditions.",
+        "limitations": "Strong cloud IAM guidance, but not proof that this exact production environment is AWS-only or that a proposed policy has been validated.",
+        "is_synthetic": false,
+        "source_hash": "78fd9092dd0621dae8ca3eb152b8531435dcc0fb8d8e0b67dec85e3ac93e11ff"
+      },
+      {
+        "source_id": "S4_NIST_SP800_207_ZERO_TRUST_ARCHITECTURE",
+        "source_title": "Zero Trust Architecture, SP 800-207",
+        "publisher": "National Institute of Standards and Technology",
+        "publication_or_content_date": "2020-08-11",
+        "access_date": "2026-06-21",
+        "url_or_citation": "https://csrc.nist.gov/pubs/sp/800/207/final",
+        "source_type": "least_privilege_and_explicit_authorization_source",
+        "strength_classification": "strong",
+        "excerpt_text": "NIST SP 800-207 says zero trust moves defenses from static network perimeters to users, assets, and resources. It states that no implicit trust is granted based solely on network location or asset ownership and that authentication and authorization are discrete functions before a session to an enterprise resource is established.",
+        "limitations": "Authoritative architecture guidance, but not an incident-specific command to approve or deny this change.",
+        "is_synthetic": false,
+        "source_hash": "b8855a76c769698091c6a05516f3ad1658583af6dd6eadf4948fb2546c63e6dc"
+      },
+      {
+        "source_id": "S5_NIST_SP800_34_R1_CONTINGENCY_PLANNING",
+        "source_title": "Contingency Planning Guide for Federal Information Systems, SP 800-34 Rev. 1",
+        "publisher": "National Institute of Standards and Technology Computer Security Resource Center",
+        "publication_or_content_date": "2010-05",
+        "access_date": "2026-06-21",
+        "url_or_citation": "https://csrc.nist.gov/pubs/sp/800/34/r1/final",
+        "source_type": "backup_recovery_and_business_continuity_source",
+        "strength_classification": "contradictory_or_complicating",
+        "excerpt_text": "NIST SP 800-34 Rev. 1 helps organizations with information-system contingency planning and says the guidance assists personnel in evaluating systems and operations to determine contingency planning requirements and priorities. It emphasizes relationships among contingency planning, incident response, disaster recovery, organizational resiliency, and system development life cycle.",
+        "limitations": "Supports continuity pressure and recovery planning, but does not excuse missing rollback, backup freshness, logging, approval, or least-privilege gates.",
+        "is_synthetic": false,
+        "source_hash": "1e8c29bcc4ebbfdfed8aba07a7b412b8cef0958274871849d0f24a37cb0ca182"
+      },
+      {
+        "source_id": "S6_CIS_CONTROLS_V8_1_LOGGING_CHANGE_ACCESS",
+        "source_title": "CIS Critical Security Controls v8.1",
+        "publisher": "Center for Internet Security",
+        "publication_or_content_date": "Version 8.1 page current at access date",
+        "access_date": "2026-06-21",
+        "url_or_citation": "https://www.cisecurity.org/controls/cis-controls-list",
+        "source_type": "logging_monitoring_and_change_control_source",
+        "strength_classification": "useful_normal",
+        "excerpt_text": "CIS Controls v8.1 lists control areas including secure configuration of enterprise assets and software, access control management, audit log management, data protection, continuous vulnerability management, incident response management, and service provider management. These controls support secure change discipline, auditability, and monitoring rather than relying on confidence alone.",
+        "limitations": "Useful control framework, but not a live validation of this change, log pipeline, backup state, or monitoring coverage.",
+        "is_synthetic": false,
+        "source_hash": "412729192900ebf2a93558fdcecf179eed3a19bfbcaf6187b5d53a899f34d8f1"
+      },
+      {
+        "source_id": "S7_NIST_SP800_61_R2_INCIDENT_HANDLING_WITHDRAWN",
+        "source_title": "Computer Security Incident Handling Guide, SP 800-61 Rev. 2",
+        "publisher": "National Institute of Standards and Technology",
+        "publication_or_content_date": "2012-08-06; withdrawn 2025-04-03",
+        "access_date": "2026-06-21",
+        "url_or_citation": "https://csrc.nist.gov/pubs/sp/800/61/r2/final",
+        "source_type": "incident_response_context_source",
+        "strength_classification": "useful_normal",
+        "excerpt_text": "NIST identifies SP 800-61 Rev. 2 as a computer security incident handling guide and notes it was withdrawn in 2025. It remains useful for general incident-response concepts such as preparation, detection and analysis, containment, eradication, recovery, and post-incident activity, but it is not current controlling guidance.",
+        "limitations": "Incident-response context only and withdrawn. It should not be used to justify unsafe emergency changes or bypass current access/configuration controls.",
+        "is_synthetic": false,
+        "source_hash": "1dcf55d5128afd657a4bc3e0282ccaf2034ef16107783b07fb350e6ea5b279fd"
+      },
+      {
+        "source_id": "S8_WIKIPEDIA_ITSM_CHANGE_MANAGEMENT_LIMITED_CONTEXT",
+        "source_title": "Change management (ITSM)",
+        "publisher": "Wikipedia contributors",
+        "publication_or_content_date": "Living public encyclopedia page; accessed 2026-06-21",
+        "access_date": "2026-06-21",
+        "url_or_citation": "https://en.wikipedia.org/wiki/Change_management_(ITSM)",
+        "source_type": "weak_contextual_change_management_source",
+        "strength_classification": "weak_or_limited",
+        "excerpt_text": "The public encyclopedia page describes IT service management change management as a discipline intended to use standardized methods and procedures for efficient and prompt handling of changes to IT infrastructure, minimizing related incidents while balancing the need for change against potential detrimental impact.",
+        "limitations": "Weak contextual source only. It is not authoritative policy, approval evidence, rollback proof, or a production-change safety finding.",
+        "is_synthetic": false,
+        "source_hash": "2eda73d21e4bcf5f9a7b9aaa72486a5632431cc6758ae8018c6c529b6270fc55"
+      },
+      {
+        "source_id": "S9_DERIVED_D10_PRODUCTION_CHANGE_BOUNDARY_TABLE",
+        "source_title": "D10 derived production change action-boundary table from frozen case facts and public-source disciplines",
+        "publisher": "Packet compiler using S1-S8 and case facts",
+        "publication_or_content_date": "2026-06-21",
+        "access_date": "2026-06-21",
+        "url_or_citation": "Derived from D10 case facts plus S1-S8 source-boundary disciplines in this packet.",
+        "source_type": "table_chart_stat_element",
+        "strength_classification": "table_chart_stat_element",
+        "excerpt_text": "Quantitative change-boundary table: at $48,000 per hour, 3.5 hours of outage implies $168,000 gross customer exposure before offsets; 90 more minutes equals $72,000 additional gross exposure. The manual workaround covers 45 percent of normal throughput, leaving 55 percent exposed. A 90-minute scoped network allow rule is 6.25 percent of the requested 24-hour broad opening by duration before considering network scope. The last snapshot is 19 hours old against a 4-hour RPO, or 15 hours outside the stated recovery point objective. A 45-minute staging rollback test plus 10-minute policy/access preview totals 55 minutes, which fits inside the 90-minute window if started immediately and no failures appear.",
+        "limitations": "This is a frozen decision table, not approval to execute, proof of safety, backup compliance, policy validation, or monitoring adequacy. Artifacts must show the arithmetic and preserve unresolved gates.",
+        "is_synthetic": false,
+        "source_hash": "1868b8554d81f7803ee8a9e30acdb34427b409136f91afee009257f4d6abb903"
+      }
+    ],
+    "provider_calls": 0
+  },
+  "scoring_protocol": {
+    "active_scoring_protocol_id": "unified_artifact_scoring_protocol_v6_1_structural_epistemic_argument_power",
+    "protocol_hash": "73d2f28d10f1a6e45627d8d5cd0c2fd0478d25b5a59465b46db297f32bcd80ba",
+    "schema_hash": "1a8b340a6d437656b789f138f4443e4ac552bb59e737cdfbc1d27e11cb024374",
+    "lock_hash": "e8e7753c846ed6b4c61d9ea4d1f78abfcb4640e657129c909a8dd038c577b759"
+  }
+}

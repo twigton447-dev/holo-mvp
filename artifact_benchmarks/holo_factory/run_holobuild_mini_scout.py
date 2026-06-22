@@ -30,6 +30,7 @@ HOLO_MODES = ("diagnostic_v3", "full_gov_v4", "patent_aligned_v4")
 HOLO_CONTEXT_PROFILES = ("full_registry", "latest_only")
 DEFAULT_HOLO_CONTEXT_PROFILE = "full_registry"
 MAX_HOLO_FINAL_REPAIR_ATTEMPTS = 1
+MAX_HOLO_FINAL_COMPRESSION_REPAIR_ATTEMPTS = 1
 MAX_HOLO_INTERMEDIATE_REPAIR_ATTEMPTS = 1
 DEFAULT_TURN_MAX_TOKENS = 3800
 FINAL_SYNTHESIS_MAX_TOKENS = 6000
@@ -101,6 +102,8 @@ ARCHITECTURE_POLICY_PATH = FACTORY_DIR / "architecture_policies/holobuild_archit
 INTERMEDIATE_DEFAULT_MIN_WORDS = 250
 FINAL_REPAIR_TARGET_WORDS = 1180
 FINAL_REPAIR_HARD_MAX_WORDS = FINAL_WORD_MAX
+FINAL_REPAIR_KIND_MISSING_SECTION = "missing_section_repair"
+FINAL_REPAIR_KIND_COMPRESSION_ONLY = "compression_only_final_repair"
 HOLOGOV_C_TENURE_MIN = 7
 HOLOGOV_C_TENURE_MAX = 11
 PROVIDER_CALLS = 0
@@ -706,6 +709,33 @@ def final_word_band_compliance(output_text: str) -> dict[str, Any]:
     }
 
 
+def final_repair_prompt_kind(
+    *,
+    word_band_result: dict[str, Any],
+    final_completeness_result: dict[str, Any],
+) -> str:
+    if final_completeness_result.get("status") == "pass" and word_band_result.get("status") == "fail_over_hard_max":
+        return FINAL_REPAIR_KIND_COMPRESSION_ONLY
+    return FINAL_REPAIR_KIND_MISSING_SECTION
+
+
+def eligible_for_bounded_final_compression_repair(
+    *,
+    word_band_result: dict[str, Any],
+    final_completeness_result: dict[str, Any],
+    state_source_audit_result: dict[str, Any],
+    other_final_blockers: list[str] | tuple[str, ...] | None = None,
+) -> bool:
+    return (
+        word_band_result.get("status") == "fail_over_hard_max"
+        and final_completeness_result.get("status") == "pass"
+        and state_source_audit_result.get("status") == "pass"
+        and state_source_audit_result.get("packet_hash_preserved") is True
+        and not state_source_audit_result.get("invented_source_ids")
+        and not (other_final_blockers or [])
+    )
+
+
 def registered_artifact_id(index: int, role: str, final: bool = False) -> str:
     return "FINAL_ARTIFACT" if final else f"TURN_{index:03d}_{role.upper()}"
 
@@ -1132,6 +1162,84 @@ def required_practical_response_options(source_packet: dict[str, Any]) -> list[s
     if isinstance(options, list):
         return [str(item) for item in options if str(item).strip()]
     return []
+
+
+def build_final_repair_user(
+    *,
+    repair_kind: str,
+    final_band: dict[str, int],
+    previous_word_count: int,
+    failed_final_word_band: dict[str, Any],
+    final_quality_failures: list[str],
+    final_completeness: dict[str, Any],
+    final_state_source_audit: dict[str, Any],
+    context_governor_instructions: str,
+    state_json: str,
+    gov_notes_json: str,
+    baton_json: str,
+    registry_json: str,
+    retrieved: str,
+    required_options_text: str,
+    failed_output_text: str,
+) -> str:
+    if repair_kind == FINAL_REPAIR_KIND_COMPRESSION_ONLY:
+        repair_header = "FINAL_ARTIFACT_COMPRESSION_REPAIR"
+        repair_instructions = (
+            "The current artifact is complete but too long. "
+            "Do not add new analysis. Do not add new sections. "
+            "Preserve all required sections: bottom line, risks of acting, risks of waiting, next steps, claim boundaries. "
+            "Preserve exact source IDs. Preserve recommendation and action-boundary logic. "
+            "Cut lower-priority wording. Merge repetitive sentences. Remove filler and duplicate explanation. "
+            f"The hard {final_band['min_words']}-{final_band['max_words']:,} body-word band remains mandatory. "
+            f"Target {final_band['repair_target_words']} words. Hard maximum {final_band['max_words']} words. "
+            f"Returning over {final_band['max_words']} fails. "
+            "Return only the repaired artifact body."
+        )
+    elif repair_kind == FINAL_REPAIR_KIND_MISSING_SECTION:
+        repair_header = "FINAL_ARTIFACT_COMPLETENESS_REPAIR"
+        repair_instructions = (
+            "The final synthesis output failed final artifact quality checks. "
+            f"Return only a corrected final decision-grade crisis/action brief, {final_band['min_words']}-{final_band['max_words']} body words, target {final_band['repair_target_words']}. "
+            f"The {final_band['max_words']}-word maximum is hard for architecture compliance; do not return an overlength repair. "
+            "Preserve or add the missing section identified by the audit, then compress elsewhere to stay within the hard word band. "
+            f"Target approximately {final_band['repair_target_words']} words. "
+            f"If adding a section, remove or compress lower-priority wording so the repair remains under {final_band['max_words']} words. "
+            "Do not add commentary about this repair. Use only the frozen packet and registered artifacts below. "
+            "Preserve the central thesis, decision recommendation, risk of acting, risk of waiting, trigger/gate table, calculations, counterargument, source IDs, and source-boundary disclaimer. "
+            "The final answer must end cleanly with a complete sentence and a complete claim-boundary/disclaimer section."
+        )
+    else:
+        raise ValueError(f"unknown final repair kind: {repair_kind}")
+
+    return (
+        f"{repair_header}\n"
+        f"{'=' * len(repair_header)}\n"
+        f"{repair_instructions}\n\n"
+        f"{GENERATION_ARGUMENT_QUALITY_GUIDANCE}\n"
+        f"{FINAL_SYNTHESIS_TRIGGER_TAXONOMY}\n"
+        "Keep exact required practical response option labels if supplied, and retain the strongest counterargument handling.\n\n"
+        f"FAILED_FINAL_WORD_COUNT: {previous_word_count}\n\n"
+        f"FAILED_FINAL_WORD_BAND: {stable_json(failed_final_word_band)}\n\n"
+        f"FINAL_QUALITY_FAILURES: {stable_json(final_quality_failures)}\n\n"
+        f"FINAL_COMPLETENESS_AUDIT: {stable_json(final_completeness)}\n\n"
+        f"FINAL_STATE_SOURCE_AUDIT: {stable_json(final_state_source_audit)}\n\n"
+        "CONTEXT_GOVERNOR_INSTRUCTIONS\n=============================\n"
+        f"{context_governor_instructions}\n\n"
+        "CANONICAL STATE_OBJECT\n======================\n"
+        f"{state_json}\n\nSTATE_OBJECT_SHA256: {sha_text(state_json)}\n\n"
+        "GOV_NOTES\n=========\n"
+        f"{gov_notes_json}\n\nGOV_NOTES_SHA256: {sha_text(gov_notes_json)}\n\n"
+        "BATON_PASS\n==========\n"
+        f"{baton_json}\n\nBATON_PASS_SHA256: {sha_text(baton_json)}\n\n"
+        "ARTIFACTS_REGISTRY\n==================\n"
+        f"{registry_json}\n\nARTIFACTS_REGISTRY_SHA256: {sha_text(registry_json)}\n\n"
+        "RETRIEVED PINNED SOURCES AND ARTIFACTS\n======================================\n"
+        f"{retrieved}\n\n"
+        "REQUIRED PRACTICAL RESPONSE OPTION LABELS\n=========================================\n"
+        f"{required_options_text}\n\n"
+        "FAILED FINAL OUTPUT TO REPAIR\n=============================\n"
+        f"{failed_output_text}\n"
+    )
 
 
 def load_packet_surfaces(packet_dir: Path) -> dict[str, Any]:
@@ -1696,47 +1804,41 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         if final:
             initial_final_word_count = word_count(output_text)
             initial_completeness = final_artifact_completeness(output_text, out)
+            initial_state_source_audit = state_audit(output_text, state, allowed_ids, packet_hash, registry)
             final_quality_failures = []
             initial_word_band = final_word_band_compliance(output_text)
             if initial_word_band["status"] != "pass":
                 final_quality_failures.append("word_band_failure")
             final_quality_failures.extend(initial_completeness["failures"])
             if final_quality_failures:
-                for repair_attempt in range(1, MAX_HOLO_FINAL_REPAIR_ATTEMPTS + 1):
-                    repair_user = (
-                        "FINAL_ARTIFACT_COMPLETENESS_REPAIR\n"
-                        "==================================\n"
-                        "The final synthesis output failed final artifact quality checks. "
-                        f"Return only a corrected final decision-grade crisis/action brief, {final_band['min_words']}-{final_band['max_words']} body words, target {final_band['repair_target_words']}. "
-                        f"The {final_band['max_words']}-word maximum is hard for architecture compliance; do not return an overlength repair. "
-                        "Preserve or add the missing section identified by the audit, then compress elsewhere to stay within the hard word band. "
-                        f"Target approximately {final_band['repair_target_words']} words. "
-                        f"If adding a section, remove or compress lower-priority wording so the repair remains under {final_band['max_words']} words. "
-                        "Do not add commentary about this repair. Use only the frozen packet and registered artifacts below. "
-                        "Preserve the central thesis, decision recommendation, risk of acting, risk of waiting, trigger/gate table, calculations, counterargument, source IDs, and source-boundary disclaimer. "
-                        "The final answer must end cleanly with a complete sentence and a complete claim-boundary/disclaimer section.\n\n"
-                        f"{GENERATION_ARGUMENT_QUALITY_GUIDANCE}\n"
-                        f"{FINAL_SYNTHESIS_TRIGGER_TAXONOMY}\n"
-                        "Keep exact required practical response option labels if supplied, and retain the strongest counterargument handling.\n\n"
-                        f"FAILED_FINAL_WORD_COUNT: {initial_final_word_count}\n\n"
-                        f"FINAL_QUALITY_FAILURES: {stable_json(final_quality_failures)}\n\n"
-                        f"FINAL_COMPLETENESS_AUDIT: {stable_json(initial_completeness)}\n\n"
-                        "CONTEXT_GOVERNOR_INSTRUCTIONS\n=============================\n"
-                        f"{context_governor_instructions}\n\n"
-                        "CANONICAL STATE_OBJECT\n======================\n"
-                        f"{state_json}\n\nSTATE_OBJECT_SHA256: {sha_text(state_json)}\n\n"
-                        "GOV_NOTES\n=========\n"
-                        f"{gov_notes_json}\n\nGOV_NOTES_SHA256: {sha_text(gov_notes_json)}\n\n"
-                        "BATON_PASS\n==========\n"
-                        f"{baton_json}\n\nBATON_PASS_SHA256: {sha_text(baton_json)}\n\n"
-                        "ARTIFACTS_REGISTRY\n==================\n"
-                        f"{registry_json}\n\nARTIFACTS_REGISTRY_SHA256: {sha_text(registry_json)}\n\n"
-                        "RETRIEVED PINNED SOURCES AND ARTIFACTS\n======================================\n"
-                        f"{retrieved}\n\n"
-                        "REQUIRED PRACTICAL RESPONSE OPTION LABELS\n=========================================\n"
-                        f"{required_options_text}\n\n"
-                        "FAILED FINAL OUTPUT TO REPAIR\n=============================\n"
-                        f"{output_text}\n"
+                current_failed_text = output_text
+                current_word_count = initial_final_word_count
+                current_word_band = initial_word_band
+                current_completeness = initial_completeness
+                current_state_source_audit = initial_state_source_audit
+                repair_attempt = 1
+                extra_compression_attempts = 0
+                while repair_attempt <= MAX_HOLO_FINAL_REPAIR_ATTEMPTS + extra_compression_attempts:
+                    repair_kind = final_repair_prompt_kind(
+                        word_band_result=current_word_band,
+                        final_completeness_result=current_completeness,
+                    )
+                    repair_user = build_final_repair_user(
+                        repair_kind=repair_kind,
+                        final_band=final_band,
+                        previous_word_count=current_word_count,
+                        failed_final_word_band=current_word_band,
+                        final_quality_failures=final_quality_failures,
+                        final_completeness=current_completeness,
+                        final_state_source_audit=current_state_source_audit,
+                        context_governor_instructions=context_governor_instructions,
+                        state_json=state_json,
+                        gov_notes_json=gov_notes_json,
+                        baton_json=baton_json,
+                        registry_json=registry_json,
+                        retrieved=retrieved,
+                        required_options_text=required_options_text,
+                        failed_output_text=current_failed_text,
                     )
                     repair_prompt_text = f"SYSTEM:\n{build_base_system()}\n\nUSER:\n{repair_user}"
                     repair_out = call_model(model, system=build_base_system(), user=repair_user, max_tokens=FINAL_REPAIR_MAX_TOKENS, timeout=timeout)
@@ -1744,15 +1846,21 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                     repaired_text = repair_out["text"].strip()
                     repaired_word_count = word_count(repaired_text)
                     repaired_completeness = final_artifact_completeness(repaired_text, repair_out)
+                    repaired_word_band = final_word_band_compliance(repaired_text)
+                    repaired_state_source_audit = state_audit(repaired_text, state, allowed_ids, packet_hash, registry)
                     repair_record = {
                         "attempt": repair_attempt,
+                        "repair_kind": repair_kind,
                         "model": model,
-                        "previous_word_count": initial_final_word_count,
-                        "previous_final_completeness": initial_completeness,
+                        "previous_word_count": current_word_count,
+                        "previous_final_word_band_compliance": current_word_band,
+                        "previous_final_completeness": current_completeness,
+                        "previous_state_source_audit": current_state_source_audit,
                         "repaired_word_count": repaired_word_count,
                         "repaired_final_completeness": repaired_completeness,
-                        "repaired_final_word_band_compliance": final_word_band_compliance(repaired_text),
-                        "accepted": final_word_band_compliance(repaired_text)["status"] == "pass" and repaired_completeness["status"] == "pass",
+                        "repaired_final_word_band_compliance": repaired_word_band,
+                        "repaired_state_source_audit": repaired_state_source_audit,
+                        "accepted": repaired_word_band["status"] == "pass" and repaired_completeness["status"] == "pass",
                         **repair_io,
                     }
                     turn_repair_attempts.append(repair_record)
@@ -1770,6 +1878,24 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         artifact_source_io = repair_io
                         artifact_output_meta = repair_out
                         break
+                    if (
+                        extra_compression_attempts < MAX_HOLO_FINAL_COMPRESSION_REPAIR_ATTEMPTS
+                        and eligible_for_bounded_final_compression_repair(
+                            word_band_result=repaired_word_band,
+                            final_completeness_result=repaired_completeness,
+                            state_source_audit_result=repaired_state_source_audit,
+                            other_final_blockers=[],
+                        )
+                    ):
+                        extra_compression_attempts += 1
+                        current_failed_text = repaired_text
+                        current_word_count = repaired_word_count
+                        current_word_band = repaired_word_band
+                        current_completeness = repaired_completeness
+                        current_state_source_audit = repaired_state_source_audit
+                        repair_attempt += 1
+                        continue
+                    repair_attempt += 1
         if not final:
             initial_intermediate_compliance = role_compliance(role, output_text, final=False, output_meta=out)
             initial_intermediate_state_audit = state_audit(output_text, state, allowed_ids, packet_hash, registry)

@@ -19,6 +19,12 @@ D10_POST_V4_2_CONDITION_DIR = (
     / "d10_infrastructure_configuration_change_001_post_v4_2_opusgovb_holo_only_live_20260622T000000Z"
     / "frontier_holo_opus_gov_b_v1"
 )
+OPTIMIZED_D10_RUN_MANIFEST = (
+    REPO_ROOT
+    / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001/runs"
+    / "d10_infrastructure_configuration_change_001_frontier_optimized_opus_gpt55_holo_only_live_retry2_20260622T000000Z"
+    / "run_manifest.json"
+)
 FORBIDDEN_GENERATION_CONTRACT_TERMS = (
     "900-1,500",
     "900-1500",
@@ -118,6 +124,18 @@ def final_text_with_sections(word_target: int = 940) -> str:
     text = "\n\n".join(sections)
     while runner.word_count(text) < word_target:
         text += filler
+    return text
+
+
+def final_text_with_exact_word_count(word_target: int) -> str:
+    text = final_text_with_sections()
+    current = runner.word_count(text)
+    assert current <= word_target
+    padding_words = word_target - current
+    if padding_words:
+        padding = ["source"] * (padding_words - 1) + ["source."]
+        text = f"{text}\n\n{' '.join(padding)}"
+    assert runner.word_count(text) == word_target
     return text
 
 
@@ -1046,6 +1064,160 @@ def test_final_repair_prompt_requires_add_missing_section_and_compress_under_har
     assert "do not return an overlength repair" in runner_text
     assert "Target approximately" in runner_text
     assert "remove or compress lower-priority wording" in runner_text
+
+
+def test_final_compression_prompt_renders_for_complete_overlength_final() -> None:
+    overlength = final_text_with_exact_word_count(1375)
+    word_band = runner.final_word_band_compliance(overlength)
+    completeness = runner.final_artifact_completeness(overlength, {})
+    source_audit = {"status": "pass", "packet_hash_preserved": True, "invented_source_ids": []}
+    repair_kind = runner.final_repair_prompt_kind(
+        word_band_result=word_band,
+        final_completeness_result=completeness,
+    )
+    prompt = runner.build_final_repair_user(
+        repair_kind=repair_kind,
+        final_band=runner.final_word_band_policy(),
+        previous_word_count=runner.word_count(overlength),
+        failed_final_word_band=word_band,
+        final_quality_failures=["word_band_failure"],
+        final_completeness=completeness,
+        final_state_source_audit=source_audit,
+        context_governor_instructions="Use frozen context only.",
+        state_json="{}",
+        gov_notes_json="{}",
+        baton_json="{}",
+        registry_json="{}",
+        retrieved="SOURCE_PACKET_MD",
+        required_options_text="conditional_go",
+        failed_output_text=overlength,
+    )
+    assert repair_kind == runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY
+    assert "FINAL_ARTIFACT_COMPRESSION_REPAIR" in prompt
+    assert "The current artifact is complete but too long." in prompt
+    assert "The hard 900-1,300 body-word band remains mandatory." in prompt
+    assert "Target 1180 words." in prompt
+    assert "Returning over 1300 fails." in prompt
+
+
+def test_final_compression_prompt_forbids_new_analysis_and_preserves_boundaries_and_source_ids() -> None:
+    text = final_text_with_exact_word_count(1375)
+    prompt = runner.build_final_repair_user(
+        repair_kind=runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY,
+        final_band=runner.final_word_band_policy(),
+        previous_word_count=1375,
+        failed_final_word_band=runner.final_word_band_compliance(text),
+        final_quality_failures=["word_band_failure"],
+        final_completeness=runner.final_artifact_completeness(text, {}),
+        final_state_source_audit={"status": "pass", "packet_hash_preserved": True, "invented_source_ids": []},
+        context_governor_instructions="Use frozen context only.",
+        state_json="{}",
+        gov_notes_json="{}",
+        baton_json="{}",
+        registry_json="{}",
+        retrieved="SOURCE_PACKET_MD",
+        required_options_text="conditional_go",
+        failed_output_text=text,
+    )
+    assert "Do not add new analysis." in prompt
+    assert "Do not add new sections." in prompt
+    assert "claim boundaries" in prompt
+    assert "Preserve exact source IDs." in prompt
+    assert "Preserve recommendation and action-boundary logic." in prompt
+    assert "Cut lower-priority wording." in prompt
+    assert "Merge repetitive sentences." in prompt
+    assert "Remove filler and duplicate explanation." in prompt
+    assert "Return only the repaired artifact body." in prompt
+
+
+def test_synthetic_complete_1375_word_final_triggers_compression_repair_path() -> None:
+    overlength = final_text_with_exact_word_count(1375)
+    assert runner.final_artifact_completeness(overlength, {})["status"] == "pass"
+    assert runner.final_word_band_compliance(overlength)["status"] == "fail_over_hard_max"
+    assert (
+        runner.final_repair_prompt_kind(
+            word_band_result=runner.final_word_band_compliance(overlength),
+            final_completeness_result=runner.final_artifact_completeness(overlength, {}),
+        )
+        == runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY
+    )
+
+
+def test_synthetic_repaired_final_1295_words_with_sections_passes() -> None:
+    repaired = final_text_with_exact_word_count(1295)
+    compliance = runner.role_compliance("final_synthesis_author", repaired, final=True, output_meta={})
+    assert compliance["status"] == "pass"
+    assert compliance["final_word_band_status"] == "pass"
+    assert compliance["final_artifact_completeness"]["status"] == "pass"
+
+
+def test_synthetic_repaired_final_1347_words_with_sections_fails_word_band() -> None:
+    repaired = final_text_with_exact_word_count(1347)
+    compliance = runner.role_compliance("final_synthesis_author", repaired, final=True, output_meta={})
+    assert compliance["status"] == "fail"
+    assert compliance["final_word_band_status"] == "fail_over_hard_max"
+    assert compliance["final_artifact_completeness"]["status"] == "pass"
+
+
+def test_synthetic_under_1300_final_missing_claim_boundaries_fails() -> None:
+    sections = [
+        "# Bottom Line\nRecommend the source-bounded conditional path using S1_TEST_SOURCE and S2_TEST_SOURCE.",
+        "# Risks of Acting\nThe risk of acting is execution error, preventable exposure, and overbroad authority.",
+        "# Risks of Waiting\nThe risk of waiting is operational delay, missed escalation timing, and stakeholder confusion.",
+        "# Trigger Taxonomy\nUse a no-go trigger, narrow-go trigger, rollback trigger, monitoring gate, and accountable owner.",
+    ]
+    text = "\n\n".join(sections)
+    while runner.word_count(text) < 940:
+        text += " The source packet supports conditional execution discipline, monitoring, rollback ownership, and explicit approval checks."
+    compliance = runner.role_compliance("final_synthesis_author", text, final=True, output_meta={})
+    assert runner.word_count(text) < 1300
+    assert compliance["status"] == "fail"
+    assert "missing_final_section:claim_boundaries" in compliance["final_artifact_completeness"]["failures"]
+
+
+def test_historical_optimized_d10_repair_1347_remains_not_proof_clean() -> None:
+    manifest = json.loads(OPTIMIZED_D10_RUN_MANIFEST.read_text(encoding="utf-8"))
+    condition = manifest["conditions"][0]
+    repair_attempt = condition["final_repair_attempts"][0]
+    arch_summary = condition["architecture_evidence_validation"]
+    assert repair_attempt["repaired_word_count"] == 1347
+    assert repair_attempt["repaired_final_word_band_compliance"]["status"] == "fail_over_hard_max"
+    assert repair_attempt["repaired_final_completeness"]["status"] == "pass"
+    assert arch_summary["final_word_band_pass"] is False
+    assert arch_summary["proof_credit_eligible"] is False
+
+
+def test_v4_2_proof_credit_word_band_strictness_remains_unchanged() -> None:
+    policy = runner.final_word_band_policy()
+    assert policy == {"min_words": 900, "max_words": 1300, "repair_target_words": 1180}
+    assert runner.final_word_band_compliance(" ".join(["word"] * 1300))["status"] == "pass"
+    assert runner.final_word_band_compliance(" ".join(["word"] * 1301))["status"] == "fail_over_hard_max"
+
+
+def test_bounded_second_compression_repair_requires_clean_source_and_no_other_blockers() -> None:
+    repaired = final_text_with_exact_word_count(1347)
+    word_band = runner.final_word_band_compliance(repaired)
+    completeness = runner.final_artifact_completeness(repaired, {})
+    clean_source = {"status": "pass", "packet_hash_preserved": True, "invented_source_ids": []}
+    dirty_source = {"status": "fail", "packet_hash_preserved": True, "invented_source_ids": ["S9_FAKE"]}
+    assert runner.eligible_for_bounded_final_compression_repair(
+        word_band_result=word_band,
+        final_completeness_result=completeness,
+        state_source_audit_result=clean_source,
+        other_final_blockers=[],
+    )
+    assert not runner.eligible_for_bounded_final_compression_repair(
+        word_band_result=word_band,
+        final_completeness_result=completeness,
+        state_source_audit_result=dirty_source,
+        other_final_blockers=[],
+    )
+    assert not runner.eligible_for_bounded_final_compression_repair(
+        word_band_result=word_band,
+        final_completeness_result=completeness,
+        state_source_audit_result=clean_source,
+        other_final_blockers=["missing_claim_boundaries"],
+    )
 
 
 def test_successful_final_repair_preserves_required_sections_and_source_ids() -> None:

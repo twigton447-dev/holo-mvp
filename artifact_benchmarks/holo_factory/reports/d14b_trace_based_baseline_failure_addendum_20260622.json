@@ -1,0 +1,116 @@
+{
+  "report_id": "d14b_trace_based_baseline_failure_report_20260622",
+  "created_date": "2026-06-22",
+  "result_classification": "HOLO_COMPLETION_SUCCESS_VS_SOLO_BASELINE_ELIGIBILITY_FAILURE",
+  "constraints_observed_for_report": {
+    "provider_calls": 0,
+    "holo_rerun": false,
+    "solo_rerun": false,
+    "judging": 0,
+    "scoring": 0,
+    "unblinding": 0,
+    "push": false
+  },
+  "packet": {
+    "packet_id": "d14b_trade_finance_lc_amendment_discrepancy_release_001",
+    "domain": "D14B Trade Finance LC Amendment / Discrepancy / Payment Release",
+    "packet_path": "artifact_benchmarks/holo_factory/mini_scouts/d14b_trade_finance_lc_amendment_discrepancy_release_001",
+    "source_count": 10,
+    "source_type_counts": {
+      "strong": 3,
+      "useful_normal": 3,
+      "stale_tempting": 1,
+      "contradictory_or_complicating": 1,
+      "weak_or_limited": 1,
+      "table_chart_stat_element": 1
+    },
+    "source_packet_hash": "80443b39a6f6c4cd0149bdc88e8016442d448521aabba78619e770f350131ef4",
+    "source_packet_md_hash": "46738f52f305653850d36d3f61d2465cc72746f57fa7850b2139542284bb2a52",
+    "task_brief_hash": "bc69e59758848452deec3d425b8a2f30e2a0d7c31e3454dfb9aadbe9bf687ae9",
+    "source_manifest_hash": "1296f118cdf88f2cbde877d6fe7a3f313fb141eed4cc9e97cdf98063ca35d5b8",
+    "packet_lock_hash": "94a8d2524c12440a75744e72abe322f92aaad69fa5c107b6db1f4e2446beb2f2",
+    "freeze_manifest_hash": "c67a4166d9d6f1ca66e987cf2882c5f9ad953f93e05a042a93a1f29d62a4fb15"
+  },
+  "holo_run": {
+    "run_id": "d14b_trade_finance_lc_amendment_discrepancy_release_001_frontier_optimized_opus_gpt55_holo_only_live_20260622T221941Z",
+    "artifact_hash": "0b1a2b2e695796f32918ea691f9b7b67650953d335e1090a0dc688c5cf12575b",
+    "provider_calls": 7,
+    "repair_calls": 1,
+    "input_tokens": 123070,
+    "output_tokens": 19525,
+    "proof_credit_eligible": true,
+    "deterministic_gate_pass": true,
+    "required_roles_all_completed": true,
+    "role_compliance_all_pass": true,
+    "intermediate_completeness_all_pass": true,
+    "state_audit_all_pass": true,
+    "registry_acceptance_all_pass": true,
+    "no_failed_required_turn_consumed_by_final": true,
+    "final_artifact_completeness_pass": true,
+    "final_word_band_pass": true,
+    "final_repair_succeeded_if_used": true,
+    "final_synthesis_blocked": false,
+    "contamination_scan": {
+      "status": "PASS",
+      "findings": []
+    },
+    "blind_export_integrity": {
+      "status": "PASS",
+      "expected_condition_results": 1,
+      "exported_packets": 1,
+      "internal_map_entries": 1,
+      "existing_generated_artifacts": 1,
+      "missing_existing_generated_artifacts": []
+    }
+  },
+  "solo_opus_baseline_run": {
+    "run_id": "d14b_trade_finance_lc_amendment_discrepancy_release_001_solo_opus_4_8_baseline_live_20260622T223900Z",
+    "artifact_hash": "5b357e28971f7aa2acc95b396b961d434a29c04bef73c82ef37386375ce3277d",
+    "provider_calls": 6,
+    "input_tokens": 58216,
+    "output_tokens": 20751,
+    "solo_baseline_eligible": false,
+    "deterministic_gate_pass": true,
+    "final_artifact_completeness_pass": false,
+    "final_word_band_pass": true,
+    "artifact_body_word_count": 966,
+    "clean_ending": false,
+    "claim_boundaries_or_disclaimer_present": false,
+    "missing_sections": [
+      "claim_boundaries"
+    ],
+    "eligibility_failures": [
+      "final_artifact_completeness_failed"
+    ],
+    "deterministic_failure_reasons": [
+      "unclean_or_mid_sentence_ending",
+      "missing_final_section:claim_boundaries"
+    ],
+    "invented_source_ids_detected_by_literal_scan": [
+      "S2_C"
+    ],
+    "s2_c_interpretation": "S2_C appears because the artifact cut off mid-source-ID; treat as truncation/completion failure, not as a standalone source-hallucination claim.",
+    "artifact_tail": "Route open gates to owners in parallel: discrepancy register to Trade Operations document exam (S2_C",
+    "contamination_scan": {
+      "status": "PASS",
+      "findings": []
+    },
+    "blind_export_integrity": {
+      "status": "PASS",
+      "expected_condition_results": 1,
+      "exported_packets": 1,
+      "internal_map_entries": 1,
+      "existing_generated_artifacts": 1,
+      "missing_existing_generated_artifacts": []
+    }
+  },
+  "blind_comparison": {
+    "two_artifact_blind_comparison_packet_created": false,
+    "reason": "solo_baseline_eligible=false",
+    "held_out_judging_run": false,
+    "score_valid": false,
+    "official_numeric_holo_vs_opus_score_exists": false
+  },
+  "public_safe_summary": "In D14B, Holo produced a proof-clean governed trade-finance payment-release brief on a fresh LC discrepancy holdout. The bounded solo Opus baseline did not produce a baseline-eligible artifact: it stayed inside the 900-1300 word band, but ended mid-sentence and omitted the required claim-boundaries/disclaimer section. Because the solo baseline did not clear deterministic eligibility, no official numeric Holo-vs-Opus score was produced.",
+  "recommendation": "Preserve D14B as baseline-failure evidence, not scored flagship proof."
+}

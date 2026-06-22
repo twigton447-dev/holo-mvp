@@ -27,6 +27,18 @@ D10_POST_V4_2_CONDITION_DIR = (
     / "d10_infrastructure_configuration_change_001_post_v4_2_opusgovb_holo_only_live_20260622T000000Z"
     / "frontier_holo_opus_gov_b_v1"
 )
+D11_PROOF_CLEAN_CONDITION_DIR = (
+    REPO_ROOT
+    / "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001/runs"
+    / "d11_cyber_incident_contract_notice_emergency_cloud_access_001_frontier_optimized_opus_gpt55_holo_only_live_20260622T000000Z"
+    / "frontier_holo_optimized_opus_gpt55_v1"
+)
+D12_T3_FAILURE_CONDITION_DIR = (
+    REPO_ROOT
+    / "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001/runs"
+    / "d12_fund_nav_redemption_cash_release_001_frontier_optimized_opus_gpt55_holo_only_live_20260622T000000Z"
+    / "frontier_holo_optimized_opus_gpt55_v1"
+)
 OPTIMIZED_D10_RUN_MANIFEST = (
     REPO_ROOT
     / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001/runs"
@@ -264,6 +276,7 @@ def render_intermediate_repair_prompt_for_test(role: str = "options_operational_
     objective = {
         "initial_decision_brief_drafter": "Draft a source-grounded initial decision frame.",
         "assumption_and_evidence_attacker": "Attack assumptions, weak evidence, stale claims, missing calculations, and unsupported causal links.",
+        "contradiction_uncertainty_source_fidelity_reviewer": "Stress-test contradictory evidence, source fidelity, source-status boundaries, and uncertainty handling.",
         "options_operational_usefulness_reviewer": "Stress-test practical options, risks, gates, and operational usefulness.",
     }.get(role, "Perform the assigned intermediate role.")
     failed_role_compliance = {
@@ -303,6 +316,61 @@ def render_intermediate_repair_prompt_for_test(role: str = "options_operational_
         retrieved="ARTIFACT_ID: TASK_BRIEF\n[task]\n\nARTIFACT_ID: SOURCE_PACKET_MD\n[source]",
     )
     return f"SYSTEM:\n{runner.build_base_system()}\n\nUSER:\n{user}"
+
+
+def synthetic_t3_concise_audit_text(extra_words: int = 0, omit_section: str | None = None) -> str:
+    sections = {
+        "Top 5 source-boundary risks": [
+            "Risk one: do not let S1_TEST_SOURCE become approval for facts that S1_TEST_SOURCE does not contain, because source boundaries decide whether the final can act.",
+            "Risk two: do not merge S2_PRELIMINARY_ADMIN_NOTE with governing authority; it is preliminary and cannot settle a final action threshold.",
+            "Risk three: do not treat S3_DERIVED_TABLE as independent authority when it only organizes estimates and pressure points from other packet facts.",
+            "Risk four: do not treat S4_INTERNAL_NOTE as governing authority if the packet labels it internal, stale, weak, or limited in source status.",
+            "Risk five: do not let a prior turn's confident wording become evidence; the final must cite exact packet source IDs for each factual claim.",
+        ],
+        "Top 5 uncertainty claims to preserve": [
+            "Uncertainty one: the packet does not prove final approval, so the final must say not shown rather than failed or denied.",
+            "Uncertainty two: the packet does not resolve timing, so the final must keep the decision conditional until S1_TEST_SOURCE and S2_PRELIMINARY_ADMIN_NOTE align.",
+            "Uncertainty three: the packet does not prove operational readiness, even if S3_DERIVED_TABLE looks precise and decision-ready.",
+            "Uncertainty four: the packet leaves the governing interpretation open, so the final cannot collapse uncertainty into a single authoritative conclusion.",
+            "Uncertainty five: the strongest counterargument may support reversible preparation, but it does not supply irreversible action authority.",
+        ],
+        "Stale / weak / derived source cautions": [
+            "Caution one: stale sources may explain context but must not override current governing packet authority or exact approval gates.",
+            "Caution two: weak sources may support communication tone but must not carry dispositive weight for operational authority.",
+            "Caution three: derived tables must remain labeled derived, estimated, and non-authoritative unless another exact source ID grants authority.",
+            "Caution four: preliminary notes must remain preliminary and cannot be upgraded because they sound specific or administrative.",
+            "Caution five: internal relationship pressure must remain a pressure fact, not a control approval or source of execution authority.",
+        ],
+        "Exact source-ID audit": [
+            "Audit one: cite S1_TEST_SOURCE exactly when using governing authority and do not abbreviate it to S1.",
+            "Audit two: cite S2_PRELIMINARY_ADMIN_NOTE exactly when using preliminary status and do not rename it as final approval.",
+            "Audit three: cite S3_DERIVED_TABLE exactly when using calculations and label every calculation as derived from that table.",
+            "Audit four: cite S4_INTERNAL_NOTE exactly when using urgency or pressure, but do not transform it into approval evidence.",
+            "Audit five: no invented source IDs, no shortened IDs, and no uncited factual claims should enter the final synthesis.",
+        ],
+        "Final synthesis instructions": [
+            "Instruction one: preserve the central tension between urgency and authority rather than deciding from urgency alone.",
+            "Instruction two: present the strongest opposing argument before explaining why reversible preparation is the safer action path.",
+            "Instruction three: convert unresolved facts into stop/go triggers, owner checks, and evidence thresholds.",
+            "Instruction four: keep derived, stale, weak, preliminary, and internal materials below governing authority in the final hierarchy.",
+            "Instruction five: end the final guidance with a bounded claim that the packet supports conditional preparation, not final execution authority.",
+        ],
+    }
+    text = "\n\n".join(
+        f"## {heading}\n" + "\n".join(f"- {item}" for item in items)
+        for heading, items in sections.items()
+        if heading != omit_section
+    )
+    filler = (
+        "\n- Preserve exact source IDs, maintain uncertainty, and keep every governing claim tied to a packet-backed authority threshold."
+    )
+    while runner.word_count(text) < runner.T3_CONCISE_AUDIT_MIN_WORDS + 20:
+        text += filler
+    if extra_words:
+        text += " " + " ".join(["extra"] * extra_words) + "."
+    else:
+        text += "\n- This compact source-fidelity audit ends with one complete standalone sentence."
+    return text
 
 
 def synthetic_options_repair_text(omit_heading: str | None = None) -> str:
@@ -437,6 +505,14 @@ def d10_post_v4_2_raw_output(name: str) -> dict:
     return json.loads((D10_POST_V4_2_CONDITION_DIR / "raw_outputs" / name).read_text(encoding="utf-8"))
 
 
+def d12_t3_failure_raw_output(name: str) -> dict:
+    return json.loads((D12_T3_FAILURE_CONDITION_DIR / "raw_outputs" / name).read_text(encoding="utf-8"))
+
+
+def d12_t3_failure_arch_evidence() -> dict:
+    return json.loads((D12_T3_FAILURE_CONDITION_DIR / "arch_evidence.json").read_text(encoding="utf-8"))
+
+
 def d10_post_v4_2_final_prompt_state() -> tuple[str, dict]:
     prompt = (D10_POST_V4_2_CONDITION_DIR / "prompt_cards/turn_006.md").read_text(encoding="utf-8")
     match = re.search(r"CANONICAL STATE_OBJECT\n=+\n(\{.*?\})\n\nSTATE_OBJECT_SHA256:", prompt, flags=re.S)
@@ -508,6 +584,28 @@ def test_assumption_repair_prompt_renders_revision_pressure_and_source_id_checkl
     assert "- What unsupported claim must be tightened" in prompt
     assert "- Source-ID copy discipline" in prompt
     assert "Do not invent, abbreviate, rename, shorten, or mutate source IDs." in prompt
+
+
+def test_t3_repair_prompt_contains_five_section_compact_audit_format() -> None:
+    prompt = render_intermediate_repair_prompt_for_test("contradiction_uncertainty_source_fidelity_reviewer")
+    assert "T3 COMPACT SOURCE-FIDELITY REPAIR REQUIRED FORMAT" in prompt
+    for index, heading in enumerate(runner.T3_CONCISE_AUDIT_SECTION_ITEMS, start=1):
+        assert f"{index}. {heading}" in prompt
+
+
+def test_t3_repair_prompt_forbids_prose_essay_and_prior_continuation() -> None:
+    prompt = render_intermediate_repair_prompt_for_test("contradiction_uncertainty_source_fidelity_reviewer")
+    assert "The previous T3 failed because it was incomplete/truncated." in prompt
+    assert "Return only the corrected compact T3 audit." in prompt
+    assert "Do not continue the prior text." in prompt
+    assert "Do not produce an essay." in prompt
+
+
+def test_t3_repair_prompt_requires_700_900_words_and_complete_ending() -> None:
+    prompt = render_intermediate_repair_prompt_for_test("contradiction_uncertainty_source_fidelity_reviewer")
+    assert "Target 700-900 words." in prompt
+    assert "End with one complete standalone sentence." in prompt
+    assert "Do not append a word-count footer." in prompt
 
 
 def test_initial_decision_repair_prompt_includes_clean_terminal_contract() -> None:
@@ -970,6 +1068,83 @@ def test_stop_go_trigger_aliases_pass_when_substantive() -> None:
     assert compliance["intermediate_artifact_completeness"]["role_specific_presence"]["component_presence"]["stop_go_triggers"] is True
 
 
+def test_synthetic_concise_t3_source_fidelity_audit_passes() -> None:
+    text = synthetic_t3_concise_audit_text()
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        text,
+        final=False,
+        output_meta={},
+    )
+    presence = compliance["intermediate_artifact_completeness"]["role_specific_presence"]
+    assert runner.T3_CONCISE_AUDIT_MIN_WORDS <= runner.word_count(text) <= runner.T3_CONCISE_AUDIT_MAX_WORDS
+    assert compliance["status"] == "pass"
+    assert presence["status"] == "pass"
+    assert all(presence["section_presence"].values())
+
+
+def test_synthetic_t3_essay_over_target_token_ceiling_style_fails() -> None:
+    text = synthetic_t3_concise_audit_text(extra_words=260)
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        text,
+        final=False,
+        output_meta={"output_tokens": 3800, "max_tokens_requested": 3800},
+    )
+    failures = compliance["intermediate_artifact_completeness"]["failures"]
+    assert compliance["status"] == "fail"
+    assert "t3_compact_audit_over_target_words" in failures
+
+
+def test_synthetic_t3_missing_required_section_fails() -> None:
+    text = synthetic_t3_concise_audit_text(omit_section="Exact source-ID audit")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        text,
+        final=False,
+        output_meta={},
+    )
+    failures = compliance["intermediate_artifact_completeness"]["failures"]
+    assert compliance["status"] == "fail"
+    assert "missing_t3_compact_section:Exact source-ID audit" in failures
+
+
+def test_d12_historical_t3_original_still_fails_compact_audit_gate() -> None:
+    raw = d12_t3_failure_raw_output("turn_003.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    failures = compliance["intermediate_artifact_completeness"]["failures"]
+    assert compliance["status"] == "fail"
+    assert raw["output_tokens"] == 3800
+    assert raw["max_tokens_requested"] == 3800
+    assert raw["text"].rstrip().endswith("10. Hold the final body to")
+    assert "unclean_or_mid_sentence_intermediate_ending" in failures
+    assert "provider_output_hit_max_tokens_with_unclean_intermediate_ending" in failures
+    assert "t3_compact_audit_over_target_words" in failures
+
+
+def test_d12_historical_t3_repair_still_fails_compact_audit_gate() -> None:
+    raw = d12_t3_failure_raw_output("turn_003_intermediate_repair_001.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    failures = compliance["intermediate_artifact_completeness"]["failures"]
+    assert compliance["status"] == "fail"
+    assert raw["output_tokens"] == 3600
+    assert raw["max_tokens_requested"] == 3600
+    assert raw["text"].rstrip().endswith("ensure every factual claim carries an")
+    assert "unclean_or_mid_sentence_intermediate_ending" in failures
+    assert "provider_output_hit_max_tokens_with_unclean_intermediate_ending" in failures
+    assert "t3_compact_audit_over_target_words" in failures
+
+
 def test_initial_decision_repaired_draft_complete_ending_passes_clean_ending_check() -> None:
     completeness = runner.intermediate_artifact_completeness(
         "initial_decision_brief_drafter",
@@ -1053,6 +1228,19 @@ def test_rejected_turn4_raw_outputs_remain_preserved_on_disk() -> None:
         assert path.exists()
         raw = json.loads(path.read_text(encoding="utf-8"))
         assert raw["text"]
+
+
+def test_d12_rejected_t3_remains_blocked_from_registry_and_final_synthesis() -> None:
+    evidence = d12_t3_failure_arch_evidence()
+    validation = evidence["architecture_evidence_validation"]
+    t3_turn = next(item for item in evidence["turns"] if item["role"] == "contradiction_uncertainty_source_fidelity_reviewer")
+    final_turn = next(item for item in evidence["turns"] if item["role"] == "final_synthesis_author")
+    assert t3_turn["registry_acceptance"]["status"] == "rejected"
+    assert t3_turn["registry_acceptance"]["repair_succeeded"] is False
+    assert validation["required_roles_all_completed"] is False
+    assert validation["proof_credit_eligible"] is False
+    assert validation["failed_required_turns_consumed_by_final"] == []
+    assert "TURN_003_CONTRADICTION_UNCERTAINTY_SOURCE_FIDELITY_REVIEWER" not in final_turn["retrieved_artifact_ids"]
 
 
 def test_d10_post_v4_2_fixture_replay_preserves_gate_strictness_and_final_isolation() -> None:
@@ -1434,6 +1622,22 @@ def test_historical_optimized_d10_retry3_1421_remains_not_proof_clean() -> None:
     assert arch_summary["final_artifact_completeness_pass"] is True
     assert arch_summary["final_word_band_pass"] is False
     assert arch_summary["proof_credit_eligible"] is False
+
+
+def test_historical_d11_optimized_holo_remains_proof_clean() -> None:
+    metadata = json.loads((D11_PROOF_CLEAN_CONDITION_DIR / "artifact_metadata.json").read_text(encoding="utf-8"))
+    arch_evidence = json.loads((D11_PROOF_CLEAN_CONDITION_DIR / "arch_evidence.json").read_text(encoding="utf-8"))
+    validation = metadata["architecture_evidence_validation"]
+    assert metadata["proof_credit_eligible"] is True
+    assert validation["proof_credit_eligible"] is True
+    assert validation["deterministic_gate_pass"] is True
+    assert validation["required_roles_all_completed"] is True
+    assert validation["role_compliance_all_pass"] is True
+    assert validation["intermediate_completeness_all_pass"] is True
+    assert validation["state_audit_all_pass"] is True
+    assert validation["registry_acceptance_all_pass"] is True
+    assert validation["no_failed_required_turn_consumed_by_final"] is True
+    assert arch_evidence["proof_credit_architecture_status"] == "eligible_if_all_turn_audits_pass_and_deterministic_gate_passes"
 
 
 def test_v4_2_proof_credit_word_band_strictness_remains_unchanged() -> None:

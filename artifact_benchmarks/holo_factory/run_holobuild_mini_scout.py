@@ -186,6 +186,37 @@ INTERMEDIATE_REPAIR_CLEAN_ENDING_CONTRACT = (
     "Do not end in a dangling parenthesis, slash, markdown emphasis, code fence, table row, JSON fragment, or metadata/footer.\n"
     "Do not append a word-count footer."
 )
+T3_CONCISE_AUDIT_MIN_WORDS = 700
+T3_CONCISE_AUDIT_MAX_WORDS = 900
+T3_CONCISE_AUDIT_SECTION_ITEMS = (
+    "Top 5 source-boundary risks",
+    "Top 5 uncertainty claims to preserve",
+    "Stale / weak / derived source cautions",
+    "Exact source-ID audit",
+    "Final synthesis instructions",
+)
+T3_CONCISE_AUDIT_CONTRACT = (
+    "CONTRADICTION / UNCERTAINTY / SOURCE-FIDELITY COMPACT AUDIT CONTRACT\n"
+    "====================================================================\n"
+    "For contradiction_uncertainty_source_fidelity_reviewer, return a compact audit, not a prose essay. "
+    f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words. Use compact bullets or numbered items. "
+    "Preserve exact source IDs; do not abbreviate, rename, shorten, or invent source IDs. "
+    "Do not treat derived, stale, weak, preliminary, or internal notes as governing authority. "
+    "Do not resolve factual uncertainty that the packet leaves open. "
+    "End with one complete standalone sentence and do not add a word-count footer.\n"
+    "Use exactly these five required sections:\n"
+    + "\n".join(f"{index}. {item}" for index, item in enumerate(T3_CONCISE_AUDIT_SECTION_ITEMS, start=1))
+)
+T3_CONCISE_AUDIT_REPAIR_CONTRACT = (
+    "T3 COMPACT SOURCE-FIDELITY REPAIR REQUIRED FORMAT\n"
+    "=================================================\n"
+    "The previous T3 failed because it was incomplete/truncated. "
+    "Return only the corrected compact T3 audit. Do not continue the prior text. Do not produce an essay. "
+    "Use the five required sections below. "
+    f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words. "
+    "End with one complete standalone sentence.\n"
+    + "\n".join(f"{index}. {item}" for index, item in enumerate(T3_CONCISE_AUDIT_SECTION_ITEMS, start=1))
+)
 OPTIONS_OPERATIONAL_REPAIR_CHECKLIST_ITEMS = (
     "Available options",
     "Risk of acting",
@@ -668,6 +699,39 @@ def options_operational_analysis_presence(output_text: str) -> dict[str, Any]:
     }
 
 
+def t3_concise_audit_presence(output_text: str) -> dict[str, Any]:
+    lowered = re.sub(r"\s+", " ", output_text.lower())
+    section_presence = {
+        item: item.lower() in lowered
+        for item in T3_CONCISE_AUDIT_SECTION_ITEMS
+    }
+    missing_sections = [item for item, present in section_presence.items() if not present]
+    wc = word_count(output_text)
+    bullet_or_numbered_lines = len(re.findall(r"(?m)^\s*(?:[-*]|\d+[.)])\s+\S", output_text))
+    cited_source_ids = sorted(set(SOURCE_ID_RE.findall(output_text)))
+    failures: list[str] = []
+    failures.extend(f"missing_t3_compact_section:{item}" for item in missing_sections)
+    if wc < T3_CONCISE_AUDIT_MIN_WORDS:
+        failures.append("t3_compact_audit_under_target_words")
+    if wc > T3_CONCISE_AUDIT_MAX_WORDS:
+        failures.append("t3_compact_audit_over_target_words")
+    if bullet_or_numbered_lines < 15:
+        failures.append("t3_compact_audit_not_bulleted")
+    if not cited_source_ids:
+        failures.append("t3_compact_audit_missing_exact_source_ids")
+    return {
+        "status": "pass" if not failures else "fail",
+        "section_presence": section_presence,
+        "missing_sections": missing_sections,
+        "word_count": wc,
+        "target_min_words": T3_CONCISE_AUDIT_MIN_WORDS,
+        "target_max_words": T3_CONCISE_AUDIT_MAX_WORDS,
+        "bullet_or_numbered_lines": bullet_or_numbered_lines,
+        "cited_source_ids": cited_source_ids,
+        "failures": failures,
+    }
+
+
 def intermediate_artifact_completeness(role: str, output_text: str, output_meta: dict[str, Any] | None = None) -> dict[str, Any]:
     stripped = output_text.strip()
     failures: list[str] = []
@@ -693,6 +757,9 @@ def intermediate_artifact_completeness(role: str, output_text: str, output_meta:
     role_specific_presence: dict[str, Any] = {}
     if role == "options_operational_usefulness_reviewer":
         role_specific_presence = options_operational_analysis_presence(stripped)
+        failures.extend(role_specific_presence["failures"])
+    if role == "contradiction_uncertainty_source_fidelity_reviewer":
+        role_specific_presence = t3_concise_audit_presence(stripped)
         failures.extend(role_specific_presence["failures"])
 
     return {
@@ -1645,9 +1712,17 @@ def intermediate_role_repair_instructions(role: str) -> str:
     instructions = [INTERMEDIATE_REPAIR_CLEAN_ENDING_CONTRACT]
     if role == "assumption_and_evidence_attacker":
         instructions.append(ASSUMPTION_EVIDENCE_REPAIR_CHECKLIST)
+    if role == "contradiction_uncertainty_source_fidelity_reviewer":
+        instructions.append(T3_CONCISE_AUDIT_REPAIR_CONTRACT)
     if role == "options_operational_usefulness_reviewer":
         instructions.append(OPTIONS_OPERATIONAL_REPAIR_CHECKLIST)
     return "\n\n".join(instructions)
+
+
+def intermediate_role_generation_instructions(role: str) -> str:
+    if role == "contradiction_uncertainty_source_fidelity_reviewer":
+        return T3_CONCISE_AUDIT_CONTRACT
+    return ""
 
 
 def build_intermediate_repair_user(
@@ -1724,6 +1799,9 @@ def gov_notes_for_turn(index: int, role: str, final: bool, retrieved_ids: list[s
         notes.append("Final synthesis must explicitly handle the strongest counterargument and explain why the recommended path is still better or conditional.")
     else:
         notes.append("This is an intermediate registered artifact; produce role-specific draft, critique, or constraints for the next turn.")
+        role_instruction = intermediate_role_generation_instructions(role)
+        if role_instruction:
+            notes.append(role_instruction)
     notes.append(f"Registry currently contains {len(registry.get('artifacts', {}))} artifacts; all retrieved content must be traceable to registry IDs and hashes.")
     return notes
 
@@ -1846,6 +1924,10 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
             "ADVERSARIAL ROLE INSTRUCTION\n============================\n"
             f"Role: {role}\nObjective: {objective}\n"
         )
+        if not final:
+            role_instruction = intermediate_role_generation_instructions(role)
+            if role_instruction:
+                user += f"\nROLE OUTPUT CONTRACT\n====================\n{role_instruction}\n"
         if final:
             user += (
                 "\nFINAL SYNTHESIS QUALITY BAR\n===========================\n"

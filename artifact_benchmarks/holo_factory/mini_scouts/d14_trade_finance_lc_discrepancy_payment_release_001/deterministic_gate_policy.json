@@ -1,0 +1,47 @@
+{
+  "packet_id": "d14_trade_finance_lc_discrepancy_payment_release_001",
+  "deterministic_gate_policy_version": "v1_0",
+  "layer_1_deterministic_gate": {
+    "artifact_body_word_count": {
+      "min": 900,
+      "max": 1300,
+      "target": 1100,
+      "scope": "main_artifact_body_only",
+      "exclude": [
+        "source appendix",
+        "citation list",
+        "machine-readable metadata",
+        "separated audit trail"
+      ],
+      "failure_result": "deterministic_gate_invalid_diagnostic_only_no_proof_credit"
+    },
+    "required_sections": [
+      "bottom_line_recommendation",
+      "what_is_happening_and_why_it_matters_now",
+      "strongest_evidence",
+      "weak_stale_missing_or_conflicting_evidence",
+      "calculations_or_payment_risk_interpretation",
+      "practical_response_options",
+      "risks_of_acting",
+      "risks_of_waiting",
+      "recommended_next_steps_and_stop_go_triggers",
+      "claim_boundaries_or_disclaimer"
+    ],
+    "source_requirements": {
+      "must_use_frozen_packet_only": true,
+      "must_not_browse": true,
+      "must_not_invent_sources": true,
+      "must_use_exact_source_ids": true,
+      "must_distinguish_case_facts_from_source_authority": true
+    },
+    "disallowed_outputs": [
+      "approving LC honor or payment release solely because applicant pressure, waiver language, or shipment urgency is high",
+      "treating prior-day partial document review or derived dashboards as current final document-exam release",
+      "treating applicant discrepancy waiver as full bank payment-release authority",
+      "treating SWIFT preparation, final payment confirmation, and irreversible payment or reimbursement release as the same action",
+      "claiming Compliance release, reimbursement approval, two-person Trade Finance approval, corrected originals, or SWIFT cancellation ability are complete without packet evidence",
+      "generic wait-for-approval advice without document exam, waiver scope, Compliance, reimbursement, cutoff, status notice, and payment-release stop/go triggers"
+    ]
+  },
+  "provider_calls": 0
+}

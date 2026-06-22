@@ -1,0 +1,122 @@
+{
+  "policy_id": "HOLOBUILD_ARCHITECTURE_POLICY_V4_2",
+  "supersedes_policy_id": "HOLOBUILD_ARCHITECTURE_POLICY_V4_1",
+  "status": "internal_scaffold_no_provider",
+  "provider_calls": 0,
+  "public_exposure_allowed": false,
+  "prompt_exposure_allowed": false,
+  "judge_exposure_allowed": false,
+  "browser_packet_exposure_allowed": false,
+  "purpose": "Define the internal HoloBuild architecture evidence contract for pre-registry intermediate QA, final synthesis input guarding, and strict final word-band compliance in new runs.",
+  "scope": {
+    "applies_to_new_runs_only": true,
+    "historical_runs_rewritten": false,
+    "scoring_protocol_changed": false,
+    "blind_exports_changed": false
+  },
+  "intermediate_registry_gate": {
+    "default_min_visible_words": 250,
+    "role_min_visible_words": {
+      "initial_decision_brief_drafter": 420,
+      "assumption_and_evidence_attacker": 320,
+      "contradiction_uncertainty_source_fidelity_reviewer": 340,
+      "options_operational_usefulness_reviewer": 340,
+      "claim_discipline_overclaim_reducer": 320
+    },
+    "required_before_registry_acceptance": [
+      "non_empty_visible_output",
+      "policy_configured_minimum_visible_word_count",
+      "clean_terminal_sentence",
+      "no_mid_sentence_termination",
+      "no_dangling_markdown_emphasis",
+      "no_unclosed_code_fence",
+      "no_dangling_table_row_or_list_fragment",
+      "no_dangling_json_or_structured_fragment",
+      "no_provider_truncation_signature",
+      "role_specific_required_behaviors_present",
+      "source_state_audit_passed",
+      "packet_hash_preserved",
+      "no_invented_source_ids"
+    ],
+    "failed_turn_handling": [
+      "preserve_original_raw_output",
+      "do_not_register_failed_output",
+      "invoke_configured_repair_path",
+      "validate_repair_with_same_gate",
+      "preserve_repair_output_separately",
+      "mark_required_role_unresolved_if_repair_fails",
+      "proof_credit_ineligible_when_required_role_unresolved"
+    ]
+  },
+  "role_specific_validators": {
+    "options_operational_usefulness_reviewer": {
+      "required_components": [
+        "available_options",
+        "risk_of_acting",
+        "risk_of_waiting",
+        "sequencing_or_dependency_chain",
+        "stop_go_triggers",
+        "rollback_gates",
+        "monitoring_or_logging_gates",
+        "executive_next_actions"
+      ],
+      "action_boundary_components": [
+        "what_must_be_true_before_execution",
+        "what_signal_stops_execution",
+        "what_signal_permits_expansion",
+        "what_can_be_reversed",
+        "what_cannot_be_reversed",
+        "what_must_be_observable_before_rollback_can_be_trusted"
+      ],
+      "keyword_only_output_rejected": true
+    }
+  },
+  "final_synthesis_input_guard": {
+    "may_consume_only_registry_entries_with": [
+      "intermediate_completeness_pass",
+      "role_compliance_pass",
+      "state_source_audit_pass",
+      "repair_validation_pass_if_repair_was_required"
+    ],
+    "failed_role_turn_must_not_be_retrieved_as_valid_artifact": true,
+    "unresolved_required_role_blocks_proof_credit": true
+  },
+  "final_word_band_compliance": {
+    "min_words": 900,
+    "max_words": 1300,
+    "repair_target_words": 1180,
+    "repair_acceptance_requires_band_pass": true,
+    "overlength_repair_is_not_successful": true,
+    "preserve_original_final_and_each_repair_attempt": true,
+    "must_preserve_in_repair": [
+      "central_thesis",
+      "decision_recommendation",
+      "risk_of_acting",
+      "risk_of_waiting",
+      "trigger_or_gate_table",
+      "calculations",
+      "counterargument",
+      "source_ids",
+      "source_boundary_disclaimer"
+    ]
+  },
+  "proof_credit_eligibility_requires": [
+    "every_required_role_completed",
+    "every_required_role_passed_role_compliance",
+    "every_accepted_role_passed_intermediate_completeness",
+    "every_accepted_role_passed_state_source_audit",
+    "no_failed_required_turn_consumed_by_final_synthesis",
+    "final_artifact_passed_required_section_checks",
+    "final_artifact_passed_word_band_compliance",
+    "final_repair_succeeded_if_used"
+  ],
+  "hidden_from_scoring_and_judging": [
+    "state_object_hash",
+    "artifact_registry_entries",
+    "registry_acceptance",
+    "intermediate_completeness",
+    "repair_attempts",
+    "architecture_evidence_validation",
+    "proof_credit_architecture_status"
+  ]
+}

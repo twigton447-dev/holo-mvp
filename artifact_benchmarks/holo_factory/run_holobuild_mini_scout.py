@@ -29,9 +29,11 @@ HOLO_MODES = ("diagnostic_v3", "full_gov_v4", "patent_aligned_v4")
 HOLO_CONTEXT_PROFILES = ("full_registry", "latest_only")
 DEFAULT_HOLO_CONTEXT_PROFILE = "full_registry"
 MAX_HOLO_FINAL_REPAIR_ATTEMPTS = 1
+MAX_HOLO_INTERMEDIATE_REPAIR_ATTEMPTS = 1
 DEFAULT_TURN_MAX_TOKENS = 3800
 FINAL_SYNTHESIS_MAX_TOKENS = 6000
 FINAL_REPAIR_MAX_TOKENS = 5200
+INTERMEDIATE_REPAIR_MAX_TOKENS = 3600
 HOLO_SESSION_TEMPLATES = ("random", "d3_success_v1", "grok_swap_v1", "opus_gov_b_v1")
 D3_SUCCESS_HOLO_TURN_MODELS = (
     "google:gemini-3.1-pro-preview",
@@ -80,6 +82,12 @@ FINAL_WORD_MAX = 1300
 FINAL_WORD_TARGET = 1250
 FINAL_WORD_PERSUASIVE_MAX = 1500
 FINAL_WORD_EXTREME_MAX = 1800
+ARCHITECTURE_POLICY_ID = "HOLOBUILD_ARCHITECTURE_POLICY_V4_2"
+ARCHITECTURE_POLICY_VERSION = "v4.2"
+ARCHITECTURE_POLICY_PATH = FACTORY_DIR / "architecture_policies/holobuild_architecture_policy_v4_2.json"
+INTERMEDIATE_DEFAULT_MIN_WORDS = 250
+FINAL_REPAIR_TARGET_WORDS = 1180
+FINAL_REPAIR_HARD_MAX_WORDS = FINAL_WORD_MAX
 HOLOGOV_C_TENURE_MIN = 7
 HOLOGOV_C_TENURE_MAX = 11
 PROVIDER_CALLS = 0
@@ -93,7 +101,7 @@ SOLO_TURNS = (
     ("contradiction_uncertainty_source_fidelity_pass", "Revise for contradictory evidence, uncertainty, stale or weak source handling, and source-fidelity problems."),
     ("options_risks_operational_usefulness_pass", "Revise for practical options, risks of acting, risks of waiting, stop/go triggers, and operational usefulness for leadership."),
     ("claim_discipline_overclaim_reduction_pass", "Cut unsupported claims, reduce overclaiming, tighten source citations, and prepare a concise final version."),
-    ("final_synthesis_900_1500_words", "Return only the final decision-grade crisis/action brief, 900-1,500 body words, target 1,250; use any words over 1,300 only when they materially improve argument power."),
+    ("final_synthesis_900_1300_words", "Return only the final decision-grade crisis/action brief. Final artifact body must be 900-1,300 words."),
 )
 HOLO_TURNS = (
     ("initial_decision_brief_drafter", "anthropic:claude-opus-4-8", "Draft a source-grounded initial decision frame covering what is happening, why it matters, and the main options. This is not final."),
@@ -101,20 +109,65 @@ HOLO_TURNS = (
     ("contradiction_uncertainty_source_fidelity_reviewer", "openai:gpt-5.5", "Stress-test contradictory evidence, source fidelity, source-status boundaries, and uncertainty handling."),
     ("options_operational_usefulness_reviewer", "anthropic:claude-opus-4-8", "Stress-test practical options, risks of acting, risks of waiting, operating gates, and usefulness for leadership."),
     ("claim_discipline_overclaim_reducer", "google:gemini-3.1-pro-preview", "Reduce unsupported claims, identify overclaim risks, and prepare final-brief constraints."),
-    ("final_synthesis_author", "openai:gpt-5.5", "Return only the final decision-grade crisis/action brief, 900-1,500 body words, target 1,250; use any words over 1,300 only when they materially improve argument power."),
+    ("final_synthesis_author", "openai:gpt-5.5", "Return only the final decision-grade crisis/action brief, 900-1,300 body words, target 1,180; do not exceed 1,300 words."),
 )
-V6_1_ARGUMENT_POWER_GUIDANCE = (
-    "Optimize for the locked v6.1 scoring protocol: not just safe compliance, but stronger thinking. "
-    "After source fidelity, action-boundary safety, and claim discipline are preserved, argument strength and persuasion are the decisive top-band discriminator. "
+INTERMEDIATE_ROLE_MIN_WORDS = {
+    "initial_decision_brief_drafter": 420,
+    "assumption_and_evidence_attacker": 320,
+    "contradiction_uncertainty_source_fidelity_reviewer": 340,
+    "options_operational_usefulness_reviewer": 340,
+    "claim_discipline_overclaim_reducer": 320,
+}
+REQUIRED_INTERMEDIATE_ROLES = frozenset(INTERMEDIATE_ROLE_MIN_WORDS)
+GENERATION_ARGUMENT_QUALITY_GUIDANCE = (
+    "Optimize for strong decision quality: not just safe compliance, but stronger thinking. "
+    "After source fidelity, action-boundary safety, and claim discipline are preserved, argument strength and practical judgment matter. "
     "A merely safe, complete, or well-cited artifact is not enough; the final artifact must be the more convincing and more powerful decision argument. "
     "The final brief must have a sharp central thesis, clean evidence-to-decision argument, persuasive uncertainty handling, "
     "non-generic insights, source synthesis, practical judgment, and explicit handling of the best counterargument. "
-    "Do not make the brief longer to sound stronger; use the clean 900-1,300 band when possible and the 1,500-word persuasive ceiling only for decision-useful argument power."
+    "Do not make the brief longer to sound stronger; keep the final artifact within the hard 900-1,300 word band."
+)
+EXACT_SOURCE_ID_GENERATION_INSTRUCTION = (
+    "Use exact full source_id strings from the source packet. Do not abbreviate, rename, shorten, or invent source IDs. "
+    "Do not use S1/S2-style shorthand unless the exact source_id itself is literally S1 or S2. "
+    "Claims that rely on sources must preserve the exact source_id string."
 )
 FINAL_SYNTHESIS_TRIGGER_TAXONOMY = (
     "In the final synthesis, convert the recommendation into an executable trigger taxonomy: broad-action go/no-go, "
     "narrow/conditional go, hold/escalate, revoke/rollback/stop, and post-action review or follow-up where relevant. "
     "Use packet-specific names when the packet supplies required practical response options."
+)
+INTERMEDIATE_REPAIR_CLEAN_ENDING_CONTRACT = (
+    "INTERMEDIATE REPAIR CLEAN ENDING CONTRACT\n"
+    "==========================================\n"
+    "End with one complete standalone sentence.\n"
+    "Do not end mid-sentence.\n"
+    "Do not end in an unfinished list item.\n"
+    "Do not end in a dangling parenthesis, slash, markdown emphasis, code fence, table row, JSON fragment, or metadata/footer.\n"
+    "Do not append a word-count footer."
+)
+OPTIONS_OPERATIONAL_REPAIR_CHECKLIST_ITEMS = (
+    "Available options",
+    "Risk of acting",
+    "Risk of waiting",
+    "Must be true before execution",
+    "Signal that stops execution",
+    "Signal that permits expansion",
+    "What can be reversed",
+    "What cannot be reversed",
+    "Rollback gates",
+    "Monitoring/logging gates",
+    "Executive next actions",
+    "Dependency chain",
+    "What must be observable before rollback/canary can be trusted",
+)
+OPTIONS_OPERATIONAL_REPAIR_CHECKLIST = (
+    "OPTIONS OPERATIONAL REPAIR REQUIRED CHECKLIST\n"
+    "==============================================\n"
+    "This repair will be validated against the V4.2 options_operational_usefulness_reviewer role-specific validator. "
+    "Omission of any required component fails the repair. Use explicit headings or clearly matched phrases for every component below, "
+    "and put at least one substantive sentence under each heading. Keyword-only output still fails.\n"
+    + "\n".join(f"- {item}" for item in OPTIONS_OPERATIONAL_REPAIR_CHECKLIST_ITEMS)
 )
 FINAL_REQUIRED_SECTION_PATTERNS = {
     "bottom_line": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:bottom line|recommendation|bottom-line)"),
@@ -124,6 +177,7 @@ FINAL_REQUIRED_SECTION_PATTERNS = {
     "claim_boundaries": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:claim\s+boundaries|disclaimer|claim\s+boundaries\s*/\s*disclaimer)"),
 }
 FINAL_CLEAN_ENDING_RE = re.compile(r"[.!?][\"')\]]*$")
+UNCLEAN_INTERMEDIATE_ENDING_RE = re.compile(r"[*_\-:;,(\[{]$")
 SOURCE_ID_RE = re.compile(r"\bS\d+_[A-Z0-9_]+\b")
 ACTIVE_SCORING_LOCK_PATH = FACTORY_DIR / "scoring_policies/ACTIVE_SCORING_PROTOCOL.lock.json"
 HARD_FORBIDDEN_JUDGE_VISIBLE_PATTERNS = {
@@ -206,14 +260,102 @@ def repo_rel(path: Path) -> str:
         return str(path)
 
 
+_ARCHITECTURE_POLICY_CACHE: dict[str, Any] | None = None
+
+
+def load_architecture_policy() -> dict[str, Any]:
+    global _ARCHITECTURE_POLICY_CACHE
+    if _ARCHITECTURE_POLICY_CACHE is not None:
+        return _ARCHITECTURE_POLICY_CACHE
+    if not ARCHITECTURE_POLICY_PATH.exists():
+        raise SystemExit(json.dumps({
+            "status": "HOLOBUILD_MINI_SCOUT_FAIL_CLOSED",
+            "reason": "architecture_policy_missing",
+            "expected_policy_id": ARCHITECTURE_POLICY_ID,
+            "policy_path": repo_rel(ARCHITECTURE_POLICY_PATH),
+            "provider_calls": 0,
+        }, indent=2))
+    policy = read_json(ARCHITECTURE_POLICY_PATH)
+    if policy.get("policy_id") != ARCHITECTURE_POLICY_ID:
+        raise SystemExit(json.dumps({
+            "status": "HOLOBUILD_MINI_SCOUT_FAIL_CLOSED",
+            "reason": "architecture_policy_id_mismatch",
+            "expected_policy_id": ARCHITECTURE_POLICY_ID,
+            "actual_policy_id": policy.get("policy_id"),
+            "policy_path": repo_rel(ARCHITECTURE_POLICY_PATH),
+            "provider_calls": 0,
+        }, indent=2))
+    _ARCHITECTURE_POLICY_CACHE = policy
+    return policy
+
+
+def architecture_policy_lock_path() -> Path | None:
+    candidates = [
+        ARCHITECTURE_POLICY_PATH.with_suffix(".lock.json"),
+        ARCHITECTURE_POLICY_PATH.with_name(ARCHITECTURE_POLICY_PATH.stem + ".lock.json"),
+    ]
+    for path in candidates:
+        if path.exists():
+            return path
+    return None
+
+
+def architecture_policy_ref() -> dict[str, Any]:
+    policy = load_architecture_policy()
+    lock_path = architecture_policy_lock_path()
+    return {
+        "policy_id": policy.get("policy_id"),
+        "policy_version": ARCHITECTURE_POLICY_VERSION,
+        "policy_path": repo_rel(ARCHITECTURE_POLICY_PATH),
+        "policy_hash": sha_file(ARCHITECTURE_POLICY_PATH),
+        "policy_missing": False,
+        "lock_path": repo_rel(lock_path) if lock_path else None,
+        "lock_hash": sha_file(lock_path) if lock_path else None,
+    }
+
+
+def intermediate_registry_policy() -> dict[str, Any]:
+    return load_architecture_policy().get("intermediate_registry_gate") or {}
+
+
+def intermediate_default_min_words() -> int:
+    return int(intermediate_registry_policy().get("default_min_visible_words", INTERMEDIATE_DEFAULT_MIN_WORDS))
+
+
+def intermediate_role_min_words() -> dict[str, int]:
+    role_words = intermediate_registry_policy().get("role_min_visible_words") or {}
+    return {str(role): int(words) for role, words in role_words.items()}
+
+
+def required_intermediate_roles() -> frozenset[str]:
+    return frozenset(intermediate_role_min_words())
+
+
+def final_word_band_policy() -> dict[str, int]:
+    policy = load_architecture_policy().get("final_word_band_compliance") or {}
+    return {
+        "min_words": int(policy.get("min_words", FINAL_WORD_MIN)),
+        "max_words": int(policy.get("max_words", FINAL_WORD_MAX)),
+        "repair_target_words": int(policy.get("repair_target_words", FINAL_REPAIR_TARGET_WORDS)),
+    }
+
+
 def architecture_evidence_summary(evidence_turns: list[dict[str, Any]], precheck: dict[str, Any], holo_mode: str) -> dict[str, Any]:
+    final_turns = [
+        item for item in evidence_turns
+        if item.get("role") == "final_synthesis_author" or item.get("turn") == len(HOLO_TURNS)
+    ]
+    final_retrieved_ids: set[str] = set()
+    if final_turns:
+        final_retrieved_ids = set(final_turns[-1].get("retrieved_artifact_ids") or [])
+
     role_failures = [
-        {"turn": item.get("turn"), "role_compliance": item.get("role_compliance")}
+        {"turn": item.get("turn"), "role": item.get("role"), "role_compliance": item.get("role_compliance")}
         for item in evidence_turns
         if (item.get("role_compliance") or {}).get("status") != "pass"
     ]
     state_failures = [
-        {"turn": item.get("turn"), "state_audit": item.get("state_audit")}
+        {"turn": item.get("turn"), "role": item.get("role"), "state_audit": item.get("state_audit")}
         for item in evidence_turns
         if (item.get("state_audit") or {}).get("status") != "pass"
     ]
@@ -222,31 +364,110 @@ def architecture_evidence_summary(evidence_turns: list[dict[str, Any]], precheck
         for item in evidence_turns
         if not item.get("prompt_card_hash")
     ]
+    intermediate_completeness_failures = []
+    registry_rejections = []
+    unresolved_required_roles = []
+    failed_required_turns_consumed_by_final = []
+    for item in evidence_turns:
+        role = item.get("role")
+        if role == "final_synthesis_author":
+            continue
+        role_compliance_result = item.get("role_compliance") or {}
+        completeness = role_compliance_result.get("intermediate_artifact_completeness") or {}
+        registry_acceptance = item.get("registry_acceptance") or {}
+        artifact_id = item.get("artifact_id")
+        failed_role = role_compliance_result.get("status") != "pass"
+        failed_state = (item.get("state_audit") or {}).get("status") != "pass"
+        failed_completeness = completeness.get("status") != "pass"
+        rejected = registry_acceptance.get("status") != "accepted"
+        if failed_completeness:
+            intermediate_completeness_failures.append({
+                "turn": item.get("turn"),
+                "role": role,
+                "intermediate_artifact_completeness": completeness,
+            })
+        if rejected:
+            registry_rejections.append({
+                "turn": item.get("turn"),
+                "role": role,
+                "registry_acceptance": registry_acceptance,
+            })
+        if role in required_intermediate_roles() and rejected:
+            unresolved_required_roles.append({
+                "turn": item.get("turn"),
+                "role": role,
+                "artifact_id": artifact_id,
+                "registry_acceptance": registry_acceptance,
+            })
+        if artifact_id in final_retrieved_ids and (failed_role or failed_state or failed_completeness or rejected):
+            failed_required_turns_consumed_by_final.append({
+                "turn": item.get("turn"),
+                "role": role,
+                "artifact_id": artifact_id,
+                "role_status": role_compliance_result.get("status"),
+                "intermediate_completeness_status": completeness.get("status"),
+                "state_audit_status": (item.get("state_audit") or {}).get("status"),
+                "registry_acceptance_status": registry_acceptance.get("status"),
+            })
+
     final_completeness_failures = [
         {"turn": item.get("turn"), "final_artifact_completeness": (item.get("role_compliance") or {}).get("final_artifact_completeness")}
-        for item in evidence_turns
+        for item in final_turns
         if ((item.get("role_compliance") or {}).get("final_artifact_completeness") or {}).get("status") == "fail"
     ]
-    deterministic_gate_pass = precheck.get("deterministic_gate_status") in {"pass", "pass_with_word_overage_penalty"}
+    final_word_band_failures = [
+        {"turn": item.get("turn"), "final_word_band_status": (item.get("role_compliance") or {}).get("final_word_band_status"), "final_word_count": (item.get("role_compliance") or {}).get("final_word_count")}
+        for item in final_turns
+        if (item.get("role_compliance") or {}).get("final_word_band_status") != "pass"
+    ]
+    final_repair_failures = [
+        {"turn": item.get("turn"), "final_repair_attempts": item.get("final_repair_attempts")}
+        for item in final_turns
+        if item.get("final_repair_required") and not item.get("final_repair_succeeded")
+    ]
+    final_synthesis_blocked = any(bool(item.get("final_synthesis_blocked")) for item in evidence_turns)
+    deterministic_gate_pass = precheck.get("deterministic_gate_status") == "pass"
     proof_eligible = (
         holo_mode == PROOF_ELIGIBLE_HOLO_MODE
         and deterministic_gate_pass
         and not role_failures
         and not state_failures
         and not prompt_hash_missing
+        and not intermediate_completeness_failures
+        and not registry_rejections
+        and not unresolved_required_roles
+        and not failed_required_turns_consumed_by_final
         and not final_completeness_failures
+        and not final_word_band_failures
+        and not final_repair_failures
+        and not final_synthesis_blocked
     )
     return {
         "proof_credit_eligible": proof_eligible,
+        "architecture_policy": architecture_policy_ref(),
         "deterministic_gate_pass": deterministic_gate_pass,
+        "deterministic_gate_status": precheck.get("deterministic_gate_status"),
+        "required_roles_all_completed": not unresolved_required_roles,
         "role_compliance_all_pass": not role_failures,
+        "intermediate_completeness_all_pass": not intermediate_completeness_failures,
         "state_audit_all_pass": not state_failures,
+        "registry_acceptance_all_pass": not registry_rejections,
+        "no_failed_required_turn_consumed_by_final": not failed_required_turns_consumed_by_final,
         "prompt_card_hashes_present": not prompt_hash_missing,
         "final_artifact_completeness_pass": not final_completeness_failures,
+        "final_word_band_pass": not final_word_band_failures,
+        "final_repair_succeeded_if_used": not final_repair_failures,
+        "final_synthesis_blocked": final_synthesis_blocked,
         "role_compliance_failures": role_failures,
+        "intermediate_completeness_failures": intermediate_completeness_failures,
         "state_audit_failures": state_failures,
+        "registry_rejections": registry_rejections,
+        "unresolved_required_roles": unresolved_required_roles,
+        "failed_required_turns_consumed_by_final": failed_required_turns_consumed_by_final,
         "prompt_hash_missing_turns": prompt_hash_missing,
         "final_artifact_completeness_failures": final_completeness_failures,
+        "final_word_band_failures": final_word_band_failures,
+        "final_repair_failures": final_repair_failures,
     }
 
 
@@ -306,6 +527,186 @@ def final_artifact_completeness(output_text: str, output_meta: dict[str, Any] | 
         "max_tokens_requested": max_tokens_requested,
         "hit_requested_token_ceiling": hit_requested_token_ceiling,
         "failures": failures,
+    }
+
+
+def intermediate_fragment_audit(stripped: str) -> dict[str, Any]:
+    failures: list[str] = []
+    lines = [line.rstrip() for line in stripped.splitlines() if line.strip()]
+    last_line = lines[-1] if lines else ""
+    clean_terminal_sentence = bool(FINAL_CLEAN_ENDING_RE.search(stripped))
+    dangling_terminal = bool(stripped and UNCLEAN_INTERMEDIATE_ENDING_RE.search(stripped))
+    if not clean_terminal_sentence or dangling_terminal:
+        failures.append("unclean_or_mid_sentence_intermediate_ending")
+    if stripped.count("```") % 2:
+        failures.append("dangling_markdown_code_fence")
+    last_line_for_emphasis = re.sub(r"^\s*[-*+]\s+", "", last_line.strip())
+    unpaired_star_markers = re.findall(r"(?<!\\)(?<!\*)\*(?!\*)", last_line_for_emphasis)
+    unpaired_underscore_markers = re.findall(r"(?<![\\\w_])_(?![\w_])", last_line_for_emphasis)
+    if len(unpaired_star_markers) % 2 or len(unpaired_underscore_markers) % 2:
+        failures.append("dangling_markdown_emphasis")
+    if last_line.endswith("|") or re.search(r"^\s*\|.*\|\s*$", last_line) and not clean_terminal_sentence:
+        failures.append("dangling_markdown_table_row")
+    if re.search(r"^\s*(?:[-*+]|\d+\.)\s+\S{0,80}$", last_line) and not clean_terminal_sentence:
+        failures.append("dangling_markdown_list_fragment")
+    tail = stripped[-600:]
+    if (
+        re.search(r"[\[{]\s*(?:\"[^\"]*\"|[A-Za-z0-9_ -]+)?\s*$", tail)
+        or re.search(r"[:,]\s*$", tail)
+        or tail.count("{") > tail.count("}")
+        or tail.count("[") > tail.count("]")
+    ):
+        failures.append("dangling_json_or_structured_fragment")
+    return {
+        "clean_terminal_sentence": clean_terminal_sentence,
+        "dangling_terminal": dangling_terminal,
+        "last_line": last_line,
+        "failures": list(dict.fromkeys(failures)),
+    }
+
+
+def options_operational_analysis_presence(output_text: str) -> dict[str, Any]:
+    lowered = output_text.lower()
+    component_patterns = {
+        "available_options": r"\b(option|path|alternative|approve|deny|block|hold|escalate|fallback|response)\b",
+        "risk_of_acting": r"\b(risk of acting|acting risk|execution risk|risk if approved|risk if executed|if (?:we )?(?:act|approve|execute|proceed)|harm of acting|blast radius|downside of proceeding|cost of acting|consequence of acting)\b",
+        "risk_of_waiting": r"\b(risk of waiting|waiting risk|delay risk|if (?:we )?(?:wait|defer|delay)|cost of waiting|deadline|manual workaround)\b",
+        "sequencing_or_dependency_chain": r"\b(sequence|dependency|before|after|first|then|stage|canary|timeline|chain|prerequisite)\b",
+        "stop_go_triggers": r"\b(stop|go|no-go|trigger|threshold|condition|permit|gate|decision point)\b",
+        "rollback_gates": r"\b(rollback|revert|revoke|undo|reversal|backout|kill switch)\b",
+        "monitoring_or_logging_gates": r"\b(monitor|monitoring|log|logging|observable|observability|metric|alert|audit trail|signal)\b",
+        "executive_next_actions": r"\b(next action|next step|owner|executive|approve|approval|escalate|commander|business owner|accountable)\b",
+        "true_before_execution": r"\b(must be true before execution|prerequisites? before execution|preconditions? before execution|before execution|before approval|required before release|gate before execution|condition before execution|before (?:we )?(?:execute|approve|expand|proceed)|must be true|preconditions?|prerequisites?)\b",
+        "signal_stops_execution": r"\b(signal that stops execution|signal stops execution|signal.*stop|stop.*signal|halt|kill switch|block execution|do not proceed|stop execution)\b",
+        "signal_permits_expansion": r"\b(signal permits expansion|signal that permits expansion|expansion permitted only if|expansion allowed only if|go signal|go condition|proceed only if|expand only after|permit expansion when|allow expansion when|signal.*(?:expand|scale|continue)|permits expansion|expand only|scale only|continue only)\b",
+        "reversible_action": r"\b(reversible|can be reversed|can reverse|rollback|revert|undo|revocable)\b",
+        "irreversible_action": r"\b(irreversible action|cannot be reversed|not reversible|unrecoverable|sticky consequence|irreversible consequence|external reliance|irreversible exposure|permanent effect|cannot be undone|irreversible|cannot reverse|permanent|one-way)\b",
+        "observable_before_rollback_trusted": r"\b(observable before rollback|before rollback.*observable|rollback.*(?:trusted|trust)|monitor.*rollback|logs?.*rollback)\b",
+    }
+    presence = {
+        name: bool(re.search(pattern, lowered))
+        for name, pattern in component_patterns.items()
+    }
+    missing = [name for name, present in presence.items() if not present]
+    sentences = [part.strip() for part in re.split(r"(?<=[.!?])\s+", output_text.strip()) if word_count(part) >= 8]
+    operational_clause_hits = len(re.findall(r"\b(if|when|unless|until|before|after|trigger|threshold|gate|rollback|monitor|observable|owner|approve|escalate)\b", lowered))
+    substantive = len(sentences) >= 6 and operational_clause_hits >= 8
+    failures = [f"missing_options_role_component:{name}" for name in missing]
+    if not substantive:
+        failures.append("options_operational_analysis_too_thin_or_keyword_only")
+    return {
+        "status": "pass" if not failures else "fail",
+        "component_presence": presence,
+        "missing_components": missing,
+        "substantive_sentence_count": len(sentences),
+        "operational_clause_hits": operational_clause_hits,
+        "failures": failures,
+    }
+
+
+def intermediate_artifact_completeness(role: str, output_text: str, output_meta: dict[str, Any] | None = None) -> dict[str, Any]:
+    stripped = output_text.strip()
+    failures: list[str] = []
+    wc = word_count(stripped)
+    policy_role_words = intermediate_role_min_words()
+    default_min_words = intermediate_default_min_words()
+    min_words = max(default_min_words, policy_role_words.get(role, default_min_words))
+
+    if not stripped:
+        failures.append("empty_intermediate_artifact")
+    if wc < min_words:
+        failures.append("intermediate_artifact_too_short")
+
+    fragment_audit = intermediate_fragment_audit(stripped)
+    failures.extend(fragment_audit["failures"])
+
+    output_tokens = int((output_meta or {}).get("output_tokens") or 0)
+    max_tokens_requested = int((output_meta or {}).get("max_tokens_requested") or 0)
+    hit_requested_token_ceiling = bool(output_tokens and max_tokens_requested and output_tokens >= max_tokens_requested)
+    if hit_requested_token_ceiling and not fragment_audit["clean_terminal_sentence"]:
+        failures.append("provider_output_hit_max_tokens_with_unclean_intermediate_ending")
+
+    role_specific_presence: dict[str, Any] = {}
+    if role == "options_operational_usefulness_reviewer":
+        role_specific_presence = options_operational_analysis_presence(stripped)
+        failures.extend(role_specific_presence["failures"])
+
+    return {
+        "status": "pass" if not failures else "fail",
+        "word_count": wc,
+        "min_words_required": min_words,
+        "clean_ending": fragment_audit["clean_terminal_sentence"] and not fragment_audit["failures"],
+        "fragment_audit": fragment_audit,
+        "output_tokens": output_tokens,
+        "max_tokens_requested": max_tokens_requested,
+        "hit_requested_token_ceiling": hit_requested_token_ceiling,
+        "role_specific_presence": role_specific_presence,
+        "failures": list(dict.fromkeys(failures)),
+    }
+
+
+def final_word_band_compliance(output_text: str) -> dict[str, Any]:
+    policy = final_word_band_policy()
+    minimum = policy["min_words"]
+    maximum = policy["max_words"]
+    wc = word_count(output_text)
+    if wc < minimum:
+        status = "fail_under_minimum"
+    elif wc > maximum:
+        status = "fail_over_hard_max"
+    else:
+        status = "pass"
+    return {
+        "status": status,
+        "word_count": wc,
+        "min_words_required": minimum,
+        "max_words_allowed": maximum,
+        "repair_target_words": policy["repair_target_words"],
+        "over_max_words": max(0, wc - maximum),
+        "under_min_words": max(0, minimum - wc),
+        "threshold_source": repo_rel(ARCHITECTURE_POLICY_PATH),
+        "policy_id": load_architecture_policy().get("policy_id"),
+    }
+
+
+def registered_artifact_id(index: int, role: str, final: bool = False) -> str:
+    return "FINAL_ARTIFACT" if final else f"TURN_{index:03d}_{role.upper()}"
+
+
+def intermediate_registry_gate(
+    *,
+    artifact_id: str,
+    role: str,
+    role_compliance_result: dict[str, Any],
+    state_audit_result: dict[str, Any],
+    repair_attempts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    completeness = role_compliance_result.get("intermediate_artifact_completeness") or {}
+    failures: list[str] = []
+    if role_compliance_result.get("status") != "pass":
+        failures.append("role_compliance_failed")
+    if completeness.get("status") != "pass":
+        failures.append("intermediate_completeness_failed")
+    if state_audit_result.get("status") != "pass":
+        failures.append("state_or_source_audit_failed")
+    if not state_audit_result.get("packet_hash_preserved"):
+        failures.append("packet_hash_not_preserved")
+    if state_audit_result.get("invented_source_ids"):
+        failures.append("invented_source_ids")
+    repair_required = bool(repair_attempts) or bool(failures)
+    repair_succeeded = bool(repair_attempts and repair_attempts[-1].get("accepted"))
+    if repair_required and failures:
+        failures.append("required_repair_not_validated")
+    return {
+        "artifact_id": artifact_id,
+        "role": role,
+        "status": "accepted" if not failures else "rejected",
+        "repair_required": repair_required,
+        "repair_succeeded": repair_succeeded,
+        "role_compliance_status": role_compliance_result.get("status"),
+        "intermediate_completeness_status": completeness.get("status"),
+        "state_audit_status": state_audit_result.get("status"),
+        "failures": list(dict.fromkeys(failures)),
     }
 
 
@@ -396,6 +797,8 @@ def load_configs() -> dict[str, dict[str, Any]]:
     configs: dict[str, dict[str, Any]] = {}
     for path in sorted(CONFIG_DIR.glob("*.json")):
         cfg = read_json(path)
+        if "condition_type" not in cfg:
+            continue
         configs[cfg["config_id"]] = cfg
         for alias in cfg.get("condition_aliases", []):
             configs[alias] = cfg
@@ -697,9 +1100,9 @@ def build_base_system() -> str:
         "You are producing a decision-grade crisis/action brief from a frozen benchmark packet. "
         "Use only the provided task brief and frozen source packet. Do not browse. Do not infer model identity. "
         "Separate facts from inference, preserve source boundaries, compare options, and include risks of acting and waiting. "
-        "The clean final artifact band is 900-1,300 words, but the persuasive ceiling is 1,500 words when the extra space materially improves the argument. "
-        "Target about 1,250 words. Under v6.1, words over 1,300 receive a scoring penalty rather than automatic failure; do not exceed 1,500 unless explicitly instructed. "
-        f"{V6_1_ARGUMENT_POWER_GUIDANCE}"
+        "Final artifact body must be 900-1,300 words. "
+        f"{EXACT_SOURCE_ID_GENERATION_INSTRUCTION} "
+        f"{GENERATION_ARGUMENT_QUALITY_GUIDANCE}"
     )
 
 
@@ -725,6 +1128,7 @@ def call_model(provider_model_name: str, *, system: str, user: str, max_tokens: 
         raise
     ACCEPTED_PROVIDER_CALLS += 1
     out["provider_model"] = provider_model_name
+    out["max_tokens_requested"] = max_tokens
     return out
 
 
@@ -766,6 +1170,30 @@ def run_dir_for(packet_dir: Path, run_id: str) -> Path:
 
 def condition_dir_for(packet_dir: Path, run_id: str, condition: str) -> Path:
     return run_dir_for(packet_dir, run_id) / condition
+
+
+def generated_artifact_records(run_dir: Path) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    if not run_dir.exists():
+        return records
+    for metadata_path in sorted(run_dir.glob("*/artifact_metadata.json")):
+        try:
+            metadata = read_json(metadata_path)
+        except (OSError, json.JSONDecodeError):
+            metadata = {}
+        artifact_path_value = metadata.get("artifact_path")
+        artifact_path = REPO_ROOT / artifact_path_value if artifact_path_value else metadata_path.parent / "artifact.md"
+        if not artifact_path.exists():
+            continue
+        records.append({
+            "condition_dir": metadata_path.parent.name,
+            "metadata_path": repo_rel(metadata_path),
+            "artifact_path": repo_rel(artifact_path),
+            "artifact_hash": sha_file(artifact_path),
+            "condition": metadata.get("condition") or metadata_path.parent.name,
+            "config_id": metadata.get("config_id"),
+        })
+    return records
 
 
 def write_prompt_and_output(condition_dir: Path, turn_index: int, prompt_text: str, output: dict[str, Any]) -> dict[str, str]:
@@ -823,6 +1251,7 @@ def run_solo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         "artifact_hash": sha_file(artifact_path),
         "turns": turn_records,
         "provider_calls": len(turn_records),
+        "solo_call_structure": config.get("solo_call_structure"),
         "input_tokens": sum(int(item.get("input_tokens") or 0) for item in turn_records),
         "output_tokens": sum(int(item.get("output_tokens") or 0) for item in turn_records),
         "proof_credit_eligible": False,
@@ -853,9 +1282,12 @@ def role_compliance(role: str, output_text: str, final: bool, output_meta: dict[
             "source_fidelity": r"\b(source|source id|packet|cited|frozen|stale|weak)",
         },
         "options_operational_usefulness_reviewer": {
-            "options": r"\b(option|path|trigger|go|no-go|hold|escalate|fallback|response)",
-            "risk": r"\b(risk|exposure|failure|harm|cost)",
-            "waiting_or_sequence": r"\b(wait|waiting|sequence|window|timeline|next step|within)",
+            "available_options": r"\b(option|path|alternative|approve|deny|block|hold|escalate|fallback|response)",
+            "risk_of_acting": r"\b(risk of acting|acting risk|execution risk|risk if approved|risk if executed|if (?:we )?(?:act|approve|execute|proceed)|harm of acting|blast radius|downside of proceeding|cost of acting|consequence of acting|harm|cost)",
+            "risk_of_waiting": r"\b(risk of waiting|waiting risk|delay risk|if (?:we )?(?:wait|defer|delay)|cost of waiting)",
+            "sequence_or_dependency": r"\b(sequence|dependency|before|after|first|then|stage|canary|timeline|chain|prerequisite)",
+            "stop_go_or_rollback_gate": r"\b(stop|go|no-go|trigger|threshold|gate|rollback|revert|revoke|undo)",
+            "monitoring_or_next_action": r"\b(monitor|logging|observable|alert|audit trail|next action|next step|owner|executive|approval)",
         },
         "claim_discipline_overclaim_reducer": {
             "overclaim_reduction": r"\b(overclaim|avoid|reduce|replace|bounded|tighten|soften|do not assert|should not imply)",
@@ -875,16 +1307,18 @@ def role_compliance(role: str, output_text: str, final: bool, output_meta: dict[
         "praise_only": praise_only,
         "missing_role_behaviors": missing_terms,
     }
-    if final:
-        wc = word_count(output_text)
-        result["final_word_count"] = wc
-        if FINAL_WORD_MIN <= wc <= FINAL_WORD_MAX:
-            result["final_word_band_status"] = "pass"
-        elif FINAL_WORD_MAX < wc <= FINAL_WORD_PERSUASIVE_MAX:
-            result["final_word_band_status"] = "pass_with_word_overage_penalty"
-            result["word_count_penalty_points"] = round((wc - FINAL_WORD_MAX) * 0.03, 4)
-        else:
-            result["final_word_band_status"] = "fail"
+    if not final:
+        completeness = intermediate_artifact_completeness(role, output_text, output_meta)
+        result["intermediate_artifact_completeness"] = completeness
+        if completeness["status"] != "pass":
+            result["status"] = "fail"
+    else:
+        word_band = final_word_band_compliance(output_text)
+        result["final_word_count"] = word_band["word_count"]
+        result["final_word_band_status"] = word_band["status"]
+        result["final_word_band_compliance"] = word_band
+        if word_band["status"] != "pass":
+            result["status"] = "fail"
         completeness = final_artifact_completeness(output_text, output_meta)
         result["final_artifact_completeness"] = completeness
         if completeness["status"] != "pass":
@@ -917,6 +1351,59 @@ def retrieved_content_for(ids: list[str], registry: dict[str, Any]) -> str:
     return "\n\n---\n\n".join(chunks)
 
 
+def registry_view_without_content(registry: dict[str, Any], *, statuses: set[str] | None = None) -> dict[str, dict[str, Any]]:
+    view = {}
+    for artifact_id, item in registry.get("artifacts", {}).items():
+        if statuses is not None and item.get("status") not in statuses:
+            continue
+        view[artifact_id] = {key: value for key, value in item.items() if key != "content"}
+    return view
+
+
+def repair_attempt_public_status(attempts: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "attempt_count": len(attempts),
+        "accepted": bool(attempts and attempts[-1].get("accepted")),
+        "attempts": [
+            {
+                "attempt": item.get("attempt"),
+                "role": item.get("role") or item.get("repaired_role"),
+                "model": item.get("model"),
+                "accepted": bool(item.get("accepted")),
+            }
+            for item in attempts
+        ],
+    }
+
+
+def proof_credit_eligibility_state(unresolved_required_roles: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    reasons = ["unresolved_required_roles"] if unresolved_required_roles else []
+    return {
+        "eligible": not unresolved_required_roles,
+        "reasons": reasons,
+        "blocking_required_roles": sorted(unresolved_required_roles),
+    }
+
+
+def update_holobuild_state_surfaces(
+    state: dict[str, Any],
+    registry: dict[str, Any],
+    *,
+    rejected_artifact_ids: list[str],
+    unresolved_required_roles: dict[str, dict[str, Any]],
+    repair_attempt_status: dict[str, Any],
+    final_synthesis_allowed_input_ids: list[str],
+) -> None:
+    accepted_statuses = {"PINNED", "INTERMEDIATE_ACCEPTED", "INTERMEDIATE_ACCEPTED_AFTER_REPAIR"}
+    state["ARTIFACTS_REGISTRY"] = {"artifact_ids": list(registry.get("artifacts", {}).keys())}
+    state["ACCEPTED_ARTIFACT_REGISTRY"] = registry_view_without_content(registry, statuses=accepted_statuses)
+    state["REJECTED_ARTIFACT_IDS"] = sorted(set(rejected_artifact_ids))
+    state["UNRESOLVED_REQUIRED_ROLES"] = sorted(unresolved_required_roles)
+    state["REPAIR_ATTEMPT_STATUS"] = repair_attempt_status
+    state["FINAL_SYNTHESIS_ALLOWED_INPUT_IDS"] = final_synthesis_allowed_input_ids
+    state["PROOF_CREDIT_ELIGIBILITY_STATE"] = proof_credit_eligibility_state(unresolved_required_roles)
+
+
 def build_context_governor_instructions(hologov_profile: str | None, context_profile: str) -> str:
     profile = hologov_profile or "HoloGov-C"
     return (
@@ -931,6 +1418,58 @@ def build_context_governor_instructions(hologov_profile: str | None, context_pro
     )
 
 
+def intermediate_role_repair_instructions(role: str) -> str:
+    instructions = [INTERMEDIATE_REPAIR_CLEAN_ENDING_CONTRACT]
+    if role == "options_operational_usefulness_reviewer":
+        instructions.append(OPTIONS_OPERATIONAL_REPAIR_CHECKLIST)
+    return "\n\n".join(instructions)
+
+
+def build_intermediate_repair_user(
+    *,
+    role: str,
+    objective: str,
+    failed_role_compliance: dict[str, Any],
+    failed_state_source_audit: dict[str, Any],
+    context_governor_instructions: str,
+    state_json: str,
+    gov_notes_json: str,
+    baton_json: str,
+    registry_json: str,
+    retrieved: str,
+) -> str:
+    return (
+        "INTERMEDIATE_ROLE_ARTIFACT_REPAIR\n"
+        "=================================\n"
+        "The prior HoloBuild intermediate turn failed role-compliance or completeness checks. "
+        "Return only a corrected role-specific intermediate artifact for the Artifact Registry. "
+        "Do not write the final brief. Do not add commentary about this repair. "
+        "The output must be substantive, preserve source boundaries, and perform the assigned adversarial role. "
+        "The repair will be validated against the failed audit fields and the V4.2 role-specific validator; omission of a required component fails the repair.\n\n"
+        f"ROLE: {role}\n"
+        f"ROLE_OBJECTIVE: {objective}\n\n"
+        "REPAIR_VALIDATION_INSTRUCTIONS\n"
+        "==============================\n"
+        f"{intermediate_role_repair_instructions(role)}\n\n"
+        f"FAILED_ROLE_COMPLIANCE_AUDIT: {stable_json(failed_role_compliance)}\n\n"
+        f"FAILED_STATE_SOURCE_AUDIT: {stable_json(failed_state_source_audit)}\n\n"
+        "CONTEXT_GOVERNOR_INSTRUCTIONS\n=============================\n"
+        f"{context_governor_instructions}\n\n"
+        "CANONICAL STATE_OBJECT\n======================\n"
+        f"{state_json}\n\nSTATE_OBJECT_SHA256: {sha_text(state_json)}\n\n"
+        "GOV_NOTES\n=========\n"
+        f"{gov_notes_json}\n\nGOV_NOTES_SHA256: {sha_text(gov_notes_json)}\n\n"
+        "BATON_PASS\n==========\n"
+        f"{baton_json}\n\nBATON_PASS_SHA256: {sha_text(baton_json)}\n\n"
+        "ARTIFACTS_REGISTRY\n==================\n"
+        f"{registry_json}\n\nARTIFACTS_REGISTRY_SHA256: {sha_text(registry_json)}\n\n"
+        "RETRIEVED PINNED SOURCES AND ARTIFACTS\n======================================\n"
+        f"{retrieved}\n\n"
+        "FAILED INTERMEDIATE OUTPUT BODY\n===============================\n"
+        "[withheld from repair prompt; preserved only in raw output and architecture evidence]\n"
+    )
+
+
 def gov_notes_for_turn(index: int, role: str, final: bool, retrieved_ids: list[str], state: dict[str, Any], registry: dict[str, Any], context_profile: str) -> list[str]:
     notes = [
         "Governor-controlled state is authoritative for this turn.",
@@ -938,9 +1477,9 @@ def gov_notes_for_turn(index: int, role: str, final: bool, retrieved_ids: list[s
         f"Retrieved artifact IDs are Gov-selected from the Artifact Registry: {', '.join(retrieved_ids)}.",
         f"Holo context profile is {context_profile}; full_registry means all prior registered turn artifacts are retrieved, not only the latest note.",
         "Preserve the frozen packet source boundary; do not browse and do not invent approvals, clearances, or source IDs.",
-        "If citing source IDs, copy exact source_id strings from the frozen source packet; do not abbreviate or rename them.",
+        EXACT_SOURCE_ID_GENERATION_INSTRUCTION,
         "Keep risks of acting, risks of waiting, practical options, and claim boundaries visible.",
-        V6_1_ARGUMENT_POWER_GUIDANCE,
+        GENERATION_ARGUMENT_QUALITY_GUIDANCE,
     ]
     required_options = state.get("REQUIRED_PRACTICAL_RESPONSE_OPTIONS") or []
     if required_options:
@@ -948,9 +1487,14 @@ def gov_notes_for_turn(index: int, role: str, final: bool, retrieved_ids: list[s
         notes.append("Required option labels: " + "; ".join(str(item) for item in required_options))
     if state.get("SETTLED_DECISIONS"):
         notes.append("Do not contradict settled decisions unless explicitly identifying a source-grounded reason to reopen them.")
+    unresolved_roles = state.get("UNRESOLVED_REQUIRED_ROLES") or []
+    if unresolved_roles:
+        notes.append("Required intermediate roles remain unresolved; do not treat missing or rejected role artifacts as completed, and proof credit is blocked until repair validates.")
+        notes.append("Unresolved required roles: " + ", ".join(str(item) for item in unresolved_roles))
     if final:
-        notes.append("Final synthesis clean band is 900-1,300 body words, target 1,250; persuasive ceiling is 1,500 when extra words materially improve argument power.")
-        notes.append("Words over 1,300 carry a v6.1 scoring penalty, so use overage only for better thesis, trigger taxonomy, counterargument handling, or insight density.")
+        word_band = final_word_band_policy()
+        notes.append(f"Final synthesis architecture-compliance band is {word_band['min_words']}-{word_band['max_words']} body words, target {word_band['repair_target_words']}; do not exceed the hard maximum.")
+        notes.append("HoloBuild proof credit requires the clean architecture band.")
         notes.append(FINAL_SYNTHESIS_TRIGGER_TAXONOMY)
         notes.append("Final synthesis must explicitly handle the strongest counterargument and explain why the recommended path is still better or conditional.")
     else:
@@ -961,7 +1505,11 @@ def gov_notes_for_turn(index: int, role: str, final: bool, retrieved_ids: list[s
 
 def retrieved_ids_for_holo_turn(registry: dict[str, Any], context_profile: str) -> list[str]:
     retrieved_ids = ["TASK_BRIEF", "SOURCE_PACKET_MD"]
-    prior_ids = [key for key in registry["artifacts"] if key.startswith("TURN_")]
+    accepted_statuses = {"INTERMEDIATE_ACCEPTED", "INTERMEDIATE_ACCEPTED_AFTER_REPAIR", "PINNED"}
+    prior_ids = [
+        key for key, entry in registry["artifacts"].items()
+        if key.startswith("TURN_") and entry.get("status") in accepted_statuses
+    ]
     if not prior_ids:
         return retrieved_ids
     if context_profile == "latest_only":
@@ -987,38 +1535,57 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         }
     }
     context_governor_instructions = build_context_governor_instructions(config.get("hologov_profile"), holo_context_profile)
+    final_band = final_word_band_policy()
+    rejected_artifact_ids: list[str] = []
+    repair_attempt_status: dict[str, Any] = {}
+    unresolved_required_roles: dict[str, dict[str, Any]] = {}
     state = {
         "USER_GOAL": "Produce a decision-grade crisis/action brief from the frozen packet.",
         "LATEST_INPUT_SUMMARY": surfaces["source_packet_json"].get("decision_question") or surfaces["source_packet_json"].get("crisis_frame"),
         "CRITICAL_CONSTRAINTS": [
             "Use only the frozen task brief and source packet; no browsing.",
-            "Final artifact body must be 900-1,300 words, target 1,100.",
+            f"Final artifact body must be {final_band['min_words']}-{final_band['max_words']} words, target {final_band['repair_target_words']}.",
             "Separate source facts from inference and preserve claim boundaries.",
             "No proof credit if deterministic gate fails.",
             "Full-architecture Holo context must retrieve pinned sources and registered prior artifacts by ID before every generation turn.",
-            "Optimize the final artifact for v6.1 Structural/Epistemic + Argument Power scoring, including a sharp thesis, trigger taxonomy, counterargument handling, and high insight density.",
+            "Optimize the final artifact for source-grounded decision quality, including a sharp thesis, trigger taxonomy, counterargument handling, and high insight density.",
             "If the packet supplies required practical response options, preserve the exact option labels in the final artifact and explain them.",
         ],
         "PACKET_HASH": packet_hash,
-        "ROLLING_SUMMARY": "No model turns completed yet.",
         "SETTLED_DECISIONS": [],
-        "ARTIFACTS_REGISTRY": {"artifact_ids": list(registry["artifacts"].keys())},
         "REQUIRED_TOOLS": [],
         "REQUIRED_PRACTICAL_RESPONSE_OPTIONS": required_options,
         "BATON_PASS": {},
         "GOV_NOTES": [
             "Context Governor initialized the canonical state and pinned frozen task/source packet artifacts.",
-            "Architecture evidence is internal only and must never be included in judge-visible packets.",
+            "Architecture evidence is internal only and must never be included in the final artifact.",
             "Argument power is a first-class quality target: the final artifact should be the strongest usable decision argument, not merely a safe source summary.",
         ],
     }
+    update_holobuild_state_surfaces(
+        state,
+        registry,
+        rejected_artifact_ids=rejected_artifact_ids,
+        unresolved_required_roles=unresolved_required_roles,
+        repair_attempt_status=repair_attempt_status,
+        final_synthesis_allowed_input_ids=[],
+    )
     evidence_turns = []
     turn_records = []
     final_repair_attempts: list[dict[str, Any]] = []
+    intermediate_repair_attempts: list[dict[str, Any]] = []
     final_text = ""
     for index, (role, model, objective) in enumerate(turn_plan, start=1):
         final = index == len(turn_plan)
         retrieved_ids = retrieved_ids_for_holo_turn(registry, holo_context_profile)
+        update_holobuild_state_surfaces(
+            state,
+            registry,
+            rejected_artifact_ids=rejected_artifact_ids,
+            unresolved_required_roles=unresolved_required_roles,
+            repair_attempt_status=repair_attempt_status,
+            final_synthesis_allowed_input_ids=retrieved_ids if final else [],
+        )
         gov_notes = gov_notes_for_turn(index, role, final, retrieved_ids, state, registry, holo_context_profile)
         baton = {
             "next_model": model,
@@ -1032,7 +1599,6 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         }
         state["BATON_PASS"] = baton
         state["GOV_NOTES"] = gov_notes
-        state["ARTIFACTS_REGISTRY"] = {"artifact_ids": list(registry["artifacts"].keys())}
         state_json = stable_json(state)
         baton_json = stable_json(baton)
         registry_json = stable_json({k: {kk: vv for kk, vv in v.items() if kk != "content"} for k, v in registry["artifacts"].items()})
@@ -1058,13 +1624,12 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         if final:
             user += (
                 "\nFINAL SYNTHESIS QUALITY BAR\n===========================\n"
-                "Return only the final decision-grade crisis/action brief. Clean body word band is 900-1,300; persuasive ceiling is 1,500; target about 1,250. "
-                "Words over 1,300 carry a v6.1 scoring penalty, so use them only when they materially improve argument strength, persuasion, trigger taxonomy, or insight density. "
-                "If over 1,500, revise shorter before final answer.\n"
-                f"{V6_1_ARGUMENT_POWER_GUIDANCE}\n"
+                f"Return only the final decision-grade crisis/action brief. Architecture-compliance body word band is {final_band['min_words']}-{final_band['max_words']}; target about {final_band['repair_target_words']}. "
+                f"Do not exceed {final_band['max_words']} words. Preserve argument power through tighter synthesis, not overage.\n"
+                f"{GENERATION_ARGUMENT_QUALITY_GUIDANCE}\n"
                 f"{FINAL_SYNTHESIS_TRIGGER_TAXONOMY}\n"
                 "Include the strongest counterargument or temptation for the opposite action, then explain why the recommended path is safer, stronger, or conditional.\n"
-                "Use exact source IDs when citing frozen sources. Do not abbreviate source IDs.\n"
+                f"{EXACT_SOURCE_ID_GENERATION_INSTRUCTION}\n"
                 "Preserve claim boundaries, but do not let cautious wording make the brief generic or weak.\n"
                 "If the packet supplies required practical response options, include the exact option labels below and then explain them:\n"
                 f"{required_options_text}\n"
@@ -1082,7 +1647,8 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
             initial_final_word_count = word_count(output_text)
             initial_completeness = final_artifact_completeness(output_text, out)
             final_quality_failures = []
-            if not (FINAL_WORD_MIN <= initial_final_word_count <= FINAL_WORD_PERSUASIVE_MAX):
+            initial_word_band = final_word_band_compliance(output_text)
+            if initial_word_band["status"] != "pass":
                 final_quality_failures.append("word_band_failure")
             final_quality_failures.extend(initial_completeness["failures"])
             if final_quality_failures:
@@ -1091,12 +1657,12 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         "FINAL_ARTIFACT_COMPLETENESS_REPAIR\n"
                         "==================================\n"
                         "The final synthesis output failed final artifact quality checks. "
-                        "Return only a corrected final decision-grade crisis/action brief, 900-1,500 body words, target 1,250. "
-                        "Words over 1,300 are allowed only when they materially improve argument strength, persuasion, trigger taxonomy, or insight density. "
+                        f"Return only a corrected final decision-grade crisis/action brief, {final_band['min_words']}-{final_band['max_words']} body words, target {final_band['repair_target_words']}. "
+                        f"The {final_band['max_words']}-word maximum is hard for architecture compliance; do not return an overlength repair. "
                         "Do not add commentary about this repair. Use only the frozen packet and registered artifacts below. "
-                        "Preserve source boundaries, calculations, practical options, risks of acting, risks of waiting, next steps, and claim boundaries. "
+                        "Preserve the central thesis, decision recommendation, risk of acting, risk of waiting, trigger/gate table, calculations, counterargument, source IDs, and source-boundary disclaimer. "
                         "The final answer must end cleanly with a complete sentence and a complete claim-boundary/disclaimer section.\n\n"
-                        f"{V6_1_ARGUMENT_POWER_GUIDANCE}\n"
+                        f"{GENERATION_ARGUMENT_QUALITY_GUIDANCE}\n"
                         f"{FINAL_SYNTHESIS_TRIGGER_TAXONOMY}\n"
                         "Keep exact required practical response option labels if supplied, and retain the strongest counterargument handling.\n\n"
                         f"FAILED_FINAL_WORD_COUNT: {initial_final_word_count}\n\n"
@@ -1132,7 +1698,8 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         "previous_final_completeness": initial_completeness,
                         "repaired_word_count": repaired_word_count,
                         "repaired_final_completeness": repaired_completeness,
-                        "accepted": FINAL_WORD_MIN <= repaired_word_count <= FINAL_WORD_PERSUASIVE_MAX and repaired_completeness["status"] == "pass",
+                        "repaired_final_word_band_compliance": final_word_band_compliance(repaired_text),
+                        "accepted": final_word_band_compliance(repaired_text)["status"] == "pass" and repaired_completeness["status"] == "pass",
                         **repair_io,
                     }
                     turn_repair_attempts.append(repair_record)
@@ -1145,26 +1712,122 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         "output_tokens": repair_out.get("output_tokens"),
                         **repair_io,
                     })
-                    output_text = repaired_text
-                    artifact_source_io = repair_io
-                    artifact_output_meta = repair_out
                     if repair_record["accepted"]:
+                        output_text = repaired_text
+                        artifact_source_io = repair_io
+                        artifact_output_meta = repair_out
                         break
-        artifact_id = "FINAL_ARTIFACT" if final else f"TURN_{index:03d}_{role.upper()}"
-        registry["artifacts"][artifact_id] = {
-            "status": "PINNED" if final else "INTERMEDIATE",
-            "hash": sha_text(output_text),
-            "source_reference": artifact_source_io["raw_output_path"],
-            "content": output_text,
-        }
+        if not final:
+            initial_intermediate_compliance = role_compliance(role, output_text, final=False, output_meta=out)
+            initial_intermediate_state_audit = state_audit(output_text, state, allowed_ids, packet_hash, registry)
+            if initial_intermediate_compliance["status"] != "pass" or initial_intermediate_state_audit["status"] != "pass":
+                for repair_attempt in range(1, MAX_HOLO_INTERMEDIATE_REPAIR_ATTEMPTS + 1):
+                    repair_user = build_intermediate_repair_user(
+                        role=role,
+                        objective=objective,
+                        failed_role_compliance=initial_intermediate_compliance,
+                        failed_state_source_audit=initial_intermediate_state_audit,
+                        context_governor_instructions=context_governor_instructions,
+                        state_json=state_json,
+                        gov_notes_json=gov_notes_json,
+                        baton_json=baton_json,
+                        registry_json=registry_json,
+                        retrieved=retrieved,
+                    )
+                    repair_prompt_text = f"SYSTEM:\n{build_base_system()}\n\nUSER:\n{repair_user}"
+                    repair_out = call_model(model, system=build_base_system(), user=repair_user, max_tokens=INTERMEDIATE_REPAIR_MAX_TOKENS, timeout=timeout)
+                    repair_io = write_named_prompt_and_output(condition_dir, f"turn_{index:03d}_intermediate_repair_{repair_attempt:03d}", repair_prompt_text, repair_out)
+                    repaired_text = repair_out["text"].strip()
+                    repaired_compliance = role_compliance(role, repaired_text, final=False, output_meta=repair_out)
+                    repaired_state_audit = state_audit(repaired_text, state, allowed_ids, packet_hash, registry)
+                    repair_record = {
+                        "attempt": repair_attempt,
+                        "model": model,
+                        "role": role,
+                        "previous_role_compliance": initial_intermediate_compliance,
+                        "previous_state_audit": initial_intermediate_state_audit,
+                        "repaired_role_compliance": repaired_compliance,
+                        "repaired_state_audit": repaired_state_audit,
+                        "accepted": repaired_compliance["status"] == "pass" and repaired_state_audit["status"] == "pass",
+                        **repair_io,
+                    }
+                    turn_repair_attempts.append(repair_record)
+                    intermediate_repair_attempts.append(repair_record)
+                    repair_turn_records.append({
+                        "turn": f"{index}_intermediate_repair_{repair_attempt}",
+                        "role": "intermediate_role_repair",
+                        "repaired_role": role,
+                        "model": model,
+                        "input_tokens": repair_out.get("input_tokens"),
+                        "output_tokens": repair_out.get("output_tokens"),
+                        **repair_io,
+                    })
+                    if repair_record["accepted"]:
+                        output_text = repaired_text
+                        artifact_source_io = repair_io
+                        artifact_output_meta = repair_out
+                        break
+        artifact_id = registered_artifact_id(index, role, final)
+        registry_acceptance: dict[str, Any]
         compliance = role_compliance(role, output_text, final, artifact_output_meta)
-        audit = state_audit(output_text, state, allowed_ids, packet_hash, registry)
-        state["ROLLING_SUMMARY"] = excerpt(output_text, 650)
+        if final:
+            registry["artifacts"][artifact_id] = {
+                "status": "PINNED",
+                "hash": sha_text(output_text),
+                "source_reference": artifact_source_io["raw_output_path"],
+                "content": output_text,
+            }
+            audit = state_audit(output_text, state, allowed_ids, packet_hash, registry)
+            registry_acceptance = {"artifact_id": artifact_id, "role": role, "status": "accepted", "final_artifact": True}
+        else:
+            audit = state_audit(output_text, state, allowed_ids, packet_hash, registry)
+            registry_acceptance = intermediate_registry_gate(
+                artifact_id=artifact_id,
+                role=role,
+                role_compliance_result=compliance,
+                state_audit_result=audit,
+                repair_attempts=turn_repair_attempts,
+            )
+            if registry_acceptance["status"] == "accepted":
+                registry["artifacts"][artifact_id] = {
+                    "status": "INTERMEDIATE_ACCEPTED_AFTER_REPAIR" if turn_repair_attempts else "INTERMEDIATE_ACCEPTED",
+                    "hash": sha_text(output_text),
+                    "source_reference": artifact_source_io["raw_output_path"],
+                    "content": output_text,
+                }
+            elif role in required_intermediate_roles():
+                unresolved_required_roles[role] = registry_acceptance
+                state["UNRESOLVED_REQUIRED_ROLES"] = sorted(unresolved_required_roles)
+                state["ARCHITECTURE_INVALID_REASONS"] = [item["status"] + ":" + item["role"] for item in unresolved_required_roles.values()]
+        if turn_repair_attempts:
+            repair_attempt_status[artifact_id] = repair_attempt_public_status(turn_repair_attempts)
+        if registry_acceptance["status"] == "rejected":
+            rejected_artifact_ids.append(artifact_id)
+        update_holobuild_state_surfaces(
+            state,
+            registry,
+            rejected_artifact_ids=rejected_artifact_ids,
+            unresolved_required_roles=unresolved_required_roles,
+            repair_attempt_status=repair_attempt_status,
+            final_synthesis_allowed_input_ids=retrieved_ids if final else [],
+        )
         if final:
             state["SETTLED_DECISIONS"].append("final_artifact_synthesized")
             final_text = output_text
+        final_input_guard = {
+            "status": "architecture_invalid_required_roles_unresolved" if final and unresolved_required_roles else "pass",
+            "retrieved_registered_ids_only": True,
+            "unresolved_required_roles": sorted(unresolved_required_roles),
+            "blocked_rejected_artifact_ids": [
+                item.get("artifact_id")
+                for item in unresolved_required_roles.values()
+                if item.get("artifact_id")
+            ] if final and unresolved_required_roles else [],
+        }
         evidence_turns.append({
             "turn": index,
+            "role": role,
+            "artifact_id": artifact_id,
             "model": model,
             "holo_context_profile": holo_context_profile,
             "context_governor_instructions_hash": sha_text(context_governor_instructions),
@@ -1172,12 +1835,20 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
             "state_object_hash": sha_text(state_json),
             "baton_pass_hash": sha_text(baton_json),
             "artifact_registry_hash": sha_text(registry_json),
-            "prompt_card_hash": io["prompt_hash"],
+            "prompt_card_hash": artifact_source_io["prompt_hash"],
+            "initial_prompt_card_hash": io["prompt_hash"],
+            "accepted_raw_output_hash": artifact_source_io["raw_output_hash"],
             "retrieved_artifact_ids": retrieved_ids,
             "retrieved_content_hash": sha_text(retrieved),
             "role_compliance": compliance,
             "state_audit": audit,
-            "final_repair_attempts": turn_repair_attempts,
+            "registry_acceptance": registry_acceptance,
+            "intermediate_repair_attempts": [] if final else turn_repair_attempts,
+            "final_repair_attempts": turn_repair_attempts if final else [],
+            "final_repair_required": bool(final and turn_repair_attempts),
+            "final_repair_succeeded": bool(final and turn_repair_attempts and turn_repair_attempts[-1].get("accepted")),
+            "final_synthesis_input_guard": final_input_guard,
+            "final_synthesis_blocked": final_input_guard["status"] != "pass",
         })
         turn_records.append({"turn": index, "role": role, "model": model, "input_tokens": out.get("input_tokens"), "output_tokens": out.get("output_tokens"), **io})
         turn_records.extend(repair_turn_records)
@@ -1190,6 +1861,7 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         "architecture_mode": holo_mode,
         "holo_context_profile": holo_context_profile,
         "architecture_evidence_visible_to_judges": False,
+        "architecture_policy": architecture_policy_ref(),
         "context_governor_type": "internal_deterministic_state_management_layer",
         "context_governor_instructions_hash": sha_text(context_governor_instructions),
         "hologov_profile": config.get("hologov_profile"),
@@ -1201,6 +1873,7 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         "proof_credit_architecture_status": "eligible_if_all_turn_audits_pass_and_deterministic_gate_passes" if arch_validation["proof_credit_eligible"] else "not_proof_eligible_due_failed_architecture_or_gate_check",
         "provider_calls": len(turn_records),
         "final_repair_attempts": final_repair_attempts,
+        "intermediate_repair_attempts": intermediate_repair_attempts,
     }
     write_json(condition_dir / "arch_evidence.json", arch_evidence)
     metadata = {
@@ -1212,6 +1885,7 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         "holo_context_profile": holo_context_profile,
         "hologov_profile": config.get("hologov_profile"),
         "holo_session_plan": session_plan,
+        "architecture_policy": architecture_policy_ref(),
         "holo_mode_status": "proof_eligible_if_evidence_validates" if holo_mode == PROOF_ELIGIBLE_HOLO_MODE else "diagnostic_only_no_proof_credit",
         "packet_hash": packet_hash,
         "artifact_path": repo_rel(artifact_path),
@@ -1219,10 +1893,11 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         "arch_evidence_path": repo_rel(condition_dir / "arch_evidence.json"),
         "turns": turn_records,
         "provider_calls": len(turn_records),
-        "repair_calls": len(final_repair_attempts),
+        "repair_calls": len(final_repair_attempts) + len(intermediate_repair_attempts),
         "input_tokens": sum(int(item.get("input_tokens") or 0) for item in turn_records),
         "output_tokens": sum(int(item.get("output_tokens") or 0) for item in turn_records),
         "final_repair_attempts": final_repair_attempts,
+        "intermediate_repair_attempts": intermediate_repair_attempts,
         "architecture_evidence_validation": arch_validation,
         "proof_credit_eligible": arch_validation["proof_credit_eligible"],
         "scores_generated": 0,
@@ -1264,6 +1939,31 @@ def create_blind_export(packet_dir: Path, run_id: str, condition_results: list[d
         write_json(packet_path, packet)
         created.append({"artifact_label": label, "path": repo_rel(packet_path), "artifact_hash": result.get("artifact_hash")})
         internal_map[label] = {"condition": result.get("condition"), "config_id": result.get("config_id"), "artifact_hash": result.get("artifact_hash")}
+    result_artifact_paths = {str((REPO_ROOT / item["artifact_path"]).resolve()) for item in condition_results if item.get("artifact_path")}
+    existing_records = generated_artifact_records(run_dir)
+    missing_records = [
+        item for item in existing_records
+        if str((REPO_ROOT / item["artifact_path"]).resolve()) not in result_artifact_paths
+    ]
+    export_integrity = {
+        "status": "PASS",
+        "expected_condition_results": len(condition_results),
+        "exported_packets": len(created),
+        "internal_map_entries": len(internal_map),
+        "existing_generated_artifacts": len(existing_records),
+        "missing_existing_generated_artifacts": missing_records,
+    }
+    if len(created) != len(condition_results) or set(internal_map) != {item["artifact_label"] for item in created} or missing_records:
+        export_integrity["status"] = "FAIL"
+        export_integrity["reason"] = "blind_export_incomplete_or_run_id_reuse_detected"
+        write_json(export_dir / "blind_export_integrity_failure.json", export_integrity)
+        raise SystemExit(json.dumps({
+            "status": "HOLOBUILD_MINI_SCOUT_BLIND_EXPORT_FAIL_CLOSED",
+            "reason": export_integrity["reason"],
+            "run_id": run_id,
+            "provider_calls": PROVIDER_CALLS,
+            "export_integrity": export_integrity,
+        }, indent=2))
     map_path = export_dir / "anonymization_map.internal.json"
     write_json(map_path, internal_map)
     findings = []
@@ -1282,6 +1982,7 @@ def create_blind_export(packet_dir: Path, run_id: str, condition_results: list[d
         "mapping_is_internal_only": True,
         "architecture_evidence_judge_visible": False,
         "contamination_scan_result": scan,
+        "blind_export_integrity": export_integrity,
         "provider_calls": 0,
     }
     write_json(export_dir / "blind_export_manifest.json", manifest)
@@ -1313,6 +2014,8 @@ def run_dry(packet_dir: Path, run_id: str, conditions: list[str], configs: dict[
             )
             resolved_item["holo_context_profile"] = holo_context_profile
             resolved_item["holo_session_template"] = holo_session_template
+        if cfg.get("condition_type") == "solo":
+            resolved_item["solo_call_structure"] = cfg.get("solo_call_structure")
         resolved.append(resolved_item)
     payload = {
         "status": "HOLOBUILD_MINI_SCOUT_DRY_RUN_READY",
@@ -1340,6 +2043,20 @@ def run_dry(packet_dir: Path, run_id: str, conditions: list[str], configs: dict[
 
 def run_live(packet_dir: Path, run_id: str, conditions: list[str], configs: dict[str, dict[str, Any]], timeout: int, holo_mode: str, holo_context_profile: str, holo_session_template: str) -> int:
     enforce_live_guard(True)
+    run_dir = run_dir_for(packet_dir, run_id)
+    existing_records = generated_artifact_records(run_dir)
+    if existing_records:
+        failure = {
+            "status": "HOLOBUILD_MINI_SCOUT_LIVE_FAIL_CLOSED",
+            "reason": "run_id_already_contains_generated_artifacts",
+            "run_id": run_id,
+            "existing_generated_artifacts": existing_records,
+            "provider_calls": 0,
+            "repair_guidance": "Use a fresh run_id. Historical multi-condition repairs should be recorded as addenda, not by overwriting the original run folder.",
+        }
+        write_json(run_dir / "run_id_reuse_failure.json", failure)
+        print(json.dumps(failure, indent=2))
+        return 1
     condition_results = []
     selected_models = []
     for condition in conditions:

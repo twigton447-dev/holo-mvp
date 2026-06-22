@@ -38,6 +38,16 @@ EXPECTED_HOLOGOV_PROFILE = {
     "frontier_holo_v1": "HoloGov-C",
     "mini_holo_v1": "HoloGov-C",
 }
+EXPECTED_SOLO_COMPARISON_LABELS = [
+    "six-call solo",
+    "budget-matched solo",
+    "sequential solo chain",
+]
+EXCLUDED_SOLO_COMPARISON_LABELS = [
+    "one-shot solo",
+    "best-of-N solo",
+    "retry-expanded solo",
+]
 
 
 def sha_file(path: Path) -> str:
@@ -75,6 +85,43 @@ def governor_models(cfg: dict[str, Any]) -> list[str]:
     return list(cfg.get("governor_model_pool") or [])
 
 
+def validate_solo_call_structure(cfg: dict[str, Any], errors: list[str]) -> None:
+    config_id = cfg.get("config_id")
+    structure = cfg.get("solo_call_structure")
+    if not isinstance(structure, dict):
+        errors.append(f"{config_id} solo config must document solo_call_structure")
+        return
+    expected_values = {
+        "provider_calls": 6,
+        "final_artifact_source": "turn_6_output",
+        "final_artifact_generation_calls": 6,
+        "call_topology": "sequential_drafting_chain",
+        "calls_are_independent_attempts": False,
+        "calls_are_sequential_drafting": True,
+        "calls_are_retries": False,
+        "calls_are_repairs": False,
+        "calls_are_metadata_artifacts": False,
+        "selection_across_multiple_solo_outputs": False,
+        "final_artifact_selector": "runner_deterministically_selects_turn_6_output",
+        "artifact_registry": False,
+        "gov_notes": False,
+        "intermediate_validation": False,
+    }
+    for key, expected in expected_values.items():
+        if structure.get(key) != expected:
+            errors.append(f"{config_id} solo_call_structure.{key} must be {expected!r}")
+    if structure.get("comparison_labels") != EXPECTED_SOLO_COMPARISON_LABELS:
+        errors.append(f"{config_id} comparison_labels must be {EXPECTED_SOLO_COMPARISON_LABELS}")
+    if structure.get("excluded_comparison_labels") != EXCLUDED_SOLO_COMPARISON_LABELS:
+        errors.append(f"{config_id} excluded_comparison_labels must be {EXCLUDED_SOLO_COMPARISON_LABELS}")
+    prior_access = structure.get("final_output_access_to_prior_solo_outputs", "")
+    if "immediately_prior_solo_output" not in prior_access:
+        errors.append(f"{config_id} must state that the final solo output has access to the immediately prior solo output")
+    role_separation = structure.get("role_separation", "")
+    if "single model" not in role_separation or "no separate role registry" not in role_separation:
+        errors.append(f"{config_id} must state solo has no separate role registry or multi-agent role assignment")
+
+
 def validate_config(cfg: dict[str, Any], errors: list[str]) -> None:
     config_id = cfg.get("config_id")
     models = provider_models(cfg)
@@ -105,6 +152,8 @@ def validate_config(cfg: dict[str, Any], errors: list[str]) -> None:
             errors.append(f"{config_id} live_ready holo config requires exactly 3 HoloAgent models")
         if condition_type == "solo" and len(models) != 1:
             errors.append(f"{config_id} live_ready solo config requires exactly 1 provider model")
+    if condition_type == "solo":
+        validate_solo_call_structure(cfg, errors)
     if config_id == "mini_holo_v1":
         if cfg.get("architecture_mode") != "patent_aligned_v4":
             errors.append("mini_holo_v1 must use patent_aligned_v4")
@@ -190,7 +239,14 @@ def main() -> int:
             "holo_context_profile_required": template_lock.get("holo_context_profile_required"),
         }
     config_results = {}
-    for name in ["frontier_solo_v1.json", "frontier_holo_v1.json", "mini_solo_v1.stub.json", "mini_holo_v1.stub.json"]:
+    for name in [
+        "frontier_solo_v1.json",
+        "frontier_solo_grok_4_3_v1.json",
+        "frontier_solo_opus_4_8_v1.json",
+        "frontier_holo_v1.json",
+        "mini_solo_v1.stub.json",
+        "mini_holo_v1.stub.json",
+    ]:
         path = CONFIG_DIR / name
         if not path.exists():
             errors.append(f"missing config: {repo_rel(path)}")
@@ -209,6 +265,7 @@ def main() -> int:
             "proof_credit_eligible": cfg.get("proof_credit_eligible"),
             "provider_call_budget": cfg.get("provider_call_budget"),
             "model_pool": provider_models(cfg),
+            "solo_call_structure": cfg.get("solo_call_structure") if cfg.get("condition_type") == "solo" else None,
         }
     holo_cfg = config_results.get("frontier_holo_v1", {})
     if holo_cfg.get("architecture_mode") != "patent_aligned_v4":

@@ -18,6 +18,35 @@
     "turn_count": 6
   },
   "provider_call_budget": 6,
+  "solo_call_structure": {
+    "provider_calls": 6,
+    "final_artifact_source": "turn_6_output",
+    "final_artifact_generation_calls": 6,
+    "call_topology": "sequential_drafting_chain",
+    "calls_are_independent_attempts": false,
+    "calls_are_sequential_drafting": true,
+    "calls_are_retries": false,
+    "calls_are_repairs": false,
+    "calls_are_metadata_artifacts": false,
+    "selection_across_multiple_solo_outputs": false,
+    "final_artifact_selector": "runner_deterministically_selects_turn_6_output",
+    "final_output_access_to_prior_solo_outputs": "direct_access_to_immediately_prior_solo_output; earlier turns are available only through content carried forward in the chain",
+    "role_separation": "single model with turn-objective labels; no separate role registry or multi-agent role assignment",
+    "artifact_registry": false,
+    "gov_notes": false,
+    "intermediate_validation": false,
+    "post_final_validation": "deterministic_gate_precheck_after_final_artifact_only",
+    "comparison_labels": [
+      "six-call solo",
+      "budget-matched solo",
+      "sequential solo chain"
+    ],
+    "excluded_comparison_labels": [
+      "one-shot solo",
+      "best-of-N solo",
+      "retry-expanded solo"
+    ]
+  },
   "proof_credit_eligible": false,
   "baseline_eligible": true,
   "blind_export_required": true,

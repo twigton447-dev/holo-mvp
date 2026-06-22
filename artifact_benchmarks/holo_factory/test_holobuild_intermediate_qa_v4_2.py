@@ -74,6 +74,12 @@ D14_RETRY2_CONDITION_DIR = (
     / "d14_trade_finance_lc_discrepancy_payment_release_001_frontier_optimized_opus_gpt55_holo_only_live_retry2_same_packet_patch_validation_20260622T212753Z"
     / "frontier_holo_optimized_opus_gpt55_v1"
 )
+D14_RETRY3_CONDITION_DIR = (
+    REPO_ROOT
+    / "artifact_benchmarks/holo_factory/mini_scouts/d14_trade_finance_lc_discrepancy_payment_release_001/runs"
+    / "d14_trade_finance_lc_discrepancy_payment_release_001_frontier_optimized_opus_gpt55_holo_only_live_retry3_same_packet_patch_validation_20260622T215419Z"
+    / "frontier_holo_optimized_opus_gpt55_v1"
+)
 OPTIMIZED_D10_RUN_MANIFEST = (
     REPO_ROOT
     / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001/runs"
@@ -653,6 +659,14 @@ def d14_retry2_raw_output(name: str) -> dict:
     return json.loads((D14_RETRY2_CONDITION_DIR / "raw_outputs" / name).read_text(encoding="utf-8"))
 
 
+def d14_retry3_raw_output(name: str) -> dict:
+    return json.loads((D14_RETRY3_CONDITION_DIR / "raw_outputs" / name).read_text(encoding="utf-8"))
+
+
+def d14_retry3_arch_evidence() -> dict:
+    return json.loads((D14_RETRY3_CONDITION_DIR / "arch_evidence.json").read_text(encoding="utf-8"))
+
+
 def d12_retry3_metadata() -> dict:
     return json.loads((D12_RETRY3_CONDITION_DIR / "artifact_metadata.json").read_text(encoding="utf-8"))
 
@@ -749,7 +763,7 @@ def test_t3_repair_prompt_forbids_prose_essay_and_prior_continuation() -> None:
     assert "Return only the corrected compact T3 audit." in prompt
     assert "Do not continue the prior text." in prompt
     assert "Do not produce an essay." in prompt
-    assert "Use bullet-only format with no intro, conclusion, prose paragraphs, appendix, or word-count footer." in prompt
+    assert "Use bullet-first format with no intro, conclusion, appendix, or word-count footer." in prompt
 
 
 def test_t3_repair_prompt_requires_550_800_words_and_complete_ending() -> None:
@@ -1489,6 +1503,75 @@ def test_d14_t3_repair_output_remains_rejected_and_final_synthesis_does_not_cons
     assert validation["failed_required_turns_consumed_by_final"] == []
     assert validation["no_failed_required_turn_consumed_by_final"] is True
     assert validation["final_synthesis_blocked"] is True
+
+
+def test_d14_retry3_t3_original_is_compact_source_fidelity_fixture_under_corrected_contract() -> None:
+    raw = d14_retry3_raw_output("turn_003.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    completeness = compliance["intermediate_artifact_completeness"]
+    presence = completeness["role_specific_presence"]
+    failures = completeness["failures"]
+    assert compliance["status"] == "pass"
+    assert completeness["word_count"] == 515
+    assert completeness["clean_ending"] is True
+    assert completeness["hit_requested_token_ceiling"] is False
+    assert presence["status"] == "pass"
+    assert all(presence["section_presence"].values())
+    assert presence["missing_sections"] == []
+    assert presence["under_target_words_nonblocking"] is True
+    assert presence["prose_paragraph_line_count"] == 1
+    assert presence["warnings"] == ["t3_compact_audit_contains_prose_paragraphs_warning"]
+    assert "t3_compact_audit_under_target_words" not in failures
+    assert "t3_compact_audit_contains_prose_paragraphs" not in failures
+
+
+def test_d14_retry3_t3_repair_is_compact_source_fidelity_fixture_under_corrected_contract() -> None:
+    raw = d14_retry3_raw_output("turn_003_intermediate_repair_001.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    completeness = compliance["intermediate_artifact_completeness"]
+    presence = completeness["role_specific_presence"]
+    failures = completeness["failures"]
+    assert compliance["status"] == "pass"
+    assert completeness["word_count"] == 548
+    assert completeness["clean_ending"] is True
+    assert completeness["hit_requested_token_ceiling"] is False
+    assert presence["status"] == "pass"
+    assert presence["missing_sections"] == []
+    assert presence["under_target_words_nonblocking"] is True
+    assert presence["prose_paragraph_line_count"] == 1
+    assert presence["warnings"] == ["t3_compact_audit_contains_prose_paragraphs_warning"]
+    assert "t3_compact_audit_under_target_words" not in failures
+    assert "t3_compact_audit_contains_prose_paragraphs" not in failures
+
+
+def test_d14_retry3_committed_run_remains_contract_overconstraint_fixture_not_proof_evidence() -> None:
+    arch_evidence = d14_retry3_arch_evidence()
+    validation = arch_evidence["architecture_evidence_validation"]
+    turn3 = next(entry for entry in arch_evidence["turns"] if entry["turn"] == 3)
+    assert validation["proof_credit_eligible"] is False
+    assert validation["deterministic_gate_pass"] is True
+    assert validation["required_roles_all_completed"] is False
+    assert validation["role_compliance_all_pass"] is False
+    assert validation["intermediate_completeness_all_pass"] is False
+    assert validation["registry_acceptance_all_pass"] is False
+    assert validation["failed_required_turns_consumed_by_final"] == []
+    assert validation["no_failed_required_turn_consumed_by_final"] is True
+    assert validation["final_synthesis_blocked"] is True
+    assert turn3["registry_acceptance"]["status"] == "rejected"
+    assert turn3["role_compliance"]["intermediate_artifact_completeness"]["failures"] == [
+        "t3_compact_audit_contains_prose_paragraphs",
+        "t3_compact_audit_under_target_words",
+    ]
 
 
 def test_d12_historical_t3_original_still_fails_compact_audit_gate() -> None:

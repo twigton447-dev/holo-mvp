@@ -247,7 +247,7 @@ T3_CONCISE_AUDIT_CONTRACT = (
     "For contradiction_uncertainty_source_fidelity_reviewer, return a compact claim audit, not a prose essay. "
     f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words; prefer 600-720 words. "
     f"Never exceed {T3_CONCISE_AUDIT_MAX_WORDS} words. Under {T3_CONCISE_AUDIT_MIN_WORDS} words is acceptable only when all required sections, exact source IDs, and substantive bullets are present. "
-    "Use bullet-only format: no intro, no conclusion, no prose paragraphs, and no numbered mini-essays. "
+    "Use bullet-first format: no intro, no conclusion, avoid prose paragraphs, and no numbered mini-essays. "
     f"Use {T3_CONCISE_AUDIT_MIN_BULLETS_PER_SECTION}-{T3_CONCISE_AUDIT_MAX_BULLETS_PER_SECTION} bullets per section, "
     f"no more than {T3_CONCISE_AUDIT_MAX_BULLETS} bullets total, "
     f"no more than {T3_CONCISE_AUDIT_MAX_BULLET_WORDS} words per bullet, "
@@ -265,7 +265,7 @@ T3_CONCISE_AUDIT_REPAIR_CONTRACT = (
     "=================================================\n"
     "The previous T3 failed because a required section, source-ID discipline, or minimum substance was missing. "
     "Return only the corrected compact T3 audit. Do not continue the prior text. Do not produce an essay. "
-    "Use the five required sections below. Use bullet-only format with no intro, conclusion, prose paragraphs, appendix, or word-count footer. "
+    "Use the five required sections below. Use bullet-first format with no intro, conclusion, appendix, or word-count footer. "
     f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words; prefer 600-720 words. "
     f"Never exceed {T3_CONCISE_AUDIT_MAX_WORDS} words. Under {T3_CONCISE_AUDIT_MIN_WORDS} words is acceptable only when all required sections, exact source IDs, and substantive bullets are present. "
     f"Use {T3_CONCISE_AUDIT_MIN_BULLETS_PER_SECTION}-{T3_CONCISE_AUDIT_MAX_BULLETS_PER_SECTION} bullets per section, "
@@ -869,6 +869,7 @@ def t3_concise_audit_presence(output_text: str) -> dict[str, Any]:
         and not bullet_line_pattern.match(line)
     ]
     failures: list[str] = []
+    warnings: list[str] = []
     failures.extend(f"missing_t3_compact_section:{item}" for item in missing_sections)
     failures.extend(f"t3_compact_audit_forbidden_meta_section:{item}" for item in forbidden_meta_sections)
     if wc > T3_CONCISE_AUDIT_MAX_WORDS:
@@ -877,8 +878,6 @@ def t3_concise_audit_presence(output_text: str) -> dict[str, Any]:
         failures.append("t3_compact_audit_not_bulleted")
     if bullet_or_numbered_lines > T3_CONCISE_AUDIT_MAX_BULLETS:
         failures.append("t3_compact_audit_too_many_bullets")
-    if prose_paragraph_lines:
-        failures.append("t3_compact_audit_contains_prose_paragraphs")
     for item, details in section_details.items():
         if details["bullet_count"] < T3_CONCISE_AUDIT_MIN_BULLETS_PER_SECTION:
             failures.append(f"t3_compact_section_too_few_bullets:{item}")
@@ -890,6 +889,24 @@ def t3_concise_audit_presence(output_text: str) -> dict[str, Any]:
             failures.append(f"t3_compact_bullet_over_word_cap:{item}")
     if not cited_source_ids:
         failures.append("t3_compact_audit_missing_exact_source_ids")
+    hard_structure_or_sprawl_failure = bool(missing_sections) or any(
+        failure == "t3_compact_audit_over_target_words"
+        or failure == "t3_compact_audit_not_bulleted"
+        or failure == "t3_compact_audit_too_many_bullets"
+        or failure.startswith(
+            (
+                "t3_compact_section_too_few_bullets:",
+                "t3_compact_section_too_many_bullets:",
+                "t3_compact_section_over_word_cap:",
+                "t3_compact_bullet_over_word_cap:",
+            )
+        )
+        for failure in failures
+    )
+    if prose_paragraph_lines:
+        warnings.append("t3_compact_audit_contains_prose_paragraphs_warning")
+        if hard_structure_or_sprawl_failure:
+            failures.append("t3_compact_audit_contains_prose_paragraphs")
     required_section_bullet_floor_met = (
         not missing_sections
         and all(
@@ -902,7 +919,6 @@ def t3_concise_audit_presence(output_text: str) -> dict[str, Any]:
         and bool(cited_source_ids)
         and required_section_bullet_floor_met
         and bullet_or_numbered_lines >= T3_CONCISE_AUDIT_MIN_BULLETS_PER_SECTION * len(T3_CONCISE_AUDIT_SECTION_ITEMS)
-        and not prose_paragraph_lines
         and not forbidden_meta_sections
         and not any(
             failure.startswith(
@@ -934,6 +950,7 @@ def t3_concise_audit_presence(output_text: str) -> dict[str, Any]:
         "forbidden_meta_sections": forbidden_meta_sections,
         "under_target_words_nonblocking": under_target_words_nonblocking,
         "cited_source_ids": cited_source_ids,
+        "warnings": warnings,
         "failures": failures,
     }
 

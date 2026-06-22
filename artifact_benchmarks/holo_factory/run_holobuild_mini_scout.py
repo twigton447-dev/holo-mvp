@@ -1586,6 +1586,39 @@ def deterministic_gate_precheck(packet_dir: Path, artifact_text: str) -> dict[st
     }
 
 
+def solo_baseline_eligibility_validation(
+    packet_dir: Path,
+    artifact_text: str,
+    *,
+    output_meta: dict[str, Any] | None = None,
+    deterministic_precheck: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    precheck = deterministic_precheck or deterministic_gate_precheck(packet_dir, artifact_text)
+    final_completeness = final_artifact_completeness(artifact_text, output_meta)
+    final_word_band = final_word_band_compliance(artifact_text)
+    deterministic_gate_pass = precheck.get("deterministic_gate_status") == "pass"
+    final_artifact_completeness_pass = final_completeness.get("status") == "pass"
+    final_word_band_pass = final_word_band.get("status") == "pass"
+    failures: list[str] = []
+    if not deterministic_gate_pass:
+        failures.append(f"deterministic_gate_failed:{precheck.get('deterministic_gate_status')}")
+    if not final_artifact_completeness_pass:
+        failures.append("final_artifact_completeness_failed")
+    if not final_word_band_pass:
+        failures.append(f"final_word_band_failed:{final_word_band.get('status')}")
+    return {
+        "solo_baseline_eligible": not failures,
+        "deterministic_gate_pass": deterministic_gate_pass,
+        "deterministic_gate_status": precheck.get("deterministic_gate_status"),
+        "final_artifact_completeness_pass": final_artifact_completeness_pass,
+        "final_word_band_pass": final_word_band_pass,
+        "final_artifact_completeness": final_completeness,
+        "final_word_band_compliance": final_word_band,
+        "artifact_body_word_count": precheck.get("artifact_body_word_count"),
+        "failures": failures,
+    }
+
+
 def run_dir_for(packet_dir: Path, run_id: str) -> Path:
     return packet_dir / "runs" / run_id
 
@@ -1663,6 +1696,11 @@ def run_solo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
     write_text(artifact_path, artifact_text)
     precheck = deterministic_gate_precheck(packet_dir, artifact_text)
     write_json(condition_dir / "deterministic_gate_precheck.json", precheck)
+    baseline_validation = solo_baseline_eligibility_validation(
+        packet_dir,
+        artifact_text,
+        deterministic_precheck=precheck,
+    )
     metadata = {
         "condition": condition,
         "config_id": config["config_id"],
@@ -1677,7 +1715,13 @@ def run_solo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         "input_tokens": sum(int(item.get("input_tokens") or 0) for item in turn_records),
         "output_tokens": sum(int(item.get("output_tokens") or 0) for item in turn_records),
         "proof_credit_eligible": False,
-        "baseline_eligible": True,
+        "baseline_eligible": baseline_validation["solo_baseline_eligible"],
+        "baseline_eligibility_validation": baseline_validation,
+        "deterministic_gate_pass": baseline_validation["deterministic_gate_pass"],
+        "deterministic_gate_status": baseline_validation["deterministic_gate_status"],
+        "final_artifact_completeness_pass": baseline_validation["final_artifact_completeness_pass"],
+        "final_word_band_pass": baseline_validation["final_word_band_pass"],
+        "final_artifact_completeness_failures": baseline_validation["final_artifact_completeness"].get("failures", []),
         "scores_generated": 0,
     }
     write_json(condition_dir / "artifact_metadata.json", metadata)

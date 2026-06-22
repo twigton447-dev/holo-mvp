@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import re
@@ -16,6 +17,10 @@ D10_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d10_i
 D11_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001"
 D12_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001"
 D13_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d13_treasury_sanctions_payment_release_001"
+D13_BLIND_COMPARISON_PACKET = (
+    D13_PACKET_DIR
+    / "blind_exports/d13_two_artifact_blind_comparison_20260622T201000Z/judge_packets/D13_TWO_ARTIFACT_BLIND_COMPARISON_PACKET.json"
+)
 D11_VALIDATOR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001/validate_packet_no_provider.py"
 D12_VALIDATOR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001/validate_packet_no_provider.py"
 D13_VALIDATOR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d13_treasury_sanctions_payment_release_001/validate_packet_no_provider.py"
@@ -1976,6 +1981,29 @@ def test_synthetic_under_1300_final_missing_claim_boundaries_fails() -> None:
     assert runner.word_count(text) < 1300
     assert compliance["status"] == "fail"
     assert "missing_final_section:claim_boundaries" in compliance["final_artifact_completeness"]["failures"]
+
+
+def test_d13_artifact_002_incomplete_blind_fixture_fails_solo_baseline_eligibility() -> None:
+    packet = json.loads(D13_BLIND_COMPARISON_PACKET.read_text(encoding="utf-8"))
+    artifacts = {item["artifact_label"]: item for item in packet["artifacts"]}
+    artifact = artifacts["ARTIFACT_002"]
+    text = artifact["artifact_text"]
+
+    assert hashlib.sha256(text.encode()).hexdigest() == artifact["artifact_text_sha256"]
+    assert artifact["artifact_body_word_count"] == 1032
+    assert runner.word_count(text) == 1032
+
+    completeness = runner.final_artifact_completeness(text, {})
+    assert completeness["status"] == "fail"
+    assert "unclean_or_mid_sentence_ending" in completeness["failures"]
+    assert "missing_final_section:claim_boundaries" in completeness["failures"]
+
+    validation = runner.solo_baseline_eligibility_validation(D13_PACKET_DIR, text)
+    assert validation["deterministic_gate_pass"] is True
+    assert validation["final_word_band_pass"] is True
+    assert validation["final_artifact_completeness_pass"] is False
+    assert validation["solo_baseline_eligible"] is False
+    assert "final_artifact_completeness_failed" in validation["failures"]
 
 
 def test_historical_optimized_d10_repair_1347_remains_not_proof_clean() -> None:

@@ -1,0 +1,59 @@
+{
+  "addendum_id": "d13_two_artifact_blind_comparison_20260622T201000Z_deterministic_completeness_addendum_003",
+  "created_at_utc": "2026-06-22T20:19:20Z",
+  "source_commit_before_addendum": "98717cdb209e67d49ca7ac64373b211c5b4a74fa",
+  "blind_export_id": "d13_two_artifact_blind_comparison_20260622T201000Z",
+  "status": "DETERMINISTIC_COMPLETENESS_ADDENDUM_NO_UNBLINDING",
+  "provider_calls": 0,
+  "judge_calls": 0,
+  "scores_generated": 0,
+  "unblinding_performed": false,
+  "anonymization_map_accessed": false,
+  "anonymization_map_remained_sealed": true,
+  "blind_export_integrity": {
+    "status": "AUTHENTIC",
+    "finding": "ARTIFACT_001 and ARTIFACT_002 exported text hashes each match one committed source final artifact hash; the blind export body hashes are authentic."
+  },
+  "corrected_deterministic_counts": {
+    "ARTIFACT_001": {
+      "deterministic_word_count": 1237,
+      "packet_word_count": 1237,
+      "pasted_score_object_word_count": 1237,
+      "count_status": "CORRECT"
+    },
+    "ARTIFACT_002": {
+      "deterministic_word_count": 1032,
+      "packet_word_count": 1032,
+      "pasted_score_object_word_count": 820,
+      "count_status": "PASTED_SCORE_OBJECT_COUNT_INCORRECT"
+    }
+  },
+  "artifact_completeness_findings": {
+    "ARTIFACT_001": {
+      "final_artifact_completeness_pass": true
+    },
+    "ARTIFACT_002": {
+      "final_artifact_completeness_pass": false,
+      "final_word_band_pass": true,
+      "deterministic_gate_pass": true,
+      "failure_reasons": [
+        "unclean_or_mid_sentence_ending",
+        "missing_final_section:claim_boundaries"
+      ],
+      "tail_observation": "ARTIFACT_002 ends mid-sentence at 'Second Treasury approval rec'."
+    }
+  },
+  "solo_baseline_eligibility_correction": {
+    "prior_solo_baseline_eligible_value": true,
+    "prior_value_status": "INVALID_UNDER_CORRECTED_DETERMINISTIC_COMPLETENESS_VALIDATION",
+    "corrected_solo_baseline_eligible": false,
+    "reason": "A solo baseline final artifact must pass deterministic final-artifact completeness, including clean ending and required claim-boundaries section. ARTIFACT_002 does not."
+  },
+  "heldout_judging_status": {
+    "heldout_judging_remains_parse_invalid": true,
+    "score_valid": false,
+    "accepted_locked_scores": false,
+    "reason": "Existing held-out judging and pasted score payloads remain strict-validator invalid and are not score-valid."
+  },
+  "claim_boundary": "This addendum corrects deterministic eligibility and word-count accounting only. It does not judge, score, rerun providers, rerun Holo, rerun solo, or unblind."
+}

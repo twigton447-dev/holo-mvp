@@ -14,9 +14,13 @@ REPO_ROOT = FACTORY_DIR.parents[1]
 RUNNER_PATH = FACTORY_DIR / "run_holobuild_mini_scout.py"
 D10_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001"
 D11_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001"
+D12_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001"
 D11_VALIDATOR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001/validate_packet_no_provider.py"
+D12_VALIDATOR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001/validate_packet_no_provider.py"
 D11_PACKET_HASH = "2e80109e4149da65b241452a5ffc194fb4caf4117d204616a1065eb47afde371"
+D12_PACKET_HASH = "fce82318244558dbd36b0b8aec377bc0c180c885a8c9d5ed3b5a7a703c605bb0"
 D11_PACKET_LOCK_HASH = "27ba069ef63c8c14386ef43a974c316320ebeb5067cfa4623aa9446632e70564"
+D12_PACKET_LOCK_HASH = "0550af2c53affb28bdf367be27a2e684007b0eb4c61c484656f458a1eaff2f4f"
 D10_POST_V4_2_CONDITION_DIR = (
     REPO_ROOT
     / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001/runs"
@@ -644,7 +648,7 @@ def test_d11_packet_validator_remains_no_provider_pass() -> None:
 
 def test_d11_runner_domain_gate_accepts_and_resolves_cyber_packet() -> None:
     runner_text = RUNNER_PATH.read_text(encoding="utf-8")
-    assert 'choices=[f"D{i}" for i in range(1, 12)]' in runner_text
+    assert 'choices=[f"D{i}" for i in range(1, 13)]' in runner_text
 
     manifest = runner.load_suite_manifest(runner.DEFAULT_SUITE_MANIFEST)
     packet_dir, entry = runner.resolve_packet_dir(
@@ -660,6 +664,33 @@ def test_d11_runner_domain_gate_accepts_and_resolves_cyber_packet() -> None:
     validated = runner.validate_packet_against_manifest(packet_dir, entry)
     assert validated["hashes"]["packet_hash"] == D11_PACKET_HASH
     assert validated["hashes"]["packet_lock_hash"] == D11_PACKET_LOCK_HASH
+
+
+def test_d12_runner_domain_gate_accepts_and_resolves_fund_nav_packet() -> None:
+    result = subprocess.run(
+        [sys.executable, "-B", str(D12_VALIDATOR)],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "D12_MINI_SCOUT_PACKET_VALIDATION_PASS"
+    assert payload["provider_calls"] == 0
+
+    manifest = runner.load_suite_manifest(runner.DEFAULT_SUITE_MANIFEST)
+    packet_dir, entry = runner.resolve_packet_dir(
+        argparse.Namespace(domain="D12", packet_dir=None),
+        manifest,
+    )
+    assert packet_dir == D12_PACKET_DIR.resolve()
+    assert entry["domain_id"] == "D12"
+    assert entry["packet_id"] == "d12_fund_nav_redemption_cash_release_001"
+    assert entry["packet_dir"] == "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001"
+
+    validated = runner.validate_packet_against_manifest(packet_dir, entry)
+    assert validated["hashes"]["packet_hash"] == D12_PACKET_HASH
+    assert validated["hashes"]["packet_lock_hash"] == D12_PACKET_LOCK_HASH
 
 
 def test_d11_optimized_holo_config_resolves_to_fixed_opus_gpt55_roster() -> None:

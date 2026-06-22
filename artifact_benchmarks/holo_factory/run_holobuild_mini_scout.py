@@ -19,6 +19,7 @@ FACTORY_DIR = Path(__file__).resolve().parent
 REPO_ROOT = FACTORY_DIR.parents[1]
 DEFAULT_SUITE_MANIFEST = FACTORY_DIR / "mini_scouts/TEN_DOMAIN_PACKET_SUITE_MANIFEST.json"
 D11_PACKET_DIR_REL = "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001"
+D12_PACKET_DIR_REL = "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001"
 D11_RUNNER_DOMAIN_ENTRY = {
     "domain_id": "D11",
     "domain_name": "Cyber Incident / Contract Notice / Emergency Cloud Access",
@@ -29,6 +30,17 @@ D11_RUNNER_DOMAIN_ENTRY = {
     "packet_lock_hash": "27ba069ef63c8c14386ef43a974c316320ebeb5067cfa4623aa9446632e70564",
     "freeze_manifest_hash": "23575df2ac7e5129a7e917e92dbc70402614c199035ef752601387c1c02c32f2",
     "validator_path": f"{D11_PACKET_DIR_REL}/validate_packet_no_provider.py",
+}
+D12_RUNNER_DOMAIN_ENTRY = {
+    "domain_id": "D12",
+    "domain_name": "Fund NAV / Redemption / Cash Release",
+    "packet_id": "d12_fund_nav_redemption_cash_release_001",
+    "packet_dir": D12_PACKET_DIR_REL,
+    "packet_hash": "fce82318244558dbd36b0b8aec377bc0c180c885a8c9d5ed3b5a7a703c605bb0",
+    "source_packet_hash": "fce82318244558dbd36b0b8aec377bc0c180c885a8c9d5ed3b5a7a703c605bb0",
+    "packet_lock_hash": "0550af2c53affb28bdf367be27a2e684007b0eb4c61c484656f458a1eaff2f4f",
+    "freeze_manifest_hash": "2a0a0d4fca56a3a542a56b5cf84ab2d4530e57200ab98f199f8f56b26e8a125f",
+    "validator_path": f"{D12_PACKET_DIR_REL}/validate_packet_no_provider.py",
 }
 CONFIG_DIR = FACTORY_DIR / "configs"
 D3_SUCCESS_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_d3_success_v1.lock.json"
@@ -806,8 +818,9 @@ def load_suite_manifest(path: Path) -> dict[str, Any]:
 def runner_domain_entries(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     entries = list(manifest.get("domains", []))
     domain_ids = {entry.get("domain_id") for entry in entries}
-    if "D11" not in domain_ids:
-        entries.append(D11_RUNNER_DOMAIN_ENTRY)
+    for extra_entry in (D11_RUNNER_DOMAIN_ENTRY, D12_RUNNER_DOMAIN_ENTRY):
+        if extra_entry["domain_id"] not in domain_ids:
+            entries.append(extra_entry)
     return entries
 
 
@@ -2351,9 +2364,9 @@ def run_live(packet_dir: Path, run_id: str, conditions: list[str], configs: dict
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generic HoloBuild mini-scout runner for frozen D1-D11 packets.")
+    parser = argparse.ArgumentParser(description="Generic HoloBuild mini-scout runner for frozen D1-D12 packets.")
     parser.add_argument("--suite-manifest", default=str(DEFAULT_SUITE_MANIFEST))
-    parser.add_argument("--domain", choices=[f"D{i}" for i in range(1, 12)])
+    parser.add_argument("--domain", choices=[f"D{i}" for i in range(1, 13)])
     parser.add_argument("--packet-dir")
     parser.add_argument("--condition", action="append", choices=VALID_CONDITIONS, required=True)
     parser.add_argument("--run-id", required=True)

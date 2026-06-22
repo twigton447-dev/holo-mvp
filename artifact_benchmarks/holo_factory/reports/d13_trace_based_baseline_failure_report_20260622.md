@@ -15,6 +15,8 @@ Evidence commits:
 - `695ba7f` - Patch solo baseline completeness eligibility gate
 - `25ae69d` - Preserve corrected D13 solo Opus rerun failure evidence
 - `d034c16` - Preserve D13 trace-based baseline failure report
+- `6fb9de5` - Preserve D13 solo Opus relaxed-budget diagnostic
+- `4e0c5a9` - Lock D13 baseline failure classification
 
 ## Packet Identity
 

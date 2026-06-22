@@ -45,6 +45,12 @@ D12_RETRY2_CONDITION_DIR = (
     / "d12_fund_nav_redemption_cash_release_001_frontier_optimized_opus_gpt55_holo_only_live_retry2_20260622T000000Z"
     / "frontier_holo_optimized_opus_gpt55_v1"
 )
+D12_RETRY3_CONDITION_DIR = (
+    REPO_ROOT
+    / "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001/runs"
+    / "d12_fund_nav_redemption_cash_release_001_frontier_optimized_opus_gpt55_holo_only_live_retry3_final_boundary_patch_20260622T000000Z"
+    / "frontier_holo_optimized_opus_gpt55_v1"
+)
 OPTIMIZED_D10_RUN_MANIFEST = (
     REPO_ROOT
     / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001/runs"
@@ -326,6 +332,29 @@ def render_intermediate_repair_prompt_for_test(role: str = "options_operational_
     return f"SYSTEM:\n{runner.build_base_system()}\n\nUSER:\n{user}"
 
 
+def render_t3_overword_repair_prompt_for_test() -> str:
+    raw = d12_retry3_raw_output("turn_003.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    user = runner.build_intermediate_repair_user(
+        role="contradiction_uncertainty_source_fidelity_reviewer",
+        objective="Stress-test contradictory evidence, source fidelity, source-status boundaries, and uncertainty handling.",
+        failed_role_compliance=compliance,
+        failed_state_source_audit={"status": "pass", "packet_hash_preserved": True, "invented_source_ids": []},
+        context_governor_instructions=runner.build_context_governor_instructions("HoloGov-B", "full_registry"),
+        state_json=runner.stable_json({"PACKET_HASH": "packet_hash", "FINAL_SYNTHESIS_ALLOWED_INPUT_IDS": []}),
+        gov_notes_json=runner.stable_json(["test gov note"]),
+        baton_json=runner.stable_json({"adversarial_role": "contradiction_uncertainty_source_fidelity_reviewer"}),
+        registry_json=runner.stable_json({"TASK_BRIEF": {"status": "PINNED"}, "SOURCE_PACKET_MD": {"status": "PINNED"}}),
+        retrieved="ARTIFACT_ID: TASK_BRIEF\n[task]\n\nARTIFACT_ID: SOURCE_PACKET_MD\n[source]",
+    )
+    return f"SYSTEM:\n{runner.build_base_system()}\n\nUSER:\n{user}"
+
+
 def synthetic_t3_concise_audit_text(extra_words: int = 0, omit_section: str | None = None) -> str:
     sections = {
         "Top 5 source-boundary risks": [
@@ -529,6 +558,18 @@ def d12_retry2_metadata() -> dict:
     return json.loads((D12_RETRY2_CONDITION_DIR / "artifact_metadata.json").read_text(encoding="utf-8"))
 
 
+def d12_retry3_raw_output(name: str) -> dict:
+    return json.loads((D12_RETRY3_CONDITION_DIR / "raw_outputs" / name).read_text(encoding="utf-8"))
+
+
+def d12_retry3_metadata() -> dict:
+    return json.loads((D12_RETRY3_CONDITION_DIR / "artifact_metadata.json").read_text(encoding="utf-8"))
+
+
+def d12_retry3_run_manifest() -> dict:
+    return json.loads((D12_RETRY3_CONDITION_DIR.parent / "run_manifest.json").read_text(encoding="utf-8"))
+
+
 def d10_post_v4_2_final_prompt_state() -> tuple[str, dict]:
     prompt = (D10_POST_V4_2_CONDITION_DIR / "prompt_cards/turn_006.md").read_text(encoding="utf-8")
     match = re.search(r"CANONICAL STATE_OBJECT\n=+\n(\{.*?\})\n\nSTATE_OBJECT_SHA256:", prompt, flags=re.S)
@@ -624,6 +665,19 @@ def test_t3_repair_prompt_requires_700_900_words_and_complete_ending() -> None:
     assert "Target 700-900 words." in prompt
     assert "End with one complete standalone sentence." in prompt
     assert "Do not append a word-count footer." in prompt
+
+
+def test_t3_overword_repair_prompt_is_bounded_and_not_truncation_repair() -> None:
+    prompt = render_t3_overword_repair_prompt_for_test()
+    assert "T3 BOUNDED OVER-WORD SOURCE-FIDELITY REPAIR REQUIRED FORMAT" in prompt
+    assert "exceeded the compact audit word target, not because it needed more scope" in prompt
+    assert "The previous T3 failed because it was incomplete/truncated." not in prompt
+    assert "Return only the corrected compact T3 audit." in prompt
+    assert "Do not continue the prior text." in prompt
+    assert "Do not produce an essay." in prompt
+    assert "Target 700-900 words." in prompt
+    assert "Preferred repair window is 780-860 words; never exceed 900 words." in prompt
+    assert "End with one complete standalone sentence." in prompt
 
 
 def test_initial_decision_repair_prompt_includes_clean_terminal_contract() -> None:
@@ -1163,6 +1217,42 @@ def test_d12_historical_t3_repair_still_fails_compact_audit_gate() -> None:
     assert "t3_compact_audit_over_target_words" in failures
 
 
+def test_d12_retry3_t3_original_fails_only_bounded_overword_gate() -> None:
+    raw = d12_retry3_raw_output("turn_003.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    completeness = compliance["intermediate_artifact_completeness"]
+    failures = completeness["failures"]
+    assert compliance["status"] == "fail"
+    assert completeness["word_count"] == 913
+    assert completeness["clean_ending"] is True
+    assert completeness["hit_requested_token_ceiling"] is False
+    assert failures == ["t3_compact_audit_over_target_words"]
+    assert completeness["role_specific_presence"]["missing_sections"] == []
+
+
+def test_d12_retry3_t3_repair_still_fails_overword_and_truncation_gate() -> None:
+    raw = d12_retry3_raw_output("turn_003_intermediate_repair_001.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    failures = compliance["intermediate_artifact_completeness"]["failures"]
+    assert compliance["status"] == "fail"
+    assert raw["output_tokens"] == 3600
+    assert raw["max_tokens_requested"] == 3600
+    assert raw["text"].rstrip().endswith("valuation acceptance, li")
+    assert "unclean_or_mid_sentence_intermediate_ending" in failures
+    assert "provider_output_hit_max_tokens_with_unclean_intermediate_ending" in failures
+    assert "t3_compact_audit_over_target_words" in failures
+
+
 def test_initial_decision_repaired_draft_complete_ending_passes_clean_ending_check() -> None:
     completeness = runner.intermediate_artifact_completeness(
         "initial_decision_brief_drafter",
@@ -1465,6 +1555,57 @@ def test_historical_d12_retry2_final_repair_failure_still_fails() -> None:
     assert "provider_output_hit_max_tokens_with_unclean_ending" in completeness["failures"]
 
 
+def test_historical_d12_retry3_final_original_is_complete_but_three_words_over() -> None:
+    raw = d12_retry3_raw_output("turn_006.json")
+    completeness = runner.final_artifact_completeness(raw["text"], raw)
+    word_band = runner.final_word_band_compliance(raw["text"])
+    assert completeness["status"] == "pass"
+    assert completeness["section_presence"] == {
+        "bottom_line": True,
+        "risks_of_acting": True,
+        "risks_of_waiting": True,
+        "next_steps": True,
+        "claim_boundaries": True,
+    }
+    assert word_band["status"] == "fail_over_hard_max"
+    assert word_band["word_count"] == 1303
+    assert word_band["over_max_words"] == 3
+
+
+def test_historical_d12_retry3_final_repair_fixture_detects_heading_loss() -> None:
+    repair = d12_retry3_raw_output("turn_006_final_repair_001.json")
+    completeness = runner.final_artifact_completeness(repair["text"], repair)
+    word_band = runner.final_word_band_compliance(repair["text"])
+    assert word_band["status"] == "pass"
+    assert word_band["word_count"] == 1133
+    assert completeness["status"] == "fail"
+    assert completeness["missing_sections"] == [
+        "bottom_line",
+        "risks_of_acting",
+        "risks_of_waiting",
+        "next_steps",
+        "claim_boundaries",
+    ]
+    assert "missing_final_section:bottom_line" in completeness["failures"]
+    assert "missing_final_section:claim_boundaries" in completeness["failures"]
+
+
+def test_historical_d12_retry3_metadata_remains_not_proof_clean() -> None:
+    metadata = d12_retry3_metadata()
+    manifest = d12_retry3_run_manifest()
+    validation = metadata["architecture_evidence_validation"]
+    assert metadata["provider_calls"] == 9
+    assert metadata["scores_generated"] == 0
+    assert manifest["judging_runs"] == 0
+    assert manifest["scores_generated"] == 0
+    assert manifest["unblinding_runs"] == 0
+    assert validation["proof_credit_eligible"] is False
+    assert validation["required_roles_all_completed"] is False
+    assert validation["final_artifact_completeness_pass"] is True
+    assert validation["final_word_band_pass"] is False
+    assert validation["no_failed_required_turn_consumed_by_final"] is True
+
+
 def test_synthetic_final_with_required_five_headings_passes() -> None:
     text = final_text_with_sections()
     compliance = runner.role_compliance("final_synthesis_author", text, final=True, output_meta={})
@@ -1595,9 +1736,11 @@ def test_final_compression_prompt_renders_for_complete_overlength_final() -> Non
     assert "You must cut at least 180 words unless already below 1300." in prompt
     assert "The output must be at least 10 percent shorter than the input and no more than 1,250 words." in prompt
     assert "If the input is over 1300, returning above 1300 is invalid." in prompt
+    for heading in runner.FINAL_SYNTHESIS_REQUIRED_HEADINGS:
+        assert f"## {heading}" in prompt
 
 
-def test_final_compression_prompt_forbids_new_analysis_and_preserves_boundaries_and_source_ids() -> None:
+def test_final_compression_prompt_forbids_new_analysis_and_preserves_markdown_headings_and_source_ids() -> None:
     text = final_text_with_exact_word_count(1375)
     prompt = runner.build_final_repair_user(
         repair_kind=runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY,
@@ -1618,7 +1761,10 @@ def test_final_compression_prompt_forbids_new_analysis_and_preserves_boundaries_
     )
     assert "Do not add new analysis." in prompt
     assert "Do not add new sections." in prompt
-    assert "claim boundaries" in prompt
+    assert "Preserve the five required Markdown heading lines exactly" in prompt
+    assert "## Bottom line; ## Risks of acting; ## Risks of waiting; ## Next steps / stop-go gates; ## Claim boundaries." in prompt
+    assert "Do not convert headings to plain text, bullets, labels, inline phrases, or unmarked section names." in prompt
+    assert "Before returning, verify each required Markdown heading line remains present exactly once." in prompt
     assert "Preserve exact source IDs." in prompt
     assert "Preserve recommendation and action-boundary logic." in prompt
     assert "Cut lower-priority wording." in prompt

@@ -188,10 +188,11 @@ FINAL_SYNTHESIS_REQUIRED_HEADINGS = (
     "Claim boundaries",
 )
 FINAL_SYNTHESIS_HEADING_TEMPLATE = (
-    "FINAL SYNTHESIS REQUIRED HEADING TEMPLATE\n"
-    "=========================================\n"
-    "Use exactly these five headings in the final artifact:\n"
-    + "\n".join(f"- {heading}" for heading in FINAL_SYNTHESIS_REQUIRED_HEADINGS)
+    "FINAL SYNTHESIS REQUIRED MARKDOWN HEADING TEMPLATE\n"
+    "==================================================\n"
+    "Use exactly these five Markdown heading lines in the final artifact, in this order. "
+    "During repair, preserve the leading ## characters and do not convert headings to plain labels:\n"
+    + "\n".join(f"## {heading}" for heading in FINAL_SYNTHESIS_REQUIRED_HEADINGS)
 )
 FINAL_SYNTHESIS_CLAIM_BOUNDARY_CONTRACT = (
     "The Claim boundaries section must explicitly state what the brief does not conclude and what remains unsupported until gates pass. "
@@ -234,6 +235,19 @@ T3_CONCISE_AUDIT_REPAIR_CONTRACT = (
     "Return only the corrected compact T3 audit. Do not continue the prior text. Do not produce an essay. "
     "Use the five required sections below. "
     f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words. "
+    "End with one complete standalone sentence.\n"
+    + "\n".join(f"{index}. {item}" for index, item in enumerate(T3_CONCISE_AUDIT_SECTION_ITEMS, start=1))
+)
+T3_CONCISE_AUDIT_OVERWORD_REPAIR_CONTRACT = (
+    "T3 BOUNDED OVER-WORD SOURCE-FIDELITY REPAIR REQUIRED FORMAT\n"
+    "===========================================================\n"
+    "The previous T3 failed because it exceeded the compact audit word target, not because it needed more scope. "
+    "Return only the corrected compact T3 audit. Do not continue the prior text. Do not produce an essay. "
+    "Use the five required sections below. "
+    f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words. "
+    "Preferred repair window is 780-860 words; never exceed 900 words. "
+    "Use compact bullets or numbered items, cut redundancy before cutting source-boundary cautions, and preserve exact source IDs that remain material. "
+    "Do not invent source IDs. Do not add an introduction, conclusion, appendix, or word-count footer. "
     "End with one complete standalone sentence.\n"
     + "\n".join(f"{index}. {item}" for index, item in enumerate(T3_CONCISE_AUDIT_SECTION_ITEMS, start=1))
 )
@@ -1356,7 +1370,9 @@ def build_final_repair_user(
         repair_instructions = (
             "The current artifact is complete but too long. "
             "Do not add new analysis. Do not add new sections. "
-            "Preserve all required sections: bottom line, risks of acting, risks of waiting, next steps, claim boundaries. "
+            "Preserve the five required Markdown heading lines exactly: ## Bottom line; ## Risks of acting; ## Risks of waiting; ## Next steps / stop-go gates; ## Claim boundaries. "
+            "Do not convert headings to plain text, bullets, labels, inline phrases, or unmarked section names. "
+            "Before returning, verify each required Markdown heading line remains present exactly once. "
             "Preserve exact source IDs. Preserve recommendation and action-boundary logic. "
             "Cut lower-priority wording. Merge repetitive sentences. Remove filler and duplicate explanation. "
             f"You must cut at least 180 words unless already below {final_band['max_words']}. "
@@ -1765,12 +1781,29 @@ def build_context_governor_instructions(hologov_profile: str | None, context_pro
     )
 
 
-def intermediate_role_repair_instructions(role: str) -> str:
+def t3_repair_contract_for_failure(failed_role_compliance: dict[str, Any] | None = None) -> str:
+    completeness = (failed_role_compliance or {}).get("intermediate_artifact_completeness") or {}
+    role_specific = completeness.get("role_specific_presence") or {}
+    failures = set(completeness.get("failures") or [])
+    failures.update(role_specific.get("failures") or [])
+    over_target_only = (
+        "t3_compact_audit_over_target_words" in failures
+        and completeness.get("clean_ending") is True
+        and not completeness.get("hit_requested_token_ceiling")
+        and "unclean_or_mid_sentence_intermediate_ending" not in failures
+        and "provider_output_hit_max_tokens_with_unclean_intermediate_ending" not in failures
+    )
+    if over_target_only:
+        return T3_CONCISE_AUDIT_OVERWORD_REPAIR_CONTRACT
+    return T3_CONCISE_AUDIT_REPAIR_CONTRACT
+
+
+def intermediate_role_repair_instructions(role: str, failed_role_compliance: dict[str, Any] | None = None) -> str:
     instructions = [INTERMEDIATE_REPAIR_CLEAN_ENDING_CONTRACT]
     if role == "assumption_and_evidence_attacker":
         instructions.append(ASSUMPTION_EVIDENCE_REPAIR_CHECKLIST)
     if role == "contradiction_uncertainty_source_fidelity_reviewer":
-        instructions.append(T3_CONCISE_AUDIT_REPAIR_CONTRACT)
+        instructions.append(t3_repair_contract_for_failure(failed_role_compliance))
     if role == "options_operational_usefulness_reviewer":
         instructions.append(OPTIONS_OPERATIONAL_REPAIR_CHECKLIST)
     return "\n\n".join(instructions)
@@ -1807,7 +1840,7 @@ def build_intermediate_repair_user(
         f"ROLE_OBJECTIVE: {objective}\n\n"
         "REPAIR_VALIDATION_INSTRUCTIONS\n"
         "==============================\n"
-        f"{intermediate_role_repair_instructions(role)}\n\n"
+        f"{intermediate_role_repair_instructions(role, failed_role_compliance)}\n\n"
         f"FAILED_ROLE_COMPLIANCE_AUDIT: {stable_json(failed_role_compliance)}\n\n"
         f"FAILED_STATE_SOURCE_AUDIT: {stable_json(failed_state_source_audit)}\n\n"
         "CONTEXT_GOVERNOR_INSTRUCTIONS\n=============================\n"

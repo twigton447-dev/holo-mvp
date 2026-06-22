@@ -39,6 +39,12 @@ D12_T3_FAILURE_CONDITION_DIR = (
     / "d12_fund_nav_redemption_cash_release_001_frontier_optimized_opus_gpt55_holo_only_live_20260622T000000Z"
     / "frontier_holo_optimized_opus_gpt55_v1"
 )
+D12_RETRY2_CONDITION_DIR = (
+    REPO_ROOT
+    / "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001/runs"
+    / "d12_fund_nav_redemption_cash_release_001_frontier_optimized_opus_gpt55_holo_only_live_retry2_20260622T000000Z"
+    / "frontier_holo_optimized_opus_gpt55_v1"
+)
 OPTIMIZED_D10_RUN_MANIFEST = (
     REPO_ROOT
     / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001/runs"
@@ -140,11 +146,11 @@ def state_after_rejected_options_turn(domain: str) -> tuple[str, str, dict, str]
 
 def final_text_with_sections(word_target: int = 940) -> str:
     sections = [
-        "# Bottom Line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option, not an unrestricted action.",
-        "# Risks of Acting\nThe risk of acting is execution error, preventable exposure, and reliance on a source boundary the packet does not prove.",
-        "# Risks of Waiting\nThe risk of waiting is delay cost, operational drift, and missed escalation timing if leadership does not assign an owner.",
-        "# Trigger Taxonomy\nUse a go trigger, no-go trigger, rollback trigger, monitoring gate, and executive escalation owner before expansion.",
-        "# Claim Boundaries\nThis benchmark artifact uses only S1_TEST_SOURCE and S2_TEST_SOURCE. It does not provide legal, medical, regulatory, statistical, or operational approval.",
+        "# Bottom line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option, not an unrestricted action.",
+        "# Risks of acting\nThe risk of acting is execution error, preventable exposure, and reliance on a source boundary the packet does not prove.",
+        "# Risks of waiting\nThe risk of waiting is delay cost, operational drift, and missed escalation timing if leadership does not assign an owner.",
+        "# Next steps / stop-go gates\nUse a go trigger, no-go trigger, rollback trigger, monitoring gate, and executive escalation owner before expansion.",
+        "# Claim boundaries\nThis brief does not conclude broad approval is available from S1_TEST_SOURCE and S2_TEST_SOURCE, and final execution remains unsupported until gates pass.",
     ]
     filler = " The recommendation remains conditional, source bounded, monitored, reversible where possible, and explicit about what the packet does not prove."
     text = "\n\n".join(sections)
@@ -261,6 +267,8 @@ def render_holo_final_prompt(packet_dir: Path) -> str:
         f"Return only the final decision-grade crisis/action brief. Architecture-compliance body word band is {final_band['min_words']}-{final_band['max_words']}; target about {final_band['repair_target_words']}. "
         f"Do not exceed {final_band['max_words']} words. Preserve argument power through tighter synthesis, not overage.\n"
         f"{runner.GENERATION_ARGUMENT_QUALITY_GUIDANCE}\n"
+        f"{runner.FINAL_SYNTHESIS_HEADING_TEMPLATE}\n"
+        f"{runner.FINAL_SYNTHESIS_CLAIM_BOUNDARY_CONTRACT}\n"
         f"{runner.FINAL_SYNTHESIS_TRIGGER_TAXONOMY}\n"
         "Include the strongest counterargument or temptation for the opposite action, then explain why the recommended path is safer, stronger, or conditional.\n"
         f"{runner.EXACT_SOURCE_ID_GENERATION_INSTRUCTION}\n"
@@ -513,6 +521,14 @@ def d12_t3_failure_arch_evidence() -> dict:
     return json.loads((D12_T3_FAILURE_CONDITION_DIR / "arch_evidence.json").read_text(encoding="utf-8"))
 
 
+def d12_retry2_raw_output(name: str) -> dict:
+    return json.loads((D12_RETRY2_CONDITION_DIR / "raw_outputs" / name).read_text(encoding="utf-8"))
+
+
+def d12_retry2_metadata() -> dict:
+    return json.loads((D12_RETRY2_CONDITION_DIR / "artifact_metadata.json").read_text(encoding="utf-8"))
+
+
 def d10_post_v4_2_final_prompt_state() -> tuple[str, dict]:
     prompt = (D10_POST_V4_2_CONDITION_DIR / "prompt_cards/turn_006.md").read_text(encoding="utf-8")
     match = re.search(r"CANONICAL STATE_OBJECT\n=+\n(\{.*?\})\n\nSTATE_OBJECT_SHA256:", prompt, flags=re.S)
@@ -553,6 +569,8 @@ def test_solo_prompt_has_common_hard_contract_without_hologov_surfaces() -> None
 def test_holo_prompt_has_common_hard_contract_and_architecture_surfaces() -> None:
     prompt = render_d10_holo_final_prompt()
     assert_common_generation_contract(prompt)
+    assert runner.FINAL_SYNTHESIS_HEADING_TEMPLATE in prompt
+    assert runner.FINAL_SYNTHESIS_CLAIM_BOUNDARY_CONTRACT in prompt
     assert "HoloGov-B" in prompt
     assert "CONTEXT_GOVERNOR_INSTRUCTIONS" in prompt
     assert "CANONICAL STATE_OBJECT" in prompt
@@ -1388,11 +1406,11 @@ def test_failed_final_repair_above_1300_remains_failed() -> None:
 
 def test_counterargument_claim_boundaries_heading_requires_substantive_boundary_text() -> None:
     sections = [
-        "# Bottom Line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option, not an unrestricted action.",
-        "# Risks of Acting\nThe risk of acting is execution error, preventable exposure, and reliance on a source boundary the packet does not prove.",
-        "# Risks of Waiting\nThe risk of waiting is delay cost, operational drift, and missed escalation timing if leadership does not assign an owner.",
-        "# Trigger Taxonomy\nUse a go trigger, no-go trigger, rollback trigger, monitoring gate, and executive escalation owner before expansion.",
-        "# Counterargument and claim boundaries\nThe strongest counterargument is speed, but this packet only supports a source-bounded conditional action. It does not prove broad approval, legal clearance, irreversible release authority, or operational approval beyond S1_TEST_SOURCE and S2_TEST_SOURCE.",
+        "# Bottom line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option, not an unrestricted action.",
+        "# Risks of acting\nThe risk of acting is execution error, preventable exposure, and reliance on a source boundary the packet does not prove.",
+        "# Risks of waiting\nThe risk of waiting is delay cost, operational drift, and missed escalation timing if leadership does not assign an owner.",
+        "# Next steps / stop-go gates\nUse a go trigger, no-go trigger, rollback trigger, monitoring gate, and executive escalation owner before expansion.",
+        "# Claim boundaries\nThe strongest counterargument is speed, but this brief does not prove broad approval, legal clearance, irreversible release authority, or operational approval beyond S1_TEST_SOURCE and S2_TEST_SOURCE.",
     ]
     text = "\n\n".join(sections)
     while runner.word_count(text) < 940:
@@ -1404,11 +1422,11 @@ def test_counterargument_claim_boundaries_heading_requires_substantive_boundary_
 
 def test_counterargument_claim_boundaries_heading_without_boundary_text_fails() -> None:
     sections = [
-        "# Bottom Line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option, not an unrestricted action.",
-        "# Risks of Acting\nThe risk of acting is execution error, preventable exposure, and reliance on a source boundary the packet does not prove.",
-        "# Risks of Waiting\nThe risk of waiting is delay cost, operational drift, and missed escalation timing if leadership does not assign an owner.",
-        "# Trigger Taxonomy\nUse a go trigger, no-go trigger, rollback trigger, monitoring gate, and executive escalation owner before expansion.",
-        "# Counterargument and claim boundaries\nThe strongest counterargument is speed. Leaders want momentum, confidence, crisp ownership, fast execution, immediate delivery, and strong implementation.",
+        "# Bottom line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option, not an unrestricted action.",
+        "# Risks of acting\nThe risk of acting is execution error, preventable exposure, and reliance on a source boundary the packet does not prove.",
+        "# Risks of waiting\nThe risk of waiting is delay cost, operational drift, and missed escalation timing if leadership does not assign an owner.",
+        "# Next steps / stop-go gates\nUse a go trigger, no-go trigger, rollback trigger, monitoring gate, and executive escalation owner before expansion.",
+        "# Claim boundaries\nThe strongest counterargument is speed. Leaders want momentum, confidence, crisp ownership, fast execution, immediate delivery, and strong implementation.",
     ]
     text = "\n\n".join(sections)
     while runner.word_count(text) < 940:
@@ -1425,6 +1443,121 @@ def test_final_repair_prompt_requires_add_missing_section_and_compress_under_har
     assert "do not return an overlength repair" in runner_text
     assert "Target approximately" in runner_text
     assert "remove or compress lower-priority wording" in runner_text
+
+
+def test_historical_d12_retry2_original_final_failure_fixture_remains_detected() -> None:
+    metadata = d12_retry2_metadata()
+    repair_attempt = metadata["final_repair_attempts"][0]
+    previous_completeness = repair_attempt["previous_final_completeness"]
+    assert repair_attempt["previous_word_count"] == 1294
+    assert repair_attempt["previous_final_word_band_compliance"]["status"] == "pass"
+    assert previous_completeness["status"] == "fail"
+    assert previous_completeness["failures"] == ["claim_boundary_section_lacks_substantive_boundary_text"]
+
+
+def test_historical_d12_retry2_final_repair_failure_still_fails() -> None:
+    repair = d12_retry2_raw_output("turn_006_final_repair_001.json")
+    completeness = runner.final_artifact_completeness(repair["text"], repair)
+    assert repair["output_tokens"] == 5200
+    assert repair["max_tokens_requested"] == 5200
+    assert completeness["status"] == "fail"
+    assert "unclean_or_mid_sentence_ending" in completeness["failures"]
+    assert "provider_output_hit_max_tokens_with_unclean_ending" in completeness["failures"]
+
+
+def test_synthetic_final_with_required_five_headings_passes() -> None:
+    text = final_text_with_sections()
+    compliance = runner.role_compliance("final_synthesis_author", text, final=True, output_meta={})
+    assert compliance["status"] == "pass"
+    assert compliance["final_artifact_completeness"]["status"] == "pass"
+    assert compliance["final_artifact_completeness"]["section_presence"] == {
+        "bottom_line": True,
+        "risks_of_acting": True,
+        "risks_of_waiting": True,
+        "next_steps": True,
+        "claim_boundaries": True,
+    }
+
+
+def test_synthetic_final_vague_claim_boundaries_fail() -> None:
+    sections = [
+        "# Bottom line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option.",
+        "# Risks of acting\nThe risk of acting is execution error and preventable exposure.",
+        "# Risks of waiting\nThe risk of waiting is delay cost and missed escalation timing.",
+        "# Next steps / stop-go gates\nUse a no-go trigger, narrow-go trigger, rollback trigger, monitoring gate, and accountable owner.",
+        "# Claim boundaries\nThis benchmark artifact uses sources and should not be treated as advice.",
+    ]
+    text = "\n\n".join(sections)
+    while runner.word_count(text) < 940:
+        text += " The source packet supports conditional execution discipline, monitoring, rollback ownership, and explicit approval checks."
+    compliance = runner.role_compliance("final_synthesis_author", text, final=True, output_meta={})
+    assert compliance["status"] == "fail"
+    assert "claim_boundary_section_lacks_substantive_boundary_text" in compliance["final_artifact_completeness"]["failures"]
+
+
+def test_synthetic_final_does_not_conclude_and_unsupported_until_gates_passes() -> None:
+    sections = [
+        "# Bottom line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option.",
+        "# Risks of acting\nThe risk of acting is execution error and preventable exposure.",
+        "# Risks of waiting\nThe risk of waiting is delay cost and missed escalation timing.",
+        "# Next steps / stop-go gates\nUse a no-go trigger, narrow-go trigger, rollback trigger, monitoring gate, and accountable owner.",
+        "# Claim boundaries\nThis brief does not conclude broad approval exists, and final execution remains unsupported until gates pass under S1_TEST_SOURCE and S2_TEST_SOURCE.",
+    ]
+    text = "\n\n".join(sections)
+    while runner.word_count(text) < 940:
+        text += " The recommendation remains conditional, source bounded, monitored, reversible where possible, and explicit about what remains unsupported until gates pass."
+    compliance = runner.role_compliance("final_synthesis_author", text, final=True, output_meta={})
+    assert compliance["status"] == "pass"
+
+
+def test_claim_boundary_only_repair_prompt_is_bounded_and_exactly_structured() -> None:
+    failed = "\n\n".join([
+        "# Bottom line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option.",
+        "# Risks of acting\nThe risk of acting is execution error and preventable exposure.",
+        "# Risks of waiting\nThe risk of waiting is delay cost and missed escalation timing.",
+        "# Next steps / stop-go gates\nUse a no-go trigger, narrow-go trigger, rollback trigger, monitoring gate, and accountable owner.",
+        "# Claim boundaries\nThis benchmark artifact uses sources and should not be treated as advice.",
+    ])
+    while runner.word_count(failed) < 940:
+        failed += " The source packet supports conditional execution discipline, monitoring, rollback ownership, and explicit approval checks."
+    word_band = runner.final_word_band_compliance(failed)
+    completeness = runner.final_artifact_completeness(failed, {})
+    repair_kind = runner.final_repair_prompt_kind(
+        word_band_result=word_band,
+        final_completeness_result=completeness,
+    )
+    prompt = runner.build_final_repair_user(
+        repair_kind=repair_kind,
+        final_band=runner.final_word_band_policy(),
+        previous_word_count=runner.word_count(failed),
+        failed_final_word_band=word_band,
+        final_quality_failures=completeness["failures"],
+        final_completeness=completeness,
+        final_state_source_audit={"status": "pass", "packet_hash_preserved": True, "invented_source_ids": []},
+        context_governor_instructions="Use frozen context only.",
+        state_json="{}",
+        gov_notes_json="{}",
+        baton_json="{}",
+        registry_json="{}",
+        retrieved="SOURCE_PACKET_MD",
+        required_options_text="conditional_go",
+        failed_output_text=failed,
+    )
+    assert repair_kind == runner.FINAL_REPAIR_KIND_CLAIM_BOUNDARY_ONLY
+    assert "FINAL_ARTIFACT_CLAIM_BOUNDARY_REPAIR" in prompt
+    assert "Repair only the claim-boundary failure." in prompt
+    assert "Return the full final artifact." in prompt
+    assert "Bottom line" in prompt
+    assert "Risks of acting" in prompt
+    assert "Risks of waiting" in prompt
+    assert "Next steps / stop-go gates" in prompt
+    assert "Claim boundaries" in prompt
+    assert "Target 1050-1150 words." in prompt
+    assert "Must end with a complete standalone sentence." in prompt
+    assert "No commentary." in prompt
+    assert "No appendix." in prompt
+    assert "No judge-facing explanation." in prompt
+    assert "Do not continue prior truncated text." in prompt
 
 
 def test_final_compression_prompt_renders_for_complete_overlength_final() -> None:

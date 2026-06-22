@@ -128,6 +128,9 @@ FINAL_REPAIR_TARGET_WORDS = 1180
 FINAL_REPAIR_HARD_MAX_WORDS = FINAL_WORD_MAX
 FINAL_REPAIR_KIND_MISSING_SECTION = "missing_section_repair"
 FINAL_REPAIR_KIND_COMPRESSION_ONLY = "compression_only_final_repair"
+FINAL_REPAIR_KIND_CLAIM_BOUNDARY_ONLY = "claim_boundary_only_repair"
+FINAL_CLAIM_BOUNDARY_REPAIR_MIN_WORDS = 1050
+FINAL_CLAIM_BOUNDARY_REPAIR_MAX_WORDS = 1150
 HOLOGOV_C_TENURE_MIN = 7
 HOLOGOV_C_TENURE_MAX = 11
 PROVIDER_CALLS = 0
@@ -176,6 +179,23 @@ FINAL_SYNTHESIS_TRIGGER_TAXONOMY = (
     "In the final synthesis, convert the recommendation into an executable trigger taxonomy: broad-action go/no-go, "
     "narrow/conditional go, hold/escalate, revoke/rollback/stop, and post-action review or follow-up where relevant. "
     "Use packet-specific names when the packet supplies required practical response options."
+)
+FINAL_SYNTHESIS_REQUIRED_HEADINGS = (
+    "Bottom line",
+    "Risks of acting",
+    "Risks of waiting",
+    "Next steps / stop-go gates",
+    "Claim boundaries",
+)
+FINAL_SYNTHESIS_HEADING_TEMPLATE = (
+    "FINAL SYNTHESIS REQUIRED HEADING TEMPLATE\n"
+    "=========================================\n"
+    "Use exactly these five headings in the final artifact:\n"
+    + "\n".join(f"- {heading}" for heading in FINAL_SYNTHESIS_REQUIRED_HEADINGS)
+)
+FINAL_SYNTHESIS_CLAIM_BOUNDARY_CONTRACT = (
+    "The Claim boundaries section must explicitly state what the brief does not conclude and what remains unsupported until gates pass. "
+    "Preserve exact source IDs, do not invent source IDs, stay within the 900-1300 word band, and end with a complete standalone sentence."
 )
 INTERMEDIATE_REPAIR_CLEAN_ENDING_CONTRACT = (
     "INTERMEDIATE REPAIR CLEAN ENDING CONTRACT\n"
@@ -262,9 +282,28 @@ FINAL_REQUIRED_SECTION_PATTERNS = {
     "bottom_line": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:bottom line|recommendation|bottom-line)"),
     "risks_of_acting": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?risks?\s+of\s+acting"),
     "risks_of_waiting": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?risks?\s+of\s+waiting"),
-    "next_steps": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:recommended\s+)?next\s+steps|trigger\s+taxonomy"),
+    "next_steps": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:(?:recommended\s+)?next\s+steps|next\s+steps\s*/\s*stop-go\s+gates|trigger\s+taxonomy)"),
     "claim_boundaries": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:claim\s+boundaries|counterargument\s+and\s+claim\s+boundaries|counterargument\s*/\s*claim\s+boundaries|boundaries\s+and\s+uncertainty|disclaimer|claim\s+boundaries\s*/\s*disclaimer)"),
 }
+CLAIM_BOUNDARY_SUBSTANTIVE_RE = re.compile(
+    r"\b("
+    r"does\s+not\s+conclude|"
+    r"does\s+not\s+establish|"
+    r"does\s+not\s+prove|"
+    r"unsupported\s+until|"
+    r"unsupported\s+before|"
+    r"not\s+supported\s+until|"
+    r"not\s+authorized\s+until|"
+    r"cannot\s+support\s+final\s+release|"
+    r"cannot\s+support\s+final\s+commitment|"
+    r"before\s+gates\s+pass|"
+    r"until\s+gates\s+pass|"
+    r"invents\s+no\s+approvals|"
+    r"not\s+a\s+deterministic\s+[^.!?]{0,80}\s+verdict|"
+    r"no\s+[^.!?]{0,80}\s+asserted\s+as\s+validated"
+    r")\b",
+    flags=re.IGNORECASE,
+)
 FINAL_CLEAN_ENDING_RE = re.compile(r"[.!?][\"')\]]*$")
 UNCLEAN_INTERMEDIATE_ENDING_RE = re.compile(r"[*_\-:;,(\[{]$")
 SOURCE_ID_RE = re.compile(r"\bS\d+_[A-Z0-9_]+\b")
@@ -599,11 +638,7 @@ def final_artifact_completeness(output_text: str, output_meta: dict[str, Any] | 
         claim_boundary_tail_words = word_count(claim_boundary_tail)
         if claim_boundary_tail_words < 20:
             failures.append("claim_boundary_section_too_short_or_truncated")
-        if not re.search(
-            r"\b(boundar|only|does not prove|not shown|not provided|cannot conclude|uncertain|uncertainty|source|packet|not legal advice|not operational approval|not approval)\b",
-            claim_boundary_tail,
-            flags=re.IGNORECASE,
-        ):
+        if not CLAIM_BOUNDARY_SUBSTANTIVE_RE.search(claim_boundary_tail):
             failures.append("claim_boundary_section_lacks_substantive_boundary_text")
 
     output_tokens = int((output_meta or {}).get("output_tokens") or 0)
@@ -805,6 +840,13 @@ def final_repair_prompt_kind(
     word_band_result: dict[str, Any],
     final_completeness_result: dict[str, Any],
 ) -> str:
+    failures = list(final_completeness_result.get("failures") or [])
+    if (
+        word_band_result.get("status") == "pass"
+        and final_completeness_result.get("status") == "fail"
+        and failures == ["claim_boundary_section_lacks_substantive_boundary_text"]
+    ):
+        return FINAL_REPAIR_KIND_CLAIM_BOUNDARY_ONLY
     if final_completeness_result.get("status") == "pass" and word_band_result.get("status") == "fail_over_hard_max":
         return FINAL_REPAIR_KIND_COMPRESSION_ONLY
     return FINAL_REPAIR_KIND_MISSING_SECTION
@@ -1342,6 +1384,19 @@ def build_final_repair_user(
             "Preserve the central thesis, decision recommendation, risk of acting, risk of waiting, trigger/gate table, calculations, counterargument, source IDs, and source-boundary disclaimer. "
             "The final answer must end cleanly with a complete sentence and a complete claim-boundary/disclaimer section."
         )
+    elif repair_kind == FINAL_REPAIR_KIND_CLAIM_BOUNDARY_ONLY:
+        repair_header = "FINAL_ARTIFACT_CLAIM_BOUNDARY_REPAIR"
+        repair_instructions = (
+            "The final synthesis output passed the word band but failed claim-boundary completeness. "
+            "Repair only the claim-boundary failure. Return the full final artifact. "
+            "Preserve the five required headings exactly: Bottom line; Risks of acting; Risks of waiting; Next steps / stop-go gates; Claim boundaries. "
+            f"Target {FINAL_CLAIM_BOUNDARY_REPAIR_MIN_WORDS}-{FINAL_CLAIM_BOUNDARY_REPAIR_MAX_WORDS} words. "
+            "No commentary. No appendix. No judge-facing explanation. "
+            "Preserve exact source IDs. Do not invent source IDs. "
+            "Do not continue prior truncated text. "
+            "The Claim boundaries section must explicitly state what the brief does not conclude and what remains unsupported until gates pass. "
+            "Must end with a complete standalone sentence. Hard stop before token ceiling."
+        )
     else:
         raise ValueError(f"unknown final repair kind: {repair_kind}")
 
@@ -1349,6 +1404,8 @@ def build_final_repair_user(
         f"{repair_header}\n"
         f"{'=' * len(repair_header)}\n"
         f"{repair_instructions}\n\n"
+        f"{FINAL_SYNTHESIS_HEADING_TEMPLATE}\n\n"
+        f"{FINAL_SYNTHESIS_CLAIM_BOUNDARY_CONTRACT}\n\n"
         f"{GENERATION_ARGUMENT_QUALITY_GUIDANCE}\n"
         f"{FINAL_SYNTHESIS_TRIGGER_TAXONOMY}\n"
         "Keep exact required practical response option labels if supplied, and retain the strongest counterargument handling.\n\n"
@@ -1795,6 +1852,8 @@ def gov_notes_for_turn(index: int, role: str, final: bool, retrieved_ids: list[s
         word_band = final_word_band_policy()
         notes.append(f"Final synthesis architecture-compliance band is {word_band['min_words']}-{word_band['max_words']} body words, target {word_band['repair_target_words']}; do not exceed the hard maximum.")
         notes.append("HoloBuild proof credit requires the clean architecture band.")
+        notes.append(FINAL_SYNTHESIS_HEADING_TEMPLATE)
+        notes.append(FINAL_SYNTHESIS_CLAIM_BOUNDARY_CONTRACT)
         notes.append(FINAL_SYNTHESIS_TRIGGER_TAXONOMY)
         notes.append("Final synthesis must explicitly handle the strongest counterargument and explain why the recommended path is still better or conditional.")
     else:
@@ -1934,6 +1993,8 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                 f"Return only the final decision-grade crisis/action brief. Architecture-compliance body word band is {final_band['min_words']}-{final_band['max_words']}; target about {final_band['repair_target_words']}. "
                 f"Do not exceed {final_band['max_words']} words. Preserve argument power through tighter synthesis, not overage.\n"
                 f"{GENERATION_ARGUMENT_QUALITY_GUIDANCE}\n"
+                f"{FINAL_SYNTHESIS_HEADING_TEMPLATE}\n"
+                f"{FINAL_SYNTHESIS_CLAIM_BOUNDARY_CONTRACT}\n"
                 f"{FINAL_SYNTHESIS_TRIGGER_TAXONOMY}\n"
                 "Include the strongest counterargument or temptation for the opposite action, then explain why the recommended path is safer, stronger, or conditional.\n"
                 f"{EXACT_SOURCE_ID_GENERATION_INSTRUCTION}\n"

@@ -223,6 +223,11 @@ INTERMEDIATE_REPAIR_CLEAN_ENDING_CONTRACT = (
 )
 T3_CONCISE_AUDIT_MIN_WORDS = 700
 T3_CONCISE_AUDIT_MAX_WORDS = 900
+T3_CONCISE_AUDIT_MAX_BULLETS = 25
+T3_CONCISE_AUDIT_MIN_BULLETS_PER_SECTION = 3
+T3_CONCISE_AUDIT_MAX_BULLETS_PER_SECTION = 5
+T3_CONCISE_AUDIT_MAX_SECTION_WORDS = 185
+T3_CONCISE_AUDIT_MAX_BULLET_WORDS = 48
 T3_CONCISE_AUDIT_SECTION_ITEMS = (
     "Top 5 source-boundary risks",
     "Top 5 uncertainty claims to preserve",
@@ -233,8 +238,13 @@ T3_CONCISE_AUDIT_SECTION_ITEMS = (
 T3_CONCISE_AUDIT_CONTRACT = (
     "CONTRADICTION / UNCERTAINTY / SOURCE-FIDELITY COMPACT AUDIT CONTRACT\n"
     "====================================================================\n"
-    "For contradiction_uncertainty_source_fidelity_reviewer, return a compact audit, not a prose essay. "
-    f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words. Use compact bullets or numbered items. "
+    "For contradiction_uncertainty_source_fidelity_reviewer, return a compact claim audit, not a prose essay. "
+    f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words; prefer 720-820 words. "
+    "Use bullet-only format: no intro, no conclusion, no prose paragraphs, and no numbered mini-essays. "
+    f"Use {T3_CONCISE_AUDIT_MIN_BULLETS_PER_SECTION}-{T3_CONCISE_AUDIT_MAX_BULLETS_PER_SECTION} bullets per section, "
+    f"no more than {T3_CONCISE_AUDIT_MAX_BULLETS} bullets total, "
+    f"no more than {T3_CONCISE_AUDIT_MAX_BULLET_WORDS} words per bullet, "
+    f"and no more than {T3_CONCISE_AUDIT_MAX_SECTION_WORDS} words per section. "
     "Preserve exact source IDs; do not abbreviate, rename, shorten, or invent source IDs. "
     "Do not treat derived, stale, weak, preliminary, or internal notes as governing authority. "
     "Do not resolve factual uncertainty that the packet leaves open. "
@@ -245,24 +255,34 @@ T3_CONCISE_AUDIT_CONTRACT = (
 T3_CONCISE_AUDIT_REPAIR_CONTRACT = (
     "T3 COMPACT SOURCE-FIDELITY REPAIR REQUIRED FORMAT\n"
     "=================================================\n"
-    "The previous T3 failed because it was incomplete/truncated. "
+    "The previous T3 failed because a required section, source-ID discipline, or minimum substance was missing. "
     "Return only the corrected compact T3 audit. Do not continue the prior text. Do not produce an essay. "
-    "Use the five required sections below. "
-    f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words. "
+    "Use the five required sections below. Use bullet-only format with no intro, conclusion, prose paragraphs, appendix, or word-count footer. "
+    f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words; prefer 720-820 words. "
+    f"Use {T3_CONCISE_AUDIT_MIN_BULLETS_PER_SECTION}-{T3_CONCISE_AUDIT_MAX_BULLETS_PER_SECTION} bullets per section, "
+    f"no more than {T3_CONCISE_AUDIT_MAX_BULLETS} bullets total, "
+    f"no more than {T3_CONCISE_AUDIT_MAX_BULLET_WORDS} words per bullet, "
+    f"and no more than {T3_CONCISE_AUDIT_MAX_SECTION_WORDS} words per section. "
     "End with one complete standalone sentence.\n"
     + "\n".join(f"{index}. {item}" for index, item in enumerate(T3_CONCISE_AUDIT_SECTION_ITEMS, start=1))
 )
 T3_CONCISE_AUDIT_OVERWORD_REPAIR_CONTRACT = (
-    "T3 BOUNDED OVER-WORD SOURCE-FIDELITY REPAIR REQUIRED FORMAT\n"
-    "===========================================================\n"
-    "The previous T3 failed because it exceeded the compact audit word target, not because it needed more scope. "
-    "Return only the corrected compact T3 audit. Do not continue the prior text. Do not produce an essay. "
+    "T3 BOUNDED COMPRESSION-ONLY SOURCE-FIDELITY REPAIR REQUIRED FORMAT\n"
+    "=================================================================\n"
+    "The previous T3 already had the compact-audit shape but exceeded the word target, hit the output ceiling, or ended uncleanly. "
+    "Compress the audit; do not restart it with more scope. Return only the corrected compact T3 audit. "
+    "Do not continue the prior text. Do not produce an essay. "
     "Use the five required sections below. "
     f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words. "
-    "Preferred repair window is 780-860 words; never exceed 900 words. "
+    "Preferred repair window is 720-820 words; never exceed 900 words. "
     f"The output budget for this repair is intentionally capped at {T3_OVERWORD_REPAIR_MAX_TOKENS} tokens; cut scope before adding prose. "
-    "Use compact bullets or numbered items, cut redundancy before cutting source-boundary cautions, and preserve exact source IDs that remain material. "
-    "Do not invent source IDs. Do not add an introduction, conclusion, appendix, or word-count footer. "
+    "Use bullet-only format with no intro, conclusion, prose paragraphs, appendix, or word-count footer. "
+    f"Use {T3_CONCISE_AUDIT_MIN_BULLETS_PER_SECTION}-{T3_CONCISE_AUDIT_MAX_BULLETS_PER_SECTION} bullets per section, "
+    f"no more than {T3_CONCISE_AUDIT_MAX_BULLETS} bullets total, "
+    f"no more than {T3_CONCISE_AUDIT_MAX_BULLET_WORDS} words per bullet, "
+    f"and no more than {T3_CONCISE_AUDIT_MAX_SECTION_WORDS} words per section. "
+    "Cut redundancy before cutting source-boundary cautions, and preserve exact source IDs that remain material. "
+    "Do not invent source IDs. "
     "End with one complete standalone sentence.\n"
     + "\n".join(f"{index}. {item}" for index, item in enumerate(T3_CONCISE_AUDIT_SECTION_ITEMS, start=1))
 )
@@ -773,6 +793,43 @@ def t3_concise_audit_presence(output_text: str) -> dict[str, Any]:
     wc = word_count(output_text)
     bullet_or_numbered_lines = len(re.findall(r"(?m)^\s*(?:[-*]|\d+[.)])\s+\S", output_text))
     cited_source_ids = sorted(set(SOURCE_ID_RE.findall(output_text)))
+    lines = output_text.splitlines()
+    section_line_indexes: dict[str, int] = {}
+    for item in T3_CONCISE_AUDIT_SECTION_ITEMS:
+        item_lower = item.lower()
+        for index, line in enumerate(lines):
+            normalized_line = re.sub(r"^\s*(?:#{1,6}\s*)?(?:\d+[.)]\s*)?", "", line).strip().lower().rstrip(":")
+            if normalized_line == item_lower:
+                section_line_indexes[item] = index
+                break
+    ordered_sections = [
+        (item, section_line_indexes[item])
+        for item in T3_CONCISE_AUDIT_SECTION_ITEMS
+        if item in section_line_indexes
+    ]
+    section_details: dict[str, dict[str, Any]] = {}
+    for position, (item, start_index) in enumerate(ordered_sections):
+        end_index = ordered_sections[position + 1][1] if position + 1 < len(ordered_sections) else len(lines)
+        section_lines = lines[start_index + 1 : end_index]
+        bullet_lines = [
+            line.strip()
+            for line in section_lines
+            if re.match(r"^\s*(?:[-*]|\d+[.)])\s+\S", line)
+        ]
+        section_details[item] = {
+            "word_count": word_count("\n".join(section_lines)),
+            "bullet_count": len(bullet_lines),
+            "max_bullet_words": max((word_count(line) for line in bullet_lines), default=0),
+        }
+    prose_paragraph_lines = [
+        line.strip()
+        for line in lines
+        if line.strip()
+        and not re.match(r"^\s*(?:#{1,6}\s*)?(?:\d+[.)]\s*)?(?:"
+                         + "|".join(re.escape(item) for item in T3_CONCISE_AUDIT_SECTION_ITEMS)
+                         + r")\s*:?\s*$", line.strip(), flags=re.IGNORECASE)
+        and not re.match(r"^\s*(?:[-*]|\d+[.)])\s+\S", line)
+    ]
     failures: list[str] = []
     failures.extend(f"missing_t3_compact_section:{item}" for item in missing_sections)
     if wc < T3_CONCISE_AUDIT_MIN_WORDS:
@@ -781,6 +838,19 @@ def t3_concise_audit_presence(output_text: str) -> dict[str, Any]:
         failures.append("t3_compact_audit_over_target_words")
     if bullet_or_numbered_lines < 15:
         failures.append("t3_compact_audit_not_bulleted")
+    if bullet_or_numbered_lines > T3_CONCISE_AUDIT_MAX_BULLETS:
+        failures.append("t3_compact_audit_too_many_bullets")
+    if prose_paragraph_lines:
+        failures.append("t3_compact_audit_contains_prose_paragraphs")
+    for item, details in section_details.items():
+        if details["bullet_count"] < T3_CONCISE_AUDIT_MIN_BULLETS_PER_SECTION:
+            failures.append(f"t3_compact_section_too_few_bullets:{item}")
+        if details["bullet_count"] > T3_CONCISE_AUDIT_MAX_BULLETS_PER_SECTION:
+            failures.append(f"t3_compact_section_too_many_bullets:{item}")
+        if details["word_count"] > T3_CONCISE_AUDIT_MAX_SECTION_WORDS:
+            failures.append(f"t3_compact_section_over_word_cap:{item}")
+        if details["max_bullet_words"] > T3_CONCISE_AUDIT_MAX_BULLET_WORDS:
+            failures.append(f"t3_compact_bullet_over_word_cap:{item}")
     if not cited_source_ids:
         failures.append("t3_compact_audit_missing_exact_source_ids")
     return {
@@ -790,7 +860,12 @@ def t3_concise_audit_presence(output_text: str) -> dict[str, Any]:
         "word_count": wc,
         "target_min_words": T3_CONCISE_AUDIT_MIN_WORDS,
         "target_max_words": T3_CONCISE_AUDIT_MAX_WORDS,
+        "max_bullets": T3_CONCISE_AUDIT_MAX_BULLETS,
+        "max_section_words": T3_CONCISE_AUDIT_MAX_SECTION_WORDS,
+        "max_bullet_words": T3_CONCISE_AUDIT_MAX_BULLET_WORDS,
         "bullet_or_numbered_lines": bullet_or_numbered_lines,
+        "section_details": section_details,
+        "prose_paragraph_line_count": len(prose_paragraph_lines),
         "cited_source_ids": cited_source_ids,
         "failures": failures,
     }
@@ -1896,13 +1971,36 @@ def t3_repair_contract_for_failure(failed_role_compliance: dict[str, Any] | None
 
 
 def t3_overword_repair_required_from_completeness(completeness: dict[str, Any], failures: set[str]) -> bool:
-    return (
-        "t3_compact_audit_over_target_words" in failures
-        and completeness.get("clean_ending") is True
-        and not completeness.get("hit_requested_token_ceiling")
-        and "unclean_or_mid_sentence_intermediate_ending" not in failures
-        and "provider_output_hit_max_tokens_with_unclean_intermediate_ending" not in failures
+    role_specific = completeness.get("role_specific_presence") or {}
+    missing_sections = role_specific.get("missing_sections") or []
+    cited_source_ids = role_specific.get("cited_source_ids") or []
+    bullet_count = int(role_specific.get("bullet_or_numbered_lines") or 0)
+    has_complete_t3_shape = (
+        not missing_sections
+        and bool(cited_source_ids)
+        and bullet_count >= 15
+        and "t3_compact_audit_under_target_words" not in failures
+        and "t3_compact_audit_not_bulleted" not in failures
+        and "t3_compact_audit_missing_exact_source_ids" not in failures
     )
+    compactness_or_terminal_failure = (
+        "t3_compact_audit_over_target_words" in failures
+        or "unclean_or_mid_sentence_intermediate_ending" in failures
+        or "provider_output_hit_max_tokens_with_unclean_intermediate_ending" in failures
+        or "t3_compact_audit_too_many_bullets" in failures
+        or "t3_compact_audit_contains_prose_paragraphs" in failures
+        or any(
+            failure.startswith(
+                (
+                    "t3_compact_section_too_many_bullets:",
+                    "t3_compact_section_over_word_cap:",
+                    "t3_compact_bullet_over_word_cap:",
+                )
+            )
+            for failure in failures
+        )
+    )
+    return has_complete_t3_shape and compactness_or_terminal_failure
 
 
 def t3_overword_repair_required(failed_role_compliance: dict[str, Any] | None = None) -> bool:

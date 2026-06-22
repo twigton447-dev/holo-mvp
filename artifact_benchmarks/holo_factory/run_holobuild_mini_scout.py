@@ -1057,6 +1057,8 @@ def randomized_holo_session_plan(config: dict[str, Any], *, run_id: str, packet_
             ],
             "final_synthesis_model": turn_models[-1],
             "final_synthesis_model_policy": fixed["final_policy"],
+            "final_compression_repair_model": preferred_final_compression_repair_model(config, turn_models[-1]),
+            "final_compression_repair_model_policy": "configured_final_compression_repair_model_or_final_synthesis_model",
         }
     seed = secrets.token_hex(16)
     rng = random.Random(seed)
@@ -1096,6 +1098,8 @@ def randomized_holo_session_plan(config: dict[str, Any], *, run_id: str, packet_
         "holo_agent_turn_models": turn_models,
         "final_synthesis_model": final_synthesis_model,
         "final_synthesis_model_policy": "configured_or_openai_model_from_holo_agent_pool",
+        "final_compression_repair_model": preferred_final_compression_repair_model(config, final_synthesis_model),
+        "final_compression_repair_model_policy": "configured_final_compression_repair_model_or_final_synthesis_model",
         "hologov_model_pool": gov_pool,
         "hologov_selection_policy": "random_governor_from_hologov_model_pool",
         "hologov_tenure_policy": {
@@ -1138,6 +1142,29 @@ def preferred_holo_final_model(config: dict[str, Any]) -> str:
         if model.startswith("openai:"):
             return model
     return models[-1]
+
+
+def preferred_final_compression_repair_model(config: dict[str, Any], final_synthesis_model: str) -> str:
+    configured = config.get("final_compression_repair_model")
+    if not configured:
+        return final_synthesis_model
+    models = holo_agent_models(config)
+    if configured not in models:
+        raise SystemExit(json.dumps({
+            "status": "HOLOBUILD_MINI_SCOUT_FAIL_CLOSED",
+            "reason": "final_compression_repair_model_not_in_holo_agent_pool",
+            "config_id": config.get("config_id"),
+            "final_compression_repair_model": configured,
+            "holo_agent_pool": models,
+            "provider_calls": 0,
+        }, indent=2))
+    return configured
+
+
+def final_repair_model_for_kind(repair_kind: str, final_synthesis_model: str, session_plan: dict[str, Any]) -> str:
+    if repair_kind == FINAL_REPAIR_KIND_COMPRESSION_ONLY:
+        return session_plan.get("final_compression_repair_model") or final_synthesis_model
+    return final_synthesis_model
 
 
 def ensure_provider_env(models: list[str]) -> None:
@@ -1190,10 +1217,17 @@ def build_final_repair_user(
             "Preserve all required sections: bottom line, risks of acting, risks of waiting, next steps, claim boundaries. "
             "Preserve exact source IDs. Preserve recommendation and action-boundary logic. "
             "Cut lower-priority wording. Merge repetitive sentences. Remove filler and duplicate explanation. "
+            f"You must cut at least 180 words unless already below {final_band['max_words']}. "
+            "The output must be at least 10 percent shorter than the input and no more than 1,250 words. "
+            f"If the input is over {final_band['max_words']}, returning above {final_band['max_words']} is invalid. "
+            "Prefer deleting explanatory repetition over preserving every sentence. "
+            "Do not preserve paragraph count. Do not preserve section length. "
+            "Compress tables/bullets aggressively. "
+            "Keep exact source IDs, but remove redundant citations. "
             f"The hard {final_band['min_words']}-{final_band['max_words']:,} body-word band remains mandatory. "
             f"Target {final_band['repair_target_words']} words. Hard maximum {final_band['max_words']} words. "
             f"Returning over {final_band['max_words']} fails. "
-            "Return only the repaired artifact body."
+            "Return only the compressed final artifact."
         )
     elif repair_kind == FINAL_REPAIR_KIND_MISSING_SECTION:
         repair_header = "FINAL_ARTIFACT_COMPLETENESS_REPAIR"
@@ -1823,6 +1857,7 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         word_band_result=current_word_band,
                         final_completeness_result=current_completeness,
                     )
+                    repair_model = final_repair_model_for_kind(repair_kind, model, session_plan)
                     repair_user = build_final_repair_user(
                         repair_kind=repair_kind,
                         final_band=final_band,
@@ -1841,7 +1876,7 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         failed_output_text=current_failed_text,
                     )
                     repair_prompt_text = f"SYSTEM:\n{build_base_system()}\n\nUSER:\n{repair_user}"
-                    repair_out = call_model(model, system=build_base_system(), user=repair_user, max_tokens=FINAL_REPAIR_MAX_TOKENS, timeout=timeout)
+                    repair_out = call_model(repair_model, system=build_base_system(), user=repair_user, max_tokens=FINAL_REPAIR_MAX_TOKENS, timeout=timeout)
                     repair_io = write_named_prompt_and_output(condition_dir, f"turn_{index:03d}_final_repair_{repair_attempt:03d}", repair_prompt_text, repair_out)
                     repaired_text = repair_out["text"].strip()
                     repaired_word_count = word_count(repaired_text)
@@ -1851,7 +1886,8 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                     repair_record = {
                         "attempt": repair_attempt,
                         "repair_kind": repair_kind,
-                        "model": model,
+                        "model": repair_model,
+                        "final_synthesis_model": model,
                         "previous_word_count": current_word_count,
                         "previous_final_word_band_compliance": current_word_band,
                         "previous_final_completeness": current_completeness,
@@ -1868,7 +1904,8 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                     repair_turn_records.append({
                         "turn": f"{index}_final_repair_{repair_attempt}",
                         "role": "final_word_band_repair",
-                        "model": model,
+                        "model": repair_model,
+                        "final_synthesis_model": model,
                         "input_tokens": repair_out.get("input_tokens"),
                         "output_tokens": repair_out.get("output_tokens"),
                         **repair_io,

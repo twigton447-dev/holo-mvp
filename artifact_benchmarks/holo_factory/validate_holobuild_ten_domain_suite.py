@@ -163,6 +163,8 @@ def validate_config(cfg: dict[str, Any], errors: list[str]) -> None:
             errors.append(f"{config_id} must use patent_aligned_v4")
         if cfg.get("final_synthesis_model") != "anthropic:claude-opus-4-8":
             errors.append(f"{config_id} final_synthesis_model must be Opus")
+        if cfg.get("final_compression_repair_model") != "openai:gpt-5.5":
+            errors.append(f"{config_id} final_compression_repair_model must be GPT-5.5")
         joined = " ".join(models + governor_models(cfg))
         if "grok" in joined.lower() or "gemini" in joined.lower():
             errors.append(f"{config_id} must not include Grok or Gemini")
@@ -318,6 +320,7 @@ def main() -> int:
             "proof_credit_eligible": cfg.get("proof_credit_eligible"),
             "provider_call_budget": cfg.get("provider_call_budget"),
             "model_pool": provider_models(cfg),
+            "final_compression_repair_model": cfg.get("final_compression_repair_model"),
             "solo_call_structure": cfg.get("solo_call_structure") if cfg.get("condition_type") == "solo" else None,
         }
     holo_cfg = config_results.get("frontier_holo_v1", {})

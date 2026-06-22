@@ -25,6 +25,12 @@ OPTIMIZED_D10_RUN_MANIFEST = (
     / "d10_infrastructure_configuration_change_001_frontier_optimized_opus_gpt55_holo_only_live_retry2_20260622T000000Z"
     / "run_manifest.json"
 )
+OPTIMIZED_D10_RETRY3_RUN_MANIFEST = (
+    REPO_ROOT
+    / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001/runs"
+    / "d10_infrastructure_configuration_change_001_frontier_optimized_opus_gpt55_holo_only_live_retry3_compression_patch_20260622T000000Z"
+    / "run_manifest.json"
+)
 FORBIDDEN_GENERATION_CONTRACT_TERMS = (
     "900-1,500",
     "900-1500",
@@ -538,6 +544,8 @@ def test_d10_frontier_optimized_opus_gpt55_config_resolves_to_runnable_config() 
         ]
         assert cfg["distinct_holo_agent_model_count"] == 2
         assert cfg["governor_model_pool"] == ["anthropic:claude-opus-4-8"]
+        assert cfg["final_synthesis_model"] == "anthropic:claude-opus-4-8"
+        assert cfg["final_compression_repair_model"] == "openai:gpt-5.5"
         assert "grok" not in " ".join(models).lower()
         assert "gemini" not in " ".join(models).lower()
         plan = runner.randomized_holo_session_plan(
@@ -557,6 +565,17 @@ def test_d10_frontier_optimized_opus_gpt55_config_resolves_to_runnable_config() 
             "anthropic:claude-opus-4-8",
         ]
         assert plan["final_synthesis_model"] == "anthropic:claude-opus-4-8"
+        assert plan["final_compression_repair_model"] == "openai:gpt-5.5"
+        assert runner.final_repair_model_for_kind(
+            runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY,
+            plan["final_synthesis_model"],
+            plan,
+        ) == "openai:gpt-5.5"
+        assert runner.final_repair_model_for_kind(
+            runner.FINAL_REPAIR_KIND_MISSING_SECTION,
+            plan["final_synthesis_model"],
+            plan,
+        ) == "anthropic:claude-opus-4-8"
         roster = runner.holo_turn_plan(plan)
         assert roster[0][1] == "openai:gpt-5.5"
         assert roster[1][1] == "openai:gpt-5.5"
@@ -564,6 +583,25 @@ def test_d10_frontier_optimized_opus_gpt55_config_resolves_to_runnable_config() 
         assert roster[3][1] == "openai:gpt-5.5"
         assert roster[4][1] == "openai:gpt-5.5"
         assert roster[5][1] == "anthropic:claude-opus-4-8"
+
+
+def test_final_compression_repair_model_default_does_not_change_other_configs() -> None:
+    cfg = runner.config_for_condition("frontier_holo_opus_gov_b_v1", runner.load_configs())
+    plan = runner.randomized_holo_session_plan(
+        cfg,
+        run_id="D10_OPUS_GOV_B_NO_PROVIDER",
+        packet_hash="packet_hash",
+        turn_count=len(runner.HOLO_TURNS),
+        session_template="opus_gov_b_v1",
+    )
+    assert cfg.get("final_compression_repair_model") is None
+    assert plan["final_synthesis_model"] == "anthropic:claude-opus-4-8"
+    assert plan["final_compression_repair_model"] == "anthropic:claude-opus-4-8"
+    assert runner.final_repair_model_for_kind(
+        runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY,
+        plan["final_synthesis_model"],
+        plan,
+    ) == "anthropic:claude-opus-4-8"
 
 
 def test_d10_frontier_optimized_config_does_not_select_solo_or_d11() -> None:
@@ -1098,6 +1136,9 @@ def test_final_compression_prompt_renders_for_complete_overlength_final() -> Non
     assert "The hard 900-1,300 body-word band remains mandatory." in prompt
     assert "Target 1180 words." in prompt
     assert "Returning over 1300 fails." in prompt
+    assert "You must cut at least 180 words unless already below 1300." in prompt
+    assert "The output must be at least 10 percent shorter than the input and no more than 1,250 words." in prompt
+    assert "If the input is over 1300, returning above 1300 is invalid." in prompt
 
 
 def test_final_compression_prompt_forbids_new_analysis_and_preserves_boundaries_and_source_ids() -> None:
@@ -1127,7 +1168,19 @@ def test_final_compression_prompt_forbids_new_analysis_and_preserves_boundaries_
     assert "Cut lower-priority wording." in prompt
     assert "Merge repetitive sentences." in prompt
     assert "Remove filler and duplicate explanation." in prompt
-    assert "Return only the repaired artifact body." in prompt
+    assert "Prefer deleting explanatory repetition over preserving every sentence." in prompt
+    assert "Do not preserve paragraph count." in prompt
+    assert "Do not preserve section length." in prompt
+    assert "Compress tables/bullets aggressively." in prompt
+    assert "Keep exact source IDs, but remove redundant citations." in prompt
+    assert "Return only the compressed final artifact." in prompt
+
+
+def test_final_repair_attempts_record_actual_repair_model() -> None:
+    runner_text = RUNNER_PATH.read_text(encoding="utf-8")
+    assert "repair_out = call_model(repair_model" in runner_text
+    assert '"model": repair_model' in runner_text
+    assert '"final_synthesis_model": model' in runner_text
 
 
 def test_synthetic_complete_1375_word_final_triggers_compression_repair_path() -> None:
@@ -1143,11 +1196,49 @@ def test_synthetic_complete_1375_word_final_triggers_compression_repair_path() -
     )
 
 
+def test_synthetic_complete_1440_word_final_routes_to_gpt55_compression_repair() -> None:
+    overlength = final_text_with_exact_word_count(1440)
+    cfg = runner.config_for_condition("holo_build_arch_frontier_optimized_opus_gpt55", runner.load_configs())
+    plan = runner.randomized_holo_session_plan(
+        cfg,
+        run_id="D10_RETRY3_ROUTE_NO_PROVIDER",
+        packet_hash="packet_hash",
+        turn_count=len(runner.HOLO_TURNS),
+        session_template="frontier_optimized_opus_gpt55_v1",
+    )
+    repair_kind = runner.final_repair_prompt_kind(
+        word_band_result=runner.final_word_band_compliance(overlength),
+        final_completeness_result=runner.final_artifact_completeness(overlength, {}),
+    )
+    assert repair_kind == runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY
+    assert runner.final_repair_model_for_kind(
+        repair_kind,
+        plan["final_synthesis_model"],
+        plan,
+    ) == "openai:gpt-5.5"
+
+
+def test_synthetic_repaired_final_1250_words_with_sections_passes() -> None:
+    repaired = final_text_with_exact_word_count(1250)
+    compliance = runner.role_compliance("final_synthesis_author", repaired, final=True, output_meta={})
+    assert compliance["status"] == "pass"
+    assert compliance["final_word_band_status"] == "pass"
+    assert compliance["final_artifact_completeness"]["status"] == "pass"
+
+
 def test_synthetic_repaired_final_1295_words_with_sections_passes() -> None:
     repaired = final_text_with_exact_word_count(1295)
     compliance = runner.role_compliance("final_synthesis_author", repaired, final=True, output_meta={})
     assert compliance["status"] == "pass"
     assert compliance["final_word_band_status"] == "pass"
+    assert compliance["final_artifact_completeness"]["status"] == "pass"
+
+
+def test_synthetic_repaired_final_1421_words_with_sections_fails_word_band() -> None:
+    repaired = final_text_with_exact_word_count(1421)
+    compliance = runner.role_compliance("final_synthesis_author", repaired, final=True, output_meta={})
+    assert compliance["status"] == "fail"
+    assert compliance["final_word_band_status"] == "fail_over_hard_max"
     assert compliance["final_artifact_completeness"]["status"] == "pass"
 
 
@@ -1183,6 +1274,29 @@ def test_historical_optimized_d10_repair_1347_remains_not_proof_clean() -> None:
     assert repair_attempt["repaired_word_count"] == 1347
     assert repair_attempt["repaired_final_word_band_compliance"]["status"] == "fail_over_hard_max"
     assert repair_attempt["repaired_final_completeness"]["status"] == "pass"
+    assert arch_summary["final_word_band_pass"] is False
+    assert arch_summary["proof_credit_eligible"] is False
+
+
+def test_historical_optimized_d10_retry3_1421_remains_not_proof_clean() -> None:
+    manifest = json.loads(OPTIMIZED_D10_RETRY3_RUN_MANIFEST.read_text(encoding="utf-8"))
+    condition = manifest["conditions"][0]
+    repair_attempts = condition["final_repair_attempts"]
+    arch_summary = condition["architecture_evidence_validation"]
+    assert manifest["provider_calls"] == 10
+    assert manifest["failed_provider_calls"] == 0
+    assert manifest["judging_runs"] == 0
+    assert manifest["scores_generated"] == 0
+    assert manifest["unblinding_runs"] == 0
+    assert condition["artifact_hash"] == "42eefd19d1f156d747463083157f8dec915b33cda8cbd9031b9a48090d62d812"
+    assert [item["repair_kind"] for item in repair_attempts] == [
+        runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY,
+        runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY,
+    ]
+    assert [item["repaired_word_count"] for item in repair_attempts] == [1429, 1421]
+    assert repair_attempts[-1]["repaired_final_word_band_compliance"]["status"] == "fail_over_hard_max"
+    assert repair_attempts[-1]["repaired_final_completeness"]["status"] == "pass"
+    assert arch_summary["final_artifact_completeness_pass"] is True
     assert arch_summary["final_word_band_pass"] is False
     assert arch_summary["proof_credit_eligible"] is False
 

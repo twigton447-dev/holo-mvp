@@ -20,6 +20,7 @@ REPO_ROOT = FACTORY_DIR.parents[1]
 DEFAULT_SUITE_MANIFEST = FACTORY_DIR / "mini_scouts/TEN_DOMAIN_PACKET_SUITE_MANIFEST.json"
 D11_PACKET_DIR_REL = "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001"
 D12_PACKET_DIR_REL = "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001"
+D13_PACKET_DIR_REL = "artifact_benchmarks/holo_factory/mini_scouts/d13_treasury_sanctions_payment_release_001"
 D11_RUNNER_DOMAIN_ENTRY = {
     "domain_id": "D11",
     "domain_name": "Cyber Incident / Contract Notice / Emergency Cloud Access",
@@ -42,6 +43,17 @@ D12_RUNNER_DOMAIN_ENTRY = {
     "freeze_manifest_hash": "2a0a0d4fca56a3a542a56b5cf84ab2d4530e57200ab98f199f8f56b26e8a125f",
     "validator_path": f"{D12_PACKET_DIR_REL}/validate_packet_no_provider.py",
 }
+D13_RUNNER_DOMAIN_ENTRY = {
+    "domain_id": "D13",
+    "domain_name": "Treasury Sanctions / Payment Release",
+    "packet_id": "d13_treasury_sanctions_payment_release_001",
+    "packet_dir": D13_PACKET_DIR_REL,
+    "packet_hash": "716fbc94608107d10d58c4de144d6cbce92c184c7f7c102d2f1581bb6b567801",
+    "source_packet_hash": "716fbc94608107d10d58c4de144d6cbce92c184c7f7c102d2f1581bb6b567801",
+    "packet_lock_hash": "c3d9a58418c8a2cd0c7bf648e398b76465266816e36390346acb5cef04c90c6e",
+    "freeze_manifest_hash": "665d4500a31b573a770f779695b3866c5990d15dac53684a4c6cf40c6424f355",
+    "validator_path": f"{D13_PACKET_DIR_REL}/validate_packet_no_provider.py",
+}
 CONFIG_DIR = FACTORY_DIR / "configs"
 D3_SUCCESS_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_d3_success_v1.lock.json"
 GROK_SWAP_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_grok_swap_v1.lock.json"
@@ -60,6 +72,8 @@ DEFAULT_TURN_MAX_TOKENS = 3800
 FINAL_SYNTHESIS_MAX_TOKENS = 6000
 FINAL_REPAIR_MAX_TOKENS = 5200
 INTERMEDIATE_REPAIR_MAX_TOKENS = 3600
+T3_OVERWORD_REPAIR_MAX_TOKENS = 1800
+FINAL_COMPRESSION_REPAIR_MAX_TOKENS = 2800
 HOLO_SESSION_TEMPLATES = ("random", "d3_success_v1", "grok_swap_v1", "opus_gov_b_v1", "frontier_optimized_opus_gpt55_v1")
 D3_SUCCESS_HOLO_TURN_MODELS = (
     "google:gemini-3.1-pro-preview",
@@ -246,6 +260,7 @@ T3_CONCISE_AUDIT_OVERWORD_REPAIR_CONTRACT = (
     "Use the five required sections below. "
     f"Target {T3_CONCISE_AUDIT_MIN_WORDS}-{T3_CONCISE_AUDIT_MAX_WORDS} words. "
     "Preferred repair window is 780-860 words; never exceed 900 words. "
+    f"The output budget for this repair is intentionally capped at {T3_OVERWORD_REPAIR_MAX_TOKENS} tokens; cut scope before adding prose. "
     "Use compact bullets or numbered items, cut redundancy before cutting source-boundary cautions, and preserve exact source IDs that remain material. "
     "Do not invent source IDs. Do not add an introduction, conclusion, appendix, or word-count footer. "
     "End with one complete standalone sentence.\n"
@@ -941,7 +956,7 @@ def load_suite_manifest(path: Path) -> dict[str, Any]:
 def runner_domain_entries(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     entries = list(manifest.get("domains", []))
     domain_ids = {entry.get("domain_id") for entry in entries}
-    for extra_entry in (D11_RUNNER_DOMAIN_ENTRY, D12_RUNNER_DOMAIN_ENTRY):
+    for extra_entry in (D11_RUNNER_DOMAIN_ENTRY, D12_RUNNER_DOMAIN_ENTRY, D13_RUNNER_DOMAIN_ENTRY):
         if extra_entry["domain_id"] not in domain_ids:
             entries.append(extra_entry)
     return entries
@@ -1323,6 +1338,47 @@ def final_repair_model_for_kind(repair_kind: str, final_synthesis_model: str, se
     return final_synthesis_model
 
 
+def final_repair_max_tokens_for_kind(repair_kind: str) -> int:
+    if repair_kind == FINAL_REPAIR_KIND_COMPRESSION_ONLY:
+        return FINAL_COMPRESSION_REPAIR_MAX_TOKENS
+    return FINAL_REPAIR_MAX_TOKENS
+
+
+def final_heading_template_compliance(output_text: str) -> dict[str, Any]:
+    lines = [line.strip() for line in output_text.splitlines()]
+    expected = [f"## {heading}" for heading in FINAL_SYNTHESIS_REQUIRED_HEADINGS]
+    positions: dict[str, list[int]] = {
+        heading: [index for index, line in enumerate(lines) if line == heading]
+        for heading in expected
+    }
+    missing = [heading for heading, found in positions.items() if not found]
+    duplicates = [heading for heading, found in positions.items() if len(found) > 1]
+    first_positions = [positions[heading][0] for heading in expected if positions[heading]]
+    out_of_order = first_positions != sorted(first_positions)
+    failures: list[str] = []
+    failures.extend(f"missing_exact_final_heading:{heading}" for heading in missing)
+    failures.extend(f"duplicate_exact_final_heading:{heading}" for heading in duplicates)
+    if out_of_order:
+        failures.append("final_headings_out_of_order")
+    return {
+        "status": "pass" if not failures else "fail",
+        "expected_headings": expected,
+        "heading_positions": positions,
+        "missing_headings": missing,
+        "duplicate_headings": duplicates,
+        "headings_out_of_order": out_of_order,
+        "failures": failures,
+    }
+
+
+def final_repair_heading_template_requirement(repair_kind: str, output_text: str) -> dict[str, Any]:
+    if repair_kind != FINAL_REPAIR_KIND_COMPRESSION_ONLY:
+        return {"status": "not_required", "repair_kind": repair_kind, "failures": []}
+    result = final_heading_template_compliance(output_text)
+    result["repair_kind"] = repair_kind
+    return result
+
+
 def ensure_provider_env(models: list[str]) -> None:
     missing: dict[str, str] = {}
     for provider_model_name in models:
@@ -1372,7 +1428,9 @@ def build_final_repair_user(
             "Do not add new analysis. Do not add new sections. "
             "Preserve the five required Markdown heading lines exactly: ## Bottom line; ## Risks of acting; ## Risks of waiting; ## Next steps / stop-go gates; ## Claim boundaries. "
             "Do not convert headings to plain text, bullets, labels, inline phrases, or unmarked section names. "
-            "Before returning, verify each required Markdown heading line remains present exactly once. "
+            "Before returning, verify each required Markdown heading line remains present exactly once, as its own line, in the same order. "
+            "Do not return the artifact if any required heading line is missing, duplicated, renamed, demoted to plain text, or moved out of order. "
+            "A compression repair with lost headings fails even if the word count is valid. "
             "Preserve exact source IDs. Preserve recommendation and action-boundary logic. "
             "Cut lower-priority wording. Merge repetitive sentences. Remove filler and duplicate explanation. "
             f"You must cut at least 180 words unless already below {final_band['max_words']}. "
@@ -1384,6 +1442,7 @@ def build_final_repair_user(
             "Keep exact source IDs, but remove redundant citations. "
             f"The hard {final_band['min_words']}-{final_band['max_words']:,} body-word band remains mandatory. "
             f"Target {final_band['repair_target_words']} words. Hard maximum {final_band['max_words']} words. "
+            f"The output token budget is intentionally capped at {FINAL_COMPRESSION_REPAIR_MAX_TOKENS}; compress by deletion, not by adding explanation. "
             f"Returning over {final_band['max_words']} fails. "
             "Return only the compressed final artifact."
         )
@@ -1786,16 +1845,34 @@ def t3_repair_contract_for_failure(failed_role_compliance: dict[str, Any] | None
     role_specific = completeness.get("role_specific_presence") or {}
     failures = set(completeness.get("failures") or [])
     failures.update(role_specific.get("failures") or [])
-    over_target_only = (
+    over_target_only = t3_overword_repair_required_from_completeness(completeness, failures)
+    if over_target_only:
+        return T3_CONCISE_AUDIT_OVERWORD_REPAIR_CONTRACT
+    return T3_CONCISE_AUDIT_REPAIR_CONTRACT
+
+
+def t3_overword_repair_required_from_completeness(completeness: dict[str, Any], failures: set[str]) -> bool:
+    return (
         "t3_compact_audit_over_target_words" in failures
         and completeness.get("clean_ending") is True
         and not completeness.get("hit_requested_token_ceiling")
         and "unclean_or_mid_sentence_intermediate_ending" not in failures
         and "provider_output_hit_max_tokens_with_unclean_intermediate_ending" not in failures
     )
-    if over_target_only:
-        return T3_CONCISE_AUDIT_OVERWORD_REPAIR_CONTRACT
-    return T3_CONCISE_AUDIT_REPAIR_CONTRACT
+
+
+def t3_overword_repair_required(failed_role_compliance: dict[str, Any] | None = None) -> bool:
+    completeness = (failed_role_compliance or {}).get("intermediate_artifact_completeness") or {}
+    role_specific = completeness.get("role_specific_presence") or {}
+    failures = set(completeness.get("failures") or [])
+    failures.update(role_specific.get("failures") or [])
+    return t3_overword_repair_required_from_completeness(completeness, failures)
+
+
+def intermediate_repair_max_tokens_for_failure(role: str, failed_role_compliance: dict[str, Any] | None = None) -> int:
+    if role == "contradiction_uncertainty_source_fidelity_reviewer" and t3_overword_repair_required(failed_role_compliance):
+        return T3_OVERWORD_REPAIR_MAX_TOKENS
+    return INTERMEDIATE_REPAIR_MAX_TOKENS
 
 
 def intermediate_role_repair_instructions(role: str, failed_role_compliance: dict[str, Any] | None = None) -> str:
@@ -2085,18 +2162,26 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         failed_output_text=current_failed_text,
                     )
                     repair_prompt_text = f"SYSTEM:\n{build_base_system()}\n\nUSER:\n{repair_user}"
-                    repair_out = call_model(repair_model, system=build_base_system(), user=repair_user, max_tokens=FINAL_REPAIR_MAX_TOKENS, timeout=timeout)
+                    repair_max_tokens = final_repair_max_tokens_for_kind(repair_kind)
+                    repair_out = call_model(repair_model, system=build_base_system(), user=repair_user, max_tokens=repair_max_tokens, timeout=timeout)
                     repair_io = write_named_prompt_and_output(condition_dir, f"turn_{index:03d}_final_repair_{repair_attempt:03d}", repair_prompt_text, repair_out)
                     repaired_text = repair_out["text"].strip()
                     repaired_word_count = word_count(repaired_text)
                     repaired_completeness = final_artifact_completeness(repaired_text, repair_out)
                     repaired_word_band = final_word_band_compliance(repaired_text)
                     repaired_state_source_audit = state_audit(repaired_text, state, allowed_ids, packet_hash, registry)
+                    repaired_heading_template = final_repair_heading_template_requirement(repair_kind, repaired_text)
+                    repair_accepted = (
+                        repaired_word_band["status"] == "pass"
+                        and repaired_completeness["status"] == "pass"
+                        and repaired_heading_template["status"] in {"pass", "not_required"}
+                    )
                     repair_record = {
                         "attempt": repair_attempt,
                         "repair_kind": repair_kind,
                         "model": repair_model,
                         "final_synthesis_model": model,
+                        "repair_max_tokens_requested": repair_max_tokens,
                         "previous_word_count": current_word_count,
                         "previous_final_word_band_compliance": current_word_band,
                         "previous_final_completeness": current_completeness,
@@ -2105,7 +2190,8 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         "repaired_final_completeness": repaired_completeness,
                         "repaired_final_word_band_compliance": repaired_word_band,
                         "repaired_state_source_audit": repaired_state_source_audit,
-                        "accepted": repaired_word_band["status"] == "pass" and repaired_completeness["status"] == "pass",
+                        "repaired_heading_template_compliance": repaired_heading_template,
+                        "accepted": repair_accepted,
                         **repair_io,
                     }
                     turn_repair_attempts.append(repair_record)
@@ -2160,7 +2246,8 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         retrieved=retrieved,
                     )
                     repair_prompt_text = f"SYSTEM:\n{build_base_system()}\n\nUSER:\n{repair_user}"
-                    repair_out = call_model(model, system=build_base_system(), user=repair_user, max_tokens=INTERMEDIATE_REPAIR_MAX_TOKENS, timeout=timeout)
+                    repair_max_tokens = intermediate_repair_max_tokens_for_failure(role, initial_intermediate_compliance)
+                    repair_out = call_model(model, system=build_base_system(), user=repair_user, max_tokens=repair_max_tokens, timeout=timeout)
                     repair_io = write_named_prompt_and_output(condition_dir, f"turn_{index:03d}_intermediate_repair_{repair_attempt:03d}", repair_prompt_text, repair_out)
                     repaired_text = repair_out["text"].strip()
                     repaired_compliance = role_compliance(role, repaired_text, final=False, output_meta=repair_out)
@@ -2169,6 +2256,7 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         "attempt": repair_attempt,
                         "model": model,
                         "role": role,
+                        "repair_max_tokens_requested": repair_max_tokens,
                         "previous_role_compliance": initial_intermediate_compliance,
                         "previous_state_audit": initial_intermediate_state_audit,
                         "repaired_role_compliance": repaired_compliance,
@@ -2540,9 +2628,9 @@ def run_live(packet_dir: Path, run_id: str, conditions: list[str], configs: dict
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generic HoloBuild mini-scout runner for frozen D1-D12 packets.")
+    parser = argparse.ArgumentParser(description="Generic HoloBuild mini-scout runner for frozen D1-D13 packets.")
     parser.add_argument("--suite-manifest", default=str(DEFAULT_SUITE_MANIFEST))
-    parser.add_argument("--domain", choices=[f"D{i}" for i in range(1, 13)])
+    parser.add_argument("--domain", choices=[f"D{i}" for i in range(1, 14)])
     parser.add_argument("--packet-dir")
     parser.add_argument("--condition", action="append", choices=VALID_CONDITIONS, required=True)
     parser.add_argument("--run-id", required=True)

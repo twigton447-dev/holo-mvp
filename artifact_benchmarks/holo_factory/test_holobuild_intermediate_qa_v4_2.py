@@ -15,12 +15,16 @@ RUNNER_PATH = FACTORY_DIR / "run_holobuild_mini_scout.py"
 D10_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001"
 D11_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001"
 D12_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001"
+D13_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d13_treasury_sanctions_payment_release_001"
 D11_VALIDATOR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001/validate_packet_no_provider.py"
 D12_VALIDATOR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001/validate_packet_no_provider.py"
+D13_VALIDATOR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d13_treasury_sanctions_payment_release_001/validate_packet_no_provider.py"
 D11_PACKET_HASH = "2e80109e4149da65b241452a5ffc194fb4caf4117d204616a1065eb47afde371"
 D12_PACKET_HASH = "fce82318244558dbd36b0b8aec377bc0c180c885a8c9d5ed3b5a7a703c605bb0"
+D13_PACKET_HASH = "716fbc94608107d10d58c4de144d6cbce92c184c7f7c102d2f1581bb6b567801"
 D11_PACKET_LOCK_HASH = "27ba069ef63c8c14386ef43a974c316320ebeb5067cfa4623aa9446632e70564"
 D12_PACKET_LOCK_HASH = "0550af2c53affb28bdf367be27a2e684007b0eb4c61c484656f458a1eaff2f4f"
+D13_PACKET_LOCK_HASH = "c3d9a58418c8a2cd0c7bf648e398b76465266816e36390346acb5cef04c90c6e"
 D10_POST_V4_2_CONDITION_DIR = (
     REPO_ROOT
     / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001/runs"
@@ -678,6 +682,43 @@ def test_t3_overword_repair_prompt_is_bounded_and_not_truncation_repair() -> Non
     assert "Target 700-900 words." in prompt
     assert "Preferred repair window is 780-860 words; never exceed 900 words." in prompt
     assert "End with one complete standalone sentence." in prompt
+    assert f"capped at {runner.T3_OVERWORD_REPAIR_MAX_TOKENS} tokens" in prompt
+
+
+def test_d12_retry3_t3_overword_repair_uses_bounded_token_budget() -> None:
+    raw = d12_retry3_raw_output("turn_003.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    assert runner.t3_overword_repair_required(compliance) is True
+    assert (
+        runner.intermediate_repair_max_tokens_for_failure(
+            "contradiction_uncertainty_source_fidelity_reviewer",
+            compliance,
+        )
+        == runner.T3_OVERWORD_REPAIR_MAX_TOKENS
+    )
+
+
+def test_truncated_t3_repair_keeps_full_intermediate_repair_budget() -> None:
+    raw = d12_t3_failure_raw_output("turn_003.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    assert runner.t3_overword_repair_required(compliance) is False
+    assert (
+        runner.intermediate_repair_max_tokens_for_failure(
+            "contradiction_uncertainty_source_fidelity_reviewer",
+            compliance,
+        )
+        == runner.INTERMEDIATE_REPAIR_MAX_TOKENS
+    )
 
 
 def test_initial_decision_repair_prompt_includes_clean_terminal_contract() -> None:
@@ -818,7 +859,7 @@ def test_d11_packet_validator_remains_no_provider_pass() -> None:
 
 def test_d11_runner_domain_gate_accepts_and_resolves_cyber_packet() -> None:
     runner_text = RUNNER_PATH.read_text(encoding="utf-8")
-    assert 'choices=[f"D{i}" for i in range(1, 13)]' in runner_text
+    assert 'choices=[f"D{i}" for i in range(1, 14)]' in runner_text
 
     manifest = runner.load_suite_manifest(runner.DEFAULT_SUITE_MANIFEST)
     packet_dir, entry = runner.resolve_packet_dir(
@@ -861,6 +902,35 @@ def test_d12_runner_domain_gate_accepts_and_resolves_fund_nav_packet() -> None:
     validated = runner.validate_packet_against_manifest(packet_dir, entry)
     assert validated["hashes"]["packet_hash"] == D12_PACKET_HASH
     assert validated["hashes"]["packet_lock_hash"] == D12_PACKET_LOCK_HASH
+
+
+def test_d13_runner_domain_gate_accepts_and_resolves_treasury_sanctions_packet() -> None:
+    result = subprocess.run(
+        [sys.executable, "-B", str(D13_VALIDATOR)],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "D13_MINI_SCOUT_PACKET_VALIDATION_PASS"
+    assert payload["provider_calls"] == 0
+    assert payload["judging_runs"] == 0
+    assert payload["scores_generated"] == 0
+
+    manifest = runner.load_suite_manifest(runner.DEFAULT_SUITE_MANIFEST)
+    packet_dir, entry = runner.resolve_packet_dir(
+        argparse.Namespace(domain="D13", packet_dir=None),
+        manifest,
+    )
+    assert packet_dir == D13_PACKET_DIR.resolve()
+    assert entry["domain_id"] == "D13"
+    assert entry["packet_id"] == "d13_treasury_sanctions_payment_release_001"
+    assert entry["packet_dir"] == "artifact_benchmarks/holo_factory/mini_scouts/d13_treasury_sanctions_payment_release_001"
+
+    validated = runner.validate_packet_against_manifest(packet_dir, entry)
+    assert validated["hashes"]["packet_hash"] == D13_PACKET_HASH
+    assert validated["hashes"]["packet_lock_hash"] == D13_PACKET_LOCK_HASH
 
 
 def test_d11_optimized_holo_config_resolves_to_fixed_opus_gpt55_roster() -> None:
@@ -1736,8 +1806,10 @@ def test_final_compression_prompt_renders_for_complete_overlength_final() -> Non
     assert "You must cut at least 180 words unless already below 1300." in prompt
     assert "The output must be at least 10 percent shorter than the input and no more than 1,250 words." in prompt
     assert "If the input is over 1300, returning above 1300 is invalid." in prompt
+    assert f"capped at {runner.FINAL_COMPRESSION_REPAIR_MAX_TOKENS}" in prompt
     for heading in runner.FINAL_SYNTHESIS_REQUIRED_HEADINGS:
         assert f"## {heading}" in prompt
+    assert runner.final_repair_max_tokens_for_kind(repair_kind) == runner.FINAL_COMPRESSION_REPAIR_MAX_TOKENS
 
 
 def test_final_compression_prompt_forbids_new_analysis_and_preserves_markdown_headings_and_source_ids() -> None:
@@ -1764,7 +1836,9 @@ def test_final_compression_prompt_forbids_new_analysis_and_preserves_markdown_he
     assert "Preserve the five required Markdown heading lines exactly" in prompt
     assert "## Bottom line; ## Risks of acting; ## Risks of waiting; ## Next steps / stop-go gates; ## Claim boundaries." in prompt
     assert "Do not convert headings to plain text, bullets, labels, inline phrases, or unmarked section names." in prompt
-    assert "Before returning, verify each required Markdown heading line remains present exactly once." in prompt
+    assert "Do not return the artifact if any required heading line is missing, duplicated, renamed, demoted to plain text, or moved out of order." in prompt
+    assert "A compression repair with lost headings fails even if the word count is valid." in prompt
+    assert "Before returning, verify each required Markdown heading line remains present exactly once, as its own line, in the same order." in prompt
     assert "Preserve exact source IDs." in prompt
     assert "Preserve recommendation and action-boundary logic." in prompt
     assert "Cut lower-priority wording." in prompt
@@ -1776,6 +1850,42 @@ def test_final_compression_prompt_forbids_new_analysis_and_preserves_markdown_he
     assert "Compress tables/bullets aggressively." in prompt
     assert "Keep exact source IDs, but remove redundant citations." in prompt
     assert "Return only the compressed final artifact." in prompt
+
+
+def test_final_compression_repair_requires_exact_heading_template_for_acceptance() -> None:
+    repaired = final_text_with_exact_word_count(1180).replace("# ", "## ")
+    assert runner.final_heading_template_compliance(repaired)["status"] == "pass"
+    assert (
+        runner.final_repair_heading_template_requirement(
+            runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY,
+            repaired,
+        )["status"]
+        == "pass"
+    )
+
+    heading_loss = repaired.replace("## Bottom line", "Bottom line", 1)
+    template = runner.final_repair_heading_template_requirement(
+        runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY,
+        heading_loss,
+    )
+    assert template["status"] == "fail"
+    assert "missing_exact_final_heading:## Bottom line" in template["failures"]
+
+
+def test_historical_d12_retry3_final_repair_fixture_fails_exact_heading_template() -> None:
+    repair = d12_retry3_raw_output("turn_006_final_repair_001.json")
+    template = runner.final_repair_heading_template_requirement(
+        runner.FINAL_REPAIR_KIND_COMPRESSION_ONLY,
+        repair["text"],
+    )
+    assert template["status"] == "fail"
+    assert set(template["missing_headings"]) == {
+        "## Bottom line",
+        "## Risks of acting",
+        "## Risks of waiting",
+        "## Next steps / stop-go gates",
+        "## Claim boundaries",
+    }
 
 
 def test_final_repair_attempts_record_actual_repair_model() -> None:

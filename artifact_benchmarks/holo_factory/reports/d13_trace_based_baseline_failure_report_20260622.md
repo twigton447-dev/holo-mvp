@@ -14,6 +14,7 @@ Evidence commits:
 - `98717cd` - Preserve D13 blind held-out judging evidence
 - `695ba7f` - Patch solo baseline completeness eligibility gate
 - `25ae69d` - Preserve corrected D13 solo Opus rerun failure evidence
+- `d034c16` - Preserve D13 trace-based baseline failure report
 
 ## Packet Identity
 
@@ -151,6 +152,14 @@ D13 currently supports a trace-based baseline failure finding, not a scored flag
 
 The Holo run completed and passed the proof-clean architecture and deterministic gates. Both solo Opus baseline attempts failed corrected deterministic baseline eligibility despite passing the simple word-band gate. In both solo attempts, the final artifact ended uncleanly and omitted the required claim-boundaries section. The original blind packet is authentic but non-score-valid because it included the incomplete attempt-1 solo artifact and held-out judging produced zero parse-valid score objects.
 
+Public-safe summary:
+
+In D13, Holo produced a proof-clean governed payment-release brief on a fresh sanctions/payment holdout. Fresh solo Opus did not produce a baseline-eligible artifact under the bounded benchmark conditions: two attempts ended mid-sentence and omitted required claim-boundary/disclaimer material. Because the solo baseline did not clear deterministic eligibility, no official numeric Holo-vs-Opus score was produced.
+
+At the action boundary, completion discipline is part of safety. Holo cleared the gate. Solo Opus did not.
+
 ## Recommendation
 
 Preserve D13 as baseline-failure evidence. Do not present it as a numeric scored Holo-vs-Opus flagship proof unless a future baseline-eligible solo artifact is generated under the corrected deterministic gate and a fresh blind comparison is judged with a valid locked score.
+
+A relaxed-budget solo Opus diagnostic may be run separately, but it must not replace the bounded baseline attempts or be used as the official baseline unless the protocol is redefined and clearly labeled.

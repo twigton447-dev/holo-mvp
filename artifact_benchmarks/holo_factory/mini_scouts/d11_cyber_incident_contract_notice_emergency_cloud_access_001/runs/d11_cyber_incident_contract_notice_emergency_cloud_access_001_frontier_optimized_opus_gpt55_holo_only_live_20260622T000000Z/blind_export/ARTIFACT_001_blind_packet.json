@@ -1,0 +1,237 @@
+{
+  "artifact_label": "ARTIFACT_001",
+  "artifact_text": "# Crisis Decision Brief: Northbank\u2013LedgerMax Emergency Access and Customer Notice\n\n## 1. Bottom-line recommendation\n\nApprove the fastest *controlled* path, not the fastest available permission set. On the current record, leadership should **deny_or_escalate_broad_access_as_submitted**, run a **conditionally_approve_narrow_tenant_scoped_containment_path_if_gates_pass** sprint in parallel, **send_internal_carrier_and_counsel_notice_without_admission** now, and **send_limited_customer_holding_notice_if_legal_security_wording_is_confirmed** within the deadline. The defining fact is that urgency is genuine but evidence is thin: `S3_SECURITY_LOG_OBSERVABILITY_EXCERPT` supports suspicion, not confirmed data access; `S1_INCIDENT_COMMANDER_NOTE_30_MIN_WINDOW` records that security, legal, and the business owner had not approved the broad role or the external wording. Speed proves urgency, not necessity or authority.\n\n## 2. What is happening and why it matters now\n\nNorthbank Cloud Services faces a Severity 1 bridge for LedgerMax Bank with delayed reconciliation exports tied to financial-close work, a customer request for an update within 30 minutes, and an estimated $210,000 renewal risk if the update appears evasive (`S1_INCIDENT_COMMANDER_NOTE_30_MIN_WINDOW`). Engineering requests a four-hour break-glass role with organization-wide cloud administrator, IAM policy editor, object-storage read/write/delete, and network-security-group rights (`S2_ENGINEERING_EMERGENCY_ACCESS_REQUEST`). Security logs show anomalous token use by service principal svc-export-17 from a new autonomous-system number and two object-list calls touching the LedgerMax prefix, but no object-read event in centralized logs (`S3_SECURITY_LOG_OBSERVABILITY_EXCERPT`). Leadership must decide in 30 minutes how much permission and how much customer admission to authorize\u2014two separate decisions that must not be bundled.\n\n## 3. Strongest evidence\n\nThe strongest access constraint is internal policy: emergency access must be tenant/prefix/service-scoped, approved by incident commander *and* security approver, time-boxed with a named revocation owner, logged with privileged-session and object-level coverage, and reviewed after use; break-glass administrator rights are reserved for loss of control-plane access or safety-of-platform events (`S4_CLOUD_IAM_LEAST_PRIVILEGE_INTERNAL_STANDARD`). The strongest notice constraint is the contract: Section 12.4 permits an initial holding notice when facts are unconfirmed and does not require admitting breach causation, exfiltration, regulatory reportability, or liability (`S5_CUSTOMER_MSA_SECURITY_INCIDENT_NOTICE_CLAUSE`). The privacy memo reinforces that premature customer-facing statements can create inconsistent records if forensics later narrows the characterization (`S7_PRIVACY_REGULATORY_THRESHOLD_MEMO`). Decisively, `S2_ENGINEERING_EMERGENCY_ACCESS_REQUEST` itself describes a narrower role that can disable the principal, rotate the key, write only the LedgerMax prefix, and run replay without delete or organization-wide IAM\u2014so the packet supplies a less-privileged path to the same core objective.\n\n## 4. Weak, stale, missing, or conflicting evidence\n\nMissing: confirmed object reads, exfiltration, affected-data scope, security approval of either role, legal approval of wording, enabled object-level logging, current egress telemetry, and revocation evidence. Because object-level logging is disabled and egress telemetry may lag 45 minutes (`S3_SECURITY_LOG_OBSERVABILITY_EXCERPT`), the record **neither confirms nor rules out** data access\u2014uncertainty runs in both directions. The absence of read events is partly an observability artifact, not exoneration.\n\nA timing conflict matters: `S2_ENGINEERING_EMERGENCY_ACCESS_REQUEST` estimates the narrower path adds 18-to-22 minutes; `S10_DERIVED_D11_DUAL_ACTION_BOUNDARY_TIMELINE_TABLE` gives 12-to-16. Since `S10_DERIVED_D11_DUAL_ACTION_BOUNDARY_TIMELINE_TABLE` is explicitly derived and not independent authority, plan on the conservative first-party 18-to-22 number and treat 12-to-16 as optimistic. `S6_CYBER_INSURANCE_LEGAL_NOTICE_EXCERPT` cuts two ways: it requires prompt carrier/counsel notice *and* cautions that external communications be coordinated with legal/security to protect privilege and investigation integrity. `S8_WITHDRAWN_INCIDENT_GUIDE_CONTEXT` and `S9_WEAK_IR_BLOG_LIMITED_CONTEXT` are non-dispositive context and cannot override the stronger policy, contract, and legal sources.\n\n## 5. Timing interpretation that matters\n\nThe broad role grants in 5 minutes but stays live four hours unless revoked (`S10_DERIVED_D11_DUAL_ACTION_BOUNDARY_TIMELINE_TABLE`). Evidence snapshot/legal-hold is ~7 minutes; logging enablement ~6 minutes; narrow approval/preparation 18-to-22 minutes (conservative); canary 8 minutes *after* logging is active. Run serially these exceed 30 minutes. Parallelized, a gated narrow-access decision may fit, but the canary very likely will **not** land before the customer update. The operational consequence is sharp: separate \"send a holding update within 30 minutes\" from \"prove containment within 30 minutes.\" The holding notice must never be gated on canary completion.\n\n## 6. Practical response options\n\n- **deny_or_escalate_broad_access_as_submitted** \u2014 Reject the four-hour organization-wide administrator/IAM/delete/network role on the current record; escalate only if documented control-plane-loss or safety-of-platform facts appear (`S4_CLOUD_IAM_LEAST_PRIVILEGE_INTERNAL_STANDARD`).\n- **conditionally_approve_narrow_tenant_scoped_containment_path_if_gates_pass** \u2014 Approve the scoped role that disables the principal, rotates the key, writes only the LedgerMax prefix, and runs replay\u2014only after security approval, logging, revocation owner, and time box (`S2_ENGINEERING_EMERGENCY_ACCESS_REQUEST`).\n- **send_limited_customer_holding_notice_if_legal_security_wording_is_confirmed** \u2014 Tell LedgerMax known facts, containment steps, cadence, and contact, without unsupported admissions (`S5_CUSTOMER_MSA_SECURITY_INCIDENT_NOTICE_CLAUSE`).\n- **avoid_external_breach_admission_until evidence thresholds are met** \u2014 Do not assert LedgerMax data was affected until evidence supports it (`S5_CUSTOMER_MSA_SECURITY_INCIDENT_NOTICE_CLAUSE`, `S7_PRIVACY_REGULATORY_THRESHOLD_MEMO`).\n- **send_internal_carrier_and_counsel_notice_without_admission** \u2014 Notify carrier/counsel as a low-regret preservation step, not equal to customer or regulatory notice (`S6_CYBER_INSURANCE_LEGAL_NOTICE_EXCERPT`).\n- **preserve_evidence_before_containment_actions_that_could_change_logs_or state** \u2014 Snapshot and confirm legal hold before state-changing actions (`S6_CYBER_INSURANCE_LEGAL_NOTICE_EXCERPT`).\n- **require logging_observability_before_canary_or_rollback_reliance** \u2014 Do not trust canary/rollback until object-level logging is active (`S3_SECURITY_LOG_OBSERVABILITY_EXCERPT`).\n- **name revocation_owner_time_box_and_post_access_review** \u2014 Assign revocation ownership, time box, and require post-use review (`S4_CLOUD_IAM_LEAST_PRIVILEGE_INTERNAL_STANDARD`).\n\n## 7. Risks of acting\n\nGranting broad access expands blast radius precisely when observability is weakest: organization-wide IAM, delete, and network rights for four hours (`S2_ENGINEERING_EMERGENCY_ACCESS_REQUEST`) while object-level logging is disabled, egress lags, and monitoring does not alert on object reads, deletes, or cross-customer prefix access (`S3_SECURITY_LOG_OBSERVABILITY_EXCERPT`). Leadership could not distinguish legitimate containment from attacker activity, nor later prove what happened. Sending breach-admission wording risks inconsistent records if forensics narrows the picture (`S7_PRIVACY_REGULATORY_THRESHOLD_MEMO`)\u2014and a customer admission cannot be unsent.\n\n## 8. Risks of waiting\n\nWaiting risks missing LedgerMax's 30-minute expectation, worsening financial-close disruption, and increasing $210,000 renewal exposure (`S1_INCIDENT_COMMANDER_NOTE_30_MIN_WINDOW`), and may leave svc-export-17 active longer (`S2_ENGINEERING_EMERGENCY_ACCESS_REQUEST`). The answer is not passive delay but a parallel sprint\u2014preservation, logging, narrow approval, internal notice, and holding-note drafting run concurrently. The holding notice can go out on time; only containment proof may lag.\n\n## 9. Strongest counterargument\n\nThe best case for broad access: LedgerMax has real financial-close pain, expects an update in 30 minutes, evasiveness threatens $210,000, Engineering calls broad access fastest, and it grants in 5 minutes (`S1_INCIDENT_COMMANDER_NOTE_30_MIN_WINDOW`, `S2_ENGINEERING_EMERGENCY_ACCESS_REQUEST`, `S10_DERIVED_D11_DUAL_ACTION_BOUNDARY_TIMELINE_TABLE`). The rebuttal: these facts prove urgency, not necessity or authority. `S2_ENGINEERING_EMERGENCY_ACCESS_REQUEST` itself names a narrower role achieving the same core containment/replay objective, making the broad request evidentially underjustified\u2014especially when observability gaps make broad action both riskier and harder to reconstruct. The denial rests on burden-of-proof: the break-glass threshold is **not evidenced**, which suffices to deny, without claiming it is proven absent.\n\n## 10. Trigger taxonomy and next steps\n\n- **Broad-action no-go**: Deny broad access unless documented control-plane-loss or safety-of-platform facts satisfy `S4_CLOUD_IAM_LEAST_PRIVILEGE_INTERNAL_STANDARD`.\n- **Narrow/conditional go**: Authorize the scoped role only when security approval, object-level logging, named revocation owner, and time box are confirmed.\n- **Hold/escalate**: Hold any \"affecting LedgerMax data\" wording for legal/security; escalate broad-access requests to executives/legal/security.\n- **Revoke/rollback/stop**: Stop canary/replay/rollback reliance until object-level and privileged-session logging are active; stop execution if no revocation owner exists; stop breach admission until confirmed access/scope thresholds and legal review exist.\n- **Post-action review**: After revocation, run post-access review with logs sufficient to validate actual use and confirm replay touched only the LedgerMax prefix. Appoint one access owner, one wording owner, one revocation owner; require a minute-15 gate report.\n\n## 11. Claim boundaries and disclaimer\n\nThis is a **suspected incident**, not a confirmed breach, exfiltration, or regulatory-notice event. Internal carrier/counsel notice is not customer, regulatory, or breach notice. Customer pressure does not supply security, legal, or business-owner approval. This is a benchmark artifact and not legal advice, cybersecurity advice, incident-response instruction, regulatory advice, insurance advice, or customer communication approval.",
+  "task_brief": "# D11 Task Brief: Cyber Incident / Contract Notice / Emergency Cloud Access Action Brief\n\nYou are writing a decision-grade crisis/action brief for security, legal, customer success, engineering, and executive leadership.\n\nUse only the frozen case facts and source packet. Do not browse. Cite exact source IDs for every factual claim. Do not invent missing breach confirmation, customer-data access, legal approval, security approval, business-owner approval, insurer response, regulatory notice obligation, forensic conclusion, logging state, rollback proof, or revocation evidence.\n\n## Domain\n\nCyber incident response for an enterprise SaaS company, involving emergency cloud access, suspected customer-impacting activity, customer contract notice pressure, internal insurer/legal notice, and incomplete observability.\n\n## Decision Question\n\nShould leadership approve broad emergency access, approve only a narrower gated containment path, send external customer notice, send limited holding notice, notify insurer/legal internally, escalate to executives/legal/security, deny, or delay parts of the plan before action?\n\n## Required Artifact\n\nWrite a 900-1,300 word main-body decision brief. Target 1,100 words. The brief must help leadership decide what can safely happen in the next 30 minutes and what must be escalated, narrowed, delayed, or reworded.\n\n## Required Sections\n\n1. Bottom-line recommendation.\n2. What is happening and why it matters now.\n3. Strongest evidence.\n4. Weak, stale, missing, or conflicting evidence.\n5. Calculations or timing interpretation that matter.\n6. Practical response options.\n7. Risks of acting.\n8. Risks of waiting.\n9. Recommended next steps and stop/go triggers.\n10. Claim boundaries and disclaimer.\n\n## Minimum Decision Quality Bar\n\nA strong brief separates the emergency cloud access decision from the external customer notice decision. It distinguishes suspected incident, confirmed security incident, confirmed breach, internal carrier/counsel notice, customer holding notice, and customer-facing breach admission. It preserves uncertainty where logs, approval authority, data access, notice thresholds, or rollback observability are missing.\n\nDo not approve just because the customer deadline is close. Do not block generically without recognizing customer, continuity, and trust costs. Do not treat a canary, rollback, or containment path as reliable unless the logging and observability needed to validate it exist before the action. Do not let a stale or weak source override stronger source limits.\n\n## Required Disclaimer\n\nThis is a benchmark artifact and not legal advice, cybersecurity advice, incident-response instruction, regulatory advice, insurance advice, or customer communication approval.\n",
+  "source_packet": {
+    "packet_id": "d11_cyber_incident_contract_notice_emergency_cloud_access_001",
+    "packet_version": "v1_0_frozen_no_provider",
+    "domain": "D11 Cyber Incident / Contract Notice / Emergency Cloud Access",
+    "crisis_frame": "Suspected security incident involving a major customer, with simultaneous pressure to broaden emergency cloud access and send an external customer incident notice before investigation gates are complete.",
+    "expected_artifact_type": "decision-grade crisis/action brief",
+    "decision_question": "Should security, legal, customer success, engineering, and executive leadership approve broad emergency access, approve only a narrower gated containment path, send external customer notice, send limited holding notice, notify insurer/legal internally, escalate, or delay parts of the plan before action?",
+    "source_origin_policy": "Synthetic internal case documents and benchmark-created policy excerpts only; no external source fetching was performed for this packet build.",
+    "real_public_sources_only": false,
+    "frozen_sources_only": true,
+    "contestants_may_browse": false,
+    "source_count": 10,
+    "case_facts": {
+      "facts_are_case_scenario_not_external_sources": true,
+      "company_profile": "Northbank Cloud Services is a fictional enterprise SaaS company providing reconciliation exports to regulated financial-services customers.",
+      "decision_time": "The leadership bridge has 30 minutes before LedgerMax Bank expects an update and before Customer Success plans to publish a customer-facing incident notice.",
+      "proposed_access_action": "Approve a broad four-hour emergency cloud role with organization-wide administrator, IAM policy editor, object-storage read/write/delete, and network-security-group change rights.",
+      "proposed_notice_action": "Send LedgerMax a draft notice stating that Northbank experienced a security incident affecting LedgerMax data and is taking emergency remediation steps.",
+      "operational_urgency": [
+        "LedgerMax reports delayed reconciliation exports tied to financial-close work.",
+        "Customer Success estimates $210,000 of renewal risk if the update appears evasive.",
+        "Engineering says broad access can be granted in 5 minutes and may restore exports fastest.",
+        "A narrower role and logging path may fit inside the 30-minute window but requires security approval and named revocation ownership."
+      ],
+      "incomplete_facts": [
+        "Suspicious service-principal activity is visible, but data access or exfiltration is not confirmed.",
+        "Object-level data-event logging is currently disabled on the affected bucket.",
+        "Network egress telemetry may lag by 45 minutes.",
+        "Legal has not approved breach-admission wording.",
+        "Security has not approved the broad role or the narrower role at the time of decision."
+      ],
+      "authority_and_scope_ambiguities": [
+        "The incident commander approved continued containment work, not the broad role or customer-facing breach admission.",
+        "Emergency access policy allows scoped emergency access under gates, but break-glass administrator rights have a higher threshold.",
+        "The MSA permits a factual holding notice before confirmation; it does not require unsupported breach admissions.",
+        "Cyber insurance and counsel notice are internal notices and do not equal customer or regulatory notice."
+      ],
+      "illustrative_calculations_to_check": [
+        "The customer update deadline is 30 minutes.",
+        "Evidence snapshot and legal-hold confirmation take about 7 minutes.",
+        "Object-level logging enablement takes about 6 minutes.",
+        "Narrow role preparation, revocation owner, and security approval take about 12 to 16 minutes.",
+        "A canary replay takes 8 minutes only after logging is active.",
+        "The broad role can be granted in 5 minutes but remains active for four hours unless revoked.",
+        "A holding notice can be prepared immediately without admitting confirmed breach facts."
+      ]
+    },
+    "claim_boundaries": [
+      "Do not treat suspicious activity as confirmed breach, confirmed exfiltration, or confirmed regulatory reportability.",
+      "Do not treat customer notice, regulatory notice, insurer notice, and legal/counsel notice as the same action.",
+      "Do not treat incident commander pressure, customer pressure, or prior emergency process as authority for the broad access scope.",
+      "Do not claim rollback, canary, or containment is trustworthy unless observability and logging needed to verify it are active first.",
+      "Do not use stale or weak incident-response sources as dispositive authority.",
+      "Do not ignore the cost of waiting; compare it with evidence, authority, access-scope, and notice-wording risk."
+    ],
+    "source_boundary_distinctions": [
+      "S1 records urgency and incomplete approvals; it is not approval for broad access or breach-admission wording.",
+      "S2 records requested access and a narrower option; it is not proof broad access is necessary.",
+      "S3 records suspicious activity and observability gaps; it is not confirmed data access or a safe canary result.",
+      "S5 supports accurate customer communication but does not require unsupported breach admissions.",
+      "S6 supports internal carrier/counsel notice without admission; it does not authorize customer-facing admissions.",
+      "S8 and S9 are context only and cannot override stronger source limits.",
+      "S10 is a derived table and not independent authority."
+    ],
+    "practical_response_options_required": [
+      "deny_or_escalate_broad_access_as_submitted",
+      "conditionally_approve_narrow_tenant_scoped_containment_path_if_gates_pass",
+      "send_limited_customer_holding_notice_if_legal_security_wording_is_confirmed",
+      "avoid_external_breach_admission_until evidence thresholds are met",
+      "send_internal_carrier_and_counsel_notice_without_admission",
+      "preserve_evidence_before_containment_actions_that_could_change_logs_or state",
+      "require logging_observability_before_canary_or_rollback_reliance",
+      "name revocation_owner_time_box_and_post_access_review"
+    ],
+    "evidence_uncertainty_requirements": [
+      "Separate the emergency cloud access decision from the external customer notice decision.",
+      "Separate action urgency from action authority.",
+      "Separate suspected incident from confirmed breach.",
+      "Separate insurer/legal notice from customer-facing notice.",
+      "Carry logging, observability, evidence preservation, canary, rollback, revocation, and approval dependencies into the recommendation.",
+      "Define stop/go triggers for access grant, canary expansion, customer notice, internal notice, revocation, and post-incident review."
+    ],
+    "sources": [
+      {
+        "source_id": "S1_INCIDENT_COMMANDER_NOTE_30_MIN_WINDOW",
+        "source_title": "Incident Commander Note: Thirty-Minute Customer Escalation Window",
+        "publisher": "Northbank Cloud Services internal incident bridge",
+        "publication_or_content_date": "2026-06-22 14:05 UTC",
+        "access_date": "2026-06-22",
+        "url_or_citation": "Synthetic internal incident note in this frozen packet; no external URL.",
+        "source_type": "internal_case_source_incident_command",
+        "strength_classification": "useful_normal",
+        "excerpt_text": "At 14:05 UTC, Incident Commander Mira Solis records a Severity 1 bridge for customer LedgerMax Bank. LedgerMax reports delayed reconciliation exports and asks for a customer-facing security update within 30 minutes. Customer Success estimates $210,000 of contract renewal risk if the update appears evasive. Engineering says the fastest path is to grant a broad emergency cloud role and publish a notice saying Northbank experienced a security incident affecting LedgerMax data. The incident commander approves continued containment work but notes that security, legal, and the business owner have not yet approved the broad role or the proposed external wording.",
+        "limitations": "Authoritative for bridge pressure and stated approvals, but it is not security approval, business-owner approval, legal approval, breach confirmation, or authority for broad access.",
+        "is_synthetic": true,
+        "source_hash": "259945f8449d3153494a9b12d1ab48877a2ee00600c05fd8e50ef0bdf794d85c"
+      },
+      {
+        "source_id": "S2_ENGINEERING_EMERGENCY_ACCESS_REQUEST",
+        "source_title": "Engineering Emergency Access Request EAR-5528",
+        "publisher": "Northbank Cloud Services engineering change queue",
+        "publication_or_content_date": "2026-06-22 14:09 UTC",
+        "access_date": "2026-06-22",
+        "url_or_citation": "Synthetic engineering access request in this frozen packet; no external URL.",
+        "source_type": "internal_case_source_engineering_request",
+        "strength_classification": "useful_normal",
+        "excerpt_text": "Engineering requests a four-hour break-glass role with organization-wide cloud administrator, IAM policy editor, object-storage read/write/delete across the production account, and network-security-group update rights. The stated objective is to quarantine one suspicious service principal, rotate its key, replay 180 delayed LedgerMax export files, and verify customer-prefix isolation. A narrower role exists that can disable the service principal, rotate the key, write only the LedgerMax export prefix, and run the replay without delete or organization-wide IAM rights. The narrower role requires security approval, an object-log toggle, and a named revocation owner; engineering estimates those steps add 18 to 22 minutes.",
+        "limitations": "Describes the requested and narrower access paths, but does not prove the broad role is necessary or approved.",
+        "is_synthetic": true,
+        "source_hash": "6b6c9d20a014379365e79ae23b13b5e3b4198c04e3487ca344bdc80015ae55b8"
+      },
+      {
+        "source_id": "S3_SECURITY_LOG_OBSERVABILITY_EXCERPT",
+        "source_title": "Security Log Excerpt: Partial Observability During Suspected Exfiltration",
+        "publisher": "Northbank Cloud Services security operations center",
+        "publication_or_content_date": "2026-06-22 14:11 UTC",
+        "access_date": "2026-06-22",
+        "url_or_citation": "Synthetic security log excerpt in this frozen packet; no external URL.",
+        "source_type": "internal_case_source_security_log",
+        "strength_classification": "useful_normal",
+        "excerpt_text": "Security logs show anomalous token use by service principal svc-export-17 from a new autonomous-system number at 13:42 UTC. Two object-list calls touched the LedgerMax export prefix; no object-read event is present in centralized logs. Object-level data-event logging is disabled on the affected bucket due to a previous cost exception. Network egress telemetry is delayed by up to 45 minutes. A proposed canary replay would only prove clean isolation if object-level data-event logging is enabled before the canary begins. Current monitoring alerts on global 5xx rate and queue age, but not object reads, delete calls, or cross-customer prefix access.",
+        "limitations": "Supports suspicion and observability limits, but does not confirm data exfiltration, breach scope, or safe canary results.",
+        "is_synthetic": true,
+        "source_hash": "1c260a8a0516e5035d732c8ba944c717b0a8826ee53a1119b138c9fc1af7ae52"
+      },
+      {
+        "source_id": "S4_CLOUD_IAM_LEAST_PRIVILEGE_INTERNAL_STANDARD",
+        "source_title": "Cloud Emergency Access Standard: Least Privilege, Logging, Time Box, Revocation",
+        "publisher": "Northbank Cloud Services security architecture standard",
+        "publication_or_content_date": "Version 4.2, effective 2026-05-15",
+        "access_date": "2026-06-22",
+        "url_or_citation": "Synthetic internal security standard in this frozen packet; no external URL.",
+        "source_type": "internal_policy_source_cloud_iam",
+        "strength_classification": "strong",
+        "excerpt_text": "Emergency cloud access may be issued during Severity 1 incidents only when the grant is scoped to the affected tenant, prefix, account, or service; approved by the incident commander and security approver; time-boxed with a named revocation owner; logged with privileged-session and object-level audit coverage; and reviewed after use. Break-glass administrator rights are reserved for loss of control-plane access or safety-of-platform events. Prior incident approval does not carry forward to a new incident or a materially broader scope.",
+        "limitations": "Authoritative internal policy for this scenario, but not proof that the listed gates have been completed.",
+        "is_synthetic": true,
+        "source_hash": "186df5c2e5e146b24889f80c846c7046ebf22e98a08d8dc0573bbeb4ba7b2a61"
+      },
+      {
+        "source_id": "S5_CUSTOMER_MSA_SECURITY_INCIDENT_NOTICE_CLAUSE",
+        "source_title": "LedgerMax Master Services Agreement Security-Incident Notice Clause",
+        "publisher": "Northbank Cloud Services contract repository",
+        "publication_or_content_date": "Contract signed 2025-11-03",
+        "access_date": "2026-06-22",
+        "url_or_citation": "Synthetic customer contract excerpt in this frozen packet; no external URL.",
+        "source_type": "contract_notice_source",
+        "strength_classification": "strong",
+        "excerpt_text": "Section 12.4 requires Northbank to notify LedgerMax without undue delay after confirming a security incident that materially affects LedgerMax data or service confidentiality, integrity, or availability. Section 12.4 also permits an initial holding notice when facts are not yet confirmed, provided the notice accurately states known facts, immediate containment steps, expected update cadence, and a contact for security questions. The clause does not require Northbank to admit breach causation, regulatory reportability, data exfiltration, or liability before investigation supports those facts.",
+        "limitations": "Binding contract excerpt for this scenario, but not a legal conclusion and not evidence that a reportable breach has occurred.",
+        "is_synthetic": true,
+        "source_hash": "ed8ee54626ea7b9b2dee6cc2097f645bd7ebbd994119d689ad778358d2805fc8"
+      },
+      {
+        "source_id": "S6_CYBER_INSURANCE_LEGAL_NOTICE_EXCERPT",
+        "source_title": "Cyber Insurance And Legal-Hold Notice Excerpt",
+        "publisher": "Northbank Cloud Services risk and legal playbook",
+        "publication_or_content_date": "Updated 2026-04-18",
+        "access_date": "2026-06-22",
+        "url_or_citation": "Synthetic internal risk/legal playbook excerpt in this frozen packet; no external URL.",
+        "source_type": "internal_legal_risk_notice_source",
+        "strength_classification": "contradictory_or_complicating",
+        "excerpt_text": "The cyber policy requires notice to the carrier and breach counsel as soon as practicable after a suspected security incident that could reasonably result in covered loss. The playbook says carrier and counsel notice should preserve evidence, avoid admissions of liability, and distinguish suspected incident, confirmed security incident, confirmed data access, and confirmed reportable breach. External customer communications should be coordinated with legal and security so preservation, privilege, and investigation integrity are not compromised.",
+        "limitations": "Supports internal insurer/legal notice and evidence preservation, but does not authorize customer-facing breach admissions or broad cloud access.",
+        "is_synthetic": true,
+        "source_hash": "58fae5ab21bc98a4978ef3db8216e55d96bc04f9e6bab54217429d754a93ed64"
+      },
+      {
+        "source_id": "S7_PRIVACY_REGULATORY_THRESHOLD_MEMO",
+        "source_title": "Privacy And Security Regulatory Threshold Memo",
+        "publisher": "Northbank Cloud Services privacy counsel",
+        "publication_or_content_date": "2026-06-10",
+        "access_date": "2026-06-22",
+        "url_or_citation": "Synthetic privacy/security legal memo excerpt in this frozen packet; no external URL.",
+        "source_type": "internal_privacy_regulatory_source",
+        "strength_classification": "strong",
+        "excerpt_text": "The memo distinguishes a suspected security incident from a confirmed reportable breach. A suspected incident triggers investigation, preservation, internal escalation, and sometimes contractual holding notices. A confirmed reportable breach requires evidence about affected data, access or acquisition, impacted individuals or customers, and applicable legal thresholds. The memo cautions that premature public or customer-facing statements can create inconsistent records if later forensic evidence narrows or changes the incident characterization.",
+        "limitations": "Internal legal analysis for the scenario, not public legal advice and not a finding that any regulatory notice is or is not required.",
+        "is_synthetic": true,
+        "source_hash": "572b4af60743f1df613208e31aa89bc57e2adae4adb2d0135aadb50843a881f0"
+      },
+      {
+        "source_id": "S8_WITHDRAWN_INCIDENT_GUIDE_CONTEXT",
+        "source_title": "Withdrawn Incident-Handling Guide Excerpt",
+        "publisher": "Legacy incident-response library",
+        "publication_or_content_date": "Legacy guide originally issued 2012; withdrawn from active playbook 2025-04-03",
+        "access_date": "2026-06-22",
+        "url_or_citation": "Synthetic excerpt representing stale/withdrawn incident guidance in this frozen packet; no external URL.",
+        "source_type": "stale_tempting_incident_response_source",
+        "strength_classification": "stale_tempting",
+        "excerpt_text": "The legacy guide describes incident response phases including detection, analysis, containment, eradication, recovery, and post-incident activity. It recommends timely communication and documentation during incidents. The current playbook marks this guide as withdrawn for authority purposes and says it may provide vocabulary only when current policy, contract, and legal instructions are silent.",
+        "limitations": "Stale/withdrawn context only. It cannot supply authority for broad access, external notice, breach confirmation, or bypassing current standards.",
+        "is_synthetic": true,
+        "source_hash": "296609d0f7dfcbe1be26487eb2078b5047108241f7c43d12f9b2ee35fc59dc5a"
+      },
+      {
+        "source_id": "S9_WEAK_IR_BLOG_LIMITED_CONTEXT",
+        "source_title": "Weak Incident-Response Explainer: Transparent Customer Messaging",
+        "publisher": "Public incident-response blog excerpt",
+        "publication_or_content_date": "Undated web explainer copied into the case file",
+        "access_date": "2026-06-22",
+        "url_or_citation": "Synthetic weak explainer excerpt in this frozen packet; no external URL.",
+        "source_type": "weak_contextual_incident_response_source",
+        "strength_classification": "weak_or_limited",
+        "excerpt_text": "The explainer says customers value fast, transparent security updates and that organizations should not appear to hide incident details. It gives generic examples of status-page language and says early updates can build trust. The explainer does not distinguish contract notice, legal admission, regulatory notice, insurer notice, or forensic confirmation thresholds.",
+        "limitations": "Weak context only. It is not contract authority, legal advice, breach evidence, or approval to use unsupported customer-facing wording.",
+        "is_synthetic": true,
+        "source_hash": "7326e294dbc286169c4eabbafa3c98cfcb4b17b068b1948dc36049b56ba10893"
+      },
+      {
+        "source_id": "S10_DERIVED_D11_DUAL_ACTION_BOUNDARY_TIMELINE_TABLE",
+        "source_title": "D11 Derived Dual Action-Boundary Timeline And Dependency Table",
+        "publisher": "Packet compiler using S1-S9 and case facts",
+        "publication_or_content_date": "2026-06-22",
+        "access_date": "2026-06-22",
+        "url_or_citation": "Derived from the D11 case facts plus S1-S9 source-boundary disciplines in this packet.",
+        "source_type": "table_chart_stat_element",
+        "strength_classification": "table_chart_stat_element",
+        "excerpt_text": "Timeline table: customer asks for an update within 30 minutes. Evidence snapshot and legal-hold confirmation are estimated at 7 minutes. Enabling object-level logging on the affected bucket is estimated at 6 minutes. Preparing the narrower tenant-scoped role, revocation owner, and security approval is estimated at 12 to 16 minutes. A 20-file canary replay takes 8 minutes after logging is active. The proposed broad administrator role can be granted in 5 minutes but creates organization-wide IAM, object delete, and network change capability for four hours. The draft external notice can be sent immediately, but it uses breach-admission wording before confirmed data access, affected-data scope, or legal review is complete. Internal carrier and counsel notice can be sent immediately without admitting liability.",
+        "limitations": "This table organizes clocks and dependencies; it is not independent authority, breach proof, access approval, legal conclusion, or evidence that the gates have passed.",
+        "is_synthetic": true,
+        "source_hash": "7cc869606e4e78483ebd6e0a816aef006d92c6df9d60c1d9747b13bc53f7e436"
+      }
+    ],
+    "provider_calls": 0
+  },
+  "scoring_protocol": {
+    "active_scoring_protocol_id": "unified_artifact_scoring_protocol_v6_1_structural_epistemic_argument_power",
+    "protocol_hash": "73d2f28d10f1a6e45627d8d5cd0c2fd0478d25b5a59465b46db297f32bcd80ba",
+    "schema_hash": "1a8b340a6d437656b789f138f4443e4ac552bb59e737cdfbc1d27e11cb024374",
+    "lock_hash": "e8e7753c846ed6b4c61d9ea4d1f78abfcb4640e657129c909a8dd038c577b759"
+  }
+}

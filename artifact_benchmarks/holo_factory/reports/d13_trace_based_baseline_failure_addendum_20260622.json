@@ -1,0 +1,99 @@
+{
+  "report_id": "d13_trace_based_baseline_failure_report_20260622",
+  "created_utc": "2026-06-22T00:00:00Z",
+  "status": "TRACE_BASED_BASELINE_FAILURE_EVIDENCE_NOT_SCORED_PROOF",
+  "constraints_observed": {
+    "provider_calls": 0,
+    "judging_runs": 0,
+    "scores_generated": 0,
+    "reruns": 0,
+    "unblinding": false,
+    "sealed_anonymization_map_modified": false,
+    "push": false
+  },
+  "packet": {
+    "packet_id": "d13_treasury_sanctions_payment_release_001",
+    "domain": "D13 Treasury Sanctions / Payment Release",
+    "source_count": 10,
+    "source_type_counts": {
+      "strong": 3,
+      "useful_normal": 3,
+      "stale_tempting": 1,
+      "contradictory_or_complicating": 1,
+      "weak_or_limited": 1,
+      "table_chart_stat_element": 1
+    },
+    "source_packet_hash": "716fbc94608107d10d58c4de144d6cbce92c184c7f7c102d2f1581bb6b567801",
+    "task_brief_hash": "6de175acfda7f0d215574d0d00a26259ecf6e1b2858c431efa0966acc57fcdfa",
+    "source_manifest_hash": "0ba970e2b1e19516e350b27a7a47b3d4de30492c0d1676ea97e29554f66c1928",
+    "packet_lock_hash": "c3d9a58418c8a2cd0c7bf648e398b76465266816e36390346acb5cef04c90c6e",
+    "validator_status": "D13_MINI_SCOUT_PACKET_VALIDATION_PASS"
+  },
+  "holo_run": {
+    "run_id": "d13_treasury_sanctions_payment_release_001_frontier_optimized_opus_gpt55_holo_only_live_20260622T193904Z",
+    "status": "HOLOBUILD_MINI_SCOUT_LIVE_GENERATION_COMPLETE",
+    "artifact_hash": "f2284d2b492de8c8256d51ca248579e9c193ea6de8a5fede1cce3820ec6195ff",
+    "provider_calls": 9,
+    "repair_calls": 3,
+    "scores_generated": 0,
+    "proof_credit_eligible": true,
+    "deterministic_gate_pass": true,
+    "final_artifact_completeness_pass": true,
+    "final_word_band_pass": true,
+    "final_word_count": 1237,
+    "clean_ending": true,
+    "claim_boundaries_present": true,
+    "proof_clean_failures": []
+  },
+  "solo_attempt_1": {
+    "run_id": "d13_treasury_sanctions_payment_release_001_solo_opus_4_8_baseline_live_20260622T194909Z",
+    "status": "HOLOBUILD_MINI_SCOUT_LIVE_GENERATION_COMPLETE",
+    "artifact_hash": "a981bf6935f08bf674d6d0237562f86673d8290b8b4c21068c0155f0745abc06",
+    "provider_calls": 6,
+    "recorded_baseline_eligible": true,
+    "corrected_baseline_eligible": false,
+    "word_count": 1032,
+    "deterministic_gate_pass": true,
+    "final_word_band_pass": true,
+    "final_artifact_completeness_pass": false,
+    "clean_ending": false,
+    "claim_boundaries_present": false,
+    "failure_reasons": [
+      "unclean_or_mid_sentence_ending",
+      "missing_final_section:claim_boundaries"
+    ],
+    "invalidation_reason": "Prior baseline_eligible=true did not include corrected deterministic final-artifact completeness validation."
+  },
+  "solo_attempt_2": {
+    "run_id": "d13_treasury_sanctions_payment_release_001_solo_opus_4_8_baseline_live_corrected_20260622T202300Z",
+    "status": "HOLOBUILD_MINI_SCOUT_LIVE_GENERATION_COMPLETE",
+    "artifact_hash": "148dc8882b463fb3767b422aab320f50b1c674eedc9002040c2fd828b0510f4b",
+    "provider_calls": 6,
+    "baseline_eligible": false,
+    "word_count": 972,
+    "deterministic_gate_pass": true,
+    "final_word_band_pass": true,
+    "final_artifact_completeness_pass": false,
+    "clean_ending": false,
+    "claim_boundaries_present": false,
+    "failure_reasons": [
+      "unclean_or_mid_sentence_ending",
+      "missing_final_section:claim_boundaries"
+    ]
+  },
+  "blind_judging": {
+    "blind_export_id": "d13_two_artifact_blind_comparison_20260622T201000Z",
+    "blind_export_authentic": true,
+    "non_score_valid_reason": "ARTIFACT_002 was an incomplete/truncated solo artifact and all held-out judge outputs failed strict parsing/validation.",
+    "judge_calls": 6,
+    "repair_calls": 3,
+    "parse_success_count": 0,
+    "parse_failure_count": 3,
+    "accepted_score_paths": [],
+    "official_numeric_holo_vs_opus_score_exists": false,
+    "contamination_scan_status": "PASS",
+    "anonymization_map_remained_sealed": true
+  },
+  "takeaway": "Holo completion success versus repeated solo baseline eligibility failure.",
+  "recommendation": "Preserve D13 as baseline-failure evidence, not scored flagship proof."
+}

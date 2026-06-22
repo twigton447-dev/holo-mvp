@@ -1,0 +1,53 @@
+{
+  "template_id": "opus_gov_b_v1",
+  "lock_status": "locked_no_provider_template",
+  "locked_utc": "2026-06-22T00:30:00Z",
+  "purpose": "Run the no-OpenAI Grok-swap Holo agent choreography with Anthropic Claude Opus 4.8 fixed as HoloGov-B.",
+  "source_evidence": {
+    "base_template_id": "grok_swap_v1",
+    "base_template_lock_path": "artifact_benchmarks/holo_factory/configs/holo_session_template_grok_swap_v1.lock.json",
+    "replacement_rule": "keep Grok-swap agent turn order and replace fixed Governor slot with anthropic:claude-opus-4-8",
+    "reason": "Next-batch Holo run should use Opus 4.8 as HoloGov-B while avoiding OpenAI quota dependency."
+  },
+  "holo_mode": "patent_aligned_v4",
+  "holo_context_profile_required": "full_registry",
+  "cohort_name": "HoloFullOpusGovB",
+  "config_id": "frontier_holo_opus_gov_b_v1",
+  "hologov_profile": "HoloGov-B",
+  "holo_agent_pool": [
+    "anthropic:claude-opus-4-8",
+    "google:gemini-3.1-pro-preview",
+    "xai:grok-4.3"
+  ],
+  "holo_agent_turn_models": [
+    "google:gemini-3.1-pro-preview",
+    "xai:grok-4.3",
+    "anthropic:claude-opus-4-8",
+    "google:gemini-3.1-pro-preview",
+    "xai:grok-4.3",
+    "anthropic:claude-opus-4-8"
+  ],
+  "holo_agent_selection_policy": "fixed_grok_swap_v1_turn_order",
+  "hologov_model_pool": [
+    "anthropic:claude-opus-4-8"
+  ],
+  "hologov_selection_policy": "fixed_opus_4_8_hologov_b_governor",
+  "hologov_schedule": [
+    {
+      "start_turn": 1,
+      "end_turn": 6,
+      "selected_tenure_turns": 7,
+      "governor_model": "anthropic:claude-opus-4-8"
+    }
+  ],
+  "final_synthesis_model": "anthropic:claude-opus-4-8",
+  "final_synthesis_model_policy": "fixed_grok_swap_v1_final_writer",
+  "architecture_evidence_visible_to_judges": false,
+  "proof_credit_policy": "proof_eligible_only_if_patent_aligned_v4_full_registry_architecture_evidence_validates_and_deterministic_gate_passes",
+  "legacy_openai_template_preserved": true,
+  "provider_calls": 0,
+  "artifact_generation": 0,
+  "scoring": 0,
+  "judging": 0,
+  "unblinding": 0
+}

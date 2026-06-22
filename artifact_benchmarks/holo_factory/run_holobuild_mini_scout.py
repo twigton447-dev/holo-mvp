@@ -21,6 +21,7 @@ DEFAULT_SUITE_MANIFEST = FACTORY_DIR / "mini_scouts/TEN_DOMAIN_PACKET_SUITE_MANI
 CONFIG_DIR = FACTORY_DIR / "configs"
 D3_SUCCESS_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_d3_success_v1.lock.json"
 GROK_SWAP_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_grok_swap_v1.lock.json"
+OPUS_GOV_B_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_opus_gov_b_v1.lock.json"
 LIVE_APPROVAL_ENV = "HOLO_ALLOW_LIVE"
 PROOF_ELIGIBLE_HOLO_MODE = "patent_aligned_v4"
 LEGACY_HOLO_MODES = {"diagnostic_v3", "full_gov_v4"}
@@ -31,7 +32,7 @@ MAX_HOLO_FINAL_REPAIR_ATTEMPTS = 1
 DEFAULT_TURN_MAX_TOKENS = 3800
 FINAL_SYNTHESIS_MAX_TOKENS = 6000
 FINAL_REPAIR_MAX_TOKENS = 5200
-HOLO_SESSION_TEMPLATES = ("random", "d3_success_v1", "grok_swap_v1")
+HOLO_SESSION_TEMPLATES = ("random", "d3_success_v1", "grok_swap_v1", "opus_gov_b_v1")
 D3_SUCCESS_HOLO_TURN_MODELS = (
     "google:gemini-3.1-pro-preview",
     "openai:gpt-5.5",
@@ -50,21 +51,27 @@ GROK_SWAP_HOLO_TURN_MODELS = (
     "anthropic:claude-opus-4-8",
 )
 GROK_SWAP_GOV_MODEL = "xai:grok-4.3"
+OPUS_GOV_B_GOV_MODEL = "anthropic:claude-opus-4-8"
 VALID_CONDITIONS = (
     "HoloFull",
     "HoloFullGrokSwap",
+    "HoloFullOpusGovB",
     "HoloMini",
     "SoloFull",
     "SoloFullGrok",
     "SoloMini",
     "holo_build_arch",
     "holo_build_arch_grok_swap",
+    "holo_build_arch_opus_gov_b",
     "solo_openai_gpt_5_5",
     "solo_xai_grok_4_3",
+    "solo_anthropic_claude_opus_4_8",
     "frontier_solo_v1",
     "frontier_solo_grok_4_3_v1",
+    "frontier_solo_opus_4_8_v1",
     "frontier_holo_v1",
     "frontier_holo_grok_swap_v1",
+    "frontier_holo_opus_gov_b_v1",
     "mini_solo_v1",
     "mini_holo_v1",
 )
@@ -447,6 +454,7 @@ def session_template_lock_info(template_id: str) -> dict[str, Any] | None:
     lock_path_by_template = {
         "d3_success_v1": D3_SUCCESS_TEMPLATE_LOCK,
         "grok_swap_v1": GROK_SWAP_TEMPLATE_LOCK,
+        "opus_gov_b_v1": OPUS_GOV_B_TEMPLATE_LOCK,
     }
     lock_path = lock_path_by_template.get(template_id)
     if not lock_path:
@@ -509,6 +517,15 @@ def randomized_holo_session_plan(config: dict[str, Any], *, run_id: str, packet_
             "selection_source": "fixed_d3_success_v1_choreography_with_openai_replaced_by_xai_grok_4_3",
             "agent_policy": "fixed_grok_swap_v1_turn_order",
             "governor_policy": "fixed_grok_swap_v1_governor",
+            "final_policy": "fixed_grok_swap_v1_final_writer",
+        },
+        "opus_gov_b_v1": {
+            "turn_models": GROK_SWAP_HOLO_TURN_MODELS,
+            "governor_model": OPUS_GOV_B_GOV_MODEL,
+            "selection_seed": "opus_gov_b_v1_fixed_template",
+            "selection_source": "fixed_grok_swap_agent_choreography_with_anthropic_claude_opus_4_8_as_hologov_b",
+            "agent_policy": "fixed_grok_swap_v1_turn_order",
+            "governor_policy": "fixed_opus_4_8_hologov_b_governor",
             "final_policy": "fixed_grok_swap_v1_final_writer",
         },
     }
@@ -773,6 +790,8 @@ def run_solo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
         condition = "solo_openai_gpt_5_5"
     elif "solo_xai_grok_4_3" in aliases:
         condition = "solo_xai_grok_4_3"
+    elif "solo_anthropic_claude_opus_4_8" in aliases:
+        condition = "solo_anthropic_claude_opus_4_8"
     else:
         condition = config["config_id"]
     condition_dir = condition_dir_for(packet_dir, run_id, condition)

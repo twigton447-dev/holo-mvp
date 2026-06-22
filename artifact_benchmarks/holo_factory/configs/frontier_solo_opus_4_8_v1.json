@@ -1,0 +1,37 @@
+{
+  "config_id": "frontier_solo_opus_4_8_v1",
+  "cohort_name": "SoloFullOpus",
+  "condition_aliases": [
+    "SoloFullOpus",
+    "solo_anthropic_claude_opus_4_8",
+    "frontier_solo_opus_4_8_v1"
+  ],
+  "condition_type": "solo",
+  "architecture_mode": "solo_self_refine_v1",
+  "model_pool": [
+    {
+      "role": "solo_self_refine",
+      "provider_model": "anthropic:claude-opus-4-8"
+    }
+  ],
+  "model_selection_policy": "fixed_single_model_all_turns",
+  "turn_policy": {
+    "turn_count": 6,
+    "turns": [
+      "initial decision-grade crisis/action brief draft",
+      "assumption and evidence attack",
+      "contradiction, uncertainty, and source-fidelity pass",
+      "options, risks of acting vs waiting, and operational usefulness pass",
+      "claim-discipline and overclaim reduction pass",
+      "final synthesis, 900-1500 body words"
+    ]
+  },
+  "provider_call_budget": 6,
+  "proof_credit_eligible": false,
+  "baseline_eligible": true,
+  "blind_export_required": true,
+  "no_unblind_policy": "scores_must_lock_before_anonymization_map_access",
+  "scoring_protocol_target": "unified_artifact_scoring_protocol_v6_1_structural_epistemic_argument_power",
+  "live_ready": true,
+  "provider_calls_in_config_creation": 0
+}

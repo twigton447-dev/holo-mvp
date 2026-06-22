@@ -1,0 +1,54 @@
+{
+  "config_id": "frontier_holo_opus_gov_b_v1",
+  "cohort_name": "HoloFullOpusGovB",
+  "condition_aliases": [
+    "HoloFullOpusGovB",
+    "holo_build_arch_opus_gov_b",
+    "frontier_holo_opus_gov_b_v1"
+  ],
+  "condition_type": "holo",
+  "architecture_mode": "patent_aligned_v4",
+  "hologov_profile": "HoloGov-B",
+  "governor_model_pool": [
+    "anthropic:claude-opus-4-8"
+  ],
+  "model_pool": [
+    {
+      "role": "holo_agent_candidate",
+      "provider_model": "anthropic:claude-opus-4-8"
+    },
+    {
+      "role": "holo_agent_candidate",
+      "provider_model": "google:gemini-3.1-pro-preview"
+    },
+    {
+      "role": "holo_agent_candidate",
+      "provider_model": "xai:grok-4.3"
+    }
+  ],
+  "model_selection_policy": "fixed_grok_swap_v1_turn_order_with_opus_hologov_b",
+  "turn_policy": {
+    "turn_count": 6,
+    "holo_agent_rotation": "fixed_grok_swap_v1_turn_order",
+    "context_governor": "internal_deterministic_state_management_layer",
+    "hologov_profile": "HoloGov-B",
+    "hologov_selection_policy": "fixed_opus_4_8_hologov_b_governor",
+    "hologov_tenure_policy": {
+      "min_turns": 7,
+      "max_turns": 11,
+      "swap_policy": "disabled_for_fixed_template",
+      "six_turn_effect": "selected_governor_remains_for_entire_session"
+    },
+    "requires_state_object_injection": true,
+    "requires_baton_pass_injection": true,
+    "requires_artifact_registry_injection": true,
+    "requires_retrieve_by_id": true
+  },
+  "provider_call_budget": 6,
+  "proof_credit_eligible": "only_if_patent_aligned_v4_architecture_evidence_validates_and_deterministic_gate_passes",
+  "blind_export_required": true,
+  "no_unblind_policy": "scores_must_lock_before_anonymization_map_access",
+  "scoring_protocol_target": "unified_artifact_scoring_protocol_v6_1_structural_epistemic_argument_power",
+  "live_ready": true,
+  "provider_calls_in_config_creation": 0
+}

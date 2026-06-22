@@ -4,7 +4,7 @@
 
 **Taylor Wigton** · Founder, HoloEngine · twigton447@gmail.com
 
-Working Paper · Version 5.16 · June 2026  
+Working Paper · Version 6.1 · June 2026  
 U.S. Provisional Patent Application No. 63/987,899
 
 > **Note on this draft.** This version takes the published action-boundary paper (v4.05) and sets it inside a larger frame. The action boundary work is unchanged in substance. It remains the only part of this paper backed by a public benchmark. What is new is the argument that the trust layer described there is one of two applications of a single underlying engine, and a description of the second application. Claims that have been benchmarked are marked as such. Claims that have not are marked as design intent. The distinction is load-bearing; see *What This Paper Does Not Claim*.
@@ -13,65 +13,77 @@ U.S. Provisional Patent Application No. 63/987,899
 
 ## Executive Summary
 
-AI is no longer just talking. It is acting.
+AI is no longer just answering questions. **It is starting to do real work.**
 
-It is approving payments, drafting contracts, granting access, ordering materials, changing records, and triggering real-world operations.
+It can approve payments, draft contracts, grant access, place orders, change records, and trigger real-world actions.
 
-That is the prize: **trusted delegation**. Hand high-stakes work to an AI system and walk away.
+It can also produce the documents people use to make those decisions: compliance memos, approval packets, legal drafts, reporting summaries, and other high-stakes work.
 
-**But we cannot do that yet.**
+That is the opportunity. Let AI handle more of the work.
 
-The reason is simple. Most AI safety infrastructure was built for chat. It checks prompts, permissions, policies, and user intent. That matters. But it is a low bar when the output is not a paragraph, but an irreversible action.
+**That is also the problem.**
 
-The modern status quo for AI action security is closer to pre-9/11 airport security: basic checks, assumed normal traffic, and a system built around the idea that most things passing through are fine.
+We are starting to trust AI in two ways at once. **We trust it to act. And we trust the work it produces before anyone acts.**
+
+Both can fail.
+
+An AI system can approve something it should stop. Or it can produce a document that looks complete, even when the evidence behind it is weak, missing, or misunderstood.
+
+**That is where HoloEngine comes in.**
+
+HoloEngine is built for the point right before trust turns into action. The question at that point is simple:
+
+**Does the evidence actually support this?**
+
+Most AI safety tools were built for chat. They check prompts, permissions, policies, and user intent. That matters. But it is not enough when the output is not just text on a screen, but a payment, a contract decision, a purchase, or a document someone is about to rely on.
+
+The modern status quo for AI action security is closer to pre-9/11 airport security. Basic checks. Assumed normal traffic. A system built around the idea that most things passing through are probably fine.
 
 High-stakes AI needs something closer to Customs and Border Protection.
 
 At the border, the question is not just, "Are you allowed through?" The question is, "Does your story hold up?" What are you carrying? Why today? Does the paperwork match the cargo? Is there a contradiction hiding inside something that looks normal?
 
-**That is the missing layer in AI execution.**
+**That is the missing layer.**
 
-When an AI agent is about to release a $180,000 payment, the important question is not merely whether the agent has permission to send money. The important question is whether this exact payment is supported by the source evidence right now.
+HoloEngine does it in two directions.
 
-**HoloEngine exists for that moment.**
+**HoloVerify** sits right before an irreversible action. It checks whether the source evidence supports the exact action the system is about to take. Then it returns one of two answers: ALLOW or ESCALATE.
 
-HoloEngine 4DNA is an adversarial checkpoint architecture for high-stakes AI actions. Three model roles investigate the evidence, cross-check the record, and surface contradictions. **HoloGov**, the silent Governor, receives the structured case and issues the final ALLOW or ESCALATE ruling.
+**HoloBuild** works earlier in the process. It helps build and pressure-test high-stakes work before anyone relies on it. If a document overclaims, misses a contradiction, or fails to show where its conclusion came from, HoloBuild does not treat it as ready.
 
-The architecture is not designed to escalate everything. That would be easy and useless. HoloEngine is designed to make ALLOW harder to fake and ESCALATE harder to overuse.
+Both use the same core idea: **sounding confident is not enough. The evidence has to hold.**
 
-To test this, we built HoloTest: a locked pressure cage for comparing AI architectures at the action boundary. The benchmark does not ask whether a model can sound careful. It asks whether the system can make the right execution decision when the evidence is messy, incomplete, stale, over-scoped, or deceptively normal.
+To test this, we built HoloTest. It is a benchmark for one specific question: can an AI system make the right call when the evidence is messy, incomplete, stale, or misleading?
 
-**The results exposed a structural problem.**
+**The results showed a structural problem.**
 
-Solo models can fail in both directions. They can surrender to apparent authority and wave through a bad action. Or they can become brittle and freeze a valid one.
+Solo models fail in both directions. They can let a bad action through because the story sounds plausible. Or they can block a valid one because they become too cautious.
 
-Self-critique loops do not reliably solve the problem. A model often uses its second pass to defend its first answer.
+And stronger models do not remove the problem. In some cases, they understand the task but still fail to produce a complete, evidence-based output that is safe to rely on under real constraints.
 
-Ungoverned councils and ensembles can also fail. More models do not automatically create better judgment. Without a Governor, consensus can become a way to launder mistakes.
+Self-critique does not reliably fix this. A model often uses its second pass to defend its first answer.
 
-**The lesson is blunt: adding more intelligence does not automatically create more safety.**
+More models do not automatically fix it either. Without a real decision layer, a group of models can simply agree on the wrong thing.
 
-What matters is **evidentiary discipline**.
+**The lesson is simple: more intelligence does not automatically mean more trust.**
 
-A high-stakes AI system should not be able to allow or block an action unless it can tie that decision back to specific source evidence. Not vibes. Not summaries. Not upstream JSON. **The actual record.**
+What matters is **evidence**.
 
-That is the role of **HoloVerify**, the first runtime surface powered by HoloEngine 4DNA. HoloVerify sits between an AI agent and an irreversible action. Before execution, it asks one question:
+A high-stakes AI system should not be able to approve, block, or certify something unless it can tie that decision back to the source record. Not a summary. Not a guess. Not a clean-looking packet. **The actual evidence.**
 
-**Does the source-grounded evidence authorize this exact action?**
+That is what HoloEngine is built to do.
 
-If yes, ALLOW.
+**HoloVerify** applies that rule at the moment of action.
 
-If no, ESCALATE.
+**HoloBuild** applies it earlier, before a high-stakes document is treated as safe.
 
-**HoloBuild** uses the same architecture to create and harden adversarial test environments. **HoloJudge** reviews whether verdicts were actually supported by evidence. **HoloTest** pressure-tests competing architectures. **HoloAtlas** preserves the failure map so future Governors get smarter.
+**HoloJudge** checks whether the system's decisions were actually supported. **HoloTest** compares architectures under pressure. **HoloAtlas** keeps the record of where models fail so the system can keep getting better.
 
-The broader point is not that AI agents are too dangerous to use. **It is the opposite.**
+The broader point is not that AI is too risky to use. **It is the opposite.**
 
-AI agents are too valuable to leave at the edge of execution with only passive policy checks.
+AI is too useful to trust without a better checkpoint.
 
-If we want trusted delegation, we need a new checkpoint at the action boundary.
-
-**One that inspects the cargo, not just the passport.**
+If we want real delegation, we need a system that checks the evidence before action happens.
 
 **That is HoloEngine.**
 
@@ -185,13 +197,17 @@ HoloEngine is the core architecture. It powers a specific set of product surface
 
 **HoloVerify.** The action-boundary runtime gate. It sits before irreversible AI actions: payments, access grants, contract execution, procurement actions, or agentic purchases, and returns ALLOW or ESCALATE. This is the first validated deployment surface of the HoloEngine, and the subject of the empirical benchmark data in this paper.
 
-**HoloBuild.** The generative product surface. It creates high-stakes artifacts and work products: benchmark packets, contracts, legal drafts, M&A memos, CFO memos, policy docs, diligence reports, and procurement packets. HoloBuild does not rely on single-shot generation; it uses the engine's adversarial architecture to construct and refine judgment-grade materials.
+**HoloBuild.** The generative product surface. It creates high-stakes artifacts and work products: benchmark packets, contracts, legal drafts, M&A memos, CFO memos, policy docs, diligence reports, and procurement packets. HoloBuild does not rely on single-shot generation; it uses the engine's adversarial architecture to construct and refine judgment-grade materials. **In HoloBuild, the Governor does not issue ALLOW or ESCALATE on a live action.** It enforces artifact integrity: source fidelity, contradiction closure, claim boundaries, completeness, and proof eligibility before a document is treated as safe for reliance.
 
 **HoloJudge.** The evaluation surface. It reviews artifacts created by HoloBuild or external systems and scores them for factual accuracy, issue spotting, internal consistency, unresolved blockers, hallucination risk, and readiness.
 
 **HoloTest.** The adversarial test cage. It runs locked packets and generation tasks against competing architectures: single-shot models, multi-turn same-model systems, homogeneous councils, ungoverned multi-model ensembles, and Holo-powered systems.
 
 **HoloAtlas.** The growing institutional record of where frontier models fail under operational pressure. It captures not just whether Holo catches what a solo model misses, but exactly how each model fails, under what conditions, and why. Every run produces a classified entry: the model, the domain, the failure class, the specific cognitive seam that broke, and the reproducibility status.
+
+One failure class in the Atlas comes directly from the Opus-facing HoloBuild lane described in Section 5.7:
+
+- **Bounded Completion Failure** — Model understood the task but failed to produce a complete, claim-bounded, source-grounded artifact under bounded production conditions.
 
 Documented failure classes across tested models:
 
@@ -358,6 +374,38 @@ The other architectures fail and stay failed because they have no structural mem
 
 Required provenance for every published score: packet ID, packet hash, model cohort, condition, verdict/score, correctness, turn count, token count, failure mode, trace path, judge model, and freeze status.
 
+### 5.7 Stronger Models Narrow the Gap. They Do Not Remove the Boundary
+
+Early Holo results showed a wide gap against standard frontier configurations. That was useful, but it was not the final test. A system that only outperforms weaker configurations does not yet prove that governed architecture remains necessary when the solo baseline is already extremely strong.
+
+We therefore began an Opus-facing HoloBuild lane. This changed the character of the evaluation. The question was no longer whether Holo could outperform ordinary solo generation. The question was whether governed architecture **still added value when the solo model was already highly capable.**
+
+The answer so far is yes, but the claim must be precise.
+
+Against Opus, the performance gap narrowed. **That was not a failure of the benchmark. It was the point of the benchmark.** Stronger models should close some of the distance. If they do not, the test is not hard enough. What mattered was what remained: not just reasoning differences, but failures of **governed completion, source-boundary preservation, and final artifact discipline** under bounded production conditions.
+
+This produced a second lesson beyond runtime ALLOW/ESCALATE judgment. At the action boundary, safety is not only about choosing the right verdict. It is also about producing a complete, source-grounded, claim-bounded artifact that is safe for human or system reliance. A plausible artifact that ends before the claim-boundary section, omits required disclaimers, or breaks source-fidelity discipline is not merely incomplete. **It is unsafe.**
+
+#### D11: scored HoloBuild proof point
+
+D11 is the cleanest scored HoloBuild comparison to date. HoloBuild produced a **proof-clean artifact** and outperformed fresh solo Opus under blind scoring on a high-stakes action-boundary artifact task.
+
+#### D13 and D14B: bounded baseline eligibility failures
+
+D13 and D14B exposed a different failure mode. In both cases, HoloBuild produced proof-clean governed payment-release artifacts. Fresh bounded solo Opus did not produce **baseline-eligible** artifacts under the same bounded conditions. The solo outputs ended uncleanly and omitted required claim-boundary or disclaimer material. Because the baseline artifacts did not clear deterministic eligibility, **these runs do not count as numeric scored wins.**
+
+A relaxed-budget diagnostic later showed that Opus could complete at least one of these artifacts when given more room. That distinction matters. The finding is not that Opus lacked domain reasoning. The finding is that **under bounded action-boundary conditions, strong solo reasoning did not reliably produce governed completion.**
+
+#### D14: hardening fixture, not benchmark credit
+
+D14 is not a proof result. HoloBuild **denied itself proof credit** because a required source-fidelity reviewer turn failed validation, even though the final artifact looked clean. This is architecture hardening evidence, not benchmark credit. It shows that HoloBuild is designed to **fail closed** when the internal chain of custody breaks.
+
+#### The new finding: bounded completion failure
+
+These runs surfaced a distinct failure class: **bounded completion failure.** A model may understand the evidence and still fail the production gate because it does not complete the governed artifact safely under operational constraints. Missing claim boundaries, unsupported assertions, omitted disclaimers, or broken source closure are not cosmetic defects. **At the boundary of reliance, they are safety failures.**
+
+This does not replace the HoloVerify thesis. It extends it. HoloVerify asks whether source-grounded evidence authorizes an irreversible **action.** HoloBuild asks whether a high-stakes **artifact** has survived enough adversarial review and deterministic validation to be safe to rely on. In both cases, plausible output is not enough. **The gate must actually close.**
+
 ---
 
 ## 6. The Generative Harness: The Work-Product Forge
@@ -511,4 +559,4 @@ Independent validation of the solo baselines is encouraged. Payloads and validat
 
 ---
 
-*HoloEngine · holoengine.ai · twigton447@gmail.com · Working Paper · Version 5.16 · June 2026*
+*HoloEngine · holoengine.ai · twigton447@gmail.com · Working Paper · Version 6.1 · June 2026*

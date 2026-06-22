@@ -223,6 +223,7 @@ def render_d10_holo_final_prompt() -> str:
 def render_intermediate_repair_prompt_for_test(role: str = "options_operational_usefulness_reviewer") -> str:
     objective = {
         "initial_decision_brief_drafter": "Draft a source-grounded initial decision frame.",
+        "assumption_and_evidence_attacker": "Attack assumptions, weak evidence, stale claims, missing calculations, and unsupported causal links.",
         "options_operational_usefulness_reviewer": "Stress-test practical options, risks, gates, and operational usefulness.",
     }.get(role, "Perform the assigned intermediate role.")
     failed_role_compliance = {
@@ -245,6 +246,10 @@ def render_intermediate_repair_prompt_for_test(role: str = "options_operational_
     if role == "initial_decision_brief_drafter":
         failed_role_compliance["intermediate_artifact_completeness"]["min_words_required"] = 420
         failed_role_compliance["intermediate_artifact_completeness"]["failures"] = ["unclean_or_mid_sentence_intermediate_ending"]
+    if role == "assumption_and_evidence_attacker":
+        failed_role_compliance["missing_role_behaviors"] = ["revision_pressure"]
+        failed_role_compliance["intermediate_artifact_completeness"]["min_words_required"] = 320
+        failed_role_compliance["intermediate_artifact_completeness"]["failures"] = []
     user = runner.build_intermediate_repair_user(
         role=role,
         objective=objective,
@@ -277,6 +282,10 @@ def synthetic_options_repair_text(omit_heading: str | None = None) -> str:
         (
             "Must be true before execution",
             "Must be true before execution: owners must confirm approvals, policy preview must pass, logging must be active, and source IDs must support the narrower path.",
+        ),
+        (
+            "Stop/go triggers",
+            "Stop/go triggers are the explicit halt trigger, go trigger, proceed-only-if gate, and block-execution-if condition that leadership must use.",
         ),
         (
             "Signal that stops execution",
@@ -337,6 +346,30 @@ def keyword_stuffed_options_repair_text() -> str:
         "Dependency chain observable rollback canary trusted "
     )
     return (fragment * 18).strip() + "."
+
+
+def synthetic_assumption_repair_text(include_revision_pressure: bool = True) -> str:
+    text = (
+        "The assumption attack should challenge the premise that the infrastructure change is safe merely because the customer impact window is urgent. "
+        "The packet supports a narrow controlled path from S1_TEST_SOURCE and S2_TEST_SOURCE, but it does not prove that broad access, delete-capable permissions, or unmonitored expansion are acceptable. "
+        "A weak evidence link is the leap from successful manual workaround to production readiness; that assumption must be challenged because manual throughput is not the same as automated blast-radius control. "
+        "Another unsupported claim is that approval exists for the full change, even though S1_TEST_SOURCE and S2_TEST_SOURCE support only a narrower source-bounded path. "
+    )
+    if include_revision_pressure:
+        text += (
+            "Revision pressure: the final should revise the recommendation into a conditional narrow go path, should avoid implying broad authorization, must include what assumptions remain unproven, and must tighten the unsupported claim that monitoring alone makes the change safe. "
+            "The final should preserve exact source IDs copied from the packet and must not invent, abbreviate, rename, shorten, or mutate source IDs. "
+        )
+    else:
+        text += (
+            "The critique notes evidence limits and source boundaries while describing the main unsupported assumptions in ordinary terms. "
+        )
+    filler = (
+        "The repaired attacker output remains source bounded, names the assumption, names the weak evidence, identifies the unsupported claim, and gives concrete constraints. "
+    )
+    while runner.word_count(text) < 340:
+        text += filler
+    return text + "This assumption and evidence repair ends with a complete standalone sentence."
 
 
 def synthetic_initial_decision_text(truncated: bool = False) -> str:
@@ -420,8 +453,21 @@ def test_options_repair_prompt_renders_v4_2_required_checklist() -> None:
     assert "validated against the V4.2 options_operational_usefulness_reviewer role-specific validator" in prompt
     assert "Omission of any required component fails the repair" in prompt
     assert "Keyword-only output still fails" in prompt
+    assert "- Stop/go triggers" in prompt
     for heading in runner.OPTIONS_OPERATIONAL_REPAIR_CHECKLIST_ITEMS:
         assert f"- {heading}" in prompt
+
+
+def test_assumption_repair_prompt_renders_revision_pressure_and_source_id_checklist() -> None:
+    prompt = render_intermediate_repair_prompt_for_test("assumption_and_evidence_attacker")
+    assert "ASSUMPTION AND EVIDENCE ATTACKER REPAIR REQUIRED CHECKLIST" in prompt
+    assert "- Revision pressure" in prompt
+    assert "- What the final should revise" in prompt
+    assert "- What the final should avoid" in prompt
+    assert "- What assumptions must be challenged" in prompt
+    assert "- What unsupported claim must be tightened" in prompt
+    assert "- Source-ID copy discipline" in prompt
+    assert "Do not invent, abbreviate, rename, shorten, or mutate source IDs." in prompt
 
 
 def test_initial_decision_repair_prompt_includes_clean_terminal_contract() -> None:
@@ -453,6 +499,66 @@ def test_d10_opus_gov_b_config_resolves_to_runnable_config_not_template_lock() -
         )
         assert plan["hologov_profile"] == "HoloGov-B"
         assert plan["final_synthesis_model"] == "anthropic:claude-opus-4-8"
+
+
+def test_d10_frontier_optimized_opus_gpt55_config_resolves_to_runnable_config() -> None:
+    configs = runner.load_configs()
+    for condition in (
+        "frontier_holo_optimized_opus_gpt55_v1",
+        "holo_build_arch_frontier_optimized_opus_gpt55",
+        "HoloFrontierOptimizedOpusGPT55",
+    ):
+        cfg = runner.config_for_condition(condition, configs)
+        assert cfg["config_id"] == "frontier_holo_optimized_opus_gpt55_v1"
+        assert cfg["condition_type"] == "holo"
+        assert cfg["architecture_mode"] == "patent_aligned_v4"
+        assert cfg["hologov_profile"] == "HoloGov-B"
+        models = [item["provider_model"] for item in cfg["model_pool"]]
+        assert models == [
+            "anthropic:claude-opus-4-8",
+            "openai:gpt-5.5",
+        ]
+        assert cfg["distinct_holo_agent_model_count"] == 2
+        assert cfg["governor_model_pool"] == ["anthropic:claude-opus-4-8"]
+        assert "grok" not in " ".join(models).lower()
+        assert "gemini" not in " ".join(models).lower()
+        plan = runner.randomized_holo_session_plan(
+            cfg,
+            run_id="D10_FRONTIER_OPTIMIZED_NO_PROVIDER",
+            packet_hash="packet_hash",
+            turn_count=len(runner.HOLO_TURNS),
+            session_template="frontier_optimized_opus_gpt55_v1",
+        )
+        assert plan["hologov_schedule"][0]["governor_model"] == "anthropic:claude-opus-4-8"
+        assert plan["holo_agent_turn_models"] == [
+            "openai:gpt-5.5",
+            "openai:gpt-5.5",
+            "anthropic:claude-opus-4-8",
+            "openai:gpt-5.5",
+            "openai:gpt-5.5",
+            "anthropic:claude-opus-4-8",
+        ]
+        assert plan["final_synthesis_model"] == "anthropic:claude-opus-4-8"
+        roster = runner.holo_turn_plan(plan)
+        assert roster[0][1] == "openai:gpt-5.5"
+        assert roster[1][1] == "openai:gpt-5.5"
+        assert roster[2][1] == "anthropic:claude-opus-4-8"
+        assert roster[3][1] == "openai:gpt-5.5"
+        assert roster[4][1] == "openai:gpt-5.5"
+        assert roster[5][1] == "anthropic:claude-opus-4-8"
+
+
+def test_d10_frontier_optimized_config_does_not_select_solo_or_d11() -> None:
+    cfg = runner.config_for_condition(
+        "holo_build_arch_frontier_optimized_opus_gpt55",
+        runner.load_configs(),
+    )
+    serialized = json.dumps(cfg, sort_keys=True).lower()
+    assert cfg["condition_type"] == "holo"
+    assert "solo_anthropic_claude_opus_4_8" not in serialized
+    assert "frontier_solo_opus_4_8_v1" not in serialized
+    assert "d11_cyber_incident_contract_notice_emergency_cloud_access_001" not in serialized
+    assert "d10_infrastructure_configuration_change_001" not in serialized
 
 
 def test_d11_packet_validator_remains_no_provider_pass() -> None:
@@ -565,6 +671,44 @@ def test_synthetic_repaired_options_turn_with_all_required_headings_passes() -> 
     assert compliance["intermediate_artifact_completeness"]["role_specific_presence"]["status"] == "pass"
 
 
+def test_synthetic_assumption_repair_with_revision_pressure_passes() -> None:
+    text = synthetic_assumption_repair_text()
+    compliance = runner.role_compliance("assumption_and_evidence_attacker", text, final=False, output_meta={})
+    audit = runner.state_audit(
+        text,
+        {"CRITICAL_CONSTRAINTS": ["test"], "PACKET_HASH": "packet_hash"},
+        {"S1_TEST_SOURCE", "S2_TEST_SOURCE"},
+        "packet_hash",
+        {"artifacts": {"TASK_BRIEF": {"status": "PINNED"}}},
+    )
+    assert compliance["status"] == "pass"
+    assert audit["status"] == "pass"
+
+
+def test_synthetic_assumption_repair_missing_revision_pressure_fails() -> None:
+    compliance = runner.role_compliance(
+        "assumption_and_evidence_attacker",
+        synthetic_assumption_repair_text(include_revision_pressure=False),
+        final=False,
+        output_meta={},
+    )
+    assert compliance["status"] == "fail"
+    assert "revision_pressure" in compliance["missing_role_behaviors"]
+
+
+def test_synthetic_assumption_repair_invented_source_id_fails_state_audit() -> None:
+    text = synthetic_assumption_repair_text() + " The final should avoid relying on invented source S9_FAKE_APPROVAL."
+    audit = runner.state_audit(
+        text,
+        {"CRITICAL_CONSTRAINTS": ["test"], "PACKET_HASH": "packet_hash"},
+        {"S1_TEST_SOURCE", "S2_TEST_SOURCE"},
+        "packet_hash",
+        {"artifacts": {"TASK_BRIEF": {"status": "PINNED"}}},
+    )
+    assert audit["status"] == "fail"
+    assert audit["invented_source_ids"] == ["S9_FAKE_APPROVAL"]
+
+
 def test_synthetic_repaired_options_turn_missing_risk_of_acting_fails() -> None:
     compliance = runner.role_compliance(
         "options_operational_usefulness_reviewer",
@@ -623,6 +767,16 @@ def test_keyword_stuffed_options_repair_with_headings_still_fails() -> None:
     failures = compliance["intermediate_artifact_completeness"]["failures"]
     assert compliance["status"] == "fail"
     assert "options_operational_analysis_too_thin_or_keyword_only" in failures
+
+
+def test_stop_go_trigger_aliases_pass_when_substantive() -> None:
+    text = synthetic_options_repair_text().replace(
+        "Stop/go triggers are the explicit halt trigger, go trigger, proceed-only-if gate, and block-execution-if condition that leadership must use.",
+        "Proceed only if the canary stays inside threshold, expand only after owner review, authorized only if audit logs are live, block execution if delete calls appear, and do not proceed unless rollback ownership is named.",
+    )
+    compliance = runner.role_compliance("options_operational_usefulness_reviewer", text, final=False, output_meta={})
+    assert compliance["status"] == "pass"
+    assert compliance["intermediate_artifact_completeness"]["role_specific_presence"]["component_presence"]["stop_go_triggers"] is True
 
 
 def test_initial_decision_repaired_draft_complete_ending_passes_clean_ending_check() -> None:
@@ -851,6 +1005,47 @@ def test_failed_final_repair_above_1300_remains_failed() -> None:
     assert summary["final_word_band_pass"] is False
     assert summary["final_repair_succeeded_if_used"] is False
     assert summary["proof_credit_eligible"] is False
+
+
+def test_counterargument_claim_boundaries_heading_requires_substantive_boundary_text() -> None:
+    sections = [
+        "# Bottom Line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option, not an unrestricted action.",
+        "# Risks of Acting\nThe risk of acting is execution error, preventable exposure, and reliance on a source boundary the packet does not prove.",
+        "# Risks of Waiting\nThe risk of waiting is delay cost, operational drift, and missed escalation timing if leadership does not assign an owner.",
+        "# Trigger Taxonomy\nUse a go trigger, no-go trigger, rollback trigger, monitoring gate, and executive escalation owner before expansion.",
+        "# Counterargument and claim boundaries\nThe strongest counterargument is speed, but this packet only supports a source-bounded conditional action. It does not prove broad approval, legal clearance, irreversible release authority, or operational approval beyond S1_TEST_SOURCE and S2_TEST_SOURCE.",
+    ]
+    text = "\n\n".join(sections)
+    while runner.word_count(text) < 940:
+        text += " The recommendation remains conditional, source bounded, monitored, reversible where possible, and explicit about what the packet does not prove."
+    compliance = runner.role_compliance("final_synthesis_author", text, final=True, output_meta={})
+    assert compliance["status"] == "pass"
+    assert compliance["final_artifact_completeness"]["section_presence"]["claim_boundaries"] is True
+
+
+def test_counterargument_claim_boundaries_heading_without_boundary_text_fails() -> None:
+    sections = [
+        "# Bottom Line\nRecommend a conditional go path using S1_TEST_SOURCE and S2_TEST_SOURCE because the packet supports a bounded option, not an unrestricted action.",
+        "# Risks of Acting\nThe risk of acting is execution error, preventable exposure, and reliance on a source boundary the packet does not prove.",
+        "# Risks of Waiting\nThe risk of waiting is delay cost, operational drift, and missed escalation timing if leadership does not assign an owner.",
+        "# Trigger Taxonomy\nUse a go trigger, no-go trigger, rollback trigger, monitoring gate, and executive escalation owner before expansion.",
+        "# Counterargument and claim boundaries\nThe strongest counterargument is speed. Leaders want momentum, confidence, crisp ownership, fast execution, immediate delivery, and strong implementation.",
+    ]
+    text = "\n\n".join(sections)
+    while runner.word_count(text) < 940:
+        text += " Execution momentum remains the repeated counterargument for leadership because teams want progress, delivery, confidence, accountability, and speed."
+    compliance = runner.role_compliance("final_synthesis_author", text, final=True, output_meta={})
+    failures = compliance["final_artifact_completeness"]["failures"]
+    assert compliance["status"] == "fail"
+    assert "claim_boundary_section_lacks_substantive_boundary_text" in failures
+
+
+def test_final_repair_prompt_requires_add_missing_section_and_compress_under_hard_max() -> None:
+    runner_text = RUNNER_PATH.read_text(encoding="utf-8")
+    assert "Preserve or add the missing section identified by the audit, then compress elsewhere" in runner_text
+    assert "do not return an overlength repair" in runner_text
+    assert "Target approximately" in runner_text
+    assert "remove or compress lower-priority wording" in runner_text
 
 
 def test_successful_final_repair_preserves_required_sections_and_source_ids() -> None:

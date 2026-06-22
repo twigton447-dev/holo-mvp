@@ -14,6 +14,7 @@ SCORING_LOCK = FACTORY_DIR / "scoring_policies/ACTIVE_SCORING_PROTOCOL.lock.json
 RUNNER_PATH = FACTORY_DIR / "run_holobuild_mini_scout.py"
 CONFIG_DIR = FACTORY_DIR / "configs"
 D3_SUCCESS_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_d3_success_v1.lock.json"
+FRONTIER_OPTIMIZED_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_frontier_optimized_opus_gpt55_v1.lock.json"
 EXPECTED_DOMAINS = {f"D{i}" for i in range(1, 11)}
 EXPECTED_MINI_SOLO_MODELS = ["openai:gpt-4o-mini"]
 EXPECTED_HOLO_AGENT_MODELS = {
@@ -28,15 +29,25 @@ EXPECTED_HOLO_AGENT_MODELS = {
         "openai:gpt-4o-mini",
     ],
 }
+EXPECTED_FRONTIER_OPTIMIZED_TURN_MODELS = [
+    "openai:gpt-5.5",
+    "openai:gpt-5.5",
+    "anthropic:claude-opus-4-8",
+    "openai:gpt-5.5",
+    "openai:gpt-5.5",
+    "anthropic:claude-opus-4-8",
+]
 EXPECTED_COHORT_NAMES = {
     "frontier_holo_v1": "HoloFull",
     "frontier_solo_v1": "SoloFull",
     "mini_holo_v1": "HoloMini",
     "mini_solo_v1": "SoloMini",
+    "frontier_holo_optimized_opus_gpt55_v1": "HoloFrontierOptimizedOpusGPT55",
 }
 EXPECTED_HOLOGOV_PROFILE = {
     "frontier_holo_v1": "HoloGov-C",
     "mini_holo_v1": "HoloGov-C",
+    "frontier_holo_optimized_opus_gpt55_v1": "HoloGov-B",
 }
 EXPECTED_SOLO_COMPARISON_LABELS = [
     "six-call solo",
@@ -137,6 +148,24 @@ def validate_config(cfg: dict[str, Any], errors: list[str]) -> None:
         expected_profile = EXPECTED_HOLOGOV_PROFILE[config_id]
         if cfg.get("hologov_profile") != expected_profile:
             errors.append(f"{config_id} hologov_profile must be {expected_profile}")
+    if config_id == "frontier_holo_optimized_opus_gpt55_v1":
+        expected_models = [
+            "anthropic:claude-opus-4-8",
+            "openai:gpt-5.5",
+        ]
+        if models != expected_models:
+            errors.append(f"{config_id} model_pool must be {expected_models}")
+        if cfg.get("distinct_holo_agent_model_count") != 2:
+            errors.append(f"{config_id} must declare distinct_holo_agent_model_count=2")
+        if governor_models(cfg) != ["anthropic:claude-opus-4-8"]:
+            errors.append(f"{config_id} governor_model_pool must be fixed Opus")
+        if cfg.get("architecture_mode") != "patent_aligned_v4":
+            errors.append(f"{config_id} must use patent_aligned_v4")
+        if cfg.get("final_synthesis_model") != "anthropic:claude-opus-4-8":
+            errors.append(f"{config_id} final_synthesis_model must be Opus")
+        joined = " ".join(models + governor_models(cfg))
+        if "grok" in joined.lower() or "gemini" in joined.lower():
+            errors.append(f"{config_id} must not include Grok or Gemini")
     if config_id in EXPECTED_HOLO_AGENT_MODELS:
         expected_models = EXPECTED_HOLO_AGENT_MODELS[config_id]
         if models != expected_models:
@@ -148,8 +177,9 @@ def validate_config(cfg: dict[str, Any], errors: list[str]) -> None:
     if live_ready:
         if cfg.get("provider_call_budget") != 6:
             errors.append(f"{config_id} live_ready requires provider_call_budget=6")
-        if condition_type == "holo" and len(models) != 3:
-            errors.append(f"{config_id} live_ready holo config requires exactly 3 HoloAgent models")
+        expected_live_holo_models = int(cfg.get("distinct_holo_agent_model_count") or 3)
+        if condition_type == "holo" and len(models) != expected_live_holo_models:
+            errors.append(f"{config_id} live_ready holo config requires exactly {expected_live_holo_models} HoloAgent models")
         if condition_type == "solo" and len(models) != 1:
             errors.append(f"{config_id} live_ready solo config requires exactly 1 provider model")
     if condition_type == "solo":
@@ -238,6 +268,28 @@ def main() -> int:
             "template_id": template_lock.get("template_id"),
             "holo_context_profile_required": template_lock.get("holo_context_profile_required"),
         }
+    frontier_optimized_template_lock_result = None
+    if not FRONTIER_OPTIMIZED_TEMPLATE_LOCK.exists():
+        errors.append(f"missing frontier optimized Holo session template lock: {repo_rel(FRONTIER_OPTIMIZED_TEMPLATE_LOCK)}")
+    else:
+        optimized_lock = read_json(FRONTIER_OPTIMIZED_TEMPLATE_LOCK)
+        if optimized_lock.get("template_id") != "frontier_optimized_opus_gpt55_v1":
+            errors.append("frontier optimized Holo session template lock has wrong template_id")
+        if optimized_lock.get("holo_agent_turn_models") != EXPECTED_FRONTIER_OPTIMIZED_TURN_MODELS:
+            errors.append("frontier optimized Holo session template lock has wrong turn model order")
+        schedule = optimized_lock.get("hologov_schedule") or []
+        if not schedule or schedule[0].get("governor_model") != "anthropic:claude-opus-4-8":
+            errors.append("frontier optimized Holo session template lock must use Opus HoloGov-B")
+        if optimized_lock.get("final_synthesis_model") != "anthropic:claude-opus-4-8":
+            errors.append("frontier optimized Holo session template lock must use Opus final synthesis")
+        if optimized_lock.get("architecture_policy_id") != "HOLOBUILD_ARCHITECTURE_POLICY_V4_2":
+            errors.append("frontier optimized Holo session template lock must preserve V4.2 policy")
+        frontier_optimized_template_lock_result = {
+            "path": repo_rel(FRONTIER_OPTIMIZED_TEMPLATE_LOCK),
+            "hash": sha_file(FRONTIER_OPTIMIZED_TEMPLATE_LOCK),
+            "template_id": optimized_lock.get("template_id"),
+            "holo_context_profile_required": optimized_lock.get("holo_context_profile_required"),
+        }
     config_results = {}
     for name in [
         "frontier_solo_v1.json",
@@ -246,6 +298,7 @@ def main() -> int:
         "frontier_holo_v1.json",
         "mini_solo_v1.stub.json",
         "mini_holo_v1.stub.json",
+        "frontier_holo_optimized_opus_gpt55_v1.json",
     ]:
         path = CONFIG_DIR / name
         if not path.exists():
@@ -308,6 +361,7 @@ def main() -> int:
         "context_governor_prompt_surface_required": True,
         "holo_final_synthesis_policy": "preferred_final_model_with_one_bounded_word_band_repair",
         "d3_success_holo_session_template_lock": template_lock_result,
+        "frontier_optimized_opus_gpt55_holo_session_template_lock": frontier_optimized_template_lock_result,
         "scoring_lock_path": repo_rel(SCORING_LOCK),
         "scoring_lock_hash": sha_file(SCORING_LOCK) if SCORING_LOCK.exists() else None,
         "proof_holo_mode": "patent_aligned_v4",

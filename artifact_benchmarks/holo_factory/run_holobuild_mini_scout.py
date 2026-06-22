@@ -22,6 +22,7 @@ CONFIG_DIR = FACTORY_DIR / "configs"
 D3_SUCCESS_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_d3_success_v1.lock.json"
 GROK_SWAP_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_grok_swap_v1.lock.json"
 OPUS_GOV_B_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_opus_gov_b_v1.lock.json"
+FRONTIER_OPTIMIZED_OPUS_GPT55_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_frontier_optimized_opus_gpt55_v1.lock.json"
 LIVE_APPROVAL_ENV = "HOLO_ALLOW_LIVE"
 PROOF_ELIGIBLE_HOLO_MODE = "patent_aligned_v4"
 LEGACY_HOLO_MODES = {"diagnostic_v3", "full_gov_v4"}
@@ -34,7 +35,7 @@ DEFAULT_TURN_MAX_TOKENS = 3800
 FINAL_SYNTHESIS_MAX_TOKENS = 6000
 FINAL_REPAIR_MAX_TOKENS = 5200
 INTERMEDIATE_REPAIR_MAX_TOKENS = 3600
-HOLO_SESSION_TEMPLATES = ("random", "d3_success_v1", "grok_swap_v1", "opus_gov_b_v1")
+HOLO_SESSION_TEMPLATES = ("random", "d3_success_v1", "grok_swap_v1", "opus_gov_b_v1", "frontier_optimized_opus_gpt55_v1")
 D3_SUCCESS_HOLO_TURN_MODELS = (
     "google:gemini-3.1-pro-preview",
     "openai:gpt-5.5",
@@ -54,10 +55,20 @@ GROK_SWAP_HOLO_TURN_MODELS = (
 )
 GROK_SWAP_GOV_MODEL = "xai:grok-4.3"
 OPUS_GOV_B_GOV_MODEL = "anthropic:claude-opus-4-8"
+FRONTIER_OPTIMIZED_OPUS_GPT55_HOLO_TURN_MODELS = (
+    "openai:gpt-5.5",
+    "openai:gpt-5.5",
+    "anthropic:claude-opus-4-8",
+    "openai:gpt-5.5",
+    "openai:gpt-5.5",
+    "anthropic:claude-opus-4-8",
+)
+FRONTIER_OPTIMIZED_OPUS_GPT55_GOV_MODEL = "anthropic:claude-opus-4-8"
 VALID_CONDITIONS = (
     "HoloFull",
     "HoloFullGrokSwap",
     "HoloFullOpusGovB",
+    "HoloFrontierOptimizedOpusGPT55",
     "HoloMini",
     "SoloFull",
     "SoloFullGrok",
@@ -65,6 +76,7 @@ VALID_CONDITIONS = (
     "holo_build_arch",
     "holo_build_arch_grok_swap",
     "holo_build_arch_opus_gov_b",
+    "holo_build_arch_frontier_optimized_opus_gpt55",
     "solo_openai_gpt_5_5",
     "solo_xai_grok_4_3",
     "solo_anthropic_claude_opus_4_8",
@@ -74,6 +86,7 @@ VALID_CONDITIONS = (
     "frontier_holo_v1",
     "frontier_holo_grok_swap_v1",
     "frontier_holo_opus_gov_b_v1",
+    "frontier_holo_optimized_opus_gpt55_v1",
     "mini_solo_v1",
     "mini_holo_v1",
 )
@@ -151,6 +164,7 @@ OPTIONS_OPERATIONAL_REPAIR_CHECKLIST_ITEMS = (
     "Risk of acting",
     "Risk of waiting",
     "Must be true before execution",
+    "Stop/go triggers",
     "Signal that stops execution",
     "Signal that permits expansion",
     "What can be reversed",
@@ -169,12 +183,29 @@ OPTIONS_OPERATIONAL_REPAIR_CHECKLIST = (
     "and put at least one substantive sentence under each heading. Keyword-only output still fails.\n"
     + "\n".join(f"- {item}" for item in OPTIONS_OPERATIONAL_REPAIR_CHECKLIST_ITEMS)
 )
+ASSUMPTION_EVIDENCE_REPAIR_CHECKLIST_ITEMS = (
+    "Revision pressure",
+    "What the final should revise",
+    "What the final should avoid",
+    "What assumptions must be challenged",
+    "What unsupported claim must be tightened",
+    "Source-ID copy discipline",
+)
+ASSUMPTION_EVIDENCE_REPAIR_CHECKLIST = (
+    "ASSUMPTION AND EVIDENCE ATTACKER REPAIR REQUIRED CHECKLIST\n"
+    "==========================================================\n"
+    "This repair will be validated against the V4.2 assumption_and_evidence_attacker role-specific validator. "
+    "The repair must create revision pressure for the final artifact, specify what the final should revise and avoid, "
+    "challenge assumptions, tighten unsupported claims, and preserve exact source IDs copied from the retrieved source packet. "
+    "Do not invent, abbreviate, rename, shorten, or mutate source IDs. Keyword-only output still fails.\n"
+    + "\n".join(f"- {item}" for item in ASSUMPTION_EVIDENCE_REPAIR_CHECKLIST_ITEMS)
+)
 FINAL_REQUIRED_SECTION_PATTERNS = {
     "bottom_line": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:bottom line|recommendation|bottom-line)"),
     "risks_of_acting": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?risks?\s+of\s+acting"),
     "risks_of_waiting": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?risks?\s+of\s+waiting"),
     "next_steps": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:recommended\s+)?next\s+steps|trigger\s+taxonomy"),
-    "claim_boundaries": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:claim\s+boundaries|disclaimer|claim\s+boundaries\s*/\s*disclaimer)"),
+    "claim_boundaries": re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(?:claim\s+boundaries|counterargument\s+and\s+claim\s+boundaries|counterargument\s*/\s*claim\s+boundaries|boundaries\s+and\s+uncertainty|disclaimer|claim\s+boundaries\s*/\s*disclaimer)"),
 }
 FINAL_CLEAN_ENDING_RE = re.compile(r"[.!?][\"')\]]*$")
 UNCLEAN_INTERMEDIATE_ENDING_RE = re.compile(r"[*_\-:;,(\[{]$")
@@ -510,6 +541,12 @@ def final_artifact_completeness(output_text: str, output_meta: dict[str, Any] | 
         claim_boundary_tail_words = word_count(claim_boundary_tail)
         if claim_boundary_tail_words < 20:
             failures.append("claim_boundary_section_too_short_or_truncated")
+        if not re.search(
+            r"\b(boundar|only|does not prove|not shown|not provided|cannot conclude|uncertain|uncertainty|source|packet|not legal advice|not operational approval|not approval)\b",
+            claim_boundary_tail,
+            flags=re.IGNORECASE,
+        ):
+            failures.append("claim_boundary_section_lacks_substantive_boundary_text")
 
     output_tokens = int((output_meta or {}).get("output_tokens") or 0)
     max_tokens_requested = int((output_meta or {}).get("max_tokens_requested") or 0)
@@ -572,7 +609,7 @@ def options_operational_analysis_presence(output_text: str) -> dict[str, Any]:
         "risk_of_acting": r"\b(risk of acting|acting risk|execution risk|risk if approved|risk if executed|if (?:we )?(?:act|approve|execute|proceed)|harm of acting|blast radius|downside of proceeding|cost of acting|consequence of acting)\b",
         "risk_of_waiting": r"\b(risk of waiting|waiting risk|delay risk|if (?:we )?(?:wait|defer|delay)|cost of waiting|deadline|manual workaround)\b",
         "sequencing_or_dependency_chain": r"\b(sequence|dependency|before|after|first|then|stage|canary|timeline|chain|prerequisite)\b",
-        "stop_go_triggers": r"\b(stop|go|no-go|trigger|threshold|condition|permit|gate|decision point)\b",
+        "stop_go_triggers": r"\b(stop/go triggers?|stop/go conditions?|halt trigger|go trigger|signal that stops execution|signal that permits expansion|proceed only if|expand only after|authorized only if|block execution if|do not proceed unless|no-go|trigger|threshold|condition|permit|gate|decision point)\b",
         "rollback_gates": r"\b(rollback|revert|revoke|undo|reversal|backout|kill switch)\b",
         "monitoring_or_logging_gates": r"\b(monitor|monitoring|log|logging|observable|observability|metric|alert|audit trail|signal)\b",
         "executive_next_actions": r"\b(next action|next step|owner|executive|approve|approval|escalate|commander|business owner|accountable)\b",
@@ -837,12 +874,13 @@ def unique_provider_models(models: list[str]) -> list[str]:
 
 def holo_agent_models(config: dict[str, Any]) -> list[str]:
     models = unique_provider_models([item["provider_model"] for item in config.get("model_pool", []) if item.get("provider_model")])
-    if len(models) != 3:
+    expected_model_count = int(config.get("distinct_holo_agent_model_count") or 3)
+    if len(models) != expected_model_count:
         raise SystemExit(json.dumps({
             "status": "HOLOBUILD_MINI_SCOUT_FAIL_CLOSED",
-            "reason": "holo_config_requires_three_holo_agent_models",
+            "reason": "holo_config_requires_declared_distinct_holo_agent_models",
             "config_id": config.get("config_id"),
-            "expected_models": 3,
+            "expected_models": expected_model_count,
             "actual_models": len(models),
             "provider_calls": 0,
         }, indent=2))
@@ -858,6 +896,7 @@ def session_template_lock_info(template_id: str) -> dict[str, Any] | None:
         "d3_success_v1": D3_SUCCESS_TEMPLATE_LOCK,
         "grok_swap_v1": GROK_SWAP_TEMPLATE_LOCK,
         "opus_gov_b_v1": OPUS_GOV_B_TEMPLATE_LOCK,
+        "frontier_optimized_opus_gpt55_v1": FRONTIER_OPTIMIZED_OPUS_GPT55_TEMPLATE_LOCK,
     }
     lock_path = lock_path_by_template.get(template_id)
     if not lock_path:
@@ -930,6 +969,15 @@ def randomized_holo_session_plan(config: dict[str, Any], *, run_id: str, packet_
             "agent_policy": "fixed_grok_swap_v1_turn_order",
             "governor_policy": "fixed_opus_4_8_hologov_b_governor",
             "final_policy": "fixed_grok_swap_v1_final_writer",
+        },
+        "frontier_optimized_opus_gpt55_v1": {
+            "turn_models": FRONTIER_OPTIMIZED_OPUS_GPT55_HOLO_TURN_MODELS,
+            "governor_model": FRONTIER_OPTIMIZED_OPUS_GPT55_GOV_MODEL,
+            "selection_seed": "frontier_optimized_opus_gpt55_v1_fixed_template",
+            "selection_source": "fixed_d10_frontier_optimized_opus_gpt55_choreography",
+            "agent_policy": "fixed_frontier_optimized_opus_gpt55_v1_turn_order",
+            "governor_policy": "fixed_opus_4_8_hologov_b_governor",
+            "final_policy": "fixed_frontier_optimized_opus_gpt55_v1_final_writer",
         },
     }
     if session_template in fixed_templates:
@@ -1420,6 +1468,8 @@ def build_context_governor_instructions(hologov_profile: str | None, context_pro
 
 def intermediate_role_repair_instructions(role: str) -> str:
     instructions = [INTERMEDIATE_REPAIR_CLEAN_ENDING_CONTRACT]
+    if role == "assumption_and_evidence_attacker":
+        instructions.append(ASSUMPTION_EVIDENCE_REPAIR_CHECKLIST)
     if role == "options_operational_usefulness_reviewer":
         instructions.append(OPTIONS_OPERATIONAL_REPAIR_CHECKLIST)
     return "\n\n".join(instructions)
@@ -1659,6 +1709,9 @@ def run_holo(packet_dir: Path, run_id: str, config: dict[str, Any], timeout: int
                         "The final synthesis output failed final artifact quality checks. "
                         f"Return only a corrected final decision-grade crisis/action brief, {final_band['min_words']}-{final_band['max_words']} body words, target {final_band['repair_target_words']}. "
                         f"The {final_band['max_words']}-word maximum is hard for architecture compliance; do not return an overlength repair. "
+                        "Preserve or add the missing section identified by the audit, then compress elsewhere to stay within the hard word band. "
+                        f"Target approximately {final_band['repair_target_words']} words. "
+                        f"If adding a section, remove or compress lower-priority wording so the repair remains under {final_band['max_words']} words. "
                         "Do not add commentary about this repair. Use only the frozen packet and registered artifacts below. "
                         "Preserve the central thesis, decision recommendation, risk of acting, risk of waiting, trigger/gate table, calculations, counterargument, source IDs, and source-boundary disclaimer. "
                         "The final answer must end cleanly with a complete sentence and a complete claim-boundary/disclaimer section.\n\n"

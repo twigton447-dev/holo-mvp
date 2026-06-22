@@ -1,0 +1,63 @@
+{
+  "template_id": "frontier_optimized_opus_gpt55_v1",
+  "lock_status": "locked_no_provider_template",
+  "locked_utc": "2026-06-22T00:00:00Z",
+  "purpose": "Run D10 optimized HoloBuild with Anthropic Claude Opus 4.8 fixed as HoloGov-B and final synthesis author, and OpenAI GPT-5.5 assigned to the T2, T4, and T5 failure-pressure roles.",
+  "source_evidence": {
+    "base_template_id": "opus_gov_b_v1",
+    "base_template_lock_path": "artifact_benchmarks/holo_factory/configs/holo_session_template_opus_gov_b_v1.lock.json",
+    "replacement_rule": "remove Grok and Gemini, keep Opus as HoloGov-B/T3/T6, assign openai:gpt-5.5 to T1/T2/T4/T5 with T2/T4/T5 carrying the targeted D10 repair pressure",
+    "reason": "D10 manual repair-patch failures concentrated in T2 revision pressure, T4 stop/go operational gates, and final claim-boundary compression."
+  },
+  "holo_mode": "patent_aligned_v4",
+  "holo_context_profile_required": "full_registry",
+  "cohort_name": "HoloFrontierOptimizedOpusGPT55",
+  "config_id": "frontier_holo_optimized_opus_gpt55_v1",
+  "condition_alias": "holo_build_arch_frontier_optimized_opus_gpt55",
+  "hologov_profile": "HoloGov-B",
+  "holo_agent_pool": [
+    "anthropic:claude-opus-4-8",
+    "openai:gpt-5.5"
+  ],
+  "holo_agent_turn_models": [
+    "openai:gpt-5.5",
+    "openai:gpt-5.5",
+    "anthropic:claude-opus-4-8",
+    "openai:gpt-5.5",
+    "openai:gpt-5.5",
+    "anthropic:claude-opus-4-8"
+  ],
+  "holo_agent_selection_policy": "fixed_frontier_optimized_opus_gpt55_v1_turn_order",
+  "hologov_model_pool": [
+    "anthropic:claude-opus-4-8"
+  ],
+  "hologov_selection_policy": "fixed_opus_4_8_hologov_b_governor",
+  "hologov_schedule": [
+    {
+      "start_turn": 1,
+      "end_turn": 6,
+      "selected_tenure_turns": 7,
+      "governor_model": "anthropic:claude-opus-4-8"
+    }
+  ],
+  "final_synthesis_model": "anthropic:claude-opus-4-8",
+  "final_synthesis_model_policy": "fixed_frontier_optimized_opus_gpt55_v1_final_writer",
+  "architecture_policy_id": "HOLOBUILD_ARCHITECTURE_POLICY_V4_2",
+  "architecture_mode": "patent_aligned_v4",
+  "rejected_content_policy": "rejected_artifact_metadata_only_no_rejected_content_in_state_or_final_synthesis",
+  "final_synthesis_input_policy": "final_synthesis_allowed_input_ids_only",
+  "exact_source_id_requirement": true,
+  "final_word_band": {
+    "min_words": 900,
+    "max_words": 1300,
+    "repair_target_words": 1180
+  },
+  "rolling_summary_allowed": false,
+  "architecture_evidence_visible_to_judges": false,
+  "proof_credit_policy": "proof_eligible_only_if_patent_aligned_v4_full_registry_architecture_evidence_validates_and_deterministic_gate_passes",
+  "provider_calls": 0,
+  "artifact_generation": 0,
+  "scoring": 0,
+  "judging": 0,
+  "unblinding": 0
+}

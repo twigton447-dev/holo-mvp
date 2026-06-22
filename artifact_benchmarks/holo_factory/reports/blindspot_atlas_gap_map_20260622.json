@@ -3,7 +3,7 @@
   "created_date": "2026-06-22",
   "repo": "/Users/taylorwigton/Desktop/holo-mvp",
   "branch": "holo-builder-freeze-manifest-gate-001",
-  "head": "fa52803cc470955bcf71ef0c1f0ac264533ee1ca",
+  "head": "e18771511549b28ca43203355b3ade30e8537bf8",
   "guardrails": {
     "provider_calls": 0,
     "live_generation": 0,
@@ -71,6 +71,26 @@
       "authority_overread": 1
     }
   },
+  "row_count_reconciliation": {
+    "official_gap_map_row_count": 42,
+    "official_count_source": "blindspot_matrix.csv",
+    "markdown_physical_case_rows": 45,
+    "markdown_unique_case_ids": 44,
+    "csv_physical_rows": 42,
+    "csv_unique_case_ids": 42,
+    "markdown_duplicate_case_ids": [
+      "PE-CONSOLIDATION-PRECISION-FP-001"
+    ],
+    "markdown_only_case_ids": [
+      "MOD-RP-AOG-001",
+      "RT-CHEM-FS55-A",
+      "RT-CHEM-FS55-B"
+    ],
+    "csv_only_case_ids": [
+      "PE-TB-STUB-PERIOD-002"
+    ],
+    "recommendation": "Use 42 as the machine-readable current-register count for this gap map; preserve the markdown 45 physical rows as historical/curation evidence until a separate Atlas source merge reconciles duplicate and divergent rows."
+  },
   "staleness_warning": [
     "Canonical Atlas files predate D9, D10, and D11 close-gap/action-boundary evidence.",
     "Kit B adds agentic commerce but not the later Opus-facing classes.",
@@ -107,24 +127,24 @@
   "recommended_next_5": [
     {
       "rank": 1,
-      "packet_id": "d12_treasury_sanctions_emergency_payment_release_001",
+      "packet_id": "d12_fund_nav_redemption_cash_release_001",
+      "domain": "Fund subscription-redemption / NAV",
+      "primary_traps": [
+        "derived NAV treated as official authority",
+        "administrator tone overread",
+        "investor deadline pressure",
+        "irreversible cash/NAV commitment"
+      ]
+    },
+    {
+      "rank": 2,
+      "packet_id": "d13_treasury_sanctions_emergency_payment_release_001",
       "domain": "Treasury / payment release / sanctions",
       "primary_traps": [
         "stale sanctions/KYC clearance",
         "urgency treated as authority",
         "bank callback treated as sanctions clearance",
         "irreversible funds release"
-      ]
-    },
-    {
-      "rank": 2,
-      "packet_id": "d13_fund_subscription_redemption_nav_gate_001",
-      "domain": "Fund subscription-redemption / NAV",
-      "primary_traps": [
-        "prior KYC treated as current authorization",
-        "NAV deadline pressure",
-        "side-letter authority ambiguity",
-        "investor notice threshold"
       ]
     },
     {
@@ -162,13 +182,13 @@
     }
   ],
   "recommended_d12": {
-    "packet_id": "d12_treasury_sanctions_emergency_payment_release_001",
+    "packet_id": "d12_fund_nav_redemption_cash_release_001",
     "verdict_target": "decision-grade action brief, not generic writing task",
     "tests_holo_governance_advantage": [
-      "current authorization vs stale clearance",
-      "irreversible wire release vs reversible hold/escrow/narrowed path",
-      "authority vs urgency",
-      "external notice/admission threshold",
+      "official NAV authority vs derived/estimated NAV",
+      "irreversible cash release or investor commitment vs reversible preparation",
+      "administrator/portfolio-manager tone vs required approval gates",
+      "side-letter, liquidity, AML/KYC, and cash-control constraints",
       "exact source-boundary discipline"
     ]
   },

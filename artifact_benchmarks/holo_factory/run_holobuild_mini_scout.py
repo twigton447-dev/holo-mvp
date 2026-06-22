@@ -18,6 +18,18 @@ from run_holo_factory_suite import PROVIDER_ENV, ProviderCallError, call_provide
 FACTORY_DIR = Path(__file__).resolve().parent
 REPO_ROOT = FACTORY_DIR.parents[1]
 DEFAULT_SUITE_MANIFEST = FACTORY_DIR / "mini_scouts/TEN_DOMAIN_PACKET_SUITE_MANIFEST.json"
+D11_PACKET_DIR_REL = "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001"
+D11_RUNNER_DOMAIN_ENTRY = {
+    "domain_id": "D11",
+    "domain_name": "Cyber Incident / Contract Notice / Emergency Cloud Access",
+    "packet_id": "d11_cyber_incident_contract_notice_emergency_cloud_access_001",
+    "packet_dir": D11_PACKET_DIR_REL,
+    "packet_hash": "2e80109e4149da65b241452a5ffc194fb4caf4117d204616a1065eb47afde371",
+    "source_packet_hash": "2e80109e4149da65b241452a5ffc194fb4caf4117d204616a1065eb47afde371",
+    "packet_lock_hash": "27ba069ef63c8c14386ef43a974c316320ebeb5067cfa4623aa9446632e70564",
+    "freeze_manifest_hash": "23575df2ac7e5129a7e917e92dbc70402614c199035ef752601387c1c02c32f2",
+    "validator_path": f"{D11_PACKET_DIR_REL}/validate_packet_no_provider.py",
+}
 CONFIG_DIR = FACTORY_DIR / "configs"
 D3_SUCCESS_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_d3_success_v1.lock.json"
 GROK_SWAP_TEMPLATE_LOCK = CONFIG_DIR / "holo_session_template_grok_swap_v1.lock.json"
@@ -791,16 +803,24 @@ def load_suite_manifest(path: Path) -> dict[str, Any]:
     return read_json(path)
 
 
+def runner_domain_entries(manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    entries = list(manifest.get("domains", []))
+    domain_ids = {entry.get("domain_id") for entry in entries}
+    if "D11" not in domain_ids:
+        entries.append(D11_RUNNER_DOMAIN_ENTRY)
+    return entries
+
+
 def suite_entries_by_packet(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
     out = {}
-    for entry in manifest.get("domains", []):
+    for entry in runner_domain_entries(manifest):
         p = (REPO_ROOT / entry["packet_dir"]).resolve()
         out[str(p)] = entry
     return out
 
 
 def resolve_packet_dir(args: argparse.Namespace, manifest: dict[str, Any]) -> tuple[Path, dict[str, Any]]:
-    entries = manifest.get("domains", [])
+    entries = runner_domain_entries(manifest)
     if args.domain:
         matches = [item for item in entries if item.get("domain_id") == args.domain]
         if not matches:
@@ -2331,9 +2351,9 @@ def run_live(packet_dir: Path, run_id: str, conditions: list[str], configs: dict
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generic HoloBuild mini-scout runner for frozen D1-D10 packets.")
+    parser = argparse.ArgumentParser(description="Generic HoloBuild mini-scout runner for frozen D1-D11 packets.")
     parser.add_argument("--suite-manifest", default=str(DEFAULT_SUITE_MANIFEST))
-    parser.add_argument("--domain", choices=[f"D{i}" for i in range(1, 11)])
+    parser.add_argument("--domain", choices=[f"D{i}" for i in range(1, 12)])
     parser.add_argument("--packet-dir")
     parser.add_argument("--condition", action="append", choices=VALID_CONDITIONS, required=True)
     parser.add_argument("--run-id", required=True)

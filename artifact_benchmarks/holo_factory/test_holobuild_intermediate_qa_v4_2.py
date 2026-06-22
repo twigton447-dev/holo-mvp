@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import json
 import re
@@ -12,7 +13,10 @@ FACTORY_DIR = Path(__file__).resolve().parent
 REPO_ROOT = FACTORY_DIR.parents[1]
 RUNNER_PATH = FACTORY_DIR / "run_holobuild_mini_scout.py"
 D10_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001"
+D11_PACKET_DIR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001"
 D11_VALIDATOR = REPO_ROOT / "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001/validate_packet_no_provider.py"
+D11_PACKET_HASH = "2e80109e4149da65b241452a5ffc194fb4caf4117d204616a1065eb47afde371"
+D11_PACKET_LOCK_HASH = "27ba069ef63c8c14386ef43a974c316320ebeb5067cfa4623aa9446632e70564"
 D10_POST_V4_2_CONDITION_DIR = (
     REPO_ROOT
     / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001/runs"
@@ -149,8 +153,8 @@ def d10_surfaces() -> dict:
     return runner.load_packet_surfaces(D10_PACKET_DIR)
 
 
-def render_d10_solo_final_prompt() -> str:
-    surfaces = d10_surfaces()
+def render_solo_final_prompt(packet_dir: Path) -> str:
+    surfaces = runner.load_packet_surfaces(packet_dir)
     base = runner.packet_context(surfaces["task_brief"], surfaces["source_packet_md"])
     role, objective = runner.SOLO_TURNS[-1]
     user = (
@@ -161,9 +165,13 @@ def render_d10_solo_final_prompt() -> str:
     return f"SYSTEM:\n{runner.build_base_system()}\n\nUSER:\n{user}"
 
 
-def render_d10_holo_final_prompt() -> str:
-    surfaces = d10_surfaces()
-    packet_hash = runner.sha_file(D10_PACKET_DIR / "source_packet.json")
+def render_d10_solo_final_prompt() -> str:
+    return render_solo_final_prompt(D10_PACKET_DIR)
+
+
+def render_holo_final_prompt(packet_dir: Path) -> str:
+    surfaces = runner.load_packet_surfaces(packet_dir)
+    packet_hash = runner.sha_file(packet_dir / "source_packet.json")
     registry = {
         "artifacts": {
             "TASK_BRIEF": {"status": "PINNED", "hash": runner.sha_text(surfaces["task_brief"]), "source_reference": "task_brief.md", "content": surfaces["task_brief"]},
@@ -242,6 +250,10 @@ def render_d10_holo_final_prompt() -> str:
         f"{runner.EXACT_SOURCE_ID_GENERATION_INSTRUCTION}\n"
     )
     return f"SYSTEM:\n{runner.build_base_system()}\n\nUSER:\n{user}"
+
+
+def render_d10_holo_final_prompt() -> str:
+    return render_holo_final_prompt(D10_PACKET_DIR)
 
 
 def render_intermediate_repair_prompt_for_test(role: str = "options_operational_usefulness_reviewer") -> str:
@@ -628,6 +640,98 @@ def test_d11_packet_validator_remains_no_provider_pass() -> None:
     payload = json.loads(result.stdout)
     assert payload["status"] == "D11_MINI_SCOUT_PACKET_VALIDATION_PASS"
     assert payload["provider_calls"] == 0
+
+
+def test_d11_runner_domain_gate_accepts_and_resolves_cyber_packet() -> None:
+    runner_text = RUNNER_PATH.read_text(encoding="utf-8")
+    assert 'choices=[f"D{i}" for i in range(1, 12)]' in runner_text
+
+    manifest = runner.load_suite_manifest(runner.DEFAULT_SUITE_MANIFEST)
+    packet_dir, entry = runner.resolve_packet_dir(
+        argparse.Namespace(domain="D11", packet_dir=None),
+        manifest,
+    )
+    assert packet_dir == D11_PACKET_DIR.resolve()
+    assert entry["domain_id"] == "D11"
+    assert entry["packet_id"] == "d11_cyber_incident_contract_notice_emergency_cloud_access_001"
+    assert entry["packet_dir"] == "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001"
+    assert "d10_infrastructure_configuration_change_001" not in entry["packet_dir"]
+
+    validated = runner.validate_packet_against_manifest(packet_dir, entry)
+    assert validated["hashes"]["packet_hash"] == D11_PACKET_HASH
+    assert validated["hashes"]["packet_lock_hash"] == D11_PACKET_LOCK_HASH
+
+
+def test_d11_optimized_holo_config_resolves_to_fixed_opus_gpt55_roster() -> None:
+    cfg = runner.config_for_condition(
+        "holo_build_arch_frontier_optimized_opus_gpt55",
+        runner.load_configs(),
+    )
+    plan = runner.randomized_holo_session_plan(
+        cfg,
+        run_id="D11_FRONTIER_OPTIMIZED_NO_PROVIDER",
+        packet_hash=D11_PACKET_HASH,
+        turn_count=len(runner.HOLO_TURNS),
+        session_template="frontier_optimized_opus_gpt55_v1",
+    )
+    assert cfg["config_id"] == "frontier_holo_optimized_opus_gpt55_v1"
+    assert cfg["condition_type"] == "holo"
+    assert cfg["architecture_mode"] == "patent_aligned_v4"
+    assert cfg["hologov_profile"] == "HoloGov-B"
+    assert cfg["governor_model_pool"] == ["anthropic:claude-opus-4-8"]
+    assert plan["hologov_schedule"][0]["governor_model"] == "anthropic:claude-opus-4-8"
+    assert plan["holo_agent_turn_models"] == [
+        "openai:gpt-5.5",
+        "openai:gpt-5.5",
+        "anthropic:claude-opus-4-8",
+        "openai:gpt-5.5",
+        "openai:gpt-5.5",
+        "anthropic:claude-opus-4-8",
+    ]
+    assert plan["final_synthesis_model"] == "anthropic:claude-opus-4-8"
+    assert plan["final_compression_repair_model"] == "openai:gpt-5.5"
+
+    prompt = render_holo_final_prompt(D11_PACKET_DIR)
+    assert_common_generation_contract(prompt)
+    assert "HoloGov-B" in prompt
+    assert "FINAL_SYNTHESIS_ALLOWED_INPUT_IDS" in prompt
+    assert "PROOF_CREDIT_ELIGIBILITY_STATE" in prompt
+
+
+def test_d11_fresh_solo_opus_config_resolves_as_six_call_sequential_solo() -> None:
+    cfg = runner.config_for_condition("solo_anthropic_claude_opus_4_8", runner.load_configs())
+    assert cfg["config_id"] == "frontier_solo_opus_4_8_v1"
+    assert cfg["condition_type"] == "solo"
+    assert cfg["architecture_mode"] == "solo_self_refine_v1"
+    assert [item["provider_model"] for item in cfg["model_pool"]] == ["anthropic:claude-opus-4-8"]
+    assert cfg.get("governor_model_pool", []) == []
+    assert cfg["proof_credit_eligible"] is False
+
+    structure = cfg["solo_call_structure"]
+    assert structure["provider_calls"] == 6
+    assert structure["calls_are_sequential_drafting"] is True
+    assert structure["calls_are_independent_attempts"] is False
+    assert structure["selection_across_multiple_solo_outputs"] is False
+    assert structure["artifact_registry"] is False
+    assert structure["gov_notes"] is False
+    assert structure["comparison_labels"] == [
+        "six-call solo",
+        "budget-matched solo",
+        "sequential solo chain",
+    ]
+    assert structure["excluded_comparison_labels"] == [
+        "one-shot solo",
+        "best-of-N solo",
+        "retry-expanded solo",
+    ]
+
+    prompt = render_solo_final_prompt(D11_PACKET_DIR)
+    assert_common_generation_contract(prompt)
+    assert "TURN ROLE: final_synthesis_900_1300_words" in prompt
+    assert "HoloGov-B" not in prompt
+    assert "CANONICAL STATE_OBJECT" not in prompt
+    assert "ARTIFACTS_REGISTRY" not in prompt
+    assert "PROOF_CREDIT_ELIGIBILITY_STATE" not in prompt
 
 
 def test_d9_collapsed_turn4_options_fails_pre_registry_gate() -> None:

@@ -68,6 +68,12 @@ D14_T3_FAILURE_CONDITION_DIR = (
     / "frontier_holo_optimized_opus_gpt55_v1"
 )
 D14_T3_FAILURE_RUN_MANIFEST = D14_T3_FAILURE_CONDITION_DIR.parent / "run_manifest.json"
+D14_RETRY2_CONDITION_DIR = (
+    REPO_ROOT
+    / "artifact_benchmarks/holo_factory/mini_scouts/d14_trade_finance_lc_discrepancy_payment_release_001/runs"
+    / "d14_trade_finance_lc_discrepancy_payment_release_001_frontier_optimized_opus_gpt55_holo_only_live_retry2_same_packet_patch_validation_20260622T212753Z"
+    / "frontier_holo_optimized_opus_gpt55_v1"
+)
 OPTIMIZED_D10_RUN_MANIFEST = (
     REPO_ROOT
     / "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001/runs"
@@ -350,12 +356,12 @@ def render_intermediate_repair_prompt_for_test(role: str = "options_operational_
 
 
 def render_t3_overword_repair_prompt_for_test() -> str:
-    raw = d12_retry3_raw_output("turn_003.json")
+    text = synthetic_t3_concise_audit_text(extra_words=260)
     compliance = runner.role_compliance(
         "contradiction_uncertainty_source_fidelity_reviewer",
-        raw["text"],
+        text,
         final=False,
-        output_meta=raw,
+        output_meta={},
     )
     user = runner.build_intermediate_repair_user(
         role="contradiction_uncertainty_source_fidelity_reviewer",
@@ -425,12 +431,12 @@ def synthetic_t3_concise_audit_text(extra_words: int = 0, omit_section: str | No
             "Audit four: cite S4_INTERNAL_NOTE exactly when using urgency or pressure, but do not transform it into approval evidence.",
             "Audit five: no invented source IDs, no shortened IDs, and no uncited factual claims should enter the final synthesis.",
         ],
-        "Final synthesis instructions": [
-            "Instruction one: preserve the central tension between urgency and authority rather than deciding from urgency alone.",
-            "Instruction two: present the strongest opposing argument before explaining why reversible preparation is the safer action path.",
-            "Instruction three: convert unresolved facts into stop/go triggers, owner checks, and evidence thresholds.",
-            "Instruction four: keep derived, stale, weak, preliminary, and internal materials below governing authority in the final hierarchy.",
-            "Instruction five: end the final guidance with a bounded claim that the packet supports conditional preparation, not final execution authority.",
+        "Action-boundary cautions": [
+            "Caution one: preserve the central tension between urgency and authority rather than deciding from urgency alone.",
+            "Caution two: present the strongest opposing argument before explaining why reversible preparation is the safer action path.",
+            "Caution three: convert unresolved facts into stop/go triggers, owner checks, and evidence thresholds.",
+            "Caution four: keep derived, stale, weak, preliminary, and internal materials below governing authority in the decision hierarchy.",
+            "Caution five: keep the supported action boundary at conditional preparation rather than final execution authority.",
         ],
     }
     expansion = " Keep authority hierarchy, uncertainty, source status, and action boundaries explicit."
@@ -442,6 +448,41 @@ def synthetic_t3_concise_audit_text(extra_words: int = 0, omit_section: str | No
     if extra_words:
         text += " " + " ".join(["extra"] * extra_words) + "."
     return text
+
+
+def synthetic_t3_under_target_but_substantive_text() -> str:
+    compact_expansion = " Preserve the gate, source rank, reversible boundary, authority chain, and unresolved evidence threshold."
+    sections = {
+        "Top 5 source-boundary risks": [
+            "S1_TEST_SOURCE controls authority; S3_DERIVED_TABLE may organize facts but cannot approve execution." + compact_expansion,
+            "S2_PRELIMINARY_ADMIN_NOTE remains preliminary and cannot become final approval through specificity." + compact_expansion,
+            "S4_INTERNAL_NOTE shows pressure only; it cannot supply a missing governing gate." + compact_expansion,
+        ],
+        "Top 5 uncertainty claims to preserve": [
+            "The packet does not prove final approval, so state not shown rather than denied." + compact_expansion,
+            "Timing remains conditional until S1_TEST_SOURCE and S2_PRELIMINARY_ADMIN_NOTE align." + compact_expansion,
+            "Operational readiness remains unresolved even if S3_DERIVED_TABLE appears precise." + compact_expansion,
+        ],
+        "Stale / weak / derived source cautions": [
+            "Stale sources explain context but must stay below current governing authority." + compact_expansion,
+            "Weak sources can shape tone but cannot carry dispositive execution weight." + compact_expansion,
+            "Derived tables must remain labeled non-authoritative unless a source grants authority." + compact_expansion,
+        ],
+        "Exact source-ID audit": [
+            "Use S1_TEST_SOURCE exactly for governing authority, not shorthand or renamed labels." + compact_expansion,
+            "Use S2_PRELIMINARY_ADMIN_NOTE exactly for preliminary status and no final approval." + compact_expansion,
+            "Use S3_DERIVED_TABLE and S4_INTERNAL_NOTE exactly when citing calculations or pressure." + compact_expansion,
+        ],
+        "Action-boundary cautions": [
+            "The action boundary supports reversible preparation while blocking final execution." + compact_expansion,
+            "The counterargument can support triage speed, not authority to cross a gate." + compact_expansion,
+            "Stop/go triggers must preserve owner checks, evidence thresholds, and source hierarchy." + compact_expansion,
+        ],
+    }
+    return "\n\n".join(
+        f"## {heading}\n" + "\n".join(f"- {item}" for item in items)
+        for heading, items in sections.items()
+    )
 
 
 def synthetic_options_repair_text(omit_heading: str | None = None) -> str:
@@ -608,6 +649,10 @@ def d14_t3_failure_arch_evidence() -> dict:
     return json.loads((D14_T3_FAILURE_CONDITION_DIR / "arch_evidence.json").read_text(encoding="utf-8"))
 
 
+def d14_retry2_raw_output(name: str) -> dict:
+    return json.loads((D14_RETRY2_CONDITION_DIR / "raw_outputs" / name).read_text(encoding="utf-8"))
+
+
 def d12_retry3_metadata() -> dict:
     return json.loads((D12_RETRY3_CONDITION_DIR / "artifact_metadata.json").read_text(encoding="utf-8"))
 
@@ -707,12 +752,16 @@ def test_t3_repair_prompt_forbids_prose_essay_and_prior_continuation() -> None:
     assert "Use bullet-only format with no intro, conclusion, prose paragraphs, appendix, or word-count footer." in prompt
 
 
-def test_t3_repair_prompt_requires_700_900_words_and_complete_ending() -> None:
+def test_t3_repair_prompt_requires_550_800_words_and_complete_ending() -> None:
     prompt = render_intermediate_repair_prompt_for_test("contradiction_uncertainty_source_fidelity_reviewer")
-    assert "Target 700-900 words; prefer 720-820 words." in prompt
+    assert "Target 550-800 words; prefer 600-720 words." in prompt
+    assert "Under 550 words is acceptable only when all required sections, exact source IDs, and substantive bullets are present." in prompt
     assert "3-5 bullets per section" in prompt
     assert f"no more than {runner.T3_CONCISE_AUDIT_MAX_BULLETS} bullets total" in prompt
     assert f"no more than {runner.T3_CONCISE_AUDIT_MAX_SECTION_WORDS} words per section" in prompt
+    assert "Action-boundary cautions" in prompt
+    assert "5. Final synthesis instructions" not in prompt
+    assert "Do not include meta sections such as Final synthesis instructions." in prompt
     assert "End with one complete standalone sentence." in prompt
     assert "Do not append a word-count footer." in prompt
 
@@ -725,20 +774,22 @@ def test_t3_overword_repair_prompt_is_bounded_and_not_truncation_repair() -> Non
     assert "Return only the corrected compact T3 audit." in prompt
     assert "Do not continue the prior text." in prompt
     assert "Do not produce an essay." in prompt
-    assert "Target 700-900 words." in prompt
-    assert "Preferred repair window is 720-820 words; never exceed 900 words." in prompt
+    assert "Target 550-800 words." in prompt
+    assert "Preferred repair window is 600-720 words; never exceed 800 words." in prompt
     assert "Use bullet-only format with no intro, conclusion, prose paragraphs, appendix, or word-count footer." in prompt
+    assert "Action-boundary cautions" in prompt
+    assert "5. Final synthesis instructions" not in prompt
     assert "End with one complete standalone sentence." in prompt
     assert f"capped at {runner.T3_OVERWORD_REPAIR_MAX_TOKENS} tokens" in prompt
 
 
-def test_d12_retry3_t3_overword_repair_uses_bounded_token_budget() -> None:
-    raw = d12_retry3_raw_output("turn_003.json")
+def test_current_contract_t3_overword_repair_uses_bounded_token_budget() -> None:
+    text = synthetic_t3_concise_audit_text(extra_words=260)
     compliance = runner.role_compliance(
         "contradiction_uncertainty_source_fidelity_reviewer",
-        raw["text"],
+        text,
         final=False,
-        output_meta=raw,
+        output_meta={},
     )
     assert runner.t3_overword_repair_required(compliance) is True
     assert (
@@ -1272,6 +1323,24 @@ def test_synthetic_concise_t3_source_fidelity_audit_passes() -> None:
     assert all(presence["section_presence"].values())
 
 
+def test_synthetic_t3_under_target_but_substantive_audit_passes() -> None:
+    text = synthetic_t3_under_target_but_substantive_text()
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        text,
+        final=False,
+        output_meta={},
+    )
+    completeness = compliance["intermediate_artifact_completeness"]
+    presence = completeness["role_specific_presence"]
+    assert runner.word_count(text) < runner.T3_CONCISE_AUDIT_MIN_WORDS
+    assert runner.word_count(text) >= completeness["min_words_required"]
+    assert compliance["status"] == "pass"
+    assert presence["status"] == "pass"
+    assert presence["under_target_words_nonblocking"] is True
+    assert "t3_compact_audit_under_target_words" not in completeness["failures"]
+
+
 def test_synthetic_t3_essay_over_target_token_ceiling_style_fails() -> None:
     text = synthetic_t3_concise_audit_text(extra_words=260)
     compliance = runner.role_compliance(
@@ -1316,7 +1385,7 @@ def test_synthetic_t3_section_cap_violation_fails() -> None:
     assert "t3_compact_bullet_over_word_cap:Top 5 source-boundary risks" in failures
 
 
-def test_d14_t3_original_mixed_failure_uses_compression_repair_and_capped_budget() -> None:
+def test_d14_t3_original_mixed_failure_rejects_meta_section_and_uses_full_repair() -> None:
     raw = d14_t3_failure_raw_output("turn_003.json")
     compliance = runner.role_compliance(
         "contradiction_uncertainty_source_fidelity_reviewer",
@@ -1331,22 +1400,69 @@ def test_d14_t3_original_mixed_failure_uses_compression_repair_and_capped_budget
     assert completeness["word_count"] == 980
     assert completeness["clean_ending"] is False
     assert completeness["hit_requested_token_ceiling"] is True
+    assert "missing_t3_compact_section:Action-boundary cautions" in failures
+    assert "t3_compact_audit_forbidden_meta_section:Final synthesis instructions" in failures
     assert "t3_compact_audit_over_target_words" in failures
     assert "unclean_or_mid_sentence_intermediate_ending" in failures
     assert "provider_output_hit_max_tokens_with_unclean_intermediate_ending" in failures
     assert "t3_compact_section_over_word_cap:Top 5 source-boundary risks" in failures
     assert "t3_compact_bullet_over_word_cap:Top 5 source-boundary risks" in failures
-    assert runner.t3_overword_repair_required(compliance) is True
+    assert runner.t3_overword_repair_required(compliance) is False
     assert (
         runner.intermediate_repair_max_tokens_for_failure(
             "contradiction_uncertainty_source_fidelity_reviewer",
             compliance,
         )
-        == runner.T3_OVERWORD_REPAIR_MAX_TOKENS
+        == runner.INTERMEDIATE_REPAIR_MAX_TOKENS
     )
-    assert "T3 BOUNDED COMPRESSION-ONLY SOURCE-FIDELITY REPAIR REQUIRED FORMAT" in prompt
-    assert "Compress the audit; do not restart it with more scope." in prompt
+    assert "T3 COMPACT SOURCE-FIDELITY REPAIR REQUIRED FORMAT" in prompt
+    assert "Action-boundary cautions" in prompt
+    assert "5. Final synthesis instructions" not in prompt
     assert "incomplete/truncated" not in prompt
+
+
+def test_d14_retry2_t3_output_rejects_meta_section_without_hard_under_target_failure() -> None:
+    raw = d14_retry2_raw_output("turn_003.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    completeness = compliance["intermediate_artifact_completeness"]
+    presence = completeness["role_specific_presence"]
+    failures = completeness["failures"]
+    assert compliance["status"] == "fail"
+    assert completeness["word_count"] == 654
+    assert completeness["clean_ending"] is True
+    assert completeness["hit_requested_token_ceiling"] is False
+    assert "missing_t3_compact_section:Action-boundary cautions" in failures
+    assert "t3_compact_audit_forbidden_meta_section:Final synthesis instructions" in failures
+    assert "t3_compact_audit_under_target_words" not in failures
+    assert presence["forbidden_meta_sections"] == ["Final synthesis instructions"]
+    assert presence["prose_paragraph_line_count"] == 1
+
+
+def test_d14_retry2_t3_repair_output_rejects_meta_section_without_hard_under_target_failure() -> None:
+    raw = d14_retry2_raw_output("turn_003_intermediate_repair_001.json")
+    compliance = runner.role_compliance(
+        "contradiction_uncertainty_source_fidelity_reviewer",
+        raw["text"],
+        final=False,
+        output_meta=raw,
+    )
+    completeness = compliance["intermediate_artifact_completeness"]
+    presence = completeness["role_specific_presence"]
+    failures = completeness["failures"]
+    assert compliance["status"] == "fail"
+    assert completeness["word_count"] == 574
+    assert completeness["clean_ending"] is True
+    assert completeness["hit_requested_token_ceiling"] is False
+    assert "missing_t3_compact_section:Action-boundary cautions" in failures
+    assert "t3_compact_audit_forbidden_meta_section:Final synthesis instructions" in failures
+    assert "t3_compact_audit_under_target_words" not in failures
+    assert presence["forbidden_meta_sections"] == ["Final synthesis instructions"]
+    assert presence["prose_paragraph_line_count"] == 1
 
 
 def test_d14_t3_repair_output_remains_rejected_and_final_synthesis_does_not_consume_it() -> None:
@@ -1411,7 +1527,7 @@ def test_d12_historical_t3_repair_still_fails_compact_audit_gate() -> None:
     assert "t3_compact_audit_over_target_words" in failures
 
 
-def test_d12_retry3_t3_original_fails_only_bounded_overword_gate() -> None:
+def test_d12_retry3_t3_original_now_fails_overword_and_legacy_meta_section_gate() -> None:
     raw = d12_retry3_raw_output("turn_003.json")
     compliance = runner.role_compliance(
         "contradiction_uncertainty_source_fidelity_reviewer",
@@ -1428,7 +1544,9 @@ def test_d12_retry3_t3_original_fails_only_bounded_overword_gate() -> None:
     assert "t3_compact_audit_over_target_words" in failures
     assert "t3_compact_section_over_word_cap:Top 5 source-boundary risks" in failures
     assert "t3_compact_bullet_over_word_cap:Top 5 source-boundary risks" in failures
-    assert completeness["role_specific_presence"]["missing_sections"] == []
+    assert "missing_t3_compact_section:Action-boundary cautions" in failures
+    assert "t3_compact_audit_forbidden_meta_section:Final synthesis instructions" in failures
+    assert completeness["role_specific_presence"]["missing_sections"] == ["Action-boundary cautions"]
 
 
 def test_d12_retry3_t3_repair_still_fails_overword_and_truncation_gate() -> None:

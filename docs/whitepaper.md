@@ -205,9 +205,9 @@ HoloEngine is the core architecture. It powers a specific set of product surface
 
 **HoloAtlas.** The growing institutional record of where frontier models fail under operational pressure. It captures not just whether Holo catches what a solo model misses, but exactly how each model fails, under what conditions, and why. Every run produces a classified entry: the model, the domain, the failure class, the specific cognitive seam that broke, and the reproducibility status.
 
-One failure class in the Atlas comes directly from the Opus-facing HoloBuild lane described in Section 5.7:
+One failure class in the Atlas comes directly from the Opus 4.8-facing HoloBuild lane described in Section 5.7:
 
-- **Bounded Completion Failure** — Model understood the task but failed to produce a complete, claim-bounded, source-grounded artifact under bounded production conditions.
+- **Bounded Completion Failure** — Solo Opus 4.8 understood the task but failed to produce a complete, claim-bounded, source-grounded artifact under bounded production conditions.
 
 Documented failure classes across tested models:
 
@@ -378,23 +378,25 @@ Required provenance for every published score: packet ID, packet hash, model coh
 
 Early Holo results showed a wide gap against standard frontier configurations. That was useful, but it was not the final test. A system that only outperforms weaker configurations does not yet prove that governed architecture remains necessary when the solo baseline is already extremely strong.
 
-We therefore began an Opus-facing HoloBuild lane. This changed the character of the evaluation. The question was no longer whether Holo could outperform ordinary solo generation. The question was whether governed architecture **still added value when the solo model was already highly capable.**
+We therefore began an Opus 4.8-facing HoloBuild lane. This changed the character of the evaluation. The question was no longer whether Holo could outperform ordinary solo generation. The question was whether governed architecture **still added value when the solo model was already highly capable.**
 
 The answer so far is yes, but the claim must be precise.
 
-Against Opus, the performance gap narrowed. **That was not a failure of the benchmark. It was the point of the benchmark.** Stronger models should close some of the distance. If they do not, the test is not hard enough. What mattered was what remained: not just reasoning differences, but failures of **governed completion, source-boundary preservation, and final artifact discipline** under bounded production conditions.
+Against **Claude Opus 4.8**, the performance gap narrowed. **That was not a failure of the benchmark. It was the point of the benchmark.** Stronger models should close some of the distance. If they do not, the test is not hard enough. What mattered was what remained: not just reasoning differences, but failures of **governed completion, source-boundary preservation, and final artifact discipline** under bounded production conditions.
+
+These results refer specifically to Claude Opus 4.8. When Fable comes out, we expect the same shape: stronger solo performance, a narrower gap, and remaining failures where governed completion is not structurally enforced. That is a forward-looking expectation, not benchmark credit, until Fable is tested through the same frozen, hash-locked protocol.
 
 This produced a second lesson beyond runtime ALLOW/ESCALATE judgment. At the action boundary, safety is not only about choosing the right verdict. It is also about producing a complete, source-grounded, claim-bounded artifact that is safe for human or system reliance. A plausible artifact that ends before the claim-boundary section, omits required disclaimers, or breaks source-fidelity discipline is not merely incomplete. **It is unsafe.**
 
 #### D11: scored HoloBuild proof point
 
-D11 is the cleanest scored HoloBuild comparison to date. HoloBuild produced a **proof-clean artifact** and outperformed fresh solo Opus under blind scoring on a high-stakes action-boundary artifact task.
+D11 is the cleanest scored HoloBuild comparison to date. HoloBuild produced a **proof-clean artifact** and outperformed fresh solo Opus 4.8 under blind scoring on a high-stakes action-boundary artifact task.
 
 #### D13 and D14B: bounded baseline eligibility failures
 
-D13 and D14B exposed a different failure mode. In both cases, HoloBuild produced proof-clean governed payment-release artifacts. Fresh bounded solo Opus did not produce **baseline-eligible** artifacts under the same bounded conditions. The solo outputs ended uncleanly and omitted required claim-boundary or disclaimer material. Because the baseline artifacts did not clear deterministic eligibility, **these runs do not count as numeric scored wins.**
+D13 and D14B exposed a different failure mode. In both cases, HoloBuild produced proof-clean governed payment-release artifacts. Fresh bounded solo Opus 4.8 did not produce **baseline-eligible** artifacts under the same bounded conditions. The solo outputs ended uncleanly and omitted required claim-boundary or disclaimer material. Because the baseline artifacts did not clear deterministic eligibility, **these runs do not count as numeric scored wins.**
 
-A relaxed-budget diagnostic later showed that Opus could complete at least one of these artifacts when given more room. That distinction matters. The finding is not that Opus lacked domain reasoning. The finding is that **under bounded action-boundary conditions, strong solo reasoning did not reliably produce governed completion.**
+A relaxed-budget diagnostic later showed that Opus 4.8 could complete at least one of these artifacts when given more room. That distinction matters. The finding is not that Opus 4.8 lacked domain reasoning. The finding is that **under bounded action-boundary conditions, strong solo reasoning did not reliably produce governed completion.**
 
 #### D14: hardening fixture, not benchmark credit
 

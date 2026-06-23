@@ -202,7 +202,7 @@ footer{border-top:1px solid var(--border);padding:3.5rem 0;background:var(--bg-c
     <p class="hero-lede">Every automated workflow has a final checkpoint before money moves, access is granted, a purchase is made, or some other irreversible action happens. We call that moment the <strong>action boundary</strong>.</p>
     <p class="hero-lede">If an AI hallucinates in a chat window, it is annoying. If it hallucinates at the action boundary, you lose money, create liability, or trigger the wrong real-world outcome.</p>
     <p class="hero-lede">We built this benchmark to test AI at that exact moment.</p>
-    <p class="hero-lede">There is now a second version of the same problem upstream. AI is not only being trusted to act. It is also being trusted to produce the documents and decision work people rely on before action happens. A system can fail there too. It can produce something that looks complete, sounds careful, and still does not actually close the gate.</p>
+    <p class="hero-lede">There is now a second version of the same problem upstream. AI is not only being trusted to act. It is also being trusted to produce the documents and decision work people rely on before action happens. A system can fail there too. It can produce something that looks complete and careful, but still fail the simple test: did it prove the required sources, approvals, and claim limits are satisfied?</p>
     <p class="hero-lede">That is why this benchmark now has two lanes.</p>
     <p class="hero-lede"><strong>HoloVerify</strong> tests runtime decisions: should the action execute or not?</p>
     <p class="hero-lede"><strong>HoloBuild</strong> tests governed decision work: can the system produce a source-grounded, claim-bounded artifact that is safe to rely on?</p>
@@ -212,7 +212,7 @@ footer{border-top:1px solid var(--border);padding:3.5rem 0;background:var(--bg-c
       <p style="font-family:var(--serif);font-size:1.25rem;color:var(--ink);line-height:1.55;margin:0">Kit A showed that standard AI will approve a payment even when the purchase order that proves authority is missing.</p>
       <p style="font-family:var(--serif);font-size:1.25rem;color:var(--ink);line-height:1.55;margin:0.75rem 0 0">Kit B showed that standard AI will treat vague or stale policy language as if it were current approval.</p>
       <p style="font-family:var(--serif);font-size:1.25rem;color:var(--ink);line-height:1.55;margin:0.75rem 0 0">The newer HoloBuild lane showed something else: even strong solo frontier models can understand the task and still fail to complete governed decision work cleanly under bounded production constraints.</p>
-      <p style="font-family:var(--serif);font-size:1.25rem;color:var(--ink);line-height:1.55;margin:0.75rem 0 0"><strong>Holo&rsquo;s job is simple: before action or reliance, prove the gate is closed.</strong></p>
+      <p style="font-family:var(--serif);font-size:1.25rem;color:var(--ink);line-height:1.55;margin:0.75rem 0 0"><strong>Holo&rsquo;s job is simple: before action or reliance, prove the required checks are complete.</strong></p>
     </div>
     <div class="hash-badge-panel">
       <div class="badge-group">
@@ -238,7 +238,7 @@ footer{border-top:1px solid var(--border);padding:3.5rem 0;background:var(--bg-c
     <h2>The Verification Standard</h2>
     <p>You cannot trust an AI safety benchmark if the test environment keeps moving.</p>
     <p><strong>We do not ask you to trust our claims. We ask you to verify our hashes.</strong></p>
-    <p>Version 6.7 puts cryptographic auditability at the center. Every packet, prompt, trace summary, and adjudication is hash-locked before publication. <strong>If the signature of the test environment changes, the benchmark invalidates itself.</strong></p>
+    <p>Version 6.7 puts cryptographic auditability at the center. In benchmark terms, that means the exact test inputs, prompts, trace summaries, and adjudications are fingerprinted before publication. <strong>If any of those files changes later, its hash changes too, so the result no longer counts as the same benchmark run.</strong></p>
     <div class="stat-grid">
       <div class="stat-box"><div class="stat-n">117s</div><div class="stat-label">Evaluation Run Window</div></div>
       <div class="stat-box"><div class="stat-n">47,948</div><div class="stat-label">Tokens per Adjudication</div></div>
@@ -255,8 +255,8 @@ footer{border-top:1px solid var(--border);padding:3.5rem 0;background:var(--bg-c
   <div class="w">
     <div class="section-eyebrow">Payload Index</div>
     <h2>Benchmark Scope: Two Benchmark Lanes, Two Different Claims</h2>
-    <p>We do not walk around claiming we have 260 public benchmark packets. That would blur diagnostic work with formal proof.</p>
-    <p>We maintain a much larger scout and diagnostic inventory. That is the wind tunnel. It helps us find failure modes, build repairs, and decide what to test next. But it does not count as benchmark evidence.</p>
+    <p>We keep a clear line between public benchmark evidence and internal development work.</p>
+    <p>The public benchmark is the frozen, locked evidence shown here. Behind it, we maintain a larger scout and diagnostic inventory that helps us find failure modes, build repairs, and choose the next tests. That engineering inventory is useful, but it does not count as benchmark evidence until it goes through the same lock and publication gates.</p>
     <p><strong>Benchmark credit comes only from frozen, locked evidence.</strong></p>
     <div class="mbox-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0">
       <div class="mbox" style="border-left:3px solid var(--gold);background:var(--bg-card)">
@@ -414,7 +414,7 @@ footer{border-top:1px solid var(--border);padding:3.5rem 0;background:var(--bg-c
     <p>Holo&rsquo;s value is governed process: adversarial roles, source-fidelity review, deterministic gates, repair validation, and Governor adjudication.</p>
     <p>In D11, Holo used roughly 2x the solo Opus 4.8 token budget. That is not a universal cost claim. It does suggest that better reliability at the action boundary may not require an order-of-magnitude increase in compute.</p>
     <p>That is the important point.</p>
-    <p>At the action boundary, plausible output is not enough. The system must prove the gate is closed.</p>
+    <p>At the action boundary, plausible output is not enough. The system must prove the required checks are complete.</p>
     <p>A model can sound right and still fail the process.</p>
     <div class="callout" style="margin-top:1.5rem">
       <p>Holo turns model intelligence into disciplined, audited decision work.</p>
@@ -432,7 +432,7 @@ footer{border-top:1px solid var(--border);padding:3.5rem 0;background:var(--bg-c
     <p>The Opus 4.8-facing lane is separate from Kit A and Kit B.</p>
     <p>All Opus 4.8-facing findings on this page refer specifically to <strong>Claude Opus 4.8</strong>, not to a generic or unspecified Opus family result.</p>
     <p>It does not test runtime <code>ALLOW</code> / <code>ESCALATE</code> verdicts. It tests whether a governed decision artifact can survive source-fidelity review, deterministic validation, claim-boundary rules, and blind comparison.</p>
-    <p>When Fable comes out, we expect the same shape: stronger solo performance, a narrower gap, and remaining failures where governed completion is not structurally enforced. That is a forward-looking expectation, not benchmark credit, until Fable is tested through the same frozen, hash-locked protocol.</p>
+    <p>When Fable comes out, the same thing could happen to it: stronger solo performance may narrow the gap, but a solo model can still fail where governed completion is not structurally enforced. That is a forward-looking possibility, not benchmark credit, until Fable is tested through the same frozen, hash-locked protocol.</p>
 
     <div class="mbox-list">
       <div class="mbox" style="border-left:3px solid var(--green)">
@@ -985,7 +985,7 @@ footer{border-top:1px solid var(--border);padding:3.5rem 0;background:var(--bg-c
     </div>
 
     <div class="callout" style="margin-top:2rem">
-      <p><strong>Final Takeaway:</strong> Kit A and Kit B show HoloVerify catching missing or stale authority before runtime execution. The Opus 4.8-facing HoloBuild lane shows a related artifact-boundary problem: even strong solo frontier models can fail to complete governed, claim-bounded decision work under production constraints. We expect Fable to narrow the gap again, not erase the boundary, but Fable will not count as evidence until it is tested under the same locked protocol. Across both lanes, Holo&rsquo;s job is the same: before action or reliance, prove the gate is closed.</p>
+      <p><strong>Final Takeaway:</strong> Kit A and Kit B show HoloVerify catching missing or stale authority before runtime execution. The Opus 4.8-facing HoloBuild lane shows a related artifact-boundary problem: even strong solo frontier models can fail to complete governed, claim-bounded decision work under production constraints. The same thing could happen to Fable too, but Fable will not count as evidence until it is tested under the same locked protocol. Across both lanes, Holo&rsquo;s job is the same: before action or reliance, prove the required checks are complete.</p>
     </div>
   </div>
 </section>

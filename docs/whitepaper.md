@@ -300,14 +300,14 @@ Running a packet through several adversarial turns is more compute-heavy than on
 
 ### Payload Index
 
-We do not walk around claiming we have 260 benchmark packets. That invites trouble and blends diagnostic testing with formal proof.
+We keep a clear line between public benchmark evidence and internal development work.
 
 We operate with roughly 120 near-term, high-stakes testable packets:
 
 * The Frozen Pilot (20 Packets): 10 matched pairs of hard ALLOWs and ESCALATEs. These are cryptographically hash-verified, leakage-scanned, and actively used for our Governor patch regressions.
 * The Staged Projection Dart (100 Packets): 50 matched pairs across five distinct strata of corporate failure (like Exception Laundering and Summary-Source Conflict).
 
-Beyond that, we maintain a massive scout and diagnostic inventory—including 43 same-substrate Holo-rescue cases in Procedural Obedience alone, and 133 Atlas trace cards. That is our wind tunnel. But when we claim benchmark credit, we only use the locked, frozen sets.
+Beyond the public benchmark set, we maintain a larger scout and diagnostic inventory, including 43 same-substrate Holo-rescue cases in Procedural Obedience and 133 Atlas trace cards. That engineering inventory helps us find failure modes, build repairs, and choose future tests. It does not count as benchmark evidence until it goes through the same lock and publication gates.
 
 ---
 
@@ -384,7 +384,7 @@ The answer so far is yes, but the claim must be precise.
 
 Against **Claude Opus 4.8**, the performance gap narrowed. **That was not a failure of the benchmark. It was the point of the benchmark.** Stronger models should close some of the distance. If they do not, the test is not hard enough. What mattered was what remained: not just reasoning differences, but failures of **governed completion, source-boundary preservation, and final artifact discipline** under bounded production conditions.
 
-These results refer specifically to Claude Opus 4.8. When Fable comes out, we expect the same shape: stronger solo performance, a narrower gap, and remaining failures where governed completion is not structurally enforced. That is a forward-looking expectation, not benchmark credit, until Fable is tested through the same frozen, hash-locked protocol.
+These results refer specifically to Claude Opus 4.8. When Fable comes out, the same thing could happen to it: stronger solo performance may narrow the gap, but a solo model can still fail where governed completion is not structurally enforced. That is a forward-looking possibility, not benchmark credit, until Fable is tested through the same frozen, hash-locked protocol.
 
 This produced a second lesson beyond runtime ALLOW/ESCALATE judgment. At the action boundary, safety is not only about choosing the right verdict. It is also about producing a complete, source-grounded, claim-bounded artifact that is safe for human or system reliance. A plausible artifact that ends before the claim-boundary section, omits required disclaimers, or breaks source-fidelity discipline is not merely incomplete. **It is unsafe.**
 
@@ -406,7 +406,7 @@ D14 is not a proof result. HoloBuild **denied itself proof credit** because a re
 
 These runs surfaced a distinct failure class: **bounded completion failure.** A model may understand the evidence and still fail the production gate because it does not complete the governed artifact safely under operational constraints. Missing claim boundaries, unsupported assertions, omitted disclaimers, or broken source closure are not cosmetic defects. **At the boundary of reliance, they are safety failures.**
 
-This does not replace the HoloVerify thesis. It extends it. HoloVerify asks whether source-grounded evidence authorizes an irreversible **action.** HoloBuild asks whether a high-stakes **artifact** has survived enough adversarial review and deterministic validation to be safe to rely on. In both cases, plausible output is not enough. **The gate must actually close.**
+This does not replace the HoloVerify thesis. It extends it. HoloVerify asks whether source-grounded evidence authorizes an irreversible **action.** HoloBuild asks whether a high-stakes **artifact** has survived enough adversarial review and deterministic validation to be safe to rely on. In both cases, plausible output is not enough. **The required evidence, approvals, and claim limits must be verified.**
 
 ---
 

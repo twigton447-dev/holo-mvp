@@ -744,59 +744,48 @@
     <h2>The Trust Gap in Agentic Systems</h2>
   </div>
 
-  <h3>1.1 &nbsp; AI Systems Are Already Making Consequential Decisions</h3>
-  <p>Large language models did not stay in chat windows for long. They became the reasoning core of systems that browse, retrieve, summarize, route, approve, and execute. In many cases, they are no longer just generating options for a human to consider. They are helping decide what happens next.</p>
-  <p>That shift changes the meaning of error. If a model gives a bad movie recommendation, the cost is trivial. If it approves a fraudulent wire transfer, grants the wrong level of access, or signs off on a flawed reporting packet, the cost is no longer conversational. It is operational.</p>
-  <p>The same model capability can feel impressive in one setting and dangerous in another. The difference is not the model. The difference is whether the output becomes an action.</p>
+  <h3>1.1 &nbsp; The Action Boundary Is Where AI Becomes Consequential</h3>
+  <p>The important question is not whether AI can reason. It is whether AI can be trusted at the moment just before something real happens.</p>
+  <p>That moment might be a payment being released, access being granted, a contract being executed, a purchase being placed, or a reporting package being approved. Before that point, the system is still drafting or deciding. After that point, <strong>it has acted.</strong></p>
+  <p>We call that final checkpoint the <strong>action boundary</strong>.</p>
+  <p>Most AI safety work does not focus on this exact moment. Some controls shape behavior upstream through prompts, policies, and permissions. Others monitor outcomes downstream through logs, alerts, and audits.</p>
+  <p>Both matter. Neither solves the core problem at the boundary itself: the packet looks ready, the system has formed its intent, and the next step is irreversible. <strong>That is where judgment matters most.</strong></p>
 
-  <h3>1.2 &nbsp; The Action Boundary Is the Moment That Matters Most</h3>
-  <p>Every AI-driven workflow has a final point before something real happens. That might be:</p>
+  <h3>1.2 &nbsp; The Hardest Failures Look Normal</h3>
+  <p>The easiest failures to catch are the loud ones: a fake sender, a broken approval chain, a missing field, a known fraud pattern.</p>
+  <p>The harder failures are quieter. The vendor is real. The bank account is on file. The amount is within threshold. The packet ties mechanically. The metadata looks clean.</p>
+  <p>And still, the action should not proceed.</p>
+  <p>Why? Because the contradiction sits deeper in the evidence:</p>
   <ul style="margin:1rem 0 1rem 1.5rem;font-size:0.975rem;color:var(--ink-muted);line-height:1.9">
-    <li>A payment being released</li>
-    <li>Production access being granted</li>
-    <li>A legal document being executed</li>
-    <li>A procurement order being placed</li>
-    <li>A financial reporting package being approved</li>
+    <li>the explanation does not match prior history</li>
+    <li>the authority is procedurally complete but substantively stale</li>
+    <li>the packet is mathematically correct but semantically incomplete</li>
+    <li>the evidence needed to approve is missing even though nothing looks broken</li>
   </ul>
-  <p>Before that point, the system is still thinking, drafting, or preparing. After that point, the system has acted. That final checkpoint is the action boundary. It is the moment where an AI system stops being advisory and becomes consequential.</p>
-  <p>Most current AI safety and governance work does not focus on this exact moment. Some controls act upstream by shaping model behavior in advance (prompts, instructions, policies, fine-tuning). Other controls act downstream by monitoring what happened after execution (logs, alerts, anomaly detection, audit review).</p>
-  <p>Both matter. Neither fully solves the problem at the action boundary itself. The action boundary is where the system has already formed its intent, the packet looks ready, and the next step is irreversible. That is the point where the quality of judgment matters most.</p>
+  <p>These are not surface-check failures. <strong>They are judgment failures.</strong></p>
 
-  <h3>1.3 &nbsp; The Real Danger Is Not Obvious Failure</h3>
-  <p>The easiest failures to catch are the loud ones. A fake sender. A broken approval chain. A missing field. A policy violation. A known fraud pattern. These are important, but they are not the hardest cases.</p>
-  <p>The harder cases are the ones that look normal. A request can come from a known vendor. The bank account can be on file. The approval chain can be complete. The amount can sit within threshold. The packet can tie mechanically. The metadata can look clean.</p>
-  <p>And still, the action should not proceed. Why? Because the real contradiction lives somewhere deeper:</p>
-  <ul style="margin:1rem 0 1rem 1.5rem;font-size:0.975rem;color:var(--ink-muted);line-height:1.9">
-    <li>The explanation does not match prior history</li>
-    <li>The authority is procedurally complete but substantively stale</li>
-    <li>The packet is mathematically correct but semantically incomplete</li>
-    <li>The evidence needed to approve is missing even though nothing looks &#8220;broken&#8221;</li>
-  </ul>
-  <p>These are not surface-check failures. They are judgment failures.</p>
+  <h3>1.3 &nbsp; Why Solo Models Fail Unevenly</h3>
+  <p>A solo frontier model can be highly capable and still fail here. Not because it is weak, but because it is alone.</p>
+  <p>A single model may accept a plausible narrative too quickly, notice a concern and then talk itself out of it, overweight procedural cleanliness over business truth, or defer to the wrong authority because the packet looks operationally complete.</p>
+  <p>Different models fail differently. One may miss the signal entirely. Another may see it but clear it. Another may escalate for the wrong reason. Another may catch exactly the right issue.</p>
+  <p>That matters because it means the problem is not just model quality. It is <strong>uneven coverage</strong>. If one model family owns the final decision, its blindspots become part of your operating risk.</p>
 
-  <h3>1.4 &nbsp; Why Solo Models Struggle Here</h3>
-  <p>A solo frontier model can be extremely capable and still fail at the action boundary. Not because it is unintelligent, but because it is alone. A single model may:</p>
-  <ul style="margin:1rem 0 1rem 1.5rem;font-size:0.975rem;color:var(--ink-muted);line-height:1.9">
-    <li>Accept a plausible narrative too quickly</li>
-    <li>Find a concern, then talk itself out of it</li>
-    <li>Sense ambiguity, but resolve it in the wrong direction</li>
-    <li>Overweight procedural cleanliness over business truth</li>
-    <li>Defer to the wrong authority because the packet looks operationally complete</li>
-  </ul>
-  <p>Different models fail differently. That is one of the key findings behind Holo. One model may miss the signal entirely. Another may see it but clear it. Another may escalate for the wrong reason. Another may catch exactly the right issue. That means the problem is not just model weakness. It is uneven coverage.</p>
-  <p>If you rely on one model family to own the final decision, you are accepting that model&#8217;s blindspots as part of your operating risk. The difficulty is that you often do not know what those blindspots are until they matter.</p>
+  <h3>1.4 &nbsp; This Is a Trust Architecture Problem</h3>
+  <p>At the action boundary, the issue is not average usefulness. It is whether the system can make the right call under ambiguity right before commitment.</p>
+  <p>A model that is right 99% of the time may still be unacceptable if the 1% failure includes a fraudulent payment, a bad legal execution, or an unsupported approval.</p>
+  <p>That is why this is not just a model problem. <strong>It is a trust problem.</strong></p>
+  <p>The failures that matter most at the boundary often appear only after the surface checks have passed: circular authorization, missing provenance, scope mismatches, stale authority, or evidence that looks complete until it is cross-examined.</p>
+  <p>Policy layers help. Better models help. Neither is enough on its own.</p>
+  <p>What is missing is a checkpoint that tests whether the evidence actually closes the gate.</p>
 
-  <h3>1.5 &nbsp; Why This Is a Trust Problem, Not Just a Model Problem</h3>
-  <p>The question is not whether frontier models are useful. The question is whether any single model should be trusted to make the final call on an irreversible action. At the action boundary, the issue is not average usefulness. It is decision confidence under ambiguity right before commitment. A model that is right 99% of the time is unacceptable if the 1% failure includes a fraudulent payment or a flawed legal execution.</p>
-  <p>The barriers at the action boundary are exactly the class of subtle structural failures&#8202;—&#8202;circular authorization, missing provenance, scope mismatches&#8202;—&#8202;that appear after the surface checks have already passed. Policy layers cannot catch these because on the surface, the data packet looks mechanically clean. The error only becomes obvious when you subject the evidence to adversarial cross-examination.</p>
-  <p>That is why organizations pay a premium for extra certainty in other high-stakes domains. They hire a second reviewer. They build redundant checks. Holo is built around that same logic. Once AI systems are allowed to act, trust stops being a nice-to-have feature and becomes part of the deployment infrastructure.</p>
-
-  <h3>1.6 &nbsp; What Holo Is</h3>
-  <p>HoloEngine is a governed adversarial judgment architecture. It operates as a controlled reactor that forces structurally different frontier models into collision to extract latent judgment.</p>
-  <p>This architecture is deployed in two directions to enable trusted delegation:</p>
-  <p><strong>At the action boundary:</strong> It acts as a runtime shield (HoloVerify). It intercepts a proposed action, evaluates the packet through a structured adversarial cross-examination, and uses a constrained Governor to return a binary verdict: ALLOW or ESCALATE.</p>
-  <p><strong>In the generative process:</strong> It acts as a work-product forge (HoloBuild). It drops early drafts into a multi-turn adversarial reactor, forcing high-volatility structural teardowns to resolve hidden contradictions before an artifact is finalized.</p>
-  <div class="callout-key">Whether intercepting a fraudulent wire or stress-testing a high-stakes M&amp;A strategy, the underlying job is the same. Holo sits at the threshold of reliance and asks a simple question: <em>This action or artifact appears ready. Has it actually survived enough hostile scrutiny to be safe?</em></div>
+  <h3>1.5 &nbsp; What Holo Does</h3>
+  <p>HoloEngine is a governed adversarial judgment architecture built for that checkpoint.</p>
+  <p>It works in two directions.</p>
+  <p>At execution time, <strong>HoloVerify</strong> acts as a runtime shield. It intercepts a proposed action, cross-examines the packet, and returns a binary verdict: <strong>ALLOW</strong> or <strong>ESCALATE</strong>.</p>
+  <p>Earlier in the process, <strong>HoloBuild</strong> acts as a work-product forge. It pressure-tests high-stakes drafts before anyone relies on them, forcing hidden contradictions to surface before the artifact is treated as ready.</p>
+  <p>The underlying job is the same in both cases.</p>
+  <p>A payment, a contract packet, a reporting memo, or a decision brief may look ready. Holo asks a harder question:</p>
+  <div class="callout-key">Has it actually survived enough scrutiny to be trusted?</div>
 </div>
 
 <!-- SECTION 2 -->

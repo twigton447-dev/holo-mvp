@@ -394,13 +394,13 @@ There were two kinds of HoloBuild wins.
 
 The first was a scored win.
 
-In D11, both systems produced work that could be judged. HoloBuild produced an output that cleared all benchmark gates and outperformed fresh solo Opus 4.8 under blind scoring. Holo gained about 18.4 strict-score points and 24 action-boundary points while using about 1.9x total tokens.
+In D11, both systems produced work that could be judged. HoloBuild produced an output that cleared all benchmark gates and outperformed Claude Opus 4.8 under blind scoring. Holo gained about 18.4 strict-score points and 24 action-boundary points while using about 1.9x total tokens.
 
 That is the clean scored proof point.
 
 The second kind of win was different.
 
-In D13 and D14B, HoloBuild completed the governed artifact. Solo Opus 4.8 did not produce a complete, scoreable deliverable under the same bounded production rules.
+In D13 and D14B, HoloBuild completed the governed artifact. Claude Opus 4.8 did not produce a complete, scoreable deliverable under the same bounded production rules.
 
 That is not a numeric scoring win because there was no valid solo artifact to score against.
 

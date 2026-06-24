@@ -88,45 +88,6 @@ h1{font-family:var(--serif);font-size:clamp(4.2rem,8.6vw,7.6rem);font-weight:600
 .cover-subtitle{font-family:var(--body-serif)!important;font-size:clamp(1.45rem,3vw,2.45rem)!important;color:var(--gold)!important;margin:0 0 1.35rem!important;font-style:normal!important;line-height:1.12!important;font-weight:600;letter-spacing:-0.025em}
 .hero-lede{font-size:1.08rem;color:var(--muted);line-height:1.7;max-width:760px;margin-bottom:1rem}
 
-.benchmark-panel{
-  border:1px solid var(--border-2);
-  border-radius:10px;
-  padding:clamp(1.15rem,2.3vw,1.65rem);
-  background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(249,248,245,0.96));
-  box-shadow:var(--shadow), inset 0 0 34px rgba(154,106,32,0.025);
-  margin-bottom:1rem;
-}
-.panel-label{font-family:var(--mono);font-size:0.66rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1rem}
-.boundary-visual-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-bottom:1rem}
-.metric-orb{
-  min-height:160px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:1rem;
-  background:
-    radial-gradient(circle at 50% 42%, rgba(255,255,255,0.95) 0 42%, transparent 43%),
-    conic-gradient(from 220deg, rgba(150,83,58,0.18), rgba(150,83,58,0.72) 76%, rgba(154,106,32,0.1) 0);
-  box-shadow:inset 0 0 26px rgba(154,106,32,0.04);
-}
-.metric-orb.pass{
-  background:
-    radial-gradient(circle at 50% 42%, rgba(255,255,255,0.95) 0 42%, transparent 43%),
-    conic-gradient(from 220deg, rgba(47,117,85,0.18), rgba(47,117,85,0.78) 82%, rgba(154,106,32,0.1) 0);
-}
-.metric-orb strong{font-family:var(--mono);font-size:clamp(1.85rem,4vw,2.65rem);line-height:1;color:var(--ink)}
-.metric-orb span{display:block;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted-2);margin-top:0.55rem}
-.metric-orb.fail strong{color:var(--red)}
-.metric-orb.pass strong{color:var(--green)}
-.micro-metrics{display:grid;gap:0.6rem;border-top:1px solid var(--border);padding-top:0.9rem}
-.micro-metric{display:grid;grid-template-columns:5.2rem 1fr;gap:0.75rem;align-items:center}
-.micro-metric b{font-family:var(--mono);font-size:1rem;color:var(--gold)}
-.micro-metric span{font-size:0.92rem;color:var(--muted);line-height:1.35}
-
 /* HASH BADGE */
 .hash-badge-panel{display:flex;flex-wrap:wrap;gap:1rem;background:rgba(255,255,255,0.78);border:1px solid var(--border);border-radius:8px;padding:1rem 1.15rem;align-items:center;justify-content:space-between;margin-top:1.25rem;box-shadow:0 12px 34px rgba(54,39,14,0.08)}
 .badge-group{display:flex;align-items:center;gap:0.75rem}
@@ -357,9 +318,8 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
   .section>.w,.section>.w-wide{padding:1rem}
   .cover-subtitle{font-size:1.45rem!important}
   .hero-lede,.section p{font-size:0.96rem}
-  .boundary-visual-grid,.chart-spotlight,.chart-spotlight.compact{grid-template-columns:1fr}
-  .metric-orb{min-height:138px}
-  .micro-metric,.score-row{grid-template-columns:1fr}
+  .chart-spotlight,.chart-spotlight.compact{grid-template-columns:1fr}
+  .score-row{grid-template-columns:1fr}
   .score-fill{justify-content:flex-start;padding-left:0.7rem;padding-right:0.7rem}
   .hero-side .hero-doc-links{gap:0.7rem;flex-direction:column;align-items:flex-start}
 }
@@ -395,24 +355,6 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
     <p class="hero-lede">That is why this benchmark has two lanes.</p>
       </div>
       <div class="hero-side">
-    <div class="benchmark-panel" aria-label="Benchmark evidence snapshot">
-      <div class="panel-label">Release Snapshot</div>
-      <div class="boundary-visual-grid">
-        <div class="metric-orb fail">
-          <strong>10/10</strong>
-          <span>non-Holo configs approved the missing-PO payment</span>
-        </div>
-        <div class="metric-orb pass">
-          <strong>3/3</strong>
-          <span>Kit B packets handled correctly by Holo</span>
-        </div>
-      </div>
-      <div class="micro-metrics">
-        <div class="micro-metric"><b>+24 pts</b><span>D11 action-boundary scoring lift over fresh solo Opus 4.8.</span></div>
-        <div class="micro-metric"><b>1.9x</b><span>D11 total token budget ratio; measured, not generalized.</span></div>
-        <div class="micro-metric"><b>11</b><span>frozen public packets across the locked release.</span></div>
-      </div>
-    </div>
     <div class="lane-grid">
       <div class="lane-card">
         <div class="lane-kicker">HoloVerify</div>
@@ -606,13 +548,13 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
       <div class="evidence-card">
         <div class="status-kicker">D11</div>
         <h3>Scored Opus-facing proof</h3>
-        <p>D11 is the cleanest scored HoloBuild comparison to date. HoloBuild produced a proof-clean output and outperformed fresh solo Opus 4.8 under blind scoring.</p>
+        <p>D11 is the cleanest scored HoloBuild comparison to date. HoloBuild produced a proof-clean output and outperformed Claude Opus 4.8 under blind scoring.</p>
         <span class="status-pill green">Current scored flagship</span>
       </div>
       <div class="evidence-card">
         <div class="status-kicker">D13</div>
-        <h3>Solo Opus 4.8 failed to finish cleanly</h3>
-        <p>HoloBuild produced a clean governed sanctions/payment-release brief. Fresh solo Opus 4.8 failed the minimum bar required to count as a valid baseline twice.</p>
+        <h3>Claude Opus 4.8 failed to finish cleanly</h3>
+        <p>HoloBuild produced a clean governed sanctions/payment-release brief. Claude Opus 4.8 failed the minimum bar required to count as a valid baseline twice.</p>
         <span class="status-pill orange">Baseline-failure evidence</span>
       </div>
       <div class="evidence-card">
@@ -624,7 +566,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
       <div class="evidence-card">
         <div class="status-kicker">D14B</div>
         <h3>Second solo baseline failure</h3>
-        <p>HoloBuild produced a clean governed trade-finance payment-release brief. Fresh solo Opus 4.8 again failed to produce a complete, scoreable baseline.</p>
+        <p>HoloBuild produced a clean governed trade-finance payment-release brief. Claude Opus 4.8 again failed to produce a complete, scoreable baseline.</p>
         <span class="status-pill orange">Baseline-failure evidence</span>
       </div>
     </div>
@@ -657,12 +599,12 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
         <div class="lift-stat">
           <div class="lift-value">+18.4 pts</div>
           <div class="lift-label">Strict v6.1 score</div>
-          <div class="lift-desc">Holo scored 100. Fresh solo Opus 4.8 scored 81.6.</div>
+          <div class="lift-desc">Holo scored 100. Claude Opus 4.8 scored 81.6.</div>
         </div>
         <div class="lift-stat">
           <div class="lift-value">+24 pts</div>
           <div class="lift-label">Action-boundary score</div>
-          <div class="lift-desc">Holo scored 100. Fresh solo Opus 4.8 scored 76.</div>
+          <div class="lift-desc">Holo scored 100. Claude Opus 4.8 scored 76.</div>
         </div>
         <div class="lift-stat">
           <div class="lift-value">1.9x</div>
@@ -673,14 +615,14 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
     </div>
 
     <p>A relaxed-budget D13 diagnostic later completed successfully. So the point is not that Opus 4.8 could not reason through the domain.</p>
-    <p>The point is narrower and more important: <strong>under real production limits, solo Opus 4.8 did not reliably finish the governed work cleanly.</strong></p>
+    <p>The point is narrower and more important: <strong>under real production limits, Claude Opus 4.8 did not reliably finish the governed work cleanly.</strong></p>
     <p>We did not score D13 or D14B head-to-head because the solo output did not clear the minimum bar required to count as a valid baseline.</p>
     <p>So no, D13 and D14B are not numeric scored wins.</p>
     <p>But they are still meaningful evidence.</p>
     <p>They show that a very strong solo model can understand the task and still fail to finish the job in a way that is safe to rely on.</p>
     <div class="callout">
       <p>The point is not that Opus 4.8 is weak. The point is that strong reasoning alone was not enough.</p>
-      <p style="font-size:1.15rem">Once the task required not just a smart answer, but a complete, source-tied, rule-following, production-safe output, solo Opus 4.8 started failing the gate. Holo didn't.</p>
+      <p style="font-size:1.15rem">Once the task required not just a smart answer, but a complete, source-tied, rule-following, production-safe output, Claude Opus 4.8 started failing the gate. Holo didn't.</p>
     </div>
   </div>
 </section>
@@ -881,7 +823,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
     <p>When that happens, we respond by making the tests harder, tightening the rules, and teaching the Governor what the new domain requires. That is how we keep finding the real breaking point.</p>
     <p>Holo's value is not just that one model beats another.</p>
     <p>Holo's value is the governed process itself: adversarial roles, source review, fixed validation rules, repair checks, and a Governor that makes the final call.</p>
-    <p>In D11, Holo gained +18.4 strict-score points and +24 action-boundary points over fresh solo Opus 4.8 while using about 1.9x total tokens. That is not a universal cost claim. It does suggest that better reliability at the action boundary may not require ten or fifty times more budget.</p>
+    <p>In D11, Holo gained +18.4 strict-score points and +24 action-boundary points over Claude Opus 4.8 while using about 1.9x total tokens. That is not a universal cost claim. It does suggest that better reliability at the action boundary may not require ten or fifty times more budget.</p>
     <div class="callout">
       <p>At the action boundary, a model can sound right and still fail the process.</p>
       <p style="font-size:1.15rem">Holo turns model intelligence into disciplined, audited decision work.</p>
@@ -953,14 +895,14 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
             <td class="strong">HoloBuild / HoloGov-B</td>
             <td class="mono strong">D11</td>
             <td><span class="status-pill green">Scored proof</span></td>
-            <td>HoloBuild beat fresh solo Opus 4.8 under blind scoring.</td>
+            <td>HoloBuild beat Claude Opus 4.8 under blind scoring.</td>
             <td>Does not prove universal statistical significance.</td>
           </tr>
           <tr>
             <td class="strong">HoloBuild / HoloGov-B</td>
             <td class="mono strong">D13</td>
             <td><span class="status-pill orange">Baseline-failure evidence</span></td>
-            <td>Holo produced a clean governed brief; solo Opus 4.8 failed to produce a complete, scoreable baseline twice.</td>
+            <td>Holo produced a clean governed brief; Claude Opus 4.8 failed to produce a complete, scoreable baseline twice.</td>
             <td>Not a numeric scored win.</td>
           </tr>
           <tr>
@@ -974,7 +916,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
             <td class="strong">HoloBuild / HoloGov-B</td>
             <td class="mono strong">D14B</td>
             <td><span class="status-pill orange">Baseline-failure evidence</span></td>
-            <td>Holo produced a clean governed brief; solo Opus 4.8 again failed to produce a complete, scoreable baseline.</td>
+            <td>Holo produced a clean governed brief; Claude Opus 4.8 again failed to produce a complete, scoreable baseline.</td>
             <td>Not a numeric scored win.</td>
           </tr>
         </tbody>

@@ -13,22 +13,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HoloEngine · AI at the Action Boundary · Version 7.2</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
 
   :root {
-    --ink: #111315;
-    --muted: #4f5661;
-    --soft: #6f7781;
-    --paper: #ffffff;
-    --wash: #f6f7f3;
-    --line: #d9ded6;
-    --line-strong: #aeb8ae;
-    --blue: #255878;
-    --green: #25715f;
-    --rust: #9a4d38;
-    --gold: #9b7f3e;
-    --violet: #5b557b;
-    --shadow: 0 24px 70px rgba(17, 19, 21, 0.08);
+    --ink: #f5ecd2;
+    --muted: #d2c39f;
+    --soft: #968d7b;
+    --paper: #071016;
+    --wash: #02060a;
+    --panel: #0b141b;
+    --panel-strong: #101c24;
+    --line: rgba(229, 176, 86, 0.28);
+    --line-strong: rgba(244, 190, 98, 0.72);
+    --blue: #70b7d4;
+    --green: #8ee49c;
+    --rust: #f0a15f;
+    --gold: #f3bc62;
+    --gold-soft: #c8913f;
+    --violet: #a798d8;
+    --shadow: 0 24px 80px rgba(0, 0, 0, 0.48);
+    --glow: 0 0 28px rgba(243, 188, 98, 0.28);
   }
 
   * { box-sizing: border-box; }
@@ -36,23 +40,26 @@
   body {
     margin: 0;
     background:
-      linear-gradient(90deg, rgba(37,88,120,0.06) 0 1px, transparent 1px 100%),
-      linear-gradient(180deg, #fbfbf8 0%, #eef2ee 100%);
-    background-size: 44px 44px, auto;
+      radial-gradient(circle at 50% 0%, rgba(243, 188, 98, 0.14), transparent 32rem),
+      radial-gradient(circle at 86% 18%, rgba(112, 183, 212, 0.1), transparent 28rem),
+      linear-gradient(90deg, rgba(243,188,98,0.055) 0 1px, transparent 1px 100%),
+      linear-gradient(180deg, rgba(243,188,98,0.04) 0 1px, transparent 1px 100%),
+      linear-gradient(180deg, #02060a 0%, #071016 48%, #02060a 100%);
+    background-size: auto, auto, 48px 48px, 48px 48px, auto;
     color: var(--ink);
-    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    line-height: 1.68;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    line-height: 1.72;
     -webkit-font-smoothing: antialiased;
   }
 
-  a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 4px; }
-  p { margin: 0 0 1rem; max-width: 690px; font-size: 1rem; color: var(--muted); }
+  a { color: var(--gold); text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  p { margin: 0 0 1rem; max-width: 720px; font-size: 0.94rem; color: var(--muted); }
   strong { color: var(--ink); font-weight: 700; }
   code {
     font-family: "IBM Plex Mono", monospace;
     font-size: 0.82em;
-    color: #243042;
-    background: #eef2ed;
+    color: var(--gold);
+    background: rgba(243,188,98,0.08);
     border: 1px solid var(--line);
     border-radius: 4px;
     padding: 0.08rem 0.32rem;
@@ -66,61 +73,70 @@
     justify-content: space-between;
     gap: 1rem;
     align-items: center;
+    border-bottom: 1px solid var(--line);
   }
   .brand-link {
     font-family: "IBM Plex Mono", monospace;
     font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--ink);
+    letter-spacing: 0.22em;
+    color: var(--gold);
     text-decoration: none;
     font-weight: 600;
+    text-shadow: var(--glow);
   }
   .toplinks { display: flex; gap: 1.1rem; align-items: center; flex-wrap: wrap; }
   .toplinks a {
     font-family: "IBM Plex Mono", monospace;
     font-size: 0.68rem;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     text-decoration: none;
-    color: var(--soft);
+    color: var(--muted);
   }
 
   .hero {
     width: min(1180px, calc(100% - 40px));
     margin: 0 auto;
-    padding: 4.5rem 0 3.4rem;
-    border-top: 1px solid var(--line);
+    padding: 3.4rem 0 2.5rem;
   }
   .hero-grid {
-    max-width: 860px;
+    display: grid;
+    grid-template-columns: minmax(0, 0.82fr) minmax(360px, 0.95fr);
+    gap: clamp(1.4rem, 4vw, 3rem);
+    align-items: center;
+    max-width: none;
   }
   .eyebrow {
     font-family: "IBM Plex Mono", monospace;
     font-size: 0.72rem;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--gold);
     font-weight: 600;
     margin-bottom: 1.3rem;
   }
   .hero h1 {
-    font-family: "EB Garamond", Georgia, serif;
-    font-size: clamp(4.2rem, 10vw, 8.2rem);
-    line-height: 0.86;
-    letter-spacing: 0;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: clamp(2.8rem, 5.2vw, 4.6rem);
+    line-height: 0.92;
+    letter-spacing: 0.12em;
     margin: 0 0 1.2rem;
     color: var(--ink);
+    text-transform: uppercase;
+    text-shadow: var(--glow);
+    overflow-wrap: anywhere;
   }
   .hero h2 {
-    font-size: clamp(1.7rem, 3vw, 3rem);
-    line-height: 1.02;
+    font-size: clamp(1.35rem, 2.7vw, 2.4rem);
+    line-height: 1.12;
     margin: 0 0 1rem;
     max-width: 780px;
-    letter-spacing: 0;
+    letter-spacing: 0.06em;
+    color: var(--gold);
   }
   .hero-subtitle {
-    font-size: 1.08rem;
+    font-size: 0.98rem;
     max-width: 620px;
     color: var(--muted);
     margin-bottom: 2rem;
@@ -128,13 +144,150 @@
   .meta-row { display: flex; gap: 1rem; flex-wrap: wrap; }
   .meta-chip {
     border: 1px solid var(--line-strong);
-    background: rgba(255,255,255,0.7);
+    background: rgba(3, 8, 12, 0.66);
     border-radius: 8px;
     padding: 0.7rem 0.85rem;
     min-width: 150px;
+    box-shadow: inset 0 0 20px rgba(243,188,98,0.05);
   }
-  .meta-chip span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft); }
+  .meta-chip span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
   .meta-chip strong { display: block; margin-top: 0.2rem; font-size: 0.92rem; }
+
+  .boundary-visual {
+    position: relative;
+    min-height: 390px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    padding: 1.25rem;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(243, 188, 98, 0.2), transparent 9rem),
+      linear-gradient(180deg, rgba(13, 22, 30, 0.92), rgba(3, 8, 12, 0.96));
+    box-shadow: var(--shadow), inset 0 0 38px rgba(243,188,98,0.06);
+    overflow: hidden;
+  }
+  .boundary-visual::before,
+  .boundary-visual::after {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border: 1px solid rgba(243,188,98,0.18);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+  .boundary-visual::after {
+    inset: 0 auto 0 50%;
+    width: 1px;
+    border: 0;
+    border-left: 1px dashed rgba(243,188,98,0.46);
+  }
+  .visual-title {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: var(--ink);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  .visual-flow {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(150px, 0.9fr) auto minmax(0, 1fr);
+    gap: 0.65rem;
+    align-items: center;
+    min-height: 230px;
+  }
+  .visual-zone,
+  .vault-zone {
+    border: 1px solid rgba(243,188,98,0.42);
+    border-radius: 8px;
+    padding: 0.9rem;
+    background: rgba(2, 6, 10, 0.72);
+  }
+  .visual-zone span,
+  .vault-zone span {
+    display: block;
+    color: var(--gold);
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.45rem;
+  }
+  .visual-zone strong,
+  .vault-zone strong {
+    display: block;
+    color: var(--ink);
+    font-size: 0.78rem;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+  .visual-zone small,
+  .vault-zone small {
+    display: block;
+    margin-top: 0.55rem;
+    color: var(--muted);
+    font-size: 0.68rem;
+    line-height: 1.45;
+  }
+  .visual-arrow {
+    color: var(--gold);
+    font-size: 2rem;
+    text-shadow: var(--glow);
+  }
+  .checkpoint {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border: 2px solid var(--gold);
+    clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%);
+    background: rgba(243,188,98,0.08);
+    box-shadow: inset 0 0 34px rgba(243,188,98,0.14), var(--glow);
+    text-align: center;
+  }
+  .checkpoint strong {
+    display: block;
+    color: var(--ink);
+    letter-spacing: 0.26em;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+  .checkpoint span {
+    display: block;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    font-size: 0.66rem;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+  }
+  .verdict-row {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 0.85rem;
+    align-items: center;
+    color: var(--muted);
+    margin-top: 0.85rem;
+  }
+  .verdict-row span {
+    letter-spacing: 0.13em;
+    font-weight: 700;
+  }
+  .verdict-row .allow { color: var(--green); }
+  .verdict-row .escalate { color: var(--rust); }
+  .visual-caption {
+    position: relative;
+    z-index: 1;
+    margin-top: 1rem;
+    border: 1px solid rgba(243,188,98,0.48);
+    border-radius: 7px;
+    padding: 0.75rem 0.85rem;
+    color: var(--muted);
+    font-size: 0.76rem;
+    background: rgba(2, 6, 10, 0.62);
+  }
 
   .article-shell {
     width: min(1180px, calc(100% - 40px));
@@ -147,14 +300,14 @@
   .toc {
     position: sticky;
     top: 1.2rem;
-    background: rgba(255,255,255,0.78);
+    background: rgba(5, 12, 17, 0.84);
     backdrop-filter: blur(14px);
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 1rem;
-    box-shadow: 0 12px 40px rgba(17,19,21,0.05);
+    box-shadow: 0 12px 48px rgba(0,0,0,0.34);
   }
-  .toc-title { font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--soft); margin-bottom: 0.8rem; }
+  .toc-title { font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.8rem; }
   .toc a {
     display: grid;
     grid-template-columns: 2.2rem 1fr;
@@ -162,7 +315,7 @@
     padding: 0.52rem 0;
     border-top: 1px solid var(--line);
     text-decoration: none;
-    color: var(--ink);
+    color: var(--muted);
     font-size: 0.86rem;
     line-height: 1.25;
   }
@@ -170,12 +323,12 @@
 
   main { min-width: 0; }
   .paper-section {
-    background: var(--paper);
+    background: linear-gradient(180deg, rgba(13, 22, 30, 0.94), rgba(5, 12, 17, 0.94));
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: clamp(1.35rem, 3vw, 2.7rem);
     margin-bottom: 1.35rem;
-    box-shadow: 0 18px 50px rgba(17,19,21,0.045);
+    box-shadow: 0 18px 54px rgba(0,0,0,0.32), inset 0 0 42px rgba(243,188,98,0.035);
   }
   .section-label {
     display: flex;
@@ -184,35 +337,39 @@
     margin-bottom: 0.9rem;
     font-family: "IBM Plex Mono", monospace;
     font-size: 0.68rem;
-    letter-spacing: 0.13em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--soft);
   }
   .section-label span { color: var(--gold); font-weight: 600; }
   .paper-section h2 {
-    font-family: "EB Garamond", Georgia, serif;
-    font-size: clamp(2rem, 4vw, 3.2rem);
-    line-height: 1;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: clamp(1.55rem, 3.4vw, 2.7rem);
+    line-height: 1.08;
     margin: 0 0 1.5rem;
-    letter-spacing: 0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
   .paper-section h3 {
-    font-size: 1.08rem;
+    font-size: 0.98rem;
     line-height: 1.25;
     margin: 1.7rem 0 0.75rem;
-    color: var(--ink);
-    letter-spacing: 0;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .line-callout {
     max-width: 760px;
     margin: 1.15rem 0;
     padding: 0.95rem 1.1rem;
+    border: 1px solid var(--line-strong);
     border-left: 4px solid var(--gold);
-    background: #f5f1e4;
+    background: rgba(243,188,98,0.075);
     color: var(--ink);
     font-weight: 700;
-    border-radius: 0 8px 8px 0;
+    border-radius: 8px;
   }
   .decision-word {
     width: max-content;
@@ -225,8 +382,8 @@
     letter-spacing: 0.08em;
     text-align: center;
   }
-  .decision-word.allow { color: var(--green); background: #e9f4ef; border: 1px solid #afcfc2; }
-  .decision-word.escalate { color: var(--rust); background: #f8ece7; border: 1px solid #ddb9ab; }
+  .decision-word.allow { color: var(--green); background: rgba(142,228,156,0.09); border: 1px solid rgba(142,228,156,0.45); }
+  .decision-word.escalate { color: var(--rust); background: rgba(240,161,95,0.09); border: 1px solid rgba(240,161,95,0.45); }
 
   .trust-grid, .lane-grid, .proof-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.95rem; margin: 1.2rem 0 1.6rem; }
   .proof-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -234,11 +391,11 @@
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 1rem;
-    background: #f9faf7;
+    background: rgba(2, 6, 10, 0.5);
   }
   .trust-card h3, .lane-card h3 { margin: 0.25rem 0 0.45rem; }
   .trust-card p, .lane-card p { margin: 0; font-size: 0.92rem; }
-  .card-kicker, .lane-card span { font-family: "IBM Plex Mono", monospace; font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft); }
+  .card-kicker, .lane-card span { font-family: "IBM Plex Mono", monospace; font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
   .lane-card.build { border-top: 5px solid var(--blue); }
   .lane-card.verify { border-top: 5px solid var(--green); }
 
@@ -252,14 +409,14 @@
     border-radius: 8px;
     border: 1px solid var(--line);
     padding: 0.95rem;
-    background: linear-gradient(180deg, #fff, #f5f7f2);
+    background: rgba(2, 6, 10, 0.54);
   }
   .process-map span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.66rem; color: var(--gold); margin-bottom: 0.35rem; }
-  .process-map strong { display: block; font-size: 0.9rem; }
+  .process-map strong { display: block; font-size: 0.9rem; color: var(--ink); }
   .process-map em { display: block; color: var(--soft); font-size: 0.78rem; font-style: normal; margin-top: 0.2rem; }
 
   .domain-cloud { display: flex; flex-wrap: wrap; gap: 0.55rem; margin: 1rem 0 1.55rem; }
-  .domain-cloud span { border: 1px solid var(--line); border-radius: 999px; padding: 0.42rem 0.65rem; background: #fff; color: var(--ink); font-size: 0.86rem; }
+  .domain-cloud span { border: 1px solid var(--line); border-radius: 999px; padding: 0.42rem 0.65rem; background: rgba(2,6,10,0.56); color: var(--ink); font-size: 0.86rem; }
 
   .result-panel {
     display: grid;
@@ -267,17 +424,18 @@
     gap: 1rem;
     margin: 1.2rem 0;
     padding: 1rem;
-    background: #121416;
+    background: #02060a;
     border-radius: 8px;
     color: #fff;
+    border: 1px solid var(--line-strong);
   }
   .result-copy { padding: 0.5rem; }
   .result-copy h3 { color: #fff; margin-top: 0.35rem; }
-  .result-copy p { color: #d6ddd4; }
+  .result-copy p { color: var(--muted); }
   .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
-  .metric-grid div { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 8px; padding: 1rem; }
-  .metric-grid strong { color: #fff; display: block; font-size: 1.8rem; line-height: 1; margin-bottom: 0.4rem; }
-  .metric-grid span { color: #cbd5c7; font-size: 0.82rem; }
+  .metric-grid div { background: rgba(243,188,98,0.07); border: 1px solid var(--line); border-radius: 8px; padding: 1rem; }
+  .metric-grid strong { color: var(--ink); display: block; font-size: 1.8rem; line-height: 1; margin-bottom: 0.4rem; }
+  .metric-grid span { color: var(--muted); font-size: 0.82rem; }
   .proof-grid div strong { display: block; margin-bottom: 0.35rem; }
   .proof-grid div span { color: var(--muted); font-size: 0.88rem; }
 
@@ -287,14 +445,14 @@
     gap: 0.75rem;
     margin: 1.2rem 0 1.6rem;
   }
-  .economics-strip div { border-radius: 8px; border: 1px solid var(--line); padding: 1rem; background: #f7f8f4; }
-  .economics-strip span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.66rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--soft); margin-bottom: 0.45rem; }
+  .economics-strip div { border-radius: 8px; border: 1px solid var(--line); padding: 1rem; background: rgba(2,6,10,0.54); }
+  .economics-strip span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.66rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.45rem; }
   .economics-strip strong { display: block; line-height: 1.25; }
 
   .boundary-note {
     border-radius: 8px;
-    border: 1px solid #d5c38b;
-    background: #fbf6e7;
+    border: 1px solid var(--line-strong);
+    background: rgba(243,188,98,0.075);
     padding: 1rem;
     margin: 1rem 0 1.5rem;
     color: var(--ink);
@@ -303,17 +461,20 @@
     padding: 0.78rem 0.95rem;
     border: 1px solid var(--line);
     border-radius: 8px;
-    background: #f9faf7;
+    background: rgba(2,6,10,0.54);
     margin-bottom: 0.55rem;
   }
   .objection-stack { display: grid; gap: 0.8rem; }
-  .objection-card { border: 1px solid var(--line); border-radius: 8px; padding: 1rem; background: #f8f9f6; }
+  .objection-card { border: 1px solid var(--line); border-radius: 8px; padding: 1rem; background: rgba(2,6,10,0.54); }
   .objection-card h3 { margin-top: 0; }
   .objection-card p:last-child { margin-bottom: 0; }
   .closing-panel {
     border-radius: 8px;
     padding: clamp(1.4rem, 3vw, 2rem);
-    background: linear-gradient(135deg, #12202b, #17372e 55%, #5a4630);
+    background:
+      radial-gradient(circle at 50% 30%, rgba(243,188,98,0.18), transparent 22rem),
+      linear-gradient(135deg, #02060a, #0b141b 55%, #2a1d0f);
+    border: 1px solid var(--line-strong);
   }
   .closing-panel p, .closing-panel h3, .closing-panel strong { color: #fff; }
   .closing-panel p { max-width: 760px; color: #e6ece4; }
@@ -329,22 +490,31 @@
     color: var(--soft);
     font-size: 0.86rem;
   }
-  footer strong { display: block; font-family: "EB Garamond", Georgia, serif; font-size: 1.5rem; }
+  footer strong { display: block; font-family: "IBM Plex Mono", monospace; font-size: 1.1rem; letter-spacing: 0.14em; color: var(--gold); text-transform: uppercase; }
   footer .links { text-align: right; }
 
   @media (max-width: 980px) {
-    .article-shell, .result-panel { grid-template-columns: 1fr; }
+    .hero-grid, .article-shell, .result-panel { grid-template-columns: 1fr; }
     .toc { position: relative; top: auto; }
     .process-map { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .boundary-visual { min-height: auto; }
   }
   @media (max-width: 680px) {
+    p { font-size: 0.88rem; }
     .topbar { align-items: flex-start; flex-direction: column; }
     .toplinks { gap: 0.75rem; }
     .hero { padding: 1.65rem 0 1.8rem; }
-    .hero h1 { font-size: clamp(2.9rem, 15vw, 4.1rem); margin-bottom: 0.8rem; }
-    .hero h2 { font-size: clamp(1.6rem, 7vw, 2rem); }
+    .hero h1 { font-size: clamp(2.3rem, 13vw, 3.5rem); letter-spacing: 0.09em; margin-bottom: 0.8rem; }
+    .hero h2 { font-size: clamp(1.18rem, 6vw, 1.72rem); }
     .hero-subtitle { font-size: 0.98rem; margin-bottom: 1rem; }
     .eyebrow { margin-bottom: 0.85rem; }
+    .boundary-visual { padding: 1rem; }
+    .boundary-visual::after { display: none; }
+    .visual-title { font-size: 0.78rem; line-height: 1.4; }
+    .visual-flow { grid-template-columns: 1fr; min-height: auto; }
+    .visual-arrow { justify-self: center; transform: rotate(90deg); font-size: 1.35rem; }
+    .checkpoint { width: min(190px, 72vw); justify-self: center; }
+    .visual-zone strong, .vault-zone strong { font-size: 0.74rem; }
     .meta-row { display: grid; grid-template-columns: 1fr; gap: 0.5rem; }
     .meta-chip { padding: 0.52rem 0.65rem; min-width: 0; }
     .meta-chip span, .meta-chip strong { display: inline; }
@@ -386,6 +556,31 @@
           <div class="meta-chip"><span>Role</span><strong>Founder, HoloEngine</strong></div>
           <div class="meta-chip"><span>Focus</span><strong>Evidence before action</strong></div>
         </div>
+      </div>
+      <div class="boundary-visual" aria-label="HoloEngine action boundary checkpoint">
+        <div class="visual-title">Holo at the Action Boundary</div>
+        <div class="visual-flow">
+          <div class="visual-zone">
+            <span>1. Policy / Workflow</span>
+            <strong>Agent executes with context</strong>
+            <small>Rules, guardrails, workflow logic, and intent arrive at the gate.</small>
+          </div>
+          <div class="visual-arrow">→</div>
+          <div class="checkpoint">
+            <div>
+              <strong>Holo</strong>
+              <span>Checkpoint</span>
+            </div>
+          </div>
+          <div class="visual-arrow">→</div>
+          <div class="vault-zone">
+            <span>3. Crown Jewels</span>
+            <strong>High-value actions</strong>
+            <small>Payments, access grants, vendor changes, contracts, and sensitive records.</small>
+          </div>
+        </div>
+        <div class="verdict-row"><span class="allow">ALLOW</span><i>/</i><span class="escalate">ESCALATE</span></div>
+        <div class="visual-caption">&gt; Only decisions with evidence closure pass. Everything else escalates.</div>
       </div>
     </div>
   </header>

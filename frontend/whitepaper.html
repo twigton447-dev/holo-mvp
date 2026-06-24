@@ -13,7 +13,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HoloEngine · AI at the Action Boundary · Version 7.2</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap');
 
   :root {
     --ink: #141414;
@@ -45,13 +45,13 @@
       linear-gradient(180deg, #ffffff 0%, #faf9f5 48%, #f1eee7 100%);
     background-size: 48px 48px, 48px 48px, auto;
     color: var(--ink);
-    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    line-height: 1.72;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.68;
     -webkit-font-smoothing: antialiased;
   }
 
   a { color: var(--gold); text-decoration-thickness: 1px; text-underline-offset: 4px; }
-  p { margin: 0 0 1rem; max-width: 720px; font-size: 0.94rem; color: var(--muted); }
+  p { margin: 0 0 1rem; max-width: 720px; font-size: 1rem; color: var(--muted); }
   strong { color: var(--ink); font-weight: 700; }
   code {
     font-family: "IBM Plex Mono", monospace;
@@ -99,7 +99,7 @@
   }
   .hero-grid {
     display: grid;
-    grid-template-columns: minmax(0, 0.82fr) minmax(360px, 0.95fr);
+    grid-template-columns: minmax(0, 0.95fr) minmax(320px, 0.72fr);
     gap: clamp(1.4rem, 4vw, 3rem);
     align-items: center;
     max-width: none;
@@ -114,10 +114,10 @@
     margin-bottom: 1.3rem;
   }
   .hero h1 {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: clamp(2.8rem, 5.2vw, 4.6rem);
-    line-height: 0.92;
-    letter-spacing: 0.12em;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: clamp(3.4rem, 7vw, 6.6rem);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
     margin: 0 0 1.2rem;
     color: var(--ink);
     text-transform: uppercase;
@@ -129,11 +129,11 @@
     line-height: 1.12;
     margin: 0 0 1rem;
     max-width: 780px;
-    letter-spacing: 0.06em;
+    letter-spacing: -0.02em;
     color: var(--gold);
   }
   .hero-subtitle {
-    font-size: 0.98rem;
+    font-size: 1.05rem;
     max-width: 620px;
     color: var(--muted);
     margin-bottom: 2rem;
@@ -150,140 +150,53 @@
   .meta-chip span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
   .meta-chip strong { display: block; margin-top: 0.2rem; font-size: 0.92rem; }
 
-  .boundary-visual {
-    position: relative;
-    min-height: 390px;
+  .hero-brief {
     border: 1px solid var(--line-strong);
     border-radius: 10px;
-    padding: 1.25rem;
-    background:
-      radial-gradient(circle at 50% 45%, rgba(200, 164, 101, 0.1), transparent 9rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 248, 245, 0.98));
+    padding: clamp(1.2rem, 2.2vw, 1.7rem);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 248, 245, 0.96));
     box-shadow: var(--shadow), inset 0 0 34px rgba(154,106,32,0.025);
-    overflow: hidden;
   }
-  .boundary-visual::before,
-  .boundary-visual::after {
-    content: "";
-    position: absolute;
-    inset: 14px;
-    border: 1px solid rgba(154,106,32,0.14);
-    border-radius: 8px;
-    pointer-events: none;
-  }
-  .boundary-visual::after {
-    inset: 0 auto 0 50%;
-    width: 1px;
-    border: 0;
-    border-left: 1px dashed rgba(154,106,32,0.36);
-  }
-  .visual-title {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    color: var(--ink);
-    letter-spacing: 0.18em;
+  .hero-brief .brief-label {
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--gold);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    font-weight: 600;
     margin-bottom: 1rem;
   }
-  .visual-flow {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(150px, 0.9fr) auto minmax(0, 1fr);
-    gap: 0.65rem;
-    align-items: center;
-    min-height: 230px;
-  }
-  .visual-zone,
-  .vault-zone {
-    border: 1px solid rgba(154,106,32,0.28);
-    border-radius: 8px;
-    padding: 0.9rem;
-    background: rgba(255, 255, 255, 0.76);
-  }
-  .visual-zone span,
-  .vault-zone span {
-    display: block;
-    color: var(--gold);
-    font-size: 0.64rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 0.45rem;
-  }
-  .visual-zone strong,
-  .vault-zone strong {
-    display: block;
+  .hero-brief h3 {
+    margin: 0 0 0.8rem;
     color: var(--ink);
-    font-size: 0.78rem;
-    line-height: 1.35;
-    text-transform: uppercase;
+    font-size: clamp(1.2rem, 2vw, 1.65rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
   }
-  .visual-zone small,
-  .vault-zone small {
-    display: block;
-    margin-top: 0.55rem;
-    color: var(--muted);
-    font-size: 0.68rem;
-    line-height: 1.45;
+  .hero-brief p {
+    margin-bottom: 1.1rem;
+    font-size: 0.95rem;
   }
-  .visual-arrow {
-    color: var(--gold);
-    font-size: 2rem;
-    text-shadow: var(--glow);
-  }
-  .checkpoint {
+  .brief-list {
     display: grid;
-    place-items: center;
-    aspect-ratio: 1;
-    border: 2px solid var(--gold);
-    clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%);
-    background: rgba(200,164,101,0.07);
-    box-shadow: inset 0 0 26px rgba(154,106,32,0.08), var(--glow);
-    text-align: center;
-  }
-  .checkpoint strong {
-    display: block;
-    color: var(--ink);
-    letter-spacing: 0.26em;
-    font-size: 1rem;
-    text-transform: uppercase;
-  }
-  .checkpoint span {
-    display: block;
-    color: var(--gold);
-    letter-spacing: 0.1em;
-    font-size: 0.66rem;
-    margin-top: 0.5rem;
-    text-transform: uppercase;
-  }
-  .verdict-row {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    gap: 0.85rem;
-    align-items: center;
-    color: var(--muted);
-    margin-top: 0.85rem;
-  }
-  .verdict-row span {
-    letter-spacing: 0.13em;
-    font-weight: 700;
-  }
-  .verdict-row .allow { color: var(--green); }
-  .verdict-row .escalate { color: var(--rust); }
-  .visual-caption {
-    position: relative;
-    z-index: 1;
+    gap: 0.7rem;
     margin-top: 1rem;
-    border: 1px solid rgba(154,106,32,0.34);
-    border-radius: 7px;
-    padding: 0.75rem 0.85rem;
-    color: var(--muted);
-    font-size: 0.76rem;
-    background: rgba(255, 255, 255, 0.78);
+  }
+  .brief-list div {
+    border-top: 1px solid var(--line);
+    padding-top: 0.7rem;
+  }
+  .brief-list span {
+    display: block;
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--gold);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+  }
+  .brief-list strong {
+    display: block;
+    font-size: 0.96rem;
   }
 
   .article-shell {
@@ -340,21 +253,19 @@
   }
   .section-label span { color: var(--gold); font-weight: 600; }
   .paper-section h2 {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: clamp(1.55rem, 3.4vw, 2.7rem);
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: clamp(1.9rem, 4vw, 3.2rem);
     line-height: 1.08;
     margin: 0 0 1.5rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: -0.035em;
     color: var(--ink);
   }
   .paper-section h3 {
-    font-size: 0.98rem;
+    font-size: 1.06rem;
     line-height: 1.25;
     margin: 1.7rem 0 0.75rem;
-    color: var(--gold);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    color: var(--ink);
+    letter-spacing: -0.01em;
   }
 
   .line-callout {
@@ -494,24 +405,17 @@
     .hero-grid, .article-shell, .result-panel { grid-template-columns: 1fr; }
     .toc { position: relative; top: auto; }
     .process-map { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .boundary-visual { min-height: auto; }
   }
   @media (max-width: 680px) {
     p { font-size: 0.88rem; }
     .topbar { align-items: flex-start; flex-direction: column; }
     .toplinks { gap: 0.75rem; }
     .hero { padding: 1.65rem 0 1.8rem; }
-    .hero h1 { font-size: clamp(2.3rem, 13vw, 3.5rem); letter-spacing: 0.09em; margin-bottom: 0.8rem; }
+    .hero h1 { font-size: clamp(2.7rem, 14vw, 4.2rem); letter-spacing: -0.045em; margin-bottom: 0.8rem; }
     .hero h2 { font-size: clamp(1.18rem, 6vw, 1.72rem); }
     .hero-subtitle { font-size: 0.98rem; margin-bottom: 1rem; }
     .eyebrow { margin-bottom: 0.85rem; }
-    .boundary-visual { padding: 1rem; }
-    .boundary-visual::after { display: none; }
-    .visual-title { font-size: 0.78rem; line-height: 1.4; }
-    .visual-flow { grid-template-columns: 1fr; min-height: auto; }
-    .visual-arrow { justify-self: center; transform: rotate(90deg); font-size: 1.35rem; }
-    .checkpoint { width: min(190px, 72vw); justify-self: center; }
-    .visual-zone strong, .vault-zone strong { font-size: 0.74rem; }
+    .hero-brief { padding: 1rem; }
     .meta-row { display: grid; grid-template-columns: 1fr; gap: 0.5rem; }
     .meta-chip { padding: 0.52rem 0.65rem; min-width: 0; }
     .meta-chip span, .meta-chip strong { display: inline; }
@@ -547,37 +451,23 @@
         <div class="eyebrow">Version 7.2 · June 2026</div>
         <h1>HoloEngine</h1>
         <h2>AI at the Action Boundary</h2>
-        <p class="hero-subtitle">Why smart models still need a checkpoint before real-world action</p>
+        <p class="hero-subtitle">Why smart models need governed context, evidence, artifacts, and audit before real-world action</p>
         <div class="meta-row">
           <div class="meta-chip"><span>Author</span><strong>Taylor Wigton</strong></div>
           <div class="meta-chip"><span>Role</span><strong>Founder, HoloEngine</strong></div>
           <div class="meta-chip"><span>Focus</span><strong>Evidence before action</strong></div>
         </div>
       </div>
-      <div class="boundary-visual" aria-label="HoloEngine action boundary checkpoint">
-        <div class="visual-title">Holo at the Action Boundary</div>
-        <div class="visual-flow">
-          <div class="visual-zone">
-            <span>1. Policy / Workflow</span>
-            <strong>Agent executes with context</strong>
-            <small>Rules, guardrails, workflow logic, and intent arrive at the gate.</small>
-          </div>
-          <div class="visual-arrow">→</div>
-          <div class="checkpoint">
-            <div>
-              <strong>Holo</strong>
-              <span>Checkpoint</span>
-            </div>
-          </div>
-          <div class="visual-arrow">→</div>
-          <div class="vault-zone">
-            <span>3. Crown Jewels</span>
-            <strong>High-value actions</strong>
-            <small>Payments, access grants, vendor changes, contracts, and sensitive records.</small>
-          </div>
+      <div class="hero-brief" aria-label="HoloEngine trust layer summary">
+        <div class="brief-label">Trust layer brief</div>
+        <h3>HoloEngine governs high-stakes AI work before it becomes operational fact.</h3>
+        <p>It is broader than a binary gate. Holo coordinates context, evidence, artifact quality, evaluation, and auditability so consequential work can be trusted before it moves downstream.</p>
+        <div class="brief-list">
+          <div><span>Context</span><strong>Keep the right state in scope without flooding the model.</strong></div>
+          <div><span>Evidence</span><strong>Force claims back to the record before reliance or action.</strong></div>
+          <div><span>Artifacts</span><strong>Harden drafts, packets, and handoffs before they are treated as complete.</strong></div>
+          <div><span>Audit</span><strong>Preserve the trace needed to explain why the output was trusted.</strong></div>
         </div>
-        <div class="verdict-row"><span class="allow">ALLOW</span><i>/</i><span class="escalate">ESCALATE</span></div>
-        <div class="visual-caption">&gt; Only decisions with evidence closure pass. Everything else escalates.</div>
       </div>
     </div>
   </header>

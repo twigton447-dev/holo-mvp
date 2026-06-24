@@ -11,7 +11,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoloEngine · AI at the Action Boundary · Version 7.2</title>
+<title>HoloEngine · AI at the Action Boundary · Version 7.4</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap');
 
@@ -92,12 +92,13 @@
   }
 
   .hero {
-    width: min(1180px, calc(100% - 40px));
+    width: min(980px, calc(100% - 40px));
     margin: 0 auto;
     padding: 3.4rem 0 2.5rem;
   }
   .hero-grid {
-    max-width: 920px;
+    max-width: 980px;
+    margin: 0 auto;
   }
   .eyebrow {
     font-family: "IBM Plex Mono", monospace;
@@ -110,8 +111,8 @@
   }
   .hero h1 {
     font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-    font-size: clamp(4rem, 8vw, 7.4rem);
-    line-height: 0.86;
+    font-size: clamp(4rem, 8vw, 6.8rem);
+    line-height: 0.9;
     letter-spacing: -0.055em;
     margin: 0 0 1.2rem;
     color: var(--ink);
@@ -133,17 +134,23 @@
     color: var(--muted);
     margin-bottom: 2rem;
   }
-  .meta-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .meta-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    max-width: 940px;
+  }
   .meta-chip {
     border: 1px solid var(--line-strong);
     background: rgba(255, 255, 255, 0.86);
     border-radius: 8px;
     padding: 0.7rem 0.85rem;
-    min-width: 150px;
+    min-width: 0;
     box-shadow: inset 0 0 20px rgba(154,106,32,0.025);
   }
   .meta-chip span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
   .meta-chip strong { display: block; margin-top: 0.2rem; font-size: 0.92rem; }
+  .meta-chip a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
 
   .article-shell {
     width: min(1180px, calc(100% - 40px));
@@ -352,6 +359,7 @@
     .hero-grid, .article-shell, .result-panel { grid-template-columns: 1fr; }
     .toc { position: relative; top: auto; }
     .process-map { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .meta-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 680px) {
     p { font-size: 0.88rem; }
@@ -394,14 +402,15 @@
   <header class="hero">
     <div class="hero-grid">
       <div>
-        <div class="eyebrow">Version 7.2 · June 2026</div>
+        <div class="eyebrow">Version 7.4 · June 2026</div>
         <h1>HoloEngine</h1>
         <h2>AI at the Action Boundary</h2>
-        <p class="hero-subtitle">Why smart models need governed context, evidence, artifacts, and audit before real-world action</p>
+        <p class="hero-subtitle">Why smart models still need a checkpoint before real-world action</p>
         <div class="meta-row">
           <div class="meta-chip"><span>Author</span><strong>Taylor Wigton</strong></div>
-          <div class="meta-chip"><span>Role</span><strong>Founder, HoloEngine</strong></div>
-          <div class="meta-chip"><span>Focus</span><strong>Evidence before action</strong></div>
+          <div class="meta-chip"><span>HoloEngine</span><strong><a href="https://holoengine.ai">holoengine.ai</a></strong></div>
+          <div class="meta-chip"><span>Benchmark</span><strong><a href="https://holoengine.ai/benchmark">holoengine.ai/benchmark</a></strong></div>
+          <div class="meta-chip"><span>Contact</span><strong><a href="mailto:taylorw@hologroup.io">taylorw@hologroup.io</a></strong></div>
         </div>
       </div>
     </div>
@@ -438,6 +447,7 @@
 <p>But it is also the risk.</p>
 <p>There is always a final moment before something real happens. Before money moves. Before access is granted. Before a contract is signed. Before a purchase is placed. Before a report is treated as safe to rely on.</p>
 <p>We call that moment the action boundary.</p>
+<p class="line-callout">High-stakes AI needs Customs and Border Protection, not pre-9/11 airport security.</p>
 <p>Right now, most AI safety tools are built for the wrong layer. They check whether the user has permission. They check whether the prompt follows policy. They check whether the model sounds careful.</p>
 <p>They do not check whether the evidence actually supports the action.</p>
 <p>This is the gap.</p>
@@ -495,7 +505,7 @@
           <div class="lane-card build">
             <span>Early Lane</span>
             <h3>HoloBuild</h3>
-            <p>Checks high-stakes work before people rely on it.</p>
+            <p>Creates high-stakes work that people can rely on.</p>
           </div>
           <div class="lane-card verify">
             <span>Late Lane</span>
@@ -867,7 +877,7 @@
   </div>
 
   <footer>
-    <div><strong>HoloEngine</strong><br>Version 7.2 · June 2026</div>
+    <div><strong>HoloEngine</strong><br>Version 7.4 · June 2026</div>
     <div class="links">
       <a href="https://holoengine.ai/whitepaper">holoengine.ai/whitepaper</a><br>
       <a href="https://holoengine.ai/benchmark">holoengine.ai/benchmark</a>

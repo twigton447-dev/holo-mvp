@@ -4,11 +4,15 @@
 
 ### Why smart models still need a checkpoint before real-world action
 
-Version 7.2
+Version 7.4
 June 2026
 
 Taylor Wigton
 Founder, HoloEngine
+
+HoloEngine: holoengine.ai
+Benchmark: holoengine.ai/benchmark
+Contact: taylorw@hologroup.io
 
 ---
 
@@ -27,6 +31,8 @@ But it is also the risk.
 There is always a final moment before something real happens. Before money moves. Before access is granted. Before a contract is signed. Before a purchase is placed. Before a report is treated as safe to rely on.
 
 We call that moment the action boundary.
+
+High-stakes AI needs Customs and Border Protection, not pre-9/11 airport security.
 
 Right now, most AI safety tools are built for the wrong layer. They check whether the user has permission. They check whether the prompt follows policy. They check whether the model sounds careful.
 

@@ -13,6 +13,7 @@ Founder, HoloEngine
 HoloEngine: holoengine.ai
 Benchmark: holoengine.ai/benchmark
 Contact: taylorw@hologroup.io
+Patent status: Patent pending
 
 ---
 
@@ -238,45 +239,33 @@ A reliance-grade artifact has to survive the gate.
 
 ## The architecture
 
-HoloEngine is not just more models.
+HoloEngine is the core architecture.
 
-That distinction matters.
+It is used inside HoloBuild, HoloVerify, and other Holo surfaces. The surface changes. The boundary rule stays the same.
+
+HoloEngine is not just more models.
 
 A group of models voting on the same problem can still fail. They can share the same assumption. They can converge on the wrong story. They can create more words without creating more proof.
 
 HoloEngine is closer to a surgical team.
 
-Different people have different jobs. One reads the chart. One looks for complications. One challenges the plan. One checks whether the required steps are complete. The attending physician does not average their opinions. The attending signs off only if the chart closes.
+Different roles have different jobs. One establishes the baseline story. One looks for weak points. One tests claims against sources. One preserves unresolved contradictions. The attending physician does not average opinions. The attending signs off only if the chart closes.
 
-That is the shape of HoloEngine.
+That is the role of HoloGov inside the architecture.
 
-A proposed action or artifact enters the system.
+HoloGov is the deterministic proof-gate component. It is not another analyst model and it does not make provider calls. It applies the relevant policy and proof standard for the surface it is governing.
 
-Specialized model roles examine it from different angles.
+In HoloBuild, HoloGov-B asks whether a work product is ready to rely on, needs revision, or must preserve unresolved risk.
 
-One role establishes the baseline story.
+In HoloVerify, HoloGov-V asks whether a proposed action can proceed or must escalate.
 
-One hunts for anomalies.
+In HoloChat, HoloGov-C governs continuity and context admission rather than action authorization.
 
-One checks whether the evidence actually supports the claim.
-
-One challenges weak assumptions.
-
-Then the Governor makes the final call.
-
-The Governor is not impressed by confidence. It is not a popularity contest. It does not clear an action because several models sound comfortable.
-
-It asks one question:
+The details differ because each lane has different policies, roles, and failure modes. But the purpose is consistent:
 
 What has actually been proven?
 
-If the evidence supports the action, Holo can allow it.
-
-If required proof is missing, stale, contradicted, or out of scope, Holo escalates.
-
-The point is not disagreement for its own sake.
-
-The point is disciplined disagreement followed by a final decision layer that checks the evidence.
+The point is disciplined disagreement followed by a final evidence gate.
 
 No proof, no clearance.
 

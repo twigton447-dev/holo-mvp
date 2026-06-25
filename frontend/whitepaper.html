@@ -136,9 +136,9 @@
   }
   .meta-row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 1rem;
-    max-width: 940px;
+    max-width: 980px;
   }
   .meta-chip {
     border: 1px solid var(--line-strong);
@@ -411,6 +411,7 @@
           <div class="meta-chip"><span>HoloEngine</span><strong><a href="https://holoengine.ai">holoengine.ai</a></strong></div>
           <div class="meta-chip"><span>Benchmark</span><strong><a href="https://holoengine.ai/benchmark">holoengine.ai/benchmark</a></strong></div>
           <div class="meta-chip"><span>Contact</span><strong><a href="mailto:taylorw@hologroup.io">taylorw@hologroup.io</a></strong></div>
+          <div class="meta-chip"><span>Patent status</span><strong>Patent pending</strong></div>
         </div>
       </div>
     </div>
@@ -601,32 +602,26 @@
         <h2>The architecture</h2>
 
         <div class="process-map" aria-label="HoloEngine process">
-          <div><span>01</span><strong>Case file</strong><em>the same record</em></div>
-          <div><span>02</span><strong>Model roles</strong><em>different jobs</em></div>
-          <div><span>03</span><strong>Evidence check</strong><em>source over style</em></div>
-          <div><span>04</span><strong>Governor</strong><em>proof threshold</em></div>
-          <div><span>05</span><strong>Decision</strong><em>allow or escalate</em></div>
+          <div><span>01</span><strong>Case packet</strong><em>same evidence record</em></div>
+          <div><span>02</span><strong>Role separation</strong><em>different jobs, not a vote</em></div>
+          <div><span>03</span><strong>Evidence pressure</strong><em>source over confidence</em></div>
+          <div><span>04</span><strong>HoloGov</strong><em>lane-specific proof gate</em></div>
+          <div><span>05</span><strong>Boundary result</strong><em>ready, revise, allow, or escalate</em></div>
         </div>
-        <p>HoloEngine is not just more models.</p>
-<p>That distinction matters.</p>
+        <p>HoloEngine is the core architecture.</p>
+<p>It is used inside HoloBuild, HoloVerify, and other Holo surfaces. The surface changes. The boundary rule stays the same.</p>
+<p>HoloEngine is not just more models.</p>
 <p>A group of models voting on the same problem can still fail. They can share the same assumption. They can converge on the wrong story. They can create more words without creating more proof.</p>
 <p>HoloEngine is closer to a surgical team.</p>
-<p>Different people have different jobs. One reads the chart. One looks for complications. One challenges the plan. One checks whether the required steps are complete. The attending physician does not average their opinions. The attending signs off only if the chart closes.</p>
-<p>That is the shape of HoloEngine.</p>
-<p>A proposed action or artifact enters the system.</p>
-<p>Specialized model roles examine it from different angles.</p>
-<p>One role establishes the baseline story.</p>
-<p>One hunts for anomalies.</p>
-<p>One checks whether the evidence actually supports the claim.</p>
-<p>One challenges weak assumptions.</p>
-<p>Then the Governor makes the final call.</p>
-<p>The Governor is not impressed by confidence. It is not a popularity contest. It does not clear an action because several models sound comfortable.</p>
-<p>It asks one question:</p>
+<p>Different roles have different jobs. One establishes the baseline story. One looks for weak points. One tests claims against sources. One preserves unresolved contradictions. The attending physician does not average opinions. The attending signs off only if the chart closes.</p>
+<p>That is the role of HoloGov inside the architecture.</p>
+<p>HoloGov is the deterministic proof-gate component. It is not another analyst model and it does not make provider calls. It applies the relevant policy and proof standard for the surface it is governing.</p>
+<p>In HoloBuild, HoloGov-B asks whether a work product is ready to rely on, needs revision, or must preserve unresolved risk.</p>
+<p>In HoloVerify, HoloGov-V asks whether a proposed action can proceed or must escalate.</p>
+<p>In HoloChat, HoloGov-C governs continuity and context admission rather than action authorization.</p>
+<p>The details differ because each lane has different policies, roles, and failure modes. But the purpose is consistent:</p>
 <p>What has actually been proven?</p>
-<p>If the evidence supports the action, Holo can allow it.</p>
-<p>If required proof is missing, stale, contradicted, or out of scope, Holo escalates.</p>
-<p>The point is not disagreement for its own sake.</p>
-<p>The point is disciplined disagreement followed by a final decision layer that checks the evidence.</p>
+<p>The point is disciplined disagreement followed by a final evidence gate.</p>
 <p class="line-callout">No proof, no clearance.</p>
 
       </section>

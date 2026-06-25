@@ -43,6 +43,26 @@ This checkout does not yet expose these exact profile strings as a single discov
 - Change rule: future modifications to the doctrine must create a new version or be explicitly approved by the operator.
 - Future extraction note: HoloBrain should eventually extract structured learning from prior HoloGov-B and HoloGov-V tests as `case_experience` objects, settled decisions, failure patterns, successful resolutions, and artifact references, but not raw trace dumps by default.
 
+## HoloBrain Maintenance Roster
+
+- Source of truth: `holobrain/memory/HoloBrainMaintenanceRoster_v0.1.md`
+- Version: `0.1`
+- Status: `locked`
+- Effective date: `2026-06-25`
+- Governing doctrine: `holobrain/memory/HoloGov_Memory_Doctrine_v0.1.md`
+- Scope: HoloScribe, HoloPrune, HoloThread, HoloSentinel, HoloScope, and HoloLedger are HoloBrain maintenance agents that may prepare memory changes but may not silently rewrite truth.
+- Change rule: future modifications to the roster must create a new version or be explicitly approved by the operator.
+
+## HoloBrain Daily Operations Policy
+
+- Source of truth: `holobrain/operations/HoloBrain_Daily_Operations_Policy_v0.1.md`
+- Version: `0.1`
+- Status: `locked`
+- Effective date: `2026-06-25`
+- Scope: benchmark execution is governed by the locked daily operations policy.
+- Operating rule: if the daily checklist is not completed, no benchmark execution may run that day.
+- Change rule: future modifications to the operations policy must create a new version or be explicitly approved by the operator.
+
 ## Prepared
 
 - HoloBuild package imports under the repo venv.

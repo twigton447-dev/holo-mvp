@@ -352,6 +352,14 @@ The benchmark evidence is still early. It is not a universal claim. It is not th
 
 But the pattern is useful.
 
+Definitions
+
+Scored proof: A completed run that passed the published gates: frozen packet, hashed prompt, captured trace, blind scoring, label assignment, and ledger promotion.
+
+Baseline failure: A solo run that did not produce a scoreable artifact.
+
+Hardening evidence: A failure Holo preserved and used to tighten the system.
+
 ### Kit A: Accounts Payable and BEC
 
 In one AP case, a payment looked ready to release. The vendor was real. The payment controls looked clean. The workflow referenced a purchase order.
@@ -556,17 +564,27 @@ The response is not to pretend otherwise. The response is to make the evidence i
 
 The best next step is independent replication.
 
-### “Couldn’t a better model fix this?”
+### “Won’t better models make Holo obsolete?”
 
-Sometimes a better model will fix a specific failure.
+No. Holo is not a bet against stronger models. It is designed to use them.
 
-That is why the benchmark has to keep getting harder.
+The architecture is model-agnostic and hot-swappable: when stronger models arrive, they can be moved into the roles, pressure tests, and Governor checks. The checkpoint gets stronger without abandoning the evidence discipline that made the checkpoint useful.
 
-But the deeper issue is structural. A model can understand the task and still fail the production gate. It can produce plausible work without closing the evidence boundary. It can self-review and defend its first answer. It can be right on average and still fail the one case that matters.
+Better models may fix specific failures. That is why the benchmark has to keep getting harder. But model progress does not remove the need for a boundary layer that asks whether the evidence actually supports the action.
 
 Model quality helps.
 
-Architecture still matters.
+The checkpoint stays ahead by upgrading the models inside it.
+
+### “Won’t models patch their own blindspots?”
+
+Not reliably by themselves.
+
+Recent research argues that hallucinations persist partly because training and evaluation systems can reward guessing over acknowledging uncertainty. Other work finds that intrinsic self-correction and self-critique can fail or even degrade performance without external feedback or sound verification.
+
+That is the point of Holo. The system does not assume a model can inspect away its own blindspots. It adds external structure: role separation, adversarial pressure, evidence gates, audit trails, and a final Governor check.
+
+Sources: Kalai et al., “Why Language Models Hallucinate” (https://arxiv.org/abs/2509.04664); Huang et al., “Large Language Models Cannot Self-Correct Reasoning Yet” (https://arxiv.org/abs/2310.01798); Valmeekam et al., “Can Large Language Models Really Improve by Self-critiquing Their Own Plans?” (https://arxiv.org/abs/2310.08118).
 
 ### “Isn’t this just more agents?”
 

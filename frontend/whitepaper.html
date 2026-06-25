@@ -693,8 +693,9 @@
             <div><strong>~1.9x</strong><span>Total token budget</span></div>
           </div>
         </div>
-        <div class="proof-grid" aria-label="Evidence categories">
-          <div><strong>Scored proof</strong><span>A completed run that cleared the gates.</span></div>
+        <div class="card-kicker">Definitions</div>
+        <div class="proof-grid" aria-label="Evidence category definitions">
+          <div><strong>Scored proof</strong><span>A completed run that passed the published gates: frozen packet, hashed prompt, captured trace, blind scoring, label assignment, and ledger promotion.</span></div>
           <div><strong>Baseline failure</strong><span>A solo run that did not produce a scoreable artifact.</span></div>
           <div><strong>Hardening evidence</strong><span>A failure Holo preserved and used to tighten the system.</span></div>
         </div>
@@ -835,12 +836,19 @@
 <p>The best next step is independent replication.</p>
 </div>
 <div class="objection-card">
-<h3>“Couldn’t a better model fix this?”</h3>
-<p>Sometimes a better model will fix a specific failure.</p>
-<p>That is why the benchmark has to keep getting harder.</p>
-<p>But the deeper issue is structural. A model can understand the task and still fail the production gate. It can produce plausible work without closing the evidence boundary. It can self-review and defend its first answer. It can be right on average and still fail the one case that matters.</p>
+<h3>“Won’t better models make Holo obsolete?”</h3>
+<p>No. Holo is not a bet against stronger models. It is designed to use them.</p>
+<p>The architecture is model-agnostic and hot-swappable: when stronger models arrive, they can be moved into the roles, pressure tests, and Governor checks. The checkpoint gets stronger without abandoning the evidence discipline that made the checkpoint useful.</p>
+<p>Better models may fix specific failures. That is why the benchmark has to keep getting harder. But model progress does not remove the need for a boundary layer that asks whether the evidence actually supports the action.</p>
 <p class="line-callout">Model quality helps.</p>
-<p class="line-callout">Architecture still matters.</p>
+<p class="line-callout">The checkpoint stays ahead by upgrading the models inside it.</p>
+</div>
+<div class="objection-card">
+<h3>“Won’t models patch their own blindspots?”</h3>
+<p>Not reliably by themselves.</p>
+<p>Recent research argues that hallucinations persist partly because training and evaluation systems can reward guessing over acknowledging uncertainty. Other work finds that intrinsic self-correction and self-critique can fail or even degrade performance without external feedback or sound verification.</p>
+<p>That is the point of Holo. The system does not assume a model can inspect away its own blindspots. It adds external structure: role separation, adversarial pressure, evidence gates, audit trails, and a final Governor check.</p>
+<p><a href="https://arxiv.org/abs/2509.04664" target="_blank" rel="noopener">Kalai et al., “Why Language Models Hallucinate”</a>; <a href="https://arxiv.org/abs/2310.01798" target="_blank" rel="noopener">Huang et al., “Large Language Models Cannot Self-Correct Reasoning Yet”</a>; <a href="https://arxiv.org/abs/2310.08118" target="_blank" rel="noopener">Valmeekam et al., “Can Large Language Models Really Improve by Self-critiquing Their Own Plans?”</a>.</p>
 </div>
 <div class="objection-card">
 <h3>“Isn’t this just more agents?”</h3>

@@ -10,8 +10,11 @@ Model defaults (override via .env):
   OPENAI_MODEL    = gpt-5.4
   ANTHROPIC_MODEL = claude-sonnet-4-6
   GOOGLE_MODEL    = gemini-2.5-pro
+  XAI_MODEL       = grok-4.3  (bench/failover backup)
   GOVERNOR_MODEL  = rotates across same 3-model pool as analysts (never shares DNA with analyst on the same turn)
 """
+
+from __future__ import annotations
 
 import json
 import logging
@@ -22,6 +25,21 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 logger = logging.getLogger("holo.adapters")
+
+
+def _api_key_header_invalid_reason(value: str) -> Optional[str]:
+    """Return why a key cannot safely be placed in an HTTP auth header."""
+    if not isinstance(value, str) or not value:
+        return "empty"
+    try:
+        value.encode("ascii")
+    except UnicodeEncodeError:
+        return "non_ascii"
+    if value != value.strip():
+        return "surrounding_whitespace"
+    if any(ch.isspace() for ch in value):
+        return "embedded_whitespace"
+    return None
 
 
 def _load_markdown_doctrine(filename: str, *, max_chars: int = 12000) -> str:
@@ -3639,7 +3657,7 @@ _MODEL_REGISTRY = [
     ("active", "anthropic", "ANTHROPIC_MODEL", "claude-sonnet-4-6",     "ANTHROPIC_API_KEY", None),
     ("active", "google",    "GOOGLE_MODEL",    "gemini-2.5-pro",        "GOOGLE_API_KEY",    None),
     # ── Bench (earns rotation via benchmark performance) ────────────────────
-    ("bench",  "xai",       "XAI_MODEL",       "grok-3",                "XAI_API_KEY",       "https://api.x.ai/v1"),
+    ("bench",  "xai",       "XAI_MODEL",       "grok-4.3",              "XAI_API_KEY",       "https://api.x.ai/v1"),
     ("bench",  "mistral",   "MISTRAL_MODEL",   "mistral-large-latest",  "MISTRAL_API_KEY",   "https://api.mistral.ai/v1"),
     ("bench",  "deepseek",  "DEEPSEEK_MODEL",  "deepseek-chat",         "DEEPSEEK_API_KEY",  "https://api.deepseek.com/v1"),
     ("bench",  "minimax",   "MINIMAX_MODEL",   "MiniMax-Text-01",       "MINIMAX_API_KEY",   "https://api.minimax.chat/v1"),
@@ -3671,6 +3689,15 @@ def load_adapters(skip_providers=None) -> tuple[list[BaseAdapter], list[BaseAdap
         api_key = os.getenv(key_env)
         if not api_key:
             logger.info(f"Skipping {provider} — {key_env} not set")
+            continue
+        invalid_key_reason = _api_key_header_invalid_reason(api_key)
+        if invalid_key_reason:
+            logger.warning(
+                "Skipping %s — %s is malformed for HTTP auth header (%s)",
+                provider,
+                key_env,
+                invalid_key_reason,
+            )
             continue
         if base_url is not None:
             adapter = OpenAICompatibleAdapter(
@@ -3738,6 +3765,15 @@ def load_fast_adapters(skip_providers=None) -> list:
         api_key = os.getenv(key_env)
         if not api_key:
             logger.info(f"Fast pool: skipping {provider} — {key_env} not set")
+            continue
+        invalid_key_reason = _api_key_header_invalid_reason(api_key)
+        if invalid_key_reason:
+            logger.warning(
+                "Fast pool: skipping %s — %s is malformed for HTTP auth header (%s)",
+                provider,
+                key_env,
+                invalid_key_reason,
+            )
             continue
         model_id = os.getenv(model_env, model_default)
         adapter  = _VENDOR_SDK_FAST[provider](provider, model_id, api_key)

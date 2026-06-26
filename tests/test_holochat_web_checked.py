@@ -243,6 +243,16 @@ def test_frontend_has_web_checked_render_path():
     assert "data-search-query" in html
 
 
+def test_frontend_stream_error_uses_non_streaming_fallback_before_showing_error():
+    html = Path("frontend/chat.html").read_text()
+
+    assert "let   streamFailed = false;" in html
+    assert "streamFailed = true;" in html
+    assert "if (streamFailed) break;" in html
+    assert "if (!streamFailed && !holoEl && !doneData)" in html
+    assert 'appendError(evt.detail || "Something went wrong. Please try again.");' not in html
+
+
 def test_frontend_message_copy_has_fallback_and_targets_response_bubbles():
     html = Path("frontend/chat.html").read_text()
 
@@ -283,11 +293,21 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
         "Context delivery",
         "Full memory to analyst",
         "Memory store",
+        "Memory delivery",
+        "Rolling summary",
+        "Continuity ledger",
         "State object",
         "Gov Arc State",
         "Baton Pass",
         "Holo4DNA",
         "AutoReseed",
+        "Auto compact count",
+        "Auto compact interval",
+        "Last compact turn",
+        "Reseed artifacts",
+        "Last reseed turn",
+        "Visible handoff after",
+        "Visible handoff shown",
         "Analyst failover",
         "Failover policy",
         "Final analyst",

@@ -6,6 +6,7 @@ from uuid import uuid4
 import pytest
 
 import chat_engine
+import llm_adapters
 from chat_engine import (
     ChatSession,
     HoloChatEngine,
@@ -19,7 +20,12 @@ from chat_engine import (
     _select_runtime_pools,
 )
 from holo_state import GovArcState
-from llm_adapters import AnthropicAdapter, GOVERNOR_SYSTEM_PROMPT, HOLO_CHAT_SYSTEM_PROMPT
+from llm_adapters import (
+    AnthropicAdapter,
+    GOVERNOR_SYSTEM_PROMPT,
+    HOLO_CHAT_SYSTEM_PROMPT,
+    _api_key_header_invalid_reason,
+)
 
 
 @dataclass
@@ -34,6 +40,9 @@ class FakeAdapter:
 class FakeGovernor:
     provider = "governor"
     model_id = "governor-mini"
+
+    def __init__(self, *args, fixed_governor=None, **kwargs):
+        self.fixed_governor = fixed_governor
 
     def prepare_for_turn(self, adapter):
         self.provider = "governor"
@@ -119,15 +128,18 @@ class MemoryHeavyBrain(FakeBrain):
 
 class CapturingAdapter(FakeAdapter):
     last_system_prompt: str = ""
+    last_history: list | None = None
 
     def chat_call(self, system_prompt, history, user_message, temperature, images=None):
         self.last_system_prompt = system_prompt
+        self.last_history = list(history)
         return super().chat_call(system_prompt, history, user_message, temperature, images=images)
 
 
 class CapturingStreamAdapter(CapturingAdapter):
     def stream_chat_call(self, system_prompt, history, user_message, temperature, images=None):
         self.last_system_prompt = system_prompt
+        self.last_history = list(history)
         yield f"{self.provider} stream answer"
         yield {"done": True, "in_tok": 4, "out_tok": 3}
 
@@ -152,23 +164,65 @@ def _mini_pool():
     ]
 
 
-def test_default_runtime_profile_is_mini_only(monkeypatch):
-    monkeypatch.delenv("HOLOCHAT_RUNTIME_PROFILE", raising=False)
+@pytest.mark.parametrize(
+    ("value", "reason"),
+    [
+        ("sk-ok_123-ABC", None),
+        ("sk-bad—dash", "non_ascii"),
+        (" sk-bad", "surrounding_whitespace"),
+        ("sk-bad value", "embedded_whitespace"),
+        ("sk-bad\nvalue", "embedded_whitespace"),
+    ],
+)
+def test_api_key_header_validation_rejects_values_that_crash_httpx(value, reason):
+    assert _api_key_header_invalid_reason(value) == reason
 
-    profile, active, bench = _select_runtime_pools(
-        fast_loader=_mini_pool,
-        frontier_loader=lambda: pytest.fail("frontier loader should not run by default"),
+
+def test_load_adapters_skips_malformed_api_keys_without_leaking_value(monkeypatch, caplog):
+    bad_key = "sk-test—copied-comment"
+    monkeypatch.setenv("BAD_API_KEY", bad_key)
+    monkeypatch.setattr(
+        llm_adapters,
+        "_MODEL_REGISTRY",
+        [("bench", "badprovider", "BAD_MODEL", "bad-model", "BAD_API_KEY", "https://example.test/v1")],
     )
 
-    assert profile == "mini_only"
-    assert [adapter.model_id for adapter in active] == [
-        "gpt-4o-mini",
-        "claude-haiku-4-5-20251001",
-        "gemini-2.5-flash-lite",
-        "grok-3-mini",
-        "mistral-small-latest",
-    ]
+    active, bench = llm_adapters.load_adapters()
+
+    assert active == []
     assert bench == []
+    assert "BAD_API_KEY is malformed" in caplog.text
+    assert bad_key not in caplog.text
+
+
+def test_default_runtime_profile_is_frontier_active(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_RUNTIME_PROFILE", raising=False)
+    monkeypatch.delenv("HOLOCHAT_PROVIDER_ROTATION", raising=False)
+    frontier_active = [
+        FakeAdapter("openai", "gpt-5.4"),
+        FakeAdapter("anthropic", "claude-sonnet-4-6"),
+        FakeAdapter("google", "gemini-2.5-pro"),
+    ]
+    frontier_bench = [
+        FakeAdapter("xai", "grok-4.3"),
+        FakeAdapter("minimax", "MiniMax-Text-01"),
+    ]
+
+    profile, active, bench = _select_runtime_pools(
+        fast_loader=lambda: pytest.fail("fast loader should not run by default"),
+        frontier_loader=lambda: (frontier_active, frontier_bench),
+    )
+
+    assert profile == "frontier_active"
+    assert [(adapter.provider, adapter.model_id) for adapter in active] == [
+        ("xai", "grok-4.3"),
+        ("openai", "gpt-5.4"),
+        ("minimax", "MiniMax-Text-01"),
+    ]
+    assert [(adapter.provider, adapter.model_id) for adapter in bench] == [
+        ("anthropic", "claude-sonnet-4-6"),
+        ("google", "gemini-2.5-pro"),
+    ]
 
 
 def test_mini_only_does_not_fall_back_to_frontier_when_empty():
@@ -180,9 +234,16 @@ def test_mini_only_does_not_fall_back_to_frontier_when_empty():
         )
 
 
-def test_explicit_frontier_profile_uses_legacy_loader():
-    frontier_active = [FakeAdapter("openai", "gpt-5.4")]
-    frontier_bench = [FakeAdapter("xai", "grok-3")]
+def test_explicit_frontier_profile_uses_legacy_loader(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_PROVIDER_ROTATION", raising=False)
+    frontier_active = [
+        FakeAdapter("openai", "gpt-5.4"),
+        FakeAdapter("anthropic", "claude-sonnet-4-6"),
+    ]
+    frontier_bench = [
+        FakeAdapter("xai", "grok-4.3"),
+        FakeAdapter("minimax", "MiniMax-Text-01"),
+    ]
 
     profile, active, bench = _select_runtime_pools(
         "frontier_active",
@@ -191,14 +252,20 @@ def test_explicit_frontier_profile_uses_legacy_loader():
     )
 
     assert profile == "frontier_active"
-    assert active == frontier_active
-    assert bench == frontier_bench
+    assert [(adapter.provider, adapter.model_id) for adapter in active] == [
+        ("xai", "grok-4.3"),
+        ("openai", "gpt-5.4"),
+        ("minimax", "MiniMax-Text-01"),
+    ]
+    assert [(adapter.provider, adapter.model_id) for adapter in bench] == [
+        ("anthropic", "claude-sonnet-4-6"),
+    ]
 
 
 def test_balanced_profile_uses_mini_pool_with_frontier_assist_pool():
     mini_pool = _mini_pool()
     frontier_active = [FakeAdapter("openai", "gpt-5.4")]
-    frontier_bench = [FakeAdapter("xai", "grok-3")]
+    frontier_bench = [FakeAdapter("xai", "grok-4.3")]
 
     profile, active, bench = _select_runtime_pools(
         "balanced",
@@ -227,7 +294,7 @@ def test_runtime_metadata_reports_balanced_frontier_assist():
     metadata = _runtime_metadata(
         "balanced",
         _mini_pool(),
-        [FakeAdapter("openai", "gpt-5.4"), FakeAdapter("xai", "grok-3")],
+        [FakeAdapter("openai", "gpt-5.4"), FakeAdapter("xai", "grok-4.3")],
     )
 
     assert metadata["runtime_profile"] == "balanced"
@@ -238,28 +305,48 @@ def test_runtime_metadata_reports_balanced_frontier_assist():
     assert len(metadata["bench_pool"]) == 2
 
 
-def test_holochat_engine_init_uses_mini_loader(monkeypatch):
+def test_holochat_engine_init_uses_frontier_loader(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_RUNTIME_PROFILE", raising=False)
-    monkeypatch.setattr(chat_engine, "load_fast_adapters", _mini_pool)
+    monkeypatch.delenv("HOLOCHAT_PROVIDER_ROTATION", raising=False)
+    monkeypatch.delenv("HOLOCHAT_GOVERNOR_PROVIDER", raising=False)
+    frontier_active = [
+        FakeAdapter("openai", "gpt-5.4"),
+        FakeAdapter("anthropic", "claude-opus-4-8"),
+    ]
+    frontier_bench = [
+        FakeAdapter("xai", "grok-4.3"),
+        FakeAdapter("minimax", "MiniMax-Text-01"),
+    ]
+    monkeypatch.setattr(
+        chat_engine,
+        "load_fast_adapters",
+        lambda: pytest.fail("fast loader should not run"),
+    )
     monkeypatch.setattr(
         chat_engine,
         "load_adapters",
-        lambda: pytest.fail("frontier loader should not run"),
+        lambda: (frontier_active, frontier_bench),
     )
-    monkeypatch.setattr(chat_engine, "GovernorAdapter", lambda pool: FakeGovernor())
+    monkeypatch.setattr(
+        chat_engine,
+        "GovernorAdapter",
+        lambda pool, fixed_governor=None: FakeGovernor(fixed_governor=fixed_governor),
+    )
     monkeypatch.setattr(chat_engine, "ProjectBrain", FakeBrain)
 
     engine = HoloChatEngine()
 
-    assert engine._runtime_profile == "mini_only"
-    assert [adapter.model_id for adapter in engine._adapters] == [
-        "gpt-4o-mini",
-        "claude-haiku-4-5-20251001",
-        "gemini-2.5-flash-lite",
-        "grok-3-mini",
-        "mistral-small-latest",
+    assert engine._runtime_profile == "frontier_active"
+    assert [(adapter.provider, adapter.model_id) for adapter in engine._adapters] == [
+        ("xai", "grok-4.3"),
+        ("openai", "gpt-5.4"),
+        ("minimax", "MiniMax-Text-01"),
     ]
-    assert engine._bench == []
+    assert [(adapter.provider, adapter.model_id) for adapter in engine._bench] == [
+        ("anthropic", "claude-opus-4-8"),
+    ]
+    assert engine._governor.fixed_governor == "openai"
+    assert engine._governor.provider == "openai"
 
 
 def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
@@ -306,14 +393,27 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["governor_status"] == "checked_this_turn"
     assert result["runtime"]["governor_role"] == "controller_check_layer"
     assert result["runtime"]["context_delivery_mode"] == "capped_ranked_prompt_slice"
-    assert result["runtime"]["lossless_memory_store"] == "HoloBrain/capsule"
+    assert result["runtime"]["durable_memory_store"] == "HoloBrain/capsule"
+    assert result["runtime"]["memory_delivery_mode"] == "rolling_summary_selected_context"
+    assert result["runtime"]["pinned_artifact_policy"] == "refs_by_default_full_fidelity_when_selected"
     assert result["runtime"]["analyst_receives_full_memory"] is False
-    assert result["runtime"]["structured_state_object_mode"] == "shadow"
-    assert result["runtime"]["baton_pass_mode"] == "shadow"
+    assert result["runtime"]["continuity_ledger_mode"] == "active_prompt_structured_private"
+    assert result["runtime"]["continuity_ledger_counts"]["open_issues"] == 3
+    assert result["runtime"]["continuity_ledger_counts"]["repaired"] == 1
+    assert result["runtime"]["continuity_ledger_counts"]["user_continuity"] == 2
+    assert result["runtime"]["structured_state_object_mode"] == "active_prompt"
+    assert result["runtime"]["baton_pass_mode"] == "active_prompt"
     assert result["runtime"]["holo4dna_mode"] == "off"
     assert result["runtime"]["reseed_present"] is False
     assert result["runtime"]["reseed_mode"] == "off"
-    assert result["runtime"]["autoreseed_enabled"] is False
+    assert result["runtime"]["autoreseed_enabled"] is True
+    assert result["runtime"]["auto_compact_enabled"] is True
+    assert result["runtime"]["auto_compact_count"] == 0
+    assert result["runtime"]["last_auto_compact_turn"] is None
+    assert result["runtime"]["reseed_artifact_count"] == 0
+    assert result["runtime"]["last_reseed_turn"] is None
+    assert result["runtime"]["visible_handoff_min_turns"] == 40
+    assert result["runtime"]["visible_handoff_suggested"] is False
     assert result["runtime"]["failover"]["attempted"] is False
     assert result["runtime"]["failover"]["count"] == 0
     assert result["runtime"]["governor_trace"]["temperature"] == "checked"
@@ -322,7 +422,7 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["governor_trace"]["web_search"]["provider"] == "tavily"
     assert result["runtime"]["governor_trace"]["claim_check"] == "checked"
     assert result["runtime"]["governor_trace"]["conversation_paths"] == "generated"
-    assert result["runtime"]["gov_arc_state_mode"] == "explicit_shadow"
+    assert result["runtime"]["gov_arc_state_mode"] == "active_prompt"
     assert result["runtime"]["gov_arc_state"]["current_topic"] == "Stay mini."
     assert result["runtime"]["gov_arc_state"]["next_paths"] == result["conversation_paths"]
     assert result["usage"] == result["runtime"]["usage"]
@@ -412,7 +512,7 @@ def test_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
     assert result["runtime"]["reseed_present"] is True
     assert result["runtime"]["reseed_mode"] == "thread_handoff_seed"
     assert result["runtime"]["thread_handoff_seed_present"] is True
-    assert result["runtime"]["autoreseed_enabled"] is False
+    assert result["runtime"]["autoreseed_enabled"] is True
     assert result["runtime"]["gov_arc_state"]["current_tension"] == transition["tension"]
     assert result["runtime"]["gov_arc_state"]["user_goal"] == transition["goal"]
     handoff_rows = [
@@ -661,18 +761,48 @@ def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeyp
     assert "capsule_attached: true" in adapter.last_system_prompt
     assert "local memory-attached workspace and chat surface" in adapter.last_system_prompt
     assert "HoloChat itself is not the irreversible-action adjudicator" in adapter.last_system_prompt
+    assert "HOLO STATE OBJECT" in adapter.last_system_prompt
+    assert "ROLLING_SUMMARY" in adapter.last_system_prompt
+    assert "BATON_PASS" in adapter.last_system_prompt
     assert "raw-capsule-id" not in adapter.last_system_prompt
     assert "must-not-leak" not in adapter.last_system_prompt
     assert "life-memory-29" not in adapter.last_system_prompt
     assert "[context_budget] omitted" in adapter.last_system_prompt
     assert budget_rows["runtime_identity"]["included"] is True
+    assert budget_rows["holo_state_object"]["included"] is True
     assert budget_rows["life_context"]["token_estimate"] < 500
     assert budget_rows["capsule_context"]["token_estimate"] < 400
     assert result["runtime"]["runtime_profile"] == "mini_only"
     assert result["runtime"]["governor_checked_this_turn"] is True
     assert result["runtime"]["governor_role"] == "controller_check_layer"
     assert result["runtime"]["context_delivery_mode"] == "capped_ranked_prompt_slice"
+    assert result["runtime"]["memory_delivery_mode"] == "rolling_summary_selected_context"
+    assert result["runtime"]["rolling_summary_mode"] == "active_prompt_sliding_window"
+    assert result["runtime"]["continuity_ledger_mode"] == "active_prompt_structured_private"
     assert result["runtime"]["analyst_receives_full_memory"] is False
+
+
+def test_second_turn_prompt_includes_private_continuity_ledger(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+    session_id = str(uuid4())
+
+    first = engine.send_message(session_id, "Map what Gov carries forward.")
+    assert first["runtime"]["continuity_ledger_counts"]["open_issues"] == 3
+
+    engine.send_message(session_id, "Now use that carry-forward.")
+
+    assert "CONTINUITY_LEDGER" in adapter.last_system_prompt
+    assert "open_issues" in adapter.last_system_prompt
+    assert "user_continuity" in adapter.last_system_prompt
+    assert "latest user need: Map what Gov carries forward." in adapter.last_system_prompt
 
 
 def test_currentness_query_forces_web_search_without_gov_gate(monkeypatch):
@@ -783,6 +913,8 @@ def test_thread_handoff_artifact_is_tethered_to_source_session():
 
     assert artifact_id == "artifact-1"
     assert session.handoff_artifact_saved is True
+    assert session.handoff_artifact_count == 1
+    assert session.last_handoff_artifact_turn == 16
     assert brain.saved_artifacts == [
         {
             "capsule_id": "capsule-1",
@@ -804,10 +936,22 @@ def test_thread_handoff_artifact_is_tethered_to_source_session():
     assert second is None
     assert len(brain.saved_artifacts) == 1
 
+    session.turn_count = 26
+    third = _save_thread_handoff_artifact(
+        brain,
+        capsule_id="capsule-1",
+        session=session,
+        consolidation={"session_note": {"what_changed": "Changed again"}, "life_context": []},
+    )
+    assert third == "artifact-1"
+    assert session.handoff_artifact_count == 2
+    assert session.last_handoff_artifact_turn == 26
+    assert len(brain.saved_artifacts) == 2
+
 
 def test_handoff_prompt_is_once_per_context_window():
     session = ChatSession(session_id="session-1")
-    session.turn_count = 24
+    session.turn_count = 40
     session.gov_arc_state = GovArcState(
         current_topic="mobile controls and reseed continuity",
         user_goal="make the fresh thread feel continuous",
@@ -833,16 +977,16 @@ def test_handoff_prompt_is_once_per_context_window():
 
 def test_handoff_prompt_waits_past_initial_red_zone():
     session = ChatSession(session_id="session-1")
-    session.turn_count = 16
+    session.turn_count = 30
 
     assert session.thread_health_level == "RED"
     assert _handoff_for_context_window(session) is None
     assert session.handoff_suggested is False
 
 
-def test_autocompact_is_claimed_once_per_context_window():
+def test_autocompact_is_claimed_on_spaced_intervals():
     session = ChatSession(session_id="session-1")
-    session.turn_count = 24
+    session.turn_count = 30
 
     first = _claim_autocompact_for_context_window(
         session,
@@ -858,9 +1002,30 @@ def test_autocompact_is_claimed_once_per_context_window():
     assert first is True
     assert second is False
     assert session.autocompact_attempted is True
+    assert session.autocompact_count == 1
+    assert session.last_autocompact_turn == 30
+
+    session.turn_count = 39
+    too_soon = _claim_autocompact_for_context_window(
+        session,
+        capsule_id="capsule-1",
+        incognito=False,
+    )
+    assert too_soon is False
+    assert session.autocompact_count == 1
+
+    session.turn_count = 40
+    third = _claim_autocompact_for_context_window(
+        session,
+        capsule_id="capsule-1",
+        incognito=False,
+    )
+    assert third is True
+    assert session.autocompact_count == 2
+    assert session.last_autocompact_turn == 40
 
     incognito_session = ChatSession(session_id="session-2")
-    incognito_session.turn_count = 24
+    incognito_session.turn_count = 30
     assert _claim_autocompact_for_context_window(
         incognito_session,
         capsule_id="capsule-1",
@@ -868,17 +1033,19 @@ def test_autocompact_is_claimed_once_per_context_window():
     ) is False
 
 
-def test_autocompact_waits_with_visible_handoff_gate():
+def test_autocompact_can_run_before_visible_handoff_gate():
     session = ChatSession(session_id="session-1")
-    session.turn_count = 16
+    session.turn_count = 30
 
     assert session.thread_health_level == "RED"
     assert _claim_autocompact_for_context_window(
         session,
         capsule_id="capsule-1",
         incognito=False,
-    ) is False
-    assert session.autocompact_attempted is False
+    ) is True
+    assert session.autocompact_attempted is True
+    assert _handoff_for_context_window(session) is None
+    assert session.handoff_suggested is False
 
 
 def test_usage_metadata_falls_back_to_estimates_when_provider_usage_unavailable(monkeypatch):
@@ -910,3 +1077,96 @@ def test_usage_metadata_falls_back_to_estimates_when_provider_usage_unavailable(
     assert ("actual " + "billed cost") not in runtime_text
     assert ("raw " + "prompt") not in runtime_text
     assert ("raw " + "memory") not in runtime_text
+
+
+def test_long_thread_history_is_bounded_before_adapter_call(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGES", "4")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_CHARS", "2000")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS", "500")
+    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+    session_id = str(uuid4())
+    session = engine.get_or_create_session(session_id)
+    session.history = [
+        {
+            "role": "user" if idx % 2 == 0 else "assistant",
+            "content": f"turn-{idx} " + ("x" * 5000),
+        }
+        for idx in range(40)
+    ]
+    original_history_count = len(session.history)
+
+    result = engine.send_message(session_id, "Keep this compact.")
+    budget_rows = {row["block_name"]: row for row in result["context_budget"]["rows"]}
+
+    assert len(session.history) == original_history_count + 2
+    assert adapter.last_history is not None
+    assert len(adapter.last_history) <= 4
+    assert all(len(message["content"]) <= 503 for message in adapter.last_history)
+    assert result["runtime"]["adapter_history_total_messages"] == original_history_count
+    assert result["runtime"]["adapter_history_omitted_messages"] == original_history_count - len(adapter.last_history)
+    assert result["runtime"]["adapter_history_chars"] <= 2000
+    assert budget_rows["recent_session_history"]["reason"] == "bounded adapter history argument"
+    assert budget_rows["recent_session_history"]["token_estimate"] < 700
+    assert result["runtime"]["usage"]["input_token_estimate"] < 12000
+
+
+def test_streaming_long_thread_history_is_bounded_before_adapter_call(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGES", "3")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_CHARS", "1500")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS", "450")
+    adapter = CapturingStreamAdapter("openai", "gpt-4o-mini")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+    session_id = str(uuid4())
+    session = engine.get_or_create_session(session_id)
+    session.history = [
+        {
+            "role": "user" if idx % 2 == 0 else "assistant",
+            "content": f"stream-turn-{idx} " + ("y" * 5000),
+        }
+        for idx in range(25)
+    ]
+
+    events = list(engine.stream_message(session_id, "Stream compactly."))
+    done = events[-1]
+
+    assert done["done"] is True
+    assert adapter.last_history is not None
+    assert len(adapter.last_history) <= 3
+    assert all(len(message["content"]) <= 453 for message in adapter.last_history)
+    assert done["runtime"]["adapter_history_total_messages"] == 25
+    assert done["runtime"]["adapter_history_omitted_messages"] == 25 - len(adapter.last_history)
+    assert done["runtime"]["adapter_history_chars"] <= 1500
+    assert done["runtime"]["usage"]["input_token_estimate"] < 12000
+
+
+def test_context_hard_limit_blocks_before_provider_call(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setenv("HOLOCHAT_CONTEXT_HARD_LIMIT_TOKENS", "1000")
+    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    with pytest.raises(RuntimeError, match="context budget exceeded"):
+        engine.send_message(str(uuid4()), "This should block before provider.")
+
+    assert adapter.last_history is None

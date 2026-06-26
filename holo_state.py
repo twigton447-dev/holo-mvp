@@ -119,6 +119,7 @@ class HoloState(BaseModel):
     latest_input_summary: str | None = None
     critical_constraints: list[str] = Field(default_factory=list)
     rolling_summary: str | None = None
+    continuity_ledger: dict[str, list[str]] = Field(default_factory=dict)
     settled_decisions: list[str] = Field(default_factory=list)
     artifact_registry: list[dict[str, Any]] = Field(default_factory=list)
     required_tools: list[RequiredTools] = Field(default_factory=lambda: [RequiredTools.NONE])
@@ -146,6 +147,11 @@ class HoloState(BaseModel):
         turn_number: int,
         user_message: str,
         capsule_id: str | None = None,
+        user_goal: str | None = None,
+        critical_constraints: list[str] | None = None,
+        rolling_summary: str | None = None,
+        continuity_ledger: dict[str, list[str]] | None = None,
+        settled_decisions: list[str] | None = None,
         thread_health_score: int = 100,
         thread_status: str | None = None,
         required_tools: list[RequiredTools] | None = None,
@@ -161,7 +167,12 @@ class HoloState(BaseModel):
             session_id=session_id,
             capsule_id=capsule_id,
             turn_number=turn_number,
+            user_goal=user_goal,
             latest_input_summary=summary or None,
+            critical_constraints=list(critical_constraints or []),
+            rolling_summary=rolling_summary,
+            continuity_ledger=dict(continuity_ledger or {}),
+            settled_decisions=list(settled_decisions or []),
             required_tools=tools,
             baton_pass=baton,
             gov_arc_state=gov_arc_state or GovArcState(current_topic=summary or None),

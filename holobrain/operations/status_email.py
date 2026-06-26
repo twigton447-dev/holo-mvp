@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from email.message import EmailMessage
 import os
 import re
+import smtplib
 from typing import Mapping
 
 
@@ -117,6 +119,7 @@ def deliver_status_email(
     env: Mapping[str, str] | None = None,
     dry_run: bool = True,
     no_send: bool = True,
+    transport_factory: object | None = None,
 ) -> EmailDeliveryResult:
     message = render_status_email(report, env=env)
     if no_send:
@@ -135,7 +138,23 @@ def deliver_status_email(
             reason="dry_run",
             message=message,
         )
-    raise RuntimeError("live email sending is not implemented in this control slice")
+    missing = _missing_send_config(message.config)
+    if missing:
+        return EmailDeliveryResult(
+            sent=False,
+            dry_run=False,
+            no_send=False,
+            reason=f"missing_config:{','.join(missing)}",
+            message=message,
+        )
+    _send_with_smtp(message, env=env, transport_factory=transport_factory)
+    return EmailDeliveryResult(
+        sent=True,
+        dry_run=False,
+        no_send=False,
+        reason="sent",
+        message=message,
+    )
 
 
 def redact_secret_like_values(text: str, *, env: Mapping[str, str] | None = None) -> str:
@@ -164,6 +183,41 @@ def _payload(report: object) -> Mapping[str, object]:
     if isinstance(report, Mapping):
         return report
     raise TypeError("report must be a mapping or expose to_dict()")
+
+
+def _missing_send_config(config: EmailConfig) -> tuple[str, ...]:
+    missing = list(config.missing_required)
+    if config.provider and config.provider.lower() != "smtp":
+        missing.append("HOLOBRAIN_STATUS_EMAIL_PROVIDER=smtp")
+    if not config.smtp_host:
+        missing.append("HOLOBRAIN_STATUS_SMTP_HOST")
+    if not config.smtp_user:
+        missing.append("HOLOBRAIN_STATUS_SMTP_USER")
+    if not config.smtp_secret_present:
+        missing.append("HOLOBRAIN_STATUS_SMTP_SECRET")
+    return tuple(missing)
+
+
+def _send_with_smtp(
+    message: StatusEmail,
+    *,
+    env: Mapping[str, str] | None = None,
+    transport_factory: object | None = None,
+) -> None:
+    source = env if env is not None else os.environ
+    smtp_host = source["HOLOBRAIN_STATUS_SMTP_HOST"]
+    smtp_user = source["HOLOBRAIN_STATUS_SMTP_USER"]
+    smtp_secret = source["HOLOBRAIN_STATUS_SMTP_SECRET"]
+    email_message = EmailMessage()
+    email_message["Subject"] = message.subject
+    email_message["To"] = message.config.to or ""
+    email_message["From"] = message.config.from_ or ""
+    email_message.set_content(message.body)
+
+    factory = transport_factory or smtplib.SMTP_SSL
+    with factory(smtp_host) as smtp:
+        smtp.login(smtp_user, smtp_secret)
+        smtp.send_message(email_message)
 
 
 def _safe_join(value: object) -> str:

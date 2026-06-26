@@ -1,9 +1,8 @@
 """Manual HoloBrain daily control command.
 
-This module is intentionally offline-only. It reads HoloSentinel and
-HoloLedger state, renders a compact status report, and can optionally write a
-draft report under recovery/daily_status/. It does not send email by default
-and does not modify canonical truth files.
+This module reads HoloSentinel and HoloLedger state, renders a compact status
+report, and can optionally write a draft report under recovery/daily_status/.
+It does not send email by default and does not modify canonical truth files.
 """
 
 from __future__ import annotations
@@ -14,7 +13,7 @@ from datetime import date
 from pathlib import Path
 import re
 import subprocess
-from typing import Sequence
+from typing import Mapping, Sequence
 
 from holobrain.operations.ledger import DailyStatusReport, build_daily_status_report
 
@@ -178,6 +177,9 @@ def run_daily_control(
     no_send: bool = True,
     write_report: bool = False,
     email: bool = False,
+    send_email: bool = False,
+    email_env: Mapping[str, str] | None = None,
+    email_transport_factory: object | None = None,
 ) -> DailyControlRunResult:
     report = build_daily_control_report(
         root,
@@ -186,10 +188,16 @@ def run_daily_control(
     )
     report_path = write_daily_report(report, root) if write_report else None
     email_delivery = None
-    if email:
+    if email or send_email:
         from holobrain.operations.status_email import deliver_status_email
 
-        email_delivery = deliver_status_email(report, dry_run=dry_run, no_send=no_send)
+        email_delivery = deliver_status_email(
+            report,
+            env=email_env,
+            dry_run=False if send_email else dry_run,
+            no_send=False if send_email else no_send,
+            transport_factory=email_transport_factory,
+        )
     return DailyControlRunResult(
         report=report,
         terminal_report=render_terminal_report(report),
@@ -199,12 +207,17 @@ def run_daily_control(
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Run offline HoloBrain daily control.")
+    parser = argparse.ArgumentParser(description="Run HoloBrain daily control.")
     parser.add_argument("--root", default=".", help="Repository root. Defaults to current directory.")
     parser.add_argument("--date", dest="report_date", default=None, help="Report date in YYYY-MM-DD format.")
     parser.add_argument("--dry-run", action="store_true", default=True, help="Safe default; no live delivery.")
     parser.add_argument("--no-send", action="store_true", default=True, help="Safe default; do not send email.")
     parser.add_argument("--email", action="store_true", help="Render email adapter output without sending.")
+    parser.add_argument(
+        "--send-email",
+        action="store_true",
+        help="Explicitly send the status email using environment-configured SMTP.",
+    )
     parser.add_argument("--write-report", action="store_true", help="Write draft report under recovery/daily_status/.")
     parser.add_argument(
         "--phase-1-2-test-status",
@@ -221,6 +234,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         no_send=args.no_send,
         write_report=args.write_report,
         email=args.email,
+        send_email=args.send_email,
     )
     print(result.terminal_report)
     if result.report_path is not None:

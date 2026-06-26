@@ -33,6 +33,26 @@ def _fake_report(**overrides):
     return DailyControlReport(**values)
 
 
+class FakeSmtp:
+    sent_messages = []
+    logins = []
+
+    def __init__(self, host):
+        self.host = host
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def login(self, user, secret):
+        self.logins.append((self.host, user, secret))
+
+    def send_message(self, message):
+        self.sent_messages.append(message)
+
+
 def test_email_config_uses_env_var_names_without_requiring_secrets():
     env = {
         "HOLOBRAIN_STATUS_EMAIL_TO": "to@example.com",
@@ -63,6 +83,20 @@ def test_dry_run_mode_does_not_send_email():
     assert result.sent is False
     assert result.dry_run is True
     assert result.reason == "dry_run"
+
+
+def test_send_mode_without_complete_env_does_not_send_email():
+    result = deliver_status_email(
+        _fake_report(),
+        env={"HOLOBRAIN_STATUS_EMAIL_PROVIDER": "smtp"},
+        dry_run=False,
+        no_send=False,
+        transport_factory=FakeSmtp,
+    )
+
+    assert result.sent is False
+    assert result.reason.startswith("missing_config:")
+    assert FakeSmtp.sent_messages == []
 
 
 def test_email_body_redacts_secret_like_values():
@@ -107,3 +141,31 @@ def test_email_benchmark_gate_is_open_or_block():
 
     assert "Benchmark gate: OPEN" in message.body
     assert message.subject.endswith(": OPEN")
+
+
+def test_send_mode_uses_mock_transport_only_when_explicitly_enabled():
+    FakeSmtp.sent_messages = []
+    FakeSmtp.logins = []
+    env = {
+        "HOLOBRAIN_STATUS_EMAIL_TO": "to@example.com",
+        "HOLOBRAIN_STATUS_EMAIL_FROM": "from@example.com",
+        "HOLOBRAIN_STATUS_EMAIL_PROVIDER": "smtp",
+        "HOLOBRAIN_STATUS_SMTP_HOST": "smtp.example.com",
+        "HOLOBRAIN_STATUS_SMTP_USER": "smtp-user",
+        "HOLOBRAIN_STATUS_SMTP_SECRET": "smtp-secret",
+    }
+
+    result = deliver_status_email(
+        _fake_report(),
+        env=env,
+        dry_run=False,
+        no_send=False,
+        transport_factory=FakeSmtp,
+    )
+
+    assert result.sent is True
+    assert result.reason == "sent"
+    assert FakeSmtp.logins == [("smtp.example.com", "smtp-user", "smtp-secret")]
+    assert len(FakeSmtp.sent_messages) == 1
+    assert FakeSmtp.sent_messages[0]["To"] == "to@example.com"
+    assert "smtp-secret" not in FakeSmtp.sent_messages[0].get_content()

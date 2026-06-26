@@ -18,6 +18,26 @@ CANONICAL_FILES = (
     ROOT / "holobrain" / "memory" / "HoloBrainMaintenanceRoster_v0.1.md",
     ROOT / "holobrain" / "operations" / "HoloBrain_Daily_Operations_Policy_v0.1.md",
 )
+DELIVERY_DESIGN = ROOT / "holobrain" / "operations" / "HoloBrain_Daily_Status_Delivery_Design.md"
+
+
+class FakeSmtp:
+    sent_messages = []
+
+    def __init__(self, host):
+        self.host = host
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def login(self, user, secret):
+        self.login_args = (user, secret)
+
+    def send_message(self, message):
+        self.sent_messages.append(message)
 
 
 def _fake_report() -> DailyControlReport:
@@ -70,6 +90,31 @@ def test_daily_control_default_mode_does_not_send_email():
     assert result.report_path is None
 
 
+def test_daily_control_send_email_uses_mock_transport_when_explicit():
+    FakeSmtp.sent_messages = []
+    env = {
+        "HOLOBRAIN_STATUS_EMAIL_TO": "to@example.com",
+        "HOLOBRAIN_STATUS_EMAIL_FROM": "from@example.com",
+        "HOLOBRAIN_STATUS_EMAIL_PROVIDER": "smtp",
+        "HOLOBRAIN_STATUS_SMTP_HOST": "smtp.example.com",
+        "HOLOBRAIN_STATUS_SMTP_USER": "smtp-user",
+        "HOLOBRAIN_STATUS_SMTP_SECRET": "smtp-secret",
+    }
+
+    result = run_daily_control(
+        ROOT,
+        report_date="2026-06-26",
+        send_email=True,
+        email_env=env,
+        email_transport_factory=FakeSmtp,
+    )
+
+    assert result.email_delivery is not None
+    assert result.email_delivery.sent is True
+    assert result.email_delivery.reason == "sent"
+    assert len(FakeSmtp.sent_messages) == 1
+
+
 def test_daily_control_terminal_output_contains_required_fields(capsys):
     exit_code = main(["--root", str(ROOT), "--date", "2026-06-26", "--dry-run"])
 
@@ -80,6 +125,24 @@ def test_daily_control_terminal_output_contains_required_fields(capsys):
     assert "local_head:" in out
     assert "remote_sha:" in out
     assert "recommended_next_action:" in out
+
+
+def test_daily_control_send_email_cli_reports_missing_config(capsys, monkeypatch):
+    for key in (
+        "HOLOBRAIN_STATUS_EMAIL_TO",
+        "HOLOBRAIN_STATUS_EMAIL_FROM",
+        "HOLOBRAIN_STATUS_EMAIL_PROVIDER",
+        "HOLOBRAIN_STATUS_SMTP_HOST",
+        "HOLOBRAIN_STATUS_SMTP_USER",
+        "HOLOBRAIN_STATUS_SMTP_SECRET",
+    ):
+        monkeypatch.delenv(key, raising=False)
+
+    exit_code = main(["--root", str(ROOT), "--date", "2026-06-26", "--send-email"])
+
+    assert exit_code == 0
+    out = capsys.readouterr().out
+    assert "email_delivery: missing_config:" in out
 
 
 def test_write_report_writes_only_under_recovery_daily_status(tmp_path):
@@ -106,3 +169,13 @@ def test_daily_control_does_not_modify_canonical_truth():
         for path in CANONICAL_FILES
     }
     assert after == before
+
+
+def test_launchd_design_note_documents_later_8am_scheduler():
+    text = DELIVERY_DESIGN.read_text(encoding="utf-8")
+
+    assert "launchd" in text
+    assert "8am" in text
+    assert "--send-email" in text
+    assert "Local launchd remains the source for dirty-worktree status." in text
+    assert "SMS is a later adapter" in text

@@ -1,11 +1,11 @@
 """
 chat_engine.py
 
-Holo chat mode — rotating serial analyst conversation engine.
+Holo chat mode -- rotating serial analyst conversation engine.
 
 Every response comes from one selected analyst provider.
-The Governor is a separate controller/check layer selected away from
-the analyst on the same turn; it does not produce a second visible answer.
+The Governor is a separate controller/check layer; it does not produce a
+second visible answer.
 All providers speak as Holo using the unified persona prompt.
 """
 
@@ -69,19 +69,27 @@ class ChatSession:
     )
     holo4dna_previous_route: Optional[PreviousRoute] = None
     gov_arc_state: GovArcState = field(default_factory=GovArcState)
+    rolling_summary: Optional[str] = None
+    continuity_ledger: Dict[str, List[str]] = field(default_factory=dict)
+    critical_constraints: List[str] = field(default_factory=list)
     handoff_artifact_saved: bool = False
     handoff_suggested: bool = False
     autocompact_attempted: bool = False
+    autocompact_count: int = 0
+    last_autocompact_turn: int = 0
+    handoff_artifact_count: int = 0
+    last_handoff_artifact_turn: int = 0
 
     @property
     def thread_health_score(self) -> int:
         """
         Starts at 100, decays with turns and accumulated message volume.
-        Roughly reaches 0 around 20 turns with moderate message length.
+        HoloChat does not pass the whole raw thread to each analyst, so decay is
+        slower than a normal single-model context window.
         """
-        base       = max(0, 100 - (self.turn_count * 5))
+        base       = max(0, 100 - (self.turn_count * 3))
         total_chars = sum(len(m["content"]) for m in self.history)
-        char_decay  = min(40, total_chars // 2000)
+        char_decay  = min(35, total_chars // 3000)
         return max(0, base - char_decay)
 
     @property
@@ -114,11 +122,21 @@ class ChatSession:
 # Governor rotation helpers
 # ---------------------------------------------------------------------------
 
-DEFAULT_RUNTIME_PROFILE = "mini_only"
+DEFAULT_RUNTIME_PROFILE = "frontier_active"
 BALANCED_RUNTIME_PROFILE = "balanced"
 FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
-DEFAULT_THREAD_HANDOFF_MIN_TURNS = 24
-THREAD_HANDOFF_FORCE_SCORE = 5
+DEFAULT_HOLOCHAT_PROVIDER_ROTATION = ("xai", "openai", "minimax")
+DEFAULT_HOLOCHAT_GOVERNOR_PROVIDER = "openai"
+DEFAULT_THREAD_HANDOFF_MIN_TURNS = 40
+DEFAULT_AUTOCOMPACT_MIN_TURNS = 24
+DEFAULT_AUTOCOMPACT_INTERVAL_TURNS = 10
+DEFAULT_ADAPTER_HISTORY_MESSAGES = 8
+DEFAULT_ADAPTER_HISTORY_CHARS = 8000
+DEFAULT_ADAPTER_HISTORY_MESSAGE_CHARS = 1800
+DEFAULT_GOVERNOR_CONTEXT_ITEMS = 16
+DEFAULT_GOVERNOR_CONTEXT_VALUE_CHARS = 360
+DEFAULT_CONTEXT_WARNING_TOKENS = 20000
+DEFAULT_CONTEXT_HARD_LIMIT_TOKENS = 30000
 
 _BALANCED_USER_POWER_TERMS = (
     "frontier",
@@ -183,6 +201,217 @@ THREAD_HANDOFF_MESSAGE = "This thread is getting long. Start a fresh thread to k
 
 def _holochat_runtime_profile() -> str:
     return (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
+
+
+def _holochat_provider_rotation() -> tuple[str, ...]:
+    raw = os.getenv("HOLOCHAT_PROVIDER_ROTATION", "").strip()
+    if not raw:
+        return DEFAULT_HOLOCHAT_PROVIDER_ROTATION
+    providers = tuple(
+        item.strip().lower()
+        for item in raw.split(",")
+        if item.strip()
+    )
+    return providers or DEFAULT_HOLOCHAT_PROVIDER_ROTATION
+
+
+def _holochat_governor_provider() -> Optional[str]:
+    raw = os.getenv("HOLOCHAT_GOVERNOR_PROVIDER", DEFAULT_HOLOCHAT_GOVERNOR_PROVIDER)
+    provider = raw.strip().lower()
+    return provider or None
+
+
+def _positive_int_env(name: str, default: int, *, minimum: int = 0) -> int:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return max(minimum, int(raw))
+    except ValueError:
+        return default
+
+
+def _adapter_history_message_limit() -> int:
+    return _positive_int_env(
+        "HOLOCHAT_ADAPTER_HISTORY_MESSAGES",
+        DEFAULT_ADAPTER_HISTORY_MESSAGES,
+        minimum=0,
+    )
+
+
+def _adapter_history_char_limit() -> int:
+    return _positive_int_env(
+        "HOLOCHAT_ADAPTER_HISTORY_CHARS",
+        DEFAULT_ADAPTER_HISTORY_CHARS,
+        minimum=1000,
+    )
+
+
+def _adapter_history_message_char_limit() -> int:
+    return _positive_int_env(
+        "HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS",
+        DEFAULT_ADAPTER_HISTORY_MESSAGE_CHARS,
+        minimum=400,
+    )
+
+
+def _bounded_adapter_history(
+    history: list[dict[str, str]],
+    *,
+    max_messages: Optional[int] = None,
+    max_chars: Optional[int] = None,
+    message_char_limit: Optional[int] = None,
+) -> list[dict[str, str]]:
+    """
+    Keep the raw transcript in session storage, but never send the full thread
+    to providers. Long-term continuity is carried by Holo state + memory blocks.
+    """
+    if not history:
+        return []
+    message_limit = _adapter_history_message_limit() if max_messages is None else max(0, max_messages)
+    char_limit = _adapter_history_char_limit() if max_chars is None else max(0, max_chars)
+    per_message_limit = (
+        _adapter_history_message_char_limit()
+        if message_char_limit is None
+        else max(1, message_char_limit)
+    )
+    if message_limit <= 0 or char_limit <= 0:
+        return []
+
+    selected: list[dict[str, str]] = []
+    used_chars = 0
+    for message in reversed(history[-message_limit:]):
+        role = str(message.get("role") or "unknown")
+        if role not in {"system", "user", "assistant", "tool"}:
+            role = "unknown"
+        content = _compact_text(message.get("content"), limit=per_message_limit)
+        if not content:
+            continue
+        entry_chars = len(role) + len(content) + 2
+        if selected and used_chars + entry_chars > char_limit:
+            break
+        if used_chars + entry_chars > char_limit:
+            content = _compact_text(content, limit=max(1, char_limit - len(role) - 2))
+            entry_chars = len(role) + len(content) + 2
+        selected.append({"role": role, "content": content})
+        used_chars += entry_chars
+        if used_chars >= char_limit:
+            break
+    return list(reversed(selected))
+
+
+def _bounded_consolidation_history(history: list[dict[str, str]]) -> list[dict[str, str]]:
+    return _bounded_adapter_history(
+        history,
+        max_messages=24,
+        max_chars=18000,
+        message_char_limit=1200,
+    )
+
+
+def _adapter_history_budget_content(
+    adapter_history: list[dict[str, str]],
+    *,
+    total_history_messages: int,
+) -> str:
+    lines = [
+        f"{message.get('role', 'unknown')}: {message.get('content', '')}"
+        for message in adapter_history
+    ]
+    omitted = max(0, total_history_messages - len(adapter_history))
+    if omitted:
+        lines.insert(0, f"[context_budget] omitted {omitted} older raw history message(s); use HOLO STATE OBJECT and memory blocks for continuity.")
+    return "\n".join(lines)
+
+
+def _provider_history_metadata(
+    adapter_history: list[dict[str, str]],
+    *,
+    total_history_messages: int,
+) -> dict[str, Any]:
+    char_count = sum(
+        len(str(message.get("role", ""))) + len(str(message.get("content", ""))) + 2
+        for message in adapter_history
+    )
+    return {
+        "adapter_history_messages": len(adapter_history),
+        "adapter_history_total_messages": max(0, total_history_messages),
+        "adapter_history_omitted_messages": max(0, total_history_messages - len(adapter_history)),
+        "adapter_history_chars": char_count,
+        "adapter_history_char_cap": _adapter_history_char_limit(),
+        "adapter_history_message_cap": _adapter_history_message_limit(),
+        "adapter_history_message_char_cap": _adapter_history_message_char_limit(),
+    }
+
+
+def _governor_capsule_context(context: dict[str, Any]) -> dict[str, str]:
+    if not context:
+        return {}
+    item_limit = _positive_int_env(
+        "HOLOCHAT_GOV_CONTEXT_ITEMS",
+        DEFAULT_GOVERNOR_CONTEXT_ITEMS,
+        minimum=1,
+    )
+    value_limit = _positive_int_env(
+        "HOLOCHAT_GOV_CONTEXT_VALUE_CHARS",
+        DEFAULT_GOVERNOR_CONTEXT_VALUE_CHARS,
+        minimum=80,
+    )
+    safe: dict[str, str] = {}
+    for key, value in list(context.items()):
+        key_text = str(key)
+        if key_text.startswith("_"):
+            continue
+        safe[key_text] = _compact_text(value, limit=value_limit)
+        if len(safe) >= item_limit:
+            break
+    return safe
+
+
+def _context_warning_token_limit() -> int:
+    return _positive_int_env(
+        "HOLOCHAT_CONTEXT_WARNING_TOKENS",
+        DEFAULT_CONTEXT_WARNING_TOKENS,
+        minimum=1000,
+    )
+
+
+def _context_hard_token_limit() -> int:
+    return _positive_int_env(
+        "HOLOCHAT_CONTEXT_HARD_LIMIT_TOKENS",
+        DEFAULT_CONTEXT_HARD_LIMIT_TOKENS,
+        minimum=1000,
+    )
+
+
+def _enforce_runtime_context_budget(context_budget: dict[str, Any]) -> None:
+    total = _safe_positive_int(context_budget.get("total_token_estimate"))
+    hard_limit = _context_hard_token_limit()
+    if total > hard_limit:
+        raise RuntimeError("HoloChat context budget exceeded safe limit before provider call.")
+
+
+def _holochat_ordered_pool(
+    active_pool: list[Any],
+    bench_pool: list[Any],
+    providers: tuple[str, ...],
+) -> tuple[list[Any], list[Any]]:
+    combined = [*active_pool, *bench_pool]
+    by_provider = {
+        str(getattr(adapter, "provider", "") or "").strip().lower(): adapter
+        for adapter in combined
+    }
+    ordered = [by_provider[provider] for provider in providers if provider in by_provider]
+    missing = [provider for provider in providers if provider not in by_provider]
+    if missing:
+        raise RuntimeError(
+            "HoloChat provider rotation is missing configured provider(s): "
+            + ", ".join(missing)
+            + ". Check the matching API keys and model registry entries."
+        )
+    selected = {id(adapter) for adapter in ordered}
+    remaining = [adapter for adapter in combined if id(adapter) not in selected]
+    return ordered, remaining
 
 
 def _contains_any(text: str, terms: tuple[str, ...]) -> bool:
@@ -321,13 +550,30 @@ def _thread_handoff_min_turns() -> int:
         return DEFAULT_THREAD_HANDOFF_MIN_TURNS
 
 
+def _autocompact_min_turns() -> int:
+    raw = os.getenv("HOLOCHAT_AUTOCOMPACT_MIN_TURNS", "").strip()
+    if not raw:
+        return DEFAULT_AUTOCOMPACT_MIN_TURNS
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return DEFAULT_AUTOCOMPACT_MIN_TURNS
+
+
+def _autocompact_interval_turns() -> int:
+    raw = os.getenv("HOLOCHAT_AUTOCOMPACT_INTERVAL_TURNS", "").strip()
+    if not raw:
+        return DEFAULT_AUTOCOMPACT_INTERVAL_TURNS
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return DEFAULT_AUTOCOMPACT_INTERVAL_TURNS
+
+
 def _thread_handoff_ready(session: "ChatSession") -> bool:
     if session.thread_health_level != "RED":
         return False
-    return (
-        session.turn_count >= _thread_handoff_min_turns()
-        or session.thread_health_score <= THREAD_HANDOFF_FORCE_SCORE
-    )
+    return session.turn_count >= _thread_handoff_min_turns()
 
 
 def _handoff_for_context_window(session: "ChatSession") -> Optional[dict[str, Any]]:
@@ -434,12 +680,19 @@ def _claim_autocompact_for_context_window(
     capsule_id: Optional[str],
     incognito: bool,
 ) -> bool:
-    """Allow one consolidation/reseed attempt per session/context window."""
-    if not capsule_id or incognito or not _thread_handoff_ready(session):
+    """Allow spaced background compaction without repeatedly nudging the user."""
+    if not capsule_id or incognito or session.thread_health_level != "RED":
         return False
-    if session.autocompact_attempted:
+    if session.turn_count < _autocompact_min_turns():
+        return False
+    if (
+        session.last_autocompact_turn
+        and session.turn_count - session.last_autocompact_turn < _autocompact_interval_turns()
+    ):
         return False
     session.autocompact_attempted = True
+    session.autocompact_count += 1
+    session.last_autocompact_turn = session.turn_count
     return True
 
 
@@ -604,6 +857,228 @@ def _gov_arc_state_block(arc_state: GovArcState) -> str:
     return "\n".join(lines)
 
 
+_PATENT_ROLE_SEQUENCE = (
+    "DIRECT_SYNTHESIS",
+    "ASSUMPTION_ATTACK",
+    "EVIDENCE_PRESSURE",
+    "EDGE_CASE_SCAN",
+    "ACTIONABILITY_AUDIT",
+    "SYNTHESIS",
+)
+
+_CONTINUITY_LEDGER_KEYS = (
+    "open_issues",
+    "repaired",
+    "regressed",
+    "still_missing",
+    "user_continuity",
+    "pinned_artifacts",
+)
+
+
+def _conversation_role_for_turn(turn_count: int) -> str:
+    if turn_count <= 1:
+        return _PATENT_ROLE_SEQUENCE[0]
+    return _PATENT_ROLE_SEQUENCE[(turn_count - 1) % len(_PATENT_ROLE_SEQUENCE)]
+
+
+def _rolling_summary_from_history(history: list[dict[str, str]], *, limit: int = 1800) -> str:
+    if not history:
+        return ""
+    lines = []
+    for item in history[-12:]:
+        role = "USER" if item.get("role") == "user" else "HOLO"
+        content = _compact_text(item.get("content"), limit=220)
+        if content:
+            lines.append(f"{role}: {content}")
+    text = "\n".join(lines)
+    if len(text) <= limit:
+        return text
+    return text[-limit:].lstrip()
+
+
+def _empty_continuity_ledger() -> dict[str, list[str]]:
+    return {key: [] for key in _CONTINUITY_LEDGER_KEYS}
+
+
+def _clean_ledger_items(values: list[Any], *, limit: int = 5, item_limit: int = 180) -> list[str]:
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        item = _compact_text(value, limit=item_limit)
+        if not item or item in seen:
+            continue
+        seen.add(item)
+        cleaned.append(item)
+        if len(cleaned) >= limit:
+            break
+    return cleaned
+
+
+def _normalized_continuity_ledger(
+    ledger: Optional[dict[str, list[str]]],
+) -> dict[str, list[str]]:
+    normalized = _empty_continuity_ledger()
+    for key in _CONTINUITY_LEDGER_KEYS:
+        normalized[key] = _clean_ledger_items(list((ledger or {}).get(key) or []))
+    return normalized
+
+
+def _continuity_ledger_from_history(history: list[dict[str, str]]) -> dict[str, list[str]]:
+    ledger = _empty_continuity_ledger()
+    if not history:
+        return ledger
+    last_user = next((m.get("content") for m in reversed(history) if m.get("role") == "user"), "")
+    last_holo = next((m.get("content") for m in reversed(history) if m.get("role") == "assistant"), "")
+    if last_user:
+        ledger["user_continuity"] = [f"restored latest user need: {_compact_text(last_user, limit=180)}"]
+    if last_holo:
+        ledger["repaired"] = [f"restored latest Holo response: {_compact_text(last_holo, limit=180)}"]
+    return ledger
+
+
+def _update_rolling_summary_after_turn(
+    session: "ChatSession",
+    *,
+    user_message: str,
+    response_text: str,
+) -> str:
+    previous = session.rolling_summary or _rolling_summary_from_history(session.history[:-2])
+    latest = (
+        f"USER: {_compact_text(user_message, limit=260)}\n"
+        f"HOLO: {_compact_text(response_text, limit=360)}"
+    )
+    combined = "\n".join(part for part in (previous, latest) if part)
+    session.rolling_summary = combined[-1800:].lstrip()
+    return session.rolling_summary
+
+
+def _update_continuity_ledger_after_turn(
+    session: "ChatSession",
+    *,
+    user_message: str,
+    response_text: str,
+    conversation_paths: Optional[list[str]] = None,
+    artifacts_saved: Optional[list[dict[str, Any]]] = None,
+    flagged_claims: Optional[list[dict[str, Any]]] = None,
+    memory_writes_count: int = 0,
+) -> dict[str, list[str]]:
+    previous = _normalized_continuity_ledger(session.continuity_ledger)
+    arc = session.gov_arc_state or GovArcState()
+    open_candidates = [
+        *(conversation_paths or []),
+        *(arc.unresolved_questions or []),
+        *(previous.get("open_issues") or []),
+    ]
+    repaired_candidates = [
+        f"addressed latest turn: {_compact_text(response_text, limit=220)}",
+        *(previous.get("repaired") or []),
+    ]
+    regression_candidates = list(previous.get("regressed") or [])
+    for claim in flagged_claims or []:
+        correction = claim.get("correction") if isinstance(claim, dict) else None
+        if correction:
+            regression_candidates.insert(0, f"claim corrected: {correction}")
+    still_missing_candidates = list(previous.get("still_missing") or [])
+    if session.thread_health_level != "GREEN":
+        still_missing_candidates.insert(0, f"thread health {session.thread_health_level}: keep continuity compressed and explicit")
+    user_candidates = [
+        f"latest user need: {_compact_text(user_message, limit=220)}",
+        *([f"current goal: {_compact_text(arc.user_goal, limit=180)}"] if arc.user_goal else []),
+        *([f"current tension: {_compact_text(arc.current_tension, limit=180)}"] if arc.current_tension else []),
+        *(previous.get("user_continuity") or []),
+    ]
+    artifact_candidates = list(previous.get("pinned_artifacts") or [])
+    if session.handoff_artifact_count:
+        artifact_candidates.insert(0, f"thread_handoff_artifacts: {session.handoff_artifact_count}")
+    for artifact in artifacts_saved or []:
+        if isinstance(artifact, dict):
+            label = artifact.get("title") or artifact.get("name") or artifact.get("artifact_id") or artifact.get("id")
+            if label:
+                artifact_candidates.insert(0, f"saved artifact: {label}")
+    if memory_writes_count:
+        repaired_candidates.insert(0, f"memory updated: {memory_writes_count} write(s)")
+    ledger = {
+        "open_issues": _clean_ledger_items(open_candidates),
+        "repaired": _clean_ledger_items(repaired_candidates),
+        "regressed": _clean_ledger_items(regression_candidates),
+        "still_missing": _clean_ledger_items(still_missing_candidates),
+        "user_continuity": _clean_ledger_items(user_candidates),
+        "pinned_artifacts": _clean_ledger_items(artifact_candidates),
+    }
+    session.continuity_ledger = ledger
+    return ledger
+
+
+def _patent_state_block(
+    session: "ChatSession",
+    *,
+    user_message: str,
+    required_tools: list[RequiredTools],
+) -> str:
+    arc = session.gov_arc_state or GovArcState()
+    rolling = session.rolling_summary or _rolling_summary_from_history(session.history)
+    role = _conversation_role_for_turn(session.turn_count)
+    focus = [
+        item
+        for item in (
+            arc.current_tension,
+            arc.current_directive,
+            arc.current_topic,
+        )
+        if item
+    ][:3]
+    lines = [
+        "HOLO STATE OBJECT (private; patent-aligned continuity state; never surface directly):",
+        f"  USER_GOAL: {_compact_text(arc.user_goal or arc.current_topic or user_message, limit=220)}",
+        f"  LATEST_INPUT_SUMMARY: {_compact_text(user_message, limit=220)}",
+        "  ROLLING_SUMMARY:",
+    ]
+    if rolling:
+        for line in rolling.splitlines()[-10:]:
+            lines.append(f"    {line}")
+    else:
+        lines.append("    none yet")
+    if session.critical_constraints:
+        lines.append("  CRITICAL_CONSTRAINTS:")
+        for item in session.critical_constraints[:6]:
+            lines.append(f"    - {_compact_text(item, limit=180)}")
+    if arc.settled_decisions:
+        lines.append("  SETTLED_DECISIONS:")
+        for item in arc.settled_decisions[:6]:
+            lines.append(f"    - {_compact_text(item, limit=180)}")
+    ledger = _normalized_continuity_ledger(session.continuity_ledger)
+    if any(ledger.values()):
+        lines.append("  CONTINUITY_LEDGER:")
+        for key in _CONTINUITY_LEDGER_KEYS:
+            values = ledger.get(key) or []
+            if not values:
+                continue
+            lines.append(f"    {key}:")
+            for item in values[:5]:
+                lines.append(f"      - {_compact_text(item, limit=180)}")
+    lines.extend(
+        [
+            "  ARTIFACTS_REGISTRY:",
+            f"    - thread_handoff_artifacts: {session.handoff_artifact_count}",
+            "  REQUIRED_TOOLS: " + ", ".join(tool.value for tool in required_tools),
+            "  BATON_PASS:",
+            "    next_model_policy: serial_distinct_model_when_available",
+            f"    assigned_role: {role}",
+            "    instruction: Treat prior output as an external hypothesis, preserve what is true, challenge what is soft, and surface the highest-value next insight.",
+        ]
+    )
+    if focus:
+        lines.append("    focus_areas:")
+        for item in focus:
+            lines.append(f"      - {_compact_text(item, limit=180)}")
+    if arc.unresolved_questions:
+        lines.append("    unresolved_tensions:")
+        for item in arc.unresolved_questions[:5]:
+            lines.append(f"      - {_compact_text(item, limit=180)}")
+    return "\n".join(lines)
+
+
 def _update_gov_arc_state(
     session: "ChatSession",
     *,
@@ -706,7 +1181,9 @@ def _save_thread_handoff_artifact(
     session: "ChatSession",
     consolidation: dict[str, Any],
 ) -> Optional[str]:
-    if not capsule_id or session.handoff_artifact_saved:
+    if not capsule_id:
+        return None
+    if session.last_handoff_artifact_turn == session.turn_count:
         return None
     markdown = _thread_handoff_markdown(
         session=session,
@@ -723,6 +1200,8 @@ def _save_thread_handoff_artifact(
     )
     if artifact_id:
         session.handoff_artifact_saved = True
+        session.handoff_artifact_count += 1
+        session.last_handoff_artifact_turn = session.turn_count
     return artifact_id
 
 
@@ -814,6 +1293,7 @@ def _turn_runtime_metadata(
     analyst_adapter: Any,
     governor: Any,
     governor_checked_this_turn: bool,
+    provider_history: Optional[dict[str, Any]] = None,
     usage: Optional[dict[str, Any]] = None,
     failover: Optional[dict[str, Any]] = None,
     governor_trace: Optional[dict[str, Any]] = None,
@@ -821,10 +1301,18 @@ def _turn_runtime_metadata(
     frontier_assist: Optional[dict[str, Any]] = None,
     timing_breakdown: Optional[dict[str, Any]] = None,
     handoff_transition: Optional[dict[str, Any]] = None,
+    session: Optional[ChatSession] = None,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
     handoff_seed_present = bool(_safe_handoff_transition(handoff_transition))
+    autocompact_count = _safe_positive_int(getattr(session, "autocompact_count", 0))
+    last_autocompact_turn = _safe_positive_int(getattr(session, "last_autocompact_turn", 0))
+    reseed_artifact_count = _safe_positive_int(getattr(session, "handoff_artifact_count", 0))
+    last_reseed_turn = _safe_positive_int(getattr(session, "last_handoff_artifact_turn", 0))
+    continuity_ledger = _normalized_continuity_ledger(
+        getattr(session, "continuity_ledger", {}) if session is not None else {}
+    )
     metadata.update(
         {
             "analyst_pool_role": "analyst",
@@ -835,22 +1323,43 @@ def _turn_runtime_metadata(
             "selected_model": selected.get("model"),
             "active_pool_count": len(metadata.get("active_pool") or []),
             "context_delivery_mode": "capped_ranked_prompt_slice",
-            "lossless_memory_store": "HoloBrain/capsule",
+            "durable_memory_store": "HoloBrain/capsule",
+            "memory_delivery_mode": "rolling_summary_selected_context",
+            "pinned_artifact_policy": "refs_by_default_full_fidelity_when_selected",
             "analyst_receives_full_memory": False,
-            "structured_state_object_mode": "shadow",
-            "gov_arc_state_mode": "explicit_shadow",
-            "baton_pass_mode": "shadow",
+            "context_budget_warning_tokens": _context_warning_token_limit(),
+            "context_budget_hard_limit_tokens": _context_hard_token_limit(),
+            "structured_state_object_mode": "active_prompt",
+            "gov_arc_state_mode": "active_prompt",
+            "baton_pass_mode": "active_prompt",
             "holo4dna_mode": "enabled"
             if _holo4dna_enabled()
             else ("shadow" if _holo4dna_shadow_enabled() else "off"),
             "reseed_present": handoff_seed_present,
             "reseed_mode": "thread_handoff_seed" if handoff_seed_present else "off",
             "thread_handoff_seed_present": handoff_seed_present,
-            "autoreseed_enabled": False,
+            "autoreseed_enabled": True,
+            "auto_compact_enabled": True,
+            "auto_compact_min_turns": _autocompact_min_turns(),
+            "auto_compact_interval_turns": _autocompact_interval_turns(),
+            "rolling_summary_mode": "active_prompt_sliding_window",
+            "continuity_ledger_mode": "active_prompt_structured_private",
+            "continuity_ledger_counts": {
+                key: len(continuity_ledger.get(key) or [])
+                for key in _CONTINUITY_LEDGER_KEYS
+            },
+            "auto_compact_count": autocompact_count,
+            "last_auto_compact_turn": last_autocompact_turn or None,
+            "reseed_artifact_count": reseed_artifact_count,
+            "last_reseed_turn": last_reseed_turn or None,
+            "visible_handoff_min_turns": _thread_handoff_min_turns(),
+            "visible_handoff_suggested": bool(getattr(session, "handoff_suggested", False)),
         }
     )
     if usage is not None:
         metadata["usage"] = usage
+    if provider_history is not None:
+        metadata.update(provider_history)
     if failover is not None:
         metadata["failover"] = failover
     if governor_trace is not None:
@@ -920,6 +1429,11 @@ def _select_runtime_pools(
         return runtime_profile, active_pool, frontier_pool
     if runtime_profile in FRONTIER_RUNTIME_PROFILES:
         active_pool, bench_pool = frontier_loader()
+        active_pool, bench_pool = _holochat_ordered_pool(
+            active_pool,
+            bench_pool,
+            _holochat_provider_rotation(),
+        )
         if not active_pool:
             raise RuntimeError("HoloChat frontier runtime has no active adapters.")
         return runtime_profile, active_pool, bench_pool
@@ -992,7 +1506,13 @@ class HoloChatEngine:
             self._adapters,
             self._bench,
         )
-        self._governor = GovernorAdapter(self._adapters) # separate controller; not another analyst answer
+        governor_provider = _holochat_governor_provider()
+        self._governor = GovernorAdapter(
+            self._adapters,
+            fixed_governor=governor_provider,
+        ) # separate controller; not another analyst answer
+        if governor_provider:
+            self._governor.lock_to_provider(governor_provider)
         self._brain    = ProjectBrain()
         self._holo_context_builder = HoloContextBuilder()
         self._holo_router = None
@@ -1017,6 +1537,8 @@ class HoloChatEngine:
                 session.history      = prior
                 session.turn_count   = sum(1 for m in prior if m["role"] == "user")
                 session.rotation_index = session.turn_count % len(self._adapters)
+                session.rolling_summary = _rolling_summary_from_history(prior)
+                session.continuity_ledger = _continuity_ledger_from_history(prior)
                 logger.info(f"Restored session {session_id[:8]} from brain ({session.turn_count} turns).")
 
         _sessions[new_id] = session
@@ -1061,6 +1583,12 @@ class HoloChatEngine:
         adapter = _select_analyst_adapter(session, self._adapters)
         initial_adapter = adapter
         session.turn_count     += 1
+        adapter_history = _bounded_adapter_history(session.history)
+        provider_history_stats = _provider_history_metadata(
+            adapter_history,
+            total_history_messages=len(session.history),
+        )
+        governor_context = _governor_capsule_context(capsule_context)
 
         gov_pre_timer = _timer_start()
         # Governor rotation policy:
@@ -1081,12 +1609,12 @@ class HoloChatEngine:
             self._governor.lock_to_provider(session.governor_provider)
 
         # Governor runs the instruments: temperature + search decision
-        temperature  = self._governor.assess_chat_temperature(user_message, session.history)
-        governor_search_query = self._governor.should_search(user_message, session.history)
+        temperature  = self._governor.assess_chat_temperature(user_message, adapter_history)
+        governor_search_query = self._governor.should_search(user_message, adapter_history)
 
         # Governor thinks about the human — skipped in incognito (would introduce bias)
-        thought = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        tenor   = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
+        thought = None if incognito else self._governor.surface_thought(adapter_history, governor_context, baton_pass=_health_context(session))
+        tenor   = None if incognito else self._governor.assess_tenor(adapter_history, governor_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
         _add_timing(timings, "governor_pre_ms", gov_pre_timer)
 
         web_timer = _timer_start()
@@ -1100,6 +1628,12 @@ class HoloChatEngine:
             user_message=user_message,
             tenor=tenor,
             web_trace=web_trace,
+        )
+        required_tools = _required_tools_for_turn(search_query, search_results)
+        patent_state = "" if incognito else _patent_state_block(
+            session,
+            user_message=user_message,
+            required_tools=required_tools,
         )
 
         frontier_assist_enabled = (
@@ -1160,6 +1694,7 @@ class HoloChatEngine:
         if not incognito:
             system_prompt += (
                 "\n\n" + _health_context(session)
+                + "\n\n" + patent_state
                 + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
                 + ("\n\n" + _thread_handoff_transition_block(active_handoff_transition) if active_handoff_transition else "")
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
@@ -1170,6 +1705,7 @@ class HoloChatEngine:
 
         context_budget = _runtime_context_budget(
             session=session,
+            adapter_history=adapter_history,
             user_message=user_message,
             capsule_context=capsule_context,
             life_context=life_context,
@@ -1180,7 +1716,9 @@ class HoloChatEngine:
             incognito=incognito,
             runtime_identity=runtime_identity,
             handoff_transition=active_handoff_transition,
+            patent_state=patent_state,
         )
+        _enforce_runtime_context_budget(context_budget)
 
         holo4dna_shadow = None
         if _holo4dna_shadow_enabled():
@@ -1195,6 +1733,7 @@ class HoloChatEngine:
                     router=self._holo_router,
                     context_builder=self._holo_context_builder,
                     previous_route=session.holo4dna_previous_route,
+                    recent_history=adapter_history,
                     capsule_context=capsule_context,
                     life_context=life_context,
                     last_session=last_session,
@@ -1220,7 +1759,7 @@ class HoloChatEngine:
         for candidate in candidate_order:
             try:
                 response_text, in_tok, out_tok = candidate.chat_call(
-                    system_prompt, session.history, enriched_message, temperature,
+                    system_prompt, adapter_history, enriched_message, temperature,
                     images=images or None,
                 )
                 adapter = candidate
@@ -1246,7 +1785,7 @@ class HoloChatEngine:
             fallback = random.choice(bench_candidates)
             try:
                 response_text, in_tok, out_tok = fallback.chat_call(
-                    system_prompt, session.history, enriched_message, temperature,
+                    system_prompt, adapter_history, enriched_message, temperature,
                     images=images or None,
                 )
                 adapter = fallback
@@ -1290,8 +1829,8 @@ class HoloChatEngine:
         conversation_paths = []
         if path_generator and not incognito:
             conversation_paths = path_generator(
-                history=session.history,
-                capsule_context=capsule_context,
+                history=adapter_history,
+                capsule_context=governor_context,
                 user_message=user_message,
                 response_text=response_text,
                 tenor=tenor or "",
@@ -1310,6 +1849,12 @@ class HoloChatEngine:
         # Commit both turns to history
         session.history.append({"role": "user",      "content": user_message})
         session.history.append({"role": "assistant",  "content": response_text})
+        if not incognito:
+            _update_rolling_summary_after_turn(
+                session,
+                user_message=user_message,
+                response_text=response_text,
+            )
 
         # Link session to capsule on first turn — skipped in incognito
         if capsule_id and session.turn_count == 1 and not incognito:
@@ -1323,13 +1868,24 @@ class HoloChatEngine:
         if capsule_id and not incognito:
             memory_extraction_attempted = True
             gov_post_timer = _timer_start()
-            updates = self._governor.extract_context_updates(session.history, capsule_context)
+            updates = self._governor.extract_context_updates(session.history, governor_context)
             for key, value in updates.items():
                 self._brain.set_capsule_context(capsule_id, key, value)
             memory_writes_count = len(updates)
             _add_timing(timings, "governor_post_ms", gov_post_timer)
             if updates:
                 logger.info(f"Capsule context updated for {capsule_id[:8]}: {list(updates.keys())}")
+
+        if not incognito:
+            _update_continuity_ledger_after_turn(
+                session,
+                user_message=user_message,
+                response_text=response_text,
+                conversation_paths=conversation_paths,
+                artifacts_saved=artifacts_saved,
+                flagged_claims=flagged_claims,
+                memory_writes_count=memory_writes_count,
+            )
 
         # Governor consolidates — skipped in incognito
         if _claim_autocompact_for_context_window(
@@ -1340,7 +1896,9 @@ class HoloChatEngine:
             def _consolidate():
                 try:
                     result = self._governor.consolidate_session(
-                        session.history, capsule_context, session.session_id
+                        _bounded_consolidation_history(session.history),
+                        governor_context,
+                        session.session_id,
                     )
                     if result.get("session_note"):
                         self._brain.save_consolidation(
@@ -1415,16 +1973,18 @@ class HoloChatEngine:
             provider_output_tokens=out_tok,
             latency_ms=elapsed_ms,
         )
+        runtime_info = getattr(self, "_runtime_info", None) or _runtime_metadata(
+            "mini_only",
+            self._adapters,
+            self._bench,
+        )
         runtime = _turn_runtime_metadata(
-            getattr(
-                self,
-                "_runtime_info",
-                _runtime_metadata("test_runtime", self._adapters, self._bench),
-            ),
+            runtime_info,
             analyst_adapter=adapter,
             governor=self._governor,
             governor_checked_this_turn=True,
             usage=usage,
+            provider_history=provider_history_stats,
             failover=failover,
             governor_trace=_governor_trace_metadata(
                 web_trace=web_trace,
@@ -1441,6 +2001,7 @@ class HoloChatEngine:
                 turn_started_at=turn_started_at,
             ),
             handoff_transition=active_handoff_transition,
+            session=session,
         )
 
         return {
@@ -1512,6 +2073,12 @@ class HoloChatEngine:
         adapter = _select_analyst_adapter(session, self._adapters)
         initial_adapter = adapter
         session.turn_count     += 1
+        adapter_history = _bounded_adapter_history(session.history)
+        provider_history_stats = _provider_history_metadata(
+            adapter_history,
+            total_history_messages=len(session.history),
+        )
+        governor_context = _governor_capsule_context(capsule_context)
 
         gov_pre_timer = _timer_start()
         if _should_rotate_governor(session):
@@ -1522,10 +2089,10 @@ class HoloChatEngine:
         else:
             self._governor.lock_to_provider(session.governor_provider)
 
-        temperature  = self._governor.assess_chat_temperature(user_message, session.history)
-        governor_search_query = self._governor.should_search(user_message, session.history)
-        thought      = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        tenor        = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
+        temperature  = self._governor.assess_chat_temperature(user_message, adapter_history)
+        governor_search_query = self._governor.should_search(user_message, adapter_history)
+        thought      = None if incognito else self._governor.surface_thought(adapter_history, governor_context, baton_pass=_health_context(session))
+        tenor        = None if incognito else self._governor.assess_tenor(adapter_history, governor_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
         _add_timing(timings, "governor_pre_ms", gov_pre_timer)
 
         web_timer = _timer_start()
@@ -1539,6 +2106,12 @@ class HoloChatEngine:
             user_message=user_message,
             tenor=tenor,
             web_trace=web_trace,
+        )
+        required_tools = _required_tools_for_turn(search_query, search_results)
+        patent_state = "" if incognito else _patent_state_block(
+            session,
+            user_message=user_message,
+            required_tools=required_tools,
         )
 
         frontier_assist_enabled = (
@@ -1588,6 +2161,7 @@ class HoloChatEngine:
         if not incognito:
             system_prompt += (
                 "\n\n" + _health_context(session)
+                + "\n\n" + patent_state
                 + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
                 + ("\n\n" + _thread_handoff_transition_block(active_handoff_transition) if active_handoff_transition else "")
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
@@ -1598,6 +2172,7 @@ class HoloChatEngine:
 
         context_budget = _runtime_context_budget(
             session=session,
+            adapter_history=adapter_history,
             user_message=user_message,
             capsule_context=capsule_context,
             life_context=life_context,
@@ -1608,7 +2183,9 @@ class HoloChatEngine:
             incognito=incognito,
             runtime_identity=runtime_identity,
             handoff_transition=active_handoff_transition,
+            patent_state=patent_state,
         )
+        _enforce_runtime_context_budget(context_budget)
 
         holo4dna_shadow = None
         if _holo4dna_shadow_enabled():
@@ -1623,6 +2200,7 @@ class HoloChatEngine:
                     router=self._holo_router,
                     context_builder=self._holo_context_builder,
                     previous_route=session.holo4dna_previous_route,
+                    recent_history=adapter_history,
                     capsule_context=capsule_context,
                     life_context=life_context,
                     last_session=last_session,
@@ -1655,7 +2233,7 @@ class HoloChatEngine:
             emitted = False
             try:
                 for chunk in candidate.stream_chat_call(
-                    system_prompt, session.history, enriched_message, temperature, images=images or None
+                    system_prompt, adapter_history, enriched_message, temperature, images=images or None
                 ):
                     if isinstance(chunk, dict) and chunk.get("done"):
                         in_tok  = chunk.get("in_tok", 0)
@@ -1720,8 +2298,8 @@ class HoloChatEngine:
         conversation_paths = []
         if path_generator and not incognito:
             conversation_paths = path_generator(
-                history=session.history,
-                capsule_context=capsule_context,
+                history=adapter_history,
+                capsule_context=governor_context,
                 user_message=user_message,
                 response_text=response_text,
                 tenor=tenor or "",
@@ -1733,12 +2311,29 @@ class HoloChatEngine:
         # Commit history
         session.history.append({"role": "user",      "content": user_message})
         session.history.append({"role": "assistant",  "content": response_text})
+        if not incognito:
+            _update_rolling_summary_after_turn(
+                session,
+                user_message=user_message,
+                response_text=response_text,
+            )
 
         # Extract artifacts
         artifacts_saved = []
         if capsule_id and not incognito:
             artifacts_saved = _extract_and_save_artifacts(
                 self._brain, response_text, capsule_id, session.session_id, session.turn_count
+            )
+
+        if not incognito:
+            _update_continuity_ledger_after_turn(
+                session,
+                user_message=user_message,
+                response_text=response_text,
+                conversation_paths=conversation_paths,
+                artifacts_saved=artifacts_saved,
+                flagged_claims=flagged_claims,
+                memory_writes_count=0,
             )
 
         # Link session on first turn
@@ -1750,7 +2345,7 @@ class HoloChatEngine:
         def _post_stream():
             try:
                 if capsule_id and not incognito:
-                    updates = self._governor.extract_context_updates(session.history, capsule_context)
+                    updates = self._governor.extract_context_updates(session.history, governor_context)
                     for key, value in updates.items():
                         self._brain.set_capsule_context(capsule_id, key, value)
                     if _claim_autocompact_for_context_window(
@@ -1758,7 +2353,11 @@ class HoloChatEngine:
                         capsule_id=capsule_id,
                         incognito=incognito,
                     ):
-                        result = self._governor.consolidate_session(session.history, capsule_context, session.session_id)
+                        result = self._governor.consolidate_session(
+                            _bounded_consolidation_history(session.history),
+                            governor_context,
+                            session.session_id,
+                        )
                         if result.get("session_note"):
                             self._brain.save_consolidation(capsule_id, session.session_id, result["session_note"])
                         if result.get("life_context"):
@@ -1811,16 +2410,18 @@ class HoloChatEngine:
             provider_output_tokens=out_tok,
             latency_ms=elapsed_ms,
         )
+        runtime_info = getattr(self, "_runtime_info", None) or _runtime_metadata(
+            "mini_only",
+            self._adapters,
+            self._bench,
+        )
         runtime = _turn_runtime_metadata(
-            getattr(
-                self,
-                "_runtime_info",
-                _runtime_metadata("test_runtime", self._adapters, self._bench),
-            ),
+            runtime_info,
             analyst_adapter=adapter,
             governor=self._governor,
             governor_checked_this_turn=True,
             usage=usage,
+            provider_history=provider_history_stats,
             failover=failover,
             governor_trace=_governor_trace_metadata(
                 web_trace=web_trace,
@@ -1837,6 +2438,7 @@ class HoloChatEngine:
                 turn_started_at=turn_started_at,
             ),
             handoff_transition=active_handoff_transition,
+            session=session,
         )
 
         yield {
@@ -1957,6 +2559,7 @@ def _required_tools_for_turn(search_query: Optional[str], search_results: Option
 def _runtime_context_budget(
     *,
     session: ChatSession,
+    adapter_history: Optional[list[dict[str, str]]] = None,
     user_message: str,
     capsule_context: dict,
     life_context: list,
@@ -1967,7 +2570,9 @@ def _runtime_context_budget(
     incognito: bool,
     runtime_identity: str,
     handoff_transition: Optional[dict[str, Any]] = None,
+    patent_state: Optional[str] = None,
 ) -> dict[str, Any]:
+    provider_history = adapter_history if adapter_history is not None else session.history
     blocks: list[dict[str, Any]] = [
         {
             "block_name": "base_holochat_prompt",
@@ -1983,13 +2588,13 @@ def _runtime_context_budget(
         },
         {
             "block_name": "recent_session_history",
-            "content": "\n".join(
-                f"{message.get('role', 'unknown')}: {message.get('content', '')}"
-                for message in session.history
+            "content": _adapter_history_budget_content(
+                provider_history,
+                total_history_messages=len(session.history),
             ),
-            "included": bool(session.history),
+            "included": bool(provider_history),
             "source_type": "history",
-            "reason": "passed as adapter history argument" if session.history else "empty",
+            "reason": "bounded adapter history argument" if provider_history else "empty",
         },
         {
             "block_name": "user_message",
@@ -2007,6 +2612,13 @@ def _runtime_context_budget(
                     "content": "",
                     "included": False,
                     "source_type": "system",
+                    "reason": "incognito mode",
+                },
+                {
+                    "block_name": "holo_state_object",
+                    "content": "",
+                    "included": False,
+                    "source_type": "governor",
                     "reason": "incognito mode",
                 },
                 {
@@ -2053,6 +2665,15 @@ def _runtime_context_budget(
                 "content": _health_context(session),
                 "included": True,
                 "source_type": "system",
+            }
+        )
+        blocks.append(
+            {
+                "block_name": "holo_state_object",
+                "content": patent_state or "",
+                "included": bool(patent_state),
+                "source_type": "governor",
+                "reason": "empty" if not patent_state else None,
             }
         )
         blocks.append(
@@ -2126,7 +2747,10 @@ def _runtime_context_budget(
         }
     )
 
-    return build_context_budget_ledger(blocks).model_dump(mode="json")
+    return build_context_budget_ledger(
+        blocks,
+        budget_limit_tokens=_context_warning_token_limit(),
+    ).model_dump(mode="json")
 
 
 def _memory_presence_summary(
@@ -2201,6 +2825,7 @@ def _build_holo4dna_shadow_turn(
     incognito: bool,
     runtime_info: dict[str, Any],
     capsule_attached: bool,
+    recent_history: Optional[list[dict[str, str]]] = None,
 ) -> Holo4DnaShadowTurn:
     required_tools = _required_tools_for_turn(search_query, search_results)
     holo_state = HoloState.from_chat_turn(
@@ -2208,6 +2833,11 @@ def _build_holo4dna_shadow_turn(
         capsule_id=capsule_id,
         turn_number=session.turn_count,
         user_message=user_message,
+        user_goal=session.gov_arc_state.user_goal,
+        critical_constraints=session.critical_constraints,
+        rolling_summary=session.rolling_summary or _rolling_summary_from_history(session.history),
+        continuity_ledger=_normalized_continuity_ledger(session.continuity_ledger),
+        settled_decisions=session.gov_arc_state.settled_decisions,
         thread_health_score=session.thread_health_score,
         thread_status=session.thread_status,
         required_tools=required_tools,
@@ -2231,7 +2861,7 @@ def _build_holo4dna_shadow_turn(
         capsule_context=capsule_context,
         life_context=life_context,
         latest_consolidation=last_session,
-        recent_history=session.history,
+        recent_history=recent_history or _bounded_adapter_history(session.history),
         web_results=search_results,
         incognito=incognito,
         runtime_info=runtime_info,

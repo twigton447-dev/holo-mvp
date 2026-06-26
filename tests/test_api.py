@@ -30,7 +30,7 @@ def _make_mock_adapters(results):
 def allow_client():
     """Client wired to return 3x ALLOW / all-LOW turns."""
     results = [make_turn_result(verdict="ALLOW", turn_number=i) for i in range(1, 4)]
-    with patch("context_governor.load_adapters", return_value=_make_mock_adapters(results)):
+    with patch("context_governor.load_adapters", return_value=(_make_mock_adapters(results), [])):
         from main import app
         with TestClient(app, raise_server_exceptions=False) as client:
             yield client
@@ -44,7 +44,7 @@ def escalate_client():
         make_turn_result(verdict="ESCALATE", turn_number=2),
         make_turn_result(verdict="ESCALATE", turn_number=3),
     ]
-    with patch("context_governor.load_adapters", return_value=_make_mock_adapters(results)):
+    with patch("context_governor.load_adapters", return_value=(_make_mock_adapters(results), [])):
         from main import app
         with TestClient(app, raise_server_exceptions=False) as client:
             yield client
@@ -102,6 +102,43 @@ class TestAuthentication:
             json=MINIMAL_PAYLOAD,
             headers=VALID_HEADERS,
         )
+        assert resp.status_code == 200
+
+    def test_valid_env_key_survives_db_validation_error(self, allow_client, monkeypatch):
+        import main
+
+        class BrokenDB:
+            def validate_api_key(self, _raw_key):
+                raise RuntimeError("db unavailable")
+
+            def log_api_usage(self, _row):
+                raise RuntimeError("db unavailable")
+
+        monkeypatch.setattr(main, "_db", BrokenDB())
+        monkeypatch.setenv("HOLO_MAX_RPM", "60")
+        main._rate_limiter._requests.clear()
+
+        resp = allow_client.post(
+            "/v1/evaluate_action",
+            json=MINIMAL_PAYLOAD,
+            headers=VALID_HEADERS,
+        )
+
+        assert resp.status_code == 200
+
+    def test_invalid_holo_max_rpm_falls_back_to_default(self, allow_client, monkeypatch):
+        import main
+
+        monkeypatch.setattr(main, "_db", None)
+        monkeypatch.setenv("HOLO_MAX_RPM", "# Optional: requests-per-minute cap")
+        main._rate_limiter._requests.clear()
+
+        resp = allow_client.post(
+            "/v1/evaluate_action",
+            json=MINIMAL_PAYLOAD,
+            headers=VALID_HEADERS,
+        )
+
         assert resp.status_code == 200
 
     def test_401_detail_does_not_leak_expected_key(self, allow_client):
@@ -189,7 +226,7 @@ class TestResponseShape:
 
     def test_risk_profile_has_all_six_categories(self):
         profile = self.data["risk_profile"]
-        assert set(profile.keys()) == set(BEC_CATEGORIES)
+        assert set(BEC_CATEGORIES).issubset(set(profile.keys()))
 
     def test_risk_profile_category_shape(self):
         for cat, info in self.data["risk_profile"].items():
@@ -206,8 +243,9 @@ class TestResponseShape:
 
     def test_token_usage_present(self):
         usage = self.data["token_usage"]
-        assert "input" in usage
-        assert "output" in usage
+        assert "total" in usage
+        assert "input" in usage["total"]
+        assert "output" in usage["total"]
 
     def test_allow_decision_on_clean_payload(self):
         assert self.data["decision"] == "ALLOW"

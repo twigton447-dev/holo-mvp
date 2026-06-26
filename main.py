@@ -75,11 +75,39 @@ from billing import create_checkout_session, create_customer_portal_session, con
 
 _rate_limiter = RateLimiter()
 _db: Database | None = None
+DEFAULT_MAX_RPM = 60
 
 # Governor is instantiated once at startup and reused for every request.
 # This means adapters are initialized once (SDK clients, auth, etc.).
 _governor: ContextGovernor | None = None
 _chat_engine: Optional[HoloChatEngine] = None
+
+
+def _max_rpm_from_value(raw: Any, *, default: int = DEFAULT_MAX_RPM) -> int:
+    try:
+        return max(1, int(raw))
+    except (TypeError, ValueError):
+        return default
+
+
+def _max_rpm_from_env() -> int:
+    raw = os.getenv("HOLO_MAX_RPM", "").strip()
+    if not raw:
+        return DEFAULT_MAX_RPM
+    max_rpm = _max_rpm_from_value(raw)
+    if str(max_rpm) != raw:
+        logger.warning("Invalid HOLO_MAX_RPM; using default rate limit.")
+    return max_rpm
+
+
+def _api_key_row_from_db(raw_key: str) -> Optional[dict]:
+    if _db is None:
+        return None
+    try:
+        return _db.validate_api_key(raw_key)
+    except Exception as e:
+        logger.warning(f"Supabase API key validation unavailable; using local fallback if configured: {e}")
+        return None
 
 
 @asynccontextmanager
@@ -195,16 +223,15 @@ def _verify_key(request: Request) -> str:
     key_id = hashlib.sha256(provided.encode()).hexdigest()[:16]
 
     # 1. Check per-user keys in Supabase
-    if _db is not None:
-        row = _db.validate_api_key(provided)
-        if row:
-            max_rpm = row.get("max_requests_per_minute", 60)
-            if not _rate_limiter.check(key_id, max_rpm):
-                raise HTTPException(
-                    status_code=429,
-                    detail=f"Rate limit exceeded ({max_rpm} requests/minute).",
-                )
-            return provided
+    row = _api_key_row_from_db(provided)
+    if row:
+        max_rpm = _max_rpm_from_value(row.get("max_requests_per_minute"))
+        if not _rate_limiter.check(key_id, max_rpm):
+            raise HTTPException(
+                status_code=429,
+                detail=f"Rate limit exceeded ({max_rpm} requests/minute).",
+            )
+        return provided
 
     # 2. Fall back to env var (admin / internal use)
     expected = os.getenv("HOLO_API_KEY", "")
@@ -212,7 +239,7 @@ def _verify_key(request: Request) -> str:
         provided_hash = hashlib.sha256(provided.encode()).digest()
         expected_hash = hashlib.sha256(expected.encode()).digest()
         if hmac.compare_digest(provided_hash, expected_hash):
-            max_rpm = int(os.getenv("HOLO_MAX_RPM", "60"))
+            max_rpm = _max_rpm_from_env()
             if not _rate_limiter.check(key_id, max_rpm):
                 raise HTTPException(
                     status_code=429,
@@ -298,11 +325,19 @@ async def evaluate_action(
     capsule_id = capsule["sub"] if capsule else None
     capsule_email = capsule.get("email", "") if capsule else ""
     if _db and not capsule_id:
-        capsule_id = _db.get_capsule_id_for_key(_key)
+        try:
+            capsule_id = _db.get_capsule_id_for_key(_key)
+        except Exception as e:
+            logger.warning(f"Capsule lookup unavailable; continuing without quota account: {e}")
 
     # Quota check
+    sub = None
     if _db and capsule_id:
-        sub = _db.get_or_create_subscription(capsule_id, capsule_email)
+        try:
+            sub = _db.get_or_create_subscription(capsule_id, capsule_email)
+        except Exception as e:
+            logger.warning(f"Subscription lookup unavailable; continuing without quota check: {e}")
+    if sub:
         if sub["calls_used"] >= sub["calls_quota"]:
             raise HTTPException(
                 status_code=402,
@@ -340,7 +375,10 @@ async def evaluate_action(
 
     # Increment quota counter
     if _db and capsule_id:
-        _db.increment_calls_used(capsule_id)
+        try:
+            _db.increment_calls_used(capsule_id)
+        except Exception as e:
+            logger.warning(f"Quota increment unavailable; response already computed: {e}")
 
     # Build API response
     response = _build_response(result)
@@ -372,13 +410,12 @@ def _verify_bearer(request: Request) -> str:
     key_id = hashlib.sha256(token.encode()).hexdigest()[:16]
 
     # 1. Supabase api_keys table
-    if _db is not None:
-        row = _db.validate_api_key(token)
-        if row:
-            max_rpm = row.get("max_requests_per_minute", 60)
-            if not _rate_limiter.check(key_id, max_rpm):
-                raise HTTPException(status_code=429, detail=f"Rate limit exceeded ({max_rpm} req/min).")
-            return token
+    row = _api_key_row_from_db(token)
+    if row:
+        max_rpm = _max_rpm_from_value(row.get("max_requests_per_minute"))
+        if not _rate_limiter.check(key_id, max_rpm):
+            raise HTTPException(status_code=429, detail=f"Rate limit exceeded ({max_rpm} req/min).")
+        return token
 
     # 2. Env var fallback
     expected = os.getenv("HOLO_API_KEY", "")
@@ -387,7 +424,7 @@ def _verify_bearer(request: Request) -> str:
             hashlib.sha256(token.encode()).digest(),
             hashlib.sha256(expected.encode()).digest(),
         ):
-            max_rpm = int(os.getenv("HOLO_MAX_RPM", "60"))
+            max_rpm = _max_rpm_from_env()
             if not _rate_limiter.check(key_id, max_rpm):
                 raise HTTPException(status_code=429, detail=f"Rate limit exceeded ({max_rpm} req/min).")
             return token
@@ -1735,7 +1772,10 @@ async def capsule_surface(
 
     context = _capsule_brain.get_capsule_context(capsule_id) or {}
     sessions = _capsule_brain.list_sessions(capsule_id)
-    result = _chat_engine._captain.generate_surface(context, sessions)
+    governor = getattr(_chat_engine, "_governor", None)
+    if governor is None or not hasattr(governor, "generate_surface"):
+        return JSONResponse(content={"topics": [], "todos": []})
+    result = governor.generate_surface(context, sessions)
     if not result:
         return JSONResponse(content={"topics": [], "todos": []})
 
@@ -1760,7 +1800,8 @@ async def thread_summary(
         history = _capsule_brain.load_chat_history(session_id) or []
     if not history:
         raise HTTPException(status_code=404, detail="Session not found.")
-    summary = _chat_engine._captain.summarize_thread(history)
+    governor = getattr(_chat_engine, "_governor", None)
+    summary = governor.summarize_thread(history) if governor and hasattr(governor, "summarize_thread") else ""
     if summary:
         _summary_cache[session_id] = summary
     return JSONResponse(content={"summary": summary})

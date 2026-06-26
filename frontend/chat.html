@@ -2105,6 +2105,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
         let   accumulated = "";
         let   pacedStream = null;
         let   doneData = null;
+        let   streamFailed = false;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -2134,15 +2135,21 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
             } else if (evt.type === "done") {
               doneData = evt;
             } else if (evt.type === "error") {
-              stopAmbientBubbles();
-              typingEl.remove();
-              appendError(evt.detail || "Something went wrong. Please try again.");
+              streamFailed = true;
+              streamOk = false;
+              if (holoEl && holoEl.parentNode) holoEl.remove();
+              if (typingEl.parentNode && typingEl.querySelector) {
+                typingEl.querySelector(".bubble").textContent = "Thinking…";
+              }
+              try { await reader.cancel(); } catch {}
+              break;
             }
           }
+          if (streamFailed) break;
         }
 
         // Handle stream that ended with no tokens and no done event
-        if (!holoEl && !doneData) {
+        if (!streamFailed && !holoEl && !doneData) {
           stopAmbientBubbles();
           if (typingEl.parentNode) typingEl.remove();
           appendError("Connection interrupted. Please try again.");
@@ -2665,12 +2672,21 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       ? "capped memory slice"
       : (runtime.context_delivery_mode || "unknown");
     const fullMemory = runtime.analyst_receives_full_memory === false ? "no" : "unknown";
-    const memoryStore = runtime.lossless_memory_store ? "attached" : "unknown";
+    const memoryStore = runtime.durable_memory_store ? "attached" : "unknown";
+    const memoryDelivery = runtime.memory_delivery_mode === "rolling_summary_selected_context"
+      ? "rolling summary + selected context"
+      : (runtime.memory_delivery_mode || "unknown");
     const stateMode = runtime.structured_state_object_mode || "off";
     const govArcMode = runtime.gov_arc_state_mode || "off";
     const batonMode = runtime.baton_pass_mode || "off";
     const holo4dnaMode = runtime.holo4dna_mode || "off";
-    const autoReseed = runtime.autoreseed_enabled === true ? "automatic" : "off/not configured";
+    const rollingSummaryMode = runtime.rolling_summary_mode === "active_prompt_sliding_window"
+      ? "active sliding summary"
+      : (runtime.rolling_summary_mode || "unknown");
+    const continuityLedgerMode = runtime.continuity_ledger_mode === "active_prompt_structured_private"
+      ? "active private ledger"
+      : (runtime.continuity_ledger_mode || "unknown");
+    const autoReseed = runtime.autoreseed_enabled === true ? "background compacting" : "off/not configured";
     const usage = runtime.usage || data.usage || {};
     const fmtTokens = value => {
       const n = Number(value);
@@ -2689,7 +2705,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     if (provider || model) rows.push(["This turn", `${provider}${model ? ":" + model : ""}`]);
     rows.push(["Mode", modeLabel]);
     const selectionLabel = runtime.selection_mode === "round_robin"
-      ? "rotating mini pool"
+      ? (runtimeProfile === "mini_only" || runtimeProfile === "balanced" ? "rotating mini pool" : "rotating frontier pool")
       : (runtime.selection_mode || "unknown");
     rows.push(["Selection", selectionLabel]);
     if (activePoolCount) rows.push(["Active pool", `${activePoolCount} ${poolLabel}`]);
@@ -2703,11 +2719,31 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     rows.push(["Context delivery", contextDelivery]);
     rows.push(["Full memory to analyst", fullMemory]);
     rows.push(["Memory store", memoryStore]);
+    rows.push(["Memory delivery", memoryDelivery]);
+    if (runtime.adapter_history_messages !== undefined) {
+      rows.push(["History sent", `${fmtTokens(runtime.adapter_history_messages)} / ${fmtTokens(runtime.adapter_history_total_messages)} messages`]);
+      rows.push(["History omitted", `${fmtTokens(runtime.adapter_history_omitted_messages)} messages`]);
+      rows.push(["History chars", `${fmtTokens(runtime.adapter_history_chars)} / ${fmtTokens(runtime.adapter_history_char_cap)}`]);
+    }
+    if (runtime.context_budget_hard_limit_tokens !== undefined) {
+      rows.push(["Context hard cap", `${fmtTokens(runtime.context_budget_hard_limit_tokens)} tokens`]);
+    }
+    rows.push(["Rolling summary", rollingSummaryMode]);
+    rows.push(["Continuity ledger", continuityLedgerMode]);
     rows.push(["State object", stateMode]);
     rows.push(["Gov Arc State", govArcMode]);
     rows.push(["Baton Pass", batonMode]);
     rows.push(["Holo4DNA", holo4dnaMode]);
     rows.push(["AutoReseed", autoReseed]);
+    if (runtime.auto_compact_enabled === true) {
+      rows.push(["Auto compact count", fmtTokens(runtime.auto_compact_count)]);
+      rows.push(["Auto compact interval", `${fmtTokens(runtime.auto_compact_interval_turns)} turns`]);
+      rows.push(["Last compact turn", runtime.last_auto_compact_turn ? fmtTokens(runtime.last_auto_compact_turn) : "none"]);
+      rows.push(["Reseed artifacts", fmtTokens(runtime.reseed_artifact_count)]);
+      rows.push(["Last reseed turn", runtime.last_reseed_turn ? fmtTokens(runtime.last_reseed_turn) : "none"]);
+      rows.push(["Visible handoff after", `${fmtTokens(runtime.visible_handoff_min_turns)} turns`]);
+      rows.push(["Visible handoff shown", runtime.visible_handoff_suggested === true ? "yes" : "no"]);
+    }
     const failover = runtime.failover || {};
     if (Object.keys(failover).length) {
       const skipped = Number(failover.count || 0);

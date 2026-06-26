@@ -97,6 +97,8 @@ class MockAdapter(BaseAdapter):
 
     provider = "mock"
     model_id = "mock-model"
+    _api_style = "mock"
+    _client = None
 
     def __init__(self, results):
         """

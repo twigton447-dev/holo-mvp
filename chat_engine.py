@@ -10,6 +10,7 @@ All providers speak as Holo using the unified persona prompt.
 """
 
 import logging
+import json
 import os
 import random
 import re as _re
@@ -17,6 +18,7 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional, List, Dict, Any
 
 from holo_context import (
@@ -34,7 +36,6 @@ from llm_adapters import (
     HOLO_CHAT_SYSTEM_PROMPT,
     GovernorAdapter,
     load_adapters,
-    load_fast_adapters,
 )
 from project_brain import ProjectBrain
 import web_search
@@ -83,14 +84,63 @@ class ChatSession:
     @property
     def thread_health_score(self) -> int:
         """
-        Starts at 100, decays with turns and accumulated message volume.
-        HoloChat does not pass the whole raw thread to each analyst, so decay is
-        slower than a normal single-model context window.
+        Continuity health is based on explicit degradation signals, not raw
+        thread length. Long threads are handled by bounded context assembly,
+        rolling summaries, and handoff artifacts; they are not automatically
+        unhealthy unless the carried frame starts to drift.
         """
-        base       = max(0, 100 - (self.turn_count * 3))
-        total_chars = sum(len(m["content"]) for m in self.history)
-        char_decay  = min(35, total_chars // 3000)
-        return max(0, base - char_decay)
+        score, _reasons = self._thread_health_assessment()
+        return score
+
+    @property
+    def thread_health_reasons(self) -> list[str]:
+        _score, reasons = self._thread_health_assessment()
+        return reasons
+
+    def _thread_health_assessment(self) -> tuple[int, list[str]]:
+        score = 100
+        reasons: list[str] = []
+        ledger = _normalized_continuity_ledger(self.continuity_ledger)
+        arc = self.gov_arc_state or GovArcState()
+
+        def penalize(points: int, reason: str) -> None:
+            nonlocal score
+            score = max(0, score - points)
+            if reason not in reasons:
+                reasons.append(reason)
+
+        joined_regressions = " ".join(ledger.get("regressed") or []).lower()
+        joined_missing = " ".join(ledger.get("still_missing") or []).lower()
+        joined_open = " ".join(ledger.get("open_issues") or []).lower()
+        joined_user = " ".join(ledger.get("user_continuity") or []).lower()
+        joined_all = " ".join((joined_regressions, joined_missing, joined_open, joined_user))
+
+        hard_drift_terms = (
+            "capsule boundary",
+            "boundary violation",
+            "goal drift",
+            "wrong goal",
+            "lost goal",
+            "stale decision",
+            "stale summary",
+            "full memory claim",
+            "raw memory leak",
+        )
+        if any(term in joined_all for term in hard_drift_terms):
+            penalize(85, "continuity_degradation_signal")
+
+        if ledger.get("regressed"):
+            penalize(35, "regression_recorded")
+        if "stale" in joined_missing or "drift" in joined_missing:
+            penalize(35, "stale_or_drift_missing_item")
+        if arc.confidence == "low":
+            penalize(25, "low_governor_continuity_confidence")
+        if self.turn_count >= 2 and not (arc.user_goal or joined_user):
+            penalize(20, "missing_live_goal_evidence")
+        if self.turn_count >= 3 and not (arc.current_directive or arc.settled_decisions or ledger.get("repaired")):
+            penalize(20, "missing_recent_decision_evidence")
+
+        return score, reasons
 
     @property
     def thread_health_level(self) -> str:
@@ -103,10 +153,11 @@ class ChatSession:
 
     @property
     def thread_status(self) -> str:
+        reasons = set(self.thread_health_reasons)
         score = self.thread_health_score
-        if score <= 20:
+        if "continuity_degradation_signal" in reasons or score <= 20:
             return "ROTATION_RECOMMENDED"
-        elif score <= 40:
+        elif score <= 60:
             return "CLEANUP_RECOMMENDED"
         return "HEALTHY"
 
@@ -122,11 +173,10 @@ class ChatSession:
 # Governor rotation helpers
 # ---------------------------------------------------------------------------
 
-DEFAULT_RUNTIME_PROFILE = "frontier_active"
+LOCKED_ARCHITECTURE_MANIFEST = Path(__file__).resolve().parent / "holo_profiles" / "locked_architecture_profiles.json"
+DEFAULT_LOCKED_ARCHITECTURE_PROFILE = "frontier_holo_optimized_opus_gpt55_v1"
+SUPPORTED_POOL_STRATEGIES = {"frontier_ordered_full_registry"}
 BALANCED_RUNTIME_PROFILE = "balanced"
-FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
-DEFAULT_HOLOCHAT_PROVIDER_ROTATION = ("xai", "openai", "minimax")
-DEFAULT_HOLOCHAT_GOVERNOR_PROVIDER = "openai"
 DEFAULT_THREAD_HANDOFF_MIN_TURNS = 40
 DEFAULT_AUTOCOMPACT_MIN_TURNS = 24
 DEFAULT_AUTOCOMPACT_INTERVAL_TURNS = 10
@@ -199,26 +249,125 @@ _STATIC_CHAT_PRICING_USD_PER_M_TOKEN: dict[tuple[str, str], tuple[float, float]]
 THREAD_HANDOFF_MESSAGE = "This thread is getting long. Start a fresh thread to keep Holo sharp."
 
 
-def _holochat_runtime_profile() -> str:
-    return (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
+@dataclass(frozen=True)
+class ResolvedArchitectureProfile:
+    profile_id: str
+    profile_version: str
+    status: str
+    runtime_class: str
+    builder_alignment: str
+    registry_mode: str
+    governor_lane: str
+    runtime_behavior: str
+    pool_strategy: str
+    active_provider_order: tuple[str, ...]
+    governor_provider: Optional[str]
+    manifest_path: str
+    manifest_version: str
+    source: str = "locked_manifest"
+    selector_source: str = "default_locked_profile"
+
+    @property
+    def architecture_profile(self) -> str:
+        return self.profile_id
+
+    @property
+    def alignment_profile(self) -> str:
+        return self.builder_alignment
+
+    @property
+    def registry_profile(self) -> str:
+        return self.registry_mode
+
+    def locked_value(self) -> dict[str, str]:
+        return {
+            "architecture_profile": self.architecture_profile,
+            "alignment_profile": self.alignment_profile,
+            "registry_profile": self.registry_profile,
+            "governor_lane": self.governor_lane,
+        }
 
 
-def _holochat_provider_rotation() -> tuple[str, ...]:
-    raw = os.getenv("HOLOCHAT_PROVIDER_ROTATION", "").strip()
-    if not raw:
-        return DEFAULT_HOLOCHAT_PROVIDER_ROTATION
-    providers = tuple(
-        item.strip().lower()
-        for item in raw.split(",")
-        if item.strip()
+def _selected_architecture_profile_id(env: dict[str, str] | None = None) -> tuple[str, str]:
+    return DEFAULT_LOCKED_ARCHITECTURE_PROFILE, "locked_constant"
+
+
+def _load_locked_architecture_manifest(path: Optional[Path] = None) -> dict[str, Any]:
+    path = path or LOCKED_ARCHITECTURE_MANIFEST
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise RuntimeError(f"Locked architecture manifest not found: {path}") from exc
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Locked architecture manifest is invalid JSON: {path}") from exc
+    if manifest.get("schema_version") != "holo.architecture_profiles.v1":
+        raise RuntimeError("Locked architecture manifest schema_version is invalid.")
+    if not isinstance(manifest.get("profiles"), dict):
+        raise RuntimeError("Locked architecture manifest has no profiles mapping.")
+    return manifest
+
+
+def _validate_locked_architecture_profile(profile_id: str, profile: dict[str, Any]) -> None:
+    required = {
+        "profile_id": profile_id,
+        "status": "locked",
+        "runtime_behavior": "manifest_controls_runtime_selection",
+        "runtime_class": "frontier_holo_optimized",
+        "builder_alignment": "patent_aligned_v4",
+        "registry_mode": "full_registry",
+        "governor_lane": "HoloGov-B",
+    }
+    for key, expected in required.items():
+        if profile.get(key) != expected:
+            raise RuntimeError(
+                f"Locked architecture profile {profile_id!r} has invalid {key}: "
+                f"{profile.get(key)!r}"
+            )
+    if profile.get("pool_strategy") not in SUPPORTED_POOL_STRATEGIES:
+        raise RuntimeError(
+            f"Locked architecture profile {profile_id!r} has unsupported pool_strategy: "
+            f"{profile.get('pool_strategy')!r}"
+        )
+    provider_order = profile.get("active_provider_order")
+    if not isinstance(provider_order, list) or not all(isinstance(item, str) and item.strip() for item in provider_order):
+        raise RuntimeError(f"Locked architecture profile {profile_id!r} must define active_provider_order.")
+
+
+def _holochat_runtime_profile(
+    profile_id: Optional[str] = None,
+    *,
+    selector_source: Optional[str] = None,
+) -> ResolvedArchitectureProfile:
+    if profile_id is None:
+        profile_id, selector_source = _selected_architecture_profile_id()
+    else:
+        profile_id = str(profile_id).strip()
+        selector_source = selector_source or "explicit_manifest_profile_id"
+    manifest = _load_locked_architecture_manifest()
+    profiles = manifest["profiles"]
+    if profile_id not in profiles:
+        raise RuntimeError(
+            f"HoloChat architecture profile {profile_id!r} is not present in "
+            f"{LOCKED_ARCHITECTURE_MANIFEST.relative_to(Path(__file__).resolve().parent)}"
+        )
+    profile = profiles[profile_id]
+    _validate_locked_architecture_profile(profile_id, profile)
+    return ResolvedArchitectureProfile(
+        profile_id=profile["profile_id"],
+        profile_version=str(profile.get("profile_version", "")),
+        status=profile["status"],
+        runtime_class=profile["runtime_class"],
+        builder_alignment=profile["builder_alignment"],
+        registry_mode=profile["registry_mode"],
+        governor_lane=profile["governor_lane"],
+        runtime_behavior=profile["runtime_behavior"],
+        pool_strategy=profile["pool_strategy"],
+        active_provider_order=tuple(item.strip().lower() for item in profile["active_provider_order"]),
+        governor_provider=(str(profile.get("governor_provider") or "").strip().lower() or None),
+        manifest_path=str(LOCKED_ARCHITECTURE_MANIFEST),
+        manifest_version=str(manifest.get("manifest_version", "")),
+        selector_source=selector_source,
     )
-    return providers or DEFAULT_HOLOCHAT_PROVIDER_ROTATION
-
-
-def _holochat_governor_provider() -> Optional[str]:
-    raw = os.getenv("HOLOCHAT_GOVERNOR_PROVIDER", DEFAULT_HOLOCHAT_GOVERNOR_PROVIDER)
-    provider = raw.strip().lower()
-    return provider or None
 
 
 def _positive_int_env(name: str, default: int, *, minimum: int = 0) -> int:
@@ -1380,15 +1529,26 @@ def _turn_runtime_metadata(
 
 
 def _runtime_metadata(
-    runtime_profile: str,
+    runtime_profile: str | ResolvedArchitectureProfile,
     active_pool: list[Any],
     bench_pool: list[Any],
 ) -> dict[str, Any]:
-    mini_only = runtime_profile == "mini_only"
-    balanced = runtime_profile == BALANCED_RUNTIME_PROFILE
+    resolved_profile = runtime_profile if isinstance(runtime_profile, ResolvedArchitectureProfile) else None
+    runtime_profile_id = (
+        resolved_profile.profile_id
+        if resolved_profile is not None
+        else str(runtime_profile)
+    )
+    runtime_class = (
+        resolved_profile.runtime_class
+        if resolved_profile is not None
+        else str(runtime_profile)
+    )
+    mini_only = runtime_class == "mini_only"
+    balanced = runtime_class == BALANCED_RUNTIME_PROFILE
     frontier_assist_enabled = balanced and bool(bench_pool)
-    return {
-        "runtime_profile": runtime_profile,
+    metadata = {
+        "runtime_profile": runtime_profile_id,
         "active_pool": _adapter_pool_metadata(active_pool),
         "bench_pool": _adapter_pool_metadata(bench_pool),
         "frontier_enabled": not mini_only,
@@ -1401,6 +1561,27 @@ def _runtime_metadata(
         "serial_call": True,
         "parallel_fanout": False,
     }
+    if resolved_profile is not None:
+        metadata.update(
+            {
+                "architecture_profile": resolved_profile.architecture_profile,
+                "alignment_profile": resolved_profile.alignment_profile,
+                "registry_profile": resolved_profile.registry_profile,
+                "governor_lane": resolved_profile.governor_lane,
+                "runtime_class": resolved_profile.runtime_class,
+                "architecture_profile_source": resolved_profile.source,
+                "architecture_manifest_path": resolved_profile.manifest_path,
+                "architecture_manifest_version": resolved_profile.manifest_version,
+                "architecture_selector_source": resolved_profile.selector_source,
+                "architecture_profile_status": resolved_profile.status,
+                "architecture_profile_locked": resolved_profile.status == "locked",
+                "architecture_override_policy": "manifest_named_profile_only",
+                "runtime_behavior": resolved_profile.runtime_behavior,
+                "pool_strategy": resolved_profile.pool_strategy,
+                "configured_active_provider_order": list(resolved_profile.active_provider_order),
+            }
+        )
+    return metadata
 
 
 def _select_runtime_pools(
@@ -1408,36 +1589,37 @@ def _select_runtime_pools(
     *,
     fast_loader=None,
     frontier_loader=None,
-) -> tuple[str, list[Any], list[Any]]:
-    fast_loader = fast_loader or load_fast_adapters
-    frontier_loader = frontier_loader or load_adapters
-    runtime_profile = (profile or _holochat_runtime_profile()).strip().lower()
-    if runtime_profile == "mini_only":
-        active_pool = fast_loader()
-        if not active_pool:
+) -> tuple[ResolvedArchitectureProfile, list[Any], list[Any]]:
+    if profile is not None:
+        if not isinstance(profile, str):
+            raise RuntimeError("HoloChat runtime profile override must be a manifest profile id.")
+        if profile.strip() != DEFAULT_LOCKED_ARCHITECTURE_PROFILE:
             raise RuntimeError(
-                "HoloChat mini_only runtime has no mini adapters; "
-                "frontier fallback is disabled."
+                "HoloChat runtime profile override is disabled; "
+                f"only {DEFAULT_LOCKED_ARCHITECTURE_PROFILE!r} may be resolved."
             )
-        return runtime_profile, active_pool, []
-    if runtime_profile == BALANCED_RUNTIME_PROFILE:
-        active_pool = fast_loader()
-        if not active_pool:
-            raise RuntimeError("HoloChat balanced runtime has no mini adapters.")
-        frontier_active, frontier_bench = frontier_loader()
-        frontier_pool = [*frontier_active, *frontier_bench]
-        return runtime_profile, active_pool, frontier_pool
-    if runtime_profile in FRONTIER_RUNTIME_PROFILES:
+        resolved_profile = _holochat_runtime_profile(
+            profile,
+            selector_source="locked_explicit_constant",
+        )
+    else:
+        resolved_profile = _holochat_runtime_profile()
+    frontier_loader = frontier_loader or load_adapters
+
+    if resolved_profile.pool_strategy == "frontier_ordered_full_registry":
         active_pool, bench_pool = frontier_loader()
         active_pool, bench_pool = _holochat_ordered_pool(
             active_pool,
             bench_pool,
-            _holochat_provider_rotation(),
+            resolved_profile.active_provider_order,
         )
         if not active_pool:
             raise RuntimeError("HoloChat frontier runtime has no active adapters.")
-        return runtime_profile, active_pool, bench_pool
-    raise RuntimeError(f"Unsupported HOLOCHAT_RUNTIME_PROFILE: {runtime_profile}")
+        return resolved_profile, active_pool, bench_pool
+
+    raise RuntimeError(
+        f"Unsupported locked architecture pool_strategy: {resolved_profile.pool_strategy}"
+    )
 
 
 def _is_mid_resolution(last_assistant_message: str) -> bool:
@@ -1500,13 +1682,14 @@ class HoloChatEngine:
     """
 
     def __init__(self):
-        self._runtime_profile, self._adapters, self._bench = _select_runtime_pools()
+        self._resolved_architecture_profile, self._adapters, self._bench = _select_runtime_pools()
+        self._runtime_profile = self._resolved_architecture_profile.profile_id
         self._runtime_info = _runtime_metadata(
-            self._runtime_profile,
+            self._resolved_architecture_profile,
             self._adapters,
             self._bench,
         )
-        governor_provider = _holochat_governor_provider()
+        governor_provider = self._resolved_architecture_profile.governor_provider
         self._governor = GovernorAdapter(
             self._adapters,
             fixed_governor=governor_provider,
@@ -1637,7 +1820,11 @@ class HoloChatEngine:
         )
 
         frontier_assist_enabled = (
-            getattr(self, "_runtime_profile", DEFAULT_RUNTIME_PROFILE) == BALANCED_RUNTIME_PROFILE
+            getattr(
+                getattr(self, "_resolved_architecture_profile", None),
+                "runtime_class",
+                getattr(self, "_runtime_profile", ""),
+            ) == BALANCED_RUNTIME_PROFILE
             and bool(self._bench)
             and not incognito
         )
@@ -1973,8 +2160,9 @@ class HoloChatEngine:
             provider_output_tokens=out_tok,
             latency_ms=elapsed_ms,
         )
+        resolved_runtime_profile = getattr(self, "_resolved_architecture_profile", None) or _holochat_runtime_profile()
         runtime_info = getattr(self, "_runtime_info", None) or _runtime_metadata(
-            "mini_only",
+            resolved_runtime_profile,
             self._adapters,
             self._bench,
         )
@@ -2115,7 +2303,11 @@ class HoloChatEngine:
         )
 
         frontier_assist_enabled = (
-            getattr(self, "_runtime_profile", DEFAULT_RUNTIME_PROFILE) == BALANCED_RUNTIME_PROFILE
+            getattr(
+                getattr(self, "_resolved_architecture_profile", None),
+                "runtime_class",
+                getattr(self, "_runtime_profile", ""),
+            ) == BALANCED_RUNTIME_PROFILE
             and bool(self._bench)
             and not incognito
         )
@@ -2410,8 +2602,9 @@ class HoloChatEngine:
             provider_output_tokens=out_tok,
             latency_ms=elapsed_ms,
         )
+        resolved_runtime_profile = getattr(self, "_resolved_architecture_profile", None) or _holochat_runtime_profile()
         runtime_info = getattr(self, "_runtime_info", None) or _runtime_metadata(
-            "mini_only",
+            resolved_runtime_profile,
             self._adapters,
             self._bench,
         )

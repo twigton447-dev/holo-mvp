@@ -126,7 +126,7 @@ def mock_client():
     """Return a MagicMock that satisfies the fluent query-builder pattern."""
     client = MagicMock()
     # Make every chained method return the same mock so chains work
-    for method in ("table", "select", "eq", "order", "limit", "single",
+    for method in ("table", "select", "eq", "order", "limit", "single", "maybe_single",
                    "insert", "update", "upsert"):
         getattr(client, method).return_value = client
     return client
@@ -137,6 +137,127 @@ def brain(mock_client):
     """ProjectBrain with a pre-wired mock client (no Supabase connection needed)."""
     b = ProjectBrain.__new__(ProjectBrain)
     b._client = mock_client
+    return b
+
+
+class _MemoryResponse:
+    def __init__(self, data=None, count=None):
+        self.data = data
+        self.count = count
+
+
+class _MemoryQuery:
+    def __init__(self, client, table_name):
+        self.client = client
+        self.table_name = table_name
+        self.filters = []
+        self.null_filters = []
+        self.order_field = None
+        self.order_desc = False
+        self.limit_count = None
+        self.single_mode = False
+        self.insert_payload = None
+        self.upsert_payload = None
+        self.upsert_conflict = None
+        self.update_payload = None
+
+    def select(self, *args, **kwargs):
+        return self
+
+    def eq(self, field, value):
+        self.filters.append((field, value))
+        return self
+
+    def is_(self, field, value):
+        self.null_filters.append((field, value))
+        return self
+
+    def order(self, field, desc=False):
+        self.order_field = field
+        self.order_desc = desc
+        return self
+
+    def limit(self, count):
+        self.limit_count = count
+        return self
+
+    def maybe_single(self):
+        self.single_mode = True
+        return self
+
+    def insert(self, payload):
+        self.insert_payload = payload
+        return self
+
+    def upsert(self, payload, on_conflict=None):
+        self.upsert_payload = payload
+        self.upsert_conflict = on_conflict
+        return self
+
+    def update(self, payload):
+        self.update_payload = payload
+        return self
+
+    def execute(self):
+        rows = self.client.tables.setdefault(self.table_name, [])
+        if self.insert_payload is not None:
+            payload = self.insert_payload if isinstance(self.insert_payload, list) else [self.insert_payload]
+            rows.extend(deepcopy(payload))
+            return _MemoryResponse(data=deepcopy(payload))
+        if self.upsert_payload is not None:
+            payload = deepcopy(self.upsert_payload)
+            conflict = [part.strip() for part in (self.upsert_conflict or "").split(",") if part.strip()]
+            match = None
+            if conflict:
+                for row in rows:
+                    if all(row.get(field) == payload.get(field) for field in conflict):
+                        match = row
+                        break
+            if match is None:
+                rows.append(payload)
+            else:
+                match.update(payload)
+            return _MemoryResponse(data=deepcopy(payload))
+        if self.update_payload is not None:
+            matched = self._matching_rows(rows)
+            for row in matched:
+                row.update(deepcopy(self.update_payload))
+            return _MemoryResponse(data=deepcopy(matched))
+        selected = deepcopy(self._matching_rows(rows))
+        if self.order_field:
+            selected.sort(
+                key=lambda row: row.get(self.order_field) or "",
+                reverse=bool(self.order_desc),
+            )
+        if self.limit_count is not None:
+            selected = selected[: self.limit_count]
+        if self.single_mode:
+            return _MemoryResponse(data=selected[0] if selected else None)
+        return _MemoryResponse(data=selected)
+
+    def _matching_rows(self, rows):
+        matched = []
+        for row in rows:
+            if any(row.get(field) != value for field, value in self.filters):
+                continue
+            if any((row.get(field) is not None) for field, value in self.null_filters if value == "null"):
+                continue
+            matched.append(row)
+        return matched
+
+
+class _MemoryClient:
+    def __init__(self):
+        self.tables = {}
+
+    def table(self, table_name):
+        return _MemoryQuery(self, table_name)
+
+
+@pytest.fixture
+def memory_cycle_brain():
+    b = ProjectBrain.__new__(ProjectBrain)
+    b._client = _MemoryClient()
     return b
 
 
@@ -444,116 +565,95 @@ class TestUpsertVendorProfile:
 
 
 # ---------------------------------------------------------------------------
-# Integration tests — only run when real Supabase creds are present
+# Offline memory-cycle certification — no network, no skipped Supabase branch
 # ---------------------------------------------------------------------------
 
-@pytest.mark.integration
-class TestProjectBrainIntegration:
-    """
-    Runs against a real Supabase instance.  Requires:
-        SUPABASE_URL and SUPABASE_KEY set in environment.
+class TestProjectBrainOfflineMemoryCycles:
 
-    These tests write real rows tagged with a unique test prefix and
-    clean them up afterwards.  Run with:
-        pytest tests/test_brain.py -v -m integration
-    """
-
-    TEST_DOMAIN = f"holo-test-{uuid.uuid4().hex[:8]}.example.com"
-
-    @pytest.fixture(autouse=True)
-    def require_supabase(self):
-        if not (os.getenv("SUPABASE_URL") and os.getenv("SUPABASE_KEY")):
-            pytest.skip("SUPABASE_URL / SUPABASE_KEY not set")
-
-    @pytest.fixture
-    def live_brain(self):
-        b = ProjectBrain()
-        if b._client is None:
-            pytest.skip("ProjectBrain could not connect to Supabase")
-        return b
-
-    @pytest.fixture(autouse=True)
-    def cleanup(self, live_brain):
-        yield
-        # Remove test rows after each test
-        try:
-            c = live_brain._client
-            eval_ids = [
-                r["evaluation_id"]
-                for r in (c.table("holo_evaluations")
-                            .select("evaluation_id")
-                            .eq("vendor_domain", self.TEST_DOMAIN)
-                            .execute().data or [])
-            ]
-            if eval_ids:
-                c.table("holo_findings").delete().in_("evaluation_id", eval_ids).execute()
-            c.table("holo_evaluations").delete().eq("vendor_domain", self.TEST_DOMAIN).execute()
-            c.table("holo_vendor_profiles").delete().eq("vendor_domain", self.TEST_DOMAIN).execute()
-        except Exception:
-            pass
-
-    def _test_request(self):
-        return {
-            "action":  {"type": "invoice_payment", "amount_usd": 9999},
-            "context": {
-                "vendor_record": {
-                    "vendor_name":  "Holo Test Vendor",
-                    "vendor_email": f"billing@{self.TEST_DOMAIN}",
-                },
-                "email_chain": [],
-            },
-        }
-
-    def test_first_evaluation_returns_no_prior_context(self, live_brain):
-        ctx = self._test_request()["context"]
-        result = live_brain.retrieve_context({}, ctx)
-        assert result is None, "Expected None for a brand-new vendor"
-
-    def test_save_then_retrieve_returns_context(self, live_brain):
-        request = self._test_request()
-        result1 = _make_result(
-            decision="ESCALATE",
-            high_categories=["payment_routing"],
-            findings=[{
-                "category":  "payment_routing",
-                "severity":  "HIGH",
-                "fact_type": "SUBMITTED_DATA",
-                "evidence":  "Bank changed 2 days ago.",
-                "detail":    "Offshore account.",
-            }],
+    def test_capsule_context_write_read_update_cycle(self, memory_cycle_brain):
+        memory_cycle_brain.set_capsule_context(
+            "capsule-1",
+            "dashboard_truth",
+            "memory write v1",
         )
-        live_brain.save_evaluation(result1, request)
+        assert memory_cycle_brain.get_capsule_context("capsule-1")["dashboard_truth"] == "memory write v1"
 
-        ctx     = request["context"]
-        context = live_brain.retrieve_context({}, ctx)
+        memory_cycle_brain.set_capsule_context(
+            "capsule-1",
+            "dashboard_truth",
+            "memory write v2",
+        )
+        context = memory_cycle_brain.get_capsule_context("capsule-1")
 
-        assert context is not None
-        assert context["vendor_domain"] == self.TEST_DOMAIN
-        assert context["total_evaluations"] == 1
-        assert context["escalate_count"] == 1
-        assert context["highest_risk_seen"] == "HIGH"
-        assert len(context["recent_evaluations"]) == 1
-        assert context["recent_evaluations"][0]["decision"] == "ESCALATE"
-        assert len(context["prior_high_findings"]) == 1
-        assert context["prior_high_findings"][0]["category"] == "payment_routing"
+        assert context["dashboard_truth"] == "memory write v2"
+        assert "memory write v1" not in context.values()
 
-    def test_second_evaluation_compounds_counters(self, live_brain):
-        request = self._test_request()
-        result1 = _make_result(decision="ALLOW")
-        result2 = _make_result(decision="ALLOW")
-        live_brain.save_evaluation(result1, request)
-        live_brain.save_evaluation(result2, request)
+    def test_chat_turn_write_read_cycle_preserves_thread_order(self, memory_cycle_brain):
+        memory_cycle_brain.save_chat_turn(
+            session_id="session-1",
+            turn_number=1,
+            user_message="Goal: certify HoloBrain before dashboard.",
+            holo_response="Decision: memory diagnostics first.",
+            provider="openai",
+            temperature=0.2,
+            capsule_id="capsule-1",
+        )
 
-        ctx     = request["context"]
-        context = live_brain.retrieve_context({}, ctx)
+        history = memory_cycle_brain.load_chat_history("session-1")
 
-        assert context["total_evaluations"] == 2
-        assert context["allow_count"] == 2
+        assert history == [
+            {"role": "user", "content": "Goal: certify HoloBrain before dashboard."},
+            {"role": "assistant", "content": "Decision: memory diagnostics first."},
+        ]
 
-    def test_context_note_is_present(self, live_brain):
-        request = self._test_request()
-        live_brain.save_evaluation(_make_result(), request)
-        ctx     = request["context"]
-        context = live_brain.retrieve_context({}, ctx)
-        assert "context_note" in context
-        assert len(context["context_note"]) > 20
+    def test_life_context_supersession_prunes_mismatched_old_key(self, memory_cycle_brain):
+        memory_cycle_brain.upsert_life_context(
+            "capsule-1",
+            [
+                {
+                    "category": "work",
+                    "key": "dashboard_ready_status",
+                    "value": "Dashboard may ship.",
+                }
+            ],
+        )
+        memory_cycle_brain.upsert_life_context(
+            "capsule-1",
+            [
+                {
+                    "category": "work",
+                    "key": "dashboard_ready_status_current",
+                    "value": "Dashboard blocked until HoloBrain memory passes.",
+                    "supersedes": "dashboard_ready_status",
+                }
+            ],
+        )
+
+        active = memory_cycle_brain.load_life_context("capsule-1")
+        active_keys = {row["key"] for row in active}
+        active_values = {row["value"] for row in active}
+        raw_rows = memory_cycle_brain._client.tables["holo_life_context"]
+        old_row = next(row for row in raw_rows if row["key"] == "dashboard_ready_status")
+
+        assert active_keys == {"dashboard_ready_status_current"}
+        assert "Dashboard may ship." not in active_values
+        assert old_row["pruned_at"]
+        assert "Superseded by 'dashboard_ready_status_current'" in old_row["prune_reason"]
+
+    def test_consolidation_write_read_cycle_preserves_latest_note(self, memory_cycle_brain):
+        memory_cycle_brain.save_consolidation(
+            "capsule-1",
+            "session-1",
+            {
+                "what_changed": "Memory gate stayed closed.",
+                "what_surfaced": "Thread health must be evidence based.",
+                "open_threads": ["fix memory write/read", "fix thread health"],
+                "captain_note": "Do not move to HoloVerify yet.",
+            },
+        )
+
+        latest = memory_cycle_brain.load_last_consolidation("capsule-1")
+
+        assert latest["what_changed"] == "Memory gate stayed closed."
+        assert latest["open_threads"] == ["fix memory write/read", "fix thread health"]
+        assert latest["captain_note"] == "Do not move to HoloVerify yet."

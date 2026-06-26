@@ -10,6 +10,8 @@ import llm_adapters
 from chat_engine import (
     ChatSession,
     HoloChatEngine,
+    DEFAULT_LOCKED_ARCHITECTURE_PROFILE,
+    ResolvedArchitectureProfile,
     THREAD_HANDOFF_MESSAGE,
     _claim_autocompact_for_context_window,
     _handoff_for_context_window,
@@ -195,7 +197,8 @@ def test_load_adapters_skips_malformed_api_keys_without_leaking_value(monkeypatc
     assert bad_key not in caplog.text
 
 
-def test_default_runtime_profile_is_frontier_active(monkeypatch):
+def test_default_runtime_profile_loads_locked_manifest(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_ARCHITECTURE_PROFILE", raising=False)
     monkeypatch.delenv("HOLOCHAT_RUNTIME_PROFILE", raising=False)
     monkeypatch.delenv("HOLOCHAT_PROVIDER_ROTATION", raising=False)
     frontier_active = [
@@ -213,7 +216,14 @@ def test_default_runtime_profile_is_frontier_active(monkeypatch):
         frontier_loader=lambda: (frontier_active, frontier_bench),
     )
 
-    assert profile == "frontier_active"
+    assert isinstance(profile, ResolvedArchitectureProfile)
+    assert profile.locked_value() == {
+        "architecture_profile": "frontier_holo_optimized_opus_gpt55_v1",
+        "alignment_profile": "patent_aligned_v4",
+        "registry_profile": "full_registry",
+        "governor_lane": "HoloGov-B",
+    }
+    assert profile.source == "locked_manifest"
     assert [(adapter.provider, adapter.model_id) for adapter in active] == [
         ("xai", "grok-4.3"),
         ("openai", "gpt-5.4"),
@@ -225,16 +235,16 @@ def test_default_runtime_profile_is_frontier_active(monkeypatch):
     ]
 
 
-def test_mini_only_does_not_fall_back_to_frontier_when_empty():
-    with pytest.raises(RuntimeError, match="frontier fallback is disabled"):
+def test_legacy_mini_only_profile_is_not_a_runtime_selector():
+    with pytest.raises(RuntimeError, match="override is disabled"):
         _select_runtime_pools(
             "mini_only",
-            fast_loader=lambda: [],
             frontier_loader=lambda: pytest.fail("frontier loader should not run"),
         )
 
 
-def test_explicit_frontier_profile_uses_legacy_loader(monkeypatch):
+def test_explicit_locked_profile_uses_manifest_loader(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_ARCHITECTURE_PROFILE", raising=False)
     monkeypatch.delenv("HOLOCHAT_PROVIDER_ROTATION", raising=False)
     frontier_active = [
         FakeAdapter("openai", "gpt-5.4"),
@@ -246,12 +256,13 @@ def test_explicit_frontier_profile_uses_legacy_loader(monkeypatch):
     ]
 
     profile, active, bench = _select_runtime_pools(
-        "frontier_active",
+        DEFAULT_LOCKED_ARCHITECTURE_PROFILE,
         fast_loader=lambda: pytest.fail("fast loader should not run"),
         frontier_loader=lambda: (frontier_active, frontier_bench),
     )
 
-    assert profile == "frontier_active"
+    assert profile.profile_id == DEFAULT_LOCKED_ARCHITECTURE_PROFILE
+    assert profile.source == "locked_manifest"
     assert [(adapter.provider, adapter.model_id) for adapter in active] == [
         ("xai", "grok-4.3"),
         ("openai", "gpt-5.4"),
@@ -262,20 +273,15 @@ def test_explicit_frontier_profile_uses_legacy_loader(monkeypatch):
     ]
 
 
-def test_balanced_profile_uses_mini_pool_with_frontier_assist_pool():
-    mini_pool = _mini_pool()
+def test_legacy_balanced_profile_is_not_a_runtime_selector():
     frontier_active = [FakeAdapter("openai", "gpt-5.4")]
     frontier_bench = [FakeAdapter("xai", "grok-4.3")]
 
-    profile, active, bench = _select_runtime_pools(
-        "balanced",
-        fast_loader=lambda: mini_pool,
-        frontier_loader=lambda: (frontier_active, frontier_bench),
-    )
-
-    assert profile == "balanced"
-    assert active == mini_pool
-    assert bench == frontier_active + frontier_bench
+    with pytest.raises(RuntimeError, match="override is disabled"):
+        _select_runtime_pools(
+            "balanced",
+            frontier_loader=lambda: (frontier_active, frontier_bench),
+        )
 
 
 def test_runtime_metadata_reports_mini_only_without_frontier_fallback():
@@ -306,6 +312,7 @@ def test_runtime_metadata_reports_balanced_frontier_assist():
 
 
 def test_holochat_engine_init_uses_frontier_loader(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_ARCHITECTURE_PROFILE", raising=False)
     monkeypatch.delenv("HOLOCHAT_RUNTIME_PROFILE", raising=False)
     monkeypatch.delenv("HOLOCHAT_PROVIDER_ROTATION", raising=False)
     monkeypatch.delenv("HOLOCHAT_GOVERNOR_PROVIDER", raising=False)
@@ -317,11 +324,6 @@ def test_holochat_engine_init_uses_frontier_loader(monkeypatch):
         FakeAdapter("xai", "grok-4.3"),
         FakeAdapter("minimax", "MiniMax-Text-01"),
     ]
-    monkeypatch.setattr(
-        chat_engine,
-        "load_fast_adapters",
-        lambda: pytest.fail("fast loader should not run"),
-    )
     monkeypatch.setattr(
         chat_engine,
         "load_adapters",
@@ -336,7 +338,13 @@ def test_holochat_engine_init_uses_frontier_loader(monkeypatch):
 
     engine = HoloChatEngine()
 
-    assert engine._runtime_profile == "frontier_active"
+    assert engine._runtime_profile == DEFAULT_LOCKED_ARCHITECTURE_PROFILE
+    assert engine._resolved_architecture_profile.locked_value() == {
+        "architecture_profile": "frontier_holo_optimized_opus_gpt55_v1",
+        "alignment_profile": "patent_aligned_v4",
+        "registry_profile": "full_registry",
+        "governor_lane": "HoloGov-B",
+    }
     assert [(adapter.provider, adapter.model_id) for adapter in engine._adapters] == [
         ("xai", "grok-4.3"),
         ("openai", "gpt-5.4"),
@@ -952,6 +960,9 @@ def test_thread_handoff_artifact_is_tethered_to_source_session():
 def test_handoff_prompt_is_once_per_context_window():
     session = ChatSession(session_id="session-1")
     session.turn_count = 40
+    session.continuity_ledger = {
+        "regressed": ["goal drift: the live objective no longer matches the latest user decision"],
+    }
     session.gov_arc_state = GovArcState(
         current_topic="mobile controls and reseed continuity",
         user_goal="make the fresh thread feel continuous",
@@ -979,14 +990,60 @@ def test_handoff_prompt_waits_past_initial_red_zone():
     session = ChatSession(session_id="session-1")
     session.turn_count = 30
 
-    assert session.thread_health_level == "RED"
+    assert session.thread_health_level != "RED"
     assert _handoff_for_context_window(session) is None
     assert session.handoff_suggested is False
+
+
+def test_thread_health_stays_green_for_long_thread_with_preserved_frame():
+    session = ChatSession(session_id="session-long")
+    session.turn_count = 80
+    session.history = [
+        {"role": "user", "content": "technical detail " * 500},
+        {"role": "assistant", "content": "bounded answer " * 500},
+    ] * 40
+    session.gov_arc_state = GovArcState(
+        user_goal="keep the dashboard blocked until memory passes",
+        current_directive="preserve the latest control gate",
+        settled_decisions=["HoloBrain diagnostic comes before HoloVerify"],
+        confidence="medium",
+    )
+    session.continuity_ledger = {
+        "user_continuity": ["latest user need: keep the control gate closed"],
+        "repaired": ["addressed latest turn: memory diagnostics first"],
+    }
+
+    assert session.thread_health_level == "GREEN"
+    assert session.thread_status == "HEALTHY"
+
+
+def test_thread_health_yellow_for_missing_live_frame_evidence():
+    session = ChatSession(session_id="session-yellow")
+    session.turn_count = 3
+
+    assert session.thread_health_level == "YELLOW"
+    assert session.thread_status == "CLEANUP_RECOMMENDED"
+    assert "missing_live_goal_evidence" in session.thread_health_reasons
+
+
+def test_thread_health_red_for_proven_continuity_degradation():
+    session = ChatSession(session_id="session-red")
+    session.turn_count = 3
+    session.continuity_ledger = {
+        "regressed": ["capsule boundary violation: incognito memory appeared in live context"],
+    }
+
+    assert session.thread_health_level == "RED"
+    assert session.thread_status == "ROTATION_RECOMMENDED"
+    assert "continuity_degradation_signal" in session.thread_health_reasons
 
 
 def test_autocompact_is_claimed_on_spaced_intervals():
     session = ChatSession(session_id="session-1")
     session.turn_count = 30
+    session.continuity_ledger = {
+        "still_missing": ["stale decision carry-over: latest constraint missing from Gov read"],
+    }
 
     first = _claim_autocompact_for_context_window(
         session,
@@ -1026,6 +1083,9 @@ def test_autocompact_is_claimed_on_spaced_intervals():
 
     incognito_session = ChatSession(session_id="session-2")
     incognito_session.turn_count = 30
+    incognito_session.continuity_ledger = {
+        "still_missing": ["stale decision carry-over: latest constraint missing from Gov read"],
+    }
     assert _claim_autocompact_for_context_window(
         incognito_session,
         capsule_id="capsule-1",
@@ -1036,6 +1096,9 @@ def test_autocompact_is_claimed_on_spaced_intervals():
 def test_autocompact_can_run_before_visible_handoff_gate():
     session = ChatSession(session_id="session-1")
     session.turn_count = 30
+    session.continuity_ledger = {
+        "still_missing": ["stale summary: current user constraint not reflected"],
+    }
 
     assert session.thread_health_level == "RED"
     assert _claim_autocompact_for_context_window(

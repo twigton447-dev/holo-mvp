@@ -76,7 +76,10 @@ def test_locked_profile_manifest_loads():
         "builder_alignment": "patent_aligned_v4",
         "registry_mode": "full_registry",
         "governor_lane": "HoloGov-B",
-        "runtime_behavior": "declarative_only_no_runtime_change",
+        "runtime_behavior": "manifest_controls_runtime_selection",
+        "pool_strategy": "frontier_ordered_full_registry",
+        "active_provider_order": ["xai", "openai", "minimax"],
+        "governor_provider": "openai",
     }
 
 

@@ -782,6 +782,7 @@ class ProjectBrain:
                     decision       = result.get("decision", ""),
                     exit_reason    = result.get("exit_reason", ""),
                     high_cats      = high_cats,
+                    medium_cats    = medium_cats,
                     brief          = brief,
                 )
 
@@ -856,6 +857,7 @@ class ProjectBrain:
         exit_reason: str,
         high_cats: list,
         brief: str,
+        medium_cats: list | None = None,
     ):
         """
         Create or update the vendor's aggregate profile row.
@@ -864,8 +866,9 @@ class ProjectBrain:
         update highest_risk_seen if this evaluation found something worse,
         update last_seen and last_brief.
         """
-        # Determine the highest risk seen in this evaluation
-        this_risk = "HIGH" if high_cats else "MEDIUM"
+        # Determine the highest risk seen in this evaluation without inflating
+        # a clean ALLOW into MEDIUM.
+        this_risk = "HIGH" if high_cats else ("MEDIUM" if medium_cats else "LOW")
 
         self._client.table("holo_vendor_profiles").upsert(
             {

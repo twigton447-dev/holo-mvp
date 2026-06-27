@@ -13,7 +13,7 @@ Full gated 100-point judge deltas are required for official quality claims. Earl
 Current full gated judge status:
 
 - D13: official full gated Holo win, 94-69.
-- D14: official full gated judge blocked by repeated Gemini HTTP 503. Diagnostic noncanonical full-gated output favors Holo 95-78, but it is not official.
+- D14: official full gated Holo win, 94-69.
 
 ## Scoreboard
 
@@ -21,8 +21,8 @@ Current full gated judge status:
 |---|---|---|---|---|---|
 | D11 | trace mechanics | Holo final admissible; Turn 3 and Turn 7 gate score 40; regression false | no A/B judge in trace folder | Holo trace valid | trace-only, not fresh A/B score |
 | D13 | scored A/B | Holo admissible score 39 vs Solo inadmissible score 28 | full gated Gemini 94-69 | Holo | local regate added 0 provider calls |
-| D14 raw | scored A/B | Holo admissible score 48 vs Solo inadmissible score 34 | official full gated blocked; diagnostic noncanonical 95-78 | Holo deterministic | posthoc parser repair, 0 provider calls |
-| D14 compiled | scored A/B | Holo admissible score 48 vs Solo inadmissible score 38 | official full gated blocked; diagnostic noncanonical 95-78 | Holo deterministic | clean corrected artifacts available |
+| D14 raw | scored A/B | Holo admissible score 48 vs Solo inadmissible score 34 | compiled official full gated Gemini 94-69 | Holo | raw autopsy plus parser repair, 0 provider calls |
+| D14 compiled | scored A/B | Holo admissible score 48 vs Solo inadmissible score 38 | full gated Gemini 94-69 | Holo | clean corrected artifacts judged through canonical validator |
 
 ## Full Judging Rule
 
@@ -65,7 +65,7 @@ Argument scores matter only after deterministic compliance is visible. This keep
 |---|---|---|---|---|---|
 | D11 | Holo trace valid | not scored as A/B | not scored as A/B | not scored as A/B | architecture proof only |
 | D13 | Holo | Holo | Holo | Holo | Holo wins official full gated judgment 94-69 |
-| D14 | Holo | diagnostic Holo | diagnostic Holo | diagnostic Holo | Holo deterministic win; official full gated judgment blocked by provider 503 |
+| D14 | Holo | Holo | Holo | Holo | Holo wins official full gated judgment 94-69 |
 
 ## Token Proof
 
@@ -83,14 +83,14 @@ These are the proof claims supported by the artifacts:
 2. Gov is not too lean. Gov consumed about 39-41 percent of Holo tokens in these runs.
 3. The D11-lock mechanism is visible in traces: early artifact creation, local gate registry, Gov lock state, final selection, and regression prevention.
 4. In D13 and D14, Holo wins the deterministic ledger before quality interpretation.
-5. D13 has an official full gated 100-point Holo win. D14 has deterministic Holo win plus diagnostic full-gated support, but official D14 full-gated judging is blocked by provider 503 until rerun succeeds.
+5. D13 and D14 both have official full gated 100-point Holo wins, each 94-69.
 
 ## Caveats
 
 - D11 is trace-mechanics proof only from this folder; do not count it as a fresh scored A/B without paired Solo artifacts.
 - D13 local regate and D14 parser re-audit added zero provider calls, but they are posthoc local harness repairs and must be labeled that way.
 - D14 prepatch 95-0 judge is superseded as official score evidence by later full-gated attempts.
-- D14 diagnostic noncanonical full-gated output favored Holo 95-78, but the local validator rejected it as official because the judge did not return the canonical schema.
+- D14 diagnostic noncanonical full-gated output favored Holo 95-78, but the local validator rejected it as official because the judge did not return the canonical schema. It is superseded by the later schema-backed official 94-69 result.
 - Gemini is a single held-out judge in these siblings, not consensus. Treat it as strong directional evidence unless paired with additional held-out judges.
 - Any judge that does not report deterministic, epistemic, structural, and argument scores out of 100 is diagnostic only.
 - Any judge that does not receive the local deterministic audit is diagnostic only.
@@ -118,6 +118,8 @@ These are the proof claims supported by the artifacts:
 - trace: `/private/tmp/d14_d11_lock_full_holo_ab_haiku_20260627/live_d14_d11_lock_20260627T213134Z/TRACE_CALLS.jsonl`
 - posthoc re-audit: `/private/tmp/d14_d11_lock_full_holo_ab_haiku_20260627/live_d14_d11_lock_20260627T213134Z/posthoc_parser_patch_reaudit_001/posthoc_parser_patch_reaudit_001.json`
 - full gated judge summary: `/private/tmp/d11_lock_full_gated_100pt_judges_20260627/FULL_GATED_100PT_JUDGE_SUMMARY.json`
+- official full gated judge: `/private/tmp/d11_lock_full_gated_100pt_judges_20260627/D14_FULL_GATED_100PT_GEMINI_001/JUDGE_RESULT_FULL_GATED_100PT.json`
+- official full gated validation: `/private/tmp/d11_lock_full_gated_100pt_judges_20260627/D14_FULL_GATED_100PT_GEMINI_001/CANONICAL_VALIDATION.json`
 - diagnostic noncanonical full-gated judge: `/private/tmp/d11_lock_full_gated_100pt_judges_20260627/D14_FULL_GATED_100PT_GEMINI_PLAINJSON_001/JUDGE_RESULT_FULL_GATED_100PT.json`
 - clean corrected judge: `/private/tmp/d14_d11_lock_full_holo_ab_haiku_20260627/live_d14_d11_lock_20260627T213134Z/judge_gemini_d14_corrected_compiled_001/JUDGE_RESULT_D14_CORRECTED_COMPILED_GEMINI_001.json`
 - old prepatch judge: `/private/tmp/d14_d11_lock_full_holo_ab_haiku_20260627/live_d14_d11_lock_20260627T213134Z/judge_gemini_d14_d11_lock_001/JUDGE_RESULT.json`

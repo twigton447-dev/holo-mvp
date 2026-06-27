@@ -91,7 +91,8 @@ D14 tested the same D11-lock architecture on a trade-finance LC payment-release 
 - Holo Gov calls: 3 real provider calls
 - posthoc parser patch audit: `/private/tmp/d14_d11_lock_full_holo_ab_haiku_20260627/live_d14_d11_lock_20260627T213134Z/posthoc_parser_patch_reaudit_001/posthoc_parser_patch_reaudit_001.md`
 - deterministic posthoc result after parser repair: Holo admissible, Solo inadmissible
-- full gated judge status: official D14 full-gated judging is blocked by repeated Gemini HTTP 503; a noncanonical diagnostic full-gated output favors Holo 95-78 but is not official
+- full gated judge status: official schema-backed Gemini full-gated judgment validates Holo 94-69
+- superseded diagnostic note: an earlier noncanonical full-gated output favored Holo 95-78, but it remains diagnostic because it did not satisfy the canonical schema
 
 Important D14 autopsy:
 

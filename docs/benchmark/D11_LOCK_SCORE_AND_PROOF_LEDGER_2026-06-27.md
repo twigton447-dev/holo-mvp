@@ -37,6 +37,8 @@ The four ledgers are:
 
 Total score is the sum of all four ledgers. The full gated judge must report all four dimension scores separately, the 100-point total, score caps, critical failures, and the reason for the winner. The local deterministic audit controls official eligibility.
 
+Executable guardrail: `benchmark_full_gated_judge.py` validates whether a saved judge output is official or diagnostic-only. The matching regression tests are in `tests/test_full_gated_judge_validator.py`. This prevents a narrow rubric, missing deterministic audit, noncanonical artifact schema, or ineligible winner from being counted as an official benchmark judgment.
+
 ### Ledger 1: Deterministic Compliance
 
 Deterministic compliance checks source coverage, source-ID validity, required sections, word band, trap-specific semantic gates, blocked moves, and action-boundary violations.

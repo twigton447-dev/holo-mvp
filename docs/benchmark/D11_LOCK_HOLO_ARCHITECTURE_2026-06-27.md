@@ -105,6 +105,8 @@ Harness rule: artifact extraction must prefer real artifact body fields before w
 
 Judge rule: no official judge result counts unless it is a full gated 100-point judgment with deterministic, epistemic, structural, and argument scores, and unless the judge receives the local deterministic audit as controlling eligibility evidence.
 
+Executable guardrail: `benchmark_full_gated_judge.py` is the canonical local validator for this rule. If that validator rejects a judge output, the output is diagnostic only even if it contains useful qualitative remarks.
+
 ## Current Weakness To Harden Next
 
 The architecture works, but worker word-budget control is still noisy.

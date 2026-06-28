@@ -150,11 +150,21 @@ Provider-free guardrail added:
 
 The architecture works on adversarial source-boundary reasoning, but worker word-budget control is still noisy. D12 proves that this is not merely a prompt-tuning issue; Gov needs deterministic actuation for hard form gates.
 
+Next architecture lock:
+
+- `D11_LOCK_DYNAMIC_GOV_ROUTER_V1`
+- lock note: `docs/benchmark/D11_LOCK_DYNAMIC_GOV_ROUTER_V1_2026-06-27.md`
+- executable validator: `benchmark_dynamic_gov_router.py`
+- core invariant: Gov does not choose models. Gov chooses control actions.
+
 Next hardening target:
 
 - stricter word-budget bands per worker turn
 - exact per-section word quotas in Gov baton
 - deterministic form actuator for word-band repair
+- dynamic early exit when deterministic gates are clean
+- targeted Hunter deployment against named vulnerabilities
+- semantic drift Delta Ledger
 - cleaner final renderer
 - no escaped newline artifacts
 - no dangling numbered-heading fragments

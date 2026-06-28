@@ -139,6 +139,13 @@ Architecture patch required before claiming a higher bar:
 3. Final worker receives hard per-section targets.
 4. If the final worker still misses the word band, the lane fails closed or enters a separately logged deterministic form-normalization step.
 
+Provider-free guardrail added:
+
+- `benchmark_form_actuator.py` is the local deterministic form actuator for this rule.
+- It does not judge artifact quality and does not rewrite artifact substance.
+- It computes word-band/section defects and emits a Gov-to-worker baton with exact word deltas, section quotas, blocked moves, and a final-worker instruction.
+- Its regression tests cover the D12 oscillation shape: under-band, over-band, in-band, missing sections, quota sums, and no artifact-body embedding.
+
 ## Current Weakness To Harden Next
 
 The architecture works on adversarial source-boundary reasoning, but worker word-budget control is still noisy. D12 proves that this is not merely a prompt-tuning issue; Gov needs deterministic actuation for hard form gates.

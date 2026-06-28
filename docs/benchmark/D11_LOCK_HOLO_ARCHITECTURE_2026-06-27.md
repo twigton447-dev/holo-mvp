@@ -108,13 +108,46 @@ Judge rule: no official judge result counts unless it is a full gated 100-point 
 
 Executable guardrail: `benchmark_full_gated_judge.py` is the canonical local validator for this rule. If that validator rejects a judge output, the output is diagnostic only even if it contains useful qualitative remarks.
 
+## D10-D12 Mini-Suite Lesson
+
+The D10-D12 mini-suite produced two additional official Holo wins and one important regression seed:
+
+- D10 infrastructure configuration change: Holo 95, Solo 71. Holo was admissible; Solo failed word band.
+- D11 cyber incident / contract notice / emergency access: Holo 96, Solo 94. Both artifacts were admissible; Holo won narrowly on structure and argument.
+- D12 fund NAV / redemption cash release: no official comparison. Holo and Solo both failed word band, so no artifact was eligible for official judgment.
+
+The D12 autopsy is now part of the architecture lock:
+
+`Gov diagnosis without deterministic actuation is insufficient for hard admissibility gates.`
+
+D12 did not show a source-boundary failure. Holo preserved the core NAV/cash-release distinctions, source IDs, required sections, and semantic gates. The failure was mechanical word-band oscillation:
+
+- Turn 1: under band
+- Gov 2: correctly diagnosed under-band and required expansion
+- Turn 3: over band
+- Gov 4: correctly diagnosed over-band and required compression
+- Turn 5: under band
+- Gov 6: correctly diagnosed under-band and required expansion
+- Turn 7: over band
+
+This means Gov was seeing the defect, but natural-language baton pressure was not enough to force a worker to land the hard form gate.
+
+Architecture patch required before claiming a higher bar:
+
+1. Local gate computes exact word-band and section defects.
+2. Gov routes exact section quotas, not only prose repair instructions.
+3. Final worker receives hard per-section targets.
+4. If the final worker still misses the word band, the lane fails closed or enters a separately logged deterministic form-normalization step.
+
 ## Current Weakness To Harden Next
 
-The architecture works, but worker word-budget control is still noisy.
+The architecture works on adversarial source-boundary reasoning, but worker word-budget control is still noisy. D12 proves that this is not merely a prompt-tuning issue; Gov needs deterministic actuation for hard form gates.
 
 Next hardening target:
 
 - stricter word-budget bands per worker turn
+- exact per-section word quotas in Gov baton
+- deterministic form actuator for word-band repair
 - cleaner final renderer
 - no escaped newline artifacts
 - no dangling numbered-heading fragments

@@ -64,26 +64,118 @@ def test_gov_length_incomplete_invalid() -> None:
     )
 
 
-def test_valid_compact_gov_baton_parses() -> None:
+def valid_gov_v2_baton() -> str:
+    return "\n".join(
+        [
+            "verdict=CONTINUE",
+            "dep=GATE",
+            "focus=GATE_REPAIR",
+            "objective=REPAIR_GATE",
+            "preserve=CLOSED",
+            "repair=GATE_FIELDS",
+            "block=FINAL_ON_FAIL",
+        ]
+    )
+
+
+def test_valid_gov_v2_baton_parses() -> None:
     parsed = RUNNER._gov_from_response(
         {
-            "text": (
-                "verdict=ALLOW route=FINAL_COMPILER final=true "
-                "preserve=SOURCE_BOUNDARY_CLOSED repair= block= dep= "
-                "objective=final focus=source"
-            ),
+            "text": valid_gov_v2_baton(),
             "finish_reason": "stop",
         }
     )
-    assert parsed["verdict"] == "ALLOW"
-    assert parsed["route"] == "FINAL_COMPILER"
-    assert parsed["final"] is True
-    assert parsed["preserve"] == "SOURCE_BOUNDARY_CLOSED"
-    assert parsed["repair"] == ""
-    assert parsed["block"] == ""
-    assert parsed["dep"] == ""
-    assert parsed["objective"] == "final"
-    assert parsed["focus"] == "source"
+    assert parsed["gov_baton_version"] == "gov_micro_baton_v2"
+    assert parsed["verdict"] == "CONTINUE"
+    assert parsed["dep"] == "GATE"
+    assert parsed["focus"] == "GATE_REPAIR"
+    assert parsed["objective"] == "REPAIR_GATE"
+    assert parsed["preserve"] == "CLOSED"
+    assert parsed["repair"] == "GATE_FIELDS"
+    assert parsed["block"] == "FINAL_ON_FAIL"
+
+
+def test_gov_v2_long_prose_invalid() -> None:
+    assert_raises_contains(
+        lambda: RUNNER._gov_from_response(
+            {
+                "text": "\n".join(
+                    [
+                        "verdict=CONTINUE",
+                        "dep=GATE",
+                        "focus=GATE_REPAIR",
+                        "objective=REPAIR_GATE",
+                        "preserve=CLOSED",
+                        "repair=Repair deterministic gate failures while preserving source boundary",
+                        "block=FINAL_ON_FAIL",
+                    ]
+                ),
+                "finish_reason": "stop",
+            }
+        ),
+        "gov_micro_v2_field_too_long:repair",
+    )
+
+
+def test_gov_v2_truncated_missing_fields_invalid() -> None:
+    assert_raises_contains(
+        lambda: RUNNER._gov_from_response(
+            {
+                "text": "\n".join(
+                    [
+                        "verdict=CONTINUE",
+                        "dep=GATE",
+                        "focus=GATE_REPAIR",
+                        "objective=REPAIR_GATE",
+                    ]
+                ),
+                "finish_reason": "stop",
+            }
+        ),
+        "gov_micro_v2_missing_keys:preserve,repair,block",
+    )
+
+
+def test_gov_v2_missing_dep_focus_objective_invalid() -> None:
+    assert_raises_contains(
+        lambda: RUNNER._gov_from_response(
+            {
+                "text": "\n".join(
+                    [
+                        "verdict=CONTINUE",
+                        "preserve=CLOSED",
+                        "repair=GATE_FIELDS",
+                        "block=FINAL_ON_FAIL",
+                    ]
+                ),
+                "finish_reason": "stop",
+            }
+        ),
+        "gov_micro_v2_missing_keys:dep,focus,objective",
+    )
+
+
+def test_gov_v2_unknown_enum_invalid() -> None:
+    assert_raises_contains(
+        lambda: RUNNER._gov_from_response(
+            {"text": valid_gov_v2_baton().replace("focus=GATE_REPAIR", "focus=WRITE_LONG_MEMO"), "finish_reason": "stop"}
+        ),
+        "gov_micro_v2_unknown_enum:focus:WRITE_LONG_MEMO",
+    )
+
+
+def test_gov_v2_finish_reason_length_invalid() -> None:
+    assert_raises_contains(
+        lambda: RUNNER._gov_from_response({"text": valid_gov_v2_baton(), "finish_reason": "length"}),
+        "gov_finish_reason_length_incomplete_baton",
+    )
+
+
+def test_gov_v2_json_or_quotes_invalid() -> None:
+    assert_raises_contains(
+        lambda: RUNNER._gov_from_response({"text": '{"verdict":"CONTINUE"}', "finish_reason": "stop"}),
+        "gov_micro_v2_forbidden_punctuation",
+    )
 
 
 def test_invalid_summary_without_architecture_lock_passes() -> None:
@@ -308,7 +400,13 @@ def test_no_packet_or_prompt_hash_mutation() -> None:
     before = freeze_fingerprint()
     test_gov_empty_text_invalid()
     test_gov_length_incomplete_invalid()
-    test_valid_compact_gov_baton_parses()
+    test_valid_gov_v2_baton_parses()
+    test_gov_v2_long_prose_invalid()
+    test_gov_v2_truncated_missing_fields_invalid()
+    test_gov_v2_missing_dep_focus_objective_invalid()
+    test_gov_v2_unknown_enum_invalid()
+    test_gov_v2_finish_reason_length_invalid()
+    test_gov_v2_json_or_quotes_invalid()
     test_retry_classifies_transport_only()
     test_transport_retry_success_marks_recovered()
     test_transport_retry_exhaustion_fails_closed()
@@ -326,7 +424,13 @@ def main() -> None:
     tests = [
         test_gov_empty_text_invalid,
         test_gov_length_incomplete_invalid,
-        test_valid_compact_gov_baton_parses,
+        test_valid_gov_v2_baton_parses,
+        test_gov_v2_long_prose_invalid,
+        test_gov_v2_truncated_missing_fields_invalid,
+        test_gov_v2_missing_dep_focus_objective_invalid,
+        test_gov_v2_unknown_enum_invalid,
+        test_gov_v2_finish_reason_length_invalid,
+        test_gov_v2_json_or_quotes_invalid,
         test_invalid_summary_without_architecture_lock_passes,
         test_retry_classifies_transport_only,
         test_transport_retry_success_marks_recovered,

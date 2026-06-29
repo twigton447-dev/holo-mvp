@@ -1,0 +1,48 @@
+{
+  "classification": "AP_OPENAI_W2_GOV_MICRO_BATON_V2_PREFLIGHT",
+  "date": "2026-06-29",
+  "status": "PASS",
+  "scope": "no_provider_preflight_only",
+  "provider_calls": 0,
+  "judge_calls": 0,
+  "live_ap_started": false,
+  "solo_started": false,
+  "commerce_or_it_started": false,
+  "runtime_gov_prompt_probe": {
+    "pair_id": "HV-AP-REP-001",
+    "packet_id": "HV-AP-REP-001-A",
+    "turn_id": "HV-AP-REP-001-A_G1",
+    "system_instruction_contains": [
+      "HoloGov-V micro-router v2. Return gov_micro_baton_v2 only.",
+      "Exactly seven lines. No prose. No reasoning. No JSON. No Markdown. No braces. No quotes.",
+      "Required keys in order: verdict,dep,focus,objective,preserve,repair,block.",
+      "Use only uppercase enum/code values from the prompt. No sentences."
+    ],
+    "user_object_short_codes_only": {
+      "fail_code": "VERDICT_BINDING",
+      "gpass": false,
+      "id": "HV-AP-REP-001-A",
+      "notes_non_authoritative": "missing_boundary_binding:escalate_rule_assessment",
+      "wb_code": "CLOSED",
+      "wv": "ALLOW"
+    }
+  },
+  "assertions": {
+    "gov_contract_is_gov_micro_baton_v2": "PASS",
+    "required_fields_exact": "PASS",
+    "long_prose_removed_from_required_baton_fields": "PASS",
+    "finish_reason_length_fails_closed": "PASS",
+    "empty_gov_output_fails_closed": "PASS",
+    "missing_required_fields_fail_closed": "PASS",
+    "unknown_enum_values_fail_closed": "PASS",
+    "overlong_or_prose_fields_fail_closed": "PASS",
+    "json_braces_quotes_markdown_fail_closed": "PASS",
+    "ap_packet_hashes_match_freeze": "PASS",
+    "ap_prompt_hashes_match_freeze": "PASS",
+    "w2_remains_openai_gpt54_mini": "PASS",
+    "worker_contract_remains_compact_key_value_v1": "PASS",
+    "transport_policy_v1_unchanged": "PASS"
+  },
+  "next_live_step": "one_pair_ap_canary_only_not_full_200_call_lane"
+}
+

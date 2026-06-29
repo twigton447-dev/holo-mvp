@@ -399,38 +399,62 @@ def _worker_from_response(response: dict[str, Any]) -> dict[str, Any]:
         raise
 
 
-def _gov_micro_from_text(text: str) -> dict[str, Any]:
+GOV_MICRO_V2_KEYS = ("verdict", "dep", "focus", "objective", "preserve", "repair", "block")
+GOV_MICRO_V2_ALLOWED = {
+    "verdict": {"CONTINUE", "FINAL", "FAIL"},
+    "dep": {"NONE", "SOURCE", "CALLBACK", "PAYMENT", "AUTHORITY", "EVIDENCE", "GATE", "POLICY", "TIMING", "SCOPE"},
+    "focus": {"SOURCE", "PAYMENT_RELEASE", "EVIDENCE_BINDING", "GATE_REPAIR", "OVERBLOCK", "UNDERBLOCK", "FINAL_CHECK"},
+    "objective": {"FINALIZE", "REPAIR_GATE", "BLOCK_UNVERIFIED_CHANGE", "PRESERVE_VERDICT", "CHECK_SOURCE", "FAIL_CLOSED"},
+    "preserve": {"NONE", "CLOSED", "OPEN", "SRC", "BOUNDARY", "VERDICT", "BEST", "GATE", "S1", "S2", "S3", "S4"},
+    "repair": {"NONE", "EVIDENCE_BINDING", "SOURCE_IDS", "GATE_FIELDS", "CRITICAL_TERMS", "VERDICT_BINDING"},
+    "block": {"NONE", "TREASURY_RELEASE", "MODEL_SELECTION", "DROP_SOURCE_IDS", "TONE_ONLY", "UNVERIFIED_CHANGE", "FINAL_ON_FAIL"},
+}
+GOV_MICRO_V2_MAX_FIELD_LENGTH = 32
+
+
+def _gov_micro_v2_from_text(text: str) -> dict[str, Any]:
     stripped = _strip_thinking_blocks(text or "")
     if not stripped.strip():
         raise ValueError("gov_empty_text")
-    keys = "verdict|route|final|preserve|repair|block|dep|objective|focus"
-    pairs = re.findall(
-        rf"\b({keys})=(.*?)(?=(?:[\s,]+)(?:{keys})=|$)",
-        stripped,
-        flags=re.I | re.S,
-    )
+    if stripped.startswith("```") or "```" in stripped:
+        raise ValueError("gov_micro_v2_markdown_present")
+    if any(char in stripped for char in "{}[]\"'"):
+        raise ValueError("gov_micro_v2_forbidden_punctuation")
     parsed: dict[str, Any] = {}
-    for key, value in pairs:
-        clean_key = key.lower()
-        clean_value: Any = value.strip().strip(",").strip().strip('"').strip("'")
-        if clean_key == "final":
-            clean_value = str(clean_value).lower() == "true"
+    for raw_line in stripped.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        if "=" not in line:
+            raise ValueError(f"gov_micro_v2_malformed_line:{line[:40]}")
+        key, value = line.split("=", 1)
+        clean_key = key.strip().lower()
+        clean_value = value.strip()
+        if clean_key not in GOV_MICRO_V2_KEYS:
+            raise ValueError(f"gov_micro_v2_unexpected_key:{clean_key}")
+        if clean_key in parsed:
+            raise ValueError(f"gov_micro_v2_duplicate_key:{clean_key}")
+        if not clean_value:
+            raise ValueError(f"gov_micro_v2_empty_field:{clean_key}")
+        if len(clean_value) > GOV_MICRO_V2_MAX_FIELD_LENGTH:
+            raise ValueError(f"gov_micro_v2_field_too_long:{clean_key}")
+        if any(char.isspace() for char in clean_value):
+            raise ValueError(f"gov_micro_v2_prose_field:{clean_key}")
+        values = clean_value.split("|")
+        allowed = GOV_MICRO_V2_ALLOWED[clean_key]
+        unknown = [item for item in values if item not in allowed]
+        if unknown:
+            raise ValueError(f"gov_micro_v2_unknown_enum:{clean_key}:{','.join(unknown)}")
         parsed[clean_key] = clean_value
-    required = {"verdict", "route", "final", "preserve", "repair", "block", "dep", "objective", "focus"}
-    missing = sorted(required - set(parsed))
+    missing = [key for key in GOV_MICRO_V2_KEYS if key not in parsed]
     if missing:
-        raise ValueError(f"gov_micro_missing_keys:{','.join(missing)}")
-    if parsed.get("verdict") in {"ALLOW", "ESCALATE"} and parsed.get("route") in {
-        "CONTINUE_WORKER",
-        "FINAL_COMPILER",
-        "FAIL_CLOSED",
-    }:
-        return parsed
-    raise ValueError("gov_micro_key_value_parse_failed")
+        raise ValueError(f"gov_micro_v2_missing_keys:{','.join(missing)}")
+    parsed["gov_baton_version"] = "gov_micro_baton_v2"
+    return parsed
 
 
 def _gov_from_text(text: str) -> dict[str, Any]:
-    return _gov_micro_from_text(text)
+    return _gov_micro_v2_from_text(text)
 
 
 def _gov_from_response(response: dict[str, Any]) -> dict[str, Any]:
@@ -440,11 +464,11 @@ def _gov_from_response(response: dict[str, Any]) -> dict[str, Any]:
         if finish_reason == "length":
             raise ValueError("gov_finish_reason_length_empty_text")
         raise ValueError("gov_empty_text")
+    if finish_reason == "length":
+        raise ValueError("gov_finish_reason_length_incomplete_baton")
     try:
         return _gov_from_text(text)
     except Exception as exc:
-        if finish_reason == "length":
-            raise ValueError(f"gov_finish_reason_length_incomplete_baton:{exc}") from exc
         raise
 
 
@@ -696,15 +720,14 @@ def _worker_contract() -> dict[str, Any]:
 
 def _gov_contract() -> dict[str, Any]:
     return {
-        "verdict": "ALLOW | ESCALATE",
-        "route": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
-        "final": "boolean",
-        "preserve": "string, max 6 words; empty string if none",
-        "repair": "string, max 8 words; empty string if none",
-        "block": "string, max 8 words; empty string if none",
-        "dep": "string, max 8 words; empty string if none",
-        "objective": "string, max 5 words",
-        "focus": "string, max 5 words",
+        "format": "gov_micro_baton_v2",
+        "required_keys_in_order": list(GOV_MICRO_V2_KEYS),
+        "rules": [
+            "Return exactly seven key=value lines.",
+            "Use enum/code values only.",
+            "No prose, markdown, JSON, braces, quotes, or sentences.",
+        ],
+        "allowed_values": GOV_MICRO_V2_ALLOWED,
     }
 
 
@@ -723,6 +746,41 @@ def _normalize_gov(parsed: dict[str, Any]) -> tuple[dict[str, Any], dict[str, An
         parsed = {**diagnosis, **{k: v for k, v in parsed.items() if k != "gov_diagnosis"}}
         raw_shape["normalized_from_nested_gov_diagnosis"] = True
     normalized = dict(parsed)
+    if normalized.get("gov_baton_version") == "gov_micro_baton_v2":
+        route_map = {
+            "CONTINUE": "CONTINUE_WORKER",
+            "FINAL": "FINAL_COMPILER",
+            "FAIL": "FAIL_CLOSED",
+        }
+        route = route_map.get(normalized.get("verdict"), "CONTINUE_WORKER")
+        normalized["route_verdict"] = route
+        normalized["final_compiler_allowed"] = route == "FINAL_COMPILER"
+        normalized["control_action"] = (
+            "FINAL_COMPILER"
+            if route == "FINAL_COMPILER"
+            else "FAIL_CLOSED"
+            if route == "FAIL_CLOSED"
+            else "CONTINUE_REPAIR"
+        )
+        normalized["must_preserve"] = _split_compact_list(str(normalized.get("preserve") or ""))
+        normalized["must_repair"] = _split_compact_list(str(normalized.get("repair") or ""))
+        normalized["blocked_moves"] = _split_compact_list(str(normalized.get("block") or ""))
+        normalized["dependency_ledger"] = _split_compact_list(str(normalized.get("dep") or ""))
+        normalized["next_worker_baton"] = {
+            "objective": normalized.get("objective") or "CHECK_SOURCE",
+            "attack_focus": normalized.get("focus") or "SOURCE",
+            "required_repairs": normalized.get("must_repair") or [],
+            "monotonic_preservation": normalized.get("must_preserve") or [],
+        }
+        raw_shape["normalized_aliases"].extend(
+            [
+                "route_verdict:from_gov_micro_baton_v2",
+                "final_compiler_allowed:from_gov_micro_baton_v2",
+                "control_action:from_gov_micro_baton_v2",
+                "lists:from_gov_micro_baton_v2_codes",
+                "next_worker_baton:from_gov_micro_baton_v2_codes",
+            ]
+        )
     if "verification_verdict" not in normalized and normalized.get("verdict") in {"ALLOW", "ESCALATE"}:
         normalized["verification_verdict"] = normalized["verdict"]
         raw_shape["normalized_aliases"].append("verification_verdict:from_micro_verdict")
@@ -883,6 +941,12 @@ def _enforce_gov_gate_compliance(
             "baton:forced_actionable_gate_repair_after_failed_gate"
         )
     worker_verdict = worker_output.get("verification_verdict")
+    if worker_verdict in {"ALLOW", "ESCALATE"} and gov_parsed.get("verification_verdict") not in {"ALLOW", "ESCALATE"}:
+        gov_parsed = dict(gov_parsed)
+        gov_parsed["verification_verdict"] = worker_verdict
+        gov_normalization.setdefault("normalized_aliases", []).append(
+            f"verification_verdict:from_worker_output_after_gov_micro_baton_v2:{worker_verdict}"
+        )
     gov_verdict = gov_parsed.get("verification_verdict")
     if (
         _gate_failures_are_repair_only(gate)
@@ -1147,25 +1211,41 @@ def _build_gov_messages(
     }
     compact_worker = _compact_worker_output_for_gov(worker_output)
     first_failure = str((compact_gate.get("failures") or [""])[0])[:80]
-    repair_directive = _gate_repair_directive(gate_result, worker_output)
+    binding_code = (
+        "CLOSED"
+        if compact_worker.get("binding_class") == "SOURCE_BOUNDARY_CLOSED"
+        else "OPEN"
+        if compact_worker.get("binding_class") == "SOURCE_BOUNDARY_OPEN"
+        else "BOUNDARY"
+    )
+    failure_code = (
+        "SOURCE_IDS"
+        if "source_id" in first_failure
+        else "CRITICAL_TERMS"
+        if "critical_term" in first_failure
+        else "VERDICT_BINDING"
+        if "verdict" in first_failure or "binding" in first_failure
+        else "GATE_FIELDS"
+        if first_failure
+        else "NONE"
+    )
     user_obj = {
         "id": packet["packet_id"],
         "gpass": bool(compact_gate.get("passed")),
-        "fail": first_failure,
-        "repair_hint": "" if compact_gate.get("passed") else repair_directive["repair"],
-        "blocked_hint": "" if compact_gate.get("passed") else repair_directive["block"],
-        "focus_hint": "source" if compact_gate.get("passed") else repair_directive["focus"],
+        "fail_code": failure_code,
+        "wb_code": binding_code,
         "wv": compact_worker.get("verification_verdict"),
-        "wb": compact_worker.get("binding_class"),
+        "notes_non_authoritative": first_failure,
     }
     system = "\n".join(
         [
-            "HoloGov-V micro-router. Return one compact key=value baton only.",
-            "No prose. No reasoning. No JSON. No Markdown. One line.",
-            "Required keys in order: verdict,route,final,preserve,repair,block,dep,objective,focus.",
-            "If gpass true: route=FINAL_COMPILER final=true repair= block= dep= objective=final.",
-            "If gpass false: route=CONTINUE_WORKER final=false repair=repair_hint block=blocked_hint dep= objective=repair.",
-            "Always set verdict=wv preserve=wb focus=focus_hint.",
+            "HoloGov-V micro-router v2. Return gov_micro_baton_v2 only.",
+            "Exactly seven lines. No prose. No reasoning. No JSON. No Markdown. No braces. No quotes.",
+            "Required keys in order: verdict,dep,focus,objective,preserve,repair,block.",
+            "Allowed verdict values: CONTINUE,FINAL,FAIL.",
+            "If gpass true: verdict=FINAL dep=NONE focus=FINAL_CHECK objective=FINALIZE preserve=wb_code repair=NONE block=NONE.",
+            "If gpass false: verdict=CONTINUE dep=GATE focus=GATE_REPAIR objective=REPAIR_GATE preserve=wb_code repair=fail_code block=FINAL_ON_FAIL.",
+            "Use only uppercase enum/code values from the prompt. No sentences.",
         ]
     )
     _assert_prompt_clean(user_obj)

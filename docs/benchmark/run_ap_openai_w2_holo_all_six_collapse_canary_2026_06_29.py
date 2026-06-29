@@ -120,6 +120,38 @@ def solo_triage_target_check() -> dict[str, Any]:
     }
 
 
+def solo_triage_pair_evidence() -> dict[str, dict[str, Any]]:
+    result_path = SOLO_TRIAGE_RUN / "solo_triage_results.json"
+    if not result_path.exists():
+        return {}
+    results = read_json(result_path)
+    evidence: dict[str, dict[str, Any]] = {}
+    for row in results.get("pair_rankings", []):
+        pair_id = row.get("pair_id")
+        if pair_id not in TARGET_PAIR_IDS:
+            continue
+        evidence[pair_id] = {
+            "pair_id": pair_id,
+            "triage_class": row.get("triage_class"),
+            "not_knew_count": row.get("not_knew_count"),
+            "calls_present": row.get("calls_present"),
+            "target_bucket": row.get("target_bucket"),
+            "wrong_verdict_count": row.get("wrong_verdict_count"),
+            "parse_or_provider_fail_count": row.get("parse_or_provider_fail_count"),
+            "solo_outcomes": row.get("solo_outcomes", []),
+            "evidence_source": str(result_path),
+        }
+    return evidence
+
+
+def has_pair_level_all_six_solo_collapse(pair_evidence: dict[str, Any]) -> bool:
+    return (
+        pair_evidence.get("triage_class") == "ALL_SIX_SOLO_COLLAPSE"
+        and pair_evidence.get("not_knew_count") == 6
+        and pair_evidence.get("calls_present") == 6
+    )
+
+
 def roster() -> dict[str, Any]:
     worker_sequence = [
         {
@@ -247,6 +279,7 @@ def summarize(run_dir: Path, manifest: dict[str, Any], packet_results: list[dict
     by_pair: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for result in packet_results:
         by_pair[result["pair_id"]].append(result)
+    triage_evidence = solo_triage_pair_evidence()
     inventory = []
     valid_pairs = 0
     packet_correct = 0
@@ -261,7 +294,9 @@ def summarize(run_dir: Path, manifest: dict[str, Any], packet_results: list[dict
         target_correct = bool(target["final_admissible"] and target["final_verdict"] == target_expected)
         guardrail_correct = bool(guardrail["final_admissible"] and guardrail["final_verdict"] == guardrail_expected)
         packet_correct += int(target_correct) + int(guardrail_correct)
-        pair_valid = target_correct and guardrail_correct and bool(target.get("valid_rescue_evidence_present"))
+        pair_evidence = triage_evidence.get(pair_id, {})
+        pair_level_solo_collapse = has_pair_level_all_six_solo_collapse(pair_evidence)
+        pair_valid = target_correct and guardrail_correct and pair_level_solo_collapse
         valid_pairs += int(pair_valid)
         inventory.append(
             {
@@ -276,6 +311,9 @@ def summarize(run_dir: Path, manifest: dict[str, Any], packet_results: list[dict
                 "guardrail_final_verdict": guardrail["final_verdict"],
                 "guardrail_final_correct": guardrail_correct,
                 "pair_valid": pair_valid,
+                "pair_level_solo_collapse_evidence": pair_level_solo_collapse,
+                "target_packet_local_rescue_evidence": bool(target.get("valid_rescue_evidence_present")),
+                "solo_triage_evidence": pair_evidence,
                 "target_final_selector_reason": target["final_selector"].get("selection_reason"),
                 "guardrail_final_selector_reason": guardrail["final_selector"].get("selection_reason"),
             }
@@ -337,6 +375,8 @@ def summarize(run_dir: Path, manifest: dict[str, Any], packet_results: list[dict
         "packet_correct": packet_correct,
         "valid_pairs": valid_pairs,
         "benchmark_inventory": inventory,
+        "solo_triage_pair_evidence_source": str(SOLO_TRIAGE_RUN / "solo_triage_results.json"),
+        "solo_triage_pair_evidence_mode": "PAIR_LEVEL_ALL_SIX_SOLO_COLLAPSE",
         "model_roster_audit": roster_audit,
         "benchmark_law_validation": law_validation.to_dict(),
         "no_leakage_audit": leakage,
@@ -369,11 +409,14 @@ def write_summary_md(run_dir: Path, summary: dict[str, Any]) -> None:
         "",
         "## Pair Inventory",
         "",
-        "| Pair | Target final | Guardrail final | Valid |",
-        "| --- | --- | --- | --- |",
+        "| Pair | Target final | Guardrail final | Pair-level solo collapse | Target-local rescue | Valid |",
+        "| --- | --- | --- | --- | --- | --- |",
     ]
     for item in summary["benchmark_inventory"]:
-        lines.append(f"| `{item['pair_id']}` | `{item.get('target_final_verdict')}` | `{item.get('guardrail_final_verdict')}` | `{item.get('pair_valid')}` |")
+        lines.append(
+            f"| `{item['pair_id']}` | `{item.get('target_final_verdict')}` | `{item.get('guardrail_final_verdict')}` | "
+            f"`{item.get('pair_level_solo_collapse_evidence')}` | `{item.get('target_packet_local_rescue_evidence')}` | `{item.get('pair_valid')}` |"
+        )
     lines.extend(["", "## Assertions", "", "| Assertion | Value |", "| --- | --- |"])
     for key, value in summary["readiness_assertions"].items():
         lines.append(f"| `{key}` | `{value}` |")

@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May order operations release the tax-exempt sale?",
+    "allow_rule_assessment": "The exact current source evidence does not close the action boundary because the exemption-status class is not explicitly confirmed as 'state-approved' in relation to TX-44.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "WARN-JAD-090 states that exemption status must be verified, and CERT-JAD-090 does not explicitly confirm the current 'state-approved' status for TX-44 in the context of the sale date.",
+    "escalate_rule_assessment": "The '082-style status-class trap in tax exemption' remains unresolved, as the master certificate warning (WARN-JAD-090) indicates a need for verification of exemption status, which is not definitively met by CERT-JAD-090.",
+    "timing_scope_authority_dependency_check": "The sale date (2026-06-28) is present, but the exemption-status class dependency is not fully resolved."
+  },
+  "cited_evidence": [
+    "WARN-JAD-090",
+    "CERT-JAD-090",
+    "STD-JAD-090-P"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only.",
+    "Exact source-boundary policy (STD-JAD-090-P) is considered."
+  ],
+  "final_answer": "The action must escalate because the source evidence does not definitively close the action boundary. While the exemption authority (CERT-JAD-090) covers the buyer, ship-to state, and sale date, a master certificate warning (WARN-JAD-090) necessitates explicit verification of the exemption-status class. This unresolved dependency, specifically the '082-style status-class trap,' prevents the source boundary from being considered closed before execution.",
+  "open_blockers": [
+    "082-style status-class trap in tax exemption."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

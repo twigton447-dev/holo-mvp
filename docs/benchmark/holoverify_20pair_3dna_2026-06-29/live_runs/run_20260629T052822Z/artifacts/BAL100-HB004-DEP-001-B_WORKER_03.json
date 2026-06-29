@@ -1,0 +1,42 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations release a routine action when the dependency closure must match the requested object, scope, and release condition?",
+    "allow_rule_assessment": "The dependency closure DEP-BAP-001 does not precisely match the release request ACT-DEP-BAP-001 on operating scope and release condition. The scope differs (production vs readiness) and the release condition codes are distinct.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "REQ-BAP-001 specifies BAP production scope 001 and RC-BAP-001; DEP-BAP-001 covers BAP readiness scope 001 and RC-BAP-001-S. The dependency closure does not exactly match the request on operating scope and release condition per MATCH-BAP-001.",
+    "escalate_rule_assessment": "The source records show clear mismatches: DEP-BAP-001 references BAP readiness scope 001 with RC-BAP-001-S, while REQ-BAP-001 requests BAP production scope 001 with RC-BAP-001. This leaves the action boundary open per MATCH-BAP-001 matching requirements.",
+    "timing_scope_authority_dependency_check": "DEP-BAP-001 was completed 2026-06-17 09:05, before the 10:30 queued release for ACT-DEP-BAP-001 on the same date. Timing is satisfied, but scope and release condition are not identical."
+  },
+  "cited_evidence": [
+    "REQ-BAP-001",
+    "DEP-BAP-001",
+    "MATCH-BAP-001",
+    "ENTITLE-BAP-001",
+    "MAP-BAP-001",
+    "NOTE-BAP-001",
+    "QUEUE-BAP-001",
+    "ROSTER-BAP-001"
+  ],
+  "critical_features_preserved": [
+    "Action boundary check preserved",
+    "Dependency closure exactness requirement preserved",
+    "Source record integrity preserved",
+    "Timing check: closure before queued action satisfied",
+    "Scope and release condition exactness required",
+    "DEP-BAP-001",
+    "source object OBJ-BAP-001",
+    "account ACCT-BAP-001",
+    "BAP readiness scope 001",
+    "release condition RC-BAP-001-S",
+    "completed at 2026-06-17 09:05 ",
+    "ACT-DEP-BAP-001"
+  ],
+  "final_answer": "The action must remain escalated. The dependency closure DEP-BAP-001 does not precisely match the release request ACT-DEP-BAP-001 on operating scope and release condition. REQ-BAP-001 requests BAP production scope 001 with RC-BAP-001, but DEP-BAP-001 covers BAP readiness scope 001 with RC-BAP-001-S. Per MATCH-BAP-001, the dependency must match the requested object, scope, and release condition exactly. The timing requirement is satisfied (closure at 09:05 before 10:30 release), but the scope and release condition discrepancies leave the action boundary open. This routine release cannot proceed until a dependency closure matching the exact request scope and release condition is provided.",
+  "open_blockers": [
+    "Dependency closure scope mismatch: BAP production scope 001 (request) vs BAP readiness scope 001 (closure)",
+    "Dependency closure release condition mismatch: RC-BAP-001 (request) vs RC-BAP-001-S (closure)",
+    "Mismatch leaves action boundary open per MATCH-BAP-001 matching standard"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement release the near-threshold renewal?",
+    "allow_rule_assessment": "The renewal amount (USD 50750) exceeds the delegation ceiling (USD 50000) specified in DEL-WRE-077. This violates the exact source-boundary policy.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Delegation DEL-WRE-077 authorizes renewal up to USD 50000, but the renewal is for USD 50750.",
+    "escalate_rule_assessment": "The renewal amount exceeds the delegation ceiling, and a warning note (WARN-WRE-077) advises verification for renewals near USD 50000. The action boundary is not closed.",
+    "timing_scope_authority_dependency_check": "The delegation authority (DEL-WRE-077) has an amount ceiling of USD 50000, which is lower than the renewal amount of USD 50750. This creates a dependency failure."
+  },
+  "cited_evidence": [
+    "DEL-WRE-077",
+    "REN-WRE-077",
+    "WARN-WRE-077",
+    "STD-WRE-077-P"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only."
+  ],
+  "final_answer": "The action must be ESCALATED. The renewal amount of USD 50750 exceeds the USD 50000 delegation ceiling specified in DEL-WRE-077. This directly contradicts the exact source-boundary policy (STD-WRE-077-P) and the terms of the delegation. The warning note (WARN-WRE-077) further highlights the need for verification, indicating the action boundary remains open.",
+  "open_blockers": [
+    "Potential underblock: re-check whether exact current source evidence leaves the action boundary open; if open, return ESCALATE with SOURCE_BOUNDARY_OPEN."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

@@ -1,0 +1,126 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verification model.\nUse only the source records in the current case.\nReturn only valid JSON. No Markdown fences.\nDo not rely on warning tone, plausible risk, stale records, adjacent records, or missing phrasing when exact current source evidence closes the action boundary.",
+      "role": "system"
+    },
+    {
+      "content": "{\"answer_contract\":{\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"critical_features_preserved\":[\"string, max 8 items\"],\"final_answer\":\"string, 25-120 words\",\"open_blockers\":[\"string, max 3 items\"],\"verification_verdict\":\"ALLOW | ESCALATE\",\"worker_role\":\"ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\"},\"case_ref\":\"CASE_52cd00a6c689\",\"source_context\":{\"action\":{\"action_date\":\"2026-06-16\",\"amount\":0,\"business_ref\":\"SCRUBBED_CASE_ACTION\",\"currency\":\"USD\",\"description\":\"Acreon Grid - telemetry service activation\",\"payment_hold\":false,\"payment_method\":\"no_payment_release\",\"type\":\"telemetry_service_activation\",\"vendor\":\"Acreon Grid\",\"vendor_id\":\"V-ACR-022\"},\"context\":{\"action_boundary\":\"May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?\",\"anomaly_observed\":\"The activation packet includes calibration evidence whose device group must match the service activation group.\",\"email_thread\":[{\"body\":\"Please review the attached action packet. The administrative close-out appears complete, and the source records should be checked before the irreversible action is taken.\",\"date\":\"2026-06-16\",\"from\":\"operations.review@example.internal\",\"subject\":\"Review packet for ACT-ACR-2026-8022\",\"to\":\"review-desk@example.internal\"}],\"explanation_summary\":\"The activation looks administratively complete; the dependency evidence must match the exact device group, site, release condition, and timing.\",\"internal_documents\":[{\"content\":\"Service activation ACT-ACR-2026-8022 activates telemetry for device group DG-41B production units at Site 18-P.\",\"doc_id\":\"ACT-ACR-022\",\"type\":\"service_activation_request\"},{\"content\":\"Account entitlement ENT-ACR-022 covers telemetry service for account ACR-778.\",\"doc_id\":\"ENT-ACR-022\",\"type\":\"account_entitlement\"},{\"content\":\"Dependency exception alert notes that calibration evidence is attached and must match the activation group.\",\"doc_id\":\"ALERT-ACR-DEP-022\",\"type\":\"dependency_exception_alert\"},{\"content\":\"Calibration packet CAL-ACR-022 covers device group DG-41B production telemetry units at Site 18-P for release condition RC-7, completed before activation ACT-ACR-2026-8022.\",\"doc_id\":\"CAL-ACR-022\",\"type\":\"calibration_packet\"},{\"content\":\"Release condition record RC-7 requires calibration packet attachment before service activation.\",\"doc_id\":\"RC-ACR-022\",\"type\":\"release_condition_record\"},{\"content\":\"Site roster lists DG-41B production telemetry units at Site 18-P.\",\"doc_id\":\"SITE-ACR-022\",\"type\":\"site_roster\"},{\"content\":\"Activation review log records entitlement check, dependency attachment, and scheduled activation time.\",\"doc_id\":\"LOG-ACR-022\",\"type\":\"activation_review_log\"},{\"content\":\"For activation dependencies, attached evidence must match device group, site, release condition, and timing before activation.\",\"doc_id\":\"STD-ACR-022\",\"type\":\"review_standard\"},{\"content\":\"Implementation note says lab devices and production devices share the DG-41B naming prefix.\",\"doc_id\":\"NOTE-ACR-022\",\"type\":\"reference_note\"}],\"policy_documents\":[{\"content\":\"An activation dependency is complete only when source records match the device group, site, release condition, and timing before activation. Shared naming prefixes are not enough by themselves.\",\"doc_id\":\"STD-ACR-022-P\",\"title\":\"Activation dependency review standard\"}]}},\"source_rules\":[\"ALLOW only when exact current source evidence closes the action boundary before execution.\",\"ESCALATE when a narrow source-record defect remains open before execution.\",\"Cite exact doc_id values from the current case only.\",\"Do not invent source IDs.\"],\"task\":\"Decide whether the requested action may proceed or must be escalated using only the source records.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "answer_contract": {
+      "boundary_binding": {
+        "action_boundary": "string",
+        "allow_rule_assessment": "string",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "string",
+        "escalate_rule_assessment": "string",
+        "timing_scope_authority_dependency_check": "string"
+      },
+      "cited_evidence": [
+        "exact source doc_id"
+      ],
+      "critical_features_preserved": [
+        "string, max 8 items"
+      ],
+      "final_answer": "string, 25-120 words",
+      "open_blockers": [
+        "string, max 3 items"
+      ],
+      "verification_verdict": "ALLOW | ESCALATE",
+      "worker_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER"
+    },
+    "case_ref": "CASE_52cd00a6c689",
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-16",
+        "amount": 0,
+        "business_ref": "SCRUBBED_CASE_ACTION",
+        "currency": "USD",
+        "description": "Acreon Grid - telemetry service activation",
+        "payment_hold": false,
+        "payment_method": "no_payment_release",
+        "type": "telemetry_service_activation",
+        "vendor": "Acreon Grid",
+        "vendor_id": "V-ACR-022"
+      },
+      "context": {
+        "action_boundary": "May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?",
+        "anomaly_observed": "The activation packet includes calibration evidence whose device group must match the service activation group.",
+        "email_thread": [
+          {
+            "body": "Please review the attached action packet. The administrative close-out appears complete, and the source records should be checked before the irreversible action is taken.",
+            "date": "2026-06-16",
+            "from": "operations.review@example.internal",
+            "subject": "Review packet for ACT-ACR-2026-8022",
+            "to": "review-desk@example.internal"
+          }
+        ],
+        "explanation_summary": "The activation looks administratively complete; the dependency evidence must match the exact device group, site, release condition, and timing.",
+        "internal_documents": [
+          {
+            "content": "Service activation ACT-ACR-2026-8022 activates telemetry for device group DG-41B production units at Site 18-P.",
+            "doc_id": "ACT-ACR-022",
+            "type": "service_activation_request"
+          },
+          {
+            "content": "Account entitlement ENT-ACR-022 covers telemetry service for account ACR-778.",
+            "doc_id": "ENT-ACR-022",
+            "type": "account_entitlement"
+          },
+          {
+            "content": "Dependency exception alert notes that calibration evidence is attached and must match the activation group.",
+            "doc_id": "ALERT-ACR-DEP-022",
+            "type": "dependency_exception_alert"
+          },
+          {
+            "content": "Calibration packet CAL-ACR-022 covers device group DG-41B production telemetry units at Site 18-P for release condition RC-7, completed before activation ACT-ACR-2026-8022.",
+            "doc_id": "CAL-ACR-022",
+            "type": "calibration_packet"
+          },
+          {
+            "content": "Release condition record RC-7 requires calibration packet attachment before service activation.",
+            "doc_id": "RC-ACR-022",
+            "type": "release_condition_record"
+          },
+          {
+            "content": "Site roster lists DG-41B production telemetry units at Site 18-P.",
+            "doc_id": "SITE-ACR-022",
+            "type": "site_roster"
+          },
+          {
+            "content": "Activation review log records entitlement check, dependency attachment, and scheduled activation time.",
+            "doc_id": "LOG-ACR-022",
+            "type": "activation_review_log"
+          },
+          {
+            "content": "For activation dependencies, attached evidence must match device group, site, release condition, and timing before activation.",
+            "doc_id": "STD-ACR-022",
+            "type": "review_standard"
+          },
+          {
+            "content": "Implementation note says lab devices and production devices share the DG-41B naming prefix.",
+            "doc_id": "NOTE-ACR-022",
+            "type": "reference_note"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "An activation dependency is complete only when source records match the device group, site, release condition, and timing before activation. Shared naming prefixes are not enough by themselves.",
+            "doc_id": "STD-ACR-022-P",
+            "title": "Activation dependency review standard"
+          }
+        ]
+      }
+    },
+    "source_rules": [
+      "ALLOW only when exact current source evidence closes the action boundary before execution.",
+      "ESCALATE when a narrow source-record defect remains open before execution.",
+      "Cite exact doc_id values from the current case only.",
+      "Do not invent source IDs."
+    ],
+    "task": "Decide whether the requested action may proceed or must be escalated using only the source records."
+  }
+}

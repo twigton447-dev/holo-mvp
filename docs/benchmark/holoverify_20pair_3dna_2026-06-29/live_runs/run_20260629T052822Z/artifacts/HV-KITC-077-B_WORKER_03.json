@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement release the near-threshold renewal?",
+    "allow_rule_assessment": "Cannot ALLOW. The source records (DEL-WRE-077, REN-WRE-077) show the renewal amount (USD 50750) exceeds the delegation ceiling (USD 50000). This violates STD-WRE-077-P's requirement for amount-ceiling alignment before release.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "DEL-WRE-077 authorizes renewal up to USD 50000; REN-WRE-077 shows renewal for USD 50750, exceeding the ceiling.",
+    "escalate_rule_assessment": "ESCALATE required. The renewal amount USD 50750 exceeds the delegation ceiling USD 50000 per DEL-WRE-077. WARN-WRE-077 confirms the near-threshold sensitivity. Source boundary remains open per STD-WRE-077-P requirements.",
+    "timing_scope_authority_dependency_check": "Delegation DEL-WRE-077 ceiling (USD 50000) is authority for this renewal. Renewal amount USD 50750 falls outside this authority scope. Timing (2026-06-27 signed before action 2026-06-28) is satisfied, but scope dependency fails due to amount misalignment."
+  },
+  "cited_evidence": [
+    "DEL-WRE-077",
+    "REN-WRE-077",
+    "WARN-WRE-077",
+    "STD-WRE-077-P"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only.",
+    "Exact source doc_ids cited.",
+    "Final answer within word band."
+  ],
+  "final_answer": "ESCALATE. The renewal amount of USD 50750 (REN-WRE-077) exceeds the delegation ceiling of USD 50000 (DEL-WRE-077). This violates the amount-alignment requirement in STD-WRE-077-P, which mandates that delegation authority must match the renewal amount before release. The committee warning (WARN-WRE-077) correctly flags this near-threshold situation. Source boundary remains open; Gov must authorize or reject this renewal.",
+  "open_blockers": [
+    "Renewal amount (USD 50750) exceeds delegation ceiling (USD 50000) \u2014 source boundary open.",
+    "Std-WRE-077-P requires amount alignment before release; this condition is unmet.",
+    "Gov authority required to authorize amount exceeding delegation."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

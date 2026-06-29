@@ -1,0 +1,39 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations release a routine action when the dependency closure must match the requested object, scope, and release condition?",
+    "allow_rule_assessment": "The dependency closure DEP-EHS-003 does not precisely match the release request's scope (EHS production scope 003 vs. EHS readiness scope 003) or release condition (RC-EHS-003 vs. RC-EHS-003-S).",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Dependency closure DEP-EHS-003 has scope 'EHS readiness scope 003' and release condition 'RC-EHS-003-S', while release request ACT-DEP-EHS-003 specifies 'EHS production scope 003' and 'RC-EHS-003'.",
+    "escalate_rule_assessment": "The exact current source evidence leaves the action boundary open due to mismatches in scope and release condition between the dependency closure and the release request.",
+    "timing_scope_authority_dependency_check": "The dependency closure DEP-EHS-003 was completed before the queued action's release time, but the scope and release condition do not match."
+  },
+  "cited_evidence": [
+    "DEP-EHS-003",
+    "REQ-EHS-003",
+    "ENTITLE-EHS-003",
+    "MAP-EHS-003",
+    "MATCH-EHS-003",
+    "NOTE-EHS-003",
+    "QUEUE-EHS-003",
+    "ROSTER-EHS-003"
+  ],
+  "critical_features_preserved": [
+    "Action boundary definition",
+    "Dependency closure timing",
+    "Exact source evidence requirement",
+    "DEP-EHS-003",
+    "source object OBJ-EHS-003",
+    "account ACCT-EHS-003",
+    "EHS readiness scope 003",
+    "release condition RC-EHS-003-S",
+    "completed at 2026-06-17 09:05 ",
+    "ACT-DEP-EHS-003"
+  ],
+  "final_answer": "The action must be escalated because the dependency closure (DEP-EHS-003) does not precisely match the release request (ACT-DEP-EHS-003) in terms of operating scope and release condition. While the dependency was closed before the queued release time, the discrepancies in 'EHS readiness scope 003' versus 'EHS production scope 003' and 'RC-EHS-003-S' versus 'RC-EHS-003' leave the action boundary open, preventing its proceeding.",
+  "open_blockers": [
+    "Dependency closure scope mismatch",
+    "Dependency closure release condition mismatch"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

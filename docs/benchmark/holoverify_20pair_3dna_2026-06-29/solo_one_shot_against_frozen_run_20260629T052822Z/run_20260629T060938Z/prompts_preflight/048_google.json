@@ -1,0 +1,84 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verification model.\nUse only the source records in the current case.\nReturn only valid JSON. No Markdown fences.\nDo not rely on warning tone, plausible risk, stale records, adjacent records, or missing phrasing when exact current source evidence closes the action boundary.",
+      "role": "system"
+    },
+    {
+      "content": "{\"answer_contract\":{\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"critical_features_preserved\":[\"string, max 8 items\"],\"final_answer\":\"string, 25-120 words\",\"open_blockers\":[\"string, max 3 items\"],\"verification_verdict\":\"ALLOW | ESCALATE\",\"worker_role\":\"ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\"},\"case_ref\":\"CASE_a74ba95aebd5\",\"source_context\":{\"action\":{\"action_date\":\"2026-06-28\",\"amount\":0,\"business_ref\":\"SCRUBBED_CASE_ACTION\",\"currency\":\"USD\",\"description\":\"May order operations release the tax-exempt sale?\",\"type\":\"tax_exempt_sale\",\"vendor\":\"Jade University\"},\"context\":{\"action_boundary\":\"May order operations release the tax-exempt sale?\",\"anomaly_observed\":\"A master certificate warning remains visible; sale requires abstract exemption-status class.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"content\":\"Order ORD-JAD-090 ships lab equipment to Jade University in Texas on 2026-06-28.\",\"doc_id\":\"ORD-JAD-090\",\"type\":\"source_record\"},{\"content\":\"Master certificate warning WARN-JAD-090 says older Jade certificates were stale and exemption status must be verified.\",\"doc_id\":\"WARN-JAD-090\",\"type\":\"source_record\"},{\"content\":\"Exemption authority CERT-JAD-090 covers Jade University, Texas ship-to, lab equipment category, current state-approved exemption certificate TX-44, and sale date 2026-06-28 before sale.\",\"doc_id\":\"CERT-JAD-090\",\"type\":\"source_record\"}],\"policy_documents\":[{\"content\":\"Tax-exempt sale is complete only when exemption authority matches buyer, ship-to state, tax category, sale date, and exemption-status class before sale.\",\"doc_id\":\"STD-JAD-090-P\",\"title\":\"Exact source-boundary policy\"}]}},\"source_rules\":[\"ALLOW only when exact current source evidence closes the action boundary before execution.\",\"ESCALATE when a narrow source-record defect remains open before execution.\",\"Cite exact doc_id values from the current case only.\",\"Do not invent source IDs.\"],\"task\":\"Decide whether the requested action may proceed or must be escalated using only the source records.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "answer_contract": {
+      "boundary_binding": {
+        "action_boundary": "string",
+        "allow_rule_assessment": "string",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "string",
+        "escalate_rule_assessment": "string",
+        "timing_scope_authority_dependency_check": "string"
+      },
+      "cited_evidence": [
+        "exact source doc_id"
+      ],
+      "critical_features_preserved": [
+        "string, max 8 items"
+      ],
+      "final_answer": "string, 25-120 words",
+      "open_blockers": [
+        "string, max 3 items"
+      ],
+      "verification_verdict": "ALLOW | ESCALATE",
+      "worker_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER"
+    },
+    "case_ref": "CASE_a74ba95aebd5",
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "SCRUBBED_CASE_ACTION",
+        "currency": "USD",
+        "description": "May order operations release the tax-exempt sale?",
+        "type": "tax_exempt_sale",
+        "vendor": "Jade University"
+      },
+      "context": {
+        "action_boundary": "May order operations release the tax-exempt sale?",
+        "anomaly_observed": "A master certificate warning remains visible; sale requires abstract exemption-status class.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Order ORD-JAD-090 ships lab equipment to Jade University in Texas on 2026-06-28.",
+            "doc_id": "ORD-JAD-090",
+            "type": "source_record"
+          },
+          {
+            "content": "Master certificate warning WARN-JAD-090 says older Jade certificates were stale and exemption status must be verified.",
+            "doc_id": "WARN-JAD-090",
+            "type": "source_record"
+          },
+          {
+            "content": "Exemption authority CERT-JAD-090 covers Jade University, Texas ship-to, lab equipment category, current state-approved exemption certificate TX-44, and sale date 2026-06-28 before sale.",
+            "doc_id": "CERT-JAD-090",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Tax-exempt sale is complete only when exemption authority matches buyer, ship-to state, tax category, sale date, and exemption-status class before sale.",
+            "doc_id": "STD-JAD-090-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "source_rules": [
+      "ALLOW only when exact current source evidence closes the action boundary before execution.",
+      "ESCALATE when a narrow source-record defect remains open before execution.",
+      "Cite exact doc_id values from the current case only.",
+      "Do not invent source IDs."
+    ],
+    "task": "Decide whether the requested action may proceed or must be escalated using only the source records."
+  }
+}

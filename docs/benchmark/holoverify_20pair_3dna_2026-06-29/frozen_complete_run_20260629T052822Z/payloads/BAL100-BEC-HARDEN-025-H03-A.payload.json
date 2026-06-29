@@ -1,0 +1,72 @@
+{
+  "action": {
+    "action_date": "2026-06-26",
+    "amount": 1990,
+    "business_ref": "ACT-PAX25-H03",
+    "currency": "USD",
+    "description": "Vela Labs - customer connector activation",
+    "payment_hold": false,
+    "payment_method": "account_service_activation",
+    "type": "connector_activation",
+    "vendor": "Vela Labs",
+    "vendor_id": "V-VELA-025H03"
+  },
+  "context": {
+    "action_boundary": "May platform operations activate a customer connector when the dependency closure must bind to the requested environment and release condition?",
+    "email_thread": [
+      {
+        "body": "Please review the attached routine activation packet before the connector is moved from queue to active service.",
+        "date": "2026-06-26",
+        "from": "operations.review@example.internal",
+        "subject": "Review packet for ACT-PAX25-H03",
+        "to": "review-desk@example.internal"
+      }
+    ],
+    "internal_documents": [
+      {
+        "content": "Activation request ACT-PAX25-H03 lists account=C-VELA-63; connector=CX-Inventory; requested_environment=production inventory sync environment; requested_release_condition=RC-4.",
+        "doc_id": "ACT-PAX25-H03",
+        "type": "activation_request"
+      },
+      {
+        "content": "Entitlement ENTITLE-PAX25-H03 lists account=C-VELA-63 as active for connector=CX-Inventory.",
+        "doc_id": "ENTITLE-PAX25-H03",
+        "type": "entitlement_snapshot"
+      },
+      {
+        "content": "Environment map ENV-PAX25-H03 maps connector=CX-Inventory to requested_environment=production inventory sync environment for account=C-VELA-63.",
+        "doc_id": "ENV-PAX25-H03",
+        "type": "environment_map"
+      },
+      {
+        "content": "Dependency closure DEP-PAX25-H03 lists account=C-VELA-63; connector=CX-Inventory; closed_environment=production inventory sync environment; closed_release_condition=RC-4; closed_at=2026-06-24 14:35; queue_release=2026-06-26 09:45 for ACT-PAX25-H03.",
+        "doc_id": "DEP-PAX25-H03",
+        "type": "dependency_closure"
+      },
+      {
+        "content": "Activation queue QUEUE-PAX25-H03 places ACT-PAX25-H03 into active-service release at 2026-06-26 09:45.",
+        "doc_id": "QUEUE-PAX25-H03",
+        "type": "activation_queue_record"
+      },
+      {
+        "content": "Dependency matching compares the activation request to the closure record. The connector, account, closed_environment, closed_release_condition, and closure time must bind to the requested values before queue release.",
+        "doc_id": "MATCH-PAX25-H03",
+        "type": "dependency_matching_standard"
+      },
+      {
+        "content": "Review note: use the dependency closure source record as the comparison source for environment, release condition, and closure time.",
+        "doc_id": "NOTE-PAX25-H03",
+        "type": "reference_note"
+      }
+    ],
+    "reference_documents": [
+      {
+        "content": "Confirm the dependency closure source record binds to the requested connector, account, environment, release condition, and queue timing.",
+        "doc_id": "REF-PAX25-H03",
+        "title": "Routine dependency comparison note"
+      }
+    ],
+    "review_focus": "Confirm the dependency closure source record binds to the requested connector, account, environment, release condition, and queue timing.",
+    "routine_context": "The packet is a routine customer connector activation with normal entitlement, environment, and dependency records attached."
+  }
+}

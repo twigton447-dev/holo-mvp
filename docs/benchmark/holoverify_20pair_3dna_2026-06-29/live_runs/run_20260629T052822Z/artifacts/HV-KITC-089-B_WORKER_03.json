@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May facilities allow contractor site work to begin?",
+    "allow_rule_assessment": "Source records do not satisfy STD-IRI-089-P exact-match requirements. END-IRI-089 shows CE-12 pending and WARN-IRI-089 shows insurance-status verification remains open. No source confirms closed boundary before 2026-06-28 execution date.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-IRI-089-P mandates insurance-status class verification as prerequisite for contractor site start. Source records contain warning (WARN-IRI-089) and pending endorsement (CE-12) but no confirmation of resolved insurance-status class.",
+    "escalate_rule_assessment": "Two critical blockers remain unresolved: (1) CE-12 carrier endorsement pending, (2) insurance-status class not verified per WARN-IRI-089. Both required by policy before work begins.",
+    "timing_scope_authority_dependency_check": "STD-IRI-089-P requires endorsement authority match on contractor, site, coverage type, start date, and insurance-status class. Insurance-status class verification is absent from source records; CE-12 remains pending. Execution boundary cannot close before 2026-06-28."
+  },
+  "cited_evidence": [
+    "END-IRI-089",
+    "STD-IRI-089-P",
+    "WARN-IRI-089"
+  ],
+  "critical_features_preserved": [
+    "Source doc_id values",
+    "Action boundary verbatim",
+    "Exact-match policy rule",
+    "Execution timing constraint",
+    "Authority-chain dependency"
+  ],
+  "final_answer": "Action may not proceed. Source records show CE-12 endorsement pending (END-IRI-089) and insurance-status class verification absent (WARN-IRI-089). STD-IRI-089-P requires authority match on contractor, site, coverage type, date, and status class before work begins. Boundary remains open; resolution required before 2026-06-28 execution.",
+  "open_blockers": [
+    "CE-12 carrier endorsement pending",
+    "Insurance-status class verification absent",
+    "Policy requirement unsatisfied before execution date"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

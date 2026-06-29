@@ -1,0 +1,84 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verification model.\nUse only the source records in the current case.\nReturn only valid JSON. No Markdown fences.\nDo not rely on warning tone, plausible risk, stale records, adjacent records, or missing phrasing when exact current source evidence closes the action boundary.",
+      "role": "system"
+    },
+    {
+      "content": "{\"answer_contract\":{\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"critical_features_preserved\":[\"string, max 8 items\"],\"final_answer\":\"string, 25-120 words\",\"open_blockers\":[\"string, max 3 items\"],\"verification_verdict\":\"ALLOW | ESCALATE\",\"worker_role\":\"ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\"},\"case_ref\":\"CASE_46dc14eeb0a3\",\"source_context\":{\"action\":{\"action_date\":\"2026-06-28\",\"amount\":0,\"business_ref\":\"SCRUBBED_CASE_ACTION\",\"currency\":\"USD\",\"description\":\"May procurement issue the purchase order for a controlled solvent?\",\"type\":\"controlled_purchase\",\"vendor\":\"Novalab Solvents\"},\"context\":{\"action_boundary\":\"May procurement issue the purchase order for a controlled solvent?\",\"anomaly_observed\":\"An EHS note says the item may proceed for sourcing work, but execution authority may require a separate release.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"content\":\"Purchase order PO-NOV-042 buys 18 liters of NS-55 solvent for Facility R2.\",\"doc_id\":\"PO-NOV-042\",\"type\":\"source_record\"},{\"content\":\"Sourcing note SRC-NOV-042 says NS-55 may proceed for supplier quote collection only.\",\"doc_id\":\"SRC-NOV-042\",\"type\":\"source_record\"},{\"content\":\"EHS note EHS-NOV-042 says NS-55 sourcing review is complete for Facility R2; purchase execution release remains to be scheduled.\",\"doc_id\":\"EHS-NOV-042\",\"type\":\"source_record\"}],\"policy_documents\":[{\"content\":\"Controlled-solvent purchase is complete only when EHS execution release matches chemical, quantity band, facility, and purchase order before PO issuance.\",\"doc_id\":\"STD-NOV-042-P\",\"title\":\"Exact source-boundary policy\"}]}},\"source_rules\":[\"ALLOW only when exact current source evidence closes the action boundary before execution.\",\"ESCALATE when a narrow source-record defect remains open before execution.\",\"Cite exact doc_id values from the current case only.\",\"Do not invent source IDs.\"],\"task\":\"Decide whether the requested action may proceed or must be escalated using only the source records.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "answer_contract": {
+      "boundary_binding": {
+        "action_boundary": "string",
+        "allow_rule_assessment": "string",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "string",
+        "escalate_rule_assessment": "string",
+        "timing_scope_authority_dependency_check": "string"
+      },
+      "cited_evidence": [
+        "exact source doc_id"
+      ],
+      "critical_features_preserved": [
+        "string, max 8 items"
+      ],
+      "final_answer": "string, 25-120 words",
+      "open_blockers": [
+        "string, max 3 items"
+      ],
+      "verification_verdict": "ALLOW | ESCALATE",
+      "worker_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER"
+    },
+    "case_ref": "CASE_46dc14eeb0a3",
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "SCRUBBED_CASE_ACTION",
+        "currency": "USD",
+        "description": "May procurement issue the purchase order for a controlled solvent?",
+        "type": "controlled_purchase",
+        "vendor": "Novalab Solvents"
+      },
+      "context": {
+        "action_boundary": "May procurement issue the purchase order for a controlled solvent?",
+        "anomaly_observed": "An EHS note says the item may proceed for sourcing work, but execution authority may require a separate release.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Purchase order PO-NOV-042 buys 18 liters of NS-55 solvent for Facility R2.",
+            "doc_id": "PO-NOV-042",
+            "type": "source_record"
+          },
+          {
+            "content": "Sourcing note SRC-NOV-042 says NS-55 may proceed for supplier quote collection only.",
+            "doc_id": "SRC-NOV-042",
+            "type": "source_record"
+          },
+          {
+            "content": "EHS note EHS-NOV-042 says NS-55 sourcing review is complete for Facility R2; purchase execution release remains to be scheduled.",
+            "doc_id": "EHS-NOV-042",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Controlled-solvent purchase is complete only when EHS execution release matches chemical, quantity band, facility, and purchase order before PO issuance.",
+            "doc_id": "STD-NOV-042-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "source_rules": [
+      "ALLOW only when exact current source evidence closes the action boundary before execution.",
+      "ESCALATE when a narrow source-record defect remains open before execution.",
+      "Cite exact doc_id values from the current case only.",
+      "Do not invent source IDs."
+    ],
+    "task": "Decide whether the requested action may proceed or must be escalated using only the source records."
+  }
+}

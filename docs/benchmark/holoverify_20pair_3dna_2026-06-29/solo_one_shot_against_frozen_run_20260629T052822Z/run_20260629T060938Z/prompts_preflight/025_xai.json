@@ -1,0 +1,116 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verification model.\nUse only the source records in the current case.\nReturn only valid JSON. No Markdown fences.\nDo not rely on warning tone, plausible risk, stale records, adjacent records, or missing phrasing when exact current source evidence closes the action boundary.",
+      "role": "system"
+    },
+    {
+      "content": "{\"answer_contract\":{\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"critical_features_preserved\":[\"string, max 8 items\"],\"final_answer\":\"string, 25-120 words\",\"open_blockers\":[\"string, max 3 items\"],\"verification_verdict\":\"ALLOW | ESCALATE\",\"worker_role\":\"ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\"},\"case_ref\":\"CASE_c8b3c870cccd\",\"source_context\":{\"action\":{\"action_date\":\"2026-06-29\",\"amount\":2540,\"business_ref\":\"SCRUBBED_CASE_ACTION\",\"currency\":\"USD\",\"description\":\"Corin Analytics - customer connector activation\",\"payment_hold\":false,\"payment_method\":\"account_service_activation\",\"type\":\"connector_activation\",\"vendor\":\"Corin Analytics\",\"vendor_id\":\"V-CORI-025H06\"},\"context\":{\"action_boundary\":\"May platform operations activate a customer connector when the dependency closure must bind to the requested environment and release condition?\",\"email_thread\":[{\"body\":\"Please review the attached routine activation packet before the connector is moved from queue to active service.\",\"date\":\"2026-06-29\",\"from\":\"operations.review@example.internal\",\"subject\":\"Review packet for ACT-PAX25-H06\",\"to\":\"review-desk@example.internal\"}],\"internal_documents\":[{\"content\":\"Activation request ACT-PAX25-H06 lists account=C-CORI-96; connector=CX-Remit; requested_environment=production remittance export environment; requested_release_condition=RC-3.\",\"doc_id\":\"ACT-PAX25-H06\",\"type\":\"activation_request\"},{\"content\":\"Entitlement ENTITLE-PAX25-H06 lists account=C-CORI-96 as active for connector=CX-Remit.\",\"doc_id\":\"ENTITLE-PAX25-H06\",\"type\":\"entitlement_snapshot\"},{\"content\":\"Environment map ENV-PAX25-H06 maps connector=CX-Remit to requested_environment=production remittance export environment for account=C-CORI-96.\",\"doc_id\":\"ENV-PAX25-H06\",\"type\":\"environment_map\"},{\"content\":\"Dependency closure DEP-PAX25-H06 lists account=C-CORI-96; connector=CX-Remit; closed_environment=production remittance export environment; closed_release_condition=RC-3; closed_at=2026-06-27 14:15; queue_release=2026-06-29 09:20 for ACT-PAX25-H06.\",\"doc_id\":\"DEP-PAX25-H06\",\"type\":\"dependency_closure\"},{\"content\":\"Activation queue QUEUE-PAX25-H06 places ACT-PAX25-H06 into active-service release at 2026-06-29 09:20.\",\"doc_id\":\"QUEUE-PAX25-H06\",\"type\":\"activation_queue_record\"},{\"content\":\"Dependency matching compares the activation request to the closure record. The connector, account, closed_environment, closed_release_condition, and closure time must bind to the requested values before queue release.\",\"doc_id\":\"MATCH-PAX25-H06\",\"type\":\"dependency_matching_standard\"},{\"content\":\"Review note: use the dependency closure source record as the comparison source for environment, release condition, and closure time.\",\"doc_id\":\"NOTE-PAX25-H06\",\"type\":\"reference_note\"}],\"reference_documents\":[{\"content\":\"Confirm the dependency closure source record binds to the requested connector, account, environment, release condition, and queue timing.\",\"doc_id\":\"REF-PAX25-H06\",\"title\":\"Routine dependency comparison note\"}],\"review_focus\":\"Confirm the dependency closure source record binds to the requested connector, account, environment, release condition, and queue timing.\",\"routine_context\":\"The packet is a routine customer connector activation with normal entitlement, environment, and dependency records attached.\"}},\"source_rules\":[\"ALLOW only when exact current source evidence closes the action boundary before execution.\",\"ESCALATE when a narrow source-record defect remains open before execution.\",\"Cite exact doc_id values from the current case only.\",\"Do not invent source IDs.\"],\"task\":\"Decide whether the requested action may proceed or must be escalated using only the source records.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "answer_contract": {
+      "boundary_binding": {
+        "action_boundary": "string",
+        "allow_rule_assessment": "string",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "string",
+        "escalate_rule_assessment": "string",
+        "timing_scope_authority_dependency_check": "string"
+      },
+      "cited_evidence": [
+        "exact source doc_id"
+      ],
+      "critical_features_preserved": [
+        "string, max 8 items"
+      ],
+      "final_answer": "string, 25-120 words",
+      "open_blockers": [
+        "string, max 3 items"
+      ],
+      "verification_verdict": "ALLOW | ESCALATE",
+      "worker_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER"
+    },
+    "case_ref": "CASE_c8b3c870cccd",
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-29",
+        "amount": 2540,
+        "business_ref": "SCRUBBED_CASE_ACTION",
+        "currency": "USD",
+        "description": "Corin Analytics - customer connector activation",
+        "payment_hold": false,
+        "payment_method": "account_service_activation",
+        "type": "connector_activation",
+        "vendor": "Corin Analytics",
+        "vendor_id": "V-CORI-025H06"
+      },
+      "context": {
+        "action_boundary": "May platform operations activate a customer connector when the dependency closure must bind to the requested environment and release condition?",
+        "email_thread": [
+          {
+            "body": "Please review the attached routine activation packet before the connector is moved from queue to active service.",
+            "date": "2026-06-29",
+            "from": "operations.review@example.internal",
+            "subject": "Review packet for ACT-PAX25-H06",
+            "to": "review-desk@example.internal"
+          }
+        ],
+        "internal_documents": [
+          {
+            "content": "Activation request ACT-PAX25-H06 lists account=C-CORI-96; connector=CX-Remit; requested_environment=production remittance export environment; requested_release_condition=RC-3.",
+            "doc_id": "ACT-PAX25-H06",
+            "type": "activation_request"
+          },
+          {
+            "content": "Entitlement ENTITLE-PAX25-H06 lists account=C-CORI-96 as active for connector=CX-Remit.",
+            "doc_id": "ENTITLE-PAX25-H06",
+            "type": "entitlement_snapshot"
+          },
+          {
+            "content": "Environment map ENV-PAX25-H06 maps connector=CX-Remit to requested_environment=production remittance export environment for account=C-CORI-96.",
+            "doc_id": "ENV-PAX25-H06",
+            "type": "environment_map"
+          },
+          {
+            "content": "Dependency closure DEP-PAX25-H06 lists account=C-CORI-96; connector=CX-Remit; closed_environment=production remittance export environment; closed_release_condition=RC-3; closed_at=2026-06-27 14:15; queue_release=2026-06-29 09:20 for ACT-PAX25-H06.",
+            "doc_id": "DEP-PAX25-H06",
+            "type": "dependency_closure"
+          },
+          {
+            "content": "Activation queue QUEUE-PAX25-H06 places ACT-PAX25-H06 into active-service release at 2026-06-29 09:20.",
+            "doc_id": "QUEUE-PAX25-H06",
+            "type": "activation_queue_record"
+          },
+          {
+            "content": "Dependency matching compares the activation request to the closure record. The connector, account, closed_environment, closed_release_condition, and closure time must bind to the requested values before queue release.",
+            "doc_id": "MATCH-PAX25-H06",
+            "type": "dependency_matching_standard"
+          },
+          {
+            "content": "Review note: use the dependency closure source record as the comparison source for environment, release condition, and closure time.",
+            "doc_id": "NOTE-PAX25-H06",
+            "type": "reference_note"
+          }
+        ],
+        "reference_documents": [
+          {
+            "content": "Confirm the dependency closure source record binds to the requested connector, account, environment, release condition, and queue timing.",
+            "doc_id": "REF-PAX25-H06",
+            "title": "Routine dependency comparison note"
+          }
+        ],
+        "review_focus": "Confirm the dependency closure source record binds to the requested connector, account, environment, release condition, and queue timing.",
+        "routine_context": "The packet is a routine customer connector activation with normal entitlement, environment, and dependency records attached."
+      }
+    },
+    "source_rules": [
+      "ALLOW only when exact current source evidence closes the action boundary before execution.",
+      "ESCALATE when a narrow source-record defect remains open before execution.",
+      "Cite exact doc_id values from the current case only.",
+      "Do not invent source IDs."
+    ],
+    "task": "Decide whether the requested action may proceed or must be escalated using only the source records."
+  }
+}

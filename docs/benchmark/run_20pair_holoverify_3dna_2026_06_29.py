@@ -58,6 +58,9 @@ PRE_RUN_MANIFEST = OUT_ROOT / "PRE_RUN_MANIFEST.json"
 TRANSPORT_RETRY_POLICY_VERSION = "HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29"
 TRANSPORT_MAX_RETRIES = 2
 TRANSPORT_BACKOFF_SECONDS = (2, 4)
+EMPTY_WORKER_OUTPUT_RETRY_POLICY_VERSION = "HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29"
+EMPTY_WORKER_OUTPUT_MAX_RETRIES = 2
+EMPTY_WORKER_OUTPUT_BACKOFF_SECONDS = (1, 2)
 PROVIDER_HTTP_TIMEOUT_SECONDS = 150
 RETRYABLE_HTTP_STATUS = {429, 500, 502, 503, 504}
 
@@ -563,6 +566,10 @@ def _transport_sleep(seconds: int) -> None:
     time.sleep(seconds)
 
 
+def _empty_worker_output_sleep(seconds: int) -> None:
+    time.sleep(seconds)
+
+
 def _call_with_transport_retry(
     call_once,
     *,
@@ -713,6 +720,64 @@ def _call_model(config: dict[str, Any], messages: list[dict[str, str]], max_toke
         raise
     response["elapsed_ms"] = int((time.time() - started) * 1000)
     return response
+
+
+def _is_retryable_empty_worker_response(response: dict[str, Any]) -> bool:
+    """Return true only for the pre-registered exact-empty worker anomaly."""
+    text = response.get("text")
+    finish_reason = response.get("finish_reason")
+    output_tokens = response.get("output_tokens")
+    return (
+        isinstance(text, str)
+        and text == ""
+        and output_tokens == 0
+        and str(finish_reason).lower() != "length"
+    )
+
+
+def _call_worker_model_with_empty_output_retry(
+    config: dict[str, Any],
+    messages: list[dict[str, str]],
+    *,
+    max_tokens: int,
+    turn_id: str,
+    max_retries: int = EMPTY_WORKER_OUTPUT_MAX_RETRIES,
+) -> dict[str, Any]:
+    """Retry only exact-empty worker responses that produced no model content."""
+    failures: list[dict[str, Any]] = []
+    total_attempts = max_retries + 1
+    for attempt in range(1, total_attempts + 1):
+        response = _call_model(config, messages, max_tokens=max_tokens)
+        if not _is_retryable_empty_worker_response(response):
+            response["empty_worker_output_retry_policy_version"] = EMPTY_WORKER_OUTPUT_RETRY_POLICY_VERSION
+            response["empty_worker_output_attempt_count"] = attempt
+            response["empty_worker_output_recovered"] = bool(failures)
+            response["empty_worker_output_retry_failures"] = failures
+            return response
+        failures.append(
+            {
+                "attempt": attempt,
+                "turn_id": turn_id,
+                "provider": config["provider"],
+                "model": config["model"],
+                "class": "EMPTY_WORKER_TEXT_ZERO_OUTPUT_TOKENS",
+                "finish_reason": response.get("finish_reason"),
+                "response_id": response.get("response_id"),
+                "input_tokens": response.get("input_tokens"),
+                "output_tokens": response.get("output_tokens"),
+                "total_tokens": response.get("total_tokens"),
+                "transport_attempt_count": response.get("transport_attempt_count"),
+                "transport_recovered": response.get("transport_recovered"),
+                "transport_retry_failures": response.get("transport_retry_failures", []),
+            }
+        )
+        if attempt >= total_attempts:
+            response["empty_worker_output_retry_policy_version"] = EMPTY_WORKER_OUTPUT_RETRY_POLICY_VERSION
+            response["empty_worker_output_attempt_count"] = attempt
+            response["empty_worker_output_recovered"] = False
+            response["empty_worker_output_retry_failures"] = failures
+            return response
+        _empty_worker_output_sleep(EMPTY_WORKER_OUTPUT_BACKOFF_SECONDS[min(attempt - 1, len(EMPTY_WORKER_OUTPUT_BACKOFF_SECONDS) - 1)])
 
 
 def _worker_contract() -> dict[str, Any]:
@@ -1873,7 +1938,12 @@ def _run_packet(run_id: str, pair: dict[str, Any], suffix: str, manifest: dict[s
         }
         response: dict[str, Any] = {}
         try:
-            response = _call_model(config, messages, max_tokens=WORKER_MAX_TOKENS)
+            response = _call_worker_model_with_empty_output_retry(
+                config,
+                messages,
+                max_tokens=WORKER_MAX_TOKENS,
+                turn_id=turn_id,
+            )
             parsed = _worker_from_response(response)
             raw_parsed = json.loads(json.dumps(parsed))
             raw_gate = _validate_worker(parsed, spec, suffix, valid_ids)

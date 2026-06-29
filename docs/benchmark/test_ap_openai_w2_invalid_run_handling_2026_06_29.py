@@ -333,6 +333,150 @@ def test_transport_retry_exhaustion_fails_closed() -> None:
         RUNNER._transport_sleep = original_sleep
 
 
+def test_empty_worker_response_classifier_is_narrow() -> None:
+    exact_empty = {"text": "", "finish_reason": "", "output_tokens": 0}
+    if RUNNER._is_retryable_empty_worker_response(exact_empty) is not True:
+        raise AssertionError(exact_empty)
+
+    markdown_failure = {"text": "```json\n{}\n```", "finish_reason": "stop", "output_tokens": 5}
+    if RUNNER._is_retryable_empty_worker_response(markdown_failure) is not False:
+        raise AssertionError(markdown_failure)
+
+    length_failure = {"text": "", "finish_reason": "length", "output_tokens": 0}
+    if RUNNER._is_retryable_empty_worker_response(length_failure) is not False:
+        raise AssertionError(length_failure)
+
+    hidden_or_unreported_output = {"text": "", "finish_reason": "stop", "output_tokens": None}
+    if RUNNER._is_retryable_empty_worker_response(hidden_or_unreported_output) is not False:
+        raise AssertionError(hidden_or_unreported_output)
+
+
+def test_empty_worker_output_retry_success_marks_recovered() -> None:
+    calls = {"count": 0}
+    original_call_model = RUNNER._call_model
+    original_sleep = RUNNER._empty_worker_output_sleep
+    RUNNER._empty_worker_output_sleep = lambda _seconds: None
+    try:
+        def fake_call_model(config, messages, max_tokens):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                return {
+                    "text": "",
+                    "finish_reason": "",
+                    "response_id": "empty-fixture-1",
+                    "input_tokens": 10,
+                    "output_tokens": 0,
+                    "total_tokens": 10,
+                    "transport_attempt_count": 1,
+                    "transport_recovered": False,
+                    "transport_retry_failures": [],
+                }
+            return {
+                "text": compact_worker_fixture(),
+                "finish_reason": "stop",
+                "response_id": "ok-fixture-2",
+                "input_tokens": 11,
+                "output_tokens": 150,
+                "total_tokens": 161,
+                "transport_attempt_count": 1,
+                "transport_recovered": False,
+                "transport_retry_failures": [],
+            }
+
+        RUNNER._call_model = fake_call_model
+        response = RUNNER._call_worker_model_with_empty_output_retry(
+            {"provider": "xai", "model": "grok-3-mini"},
+            [{"role": "user", "content": "fixture"}],
+            max_tokens=800,
+            turn_id="HV-AP-REP-FIXTURE-A_W1",
+        )
+    finally:
+        RUNNER._call_model = original_call_model
+        RUNNER._empty_worker_output_sleep = original_sleep
+    if response["empty_worker_output_attempt_count"] != 2:
+        raise AssertionError(response)
+    if response["empty_worker_output_recovered"] is not True:
+        raise AssertionError(response)
+    if response["empty_worker_output_retry_failures"][0]["class"] != "EMPTY_WORKER_TEXT_ZERO_OUTPUT_TOKENS":
+        raise AssertionError(response)
+    parsed = RUNNER._worker_from_response(response)
+    if parsed["verification_verdict"] != "ALLOW":
+        raise AssertionError(parsed)
+
+
+def test_empty_worker_output_retry_exhaustion_stays_invalid() -> None:
+    original_call_model = RUNNER._call_model
+    original_sleep = RUNNER._empty_worker_output_sleep
+    RUNNER._empty_worker_output_sleep = lambda _seconds: None
+    try:
+        def fake_call_model(config, messages, max_tokens):
+            return {
+                "text": "",
+                "finish_reason": "",
+                "response_id": "empty-fixture",
+                "input_tokens": 10,
+                "output_tokens": 0,
+                "total_tokens": 10,
+                "transport_attempt_count": 1,
+                "transport_recovered": False,
+                "transport_retry_failures": [],
+            }
+
+        RUNNER._call_model = fake_call_model
+        response = RUNNER._call_worker_model_with_empty_output_retry(
+            {"provider": "xai", "model": "grok-3-mini"},
+            [{"role": "user", "content": "fixture"}],
+            max_tokens=800,
+            turn_id="HV-AP-REP-FIXTURE-A_W1",
+        )
+    finally:
+        RUNNER._call_model = original_call_model
+        RUNNER._empty_worker_output_sleep = original_sleep
+    if response["empty_worker_output_attempt_count"] != 3:
+        raise AssertionError(response)
+    if response["empty_worker_output_recovered"] is not False:
+        raise AssertionError(response)
+    if len(response["empty_worker_output_retry_failures"]) != 3:
+        raise AssertionError(response)
+    assert_raises_contains(lambda: RUNNER._worker_from_response(response), "worker_empty_text")
+
+
+def test_malformed_worker_content_is_not_empty_retry() -> None:
+    calls = {"count": 0}
+    original_call_model = RUNNER._call_model
+    try:
+        def fake_call_model(config, messages, max_tokens):
+            calls["count"] += 1
+            return {
+                "text": "```json\n{}\n```",
+                "finish_reason": "stop",
+                "response_id": "malformed-fixture",
+                "input_tokens": 10,
+                "output_tokens": 4,
+                "total_tokens": 14,
+                "transport_attempt_count": 1,
+                "transport_recovered": False,
+                "transport_retry_failures": [],
+            }
+
+        RUNNER._call_model = fake_call_model
+        response = RUNNER._call_worker_model_with_empty_output_retry(
+            {"provider": "xai", "model": "grok-3-mini"},
+            [{"role": "user", "content": "fixture"}],
+            max_tokens=800,
+            turn_id="HV-AP-REP-FIXTURE-A_W1",
+        )
+    finally:
+        RUNNER._call_model = original_call_model
+    if calls["count"] != 1:
+        raise AssertionError(calls)
+    if response["empty_worker_output_attempt_count"] != 1:
+        raise AssertionError(response)
+    if response["empty_worker_output_recovered"] is not False:
+        raise AssertionError(response)
+    assert_raises_contains(lambda: RUNNER._worker_from_response(response), "worker_markdown_fence_present")
+
+
 def compact_worker_fixture(*, verdict: str = "ALLOW", source_id: str = "SRC-TEST-CTL") -> str:
     return "\n".join(
         [
@@ -478,6 +622,10 @@ def test_no_packet_or_prompt_hash_mutation() -> None:
     test_retry_classifies_transport_only()
     test_transport_retry_success_marks_recovered()
     test_transport_retry_exhaustion_fails_closed()
+    test_empty_worker_response_classifier_is_narrow()
+    test_empty_worker_output_retry_success_marks_recovered()
+    test_empty_worker_output_retry_exhaustion_stays_invalid()
+    test_malformed_worker_content_is_not_empty_retry()
     test_worker_malformed_unterminated_json_invalid()
     test_worker_markdown_wrapped_json_invalid()
     test_gov_prompt_contains_no_placeholder_examples()
@@ -506,6 +654,10 @@ def main() -> None:
         test_retry_classifies_transport_only,
         test_transport_retry_success_marks_recovered,
         test_transport_retry_exhaustion_fails_closed,
+        test_empty_worker_response_classifier_is_narrow,
+        test_empty_worker_output_retry_success_marks_recovered,
+        test_empty_worker_output_retry_exhaustion_stays_invalid,
+        test_malformed_worker_content_is_not_empty_retry,
         test_worker_malformed_unterminated_json_invalid,
         test_worker_markdown_wrapped_json_invalid,
         test_gov_prompt_contains_no_placeholder_examples,

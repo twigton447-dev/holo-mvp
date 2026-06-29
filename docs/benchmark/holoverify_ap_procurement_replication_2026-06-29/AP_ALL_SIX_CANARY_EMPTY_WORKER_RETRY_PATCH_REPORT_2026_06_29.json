@@ -1,0 +1,53 @@
+{
+  "report_id": "AP_ALL_SIX_CANARY_EMPTY_WORKER_RETRY_PATCH_REPORT_2026_06_29",
+  "date": "2026-06-29",
+  "status": "NO_PROVIDER_VALIDATION_PASS",
+  "prospective_only": true,
+  "preserved_invalid_run": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260629T191023Z",
+  "failure_addressed": {
+    "turn_id": "HV-AP-REP-013-B_W1",
+    "provider": "xai",
+    "model": "grok-3-mini",
+    "provider_call_ok": true,
+    "text": "",
+    "output_tokens": 0,
+    "error": "ValueError: worker_empty_text"
+  },
+  "policy_registered": "HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29",
+  "code_changes": {
+    "worker_exact_empty_retry_added": true,
+    "trace_metadata_added": [
+      "empty_worker_output_retry_policy_version",
+      "empty_worker_output_attempt_count",
+      "empty_worker_output_recovered",
+      "empty_worker_output_retry_failures"
+    ],
+    "canary_preflight_checks_added": true,
+    "ap_openai_w2_preflight_checks_added": true
+  },
+  "non_retryable_unchanged": [
+    "malformed_worker_content",
+    "markdown_wrapped_worker_content",
+    "wrong_verdict",
+    "gov_empty_text",
+    "malformed_gov_baton",
+    "finish_reason_length_incomplete_output",
+    "schema_or_admissibility_failure",
+    "deterministic_gate_failure",
+    "invented_source_ids"
+  ],
+  "validation": {
+    "py_compile": "PASS",
+    "fixture_tests": "PASS",
+    "ap_freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "ap_packet_count": 40,
+    "w2_provider": "openai",
+    "w2_model": "gpt-5.4-mini",
+    "gov_contract": "gov_micro_baton_v2",
+    "worker_contract": "compact_key_value_v1",
+    "gov_max_tokens": 1024,
+    "provider_calls": 0,
+    "judge_calls": 0
+  },
+  "next_valid_move": "fresh_ap_openai_w2_all_six_collapse_holo_canary_no_resume_no_solo_no_judges"
+}

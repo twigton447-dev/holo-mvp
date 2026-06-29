@@ -540,6 +540,8 @@ def build_openai_w2_live_holo_preflight() -> dict[str, Any]:
         "worker_contract_format": RUNNER._worker_contract().get("format") == "compact_key_value_v1",
         "gov_output_budget_sufficient": getattr(RUNNER, "GOV_MAX_TOKENS", None) >= AP_OPENAI_W2_GOV_MAX_TOKENS,
         "gov_max_tokens": getattr(RUNNER, "GOV_MAX_TOKENS", None) == AP_OPENAI_W2_GOV_MAX_TOKENS,
+        "empty_worker_output_retry_policy_v1_active": getattr(RUNNER, "EMPTY_WORKER_OUTPUT_RETRY_POLICY_VERSION", "") == "HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29",
+        "empty_worker_output_max_retries": getattr(RUNNER, "EMPTY_WORKER_OUTPUT_MAX_RETRIES", None) == 2,
         "expected_holo_calls": 40 * 5 == 200,
         "expected_packets": len(records) == 40,
         "expected_pairs": len(pairs) == 20,

@@ -165,6 +165,8 @@ def build_preflight() -> dict[str, Any]:
         "gov_contract_format": RUNNER._gov_contract().get("format") == "gov_micro_baton_v2",
         "gov_max_tokens": getattr(RUNNER, "GOV_MAX_TOKENS", None) == AP.AP_OPENAI_W2_GOV_MAX_TOKENS,
         "transport_policy_v1_active": getattr(RUNNER, "TRANSPORT_RETRY_POLICY_VERSION", "") == "HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29",
+        "empty_worker_output_retry_policy_v1_active": getattr(RUNNER, "EMPTY_WORKER_OUTPUT_RETRY_POLICY_VERSION", "") == "HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29",
+        "empty_worker_output_max_retries": getattr(RUNNER, "EMPTY_WORKER_OUTPUT_MAX_RETRIES", None) == 2,
         "no_packet_edits": not freeze_diff_names,
         "no_prompt_edits": not freeze_diff_names,
         "expected_provider_calls": EXPECTED_COUNTS["total_provider_calls"] == 60,

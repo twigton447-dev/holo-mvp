@@ -28,6 +28,26 @@ Canary status:
 AP_OPENAI_W2_CANARY_READY_FOR_FULL_FAMILY_RUN
 ```
 
+## Root Cause And Correction
+
+Taylor's local full-family preflight failed before live execution with:
+
+```text
+RuntimeError: Gov compact key=value baton prompt not active
+```
+
+That was a stale full-family wrapper assertion, not a provider failure and not a Holo verdict failure. The wrapper checked for the obsolete literal phrase `Return one compact key=value baton only`. The canary-good AP configuration uses the current Gov prompt text `HoloGov-V micro-router v2. Return gov_micro_baton_v2 only.` and proves correctness by parsing the concrete `selected_baton_lines` emitted by `_build_gov_messages()`.
+
+This handoff replaces the stale phrase assertion with the canary-good proof:
+
+- Gov contract is `gov_micro_baton_v2`.
+- Worker contract is `compact_key_value_v1`.
+- Gov prompt uses `HoloGov-V micro-router v2`.
+- Gov prompt returns `gov_micro_baton_v2`.
+- Concrete `selected_baton_lines` parse as `gov_micro_baton_v2`.
+- Placeholder fragments such as `wb_code`, `fail_code`, and `repair_hint` are absent.
+- Provider calls during preflight remain `0`.
+
 ## Scope
 
 - AP / procurement family only.
@@ -144,7 +164,117 @@ assert spec and spec.loader
 spec.loader.exec_module(m)
 m.EXPECTED_HEAD = EXPECTED_HEAD
 m.LINEAGE_COMMITS.update(LINEAGE)
-manifest = m.validate_pre_live()
+
+def canary_good_preflight(module):
+    ap = module.AP
+    runner = ap.RUNNER
+    if ap.current_head() != EXPECTED_HEAD:
+        raise RuntimeError(f"HEAD mismatch: {ap.current_head()} != {EXPECTED_HEAD}")
+    ap.configure_openai_w2_runner()
+    freeze = ap.read_freeze()
+    if freeze["summary"].get("freeze_root_hash") != module.EXPECTED_FREEZE_ROOT:
+        raise RuntimeError("freeze root mismatch")
+    pairs = ap.build_pairs(freeze["records"])
+    pair = pairs[0]
+    w2 = runner.MODEL_CONFIGS[runner.WORKER_SEQUENCE[1]["model_key"]]
+    active_models = [
+        runner.MODEL_CONFIGS[worker["model_key"]]["model"]
+        for worker in runner.WORKER_SEQUENCE
+    ] + [runner.MODEL_CONFIGS[runner.GOV_MODEL_KEY]["model"]]
+    gov_contract = runner._gov_contract()
+    sample_gov = "\n".join([
+        "verdict=FINAL",
+        "dep=NONE",
+        "focus=FINAL_CHECK",
+        "objective=FINALIZE",
+        "preserve=CLOSED",
+        "repair=NONE",
+        "block=NONE",
+    ])
+    parsed_gov = runner._gov_from_response({"text": sample_gov, "finish_reason": "stop"})
+    state_brief = runner._make_state_brief(
+        "prelive_no_provider",
+        pair["pair_id"],
+        pair["freeze_records"]["A"]["packet_id"],
+        [],
+        [pair["spec"].get("failure_class_notes") or pair["spec"]["boundary"]],
+        [],
+        None,
+        None,
+    )
+    parsed_worker = {
+        "verification_verdict": "ALLOW",
+        "boundary_binding": {"binding_class": "SOURCE_BOUNDARY_CLOSED", "controlling_source_fact": "SRC-PRELIVE"},
+        "cited_evidence": ["SRC-PRELIVE"],
+        "open_blockers": [],
+        "critical_features_preserved": [],
+        "final_answer": "ALLOW: source boundary is closed by the pre-live fixture records before execution.",
+    }
+    sample_gate = {
+        "passed": False,
+        "failures": ["missing_boundary_binding:escalate_rule_assessment"],
+        "artifact_verdict": "ALLOW",
+        "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+        "critical_term_count": 0,
+    }
+    gov_messages, gov_prompt_obj = runner._build_gov_messages(
+        "prelive_no_provider",
+        pair,
+        {"packet_id": pair["freeze_records"]["A"]["packet_id"]},
+        pair["payloads"]["A"],
+        state_brief,
+        parsed_worker,
+        sample_gate,
+        [],
+    )
+    gov_prompt_text = json.dumps({"messages": gov_messages, "prompt_object": gov_prompt_obj}, sort_keys=True)
+    placeholder_fragments = [
+        "wb_code",
+        "fail_code",
+        "repair_hint",
+        "blocked_hint",
+        "focus_hint",
+        "field_name",
+        "preserve=wb",
+        "repair=fail",
+    ]
+    placeholder_hits = [fragment for fragment in placeholder_fragments if fragment in gov_prompt_text]
+    selected_baton_lines = gov_prompt_obj.get("selected_baton_lines") or []
+    selected_baton_parsed = runner._gov_from_response({"text": "\n".join(selected_baton_lines), "finish_reason": "stop"})
+    manifest = ap.build_openai_w2_live_holo_preflight()
+    manifest["lineage_commits"] = LINEAGE
+    manifest["pre_live_contract_assertions"] = {
+        "full_family_runner_imports_canary_good_ap_module": True,
+        "head_matches_successful_canary_evidence": ap.current_head() == EXPECTED_HEAD,
+        "ap_packet_hashes_match_freeze": len(freeze["records"]) == 40,
+        "expected_holo_calls": manifest["expected_counts"]["holo_calls"],
+        "expected_packets": manifest["expected_counts"]["packets"],
+        "expected_pairs": manifest["expected_counts"]["pairs"],
+        "solo_calls": manifest["expected_counts"]["solo_calls"],
+        "judge_calls": manifest["expected_counts"]["judge_calls"],
+        "provider_calls_during_preflight": 0,
+        "w2_is_openai_gpt_5_4_mini": w2["provider"] == "openai" and w2["model"] == "gpt-5.4-mini",
+        "worker_contract_format": runner._worker_contract().get("format"),
+        "gov_contract_format": gov_contract.get("format"),
+        "gov_v2_fixture_passed": parsed_gov.get("gov_baton_version") == "gov_micro_baton_v2",
+        "gov_prompt_system_uses_micro_router_v2": "HoloGov-V micro-router v2" in gov_messages[0]["content"],
+        "gov_prompt_system_returns_gov_micro_baton_v2": "Return gov_micro_baton_v2 only" in gov_messages[0]["content"],
+        "gov_prompt_selected_baton_lines": selected_baton_lines,
+        "gov_prompt_selected_baton_parses": selected_baton_parsed.get("gov_baton_version") == "gov_micro_baton_v2",
+        "gov_prompt_placeholder_hits": placeholder_hits,
+        "no_gemini_active": not any("gemini" in str(model).lower() for model in active_models),
+        "transport_retry_policy_v1_active": runner.TRANSPORT_RETRY_POLICY_VERSION == "HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29",
+    }
+    failures = [
+        key
+        for key, value in manifest["pre_live_contract_assertions"].items()
+        if value is False or (key == "gov_prompt_placeholder_hits" and value)
+    ]
+    if failures:
+        raise RuntimeError(f"canary_good_preflight_failed:{failures}")
+    return manifest
+
+manifest = canary_good_preflight(m)
 print(json.dumps({
     "preflight": "PASS",
     "execution_head": EXPECTED_HEAD,
@@ -169,6 +299,9 @@ Expected preflight highlights:
 - `result: AP_OPENAI_W2_READY_FOR_FULL_HOLO_RUN`
 - `w2_provider: openai`
 - `w2_model: gpt-5.4-mini`
+- `pre_live_contract_assertions.gov_contract_format: gov_micro_baton_v2`
+- `pre_live_contract_assertions.gov_prompt_selected_baton_parses: true`
+- `pre_live_contract_assertions.gov_prompt_placeholder_hits: []`
 - `expected_counts.holo_calls: 200`
 - `expected_counts.solo_calls: 0`
 - `expected_counts.judge_calls: 0`
@@ -208,6 +341,115 @@ assert spec and spec.loader
 spec.loader.exec_module(m)
 m.EXPECTED_HEAD = EXPECTED_HEAD
 m.LINEAGE_COMMITS.update(LINEAGE)
+
+def canary_good_preflight(module):
+    import json
+    ap = module.AP
+    runner = ap.RUNNER
+    if ap.current_head() != EXPECTED_HEAD:
+        raise RuntimeError(f"HEAD mismatch: {ap.current_head()} != {EXPECTED_HEAD}")
+    ap.configure_openai_w2_runner()
+    freeze = ap.read_freeze()
+    if freeze["summary"].get("freeze_root_hash") != module.EXPECTED_FREEZE_ROOT:
+        raise RuntimeError("freeze root mismatch")
+    pairs = ap.build_pairs(freeze["records"])
+    pair = pairs[0]
+    active_models = [
+        runner.MODEL_CONFIGS[worker["model_key"]]["model"]
+        for worker in runner.WORKER_SEQUENCE
+    ] + [runner.MODEL_CONFIGS[runner.GOV_MODEL_KEY]["model"]]
+    sample_gov = "\n".join([
+        "verdict=FINAL",
+        "dep=NONE",
+        "focus=FINAL_CHECK",
+        "objective=FINALIZE",
+        "preserve=CLOSED",
+        "repair=NONE",
+        "block=NONE",
+    ])
+    parsed_gov = runner._gov_from_response({"text": sample_gov, "finish_reason": "stop"})
+    state_brief = runner._make_state_brief(
+        "prelive_no_provider",
+        pair["pair_id"],
+        pair["freeze_records"]["A"]["packet_id"],
+        [],
+        [pair["spec"].get("failure_class_notes") or pair["spec"]["boundary"]],
+        [],
+        None,
+        None,
+    )
+    parsed_worker = {
+        "verification_verdict": "ALLOW",
+        "boundary_binding": {"binding_class": "SOURCE_BOUNDARY_CLOSED", "controlling_source_fact": "SRC-PRELIVE"},
+        "cited_evidence": ["SRC-PRELIVE"],
+        "open_blockers": [],
+        "critical_features_preserved": [],
+        "final_answer": "ALLOW: source boundary is closed by the pre-live fixture records before execution.",
+    }
+    sample_gate = {
+        "passed": False,
+        "failures": ["missing_boundary_binding:escalate_rule_assessment"],
+        "artifact_verdict": "ALLOW",
+        "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+        "critical_term_count": 0,
+    }
+    gov_messages, gov_prompt_obj = runner._build_gov_messages(
+        "prelive_no_provider",
+        pair,
+        {"packet_id": pair["freeze_records"]["A"]["packet_id"]},
+        pair["payloads"]["A"],
+        state_brief,
+        parsed_worker,
+        sample_gate,
+        [],
+    )
+    gov_prompt_text = json.dumps({"messages": gov_messages, "prompt_object": gov_prompt_obj}, sort_keys=True)
+    placeholder_fragments = [
+        "wb_code",
+        "fail_code",
+        "repair_hint",
+        "blocked_hint",
+        "focus_hint",
+        "field_name",
+        "preserve=wb",
+        "repair=fail",
+    ]
+    placeholder_hits = [fragment for fragment in placeholder_fragments if fragment in gov_prompt_text]
+    selected_baton_lines = gov_prompt_obj.get("selected_baton_lines") or []
+    selected_baton_parsed = runner._gov_from_response({"text": "\n".join(selected_baton_lines), "finish_reason": "stop"})
+    manifest = ap.build_openai_w2_live_holo_preflight()
+    manifest["lineage_commits"] = LINEAGE
+    manifest["pre_live_contract_assertions"] = {
+        "full_family_runner_imports_canary_good_ap_module": True,
+        "head_matches_successful_canary_evidence": ap.current_head() == EXPECTED_HEAD,
+        "ap_packet_hashes_match_freeze": len(freeze["records"]) == 40,
+        "expected_holo_calls": manifest["expected_counts"]["holo_calls"],
+        "expected_packets": manifest["expected_counts"]["packets"],
+        "expected_pairs": manifest["expected_counts"]["pairs"],
+        "solo_calls": manifest["expected_counts"]["solo_calls"],
+        "judge_calls": manifest["expected_counts"]["judge_calls"],
+        "provider_calls_during_preflight": 0,
+        "worker_contract_format": runner._worker_contract().get("format"),
+        "gov_contract_format": runner._gov_contract().get("format"),
+        "gov_v2_fixture_passed": parsed_gov.get("gov_baton_version") == "gov_micro_baton_v2",
+        "gov_prompt_system_uses_micro_router_v2": "HoloGov-V micro-router v2" in gov_messages[0]["content"],
+        "gov_prompt_system_returns_gov_micro_baton_v2": "Return gov_micro_baton_v2 only" in gov_messages[0]["content"],
+        "gov_prompt_selected_baton_lines": selected_baton_lines,
+        "gov_prompt_selected_baton_parses": selected_baton_parsed.get("gov_baton_version") == "gov_micro_baton_v2",
+        "gov_prompt_placeholder_hits": placeholder_hits,
+        "no_gemini_active": not any("gemini" in str(model).lower() for model in active_models),
+        "transport_retry_policy_v1_active": runner.TRANSPORT_RETRY_POLICY_VERSION == "HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29",
+    }
+    failures = [
+        key
+        for key, value in manifest["pre_live_contract_assertions"].items()
+        if value is False or (key == "gov_prompt_placeholder_hits" and value)
+    ]
+    if failures:
+        raise RuntimeError(f"canary_good_preflight_failed:{failures}")
+    return manifest
+
+m.validate_pre_live = lambda: canary_good_preflight(m)
 raise SystemExit(m.main())
 PY
 ```

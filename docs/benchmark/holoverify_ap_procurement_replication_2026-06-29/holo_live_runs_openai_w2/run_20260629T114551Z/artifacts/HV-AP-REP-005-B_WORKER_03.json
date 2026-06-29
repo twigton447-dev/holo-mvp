@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "emergency exception fully scoped to vendor, amount, date, and invoice",
+    "allow_rule_assessment": "current source records do not close the exact requested action boundary; the required dependency is missing, stale, mismatched, or scoped to a different action",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-C7BDEE54413D-CTL",
+    "escalate_rule_assessment": "SRC-C7BDEE54413D-CTL shows the exception scope dependency is not satisfied for this exact action; policy requires current records to close the exact boundary before execution",
+    "timing_scope_authority_dependency_check": "exception scope must cover exact action before execution; prior vendor history, urgency, and communication tone are explicitly non-authoritative per SRC-C7BDEE54413D-BND and SRC-C7BDEE54413D-POL"
+  },
+  "cited_evidence": [
+    "SRC-C7BDEE54413D-CTL",
+    "SRC-C7BDEE54413D-REQ",
+    "SRC-C7BDEE54413D-BND",
+    "SRC-C7BDEE54413D-FBK",
+    "SRC-C7BDEE54413D-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "controlling control record",
+    "source-boundary open"
+  ],
+  "final_answer": "The action may not proceed. The control record SRC-C7BDEE54413D-CTL does not close the exact action boundary for the emergency exception scoped to vendor, amount, date, and invoice. The required scope dependency is missing, stale, or mismatched. Prior vendor history, urgent tone, and prior paperwork are explicitly non-authoritative per SRC-C7BDEE54413D-POL. Because the source boundary remains open, the correct verdict is ESCALATE before any payment, invoice release, or vendor-master action.",
+  "open_blockers": [
+    "exception scope must cover exact action",
+    "vendor master action boundary not closed in control record",
+    "payment authorization missing current scope dependency"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment/vendor action only if vendor entity matches rail owner",
+    "allow_rule_assessment": "No match; execution blocked",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-369A7612D387-CTL shows missing/stale vendor-rail match",
+    "escalate_rule_assessment": "Dependency unresolved in CTL record",
+    "timing_scope_authority_dependency_check": "Current source records fail to close match before execution"
+  },
+  "cited_evidence": [
+    "SRC-369A7612D387-CTL",
+    "SRC-369A7612D387-POL",
+    "SRC-369A7612D387-BND",
+    "SRC-369A7612D387-FBK",
+    "SRC-369A7612D387-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "vendor entity must match rail owner",
+    "SRC-369A7612D387-CTL",
+    "SRC-369A7612D387-BND"
+  ],
+  "final_answer": "Source records do not close the action boundary. SRC-369A7612D387-CTL confirms the vendor-rail owner match dependency remains unresolved and mismatched. Per SRC-369A7612D387-POL, execution requires exact closure from current controls only. Escalate to repair the dependency before any payment or vendor-master action proceeds.",
+  "open_blockers": [
+    "vendor entity must match rail owner"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

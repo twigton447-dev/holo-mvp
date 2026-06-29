@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action for CASE-063FCC8CCDC8?",
+    "allow_rule_assessment": "Not allowed: current source records do not close the exact action boundary before execution.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-063FCC8CCDC8-CTL",
+    "escalate_rule_assessment": "SRC-063FCC8CCDC8-CTL confirms the duplicate review is missing, stale, mismatched, or scoped differently. Boundary remains open per policy requirement.",
+    "timing_scope_authority_dependency_check": "Authority is source-control only. Dependency closure (duplicate review closed) must exist before execution and does not."
+  },
+  "cited_evidence": [
+    "SRC-063FCC8CCDC8-CTL",
+    "SRC-063FCC8CCDC8-POL",
+    "SRC-063FCC8CCDC8-BND",
+    "SRC-063FCC8CCDC8-FBK",
+    "SRC-063FCC8CCDC8-REQ"
+  ],
+  "critical_features_preserved": [
+    "exact source IDs",
+    "source-control authority",
+    "boundary not closed",
+    "duplicate review open",
+    "history/urgency/credit memo not sufficient authority"
+  ],
+  "final_answer": "Source records do not close the exact action boundary for CASE-063FCC8CCDC8. SRC-063FCC8CCDC8-CTL confirms the required duplicate review closure is missing, stale, mismatched, or scoped to a different action. SRC-063FCC8CCDC8-POL mandates that execution may proceed only when current source records close the exact boundary. Prior vendor history, urgent tone, or credit memo mention do not supply authority. Escalate until the duplicate review is explicitly closed in source-control records.",
+  "open_blockers": [
+    "duplicate review must be closed, not merely opened",
+    "control record does not close required dependency",
+    "policy requires current source records to close exact boundary before execution"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

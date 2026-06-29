@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment with duplicate unresolved despite credit memo",
+    "allow_rule_assessment": "Boundary not closed; execution blocked",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-063FCC8CCDC8-CTL",
+    "escalate_rule_assessment": "Duplicate review dependency remains open",
+    "timing_scope_authority_dependency_check": "Control record fails to close duplicate review before execution"
+  },
+  "cited_evidence": [
+    "SRC-063FCC8CCDC8-CTL",
+    "SRC-063FCC8CCDC8-BND",
+    "SRC-063FCC8CCDC8-FBK",
+    "SRC-063FCC8CCDC8-POL",
+    "SRC-063FCC8CCDC8-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "duplicate review must be closed, not merely opened",
+    "SRC-063FCC8CCDC8-CTL",
+    "SRC-063FCC8CCDC8-BND"
+  ],
+  "final_answer": "Source records show the duplicate review dependency is open and unresolved. Control record SRC-063FCC8CCDC8-CTL explicitly fails to close it for this action. Policy requires exact boundary closure before execution. Therefore the action may not proceed. Escalate to close the dependency first.",
+  "open_blockers": [
+    "duplicate review must be closed, not merely opened"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

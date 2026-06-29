@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute vendor-master action? Focus: vendor-bank change lacks out-of-band callback. Source records must close exact boundary before execution.",
+    "allow_rule_assessment": "Control record confirms callback requirement is valid, but does not confirm callback has occurred. The action boundary explicitly states the callback is absent.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-8764B4D3BAEE-CTL confirms callback requirement validity; SRC-8764B4D3BAEE-BND confirms execution boundary requires callback; SRC-8764B4D3BAEE-REQ states LACKS callback",
+    "escalate_rule_assessment": "The action boundary states vendor-bank change LACKS out-of-band callback. State unresolved_tensions also flags 'callback must confirm new rail' as unconfirmed. Exact current source evidence does not close the execution boundary\u2014callback dependency remains open.",
+    "timing_scope_authority_dependency_check": "Dependency: callback must confirm new rail. Source records confirm the requirement exists but do not confirm execution of the callback. Dependency ledger shows no completed callback action."
+  },
+  "cited_evidence": [
+    "SRC-8764B4D3BAEE-CTL",
+    "SRC-8764B4D3BAEE-BND",
+    "SRC-8764B4D3BAEE-REQ",
+    "SRC-8764B4D3BAEE-POL"
+  ],
+  "critical_features_preserved": [
+    "exact current source records only",
+    "no invented source IDs",
+    "callback requirement confirmed valid but not executed",
+    "boundary states callback LACKS",
+    "dependency remains open"
+  ],
+  "final_answer": "Escalate. The action boundary explicitly states vendor-bank change LACKS out-of-band callback. The control record confirms the callback requirement is valid, but does not confirm the callback has occurred. State unresolved_tensions also flags callback as unconfirmed. Execution boundary requires callback to close before action proceeds. Policy allows execution only when source records close the exact boundary\u2014here, the exact boundary is open. Gov baton routed ALLOW but state conflict requires flag.",
+  "open_blockers": [
+    "Gov baton routed ALLOW despite unresolved_tensions flagging callback as unconfirmed",
+    "Control record confirms requirement validity, not callback completion",
+    "Action boundary explicitly states vendor-bank change LACKS out-of-band callback"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

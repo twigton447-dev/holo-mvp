@@ -547,7 +547,7 @@ def build_openai_w2_live_holo_preflight() -> dict[str, Any]:
             ],
         },
         "runner_binding": {
-            "runner_script": str(Path(__file__).relative_to(BENCHMARK_ROOT)),
+            "runner_script": str(Path(__file__).resolve().relative_to(BENCHMARK_ROOT)),
             "actual_worker_sequence_from_runtime": worker_sequence,
             "actual_gov_key_from_runtime": RUNNER.GOV_MODEL_KEY,
             "actual_w2_provider": w2["provider"],
@@ -733,6 +733,17 @@ def holo_summary(run_dir: Path, manifest: dict[str, Any], packet_results: list[d
         )
     provider_failures = [row for row in rows if row.get("provider_call_ok") is not True]
     terminal_failures = RUNNER._terminal_call_failures(rows)
+    root_failure = terminal_failures[0] if terminal_failures else None
+    if root_failure and root_failure.get("call_kind") == "gov" and root_failure.get("parse_ok") is not True:
+        invalidation_reason = "GOV_CONTRACT_OR_TRUNCATION_FAILURE"
+    elif root_failure and root_failure.get("provider_call_ok") is not True:
+        invalidation_reason = "PROVIDER_FAILURE"
+    elif len(rows) != 200:
+        invalidation_reason = "INCOMPLETE_TRACE"
+    elif packet_correct != 40 or valid_pairs != 20:
+        invalidation_reason = "VERDICT_OR_PAIR_ADMISSIBILITY_FAILURE"
+    else:
+        invalidation_reason = None
     assertions = {
         "packet_hashes_match_freeze": "PASS",
         "holo_packets": len(packet_results),
@@ -770,6 +781,21 @@ def holo_summary(run_dir: Path, manifest: dict[str, Any], packet_results: list[d
         "judge_calls": 0,
         "provider_failures": provider_failures,
         "terminal_failures": terminal_failures,
+        "root_failure": {
+            "turn_id": root_failure.get("turn_id"),
+            "packet_id": root_failure.get("packet_id"),
+            "call_kind": root_failure.get("call_kind"),
+            "provider": root_failure.get("provider"),
+            "model": root_failure.get("model"),
+            "finish_reason": root_failure.get("finish_reason"),
+            "error": root_failure.get("error"),
+            "provider_call_ok": root_failure.get("provider_call_ok"),
+            "parse_ok": root_failure.get("parse_ok"),
+            "admissible": root_failure.get("admissible"),
+        }
+        if root_failure
+        else None,
+        "invalidation_reason": invalidation_reason,
         "totals": totals,
         "packet_correct": packet_correct,
         "packet_count": len(packet_results),
@@ -802,12 +828,32 @@ def write_holo_summary_md(run_dir: Path, summary: dict[str, Any]) -> None:
         f"- Gov calls: `{summary['gov_calls']}`",
         f"- Judge calls: `{summary['judge_calls']}`",
         f"- Tokens: `{summary['totals']['input_tokens']}` input / `{summary['totals']['output_tokens']}` output / `{summary['totals']['total_tokens']}` total",
-        "",
-        "## Assertions",
-        "",
-        "| Assertion | Value |",
-        "| --- | --- |",
     ]
+    if summary.get("root_failure"):
+        root = summary["root_failure"]
+        lines.extend(
+            [
+                "",
+                "## Root Failure",
+                "",
+                f"- Invalidation reason: `{summary.get('invalidation_reason')}`",
+                f"- Turn: `{root.get('turn_id')}`",
+                f"- Packet: `{root.get('packet_id')}`",
+                f"- Kind: `{root.get('call_kind')}`",
+                f"- Provider/model: `{root.get('provider')}/{root.get('model')}`",
+                f"- Finish reason: `{root.get('finish_reason')}`",
+                f"- Error: `{root.get('error')}`",
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "## Assertions",
+            "",
+            "| Assertion | Value |",
+            "| --- | --- |",
+        ]
+    )
     for key, value in summary["readiness_assertions"].items():
         lines.append(f"| `{key}` | `{value}` |")
     lines.extend(["", "## Pair Inventory", "", "| Pair | Bucket | Target final | Guardrail final | Valid |", "| --- | --- | --- | --- | --- |"])

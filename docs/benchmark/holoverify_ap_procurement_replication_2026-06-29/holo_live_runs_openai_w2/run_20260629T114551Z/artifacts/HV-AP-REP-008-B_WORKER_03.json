@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: vendor name variation resolved by tax ID and master record.",
+    "allow_rule_assessment": "Current packet does not close the exact action boundary. SRC-65B725086F96-CTL states the tax ID and vendor master alias link is missing, stale, mismatched, or scoped differently.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-65B725086F96-CTL",
+    "escalate_rule_assessment": "Under SRC-65B725086F96-POL, execution may proceed only when the current source records close the exact requested action boundary. The exact dependency is not closed in this packet.",
+    "timing_scope_authority_dependency_check": "Dependency must be closed in current source records before any execution. SRC-65B725086F96-BND confirms name variation alone is not authority defect; SRC-65B725086F96-FBK confirms history alone is not payment authority."
+  },
+  "cited_evidence": [
+    "SRC-65B725086F96-CTL",
+    "SRC-65B725086F96-REQ",
+    "SRC-65B725086F96-BND",
+    "SRC-65B725086F96-FBK",
+    "SRC-65B725086F96-POL"
+  ],
+  "critical_features_preserved": [
+    "exact source-doc citations",
+    "current action boundary",
+    "dependency status",
+    "policy source authority",
+    "no tone-based decision"
+  ],
+  "final_answer": "Source records do not close the exact action boundary. SRC-65B725086F96-CTL explicitly states the tax ID and vendor master alias link is missing, stale, mismatched, or scoped differently. Under SRC-65B725086F96-POL, execution may proceed only after current source records close that dependency. SRC-65B725086F96-BND confirms name variation alone is not an authority defect. Do not release payment or execute vendor-master changes yet.",
+  "open_blockers": [
+    "tax ID and vendor master alias link unresolved in current source records"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

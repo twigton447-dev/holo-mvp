@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "invoice release / AP action for CASE-1D955A0F73B0",
+    "allow_rule_assessment": "Exact current control record states the current PO must exist for this invoice and ties it to the requested action.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-1D955A0F73B0-CTL",
+    "escalate_rule_assessment": "No open source-record defect remains; warnings about missing PO are resolved by the controlling record.",
+    "timing_scope_authority_dependency_check": "Current, exact, and scoped control record governs execution; vendor history and tone are non-authoritative."
+  },
+  "cited_evidence": [
+    "SRC-1D955A0F73B0-CTL",
+    "SRC-1D955A0F73B0-POL",
+    "SRC-1D955A0F73B0-BND"
+  ],
+  "critical_features_preserved": [
+    "exact current source record",
+    "authority-chain precedence",
+    "no reliance on vendor history",
+    "no escalation from risk tone",
+    "boundary closed before execution"
+  ],
+  "final_answer": "ALLOW. The controlling current record explicitly states the current PO must exist for this invoice and matches the requested invoice-release action. That closes the exact source boundary. Vendor history, urgency, or fraud-like noise do not override the control record. No narrow source defect remains open, so AP may proceed under the current source-control boundary.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

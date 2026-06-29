@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action on the approved rail?",
+    "allow_rule_assessment": "No exact closure in current source records; execution authority is not established.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-BF347128E475-CTL",
+    "escalate_rule_assessment": "SRC-BF347128E475-CTL leaves the required dependency open and mismatched to the requested action.",
+    "timing_scope_authority_dependency_check": "bank rail effective date precedes invoice release remains unresolved, so scope/time authority is not closed."
+  },
+  "cited_evidence": [
+    "SRC-BF347128E475-CTL",
+    "SRC-BF347128E475-REQ",
+    "SRC-BF347128E475-BND",
+    "SRC-BF347128E475-FBK",
+    "SRC-BF347128E475-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "timing dependency",
+    "control record defect"
+  ],
+  "final_answer": "Source records do not close the exact action boundary. The control record, not vendor history or urgency, governs execution. SRC-BF347128E475-CTL says the required dependency remains missing, stale, mismatched, or scoped to a different action, and the timing issue is still open. Do not proceed with payment, invoice release, or vendor-master action. ESCALATE for exact source closure first.",
+  "open_blockers": [
+    "bank rail effective date precedes invoice release",
+    "source boundary not closed for execution",
+    "Gov/source conflict not present"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

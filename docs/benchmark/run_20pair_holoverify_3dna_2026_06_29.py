@@ -89,7 +89,7 @@ WORKER_SEQUENCE = [
 ]
 GOV_MODEL_KEY = "minimax"
 WORKER_MAX_TOKENS = 3600
-GOV_MAX_TOKENS = 1200
+GOV_MAX_TOKENS = 384
 DYNAMIC_EARLY_EXIT_ENABLED = False
 
 FORBIDDEN_PROMPT_TERMS = (
@@ -292,6 +292,8 @@ def _json_from_text(text: str, *, allow_markdown_fence: bool = False) -> dict[st
 
 def _gov_micro_from_text(text: str) -> dict[str, Any]:
     stripped = _strip_thinking_blocks(text or "")
+    if not stripped.strip():
+        raise ValueError("gov_empty_text")
     keys = "verdict|route|final|preserve|repair|block|dep|objective|focus"
     pairs = re.findall(
         rf"\b({keys})=(.*?)(?=(?:[\s,]+)(?:{keys})=|$)",
@@ -305,16 +307,36 @@ def _gov_micro_from_text(text: str) -> dict[str, Any]:
         if clean_key == "final":
             clean_value = str(clean_value).lower() == "true"
         parsed[clean_key] = clean_value
-    if parsed.get("verdict") in {"ALLOW", "ESCALATE"} and parsed.get("route"):
+    required = {"verdict", "route", "final", "preserve", "repair", "block", "dep", "objective", "focus"}
+    missing = sorted(required - set(parsed))
+    if missing:
+        raise ValueError(f"gov_micro_missing_keys:{','.join(missing)}")
+    if parsed.get("verdict") in {"ALLOW", "ESCALATE"} and parsed.get("route") in {
+        "CONTINUE_WORKER",
+        "FINAL_COMPILER",
+        "FAIL_CLOSED",
+    }:
         return parsed
     raise ValueError("gov_micro_key_value_parse_failed")
 
 
 def _gov_from_text(text: str) -> dict[str, Any]:
+    return _gov_micro_from_text(text)
+
+
+def _gov_from_response(response: dict[str, Any]) -> dict[str, Any]:
+    text = response.get("text") or ""
+    finish_reason = response.get("finish_reason")
+    if not text.strip():
+        if finish_reason == "length":
+            raise ValueError("gov_finish_reason_length_empty_text")
+        raise ValueError("gov_empty_text")
     try:
-        return _json_from_text(text, allow_markdown_fence=True)
-    except json.JSONDecodeError:
-        return _gov_micro_from_text(text)
+        return _gov_from_text(text)
+    except Exception as exc:
+        if finish_reason == "length":
+            raise ValueError(f"gov_finish_reason_length_incomplete_baton:{exc}") from exc
+        raise
 
 
 def _provider_url(config: dict[str, Any]) -> str:
@@ -894,12 +916,12 @@ def _build_gov_messages(
     }
     system = "\n".join(
         [
-            "HoloGov-V micro-router. Return only JSON after any thinking.",
-            "Use keys: verdict,route,final,preserve,repair,block,dep,objective,focus.",
-            "One line only. No Markdown fence. No indentation.",
-            "If gpass true: route FINAL_COMPILER, final true, repair empty.",
-            "If gpass false: route CONTINUE_WORKER, final false, repair=repair_hint, block=blocked_hint.",
-            "verdict=wv. preserve=wb. dep empty. objective final or repair. focus=focus_hint.",
+            "HoloGov-V micro-router. Return one compact key=value baton only.",
+            "No prose. No reasoning. No JSON. No Markdown. One line.",
+            "Required keys in order: verdict,route,final,preserve,repair,block,dep,objective,focus.",
+            "If gpass true: route=FINAL_COMPILER final=true repair= block= dep= objective=final.",
+            "If gpass false: route=CONTINUE_WORKER final=false repair=repair_hint block=blocked_hint dep= objective=repair.",
+            "Always set verdict=wv preserve=wb focus=focus_hint.",
         ]
     )
     _assert_prompt_clean(user_obj)
@@ -1574,7 +1596,7 @@ def _run_packet(run_id: str, pair: dict[str, Any], suffix: str, manifest: dict[s
         gov_response: dict[str, Any] = {}
         try:
             gov_response = _call_model(gov_config, gov_messages, max_tokens=GOV_MAX_TOKENS)
-            gov_raw_parsed = _gov_from_text(gov_response["text"])
+            gov_raw_parsed = _gov_from_response(gov_response)
             gov_parsed, gov_normalization = _normalize_gov(gov_raw_parsed)
             gov_parsed = _enforce_gov_gate_compliance(gov_parsed, gov_normalization, parsed, gate)
             gov_failures = _validate_gov(gov_parsed, gate)
@@ -1663,9 +1685,52 @@ def _packet_result(packet_id: str, suffix: str, pair: dict[str, Any], calls: lis
     return result
 
 
+def _declared_roster_from_manifest(manifest: dict[str, Any]) -> dict[str, Any]:
+    architecture_lock = manifest.get("architecture_lock")
+    if isinstance(architecture_lock, dict) and isinstance(architecture_lock.get("model_roster_declared"), dict):
+        declared = architecture_lock["model_roster_declared"]
+    elif isinstance(manifest.get("model_roster_declared"), dict):
+        declared = manifest["model_roster_declared"]
+    else:
+        return {"worker_sequence": [], "gov_sequence": [], "declared_roster_available": False}
+
+    workers = declared.get("worker_sequence")
+    if not isinstance(workers, list):
+        workers = []
+
+    gov_sequence = declared.get("gov_sequence")
+    if isinstance(gov_sequence, list):
+        govs = gov_sequence
+    elif isinstance(declared.get("gov"), dict):
+        govs = [{**declared["gov"], "slot": "G1"}, {**declared["gov"], "slot": "G2"}]
+    else:
+        govs = []
+
+    return {
+        "worker_sequence": workers,
+        "gov_sequence": govs,
+        "declared_roster_available": bool(workers or govs),
+        "raw_declared_model_roster": declared,
+    }
+
+
+def _expected_counts_from_manifest(manifest: dict[str, Any]) -> dict[str, int]:
+    architecture_lock = manifest.get("architecture_lock")
+    expected = architecture_lock.get("expected_counts") if isinstance(architecture_lock, dict) else None
+    if not isinstance(expected, dict):
+        expected = manifest.get("expected_counts") if isinstance(manifest.get("expected_counts"), dict) else {}
+    total_provider_calls = expected.get("total_provider_calls", expected.get("holo_calls", 0))
+    return {
+        "packets": int(expected.get("packets", 0) or 0),
+        "total_provider_calls": int(total_provider_calls or 0),
+        "judge_calls": int(expected.get("judge_calls", 0) or 0),
+    }
+
+
 def _model_roster_audit(manifest: dict[str, Any], rows: list[dict[str, Any]]) -> dict[str, Any]:
-    declared_workers = manifest["architecture_lock"]["model_roster_declared"]["worker_sequence"]
-    declared_gov = manifest["architecture_lock"]["model_roster_declared"]["gov"]
+    declared_roster = _declared_roster_from_manifest(manifest)
+    declared_workers = declared_roster["worker_sequence"]
+    declared_gov_sequence = declared_roster["gov_sequence"]
     actual_worker_turns = [
         {
             "turn_id": row.get("turn_id"),
@@ -1691,23 +1756,36 @@ def _model_roster_audit(manifest: dict[str, Any], rows: list[dict[str, Any]]) ->
     actual_dna = sorted({row.get("dna") for row in rows if row.get("dna")})
     mismatches = []
     for row in actual_worker_turns:
-        expected = next(item for item in declared_workers if item["worker_index"] == row["worker_index"])
+        expected = next((item for item in declared_workers if item.get("worker_index") == row["worker_index"]), None)
+        if expected is None:
+            mismatches.append(f"{row['turn_id']} worker_index {row.get('worker_index')} missing from declared roster")
+            continue
         for key in ("provider", "model", "dna"):
             if row.get(key) != expected.get(key):
                 mismatches.append(f"{row['turn_id']} {key} expected {expected.get(key)} got {row.get(key)}")
     for row in actual_gov_turns:
+        expected = next((item for item in declared_gov_sequence if item.get("slot") == f"G{row.get('gov_index')}"), None)
+        if expected is None and len(declared_gov_sequence) == 1:
+            expected = declared_gov_sequence[0]
+        if expected is None:
+            mismatches.append(f"{row['turn_id']} gov_index {row.get('gov_index')} missing from declared roster")
+            continue
         for key in ("provider", "model", "dna"):
-            if row.get(key) != declared_gov.get(key):
-                mismatches.append(f"{row['turn_id']} {key} expected {declared_gov.get(key)} got {row.get(key)}")
+            if row.get(key) != expected.get(key):
+                mismatches.append(f"{row['turn_id']} {key} expected {expected.get(key)} got {row.get(key)}")
     return {
-        "declared_model_roster": manifest["architecture_lock"]["model_roster_declared"],
+        "declared_model_roster": declared_roster.get("raw_declared_model_roster") or {
+            "worker_sequence": declared_workers,
+            "gov_sequence": declared_gov_sequence,
+        },
+        "declared_roster_available": declared_roster["declared_roster_available"],
         "actual_worker_turns": actual_worker_turns,
         "actual_gov_turns": actual_gov_turns,
         "actual_distinct_dna": actual_dna,
         "actual_distinct_dna_count": len(actual_dna),
         "all_3_dna_participated": len(actual_dna) >= 3,
         "mismatches": mismatches,
-        "declared_roster_matches_actual_calls": not mismatches,
+        "declared_roster_matches_actual_calls": declared_roster["declared_roster_available"] and not mismatches,
     }
 
 
@@ -1745,7 +1823,7 @@ def _summarize(run_dir: Path, manifest: dict[str, Any], packet_results: list[dic
     law_validation = validate_holo_benchmark_laws(
         rows,
         full_context_governor_audit=bool(
-            manifest.get("architecture_lock", {}).get("full_context_governor_audit")
+            (manifest.get("architecture_lock") if isinstance(manifest.get("architecture_lock"), dict) else {}).get("full_context_governor_audit")
         ),
         worker_prompt_objects=_load_worker_prompt_objects(run_dir, rows),
     )
@@ -1829,7 +1907,7 @@ def _summarize(run_dir: Path, manifest: dict[str, Any], packet_results: list[dic
         "worker_rotation_law": "PASS" if not any(failure.startswith("workers:") for failure in law_validation.failures) else "FAIL",
         "fixed_gov_model_law": "PASS" if "gov: governor_model_id_must_remain_static" not in law_validation.failures else "FAIL",
     }
-    expected = manifest["architecture_lock"]["expected_counts"]
+    expected = _expected_counts_from_manifest(manifest)
     packet_count_complete = len(packet_results) == expected["packets"]
     call_count_complete = packet_count_complete and len(rows) <= expected["total_provider_calls"]
     provider_failures = [
@@ -1999,11 +2077,11 @@ def _summarize_partial_trace(run_dir: Path, manifest: dict[str, Any], trace_path
     law_validation = validate_holo_benchmark_laws(
         rows,
         full_context_governor_audit=bool(
-            manifest.get("architecture_lock", {}).get("full_context_governor_audit")
+            (manifest.get("architecture_lock") if isinstance(manifest.get("architecture_lock"), dict) else {}).get("full_context_governor_audit")
         ),
         worker_prompt_objects=_load_worker_prompt_objects(run_dir, rows),
     )
-    expected = manifest["architecture_lock"]["expected_counts"]
+    expected = _expected_counts_from_manifest(manifest)
     terminal_failures = _terminal_call_failures(rows)
     if terminal_failures:
         first = terminal_failures[0]

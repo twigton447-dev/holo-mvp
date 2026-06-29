@@ -1,0 +1,86 @@
+{
+  "date": "2026-06-29",
+  "run_folder": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_live_runs_openai_w2/run_20260629T114551Z",
+  "classification": "INVALID_RUN_GOV_PARSE_FAILURE_BEFORE_FULL_HOLO_FREEZE",
+  "valid_frozen_holo_result": false,
+  "ready_for_solo_baseline": false,
+  "expected_calls": 200,
+  "trace_rows": 167,
+  "worker_calls_logged": 100,
+  "gov_calls_logged": 67,
+  "packets_seen": 34,
+  "pairs_seen": 17,
+  "provider_call_ok_false": 0,
+  "parse_ok_false": 1,
+  "last_turn": "HV-AP-REP-017-B_G1",
+  "root_failure": {
+    "turn_id": "HV-AP-REP-017-B_G1",
+    "packet_id": "HV-AP-REP-017-B",
+    "pair_id": "HV-AP-REP-017",
+    "call_kind": "gov",
+    "gov_index": 1,
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "provider_call_ok": true,
+    "parse_ok": false,
+    "finish_reason": "length",
+    "error": "ValueError: gov_micro_key_value_parse_failed",
+    "text_empty": true,
+    "failure_class": "GOV_PARSE_FAILURE_MINIMAX_LENGTH_EMPTY_TEXT"
+  },
+  "token_totals_through_failure": {
+    "input_tokens": 241716,
+    "output_tokens": 73470,
+    "total_tokens": 335577
+  },
+  "token_totals_by_call_kind": {
+    "worker": {
+      "calls": 100,
+      "input_tokens": 230208,
+      "output_tokens": 50234,
+      "total_tokens": 300833
+    },
+    "gov": {
+      "calls": 67,
+      "input_tokens": 11508,
+      "output_tokens": 23236,
+      "total_tokens": 34744
+    }
+  },
+  "token_totals_by_model": {
+    "xai/grok-3-mini": {
+      "calls": 34,
+      "input_tokens": 52187,
+      "output_tokens": 9121,
+      "total_tokens": 81699
+    },
+    "openai/gpt-5.4-mini": {
+      "calls": 33,
+      "input_tokens": 80273,
+      "output_tokens": 11081,
+      "total_tokens": 91354
+    },
+    "minimax/MiniMax-M2.5-highspeed": {
+      "calls": 100,
+      "input_tokens": 109256,
+      "output_tokens": 53268,
+      "total_tokens": 162524
+    }
+  },
+  "secondary_reporting_defect": {
+    "occurred": true,
+    "error": "KeyError: 'architecture_lock'",
+    "context": "local wrapper called holo_summary after the Gov parse failure; OpenAI-W2 variant manifest shape did not match summary expectation",
+    "is_root_benchmark_failure": false
+  },
+  "actions_not_taken": {
+    "automatic_rerun": false,
+    "silent_repair": false,
+    "fallback_or_substitution": false,
+    "solo_baseline": false,
+    "judges": false,
+    "commerce": false,
+    "it": false
+  },
+  "recommended_next_step": "Stop and decide whether to patch reporting/Gov truncation handling with no providers before approving any fresh AP Holo attempt."
+}

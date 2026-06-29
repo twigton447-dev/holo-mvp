@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "payment rail unchanged though remittance email text changed",
+    "allow_rule_assessment": "Current source records do not close the exact action boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-66C5F7F73D1D-CTL",
+    "escalate_rule_assessment": "SRC-66C5F7F73D1D-CTL says the required dependency is missing, stale, mismatched, or scoped to a different action.",
+    "timing_scope_authority_dependency_check": "Payment rail fingerprint must match vendor master before any execution."
+  },
+  "cited_evidence": [
+    "SRC-66C5F7F73D1D-CTL",
+    "SRC-66C5F7F73D1D-BND",
+    "SRC-66C5F7F73D1D-POL",
+    "SRC-66C5F7F73D1D-REQ",
+    "SRC-66C5F7F73D1D-FBK"
+  ],
+  "critical_features_preserved": [
+    "exact doc_ids",
+    "source-boundary focus",
+    "dependency remains open",
+    "communication text not authority",
+    "no anomaly-tone decision"
+  ],
+  "final_answer": "Source records do not close the exact execution boundary. SRC-66C5F7F73D1D-CTL states the required payment rail fingerprint match to vendor master is missing, stale, mismatched, or scoped elsewhere. The remittance email change cannot override source control. Do not proceed with payment, invoice release, or vendor-master action until the dependency is resolved.",
+  "open_blockers": [
+    "payment rail fingerprint must match vendor master",
+    "source-control record is not closed for the exact action boundary"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

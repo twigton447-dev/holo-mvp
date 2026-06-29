@@ -19,13 +19,13 @@ Codex should not execute this live provider run from the managed environment bec
 Canary runner commit:
 
 ```text
-f202785c958a6c695d607df7f2f02e3ebd44b522
+ba13bd01aaf4747ccb0d8bd34d9df7f020cae7df
 ```
 
-Underlying AP OpenAI-W2 runtime:
+Underlying AP OpenAI-W2 runtime and empty-worker retry policy:
 
 ```text
-ff7c269942026780a61f741514ea47ccf594b75f
+ba13bd01aaf4747ccb0d8bd34d9df7f020cae7df
 ```
 
 Packet freeze root:
@@ -77,6 +77,14 @@ The solo triage lock passed and identified these exact six as `ALL_SIX_SOLO_COLL
 
 Gov does not choose models. Gov routes control actions only.
 
+## Required Runtime Policies
+
+- Transport retry policy: `HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29`
+- Empty-worker retry policy: `HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29`
+- Empty-worker retry max retries: `2`
+
+The empty-worker policy applies only when a worker call returns exactly empty text with `output_tokens=0` and a non-`length` finish reason. It does not retry malformed content, wrong verdicts, Gov baton failures, deterministic-gate failures, invented source IDs, or any non-empty parse failure.
+
 ## Required Environment Variables
 
 - `XAI_API_KEY`
@@ -96,7 +104,7 @@ This is local-only and should not call providers.
 
 ```bash
 cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
-git merge-base --is-ancestor f202785c958a6c695d607df7f2f02e3ebd44b522 "$(git rev-parse HEAD)"
+git merge-base --is-ancestor ba13bd01aaf4747ccb0d8bd34d9df7f020cae7df "$(git rev-parse HEAD)"
 python3 -B docs/benchmark/run_ap_openai_w2_holo_all_six_collapse_canary_2026_06_29.py --preflight
 ```
 
@@ -118,6 +126,8 @@ Preflight must report:
 - worker contract is `compact_key_value_v1`
 - Gov contract is `gov_micro_baton_v2`
 - Gov max tokens is `1024`
+- empty-worker retry policy is `HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29`
+- empty-worker max retries is `2`
 - provider calls during preflight: `0`
 
 ## Exact Live Canary Command
@@ -126,7 +136,7 @@ Run this only in an authorized local shell/environment.
 
 ```bash
 cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
-git merge-base --is-ancestor f202785c958a6c695d607df7f2f02e3ebd44b522 "$(git rev-parse HEAD)"
+git merge-base --is-ancestor ba13bd01aaf4747ccb0d8bd34d9df7f020cae7df "$(git rev-parse HEAD)"
 set -a; source .env; set +a
 python3 -B docs/benchmark/run_ap_openai_w2_holo_all_six_collapse_canary_2026_06_29.py --run-live
 ```
@@ -147,6 +157,8 @@ run = Path(sys.argv[1])
 summary = json.loads((run / "canary_results.json").read_text())
 lock = json.loads((run / "LOCK_VALIDATION.json").read_text())
 rows = [json.loads(line) for line in (run / "TRACE_CALLS.jsonl").read_text().splitlines() if line.strip()]
+empty_worker_recovered = sum(1 for row in rows if row.get("empty_worker_output_recovered") is True)
+empty_worker_attempts = sum((row.get("empty_worker_output_attempt_count") or 0) for row in rows)
 report = {
     "run_dir": str(run),
     "classification": summary.get("classification"),
@@ -163,6 +175,8 @@ report = {
     "lock_validation": lock.get("validation_status"),
     "no_leakage_status": (summary.get("no_leakage_audit") or {}).get("status"),
     "trace_rows": len(rows),
+    "empty_worker_output_recovered_count": empty_worker_recovered,
+    "empty_worker_output_attempt_total": empty_worker_attempts,
     "target_pair_ids": summary.get("target_pair_ids"),
     "packet_correct": summary.get("packet_correct"),
     "valid_pairs": summary.get("valid_pairs"),
@@ -204,6 +218,7 @@ Pass only if:
 - `24` Gov calls complete.
 - no unrecovered provider failures.
 - no terminal parse/content failures.
+- recovered exact-empty worker attempts are allowed only if logged under `HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29`.
 - Gov v2 parses every Gov turn.
 - worker compact parses every worker turn.
 - no leakage.

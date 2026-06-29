@@ -1,0 +1,106 @@
+{
+  "classification": "PRE_REGISTERED_ROSTER_VARIANT_NO_LIVE_RUN",
+  "variant_name": "AP_OPENAI_W2_ROSTER_VARIANT_2026_06_29",
+  "created_for": "AP procurement vendor-master replication family",
+  "original_lane": {
+    "classification": "AP_ORIGINAL_ROSTER_BLOCKED_BY_GEMINI_503",
+    "blocked_not_failed": true,
+    "required_w2": "google/gemini-2.5-flash-lite",
+    "failure_mode": "HTTP 503 Service Unavailable",
+    "preserved_failed_attempts": 3,
+    "fallback_or_substitution_was_forbidden": true,
+    "holo_quality_signal": false,
+    "comparative_result": false
+  },
+  "reason_for_variant": "Provider availability: original required Gemini Worker 2 repeatedly returned HTTP 503 before the AP Holo lane could complete.",
+  "frozen_packet_bank": {
+    "source_commit": "de22377be8175d04078ba6c70f1fd35222e9f572",
+    "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "family_id": "HV-AP-REP-2026-06-29",
+    "packets": 40,
+    "pairs": 20,
+    "allow_truths": 20,
+    "escalate_truths": 20,
+    "packet_hashes_match_freeze": "PASS",
+    "prompt_hashes_match_freeze": "PASS",
+    "packet_edits": 0,
+    "prompt_edits": 0
+  },
+  "new_holo_roster": {
+    "worker_sequence": [
+      {
+        "slot": "W1",
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "role": "Worker 1"
+      },
+      {
+        "slot": "W2",
+        "provider": "openai",
+        "model": "gpt-5.4-mini",
+        "role": "Worker 2 replacement",
+        "availability_status": "DECLARED_NOT_PROVIDER_VERIFIED_IN_THIS_NO_LIVE_REGISTRATION"
+      },
+      {
+        "slot": "W3",
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "role": "Worker 3"
+      }
+    ],
+    "gov_sequence": [
+      {
+        "slot": "G1",
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed"
+      },
+      {
+        "slot": "G2",
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed"
+      }
+    ],
+    "preferred_w2_replacement": "openai/gpt-5.4-mini",
+    "fallback_w2_only_if_unavailable_after_explicit_check": "openai/gpt-4.1-mini",
+    "nickname_models_allowed": false,
+    "gov_may_choose_models": false
+  },
+  "protocol_delta_from_original": {
+    "same_ap_frozen_packets": true,
+    "same_protocol_except_w2_provider_model": true,
+    "original_w2": "google/gemini-2.5-flash-lite",
+    "variant_w2": "openai/gpt-5.4-mini",
+    "judges": 0,
+    "commerce_it": 0,
+    "answer_key_leakage_allowed": false,
+    "fallback_or_substitution_without_new_registration_allowed": false
+  },
+  "solo_baseline_rule": {
+    "requires_valid_variant_holo_freeze_first": true,
+    "must_use_same_three_models_as_variant": [
+      "xai/grok-3-mini",
+      "openai/gpt-5.4-mini",
+      "minimax/MiniMax-M2.5-highspeed"
+    ],
+    "if_fallback_variant_registered_later": "solo must use the same fallback W2 model used by that registered variant",
+    "gov": false,
+    "holo_state": false,
+    "baton": false,
+    "selector": false,
+    "judges": false
+  },
+  "registration_validation": {
+    "packet_hashes_still_match_freeze": "PASS",
+    "prompt_hashes_still_match_freeze": "PASS",
+    "model_roster_declared": "PASS",
+    "providers_called": 0,
+    "judges_called": 0,
+    "holo_runs_started": 0,
+    "solo_runs_started": 0
+  },
+  "next_allowed_step": {
+    "before_live_holo": "explicit provider availability check for declared W2 model using harmless non-benchmark prompt and no packet content",
+    "if_gpt_5_4_mini_unavailable": "do not silently substitute; stop or explicitly register fallback variant using openai/gpt-4.1-mini",
+    "if_available": "run one fresh full AP Holo attempt for this variant only"
+  }
+}

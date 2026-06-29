@@ -11,7 +11,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoloEngine · AI at the Action Boundary · Version 7.4</title>
+<title>HoloEngine · AI at the Action Boundary · Version 7.5</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap');
 
@@ -53,6 +53,14 @@
   a { color: var(--gold); text-decoration-thickness: 1px; text-underline-offset: 4px; }
   p { margin: 0 0 1rem; max-width: 720px; font-size: 1rem; color: var(--muted); }
   strong { color: var(--ink); font-weight: 700; }
+  .paper-section ol {
+    max-width: 720px;
+    margin: 0 0 1rem 1.35rem;
+    padding: 0;
+    color: var(--muted);
+  }
+  .paper-section li { margin: 0 0 0.7rem; padding-left: 0.2rem; }
+  .paper-section li::marker { color: var(--gold); font-weight: 700; }
   code {
     font-family: "IBM Plex Mono", monospace;
     font-size: 0.82em;
@@ -402,7 +410,7 @@
   <header class="hero">
     <div class="hero-grid">
       <div>
-        <div class="eyebrow">Version 7.4 · June 2026</div>
+        <div class="eyebrow">Version 7.5 · June 2026</div>
         <h1>HoloEngine</h1>
         <h2>AI at the Action Boundary</h2>
         <p class="hero-subtitle">Why smart models still need a checkpoint before real-world action</p>
@@ -517,6 +525,10 @@
         <p>HoloEngine is a trust layer for high-stakes AI work.</p>
 <p>It does not try to replace the model. It does not claim one model is always better than another. It does not pretend AI can be made perfect.</p>
 <p>It adds a checkpoint where the checkpoint matters most.</p>
+<h3>The Economics of the Checkpoint</h3>
+<p>A strong trust layer doesn't have to be slow and expensive.</p>
+<p>We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a perfect, rule-following draft on the first try, the Governor verifies the math and exits early. You don't pay for extra AI turns you don't need.</p>
+<p>In our live D11 tests, the system exited early on clean drafts, cutting token burn by 52%. But when a draft was messy or violated rules, the Governor refused to exit and forced the models to repair it. You only pay the "safety premium" when the system is actively saving you from a failure.</p>
 <p>HoloEngine has two main lanes.</p>
 <h3>HoloBuild</h3>
 <p>HoloBuild works early.</p>
@@ -594,6 +606,11 @@
 <p>That matters because production has limits. Real systems do not get infinite time, infinite budget, and infinite cleanup passes. The work has to close.</p>
 <p class="line-callout">A smart draft is not enough.</p>
 <p class="line-callout">A reliance-grade artifact has to survive the gate.</p>
+<h3>The Final-Mile Regression</h3>
+<p>Our traces revealed a deeper problem than simple hallucination. We call it Final-Mile Regression.</p>
+<p>A smart model will often find the perfect, source-grounded answer early in the process. But when you ask that same model to write the final polished document, it tries to sound helpful. In the process of smoothing out the prose, it accidentally deletes the critical limits or exceptions it established just seconds before. The model delivers a final artifact that is actually weaker than its rough draft.</p>
+<h3>The Oscillation Problem</h3>
+<p>We also found that natural language is a terrible way to enforce rules. If a document is 200 words too long, and an AI Governor says "make it shorter," the worker model will wildly overshoot and cut 500 words. When told to expand, it overwrites. The model oscillates endlessly because language is vague.</p>
 
       </section>
 
@@ -616,6 +633,14 @@
 <p>Different roles have different jobs. One establishes the baseline story. One looks for weak points. One tests claims against sources. One preserves unresolved contradictions. The attending physician does not average opinions. The attending signs off only if the chart closes.</p>
 <p>That is the role of HoloGov inside the architecture.</p>
 <p>HoloGov is the deterministic proof-gate component. It is not another analyst model and it does not make provider calls. It applies the relevant policy and proof standard for the surface it is governing.</p>
+<h3>The Deterministic Cage</h3>
+<p>To fix the oscillation and the final-mile regression, we stopped treating AI as a single thing. We split the architecture into two layers: a probabilistic Data Plane (the models that read and write) and a deterministic Control Plane (the hard-coded rules that govern them).</p>
+<p>We call this the Deterministic Cage.</p>
+<ol>
+  <li><strong>The Form Actuator:</strong> Instead of the Governor telling a worker to "make it shorter," local Python code calculates the exact mechanical defect (e.g., "Cut exactly 251 words from Section 2"). The model is handed a strict mathematical constraint, not a suggestion.</li>
+  <li><strong>Local Eligibility Gates:</strong> The AI Governor does not get to decide if a document is "ready." Local code checks the word quotas and required sections. If the math fails, the AI is physically blocked from marking the document as complete.</li>
+  <li><strong>The Final Selector (Monotonic Preservation):</strong> HoloEngine constantly pins the "best artifact" in memory. If a model tries to get clever in the final turn and accidentally regresses the quality of the document, the Final Selector automatically throws the final turn in the trash and outputs the pinned, verified intermediate draft instead.</li>
+</ol>
 <p>In HoloBuild, HoloGov-B asks whether a work product is ready to rely on, needs revision, or must preserve unresolved risk.</p>
 <p>In HoloVerify, HoloGov-V asks whether a proposed action can proceed or must escalate.</p>
 <p>In HoloChat, HoloGov-C governs continuity and context admission rather than action authorization.</p>
@@ -742,6 +767,9 @@
 <p>D14 shows HoloBuild refusing to claim victory when its internal chain did not clear.</p>
 <p>That is the honest story.</p>
 <p>And it is a strong one.</p>
+<h3>D12: The Form-Control Diagnosis</h3>
+<p>In early D12 runs, we found that models failed mechanically, not epistemically. The models understood the business logic, but repeatedly failed strict word-band limits. The AI Governor diagnosed the failure correctly, but the worker models could not execute the repair.</p>
+<p>This proved that an AI Governor without a deterministic actuator is insufficient for hard admissibility gates. We froze this failure, built the Form Actuator to pass exact mathematical constraints to the models, and locked it into the architecture. We don't hide our losses; we use them to build the infrastructure.</p>
 
       </section>
 
@@ -880,7 +908,7 @@
   </div>
 
   <footer>
-    <div><strong>HoloEngine</strong><br>Version 7.4 · June 2026</div>
+    <div><strong>HoloEngine</strong><br>Version 7.5 · June 2026</div>
     <div class="links">
       <a href="https://holoengine.ai/whitepaper">holoengine.ai/whitepaper</a><br>
       <a href="https://holoengine.ai/benchmark">holoengine.ai/benchmark</a>

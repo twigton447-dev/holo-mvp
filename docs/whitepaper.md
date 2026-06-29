@@ -4,7 +4,7 @@
 
 ### Why smart models still need a checkpoint before real-world action
 
-Version 7.4
+Version 7.5
 June 2026
 
 Taylor Wigton
@@ -102,6 +102,14 @@ HoloEngine is a trust layer for high-stakes AI work.
 It does not try to replace the model. It does not claim one model is always better than another. It does not pretend AI can be made perfect.
 
 It adds a checkpoint where the checkpoint matters most.
+
+### The Economics of the Checkpoint
+
+A strong trust layer doesn't have to be slow and expensive.
+
+We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a perfect, rule-following draft on the first try, the Governor verifies the math and exits early. You don't pay for extra AI turns you don't need.
+
+In our live D11 tests, the system exited early on clean drafts, cutting token burn by 52%. But when a draft was messy or violated rules, the Governor refused to exit and forced the models to repair it. You only pay the "safety premium" when the system is actively saving you from a failure.
 
 HoloEngine has two main lanes.
 
@@ -235,6 +243,16 @@ A smart draft is not enough.
 
 A reliance-grade artifact has to survive the gate.
 
+### The Final-Mile Regression
+
+Our traces revealed a deeper problem than simple hallucination. We call it Final-Mile Regression.
+
+A smart model will often find the perfect, source-grounded answer early in the process. But when you ask that same model to write the final polished document, it tries to sound helpful. In the process of smoothing out the prose, it accidentally deletes the critical limits or exceptions it established just seconds before. The model delivers a final artifact that is actually weaker than its rough draft.
+
+### The Oscillation Problem
+
+We also found that natural language is a terrible way to enforce rules. If a document is 200 words too long, and an AI Governor says "make it shorter," the worker model will wildly overshoot and cut 500 words. When told to expand, it overwrites. The model oscillates endlessly because language is vague.
+
 ---
 
 ## The architecture
@@ -254,6 +272,16 @@ Different roles have different jobs. One establishes the baseline story. One loo
 That is the role of HoloGov inside the architecture.
 
 HoloGov is the deterministic proof-gate component. It is not another analyst model and it does not make provider calls. It applies the relevant policy and proof standard for the surface it is governing.
+
+### The Deterministic Cage
+
+To fix the oscillation and the final-mile regression, we stopped treating AI as a single thing. We split the architecture into two layers: a probabilistic Data Plane (the models that read and write) and a deterministic Control Plane (the hard-coded rules that govern them).
+
+We call this the Deterministic Cage.
+
+1. **The Form Actuator:** Instead of the Governor telling a worker to "make it shorter," local Python code calculates the exact mechanical defect (e.g., "Cut exactly 251 words from Section 2"). The model is handed a strict mathematical constraint, not a suggestion.
+2. **Local Eligibility Gates:** The AI Governor does not get to decide if a document is "ready." Local code checks the word quotas and required sections. If the math fails, the AI is physically blocked from marking the document as complete.
+3. **The Final Selector (Monotonic Preservation):** HoloEngine constantly pins the "best artifact" in memory. If a model tries to get clever in the final turn and accidentally regresses the quality of the document, the Final Selector automatically throws the final turn in the trash and outputs the pinned, verified intermediate draft instead.
 
 In HoloBuild, HoloGov-B asks whether a work product is ready to rely on, needs revision, or must preserve unresolved risk.
 
@@ -440,6 +468,12 @@ D14 shows HoloBuild refusing to claim victory when its internal chain did not cl
 That is the honest story.
 
 And it is a strong one.
+
+### D12: The Form-Control Diagnosis
+
+In early D12 runs, we found that models failed mechanically, not epistemically. The models understood the business logic, but repeatedly failed strict word-band limits. The AI Governor diagnosed the failure correctly, but the worker models could not execute the repair.
+
+This proved that an AI Governor without a deterministic actuator is insufficient for hard admissibility gates. We froze this failure, built the Form Actuator to pass exact mathematical constraints to the models, and locked it into the architecture. We don't hide our losses; we use them to build the infrastructure.
 
 ---
 

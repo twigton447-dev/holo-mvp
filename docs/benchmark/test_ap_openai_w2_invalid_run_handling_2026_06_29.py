@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import sys
 import tempfile
+import urllib.error
 from pathlib import Path
 
 
@@ -136,11 +138,98 @@ def test_invalid_summary_without_architecture_lock_passes() -> None:
             raise AssertionError("summary Markdown was not written")
 
 
+def test_retry_classifies_transport_only() -> None:
+    retryable_http = urllib.error.HTTPError(
+        "https://example.invalid",
+        503,
+        "Service Unavailable",
+        hdrs=None,
+        fp=io.BytesIO(b"temporary outage"),
+    )
+    retryable = RUNNER._classify_transport_exception(retryable_http)
+    assert retryable and retryable["retryable"] is True
+    assert retryable["class"] == "HTTP_503"
+
+    non_retryable_http = urllib.error.HTTPError(
+        "https://example.invalid",
+        400,
+        "Bad Request",
+        hdrs=None,
+        fp=io.BytesIO(b"bad request"),
+    )
+    non_retryable = RUNNER._classify_transport_exception(non_retryable_http)
+    assert non_retryable and non_retryable["retryable"] is False
+    assert non_retryable["class"] == "HTTP_400"
+
+    timeout = RUNNER._classify_transport_exception(TimeoutError("The read operation timed out"))
+    assert timeout and timeout["retryable"] is True
+    assert timeout["class"] == "READ_TIMEOUT"
+
+    content_failure = RUNNER._classify_transport_exception(ValueError("gov_empty_text"))
+    if content_failure is not None:
+        raise AssertionError("content/model failures must not classify as transport")
+
+
+def test_transport_retry_success_marks_recovered() -> None:
+    calls = {"count": 0}
+    original_sleep = RUNNER._transport_sleep
+    RUNNER._transport_sleep = lambda _seconds: None
+    try:
+        def call_once() -> dict[str, object]:
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise TimeoutError("The read operation timed out")
+            return {"text": "OK", "finish_reason": "stop"}
+
+        response = RUNNER._call_with_transport_retry(
+            call_once,
+            provider="openai",
+            model="gpt-5.4-mini",
+            timeout_seconds=240,
+        )
+    finally:
+        RUNNER._transport_sleep = original_sleep
+    if response["transport_attempt_count"] != 2:
+        raise AssertionError(response)
+    if response["transport_recovered"] is not True:
+        raise AssertionError(response)
+    if response["transport_retry_failures"][0]["class"] != "READ_TIMEOUT":
+        raise AssertionError(response)
+
+
+def test_transport_retry_exhaustion_fails_closed() -> None:
+    original_sleep = RUNNER._transport_sleep
+    RUNNER._transport_sleep = lambda _seconds: None
+    try:
+        try:
+            RUNNER._call_with_transport_retry(
+                lambda: (_ for _ in ()).throw(TimeoutError("The read operation timed out")),
+                provider="openai",
+                model="gpt-5.4-mini",
+                timeout_seconds=240,
+            )
+        except RUNNER.TransportFailureAfterRetries as exc:
+            metadata = exc.metadata
+            if metadata["transport_attempt_count"] != 3:
+                raise AssertionError(metadata)
+            if metadata["transport_final_failure_class"] != "READ_TIMEOUT":
+                raise AssertionError(metadata)
+            if len(metadata["transport_retry_failures"]) != 3:
+                raise AssertionError(metadata)
+            return
+        raise AssertionError("transport retry exhaustion should fail closed")
+    finally:
+        RUNNER._transport_sleep = original_sleep
+
+
 def test_no_packet_or_prompt_hash_mutation() -> None:
     before = freeze_fingerprint()
     test_gov_empty_text_invalid()
     test_gov_length_incomplete_invalid()
     test_valid_compact_gov_baton_parses()
+    test_retry_classifies_transport_only()
+    test_transport_retry_success_marks_recovered()
+    test_transport_retry_exhaustion_fails_closed()
     after = freeze_fingerprint()
     if before != after:
         raise AssertionError("AP packet or prompt hashes changed during no-provider fixtures")
@@ -152,6 +241,9 @@ def main() -> None:
         test_gov_length_incomplete_invalid,
         test_valid_compact_gov_baton_parses,
         test_invalid_summary_without_architecture_lock_passes,
+        test_retry_classifies_transport_only,
+        test_transport_retry_success_marks_recovered,
+        test_transport_retry_exhaustion_fails_closed,
         test_no_packet_or_prompt_hash_mutation,
     ]
     for test in tests:

@@ -1,0 +1,80 @@
+{
+  "policy_id": "HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29",
+  "date": "2026-06-29",
+  "status": "REGISTERED_NO_PROVIDER",
+  "scope": "prospective_holoverify_provider_transport_failures_only",
+  "retroactive_application_allowed": false,
+  "allowed_retry_classes": [
+    "HTTP_429",
+    "HTTP_500",
+    "HTTP_502",
+    "HTTP_503",
+    "HTTP_504",
+    "READ_TIMEOUT",
+    "CONNECTION_RESET",
+    "TRANSIENT_NETWORK_ERROR"
+  ],
+  "non_retryable_classes": [
+    "WRONG_VERDICT",
+    "PARSE_FAILURE",
+    "EMPTY_MODEL_TEXT",
+    "FINISH_REASON_LENGTH_INCOMPLETE_OUTPUT",
+    "MALFORMED_GOV_BATON",
+    "SCHEMA_OR_ADMISSIBILITY_FAILURE",
+    "DETERMINISTIC_GATE_FAILURE"
+  ],
+  "retry_invariance": {
+    "same_packet": true,
+    "same_prompt": true,
+    "same_model": true,
+    "same_provider": true,
+    "same_temperature_settings": true,
+    "same_role": true,
+    "same_turn_id_lineage": true,
+    "feedback_about_prior_failed_attempt_forbidden": true,
+    "repair_instruction_forbidden": true,
+    "changed_prompt_forbidden": true,
+    "changed_max_tokens_forbidden": true,
+    "changed_model_forbidden": true,
+    "fallback_provider_forbidden": true
+  },
+  "retry_budget": {
+    "max_retries_per_transport_failed_call": 2,
+    "max_attempts_including_original": 3,
+    "backoff_seconds": [2, 4],
+    "all_attempts_logged": true,
+    "trace_attempt_count_field": "transport_attempt_count"
+  },
+  "if_retries_fail": {
+    "run_fails_closed": true,
+    "preserve_invalid_run": true,
+    "solo_baseline_allowed": false
+  },
+  "if_retry_succeeds": {
+    "mark_transport_recovered": true,
+    "transport_recovered_field": "transport_recovered",
+    "preserve_failed_attempt_metadata": true,
+    "failed_attempt_metadata_field": "transport_retry_failures",
+    "final_evidence_reports_recovered_transport_count": true
+  },
+  "timeout_values": {
+    "shared_openai_compatible_and_gemini_http_adapter_seconds": 150,
+    "ap_openai_w2_responses_adapter_previous_seconds": 150,
+    "ap_openai_w2_responses_adapter_current_seconds": 240
+  },
+  "implementation_boundary": {
+    "retry_layer": "provider_transport_adapter_before_model_content_parse",
+    "content_failures_remain_non_retryable": true,
+    "gov_contract_failures_remain_non_retryable": true,
+    "deterministic_gate_failures_remain_non_retryable": true
+  },
+  "required_local_validation": {
+    "py_compile": "REQUIRED",
+    "retry_classification_fixtures": "REQUIRED",
+    "ap_packet_hashes_match_freeze": "REQUIRED",
+    "ap_prompt_hashes_match_freeze": "REQUIRED",
+    "provider_calls": 0,
+    "judge_calls": 0
+  }
+}
+

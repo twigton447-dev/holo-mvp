@@ -20,12 +20,15 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import importlib.util
 import json
 import os
 import re
+import socket
 import sys
 import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -52,6 +55,11 @@ AGGREGATE = Path(
 )
 OUT_ROOT = BENCHMARK_ROOT / "holoverify_20pair_3dna_2026-06-29"
 PRE_RUN_MANIFEST = OUT_ROOT / "PRE_RUN_MANIFEST.json"
+TRANSPORT_RETRY_POLICY_VERSION = "HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29"
+TRANSPORT_MAX_RETRIES = 2
+TRANSPORT_BACKOFF_SECONDS = (2, 4)
+PROVIDER_HTTP_TIMEOUT_SECONDS = 150
+RETRYABLE_HTTP_STATUS = {429, 500, 502, 503, 504}
 
 
 MODEL_CONFIGS: dict[str, dict[str, Any]] = {
@@ -349,7 +357,123 @@ def _provider_url(config: dict[str, Any]) -> str:
     return config["default_url"]
 
 
-def _http_json(url: str, payload: dict[str, Any], headers: dict[str, str], timeout: int = 150) -> dict[str, Any]:
+class TransportFailureAfterRetries(RuntimeError):
+    """Raised only when retryable transport attempts are exhausted."""
+
+    def __init__(self, message: str, metadata: dict[str, Any]):
+        super().__init__(message)
+        self.metadata = metadata
+
+
+def _http_error_body(exc: urllib.error.HTTPError) -> str:
+    try:
+        return exc.read().decode("utf-8", errors="replace")[:2000]
+    except Exception:
+        return ""
+
+
+def _classify_transport_exception(exc: BaseException) -> dict[str, Any] | None:
+    if isinstance(exc, urllib.error.HTTPError):
+        body = _http_error_body(exc)
+        if exc.code in RETRYABLE_HTTP_STATUS:
+            return {
+                "retryable": True,
+                "class": f"HTTP_{exc.code}",
+                "http_status": exc.code,
+                "message": str(exc),
+                "error_body": body,
+            }
+        return {
+            "retryable": False,
+            "class": f"HTTP_{exc.code}",
+            "http_status": exc.code,
+            "message": str(exc),
+            "error_body": body,
+        }
+    if isinstance(exc, (TimeoutError, socket.timeout)):
+        return {"retryable": True, "class": "READ_TIMEOUT", "message": str(exc)}
+    if isinstance(exc, ConnectionResetError):
+        return {"retryable": True, "class": "CONNECTION_RESET", "message": str(exc)}
+    if isinstance(exc, http.client.RemoteDisconnected):
+        return {"retryable": True, "class": "TRANSIENT_NETWORK_ERROR", "message": str(exc)}
+    if isinstance(exc, urllib.error.URLError):
+        reason = getattr(exc, "reason", exc)
+        reason_text = str(reason).lower()
+        retryable = any(
+            marker in reason_text
+            for marker in ("timed out", "timeout", "temporarily unavailable", "connection reset", "network is unreachable")
+        )
+        return {
+            "retryable": retryable,
+            "class": "READ_TIMEOUT" if "timed out" in reason_text or "timeout" in reason_text else "TRANSIENT_NETWORK_ERROR",
+            "message": str(exc),
+        }
+    return None
+
+
+def _transport_sleep(seconds: int) -> None:
+    time.sleep(seconds)
+
+
+def _call_with_transport_retry(
+    call_once,
+    *,
+    provider: str,
+    model: str,
+    timeout_seconds: int,
+    max_retries: int = TRANSPORT_MAX_RETRIES,
+) -> dict[str, Any]:
+    failures: list[dict[str, Any]] = []
+    total_attempts = max_retries + 1
+    for attempt in range(1, total_attempts + 1):
+        try:
+            response = call_once()
+            response["transport_retry_policy_version"] = TRANSPORT_RETRY_POLICY_VERSION
+            response["transport_attempt_count"] = attempt
+            response["transport_recovered"] = bool(failures)
+            response["transport_retry_failures"] = failures
+            response["provider_timeout_seconds"] = timeout_seconds
+            return response
+        except Exception as exc:
+            classification = _classify_transport_exception(exc)
+            if not classification or not classification["retryable"]:
+                raise
+            failures.append(
+                {
+                    "attempt": attempt,
+                    "provider": provider,
+                    "model": model,
+                    "class": classification["class"],
+                    "message": classification.get("message", ""),
+                    "http_status": classification.get("http_status"),
+                    "error_body": classification.get("error_body", ""),
+                }
+            )
+            if attempt >= total_attempts:
+                metadata = {
+                    "text": "",
+                    "finish_reason": None,
+                    "response_id": None,
+                    "input_tokens": None,
+                    "output_tokens": None,
+                    "total_tokens": None,
+                    "transport_retry_policy_version": TRANSPORT_RETRY_POLICY_VERSION,
+                    "transport_attempt_count": attempt,
+                    "transport_recovered": False,
+                    "transport_retry_failures": failures,
+                    "transport_final_failure_class": classification["class"],
+                    "provider_timeout_seconds": timeout_seconds,
+                }
+                raise TransportFailureAfterRetries(classification["class"], metadata) from exc
+            _transport_sleep(TRANSPORT_BACKOFF_SECONDS[min(attempt - 1, len(TRANSPORT_BACKOFF_SECONDS) - 1)])
+
+
+def _http_json(
+    url: str,
+    payload: dict[str, Any],
+    headers: dict[str, str],
+    timeout: int = PROVIDER_HTTP_TIMEOUT_SECONDS,
+) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         data=json.dumps(payload).encode("utf-8"),
@@ -424,10 +548,21 @@ def _call_gemini(config: dict[str, Any], messages: list[dict[str, str]], max_tok
 
 def _call_model(config: dict[str, Any], messages: list[dict[str, str]], max_tokens: int) -> dict[str, Any]:
     started = time.time()
-    if config["kind"] == "gemini":
-        response = _call_gemini(config, messages, max_tokens)
-    else:
-        response = _call_openai_compatible(config, messages, max_tokens)
+    def call_once() -> dict[str, Any]:
+        if config["kind"] == "gemini":
+            return _call_gemini(config, messages, max_tokens)
+        return _call_openai_compatible(config, messages, max_tokens)
+
+    try:
+        response = _call_with_transport_retry(
+            call_once,
+            provider=config["provider"],
+            model=config["model"],
+            timeout_seconds=PROVIDER_HTTP_TIMEOUT_SECONDS,
+        )
+    except TransportFailureAfterRetries as exc:
+        exc.metadata["elapsed_ms"] = int((time.time() - started) * 1000)
+        raise
     response["elapsed_ms"] = int((time.time() - started) * 1000)
     return response
 
@@ -1521,7 +1656,17 @@ def _run_packet(run_id: str, pair: dict[str, Any], suffix: str, manifest: dict[s
             )
             artifact = _artifact_record(packet_id, worker["worker_index"], config, parsed, gate, out_dir)
         except Exception as exc:
-            row = {**row_base, **response, "provider_call_ok": bool(response), "parse_ok": False, "error": f"{type(exc).__name__}: {exc}", "admissible": False}
+            transport_failed = isinstance(exc, TransportFailureAfterRetries)
+            if transport_failed:
+                response = dict(exc.metadata)
+            row = {
+                **row_base,
+                **response,
+                "provider_call_ok": False if transport_failed else bool(response),
+                "parse_ok": False,
+                "error": f"{type(exc).__name__}: {exc}",
+                "admissible": False,
+            }
             trace.write(json.dumps(row, sort_keys=True) + "\n")
             trace.flush()
             call_rows.append(row)
@@ -1601,7 +1746,17 @@ def _run_packet(run_id: str, pair: dict[str, Any], suffix: str, manifest: dict[s
             gov_parsed = _enforce_gov_gate_compliance(gov_parsed, gov_normalization, parsed, gate)
             gov_failures = _validate_gov(gov_parsed, gate)
         except Exception as exc:
-            gov_row = {**gov_base, **gov_response, "provider_call_ok": bool(gov_response), "parse_ok": False, "error": f"{type(exc).__name__}: {exc}", "admissible": False}
+            transport_failed = isinstance(exc, TransportFailureAfterRetries)
+            if transport_failed:
+                gov_response = dict(exc.metadata)
+            gov_row = {
+                **gov_base,
+                **gov_response,
+                "provider_call_ok": False if transport_failed else bool(gov_response),
+                "parse_ok": False,
+                "error": f"{type(exc).__name__}: {exc}",
+                "admissible": False,
+            }
             trace.write(json.dumps(gov_row, sort_keys=True) + "\n")
             trace.flush()
             call_rows.append(gov_row)

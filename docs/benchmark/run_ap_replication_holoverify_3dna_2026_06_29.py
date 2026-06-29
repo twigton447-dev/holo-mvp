@@ -47,6 +47,7 @@ OPENAI_W2_MODEL_ID = "gpt-5.4-mini"
 OPENAI_W2_MODEL_KEYS = ("xai", OPENAI_W2_MODEL_KEY, "minimax")
 OPENAI_W2_REGISTRATION = AP_ROOT / "AP_OPENAI_W2_ROSTER_VARIANT_REGISTRATION_2026_06_29.json"
 OPENAI_W2_AVAILABILITY = AP_ROOT / "AP_OPENAI_W2_MODEL_AVAILABILITY_CHECK_2026_06_29.json"
+OPENAI_RESPONSES_TIMEOUT_SECONDS = 240
 
 ANSWER_KEY_LEAK_PATTERNS = (
     "packet_truth",
@@ -142,7 +143,7 @@ def configure_openai_w2_runner() -> None:
     RUNNER._call_model = call_model_with_openai_responses
 
 
-def call_openai_responses(config: dict[str, Any], messages: list[dict[str, str]], max_tokens: int) -> dict[str, Any]:
+def _call_openai_responses_once(config: dict[str, Any], messages: list[dict[str, str]], max_tokens: int) -> dict[str, Any]:
     prompt = "\n\n".join(f"{message['role'].upper()}:\n{message['content']}" for message in messages)
     payload = {
         "model": config["model"],
@@ -158,8 +159,7 @@ def call_openai_responses(config: dict[str, Any], messages: list[dict[str, str]]
         },
         method="POST",
     )
-    started = time.time()
-    with urllib.request.urlopen(req, timeout=150) as response:
+    with urllib.request.urlopen(req, timeout=OPENAI_RESPONSES_TIMEOUT_SECONDS) as response:
         data = json.loads(response.read().decode("utf-8", errors="replace"))
     text_parts: list[str] = []
     output = data.get("output") if isinstance(data.get("output"), list) else []
@@ -176,8 +176,27 @@ def call_openai_responses(config: dict[str, Any], messages: list[dict[str, str]]
         "input_tokens": usage.get("input_tokens"),
         "output_tokens": usage.get("output_tokens"),
         "total_tokens": usage.get("total_tokens"),
-        "elapsed_ms": int((time.time() - started) * 1000),
     }
+
+
+def call_openai_responses(config: dict[str, Any], messages: list[dict[str, str]], max_tokens: int) -> dict[str, Any]:
+    started = time.time()
+
+    def call_once() -> dict[str, Any]:
+        return _call_openai_responses_once(config, messages, max_tokens)
+
+    try:
+        response = RUNNER._call_with_transport_retry(
+            call_once,
+            provider=config["provider"],
+            model=config["model"],
+            timeout_seconds=OPENAI_RESPONSES_TIMEOUT_SECONDS,
+        )
+    except RUNNER.TransportFailureAfterRetries as exc:
+        exc.metadata["elapsed_ms"] = int((time.time() - started) * 1000)
+        raise
+    response["elapsed_ms"] = int((time.time() - started) * 1000)
+    return response
 
 
 def call_model_with_openai_responses(config: dict[str, Any], messages: list[dict[str, str]], max_tokens: int) -> dict[str, Any]:
@@ -732,6 +751,10 @@ def holo_summary(run_dir: Path, manifest: dict[str, Any], packet_results: list[d
             }
         )
     provider_failures = [row for row in rows if row.get("provider_call_ok") is not True]
+    transport_recovered_calls = [row for row in rows if row.get("transport_recovered") is True]
+    transport_attempted_calls = [
+        row for row in rows if int(row.get("transport_attempt_count") or 1) > 1
+    ]
     terminal_failures = RUNNER._terminal_call_failures(rows)
     root_failure = terminal_failures[0] if terminal_failures else None
     if root_failure and root_failure.get("call_kind") == "gov" and root_failure.get("parse_ok") is not True:
@@ -792,10 +815,17 @@ def holo_summary(run_dir: Path, manifest: dict[str, Any], packet_results: list[d
             "provider_call_ok": root_failure.get("provider_call_ok"),
             "parse_ok": root_failure.get("parse_ok"),
             "admissible": root_failure.get("admissible"),
+            "transport_attempt_count": root_failure.get("transport_attempt_count"),
+            "transport_recovered": root_failure.get("transport_recovered"),
+            "transport_final_failure_class": root_failure.get("transport_final_failure_class"),
+            "transport_retry_failures": root_failure.get("transport_retry_failures"),
         }
         if root_failure
         else None,
         "invalidation_reason": invalidation_reason,
+        "transport_retry_policy_version": getattr(RUNNER, "TRANSPORT_RETRY_POLICY_VERSION", None),
+        "transport_recovered_call_count": len(transport_recovered_calls),
+        "transport_attempted_call_count": len(transport_attempted_calls),
         "totals": totals,
         "packet_correct": packet_correct,
         "packet_count": len(packet_results),
@@ -827,6 +857,8 @@ def write_holo_summary_md(run_dir: Path, summary: dict[str, Any]) -> None:
         f"- Worker calls: `{summary['worker_calls']}`",
         f"- Gov calls: `{summary['gov_calls']}`",
         f"- Judge calls: `{summary['judge_calls']}`",
+        f"- Transport attempted calls: `{summary.get('transport_attempted_call_count', 0)}`",
+        f"- Transport recovered calls: `{summary.get('transport_recovered_call_count', 0)}`",
         f"- Tokens: `{summary['totals']['input_tokens']}` input / `{summary['totals']['output_tokens']}` output / `{summary['totals']['total_tokens']}` total",
     ]
     if summary.get("root_failure"):
@@ -843,6 +875,8 @@ def write_holo_summary_md(run_dir: Path, summary: dict[str, Any]) -> None:
                 f"- Provider/model: `{root.get('provider')}/{root.get('model')}`",
                 f"- Finish reason: `{root.get('finish_reason')}`",
                 f"- Error: `{root.get('error')}`",
+                f"- Transport attempts: `{root.get('transport_attempt_count')}`",
+                f"- Transport final failure class: `{root.get('transport_final_failure_class')}`",
             ]
         )
     lines.extend(

@@ -36,7 +36,7 @@ def test_whitepaper_version_labels_stay_in_sync():
 def test_benchmark_version_labels_stay_in_sync():
     html = _read(BENCHMARK)
     versions = set(re.findall(r"Version ([0-9]+(?:\.[0-9]+)*)", html))
-    assert versions == {"7.3"}
+    assert versions == {"7.4"}
 
 
 def test_whitepaper_problem_section_keeps_boundary_analogy():

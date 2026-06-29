@@ -1137,18 +1137,36 @@ def load_holo_run(holo_run_dir: Path) -> dict[str, Any]:
     return results
 
 
+def is_openai_w2_holo_run(holo_run_dir: Path, holo: dict[str, Any]) -> bool:
+    worker_models = set((holo.get("benchmark_law_validation") or {}).get("worker_models") or [])
+    return "holo_live_runs_openai_w2" in str(holo_run_dir) or f"openai/{OPENAI_W2_MODEL_ID}" in worker_models
+
+
+def solo_model_keys_for_holo(holo_run_dir: Path, holo: dict[str, Any]) -> tuple[str, ...]:
+    if is_openai_w2_holo_run(holo_run_dir, holo):
+        return OPENAI_W2_MODEL_KEYS
+    return MODEL_KEYS
+
+
+def configure_solo_roster(model_keys: tuple[str, ...]) -> None:
+    if OPENAI_W2_MODEL_KEY in model_keys:
+        configure_openai_w2_runner()
+
+
 def run_solo(holo_run_dir: Path) -> int:
     holo = load_holo_run(holo_run_dir)
+    solo_model_keys = solo_model_keys_for_holo(holo_run_dir, holo)
+    configure_solo_roster(solo_model_keys)
     freeze = read_freeze()
     records = freeze["records"]
     record_by_id = {row["packet_id"]: row for row in records}
-    for key in MODEL_KEYS:
+    for key in solo_model_keys:
         env = RUNNER.MODEL_CONFIGS[key]["api_key_env"]
         if not os.getenv(env, "").strip():
             raise RuntimeError(f"{env} missing")
-    seed_root = holo["trace_hash"] + "::" + EXPECTED_FREEZE_ROOT_HASH
+    seed_root = holo["trace_hash"] + "::" + EXPECTED_FREEZE_ROOT_HASH + "::" + ",".join(solo_model_keys)
     plan = []
-    for model_key in MODEL_KEYS:
+    for model_key in solo_model_keys:
         for record in records:
             sort_key = sha256_text(seed_root + "::" + model_key + "::" + record["packet_id"])
             plan.append({"sort_key": sort_key, "model_key": model_key, "record": record})
@@ -1174,7 +1192,9 @@ def run_solo(holo_run_dir: Path) -> int:
             write_text(prompt_ref, prompt_text)
             row: dict[str, Any] = {
                 "call_index": index,
-                "lane": "AP_SOLO_ONE_SHOT_3MINI_EXACT_FROZEN_PROMPTS",
+                "lane": "AP_SOLO_ONE_SHOT_3MINI_MATCHED_TO_FROZEN_HOLO_EXACT_FROZEN_PROMPTS",
+                "matched_holo_run_dir": str(holo_run_dir),
+                "solo_model_keys": list(solo_model_keys),
                 "model_key": model_key,
                 "provider": config["provider"],
                 "model": config["model"],
@@ -1230,7 +1250,7 @@ def run_solo(holo_run_dir: Path) -> int:
             rows.append(row)
             if not provider_ok:
                 break
-    summary = solo_summary(run_dir, rows, totals, trace_path, holo, record_by_id)
+    summary = solo_summary(run_dir, rows, totals, trace_path, holo, record_by_id, solo_model_keys)
     lock_directory(run_dir, "RUN_LOCK")
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0 if summary["classification"] == "AP_SOLO_ONE_SHOT_3MINI_COMPLETE" else 1
@@ -1243,9 +1263,10 @@ def solo_summary(
     trace_path: Path,
     holo: dict[str, Any],
     record_by_id: dict[str, dict[str, Any]],
+    model_keys: tuple[str, ...],
 ) -> dict[str, Any]:
     by_model: dict[str, dict[str, Any]] = {}
-    for model_key in MODEL_KEYS:
+    for model_key in model_keys:
         config = RUNNER.MODEL_CONFIGS[model_key]
         model_rows = [row for row in rows if row["model_key"] == model_key]
         counts = Counter(row["solo_label"] for row in model_rows)
@@ -1271,6 +1292,16 @@ def solo_summary(
         "freeze_root_hash": EXPECTED_FREEZE_ROOT_HASH,
         "holo_run_dir": holo["run_dir"],
         "holo_trace_hash": holo["trace_hash"],
+        "solo_model_keys": list(model_keys),
+        "solo_model_roster": [
+            {
+                "model_key": key,
+                "provider": RUNNER.MODEL_CONFIGS[key]["provider"],
+                "model": RUNNER.MODEL_CONFIGS[key]["model"],
+                "dna": RUNNER.MODEL_CONFIGS[key]["dna"],
+            }
+            for key in model_keys
+        ],
         "provider_calls": len(rows),
         "expected_provider_calls": 120,
         "gov_calls": 0,
@@ -1336,6 +1367,20 @@ def latest_run(root: Path, glob_name: str) -> Path:
     if not candidates:
         raise RuntimeError(f"no run found under {root}/{glob_name}")
     return candidates[-1]
+
+
+def latest_complete_holo_run(root: Path, glob_name: str) -> Path:
+    candidates = sorted(root.glob(glob_name), reverse=True)
+    for candidate in candidates:
+        results_path = candidate / "live_results.json"
+        if not results_path.exists():
+            continue
+        try:
+            if load_json(results_path).get("classification") == "HOLOVERIFY_AP_REPLICATION_HOLO_COMPLETE":
+                return candidate
+        except Exception:
+            continue
+    raise RuntimeError(f"no complete Holo run found under {root}/{glob_name}")
 
 
 def scan_no_leakage(holo_run_dir: Path, solo_run_dir: Path) -> dict[str, Any]:
@@ -1572,10 +1617,10 @@ def main() -> int:
         print(json.dumps(finalize_holo_run(holo_run_dir), indent=2, sort_keys=True))
         return 0
     if args.run_solo:
-        holo_run_dir = Path(args.holo_run_dir) if args.holo_run_dir else latest_run(AP_ROOT / "holo_live_runs", "run_*")
+        holo_run_dir = Path(args.holo_run_dir) if args.holo_run_dir else latest_complete_holo_run(OPENAI_W2_HOLO_RUN_ROOT, "run_*")
         return run_solo(holo_run_dir)
     if args.build_evidence:
-        holo_run_dir = Path(args.holo_run_dir) if args.holo_run_dir else latest_run(AP_ROOT / "holo_live_runs", "run_*")
+        holo_run_dir = Path(args.holo_run_dir) if args.holo_run_dir else latest_complete_holo_run(OPENAI_W2_HOLO_RUN_ROOT, "run_*")
         solo_run_dir = Path(args.solo_run_dir) if args.solo_run_dir else latest_run(AP_ROOT / "solo_one_shot_against_ap_holo", "run_*")
         build_evidence(holo_run_dir, solo_run_dir)
         return 0

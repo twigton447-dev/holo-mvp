@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>HoloEngine · Benchmark Matrix · Version 7.4 · July 2026</title>
+<title>HoloEngine · Benchmark Matrix · Version 7.5 · July 2026</title>
 <meta name="description" content="The Action Boundary Benchmark tests whether AI systems can prove required checks before action or reliance. HoloVerify tests runtime ALLOW / ESCALATE decisions. HoloBuild tests high-stakes work product under source, authority, and completion gates."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -116,6 +116,30 @@ h2{font-family:var(--serif);font-size:clamp(2.35rem,4.8vw,4.05rem);font-weight:6
 .callout{margin:2rem 0;padding:1.2rem 1.35rem;border-left:4px solid var(--gold);background:#f5f1e4;border-radius:0 8px 8px 0}
 .callout p{font-family:var(--serif);font-size:1.25rem;color:var(--ink);line-height:1.45;margin:0}
 .callout p+p{margin-top:0.75rem}
+.hv20-block{margin:2rem 0;padding:clamp(1.1rem,2vw,1.7rem);border:1px solid var(--border);border-left:4px solid var(--green);border-radius:8px;background:linear-gradient(180deg,#fffefa 0%,#f8f5ec 100%)}
+.hv20-kicker{font-family:var(--mono);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:0.6rem}
+.hv20-block h3{font-family:var(--serif);font-size:clamp(1.75rem,3vw,2.45rem);line-height:1.05;letter-spacing:-0.02em;color:var(--ink);margin-bottom:0.9rem;font-weight:600}
+.hv20-block p{font-size:1rem;line-height:1.65;color:var(--muted);max-width:860px;margin:0 0 1rem}
+.hv20-block p strong{color:var(--ink)}
+.hv20-lede{font-family:var(--serif);font-size:1.2rem!important;line-height:1.5!important;color:var(--ink)!important;max-width:900px!important}
+.hv20-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0.75rem;margin:1.35rem 0 1.5rem}
+@media(max-width:800px){.hv20-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.hv20-stat-grid{grid-template-columns:1fr}}
+.hv20-stat{border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,0.78);padding:0.95rem}
+.hv20-stat strong{display:block;font-family:var(--mono);font-size:1.45rem;line-height:1.05;color:var(--ink);margin-bottom:0.35rem}
+.hv20-stat span{display:block;font-size:0.84rem;line-height:1.35;color:var(--muted)}
+.hv20-story{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.35rem 0}
+@media(max-width:760px){.hv20-story{grid-template-columns:1fr}}
+.hv20-story-item{border-top:1px solid var(--border);padding-top:0.85rem}
+.hv20-story-label{font-family:var(--mono);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:0.45rem}
+.hv20-story-item p{font-size:0.95rem;line-height:1.6;margin:0;color:var(--muted)}
+.hv20-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fff;margin:1rem 0}
+.hv20-table th{font-family:var(--mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);background:var(--bg-card);padding:0.8rem;text-align:left;border-bottom:1px solid var(--border)}
+.hv20-table td{padding:0.85rem;border-bottom:1px solid var(--border);vertical-align:top;font-size:0.94rem;line-height:1.5;color:var(--muted)}
+.hv20-table tr:last-child td{border-bottom:0}
+.hv20-table td strong{color:var(--ink)}
+.hv20-note{border-left:3px solid var(--gold);background:#fff9ea;padding:0.9rem 1rem;border-radius:0 8px 8px 0;margin-top:1rem}
+.hv20-note p{margin:0;font-size:0.95rem;line-height:1.55;color:var(--ink)}
 .takeaway{margin-top:1.8rem;margin-bottom:0;padding:1.3rem 1.45rem;border:1px solid #d5c38b;border-left:4px solid var(--gold);background:#fbf6e7;border-radius:8px}
 .takeaway-label{font-family:var(--mono);font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:0.75rem}
 .takeaway p{font-family:var(--serif);font-size:1.15rem;color:var(--ink);line-height:1.5;margin:0;max-width:820px}
@@ -337,7 +361,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
 <!-- HERO -->
 <section class="hero">
   <div class="w">
-    <div class="eyebrow">Version 7.4 &nbsp;&middot;&nbsp; July 2026</div>
+    <div class="eyebrow">Version 7.5 &nbsp;&middot;&nbsp; July 2026</div>
     <h1>The Action Boundary Benchmark</h1>
     <p class="cover-subtitle">Hardening AI for Autonomous Execution</p>
     <div class="hero-layout">
@@ -523,71 +547,98 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
     <p>HoloBuild asks whether a high-stakes document or decision output is actually ready to rely on.</p>
     <p><strong>Do not blend the two.</strong></p>
 
-    <div class="callout" style="margin-top:2rem">
-      <p><strong>HoloVerify solved a frozen 40-packet runtime cage.</strong></p>
-      <p>Same mini-model families. Same frozen packets. Solo one-shots mostly failed the evidence gate; HoloVerify solved every packet with about 2.06x the solo token budget.</p>
-      <div class="table-wrap" style="margin-top:1.25rem">
-        <table class="status-table">
-          <thead>
-            <tr>
-              <th>Metric</th>
-              <th>Public Copy</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Holo</strong></td>
-              <td>40/40 packets correct</td>
-            </tr>
-            <tr>
-              <td><strong>Solo one-shots</strong></td>
-              <td>120/120 completed, 6/120 KNEW/admissible</td>
-            </tr>
-            <tr>
-              <td><strong>Clean collapse subset</strong></td>
-              <td>14/20 pairs all-six-solo-fail while Holo solved both siblings</td>
-            </tr>
-            <tr>
-              <td><strong>Audit status</strong></td>
-              <td>No-leakage PASS; packet identity PASS; no judges</td>
-            </tr>
-            <tr>
-              <td><strong>Token budget</strong></td>
-              <td>426,002 Holo tokens vs 206,839 solo tokens (2.06x)</td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="hv20-block">
+      <div class="hv20-kicker">HV-20 Runtime Cage</div>
+      <h3>A 40-packet test of the action boundary</h3>
+      <p class="hv20-lede">The plain story is simple: the same small model families saw the same frozen packets. Alone, they usually did not preserve enough evidence to make a safe ALLOW / ESCALATE decision. Inside HoloVerify, the governed architecture solved every packet.</p>
+
+      <div class="hv20-stat-grid" aria-label="HV-20 benchmark summary">
+        <div class="hv20-stat"><strong>40/40</strong><span>HoloVerify packets correct</span></div>
+        <div class="hv20-stat"><strong>6/120</strong><span>solo outputs were KNEW/admissible</span></div>
+        <div class="hv20-stat"><strong>14/20</strong><span>sibling pairs where all six solo attempts failed</span></div>
+        <div class="hv20-stat"><strong>2.06x</strong><span>Holo token budget versus solo one-shots</span></div>
       </div>
-      <p style="margin-top:1.25rem"><strong>Models used:</strong> The one-shot solo baseline used the same three mini-model families that appeared inside HoloVerify: <code>xai/grok-3-mini</code>, <code>google/gemini-2.5-flash-lite</code>, and <code>minimax/MiniMax-M2.5-highspeed</code>. HoloVerify used those families as workers inside the governed architecture. HoloGov-V used <code>minimax/MiniMax-M2.5-highspeed</code> as the Governor. Gov did not choose or substitute models; Gov chose control actions, repairs, blocked moves, and final ALLOW / ESCALATE discipline.</p>
-      <p><strong>Inspectable evidence:</strong> This is not a slide-only claim. The public package is hash-locked and inspectable. The canonical public package commit is <code>87b39f2</code>, and the public package lock root is <code>5ffe3c41e5cf35324f9bb0518c24df118aad0eea15900abbb1d9996df1756695</code>. The package includes the public-safe packet set, sibling mapping, payload hashes, summary memo, no-provider audit, and proof summary. Packet identity passed: packet IDs, sibling mapping, and payload hashes matched.</p>
-      <p><strong>Domain covered:</strong> HV-20 is an action-boundary operations cage. It is not a general chat benchmark and it is not a long-form writing benchmark. The packets cover operational decisions such as customer or vendor connector activation, rebate and ledger release, device firmware release, sterilization lot release, procurement delegation ceilings, clinical batch release, controlled-solvent purchase, production device activation, and regulated data export. Each sibling pair asks whether the current source evidence closes the exact action boundary before execution.</p>
+
+      <div class="hv20-story">
+        <div class="hv20-story-item">
+          <div class="hv20-story-label">The Setup</div>
+          <p>HV-20 contains 20 sibling pairs. Each pair has one packet where the action should be ALLOW and a nearly identical packet where the action should be ESCALATE. The job is not to sound careful. The job is to tell which source evidence actually closes the boundary.</p>
+        </div>
+        <div class="hv20-story-item">
+          <div class="hv20-story-label">The Point</div>
+          <p>This is why sibling pairs matter. A system that escalates everything is not safe; it freezes valid work. A system that allows everything is worse; it lets risky actions through. The test asks for both halves at once.</p>
+        </div>
+        <div class="hv20-story-item">
+          <div class="hv20-story-label">The Models</div>
+          <p>The one-shot solo baseline used the same three mini-model families that appeared inside HoloVerify: <code>xai/grok-3-mini</code>, <code>google/gemini-2.5-flash-lite</code>, and <code>minimax/MiniMax-M2.5-highspeed</code>. HoloGov-V used <code>minimax/MiniMax-M2.5-highspeed</code> as the Governor. Gov did not choose or substitute models; it chose control actions, repairs, blocked moves, and final ALLOW / ESCALATE discipline.</p>
+        </div>
+        <div class="hv20-story-item">
+          <div class="hv20-story-label">The Domain</div>
+          <p>This is an action-boundary operations cage, not a chat benchmark or writing benchmark. The packets cover connector activation, rebate and ledger release, firmware release, sterilization lot release, procurement ceilings, clinical batch release, controlled-solvent purchase, production device activation, and regulated data export.</p>
+        </div>
+      </div>
+
+      <table class="hv20-table" aria-label="HV-20 results">
+        <thead>
+          <tr>
+            <th>Result</th>
+            <th>What happened</th>
+            <th>Why it matters</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>HoloVerify</strong></td>
+            <td>40/40 packets correct.</td>
+            <td>The governed workflow closed every ALLOW sibling and escalated every ESCALATE sibling.</td>
+          </tr>
+          <tr>
+            <td><strong>Solo one-shots</strong></td>
+            <td>120/120 calls completed, but only 6/120 were KNEW/admissible.</td>
+            <td>The solo models usually produced an answer, but the answer usually failed the evidence gate.</td>
+          </tr>
+          <tr>
+            <td><strong>Clean collapse subset</strong></td>
+            <td>In 14/20 pairs, all six solo attempts failed while HoloVerify solved both siblings.</td>
+            <td>This isolates the core pattern: same packet family, same model families, different architecture.</td>
+          </tr>
+          <tr>
+            <td><strong>Token budget</strong></td>
+            <td>426,002 Holo tokens versus 206,839 solo tokens.</td>
+            <td>Holo spent about 2.06x more tokens to buy governance, repair, deterministic gates, and final selection.</td>
+          </tr>
+        </tbody>
+      </table>
+
       <p><strong>KNEW/admissible</strong> means the model both chose the right ALLOW / ESCALATE verdict and preserved enough source-bound evidence to count under the gate.</p>
-      <p><strong>How to read false positives and false negatives:</strong> in this lane, a positive means the system raises ESCALATE. A negative means the system allows the action. Ground truth comes from the frozen packet label.</p>
-      <div class="table-wrap" style="margin-top:1.25rem">
-        <table class="status-table">
-          <thead>
-            <tr>
-              <th>Ground Truth</th>
-              <th>Holo Says ESCALATE</th>
-              <th>Holo Says ALLOW</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Should ESCALATE</td>
-              <td><strong>True Positive</strong></td>
-              <td><strong>False Negative</strong></td>
-            </tr>
-            <tr>
-              <td>Should ALLOW</td>
-              <td><strong>False Positive</strong></td>
-              <td><strong>True Negative</strong></td>
-            </tr>
-          </tbody>
-        </table>
+
+      <table class="hv20-table" aria-label="HoloVerify confusion matrix">
+        <thead>
+          <tr>
+            <th>Ground Truth</th>
+            <th>System says ESCALATE</th>
+            <th>System says ALLOW</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Should ESCALATE</td>
+            <td><strong>True Positive</strong><br/>The system caught the risky packet.</td>
+            <td><strong>False Negative</strong><br/>The dangerous miss: an unsafe packet got allowed.</td>
+          </tr>
+          <tr>
+            <td>Should ALLOW</td>
+            <td><strong>False Positive</strong><br/>The system overblocked a clean packet.</td>
+            <td><strong>True Negative</strong><br/>The system correctly let clean work proceed.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>The ESCALATE sibling tests false negatives. The ALLOW sibling tests false positives. A real action-boundary system has to do both: stop the unsafe action without freezing the safe one.</p>
+
+      <div class="hv20-note">
+        <p><strong>Evidence status:</strong> the public package is hash-locked and inspectable. Canonical public package commit: <code>87b39f2</code>. Public package lock root: <code>5ffe3c41e5cf35324f9bb0518c24df118aad0eea15900abbb1d9996df1756695</code>. The package includes the public-safe packet set, sibling mapping, payload hashes, summary memo, no-provider audit, and proof summary. Packet identity passed: packet IDs, sibling mapping, and payload hashes matched. This is a bounded runtime proof, not a universal superiority claim.</p>
       </div>
-      <p>A false negative is the dangerous miss: an unsafe packet gets allowed. A false positive is overblocking: a safe packet gets escalated. The sibling-pair design tests both sides at once. The ESCALATE sibling tests false negatives; the ALLOW sibling tests false positives.</p>
-      <p style="margin-top:1.25rem"><strong>Evidence Status:</strong> Frozen public evidence package; bounded runtime proof, not a universal superiority claim.</p>
     </div>
   </div>
 </section>
@@ -1294,7 +1345,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
 <footer class="status-banner">
   <div class="w">
     <div class="footer-inner">
-      <p>HoloEngine &nbsp;&middot;&nbsp; Action Boundary Benchmark &nbsp;&middot;&nbsp; Version 7.4 &nbsp;&middot;&nbsp; July 2026</p>
+      <p>HoloEngine &nbsp;&middot;&nbsp; Action Boundary Benchmark &nbsp;&middot;&nbsp; Version 7.5 &nbsp;&middot;&nbsp; July 2026</p>
       <p style="font-family:var(--mono);font-size:0.75rem;color:var(--muted-2)">Contact: taylorw@hologroup.io</p>
     </div>
   </div>

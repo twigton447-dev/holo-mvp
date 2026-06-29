@@ -4,7 +4,7 @@
 
 ### Why smart models still need a checkpoint before real-world action
 
-Version 7.7
+Version 7.8
 July 2026
 
 Taylor Wigton
@@ -424,17 +424,45 @@ Several non-Holo configurations either let unsafe orders through or overblocked 
 
 ### HV-20 Runtime Cage: The 40-Packet Sibling Test
 
-HoloVerify now has a second kind of runtime proof: a frozen 40-packet action-boundary cage. In this run, the same AI models were tested twice—once on their own as solo baselines, and once inside the HoloVerify architecture.
+HoloVerify now has runtime evidence in addition to the HoloBuild document tests.
 
-The test used 20 "sibling pairs" (one packet where the correct answer is ALLOW, and an identical-looking sibling where the correct answer is ESCALATE).
+HV-20 is a frozen 40-packet action-boundary cage built from 20 sibling pairs. Each pair has one packet where the correct answer is ALLOW and one very similar packet where the correct answer is ESCALATE.
+
+That design matters.
+
+A system can look safe by escalating everything. But that creates false positives and freezes valid work.
+
+A system can look useful by allowing everything. But that creates false negatives and lets risky actions through.
+
+The hard problem is doing both at once: stop the unsafe action without blocking the safe one.
+
+The domain was not chat and it was not long-form writing. It was operational action control: connector activation, rebate and ledger release, firmware release, sterilization lot release, procurement ceilings, clinical batch release, controlled-solvent purchase, production device activation, and regulated data export.
+
+The solo baseline and HoloVerify used the same small model families: `xai/grok-3-mini`, `google/gemini-2.5-flash-lite`, and `minimax/MiniMax-M2.5-highspeed`. The solo models saw the frozen packets alone. HoloVerify used those same families inside a governed workflow, with `minimax/MiniMax-M2.5-highspeed` serving as the Governor.
+
+The Governor did not win by swapping in a secret better model. Its job was control: demand missing evidence, force repair, block unsupported moves, and preserve final ALLOW / ESCALATE discipline.
+
+The result was stark.
 
 HoloVerify solved 40 out of 40 packets.
 
-The solo models completed 120 out of 120 attempts, but only got 6 right.
+The solo one-shots completed 120 out of 120 calls, but only 6 were KNEW/admissible. KNEW/admissible means the model picked the right ALLOW / ESCALATE verdict and preserved enough source-bound evidence to count under the gate.
 
-In 14 of those sibling pairs, the solo models failed every single time, while HoloVerify successfully solved both the ALLOW and the ESCALATE sibling.
+In 14 of the 20 sibling pairs, all six solo attempts failed while HoloVerify solved both siblings.
 
-This is still a bounded claim. It does not prove Holo is generally superior, and it does not prove universal statistical dominance. It supports the narrower thesis of this paper: at the action boundary, architecture matters. The exact same AI models behaved differently when placed inside a governed verification workflow with evidence gates, packet-identity locks, and final ALLOW/ESCALATE discipline.
+The token cost was also bounded: 426,002 Holo tokens versus 206,839 solo tokens, or about 2.06x. That is not free. But it is not "run ten expensive models on everything" either. It is the cost of governed verification at the boundary.
+
+Here is the clean error map.
+
+A positive means ESCALATE. A negative means ALLOW.
+
+A true positive means the system caught a risky packet. A false negative is the dangerous miss: an unsafe packet got allowed. A false positive is overblocking: a clean packet got escalated. A true negative means clean work was allowed to proceed.
+
+HV-20 tests both sides. The ESCALATE sibling tests false negatives. The ALLOW sibling tests false positives.
+
+The evidence is also hash-locked and inspectable. The canonical public package commit is `87b39f2`. The public package lock root is `5ffe3c41e5cf35324f9bb0518c24df118aad0eea15900abbb1d9996df1756695`. The package includes the public-safe packet set, sibling mapping, payload hashes, summary memo, no-provider audit, and proof summary. Packet identity passed.
+
+This is still a bounded claim. It does not prove Holo is generally superior, and it does not prove universal statistical dominance. It supports the narrower thesis of this paper: at the action boundary, architecture matters. The same model families behaved differently when placed inside a governed verification workflow with evidence gates, packet-identity locks, and final ALLOW / ESCALATE discipline.
 
 ### HoloBuild and stronger baselines
 

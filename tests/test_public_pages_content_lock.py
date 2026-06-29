@@ -30,7 +30,7 @@ def test_public_pages_parse_as_html():
 def test_whitepaper_version_labels_stay_in_sync():
     html = _read(WHITEPAPER)
     versions = set(re.findall(r"Version ([0-9]+(?:\.[0-9]+)*)", html))
-    assert versions == {"7.6"}
+    assert versions == {"7.7"}
 
 
 def test_benchmark_version_labels_stay_in_sync():

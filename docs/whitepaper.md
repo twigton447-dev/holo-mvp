@@ -4,8 +4,8 @@
 
 ### Why smart models still need a checkpoint before real-world action
 
-Version 7.6
-June 2026
+Version 7.7
+July 2026
 
 Taylor Wigton
 Founder, HoloEngine
@@ -421,6 +421,20 @@ A serious trust layer must escalate the first two and allow the third.
 Holo did that.
 
 Several non-Holo configurations either let unsafe orders through or overblocked the valid one.
+
+### HV-20 Runtime Cage: The 40-Packet Sibling Test
+
+HoloVerify now has a second kind of runtime proof: a frozen 40-packet action-boundary cage. In this run, the same AI models were tested twice—once on their own as solo baselines, and once inside the HoloVerify architecture.
+
+The test used 20 "sibling pairs" (one packet where the correct answer is ALLOW, and an identical-looking sibling where the correct answer is ESCALATE).
+
+HoloVerify solved 40 out of 40 packets.
+
+The solo models completed 120 out of 120 attempts, but only got 6 right.
+
+In 14 of those sibling pairs, the solo models failed every single time, while HoloVerify successfully solved both the ALLOW and the ESCALATE sibling.
+
+This is still a bounded claim. It does not prove Holo is generally superior, and it does not prove universal statistical dominance. It supports the narrower thesis of this paper: at the action boundary, architecture matters. The exact same AI models behaved differently when placed inside a governed verification workflow with evidence gates, packet-identity locks, and final ALLOW/ESCALATE discipline.
 
 ### HoloBuild and stronger baselines
 

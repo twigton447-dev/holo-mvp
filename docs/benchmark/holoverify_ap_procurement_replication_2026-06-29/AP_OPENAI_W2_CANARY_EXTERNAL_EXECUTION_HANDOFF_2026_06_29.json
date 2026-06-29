@@ -1,0 +1,211 @@
+{
+  "classification": "AP_OPENAI_W2_CANARY_EXTERNAL_EXECUTION_HANDOFF",
+  "date": "2026-06-29",
+  "status": "READY_FOR_AUTHORIZED_LOCAL_SHELL_EXECUTION",
+  "purpose": "Run one AP OpenAI-W2 Holo canary pair outside Codex because Codex cannot export frozen benchmark prompts to external providers under the active tenant policy.",
+  "codex_policy_state": {
+    "tenant_policy_blocks_live_provider_export_inside_codex": true,
+    "benchmark_failure": false,
+    "preflight_passed_locally": true,
+    "gov_placeholder_fix_active_commit": "4ae402f06d47f7e839de1aa4f8c2f68d88cf9a5c",
+    "freeze_root_matched": true,
+    "gemini_active": false,
+    "provider_calls_made_inside_codex_for_second_canary": 0,
+    "live_canary_started_inside_codex": false
+  },
+  "scope": {
+    "family": "AP / procurement / vendor-master controls",
+    "pair_id": "HV-AP-REP-001",
+    "pairs": 1,
+    "siblings": [
+      "A",
+      "B"
+    ],
+    "expected_holo_calls": 10,
+    "solo": false,
+    "judges": false,
+    "commerce": false,
+    "it": false,
+    "packet_edits": false,
+    "prompt_edits": false
+  },
+  "lineage": {
+    "packet_freeze": "de22377",
+    "openai_w2_protocol": "5064777",
+    "invalid_run_hardening": "5d365d",
+    "transport_policy": "69cdaea",
+    "worker_contract_hardening": "afdda17",
+    "compact_worker_verification": "57e5ce6",
+    "gov_placeholder_fix": "4ae402f",
+    "required_current_head": "4ae402f06d47f7e839de1aa4f8c2f68d88cf9a5c"
+  },
+  "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "provider_roster": [
+    {
+      "slot": "W1",
+      "provider": "xai",
+      "model": "grok-3-mini"
+    },
+    {
+      "slot": "G1",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed"
+    },
+    {
+      "slot": "W2",
+      "provider": "openai",
+      "model": "gpt-5.4-mini"
+    },
+    {
+      "slot": "G2",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed"
+    },
+    {
+      "slot": "W3",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed"
+    }
+  ],
+  "environment_variables": {
+    "required": [
+      "XAI_API_KEY",
+      "OPENAI_API_KEY",
+      "MINIMAX_API_KEY"
+    ],
+    "optional_minimax_endpoint_overrides": [
+      "MINIMAX_CHAT_COMPLETIONS_URL",
+      "MINIMAX_BASE_URL"
+    ],
+    "safety": "Do not paste provider keys into chat."
+  },
+  "local_wrapper": "/private/tmp/run_ap_openai_w2_one_pair_canary.py",
+  "output_root": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2/",
+  "commands": {
+    "preflight": [
+      "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+      "set -a; source .env; set +a",
+      "python3 - <<'PY'",
+      "import importlib.util",
+      "import json",
+      "p = \"/private/tmp/run_ap_openai_w2_one_pair_canary.py\"",
+      "spec = importlib.util.spec_from_file_location(\"canary\", p)",
+      "m = importlib.util.module_from_spec(spec)",
+      "spec.loader.exec_module(m)",
+      "freeze, pairs, canary_pairs, checks = m.preflight()",
+      "print(json.dumps({",
+      "    \"head_matches_gov_placeholder_fix\": checks[\"head_matches_gov_v2_commit\"],",
+      "    \"freeze_root\": freeze[\"summary\"].get(\"freeze_root_hash\"),",
+      "    \"pair_count\": len(pairs),",
+      "    \"canary_pair_id\": canary_pairs[0][\"pair_id\"],",
+      "    \"w2_model\": checks[\"w2_model\"],",
+      "    \"no_gemini_active\": checks[\"no_gemini_active\"],",
+      "    \"worker_contract_format\": checks[\"worker_contract_format\"],",
+      "    \"gov_contract_format\": checks[\"gov_contract_format\"],",
+      "    \"gov_prompt_placeholder_hits\": checks[\"gov_prompt_placeholder_hits\"],",
+      "    \"gov_prompt_selected_baton_lines\": checks[\"gov_prompt_selected_baton_lines\"],",
+      "    \"transport_max_retries\": checks[\"transport_max_retries\"],",
+      "    \"openai_timeout_seconds\": checks[\"openai_timeout_seconds\"],",
+      "    \"missing_provider_env\": checks[\"missing_provider_env\"],",
+      "}, indent=2, sort_keys=True))",
+      "PY"
+    ],
+    "live_canary": [
+      "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+      "set -a; source .env; set +a",
+      "python3 -B /private/tmp/run_ap_openai_w2_one_pair_canary.py"
+    ],
+    "post_run_audit": [
+      "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+      "RUN_DIR=\"$(ls -td docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2/run_* | head -1)\"",
+      "python3 - \"$RUN_DIR\" <<'PY'",
+      "import json",
+      "import sys",
+      "from pathlib import Path",
+      "run = Path(sys.argv[1])",
+      "summary = json.loads((run / \"canary_results.json\").read_text())",
+      "lock = json.loads((run / \"LOCK_VALIDATION.json\").read_text())",
+      "leak = json.loads((run / \"AP_OPENAI_W2_CANARY_NO_LEAKAGE_AUDIT.json\").read_text())",
+      "rows = [json.loads(line) for line in (run / \"TRACE_CALLS.jsonl\").read_text().splitlines() if line.strip()]",
+      "report = {",
+      "    \"run_dir\": str(run),",
+      "    \"classification\": summary.get(\"classification\"),",
+      "    \"readiness_passed\": summary.get(\"readiness_passed\"),",
+      "    \"failure_class\": summary.get(\"failure_class\"),",
+      "    \"provider_calls\": summary.get(\"provider_calls\"),",
+      "    \"expected_provider_calls\": summary.get(\"expected_provider_calls\"),",
+      "    \"worker_calls\": summary.get(\"worker_calls\"),",
+      "    \"gov_calls\": summary.get(\"gov_calls\"),",
+      "    \"solo_calls\": summary.get(\"solo_calls\"),",
+      "    \"judge_calls\": summary.get(\"judge_calls\"),",
+      "    \"provider_failures\": len(summary.get(\"provider_failures\") or []),",
+      "    \"terminal_failures\": len(summary.get(\"terminal_failures\") or []),",
+      "    \"root_failure\": summary.get(\"root_failure\"),",
+      "    \"readiness_assertions\": summary.get(\"readiness_assertions\"),",
+      "    \"lock_validation\": lock.get(\"validation_status\"),",
+      "    \"lock_root_signature\": lock.get(\"root_signature\"),",
+      "    \"leakage_status\": leak.get(\"status\"),",
+      "    \"trace_rows\": len(rows),",
+      "}",
+      "print(json.dumps(report, indent=2, sort_keys=True))",
+      "if not summary.get(\"readiness_passed\"):",
+      "    raise SystemExit(2)",
+      "PY"
+    ]
+  },
+  "expected_preflight_highlights": {
+    "head_matches_gov_placeholder_fix": true,
+    "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "canary_pair_id": "HV-AP-REP-001",
+    "w2_model": "gpt-5.4-mini",
+    "no_gemini_active": true,
+    "worker_contract_format": "compact_key_value_v1",
+    "gov_contract_format": "gov_micro_baton_v2",
+    "gov_prompt_placeholder_hits": [],
+    "missing_provider_env": []
+  },
+  "expected_outputs": [
+    "canary_summary.md",
+    "canary_results.json",
+    "TRACE_CALLS.jsonl",
+    "LOCK_MANIFEST.json",
+    "LOCK_VALIDATION.json",
+    "AP_OPENAI_W2_CANARY_NO_LEAKAGE_AUDIT.md",
+    "AP_OPENAI_W2_CANARY_NO_LEAKAGE_AUDIT.json",
+    "AP_OPENAI_W2_CANARY_READINESS_ASSERTIONS.json",
+    "CANARY_PRE_RUN_MANIFEST.json",
+    "prompts/",
+    "artifacts/"
+  ],
+  "pass_rules": [
+    "2 packets complete",
+    "1 pair complete",
+    "expected 10 Holo calls complete",
+    "no unrecovered provider failures",
+    "Gov v2 parses on every Gov turn",
+    "worker compact parses on every worker turn",
+    "no leakage",
+    "packet identity matches freeze",
+    "both sibling final verdicts correct",
+    "final selector present",
+    "solo calls are 0",
+    "judge calls are 0"
+  ],
+  "pass_classification": "AP_OPENAI_W2_CANARY_READY_FOR_FULL_FAMILY_RUN",
+  "fail_rules": [
+    "transport unrecovered",
+    "Gov parse/content failure",
+    "worker parse/content failure",
+    "verdict failure",
+    "leakage",
+    "packet drift",
+    "incomplete calls",
+    "solo or judge call appears"
+  ],
+  "failure_handling": [
+    "preserve generated run folder",
+    "do not repair silently",
+    "do not rerun automatically"
+  ],
+  "safety_note": "Run only in an authorized local shell/environment where exporting the frozen AP canary packet/prompt content to xAI, OpenAI, and MiniMax is permitted. Do not paste provider keys into chat."
+}

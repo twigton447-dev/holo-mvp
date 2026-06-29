@@ -12,13 +12,13 @@ Run the full AP / procurement OpenAI-W2 Holo family outside Codex because Codex 
 
 This refresh supersedes the stale full-family wrapper handoff and the earlier Gov-budget-only handoff. The live command now uses the repo-owned AP runtime path pinned to the successful all-six-collapse canary evidence, not `/private/tmp/run_ap_openai_w2_holo_policy_v1.py`.
 
-## Required Execution Head
+## Required Runtime Ancestor
 
 ```text
 e3b78f17096d48569cc9e9546d3a99b063499e1b
 ```
 
-Do not run from another HEAD without registering a new handoff.
+The current checkout must contain this canary-good runtime commit in its ancestry. The refreshed handoff itself may live on a later commit, so use the ancestor check below rather than requiring exact `HEAD` equality.
 
 ## Root Cause Fixed
 
@@ -138,7 +138,7 @@ Run this before live execution. It is local-only and should not call providers.
 
 ```bash
 cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
-test "$(git rev-parse HEAD)" = "e3b78f17096d48569cc9e9546d3a99b063499e1b"
+git merge-base --is-ancestor e3b78f17096d48569cc9e9546d3a99b063499e1b "$(git rev-parse HEAD)"
 python3 -B docs/benchmark/test_ap_full_holo_gov_runtime_path_2026_06_29.py
 python3 -B docs/benchmark/run_ap_replication_holoverify_3dna_2026_06_29.py --preflight-openai-w2
 ```
@@ -170,7 +170,7 @@ Run this only in an authorized local shell/environment. This is the patched repo
 
 ```bash
 cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
-test "$(git rev-parse HEAD)" = "e3b78f17096d48569cc9e9546d3a99b063499e1b"
+git merge-base --is-ancestor e3b78f17096d48569cc9e9546d3a99b063499e1b "$(git rev-parse HEAD)"
 set -a; source .env; set +a
 python3 -B docs/benchmark/run_ap_replication_holoverify_3dna_2026_06_29.py --run-holo-openai-w2
 ```

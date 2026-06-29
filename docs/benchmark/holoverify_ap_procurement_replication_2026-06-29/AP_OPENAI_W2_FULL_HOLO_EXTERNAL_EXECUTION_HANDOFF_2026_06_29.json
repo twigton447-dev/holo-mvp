@@ -7,7 +7,8 @@
         "stale_wrapper_path": "/private/tmp/run_ap_openai_w2_holo_policy_v1.py",
         "reason": "Full-family execution must use the committed repo-owned AP OpenAI-W2 runtime path pinned after the successful all-six-collapse canary evidence."
     },
-    "required_execution_head": "e3b78f17096d48569cc9e9546d3a99b063499e1b",
+    "required_runtime_ancestor_commit": "e3b78f17096d48569cc9e9546d3a99b063499e1b",
+    "head_guard_policy": "current HEAD must contain required_runtime_ancestor_commit; exact HEAD equality is not required because this handoff lives on a later commit",
   "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
   "lineage_commits": {
     "packet_freeze": "de22377be8175d04078ba6c70f1fd35222e9f572",
@@ -111,7 +112,7 @@
   ],
   "exact_preflight_command_lines": [
     "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
-        "test \"$(git rev-parse HEAD)\" = \"e3b78f17096d48569cc9e9546d3a99b063499e1b\"",
+        "git merge-base --is-ancestor e3b78f17096d48569cc9e9546d3a99b063499e1b \"$(git rev-parse HEAD)\"",
     "python3 -B docs/benchmark/test_ap_full_holo_gov_runtime_path_2026_06_29.py",
     "python3 -B docs/benchmark/run_ap_replication_holoverify_3dna_2026_06_29.py --preflight-openai-w2"
   ],
@@ -139,7 +140,7 @@
     },
   "exact_live_full_holo_command_lines": [
     "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
-        "test \"$(git rev-parse HEAD)\" = \"e3b78f17096d48569cc9e9546d3a99b063499e1b\"",
+        "git merge-base --is-ancestor e3b78f17096d48569cc9e9546d3a99b063499e1b \"$(git rev-parse HEAD)\"",
     "set -a; source .env; set +a",
     "python3 -B docs/benchmark/run_ap_replication_holoverify_3dna_2026_06_29.py --run-holo-openai-w2"
   ],

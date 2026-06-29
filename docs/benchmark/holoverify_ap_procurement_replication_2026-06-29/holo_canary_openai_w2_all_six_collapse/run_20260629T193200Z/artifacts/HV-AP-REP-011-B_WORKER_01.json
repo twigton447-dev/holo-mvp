@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "invoice release where PO is missing despite normal vendor history",
+    "allow_rule_assessment": "Exact source closure absent for PO dependency",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-0AC515CDA285-CTL",
+    "escalate_rule_assessment": "PO existence record missing from current sources",
+    "timing_scope_authority_dependency_check": "current PO must exist for this invoice unresolved"
+  },
+  "cited_evidence": [
+    "SRC-0AC515CDA285-CTL",
+    "SRC-0AC515CDA285-REQ",
+    "SRC-0AC515CDA285-BND",
+    "SRC-0AC515CDA285-FBK",
+    "SRC-0AC515CDA285-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "current PO must exist for this invoice",
+    "SRC-0AC515CDA285-CTL",
+    "SRC-0AC515CDA285-BND"
+  ],
+  "final_answer": "Source records show unresolved PO dependency for invoice release. Control record SRC-0AC515CDA285-CTL confirms missing closure. Policy requires exact boundary match before execution. Escalate to obtain current PO record.",
+  "open_blockers": [
+    "current PO must exist for this invoice"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

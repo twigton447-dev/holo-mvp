@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: invoice release where PO is missing despite normal vendor history.",
+    "allow_rule_assessment": "PO must exist; boundary not closed",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-1D955A0F73B0-CTL",
+    "escalate_rule_assessment": "Unresolved PO existence blocks execution",
+    "timing_scope_authority_dependency_check": "current PO must exist for this invoice"
+  },
+  "cited_evidence": [
+    "SRC-1D955A0F73B0-CTL",
+    "SRC-1D955A0F73B0-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "The source records show the PO requirement is unresolved for this invoice release. Exact boundary not closed by current control record. Action must escalate until PO existence is confirmed in source documents.",
+  "open_blockers": [
+    "current PO must exist for this invoice"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

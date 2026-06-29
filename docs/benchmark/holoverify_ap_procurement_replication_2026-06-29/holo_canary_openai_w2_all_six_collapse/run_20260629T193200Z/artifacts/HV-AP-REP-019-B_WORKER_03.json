@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action for partial delivery",
+    "allow_rule_assessment": "Source records do not close exact action boundary for partial delivery",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-978A8E8D27B0-CTL",
+    "escalate_rule_assessment": "Receipt quantity dependency open before execution",
+    "timing_scope_authority_dependency_check": "receipt quantity must cover invoice line"
+  },
+  "cited_evidence": [
+    "SRC-978A8E8D27B0-CTL",
+    "SRC-978A8E8D27B0-POL",
+    "SRC-978A8E8D27B0-BND",
+    "SRC-978A8E8D27B0-FBK",
+    "SRC-978A8E8D27B0-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "receipt quantity must cover invoice line",
+    "SRC-978A8E8D27B0-CTL",
+    "SRC-978A8E8D27B0-BND"
+  ],
+  "final_answer": "The controlling record does not close the exact action boundary. The receipt quantity must cover the invoice line before payment, invoice release, or vendor-master execution may proceed. Vendor history and urgent tone do not override source-control records. Escalation is required until the receipt dependency is resolved in the source records.",
+  "open_blockers": [
+    "receipt quantity must cover invoice line"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

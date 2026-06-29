@@ -17,7 +17,7 @@ This is not a Holo run and not a judge run.
 The triage runner was committed at:
 
 ```text
-266ffbbb36b4ddf86254fa9fe592b651d782a3fd
+66e15f3db82fa7560cd7ec42715f5c646fb1ee6b
 ```
 
 The local shell should verify that this commit is an ancestor of the current checkout before execution.
@@ -57,13 +57,22 @@ Families:
 | Slot | Provider/model |
 | --- | --- |
 | Solo A | `xai/grok-3-mini` |
-| Solo B | `openai/gpt-5.4-mini` |
+| Solo B | `openai/gpt-4o-mini` |
 | Solo C | `minimax/MiniMax-M2.5-highspeed` |
 
-Expected calls:
+Full-scope expected calls:
 
 ```text
 120 packets x 3 solo models = 360 provider calls
+```
+
+Recommended batch order:
+
+```text
+AP smoke: 2 sibling pairs / 4 packets / 12 provider calls
+AP family: 20 sibling pairs / 40 packets / 120 provider calls
+Commerce family: 20 sibling pairs / 40 packets / 120 provider calls
+IT access family: 20 sibling pairs / 40 packets / 120 provider calls
 ```
 
 ## Hard Boundaries
@@ -98,22 +107,22 @@ Optional MiniMax endpoint overrides, only if needed locally:
 
 Do not paste provider keys into chat.
 
-## Exact Preflight Command
+## Exact Preflight Commands
 
-This is local-only and should not call providers.
+These are local-only and should not call providers.
 
 ```bash
 cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
-git merge-base --is-ancestor 266ffbbb36b4ddf86254fa9fe592b651d782a3fd "$(git rev-parse HEAD)"
+git merge-base --is-ancestor 66e15f3db82fa7560cd7ec42715f5c646fb1ee6b "$(git rev-parse HEAD)"
+python3 -B docs/benchmark/run_replication_3family_solo_triage_2026_06_29.py --preflight --family HV-AP-REP-2026-06-29 --pair-limit 2 --batch-label ap_smoke_2pair_12call
 python3 -B docs/benchmark/run_replication_3family_solo_triage_2026_06_29.py --preflight
 ```
 
 Preflight must report:
 
 - `status: PASS`
-- `packet_count: 120`
-- `pair_count: 60`
-- `expected_provider_calls: 360`
+- AP smoke: `packet_count: 4`, `pair_count: 2`, `expected_provider_calls: 12`
+- Full scope: `packet_count: 120`, `pair_count: 60`, `expected_provider_calls: 360`
 - `expected_gov_calls: 0`
 - `expected_holo_calls: 0`
 - `expected_judge_calls: 0`
@@ -121,25 +130,37 @@ Preflight must report:
 - `judge_calls_made_by_preflight: 0`
 - no prompt leakage rows
 - no Gemini in triage roster
+- OpenAI slot is `gpt-4o-mini`
 
-## Exact Live Triage Command
+## Exact Live Triage Commands
 
-Run this only in an authorized local shell/environment.
+Run these only in an authorized local shell/environment. Stop after each batch and inspect the generated summary before continuing.
+
+AP smoke first:
 
 ```bash
 cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
-git merge-base --is-ancestor 266ffbbb36b4ddf86254fa9fe592b651d782a3fd "$(git rev-parse HEAD)"
+git merge-base --is-ancestor 66e15f3db82fa7560cd7ec42715f5c646fb1ee6b "$(git rev-parse HEAD)"
 set -a; source .env; set +a
-python3 -B docs/benchmark/run_replication_3family_solo_triage_2026_06_29.py --run-live
+python3 -B docs/benchmark/run_replication_3family_solo_triage_2026_06_29.py --run-live --family HV-AP-REP-2026-06-29 --pair-limit 2 --batch-label ap_smoke_2pair_12call
 ```
 
-If the command exits nonzero, preserve the generated run folder. Do not rerun automatically.
+If the AP smoke is clean, run family batches one at a time:
+
+```bash
+python3 -B docs/benchmark/run_replication_3family_solo_triage_2026_06_29.py --run-live --family HV-AP-REP-2026-06-29 --batch-label ap_family_120call
+python3 -B docs/benchmark/run_replication_3family_solo_triage_2026_06_29.py --run-live --family HV-ACOM-REP-2026-06-29 --batch-label acom_family_120call
+python3 -B docs/benchmark/run_replication_3family_solo_triage_2026_06_29.py --run-live --family HV-ITAC-REP-2026-06-29 --batch-label itac_family_120call
+```
+
+If any command exits nonzero, preserve the generated run folder. Do not rerun automatically.
 
 ## Exact Post-Run Audit Command
 
 ```bash
 cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
-RUN_DIR="$(ls -td docs/benchmark/holoverify_replication_packet_freeze_3families_2026-06-29/solo_triage_3mini/run_* | head -1)"
+BATCH_LABEL=ap_smoke_2pair_12call
+RUN_DIR="$(ls -td docs/benchmark/holoverify_replication_packet_freeze_3families_2026-06-29/solo_triage_3mini/${BATCH_LABEL}/run_* | head -1)"
 python3 - "$RUN_DIR" <<'PY'
 import json
 import sys
@@ -172,7 +193,7 @@ PY
 Run folder:
 
 ```text
-docs/benchmark/holoverify_replication_packet_freeze_3families_2026-06-29/solo_triage_3mini/run_*
+docs/benchmark/holoverify_replication_packet_freeze_3families_2026-06-29/solo_triage_3mini/<batch_label>/run_*
 ```
 
 Expected files:

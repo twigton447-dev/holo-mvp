@@ -49,6 +49,7 @@ OPENAI_W2_REGISTRATION = AP_ROOT / "AP_OPENAI_W2_ROSTER_VARIANT_REGISTRATION_202
 OPENAI_W2_AVAILABILITY = AP_ROOT / "AP_OPENAI_W2_MODEL_AVAILABILITY_CHECK_2026_06_29.json"
 OPENAI_RESPONSES_TIMEOUT_SECONDS = 240
 AP_OPENAI_W2_GOV_MAX_TOKENS = 1024
+OPENAI_W2_HOLO_RUN_ROOT = AP_ROOT / "holo_live_runs_openai_w2"
 
 ANSWER_KEY_LEAK_PATTERNS = (
     "packet_truth",
@@ -963,6 +964,111 @@ def run_holo() -> int:
     return 0 if summary["readiness_passed"] else 1
 
 
+def scan_openai_w2_holo_no_leakage(run_dir: Path) -> dict[str, Any]:
+    hits = []
+    prompt_files = sorted((run_dir / "prompts").glob("*.json")) if (run_dir / "prompts").exists() else []
+    for path in prompt_files:
+        text = path.read_text(errors="replace")
+        lower = text.lower()
+        for pattern in ANSWER_KEY_LEAK_PATTERNS:
+            if pattern.lower() in lower:
+                hits.append({"path": str(path.relative_to(run_dir)), "pattern": pattern})
+    return {
+        "classification": "AP_OPENAI_W2_HOLO_NO_LEAKAGE_AUDIT",
+        "status": "PASS" if not hits else "FAIL",
+        "run_dir": str(run_dir),
+        "prompt_files_scanned": len(prompt_files),
+        "hits": hits,
+    }
+
+
+def write_openai_w2_holo_auxiliary_audits(run_dir: Path, summary: dict[str, Any]) -> None:
+    leakage = scan_openai_w2_holo_no_leakage(run_dir)
+    write_json(run_dir / "AP_OPENAI_W2_HOLO_NO_LEAKAGE_AUDIT.json", leakage)
+    write_text(
+        run_dir / "AP_OPENAI_W2_HOLO_NO_LEAKAGE_AUDIT.md",
+        "\n".join(
+            [
+                "# AP OpenAI-W2 Holo No-Leakage Audit",
+                "",
+                f"Status: `{leakage['status']}`",
+                f"Prompt files scanned: `{leakage['prompt_files_scanned']}`",
+                f"Hits: `{len(leakage['hits'])}`",
+                "",
+            ]
+        ),
+    )
+    checks = {
+        "holo_packets": "PASS" if summary.get("packet_count") == 40 else "FAIL",
+        "holo_pairs": "PASS" if summary.get("valid_pairs") == 20 else "FAIL",
+        "provider_calls": "PASS" if summary.get("provider_calls") == 200 else "FAIL",
+        "worker_calls": "PASS" if summary.get("worker_calls") == 120 else "FAIL",
+        "gov_calls": "PASS" if summary.get("gov_calls") == 80 else "FAIL",
+        "no_judges": "PASS" if summary.get("judge_calls") == 0 else "FAIL",
+        "provider_failures": "PASS" if not summary.get("provider_failures") else "FAIL",
+        "no_leakage": leakage["status"],
+        "readiness_passed": "PASS" if summary.get("readiness_passed") else "FAIL",
+    }
+    result = (
+        "AP_OPENAI_W2_HOLO_FROZEN_READY_FOR_SOLO_BASELINE"
+        if all(value == "PASS" for value in checks.values())
+        else "AP_OPENAI_W2_HOLO_NOT_READY"
+    )
+    assertions = {
+        "classification": "AP_OPENAI_W2_HOLO_READINESS_ASSERTIONS",
+        "result": result,
+        **checks,
+    }
+    write_json(run_dir / "AP_OPENAI_W2_HOLO_READINESS_ASSERTIONS.json", assertions)
+    write_text(
+        run_dir / "AP_OPENAI_W2_HOLO_READINESS_ASSERTIONS.md",
+        "\n".join(
+            [
+                "# AP OpenAI-W2 Holo Readiness Assertions",
+                "",
+                f"Result: `{result}`",
+                "",
+                "| Assertion | Value |",
+                "| --- | --- |",
+                *[f"| `{key}` | `{value}` |" for key, value in checks.items()],
+                "",
+            ]
+        ),
+    )
+
+
+def run_openai_w2_holo() -> int:
+    manifest = build_openai_w2_live_holo_preflight()
+    if manifest["status"] != "PASS":
+        raise RuntimeError(f"AP OpenAI-W2 preflight failed: {manifest.get('blocked_reason')}")
+    for key in ("xai", OPENAI_W2_MODEL_KEY, "minimax"):
+        env = RUNNER.MODEL_CONFIGS[key]["api_key_env"]
+        if not os.getenv(env, "").strip():
+            raise RuntimeError(f"{env} missing")
+    pairs = build_pairs(read_freeze()["records"])
+    run_id = datetime.now(timezone.utc).strftime("run_%Y%m%dT%H%M%SZ")
+    run_dir = OPENAI_W2_HOLO_RUN_ROOT / run_id
+    run_dir.mkdir(parents=True, exist_ok=False)
+    trace_path = run_dir / "TRACE_CALLS.jsonl"
+    packet_results: list[dict[str, Any]] = []
+    with trace_path.open("w") as trace:
+        for pair in pairs:
+            for suffix in ("A", "B"):
+                result = RUNNER._run_packet(run_id, pair, suffix, manifest, run_dir, trace)
+                packet_results.append(result)
+                if RUNNER._terminal_call_failures(result["calls"]):
+                    summary = holo_summary(run_dir, manifest, packet_results, trace_path)
+                    lock_directory(run_dir, "LOCK")
+                    write_openai_w2_holo_auxiliary_audits(run_dir, summary)
+                    print(json.dumps(summary, indent=2, sort_keys=True))
+                    return 1
+    summary = holo_summary(run_dir, manifest, packet_results, trace_path)
+    lock_directory(run_dir, "LOCK")
+    write_openai_w2_holo_auxiliary_audits(run_dir, summary)
+    print(json.dumps(summary, indent=2, sort_keys=True))
+    return 0 if summary["readiness_passed"] else 1
+
+
 def solo_gate(parsed: dict[str, Any] | None, packet: dict[str, Any]) -> dict[str, Any]:
     failures: list[str] = []
     answer_key = packet["deterministic_answer_key_for_local_audit_only"]
@@ -1440,6 +1546,7 @@ def main() -> int:
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--preflight-openai-w2", action="store_true")
     parser.add_argument("--run-holo", action="store_true")
+    parser.add_argument("--run-holo-openai-w2", action="store_true")
     parser.add_argument("--finalize-holo", action="store_true")
     parser.add_argument("--run-solo", action="store_true")
     parser.add_argument("--build-evidence", action="store_true")
@@ -1456,6 +1563,8 @@ def main() -> int:
         return 0 if preflight["status"] == "PASS" else 1
     if args.run_holo:
         return run_holo()
+    if args.run_holo_openai_w2:
+        return run_openai_w2_holo()
     if args.finalize_holo:
         holo_run_dir = Path(args.holo_run_dir) if args.holo_run_dir else latest_run(AP_ROOT / "holo_live_runs", "run_*")
         print(json.dumps(finalize_holo_run(holo_run_dir), indent=2, sort_keys=True))

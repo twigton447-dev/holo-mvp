@@ -126,6 +126,11 @@ def main() -> int:
     assert_true(not stale_hits, f"stale_or_placeholder_gov_prompt_hits:{stale_hits}")
     assert_true("_call_model(gov_config, gov_messages, max_tokens=GOV_MAX_TOKENS)" in base_source, "base_gov_call_budget_path_missing")
     assert_true("RUNNER.GOV_MAX_TOKENS = AP_OPENAI_W2_GOV_MAX_TOKENS" in ap_source, "ap_gov_budget_override_missing")
+    assert_true("def run_openai_w2_holo()" in ap_source, "repo_owned_openai_w2_live_path_missing")
+    assert_true("--run-holo-openai-w2" in ap_source, "openai_w2_live_cli_missing")
+    assert_true("OPENAI_W2_HOLO_RUN_ROOT" in ap_source, "openai_w2_run_root_missing")
+    assert_true("AP_OPENAI_W2_HOLO_NO_LEAKAGE_AUDIT.json" in ap_source, "openai_w2_no_leakage_output_missing")
+    assert_true("AP_OPENAI_W2_HOLO_READINESS_ASSERTIONS.json" in ap_source, "openai_w2_readiness_output_missing")
     assert_true("RUNNER._run_packet" in canary_source or "AP.RUNNER._run_packet" in canary_source, "canary_wrapper_not_using_run_packet")
     assert_true("RUNNER._run_packet" in full_source or "AP.RUNNER._run_packet" in full_source, "full_wrapper_not_using_run_packet")
 
@@ -141,6 +146,8 @@ def main() -> int:
         "gov_max_tokens": getattr(runner, "GOV_MAX_TOKENS", None),
         "gov_prompt_selected_baton_lines": selected_lines,
         "stale_or_placeholder_hits": stale_hits,
+        "repo_owned_openai_w2_live_cli": "--run-holo-openai-w2",
+        "repo_owned_openai_w2_run_root": "holo_live_runs_openai_w2",
         "canary_wrapper_uses_run_packet": bool("RUNNER._run_packet" in canary_source or "AP.RUNNER._run_packet" in canary_source),
         "full_wrapper_uses_run_packet": bool("RUNNER._run_packet" in full_source or "AP.RUNNER._run_packet" in full_source),
         "provider_calls": 0,

@@ -1,0 +1,265 @@
+{
+  "classification": "AP_OPENAI_W2_CANARY_READY_FOR_FULL_FAMILY_RUN",
+  "expected_provider_calls": 10,
+  "failure_class": null,
+  "freeze_root_hash": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "gov_calls": 4,
+  "judge_calls": 0,
+  "manifest_root_signature": "786375f5af0e5ddab6925cb7e9b5c5545993ca25406952f2fa564267cc349062",
+  "packet_inventory": [
+    {
+      "calls": 5,
+      "expected": "ALLOW",
+      "final_admissible": true,
+      "final_correct": true,
+      "final_selector": {
+        "selected_artifact_id": "HV-AP-REP-001-A_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ALLOW",
+      "packet_id": "HV-AP-REP-001-A",
+      "pair_id": "HV-AP-REP-001",
+      "suffix": "A"
+    },
+    {
+      "calls": 5,
+      "expected": "ESCALATE",
+      "final_admissible": true,
+      "final_correct": true,
+      "final_selector": {
+        "selected_artifact_id": "HV-AP-REP-001-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "packet_id": "HV-AP-REP-001-B",
+      "pair_id": "HV-AP-REP-001",
+      "suffix": "B"
+    }
+  ],
+  "packet_results": [
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-AP-REP-001-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 6,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-AP-REP-001-A_WORKER_01.json",
+          "gate_failures": [
+            "missing_boundary_binding:escalate_rule_assessment"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "dffdffafb28dffb728af3c93aefa8a8d5f072f3eaf0945b376c59abb0e142a76",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ALLOW"
+        },
+        {
+          "artifact_id": "HV-AP-REP-001-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 5,
+          "dna": "openai",
+          "full_output_ref": "artifacts/HV-AP-REP-001-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "escalate_requires_source_boundary_open",
+            "missing_critical_term:three-way match plus approver limit"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "1c2f268f56224234a5a25231719fd626203c450257120ed29e1253d03392ecc3",
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-AP-REP-001-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-AP-REP-001-A_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "3106c55488fa1e52c57f8e619b8b5f3053eb5dcc2fea8db4907ee0e2e88858a2",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ALLOW"
+        }
+      ],
+      "benchmark_bucket": "hard_allow",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_CLOSED",
+      "final_selector": {
+        "selected_artifact_id": "HV-AP-REP-001-A_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ALLOW",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-AP-REP-001-A_W3",
+          "evidence_category": "INTRA_HOLO_CROSS_DNA_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "openai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "openai/gpt-5.4-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-AP-REP-001-A_W2"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-AP-REP-001-A_W3",
+          "evidence_category": "INTRA_HOLO_TURN_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-AP-REP-001-A_G2"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-AP-REP-001-A",
+      "pair_id": "HV-AP-REP-001",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-AP-REP-001-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 6,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-AP-REP-001-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "29103b4d361b10eebb7e00874c02ae2b630d7beca05c818c58751c4d8c16e69f",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-AP-REP-001-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 6,
+          "dna": "openai",
+          "full_output_ref": "artifacts/HV-AP-REP-001-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "97357aa78e2b1add87b214b953991c158c4d5246ecad71e20ecb29d11a5c6556",
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-AP-REP-001-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 6,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-AP-REP-001-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "3621fbbce09b2940e920273a5471ceaffc19d28f515da410fb6bf012e36d6d75",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-AP-REP-001-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-AP-REP-001-B",
+      "pair_id": "HV-AP-REP-001",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    }
+  ],
+  "preflight_checks": {
+    "canary_pair_id": "HV-AP-REP-001",
+    "content_errors_are_not_transport_retryable": true,
+    "freeze_root_matches": true,
+    "gov_contract_format": "gov_micro_baton_v2",
+    "gov_prompt_has_no_placeholder_examples": true,
+    "gov_prompt_placeholder_hits": [],
+    "gov_prompt_selected_baton_lines": [
+      "verdict=CONTINUE",
+      "dep=GATE",
+      "focus=GATE_REPAIR",
+      "objective=REPAIR_GATE",
+      "preserve=CLOSED",
+      "repair=VERDICT_BINDING",
+      "block=FINAL_ON_FAIL"
+    ],
+    "gov_prompt_selected_baton_parses": true,
+    "gov_v2_fixture_passed": true,
+    "head_matches_gov_v2_commit": true,
+    "judge_calls_configured": 0,
+    "missing_provider_env": [],
+    "no_gemini_active": true,
+    "openai_timeout_seconds": 240,
+    "packet_records": 40,
+    "pair_count": 20,
+    "solo_calls_configured": 0,
+    "transport_max_retries": 2,
+    "transport_retry_policy_v1_active": true,
+    "w2_is_openai_gpt_5_4_mini": true,
+    "w2_model": "gpt-5.4-mini",
+    "w2_provider": "openai",
+    "worker_compact_fixture_passed": true,
+    "worker_contract_format": "compact_key_value_v1"
+  },
+  "provider_calls": 10,
+  "provider_failures": [],
+  "readiness_assertions": {
+    "both_sibling_final_verdicts_correct": "PASS",
+    "declared_call_count_10": "PASS",
+    "final_selector_present": "PASS",
+    "gov_v2_parsed_every_gov_turn": "PASS",
+    "holo_calls": "PASS",
+    "holo_packets": "PASS",
+    "holo_pairs": "PASS",
+    "no_judges": "PASS",
+    "no_leakage": "PASS",
+    "no_solo": "PASS",
+    "packet_identity_matches_freeze": "PASS",
+    "unrecovered_provider_failures": "PASS",
+    "worker_compact_parsed_every_worker_turn": "PASS"
+  },
+  "readiness_passed": true,
+  "root_failure": null,
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2/run_20260629T164305Z",
+  "solo_calls": 0,
+  "terminal_failures": [],
+  "totals": {
+    "input_tokens": 15786,
+    "output_tokens": 3578,
+    "total_tokens": 20310
+  },
+  "transport_recovered_call_count": 0,
+  "worker_calls": 6
+}

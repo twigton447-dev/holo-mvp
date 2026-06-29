@@ -32,13 +32,14 @@ if str(REPO_ROOT) not in sys.path:
 FREEZE_ROOT = BENCHMARK_ROOT / "holoverify_replication_packet_freeze_3families_2026-06-29"
 RUN_ROOT = FREEZE_ROOT / "solo_triage_3mini"
 EXPECTED_FREEZE_ROOT_HASH = "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7"
+OPENAI_WEAK_MODEL_KEY = "openai_weak"
+OPENAI_WEAK_MODEL_ID = "gpt-4o-mini"
 EXPECTED_FAMILIES = {
     "HV-AP-REP-2026-06-29": "AP / procurement / vendor-master controls",
     "HV-ACOM-REP-2026-06-29": "Agentic commerce / order execution controls",
     "HV-ITAC-REP-2026-06-29": "IT access / permission change controls",
 }
-MODEL_KEYS = ("xai", "openai_w2", "minimax")
-EXPECTED_PROVIDER_CALLS = 120 * len(MODEL_KEYS)
+MODEL_KEYS = ("xai", OPENAI_WEAK_MODEL_KEY, "minimax")
 
 FORBIDDEN_PROMPT_TERMS = (
     "packet_truth",
@@ -68,6 +69,13 @@ def load_ap_runner_module():
     assert spec and spec.loader
     spec.loader.exec_module(module)
     module.configure_openai_w2_runner()
+    module.RUNNER.MODEL_CONFIGS[OPENAI_WEAK_MODEL_KEY] = {
+        "provider": "openai",
+        "model": OPENAI_WEAK_MODEL_ID,
+        "dna": "openai",
+        "api_key_env": "OPENAI_API_KEY",
+        "kind": "openai_responses",
+    }
     return module
 
 
@@ -175,6 +183,36 @@ def prompt_leakage_hits(prompt_text: str) -> list[str]:
     return [term for term in FORBIDDEN_PROMPT_TERMS if term.lower() in lower]
 
 
+def filter_records(
+    records: list[dict[str, Any]],
+    family_ids: list[str] | None = None,
+    pair_limit: int | None = None,
+    packet_limit: int | None = None,
+) -> list[dict[str, Any]]:
+    selected = records
+    if family_ids:
+        unknown = sorted(set(family_ids) - set(EXPECTED_FAMILIES))
+        if unknown:
+            raise RuntimeError(f"unknown_family_ids:{unknown}")
+        selected = [row for row in selected if row["family_id"] in set(family_ids)]
+    if pair_limit is not None:
+        if pair_limit < 1:
+            raise RuntimeError("pair_limit_must_be_positive")
+        ordered_pairs = []
+        seen_pairs = set()
+        for row in selected:
+            if row["pair_id"] not in seen_pairs:
+                seen_pairs.add(row["pair_id"])
+                ordered_pairs.append(row["pair_id"])
+        keep_pairs = set(ordered_pairs[:pair_limit])
+        selected = [row for row in selected if row["pair_id"] in keep_pairs]
+    if packet_limit is not None:
+        if packet_limit < 1:
+            raise RuntimeError("packet_limit_must_be_positive")
+        selected = selected[:packet_limit]
+    return selected
+
+
 def build_call_plan(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     plan = []
     for model_key in MODEL_KEYS:
@@ -196,8 +234,16 @@ def model_roster() -> list[dict[str, Any]]:
     ]
 
 
-def preflight_report() -> dict[str, Any]:
-    records = read_freeze_records()
+def preflight_report(
+    family_ids: list[str] | None = None,
+    pair_limit: int | None = None,
+    packet_limit: int | None = None,
+    batch_label: str = "all_families",
+) -> dict[str, Any]:
+    all_records = read_freeze_records()
+    records = filter_records(all_records, family_ids=family_ids, pair_limit=pair_limit, packet_limit=packet_limit)
+    if not records:
+        raise RuntimeError("no_records_selected")
     call_plan = build_call_plan(records)
     family_counts = Counter(row["family_id"] for row in records)
     truth_counts = Counter(row["packet_truth"] for row in records)
@@ -211,13 +257,13 @@ def preflight_report() -> dict[str, Any]:
             leakage_rows.append({"packet_id": record["packet_id"], "hits": hits})
     checks = {
         "freeze_root_matches": True,
-        "families": len(family_counts) == 3,
-        "packets": len(records) == 120,
-        "pairs": len({row["pair_id"] for row in records}) == 60,
-        "truth_balance": truth_counts == {"ALLOW": 60, "ESCALATE": 60},
+        "families_selected": bool(family_counts),
+        "packets_selected": bool(records),
+        "pairs_selected": bool({row["pair_id"] for row in records}),
+        "truths_selected": bool(truth_counts),
         "model_count": len(MODEL_KEYS) == 3,
-        "expected_provider_calls": len(call_plan) == EXPECTED_PROVIDER_CALLS,
-        "openai_w2_is_gpt_5_4_mini": RUNNER.MODEL_CONFIGS["openai_w2"]["model"] == "gpt-5.4-mini",
+        "expected_provider_calls": len(call_plan) == len(records) * len(MODEL_KEYS),
+        "openai_weak_is_gpt_4o_mini": RUNNER.MODEL_CONFIGS[OPENAI_WEAK_MODEL_KEY]["model"] == OPENAI_WEAK_MODEL_ID,
         "no_gemini_in_triage_roster": all("gemini" not in RUNNER.MODEL_CONFIGS[key]["model"].lower() for key in MODEL_KEYS),
         "no_gov_calls_configured": True,
         "no_holo_state_configured": True,
@@ -228,8 +274,14 @@ def preflight_report() -> dict[str, Any]:
     }
     return {
         "classification": "HOLOVERIFY_REPLICATION_3FAMILY_SOLO_TRIAGE_PREFLIGHT",
+        "batch_label": batch_label,
         "status": "PASS" if all(checks.values()) else "FAIL",
         "freeze_root": EXPECTED_FREEZE_ROOT_HASH,
+        "selection": {
+            "family_ids": family_ids or sorted(EXPECTED_FAMILIES),
+            "pair_limit": pair_limit,
+            "packet_limit": packet_limit,
+        },
         "families": dict(family_counts),
         "truth_counts": dict(truth_counts),
         "pair_count": len({row["pair_id"] for row in records}),
@@ -314,19 +366,28 @@ def solo_label(provider_ok: bool, parse_ok: bool, parsed: dict[str, Any] | None,
     return "STRUCTURAL_OR_EVIDENCE_FAIL"
 
 
-def run_live() -> int:
-    records = read_freeze_records()
+def run_live(
+    family_ids: list[str] | None = None,
+    pair_limit: int | None = None,
+    packet_limit: int | None = None,
+    batch_label: str = "all_families",
+) -> int:
+    all_records = read_freeze_records()
+    records = filter_records(all_records, family_ids=family_ids, pair_limit=pair_limit, packet_limit=packet_limit)
+    if not records:
+        raise RuntimeError("no_records_selected")
     call_plan = build_call_plan(records)
     for key in MODEL_KEYS:
         env = RUNNER.MODEL_CONFIGS[key]["api_key_env"]
         if not os.getenv(env, "").strip():
             raise RuntimeError(f"{env} missing")
-    preflight = preflight_report()
+    preflight = preflight_report(family_ids=family_ids, pair_limit=pair_limit, packet_limit=packet_limit, batch_label=batch_label)
     if preflight["status"] != "PASS":
         raise RuntimeError(f"preflight_failed:{preflight['checks']}")
 
     run_id = datetime.now(timezone.utc).strftime("run_%Y%m%dT%H%M%SZ")
-    run_dir = RUN_ROOT / run_id
+    safe_label = "".join(char if char.isalnum() or char in {"-", "_"} else "_" for char in batch_label)
+    run_dir = RUN_ROOT / safe_label / run_id
     prompts_dir = run_dir / "prompts"
     prompts_dir.mkdir(parents=True, exist_ok=False)
     write_json(run_dir / "SOLO_TRIAGE_PREFLIGHT.json", preflight)
@@ -424,6 +485,7 @@ def run_live() -> int:
 
 
 def summarize(run_dir: Path, rows: list[dict[str, Any]], totals: dict[str, int], trace_path: Path, preflight: dict[str, Any]) -> dict[str, Any]:
+    expected_provider_calls = preflight["expected_provider_calls"]
     by_model = {}
     for key in MODEL_KEYS:
         config = RUNNER.MODEL_CONFIGS[key]
@@ -431,7 +493,7 @@ def summarize(run_dir: Path, rows: list[dict[str, Any]], totals: dict[str, int],
         counts = Counter(row.get("solo_label") for row in model_rows)
         by_model[f"{config['provider']}/{config['model']}"] = {
             "calls": len(model_rows),
-            "expected_calls": 120,
+            "expected_calls": preflight["packet_count"],
             "knew_admissible": counts.get("KNEW", 0),
             "wrong_verdict": counts.get("WRONG_VERDICT", 0),
             "structural_or_evidence_fail": counts.get("STRUCTURAL_OR_EVIDENCE_FAIL", 0),
@@ -450,7 +512,7 @@ def summarize(run_dir: Path, rows: list[dict[str, Any]], totals: dict[str, int],
         by_family[family_id] = {
             "domain": EXPECTED_FAMILIES[family_id],
             "calls": len(family_rows),
-            "expected_calls": 40 * len(MODEL_KEYS),
+            "expected_calls": preflight["families"].get(family_id, 0) * len(MODEL_KEYS),
             "knew_admissible": sum(1 for row in family_rows if row.get("solo_label") == "KNEW"),
             "not_knew": sum(1 for row in family_rows if row.get("solo_label") != "KNEW"),
             "wrong_verdict": sum(1 for row in family_rows if row.get("solo_label") == "WRONG_VERDICT"),
@@ -459,13 +521,14 @@ def summarize(run_dir: Path, rows: list[dict[str, Any]], totals: dict[str, int],
         }
     pair_rankings = build_pair_rankings(rows)
     provider_failures = [row for row in rows if row.get("provider_call_ok") is not True]
-    complete = len(rows) == EXPECTED_PROVIDER_CALLS and not provider_failures
+    complete = len(rows) == expected_provider_calls and not provider_failures
     return {
         "classification": "HOLOVERIFY_REPLICATION_3FAMILY_SOLO_TRIAGE_COMPLETE" if complete else "HOLOVERIFY_REPLICATION_3FAMILY_SOLO_TRIAGE_INVALID_OR_INCOMPLETE",
+        "batch_label": preflight["batch_label"],
         "run_dir": str(run_dir),
         "freeze_root": EXPECTED_FREEZE_ROOT_HASH,
         "provider_calls": len(rows),
-        "expected_provider_calls": EXPECTED_PROVIDER_CALLS,
+        "expected_provider_calls": expected_provider_calls,
         "gov_calls": 0,
         "holo_calls": 0,
         "judge_calls": 0,
@@ -644,14 +707,28 @@ def validate_run_lock(run_dir: Path) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preflight", action="store_true", help="Local no-provider preflight only.")
-    parser.add_argument("--run-live", action="store_true", help="Run the 360-call solo triage in an authorized shell.")
+    parser.add_argument("--run-live", action="store_true", help="Run solo triage in an authorized shell.")
+    parser.add_argument("--family", action="append", choices=sorted(EXPECTED_FAMILIES), help="Limit to a frozen family. May be repeated.")
+    parser.add_argument("--pair-limit", type=int, help="Limit to the first N sibling pairs after family filtering.")
+    parser.add_argument("--packet-limit", type=int, help="Limit to the first N packets after family/pair filtering.")
+    parser.add_argument("--batch-label", default="all_families", help="Label used in output run path and reports.")
     args = parser.parse_args()
     if args.preflight:
-        report = preflight_report()
+        report = preflight_report(
+            family_ids=args.family,
+            pair_limit=args.pair_limit,
+            packet_limit=args.packet_limit,
+            batch_label=args.batch_label,
+        )
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0 if report["status"] == "PASS" else 1
     if args.run_live:
-        return run_live()
+        return run_live(
+            family_ids=args.family,
+            pair_limit=args.pair_limit,
+            packet_limit=args.packet_limit,
+            batch_label=args.batch_label,
+        )
     parser.error("Use --preflight or --run-live")
     return 2
 

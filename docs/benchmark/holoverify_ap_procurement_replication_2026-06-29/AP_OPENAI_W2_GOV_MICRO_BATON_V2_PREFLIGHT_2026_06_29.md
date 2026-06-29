@@ -12,24 +12,30 @@ The AP OpenAI-W2 runner imports the shared Holo runner and uses the shared Gov p
 
 ```text
 HoloGov-V micro-router v2. Return gov_micro_baton_v2 only.
-Exactly seven lines. No prose. No reasoning. No JSON. No Markdown. No braces. No quotes.
+Exactly seven key=value lines. No prose. No reasoning. No JSON. No Markdown. No braces. No quotes.
+Copy selected_baton_lines exactly, preserving order and spelling.
 Required keys in order: verdict,dep,focus,objective,preserve,repair,block.
-Allowed verdict values: CONTINUE,FINAL,FAIL.
-If gpass true: verdict=FINAL dep=NONE focus=FINAL_CHECK objective=FINALIZE preserve=wb_code repair=NONE block=NONE.
-If gpass false: verdict=CONTINUE dep=GATE focus=GATE_REPAIR objective=REPAIR_GATE preserve=wb_code repair=fail_code block=FINAL_ON_FAIL.
-Use only uppercase enum/code values from the prompt. No sentences.
+Allowed values by field: verdict=CONTINUE,FAIL,FINAL; dep=AUTHORITY,CALLBACK,EVIDENCE,GATE,NONE,PAYMENT,POLICY,SCOPE,SOURCE,TIMING; focus=EVIDENCE_BINDING,FINAL_CHECK,GATE_REPAIR,OVERBLOCK,PAYMENT_RELEASE,SOURCE,UNDERBLOCK; objective=BLOCK_UNVERIFIED_CHANGE,CHECK_SOURCE,FAIL_CLOSED,FINALIZE,PRESERVE_VERDICT,REPAIR_GATE; preserve=BEST,BOUNDARY,CLOSED,GATE,NONE,OPEN,S1,S2,S3,S4,SRC,VERDICT; repair=CRITICAL_TERMS,EVIDENCE_BINDING,GATE_FIELDS,NONE,SOURCE_IDS,VERDICT_BINDING; block=DROP_SOURCE_IDS,FINAL_ON_FAIL,MODEL_SELECTION,NONE,TONE_ONLY,TREASURY_RELEASE,UNVERIFIED_CHANGE.
+Output only the seven selected baton lines. Do not invent schema names or substitute tokens.
 ```
 
-The local user object supplied only short routing codes plus a non-authoritative note:
+The local user object supplied a fully materialized seven-line baton plus a non-authoritative diagnostic note:
 
 ```json
 {
-  "fail_code": "VERDICT_BINDING",
-  "gpass": false,
+  "gate_diagnostic": "missing_boundary_binding:escalate_rule_assessment",
+  "gate_passed": false,
   "id": "HV-AP-REP-001-A",
-  "notes_non_authoritative": "missing_boundary_binding:escalate_rule_assessment",
-  "wb_code": "CLOSED",
-  "wv": "ALLOW"
+  "selected_baton_lines": [
+    "verdict=CONTINUE",
+    "dep=GATE",
+    "focus=GATE_REPAIR",
+    "objective=REPAIR_GATE",
+    "preserve=CLOSED",
+    "repair=VERDICT_BINDING",
+    "block=FINAL_ON_FAIL"
+  ],
+  "worker_verdict": "ALLOW"
 }
 ```
 
@@ -44,6 +50,8 @@ The local user object supplied only short routing codes plus a non-authoritative
 | Empty Gov output fails closed | PASS |
 | Missing required Gov fields fail closed | PASS |
 | Unknown enum/code values fail closed | PASS |
+| Placeholder tokens fail closed | PASS |
+| Gov prompt contains no placeholder examples | PASS |
 | Overlong/prose fields fail closed | PASS |
 | JSON/braces/quotes/markdown fail closed | PASS |
 | AP packet hashes match freeze | PASS |
@@ -57,4 +65,3 @@ The local user object supplied only short routing codes plus a non-authoritative
 ## Next Live Step
 
 Do not run a full 200-call AP lane next. The next live step should be a 1-pair AP canary under Gov micro-baton v2.
-

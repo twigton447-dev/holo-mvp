@@ -1,0 +1,165 @@
+{
+  "classification": "AP_OPENAI_W2_CANARY_INVALID_OR_INCOMPLETE",
+  "expected_provider_calls": 10,
+  "failure_class": "GOV_CONTRACT_OR_ADMISSIBILITY_FAILURE",
+  "freeze_root_hash": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "gov_calls": 1,
+  "judge_calls": 0,
+  "manifest_root_signature": "7172cd597c74b503601dafeb6839b280cd3c5a2064db7d279a6288c3023e12a9",
+  "packet_inventory": [
+    {
+      "calls": 2,
+      "expected": "ALLOW",
+      "final_admissible": false,
+      "final_correct": false,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "GOV_FAILURE"
+      },
+      "final_verdict": null,
+      "packet_id": "HV-AP-REP-001-A",
+      "pair_id": "HV-AP-REP-001",
+      "suffix": "A"
+    }
+  ],
+  "packet_results": [
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-AP-REP-001-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 6,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-AP-REP-001-A_WORKER_01.json",
+          "gate_failures": [
+            "missing_boundary_binding:escalate_rule_assessment"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "37b83b7bca0abc317f82c01e4adb4be67b2bfd06e5fe959b9093beeb1b45829f",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ALLOW"
+        }
+      ],
+      "benchmark_bucket": "hard_allow",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "GOV_FAILURE"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-AP-REP-001-A",
+      "pair_id": "HV-AP-REP-001",
+      "suffix": "A",
+      "valid_rescue_evidence_present": false
+    }
+  ],
+  "preflight_checks": {
+    "canary_pair_id": "HV-AP-REP-001",
+    "content_errors_are_not_transport_retryable": true,
+    "freeze_root_matches": true,
+    "gov_contract_format": "gov_micro_baton_v2",
+    "gov_v2_fixture_passed": true,
+    "head_matches_gov_v2_commit": true,
+    "judge_calls_configured": 0,
+    "missing_provider_env": [],
+    "no_gemini_active": true,
+    "openai_timeout_seconds": 240,
+    "packet_records": 40,
+    "pair_count": 20,
+    "solo_calls_configured": 0,
+    "transport_max_retries": 2,
+    "transport_retry_policy_v1_active": true,
+    "w2_is_openai_gpt_5_4_mini": true,
+    "w2_model": "gpt-5.4-mini",
+    "w2_provider": "openai",
+    "worker_compact_fixture_passed": true,
+    "worker_contract_format": "compact_key_value_v1"
+  },
+  "provider_calls": 2,
+  "provider_failures": [],
+  "readiness_assertions": {
+    "both_sibling_final_verdicts_correct": "FAIL",
+    "declared_call_count_10": "PASS",
+    "final_selector_present": "PASS",
+    "gov_v2_parsed_every_gov_turn": "FAIL",
+    "holo_calls": "FAIL",
+    "holo_packets": "FAIL",
+    "holo_pairs": "PASS",
+    "no_judges": "PASS",
+    "no_leakage": "PASS",
+    "no_solo": "PASS",
+    "packet_identity_matches_freeze": "PASS",
+    "unrecovered_provider_failures": "PASS",
+    "worker_compact_parsed_every_worker_turn": "FAIL"
+  },
+  "readiness_passed": false,
+  "root_failure": {
+    "call_kind": "gov",
+    "error": "ValueError: gov_micro_v2_unknown_enum:preserve:wb_code",
+    "finish_reason": "stop",
+    "model": "MiniMax-M2.5-highspeed",
+    "packet_id": "HV-AP-REP-001-A",
+    "parse_ok": false,
+    "provider": "minimax",
+    "provider_call_ok": true,
+    "transport_attempt_count": 1,
+    "transport_final_failure_class": null,
+    "transport_recovered": false,
+    "transport_retry_failures": [],
+    "turn_id": "HV-AP-REP-001-A_G1"
+  },
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2/run_20260629T153048Z",
+  "solo_calls": 0,
+  "terminal_failures": [
+    {
+      "admissible": false,
+      "benchmark_bucket": "hard_allow",
+      "call_kind": "gov",
+      "dna": "minimax",
+      "elapsed_ms": 4400,
+      "error": "ValueError: gov_micro_v2_unknown_enum:preserve:wb_code",
+      "finish_reason": "stop",
+      "gov_index": 1,
+      "gov_may_select_models": false,
+      "gov_operation": "turn_micro_control",
+      "input_tokens": 218,
+      "model": "MiniMax-M2.5-highspeed",
+      "output_tokens": 202,
+      "packet_id": "HV-AP-REP-001-A",
+      "pair_id": "HV-AP-REP-001",
+      "parse_ok": false,
+      "pre_run_root_signature": "7172cd597c74b503601dafeb6839b280cd3c5a2064db7d279a6288c3023e12a9",
+      "prompt_hash": "5a205f7debe42df56199910343e3b9003aca9776ca56878ef81070d91055ff4f",
+      "prompt_ref": "prompts/HV-AP-REP-001-A_G1.json",
+      "provider": "minimax",
+      "provider_call_ok": true,
+      "provider_timeout_seconds": 150,
+      "received_gate_result": true,
+      "response_id": "0691c2af65249d3a1d767273a1a01d6f",
+      "suffix": "A",
+      "text": "verdict=CONTINUE\ndep=GATE\nfocus=GATE_REPAIR\nobjective=REPAIR_GATE\npreserve=wb_code\nrepair=VERDICT_BINDING\nblock=FINAL_ON_FAIL",
+      "total_tokens": 420,
+      "transport_attempt_count": 1,
+      "transport_recovered": false,
+      "transport_retry_failures": [],
+      "transport_retry_policy_version": "HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29",
+      "turn_id": "HV-AP-REP-001-A_G1"
+    }
+  ],
+  "totals": {
+    "input_tokens": 1949,
+    "output_tokens": 381,
+    "total_tokens": 2726
+  },
+  "transport_recovered_call_count": 0,
+  "worker_calls": 1
+}

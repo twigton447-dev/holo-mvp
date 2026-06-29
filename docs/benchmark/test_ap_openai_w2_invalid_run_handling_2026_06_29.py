@@ -95,6 +95,18 @@ def test_valid_gov_v2_baton_parses() -> None:
     assert parsed["block"] == "FINAL_ON_FAIL"
 
 
+def test_gov_v2_placeholder_token_invalid() -> None:
+    assert_raises_contains(
+        lambda: RUNNER._gov_from_response(
+            {
+                "text": valid_gov_v2_baton().replace("preserve=CLOSED", "preserve=wb_code"),
+                "finish_reason": "stop",
+            }
+        ),
+        "gov_micro_v2_placeholder_token:preserve:wb_code",
+    )
+
+
 def test_gov_v2_long_prose_invalid() -> None:
     assert_raises_contains(
         lambda: RUNNER._gov_from_response(
@@ -175,6 +187,13 @@ def test_gov_v2_json_or_quotes_invalid() -> None:
     assert_raises_contains(
         lambda: RUNNER._gov_from_response({"text": '{"verdict":"CONTINUE"}', "finish_reason": "stop"}),
         "gov_micro_v2_forbidden_punctuation",
+    )
+
+
+def test_gov_v2_markdown_invalid() -> None:
+    assert_raises_contains(
+        lambda: RUNNER._gov_from_response({"text": f"```text\n{valid_gov_v2_baton()}\n```", "finish_reason": "stop"}),
+        "gov_micro_v2_markdown_present",
     )
 
 
@@ -344,6 +363,53 @@ def worker_spec_fixture() -> dict[str, object]:
     }
 
 
+def test_gov_prompt_contains_no_placeholder_examples() -> None:
+    worker_output = RUNNER._worker_from_response(
+        {"text": compact_worker_fixture(), "finish_reason": "completed"}
+    )
+    gate = RUNNER._validate_worker(worker_output, worker_spec_fixture(), "A", {"SRC-TEST-CTL", "SRC-TEST-POL"})
+    messages, prompt_obj = RUNNER._build_gov_messages(
+        "fixture-run",
+        {"pair_id": "HV-AP-REP-FIXTURE", "spec": worker_spec_fixture(), "benchmark_bucket": "hard_allow"},
+        {"packet_id": "HV-AP-REP-FIXTURE-A"},
+        {"context": {"internal_documents": [], "policy_documents": []}},
+        {"turns_completed": []},
+        worker_output,
+        gate,
+        [],
+    )
+    prompt_text = json.dumps({"messages": messages, "prompt_object": prompt_obj}, sort_keys=True)
+    forbidden_fragments = [
+        "wb_code",
+        "fail_code",
+        "repair_hint",
+        "blocked_hint",
+        "focus_hint",
+        "field_name",
+        "TODO",
+        "placeholder",
+        "preserve=wb",
+        "repair=fail",
+    ]
+    found = [fragment for fragment in forbidden_fragments if fragment in prompt_text]
+    if found:
+        raise AssertionError(f"Gov prompt contains placeholder-like fragments: {found}")
+    selected = prompt_obj["selected_baton_lines"]
+    if selected != [
+        "verdict=FINAL",
+        "dep=NONE",
+        "focus=FINAL_CHECK",
+        "objective=FINALIZE",
+        "preserve=CLOSED",
+        "repair=NONE",
+        "block=NONE",
+    ]:
+        raise AssertionError(selected)
+    reparsed = RUNNER._gov_from_response({"text": "\n".join(selected), "finish_reason": "stop"})
+    if reparsed["gov_baton_version"] != "gov_micro_baton_v2":
+        raise AssertionError(reparsed)
+
+
 def test_worker_malformed_unterminated_json_invalid() -> None:
     malformed = (
         '{"worker_role":"ADVERSARIAL_SCOPE_CHALLENGER","verification_verdict":"ALLOW",'
@@ -401,17 +467,20 @@ def test_no_packet_or_prompt_hash_mutation() -> None:
     test_gov_empty_text_invalid()
     test_gov_length_incomplete_invalid()
     test_valid_gov_v2_baton_parses()
+    test_gov_v2_placeholder_token_invalid()
     test_gov_v2_long_prose_invalid()
     test_gov_v2_truncated_missing_fields_invalid()
     test_gov_v2_missing_dep_focus_objective_invalid()
     test_gov_v2_unknown_enum_invalid()
     test_gov_v2_finish_reason_length_invalid()
     test_gov_v2_json_or_quotes_invalid()
+    test_gov_v2_markdown_invalid()
     test_retry_classifies_transport_only()
     test_transport_retry_success_marks_recovered()
     test_transport_retry_exhaustion_fails_closed()
     test_worker_malformed_unterminated_json_invalid()
     test_worker_markdown_wrapped_json_invalid()
+    test_gov_prompt_contains_no_placeholder_examples()
     test_valid_compact_worker_output_parses_and_gates()
     test_worker_output_missing_verdict_invalid()
     test_worker_output_with_invented_source_id_invalid()
@@ -425,18 +494,21 @@ def main() -> None:
         test_gov_empty_text_invalid,
         test_gov_length_incomplete_invalid,
         test_valid_gov_v2_baton_parses,
+        test_gov_v2_placeholder_token_invalid,
         test_gov_v2_long_prose_invalid,
         test_gov_v2_truncated_missing_fields_invalid,
         test_gov_v2_missing_dep_focus_objective_invalid,
         test_gov_v2_unknown_enum_invalid,
         test_gov_v2_finish_reason_length_invalid,
         test_gov_v2_json_or_quotes_invalid,
+        test_gov_v2_markdown_invalid,
         test_invalid_summary_without_architecture_lock_passes,
         test_retry_classifies_transport_only,
         test_transport_retry_success_marks_recovered,
         test_transport_retry_exhaustion_fails_closed,
         test_worker_malformed_unterminated_json_invalid,
         test_worker_markdown_wrapped_json_invalid,
+        test_gov_prompt_contains_no_placeholder_examples,
         test_valid_compact_worker_output_parses_and_gates,
         test_worker_output_missing_verdict_invalid,
         test_worker_output_with_invented_source_id_invalid,

@@ -410,6 +410,26 @@ GOV_MICRO_V2_ALLOWED = {
     "block": {"NONE", "TREASURY_RELEASE", "MODEL_SELECTION", "DROP_SOURCE_IDS", "TONE_ONLY", "UNVERIFIED_CHANGE", "FINAL_ON_FAIL"},
 }
 GOV_MICRO_V2_MAX_FIELD_LENGTH = 32
+GOV_MICRO_V2_PLACEHOLDER_TOKENS = {
+    "wb",
+    "wv",
+    "wb_code",
+    "fail_code",
+    "field_name",
+    "value",
+    "todo",
+    "example",
+    "placeholder",
+    "repair_hint",
+    "blocked_hint",
+    "focus_hint",
+}
+
+
+def _gov_micro_v2_allowed_text() -> str:
+    return "; ".join(
+        f"{key}={','.join(sorted(GOV_MICRO_V2_ALLOWED[key]))}" for key in GOV_MICRO_V2_KEYS
+    )
 
 
 def _gov_micro_v2_from_text(text: str) -> dict[str, Any]:
@@ -441,6 +461,9 @@ def _gov_micro_v2_from_text(text: str) -> dict[str, Any]:
         if any(char.isspace() for char in clean_value):
             raise ValueError(f"gov_micro_v2_prose_field:{clean_key}")
         values = clean_value.split("|")
+        placeholders = [item for item in values if item.lower() in GOV_MICRO_V2_PLACEHOLDER_TOKENS]
+        if placeholders:
+            raise ValueError(f"gov_micro_v2_placeholder_token:{clean_key}:{','.join(placeholders)}")
         allowed = GOV_MICRO_V2_ALLOWED[clean_key]
         unknown = [item for item in values if item not in allowed]
         if unknown:
@@ -1229,23 +1252,41 @@ def _build_gov_messages(
         if first_failure
         else "NONE"
     )
+    pass_baton = {
+        "verdict": "FINAL",
+        "dep": "NONE",
+        "focus": "FINAL_CHECK",
+        "objective": "FINALIZE",
+        "preserve": binding_code,
+        "repair": "NONE",
+        "block": "NONE",
+    }
+    fail_baton = {
+        "verdict": "CONTINUE",
+        "dep": "GATE",
+        "focus": "GATE_REPAIR",
+        "objective": "REPAIR_GATE",
+        "preserve": binding_code,
+        "repair": failure_code,
+        "block": "FINAL_ON_FAIL",
+    }
+    selected_baton = pass_baton if compact_gate.get("passed") else fail_baton
+    selected_baton_lines = [f"{key}={selected_baton[key]}" for key in GOV_MICRO_V2_KEYS]
     user_obj = {
         "id": packet["packet_id"],
-        "gpass": bool(compact_gate.get("passed")),
-        "fail_code": failure_code,
-        "wb_code": binding_code,
-        "wv": compact_worker.get("verification_verdict"),
-        "notes_non_authoritative": first_failure,
+        "gate_passed": bool(compact_gate.get("passed")),
+        "selected_baton_lines": selected_baton_lines,
+        "worker_verdict": compact_worker.get("verification_verdict"),
+        "gate_diagnostic": first_failure,
     }
     system = "\n".join(
         [
             "HoloGov-V micro-router v2. Return gov_micro_baton_v2 only.",
-            "Exactly seven lines. No prose. No reasoning. No JSON. No Markdown. No braces. No quotes.",
+            "Exactly seven key=value lines. No prose. No reasoning. No JSON. No Markdown. No braces. No quotes.",
+            "Copy selected_baton_lines exactly, preserving order and spelling.",
             "Required keys in order: verdict,dep,focus,objective,preserve,repair,block.",
-            "Allowed verdict values: CONTINUE,FINAL,FAIL.",
-            "If gpass true: verdict=FINAL dep=NONE focus=FINAL_CHECK objective=FINALIZE preserve=wb_code repair=NONE block=NONE.",
-            "If gpass false: verdict=CONTINUE dep=GATE focus=GATE_REPAIR objective=REPAIR_GATE preserve=wb_code repair=fail_code block=FINAL_ON_FAIL.",
-            "Use only uppercase enum/code values from the prompt. No sentences.",
+            f"Allowed values by field: {_gov_micro_v2_allowed_text()}.",
+            "Output only the seven selected baton lines. Do not invent schema names or substitute tokens.",
         ]
     )
     _assert_prompt_clean(user_obj)

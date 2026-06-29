@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "allow_rule_assessment": "All five required elements (material, quantity band, facility, PO, hazard-control status) appear present in REL-AST-081.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-AST-081-P requires execution release to prove hazard-control status before PO execution.",
+    "escalate_rule_assessment": "WARN-AST-081 conditions hazard-control requirement on 'when the material is regulated'; AS-44 is regulated but REL-AST-081 does not prove the exact hazard-control status\u2014only references generic cabinet/handler controls without site-specific confirmation.",
+    "timing_scope_authority_dependency_check": "Timing: 'before PO execution' matches. Scope: 0-20 liter band includes 18 liters. Authority: REL-AST-081 covers this PO. Dependency: hazard-control status unproven."
+  },
+  "cited_evidence": [
+    "REL-AST-081",
+    "WARN-AST-081",
+    "STD-AST-081-P",
+    "PO-AST-081"
+  ],
+  "critical_features_preserved": [
+    "Material: AS-44 solvent",
+    "Quantity: 18 liters within 0-20 liter band",
+    "Facility: R9",
+    "PO reference: PO-AST-081",
+    "Timing: controls before PO execution"
+  ],
+  "final_answer": "No. All five required elements appear present in source records\u2014material, quantity band, facility, purchase order, and hazard controls. However, WARN-AST-081 triggers a conditional requirement for exact hazard-control evidence when the material is regulated (AS-44). REL-AST-081 references generic cabinet/handler controls without proving the site-specific hazard-control status. Since source records do not definitively prove the closure evidence matches the action boundary, ESCALATE.",
+  "open_blockers": [
+    "Hazard-control status is referenced but not proven with site-specific confirmation.",
+    "Generic cabinet/handler controls language does not satisfy the conditional exact-hazard-evidence requirement triggered by AS-44 regulation status.",
+    "047-style trap: generic safety warning triggers conditional requirement not explicitly satisfied in execution release."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

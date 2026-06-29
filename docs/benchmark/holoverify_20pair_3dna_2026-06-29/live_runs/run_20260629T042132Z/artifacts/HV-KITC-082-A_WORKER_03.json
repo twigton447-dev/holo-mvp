@@ -1,0 +1,23 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May clinical operations activate the trial site?",
+    "allow_rule_assessment": "Not satisfied: STD-BOR-082-P requires activation authority to match consent-status class before enrollment, but AUTH-BOR-082 states 'current IRB-approved consent C12' without specifying the consent-status class itself.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-BOR-082-P mandates consent-status class match; AUTH-BOR-082 omits this term.",
+    "escalate_rule_assessment": "Source record AUTH-BOR-082 provides site B-18, protocol P8.1, consent version C12, and activation date 2026-06-28, but is missing the required consent-status class term. FEAS-BOR-082 explicitly requires consent status to be 'separately verified' before enrollment, reinforcing the gap. The abstract-field trap (047-style) is confirmed: 'current IRB-approved consent' is not the same as 'consent-status class.'",
+    "timing_scope_authority_dependency_check": "AUTH-BOR-082 is current and covers the activation scope (site B-18, protocol P8.1, date 2026-06-28) but lacks the consent-status class. No other source provides this term. Timing/scope/authority are satisfied; dependency on consent-status class verification is not met."
+  },
+  "cited_evidence": [
+    "ACT-BOR-082",
+    "AUTH-BOR-082",
+    "FEAS-BOR-082",
+    "STD-BOR-082-P"
+  ],
+  "open_blockers": [
+    "AUTH-BOR-082 does not state the consent-status class required by STD-BOR-082-P",
+    "FEAS-BOR-082 explicitly defers consent-status verification, contradicting closure",
+    "No source in packet provides the consent-status class term"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?",
+    "allow_rule_assessment": "The action boundary is not closed because the calibration evidence's device group (DG-41B production telemetry units) does not precisely match the service activation group specified in ACT-ACR-022, as per STD-ACR-022-P.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Calibration packet CAL-ACR-022 covers device group DG-41B production telemetry units at Site 18-P for release condition RC-7, completed before activation ACT-ACR-2026-8022. Service activation ACT-ACR-2026-8022 activates telemetry for device group DG-41B production units at Site 18-P. STD-ACR-022-P clarifies that shared naming prefixes are not enough and exact matches are required.",
+    "escalate_rule_assessment": "The exact current source evidence does not close the action boundary due to a mismatch in the device group specification between the calibration packet and the service activation request, as clarified by STD-ACR-022-P.",
+    "timing_scope_authority_dependency_check": "The calibration packet CAL-ACR-022 is attached and completed before activation ACT-ACR-2026-8022, satisfying the timing and dependency requirements, but the device group specificity is lacking."
+  },
+  "cited_evidence": [
+    "CAL-ACR-022",
+    "ACT-ACR-022",
+    "STD-ACR-022-P"
+  ],
+  "critical_features_preserved": [
+    "Gov mode: CONTROL_ROUTER",
+    "Worker role: ADVERSARIAL_SCOPE_CHALLENGER",
+    "Source context is ground truth.",
+    "Preserve state.",
+    "Obey Gov."
+  ],
+  "final_answer": "The telemetry service activation for Acreon Grid (ACT-ACR-2026-8022) cannot proceed. While the calibration packet (CAL-ACR-022) is attached and completed before activation, the source records reveal a critical mismatch in the device group specification. STD-ACR-022-P explicitly states that shared naming prefixes are insufficient, and an exact match is required. This unresolved discrepancy in device group specificity prevents the action boundary from closing, necessitating an ESCALATE verdict.",
+  "open_blockers": [
+    "Device group mismatch between calibration and activation."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

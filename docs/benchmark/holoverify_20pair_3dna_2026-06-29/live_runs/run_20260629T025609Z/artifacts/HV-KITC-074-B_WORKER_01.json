@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "Monitor-only no-block permits release only on exact match of name, country, tax ID, account, and disposition.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLR-TES-074 requires exact account match; FLAG-TES-074 shows visible flag.",
+    "escalate_rule_assessment": "Account mismatch (7205 vs 7025) and visible flag leave boundary open.",
+    "timing_scope_authority_dependency_check": "Clearance must precede release; current sources show unresolved flag."
+  },
+  "cited_evidence": [
+    "CLR-TES-074",
+    "FLAG-TES-074",
+    "STD-TES-074-P"
+  ],
+  "critical_features_preserved": [
+    "exact source IDs",
+    "policy match rule",
+    "no invented closures"
+  ],
+  "final_answer": "Payment release may not proceed. CLR-TES-074 lists account ending 7025 while PAY-TES-074 specifies 7205; FLAG-TES-074 remains visible with no disposition match. Policy STD-TES-074-P requires exact alignment of tax ID, account, and monitor-only status before release. Source boundary stays open.",
+  "open_blockers": [
+    "Account number mismatch",
+    "Visible sanctions flag"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

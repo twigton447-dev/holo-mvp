@@ -1,0 +1,46 @@
+{
+  "blocked_moves": [
+    "No change to ALLOW verdict",
+    "No substitution of FLAG-TES-074 as controlling source",
+    "No treatment of Belarus entity as relevant to Germany payment",
+    "No treatment of plan/policy as execution authority without source"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "FLAG-TES-074 vs CLR-TES-074 dependency resolved: entity mismatch (Belarus LLC vs Germany GmbH) confirms flag applies to distinct non-payment entity, leaving CLR-TES-074 as sole controlling source for exact match verification. The residual flag is closed by source boundary rules. Payment release boundary is SOURCE_BOUNDARY_CLOSED."
+  ],
+  "final_compiler_allowed": true,
+  "gov_binding": "SOURCE_BOUNDARY_CLOSED",
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_verdict": "ALLOW",
+  "must_preserve": [
+    "SOURCE_BOUNDARY_CLOSED binding",
+    "CLR-TES-074 as controlling source",
+    "FLAG-TES-074 entity mismatch as non-blocking",
+    "STD-TES-074-P monitor-only no-block disposition as permitting rule",
+    "ALLOW verdict for exact counterparty match"
+  ],
+  "must_repair": [
+    "Worker output must explicitly cite Tessa Medical GmbH from CLR-TES-074 in analysis text",
+    "Worker output must explicitly cite DE-4481 from CLR-TES-074 in analysis text",
+    "Worker output must explicitly cite 7205 from CLR-TES-074 in analysis text",
+    "Worker output must show the verbatim alignment between payment PAY-TES-074 fields and clearance CLR-TES-074 fields"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Verify no conflation of the Belarus monitoring flag with the Germany payment. Confirm source-boundary closure is achieved through CLR-TES-074 exact match and STD-TES-074-P monitor-only no-block rule. Explicitly quote the critical terms from CLR-TES-074 in output text to satisfy deterministic gate.",
+    "monotonic_preservation": "All source-bound findings from prior worker are preserved; only explicit term citation is added to satisfy gate completeness.",
+    "objective": "Verify exact field alignment between PAY-TES-074 and CLR-TES-074 for Tessa Medical GmbH, Germany, DE-4481, account ending 7205, monitor-only no-block disposition, and confirm FLAG-TES-074 applies to a separate Belarus entity with no tax or account overlap.",
+    "required_repairs": [
+      "Reproduce 'Tessa Medical GmbH' verbatim from CLR-TES-074 in output",
+      "Reproduce 'DE-4481' verbatim from CLR-TES-074 in output",
+      "Reproduce '7205' verbatim from CLR-TES-074 in output",
+      "Show field-by-field match: name, country, tax ID, account, disposition between PAY-TES-074 and CLR-TES-074"
+    ]
+  },
+  "packet_id": "HV-KITC-074-A",
+  "pair_id": "HV-KITC-074",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T021923Z",
+  "source_gate_interpretation": "Worker output cited CLR-TES-074 which contains exact matches for all five critical terms, but the output text did not explicitly reproduce the terms Tessa Medical GmbH, DE-4481, and 7205 in the analysis body. This is a repairable text-omission failure, not a source boundary failure. Verdict and source binding are preserved.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release the invoice while the ERP hold remains visible?",
+    "allow_rule_assessment": "Policy STD-RAV-072-P permits release when CLOSE-RAV-072 exactly matches invoice, vendor, amount, tax review, quality signoff, and payment release approval. The closeout ledger CLOSE-RAV-072 precisely fulfills these requirements for INV-RAV-072.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "CLOSE-RAV-072 provides the exact match to STD-RAV-072-P policy requirements for INV-RAV-072, USD 51600.",
+    "escalate_rule_assessment": "No open source-record defect remains. The visible ERP hold HOLD-RAV-072 is superseded by the exact match provided by CLOSE-RAV-072, as per policy.",
+    "timing_scope_authority_dependency_check": "CLOSE-RAV-072 confirms completion of tax review, quality signoff, and payment release approval before payment, thus resolving all dependencies for INV-RAV-072."
+  },
+  "cited_evidence": [
+    "INV-RAV-072",
+    "HOLD-RAV-072",
+    "CLOSE-RAV-072",
+    "STD-RAV-072-P"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "ALLOW verdict",
+    "SOURCE_BOUNDARY_CLOSED binding class"
+  ],
+  "final_answer": "Release is allowed. The closeout ledger CLOSE-RAV-072 precisely satisfies the exact-match conditions stipulated by policy STD-RAV-072-P for invoice INV-RAV-072 from Ravel Packaging, amounting to USD 51600. This includes confirmed tax review, quality signoff, and payment release approval prior to payment, effectively closing the source boundary despite the visible ERP hold HOLD-RAV-072.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

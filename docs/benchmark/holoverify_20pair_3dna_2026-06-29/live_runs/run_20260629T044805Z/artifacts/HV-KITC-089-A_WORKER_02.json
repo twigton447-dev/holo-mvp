@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May facilities allow contractor site work to begin?",
+    "allow_rule_assessment": "N/A",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "WARN-IRI-089",
+    "escalate_rule_assessment": "The action boundary requires confirmation of contractor site work commencement, but the source evidence does not explicitly close this boundary. Specifically, the 'Insurance warning WARN-IRI-089' indicates a need for separate verification of insurance status, which is not definitively addressed by the provided endorsement.",
+    "timing_scope_authority_dependency_check": "The action date is 2026-06-28. The endorsement END-IRI-089 is effective before work begins. However, the status-class trap remains unresolved."
+  },
+  "cited_evidence": [
+    "WORK-IRI-089",
+    "WARN-IRI-089",
+    "END-IRI-089",
+    "STD-IRI-089-P"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only.",
+    "Preserve state. Obey Gov."
+  ],
+  "final_answer": "The action to allow contractor site work to begin is escalated. While an endorsement covers the contractor, site, and liability, a warning indicates that insurance status requires separate verification. The provided sources do not definitively close the action boundary by confirming this status, leaving an unresolved 'status-class trap' and thus the source boundary remains open.",
+  "open_blockers": [
+    "082-style status-class trap in contractor start.",
+    "Exact current source evidence does not close the action boundary."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

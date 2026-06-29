@@ -1,0 +1,58 @@
+{
+  "blocked_moves": [
+    "treating FEAS-ZEN-080 as activation authority",
+    "substituting planning artifact for execution authority",
+    "relaxing policy exact-match requirement",
+    "escalating to COMPILER without attempting repair"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Source bindings are intact. No upstream artifacts required. Only token-count repair needed."
+  ],
+  "final_compiler_allowed": false,
+  "gov_deterministic_gate_result": {
+    "failures": [
+      "word_band_final_answer:24_requires_exact_24_tokens_not_26"
+    ],
+    "gate_name": "HOLOVERIFY_GOV_DIAGNOSTIC_GATE",
+    "passed": false,
+    "root_cause_classification": "surface_token_constraint_violation",
+    "semantic_correctness": "VERIFIED_CORRECT",
+    "source_binding_integrity": "PRESERVED"
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_role": "CONTROL_ROUTER",
+  "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+  "must_preserve": [
+    "AUTH-ZEN-080 as controlling activation authority",
+    "STD-ZEN-080-P exact-match policy application",
+    "FEAS-ZEN-080 correctly excluded from activation authority",
+    "action boundary closed correctly",
+    "clinical operations may activate verdict"
+  ],
+  "must_repair": [
+    "final_answer word band to exactly 24 tokens (current: 26 tokens)"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Reduce final_answer from 26 tokens to exactly 24 tokens without altering meaning.",
+    "constraint_on_repair": "Do not alter semantic claims. Do not introduce new source citations. Do not change verification verdict.",
+    "monotonic_preservation": [
+      "AUTH-ZEN-080 controlling authority",
+      "STD-ZEN-080-P exact-match policy",
+      "FEAS-ZEN-080 excluded correctly",
+      "action boundary closed",
+      "may activate verdict intact"
+    ],
+    "objective": "Surface token repair only. Preserve all semantic content and source bindings from turn 1.",
+    "required_repairs": [
+      "word_band_final_answer token count constraint"
+    ]
+  },
+  "packet_id": "HV-KITC-080-A",
+  "pair_id": "HV-KITC-080",
+  "repair_rationale": "Worker produced semantically correct verification with intact source bindings. Gate failure is a surface token-count constraint. Gov preserves correct source bindings, blocks invalid moves, and routes back for targeted repair without semantic modification.",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T014004Z",
+  "source_gate_interpretation": "Worker semantic output is correct. AUTH-ZEN-080 properly closes the action boundary per STD-ZEN-080-P. The gate failure is a surface token-count constraint, not a semantic defect. No source binding corruption occurred.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

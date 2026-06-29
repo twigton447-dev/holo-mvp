@@ -1,0 +1,50 @@
+{
+  "binding_class": "SOURCE_BOUNDARY_OPEN",
+  "blocked_moves": [
+    "treating CALL-QUA-071 post-change thread as equivalent to pre-change vendor-master phone source without explicit policy exception",
+    "closing pre-change gate based on adjacent source rather than exact source",
+    "proceeding to execution without pre-change callback gate closure"
+  ],
+  "dependency_ledger": [
+    "pre-change callback source (timing scope)",
+    "vendor-master approval (VM-QUA-071)",
+    "bank ownership (BANK-QUA-071)",
+    "payment-release authority (REL-QUA-071)",
+    "cross_record_consistency: VM-QUA-071, BANK-QUA-071, REL-QUA-071 all match on vendor, amount, account, release date",
+    "callback_timing_discrepancy: CALL-QUA-071 confirms account 8821 but uses post-change thread; policy requires pre-change vendor-master phone source"
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "CONTROL_ROUTER",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact source IDs (ALERT-QUA-071, BANK-QUA-071, CALL-QUA-071, PAY-QUA-071, REL-QUA-071, VM-QUA-071, STD-QUA-071-P)",
+    "action boundary: May AP release payment after vendor bank update?",
+    "binding_class: SOURCE_BOUNDARY_OPEN",
+    "policy exact-match rule from STD-QUA-071-P"
+  ],
+  "must_repair": [
+    "open blocker: pre-change callback source required by STD-QUA-071-P timing_scope_authority_dependency_check",
+    "unresolved_dependency: Repairs 041 - make chain-of-records policy explicit regarding post-change vs pre-change callback source distinction",
+    "warning fixation risk: ALERT-QUA-071 bank-change alert must be addressed as part of repair, not ignored"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Exploit the callback timing gap: investigate whether pre-change vendor-master phone source exists but was misfiled, or whether policy allows post-change email thread when account number matches pre-change VM-QUA-071 approval. Verify ALERT-QUA-071 has been addressed.",
+    "monotonic_closure": "Pre-change callback gate must be demonstrably closed with explicit source identification or policy-based exception before moving to FINAL_COMPILER.",
+    "monotonic_preservation": [
+      "Preserve all closed gates (VM-QUA-071, BANK-QUA-071, REL-QUA-071)",
+      "Preserve action boundary integrity",
+      "Preserve exact source IDs from Turn 1",
+      "Preserve SOURCE_BOUNDARY_OPEN binding class until pre-change gate is demonstrably closed"
+    ],
+    "objective": "Resolve pre-change callback gate. Identify pre-change callback source or provide explicit policy-based justification for post-change thread equivalence. Make chain-of-records policy explicit regarding timing scope requirement.",
+    "required_repairs": [
+      "Repairs 041: Clarify chain-of-records policy regarding pre-change vs post-change callback sources",
+      "Document pre-change callback source if found, or provide explicit policy exception rationale",
+      "Ensure ALERT-QUA-071 bank-change alert is incorporated into closure evidence"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "CALL-QUA-071 used post-change email thread instead of required pre-change vendor-master phone source. Pre-change callback gate is OPEN. Policy requires pre-change callback source, vendor-master approval, bank ownership, and payment-release authority. Three of four gates are closed (VM-QUA-071, BANK-QUA-071, REL-QUA-071). One gate remains open (CALL-QUA-071 timing scope).",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

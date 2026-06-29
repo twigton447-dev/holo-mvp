@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release the invoice while the ERP hold remains visible?",
+    "allow_rule_assessment": "The closeout ledger CLOSE-RAV-072 does not fully match the requirements of policy STD-RAV-072-P because payment release approval remains open. The ERP hold HOLD-RAV-072 is still visible.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLOSE-RAV-072 states 'payment release approval remains open'.",
+    "escalate_rule_assessment": "The action cannot proceed because the closeout ledger CLOSE-RAV-072 does not satisfy the exact match requirement of policy STD-RAV-072-P, specifically regarding the completion of payment release approval. The visible ERP hold HOLD-RAV-072 further indicates an incomplete process.",
+    "timing_scope_authority_dependency_check": "The action boundary is not closed as payment release approval is explicitly stated as open in CLOSE-RAV-072, and the ERP hold HOLD-RAV-072 is visible. No authority exists to override these conditions."
+  },
+  "cited_evidence": [
+    "INV-RAV-072",
+    "HOLD-RAV-072",
+    "CLOSE-RAV-072",
+    "STD-RAV-072-P"
+  ],
+  "critical_features_preserved": [
+    "Exact source boundary match requirement from STD-RAV-072-P",
+    "Visible ERP hold status from HOLD-RAV-072",
+    "Payment release approval status from CLOSE-RAV-072",
+    "Invoice, vendor, and amount alignment across INV-RAV-072 and CLOSE-RAV-072",
+    "Tax review and quality signoff completion from CLOSE-RAV-072"
+  ],
+  "final_answer": "ESCALATE. The action may not proceed. The closeout ledger CLOSE-RAV-072 explicitly states that payment release approval remains open, which violates the exact match requirement of policy STD-RAV-072-P. The visible ERP hold HOLD-RAV-072 further confirms that the action boundary is not closed. All conditions for release, including completed payment release approval, must be met before the invoice can be released.",
+  "open_blockers": [
+    "Payment release approval remains open per CLOSE-RAV-072, preventing closure of the action boundary.",
+    "Visible ERP hold HOLD-RAV-072 indicates an incomplete process."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

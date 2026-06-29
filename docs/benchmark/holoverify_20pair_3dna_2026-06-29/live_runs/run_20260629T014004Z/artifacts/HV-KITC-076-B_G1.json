@@ -1,0 +1,55 @@
+{
+  "blocked_moves": [
+    "ALLOW release of INV-VAN-076 without vendor distinction",
+    "CONTINUE to FINAL_COMPILER with current evidence",
+    "ACCEPT invoice as valid without credit/reversal status",
+    "PROCEED to payment execution"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "{'dependency': 'Vendor distinction clarification', 'status': 'UNRESOLVED', 'blocks': 'ALLOW and FINAL_COMPILER', 'required_for': 'Invoice release authorization'}",
+    "{'dependency': 'Credit or reversal status record', 'status': 'MISSING', 'blocks': 'Source boundary closure', 'required_for': 'Allow verdict'}"
+  ],
+  "final_compiler_allowed": false,
+  "gov_may_select_models": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+  "model": "minimax/MiniMax-M2.5-highspeed",
+  "must_preserve": [
+    "INV-VAN-076 exact source ID",
+    "PRIOR-VAN-076 exact source ID",
+    "MS-VAN-076 exact source ID",
+    "STD-VAN-076-P exact-match rule",
+    "action boundary question",
+    "M-4/R4 milestone/release identifier",
+    "USD 42800 amount",
+    "Vanta Field Services vendor",
+    "credit/reversal distinction requirement",
+    "SOURCE_BOUNDARY_OPEN binding class"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Adversarial cross-DNA repair - test whether any record exists that distinguishes INV-VAN-076 from PRIOR-VAN-076 beyond coincidence of fields. Probe for credit note, reversal memo, or signed escalation explaining duplicate M-4/R4 billing.",
+    "monotonic_preservation": [
+      "Do not accept planning artifacts as execution authority",
+      "Do not treat adjacent source MS-VAN-076 as exact distinction from PRIOR-VAN-076",
+      "Do not conflate action boundary question with policy allow rule",
+      "Do not allow status-class literalism to bypass credit/reversal requirement",
+      "Do not accept verbal vendor communication without signed confirmation"
+    ],
+    "objective": "Extract vendor-distinction clarification to close SOURCE_BOUNDARY_OPEN or confirm FAIL_CLOSED",
+    "required_repairs": [
+      "Request vendor (Vanta Field Services) signed statement confirming whether INV-VAN-076 represents credit, reversal, or legitimate new billing for M-4/R4",
+      "Obtain AP manager attestation that INV-VAN-076 was not auto-matched to PRIOR-VAN-076 in payment system",
+      "Secure exact record showing INV-VAN-076 is credit/reversal of PRIOR-VAN-076 or is authorized re-billing of M-4/R4"
+    ]
+  },
+  "no_substitutions": true,
+  "packet_id": "HV-KITC-076-B",
+  "pair_id": "HV-KITC-076",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T014004Z",
+  "source_gate_interpretation": "Gate PASSED. Deterministic verification confirms ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding. Artifact hash e6114fc9ee8dca50c5648883387e42d1f414840cd5f3ec5fd85778c67f2c8cae matches registry. No repair required at gate level. Source boundary remains OPEN pending vendor distinction clarification.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

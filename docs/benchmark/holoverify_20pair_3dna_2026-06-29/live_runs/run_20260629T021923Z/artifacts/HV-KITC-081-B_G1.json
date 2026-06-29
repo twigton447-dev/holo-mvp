@@ -1,0 +1,46 @@
+{
+  "blocked_moves": [
+    "treat WARN-AST-081 as execution authority",
+    "treat pending-status REL-AST-081 as execution-ready",
+    "accept generic safety language as abstract hazard-control proof",
+    "claim pending controls equal approved controls",
+    "authorize procurement execution without hazard-control closure"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "STD-AST-081-P depends on hazard-control closure before PO execution. REL-AST-081 shows cabinet/handler controls remain pending. Closure evidence not present in source documents. UNRESOLVED - requires next worker to verify completion status."
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "CONTROL_ROUTER",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "artifact verdict ESCALATE",
+    "binding class SOURCE_BOUNDARY_OPEN",
+    "source IDs PO-AST-081, REL-AST-081, STD-AST-081-P, WARN-AST-081",
+    "action boundary exact text",
+    "policy exact-match rule on hazard-control closure",
+    "critical feature count 3"
+  ],
+  "must_repair": [
+    "hazard-control status must be proven complete, not merely quoted as pending",
+    "active cabinet/handler controls must show evidence of completion or exemption"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Expose 047-style trap where abstract hazard-control status is asserted but unproven; require concrete completion evidence or exemption documentation",
+    "monotonic_preservation": [
+      "exact action boundary text preserved",
+      "source-boundary policy requirement preserved",
+      "verification_verdict ESCALATE preserved until closure proven"
+    ],
+    "objective": "Verify hazard-control closure evidence exists and exactly matches the controlled-solvent execution requirement",
+    "required_repairs": [
+      "Prove hazard-control status is closed per REL-AST-081 pending-controls flag",
+      "Obtain cabinet/handler control completion evidence or documented exemption",
+      "Disambiguate pending status from execution authorization"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate PASSED. Worker correctly identified SOURCE_BOUNDARY_OPEN via source evidence. Artifact verdict ESCALATE is source-plausible; no inversion required. The open hazard-control dependency is the sole unresolved blocker per source documents.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

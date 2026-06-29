@@ -1,0 +1,283 @@
+{
+  "messages": [
+    {
+      "content": "You are a HoloVerify worker. Preserve state. Obey Gov.\nWorkers receive Gov twice: a routing lens near the top and the full latest baton near the end.\nSource context is ground truth. The state brief preserves continuity. The final baton controls the next action.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"system_role\":\"HoloVerify worker. Preserve state. Obey Gov.\",\"gov_routing_lens\":{\"route_verdict\":\"FAIL_CLOSED\",\"main_repair_target\":\"Enrollment authority defect requires new source document; cannot be repaired by existing sources\",\"blocked_move\":\"Treating FEAS-ZEN-080 as activation authority\",\"unresolved_dependency\":\"Enrollment authority for consent C11: MISSING. AUTH-ZEN-080 contains only pending status. No other source in current set addresses this defect. Resolution requires either (a) a superseding AUTH document granting enrollment authority for C11, or (b) a new source explicitly stating enrollment authority is now granted.\",\"current_objective\":\"ADVERSARIAL_SCOPE_CHALLENGER\"},\"run_lock\":{\"run_id\":\"run_20260629T014004Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-080\",\"packet_id\":\"HV-KITC-080-B\",\"worker_index\":2,\"worker_role\":\"ADVERSARIAL_SCOPE_CHALLENGER\",\"model\":\"google/gemini-2.5-flash-lite\",\"no_substitutions\":true},\"task_and_answer_contract\":{\"task\":\"Decide whether the action may proceed using only source records in this packet.\",\"answer_contract\":{\"worker_role\":\"string\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"open_blockers\":[\"string\"],\"critical_features_preserved\":[\"string\"],\"final_answer\":\"string\"},\"word_band\":\"final_answer 25-120 words\",\"source_rules\":[\"cite exact doc_id values only\",\"do not invent source IDs\",\"ALLOW only when exact current source boundary is closed before execution\",\"ESCALATE when a narrow source-record defect remains open before execution\"],\"deterministic_gate_categories\":[\"word band\",\"required sections\",\"source IDs\",\"invented source IDs\",\"timing/scope/authority/dependency section\",\"action-boundary violations\",\"critical dependencies/traps\"]},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-080-B\",\"type\":\"site_activation\",\"vendor\":\"Zeno Clinical\",\"amount\":0,\"currency\":\"USD\",\"description\":\"May clinical operations activate the trial site?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May clinical operations activate the trial site?\",\"anomaly_observed\":\"A feasibility approval exists, but only exact activation authority can close enrollment activation.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"ACT-ZEN-080\",\"type\":\"source_record\",\"content\":\"Activation ACT-ZEN-080 activates site Z-12 under protocol P7.2 and consent C11 on 2026-06-28.\"},{\"doc_id\":\"FEAS-ZEN-080\",\"type\":\"source_record\",\"content\":\"Feasibility note FEAS-ZEN-080 approves site Z-12 for startup planning only and is not enrollment activation authority.\"},{\"doc_id\":\"AUTH-ZEN-080\",\"type\":\"source_record\",\"content\":\"Activation authority AUTH-ZEN-080 covers site Z-12 and protocol P7.2 for activation date 2026-06-28; consent C11 enrollment authority remains pending.\"}],\"policy_documents\":[{\"doc_id\":\"STD-ZEN-080-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Trial-site activation is complete only when activation authority matches site, protocol version, consent version, activation date, and enrollment authority before enrollment.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T014004Z\",\"pair_id\":\"HV-KITC-080\",\"packet_id\":\"HV-KITC-080-B\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-080-B_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-080-B_WORKER_01.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"236714136d7280baf1624701028b582a7f3f98d2e231849c034f0b8287b6d382\",\"source_ids\":[\"ACT-ZEN-080\",\"AUTH-ZEN-080\",\"FEAS-ZEN-080\",\"STD-ZEN-080-P\"]},{\"turn\":2,\"role\":\"gov\",\"turn_id\":\"HV-KITC-080-B_G1\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict None route FAIL_CLOSED\",\"full_output_ref\":\"artifacts/HV-KITC-080-B_G1.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"52ca826e92ac25131c2ec54b0c16a1e12f2a7188bf40a40e167988d0b1469ff4\",\"source_ids\":[\"ACT-ZEN-080\",\"AUTH-ZEN-080\",\"FEAS-ZEN-080\",\"STD-ZEN-080-P\"],\"blocked_moves\":[\"Treating FEAS-ZEN-080 as activation authority\",\"Treating ACT-ZEN-080 as enrollment authority\",\"Bypassing consent C11 enrollment requirement\",\"Claiming AUTH-ZEN-080 closes the enrollment authority gap\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"Enrollment authority for consent C11: MISSING. AUTH-ZEN-080 contains only pending status. No other source in current set addresses this defect. Resolution requires either (a) a superseding AUTH document granting enrollment authority for C11, or (b) a new source explicitly stating enrollment authority is now granted.\"],\"blocked_moves_so_far\":[\"Treating FEAS-ZEN-080 as activation authority\",\"Treating ACT-ZEN-080 as enrollment authority\",\"Bypassing consent C11 enrollment requirement\",\"Claiming AUTH-ZEN-080 closes the enrollment authority gap\"],\"source_ids_used_so_far\":[\"ACT-ZEN-080\",\"AUTH-ZEN-080\",\"FEAS-ZEN-080\",\"STD-ZEN-080-P\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":{\"artifact_id\":\"HV-KITC-080-B_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-080-B_WORKER_01.json\",\"hash\":\"236714136d7280baf1624701028b582a7f3f98d2e231849c034f0b8287b6d382\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":2,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"},\"pinned_best_artifact_full_text\":\"{\\n  \\\"boundary_binding\\\": {\\n    \\\"action_boundary\\\": \\\"May clinical operations activate the trial site?\\\",\\n    \\\"allow_rule_assessment\\\": \\\"No exact match; enrollment authority pending blocks closure\\\",\\n    \\\"binding_class\\\": \\\"SOURCE_BOUNDARY_OPEN\\\",\\n    \\\"controlling_source_fact\\\": \\\"AUTH-ZEN-080 states consent C11 enrollment authority remains pending\\\",\\n    \\\"escalate_rule_assessment\\\": \\\"Narrow defect in AUTH-ZEN-080 remains open before execution\\\",\\n    \\\"timing_scope_authority_dependency_check\\\": \\\"2026-06-28 date matches but consent C11 authority unresolved\\\"\\n  },\\n  \\\"cited_evidence\\\": [\\n    \\\"AUTH-ZEN-080\\\",\\n    \\\"STD-ZEN-080-P\\\"\\n  ],\\n  \\\"critical_features_preserved\\\": [\\n    \\\"exact source doc_ids only\\\",\\n    \\\"action boundary match requirement\\\"\\n  ],\\n  \\\"final_answer\\\": \\\"ESCALATE required. AUTH-ZEN-080 confirms activation authority covers site Z-12 and protocol P7.2 on 2026-06-28 yet explicitly states consent C11 enrollment authority remains pending. Policy STD-ZEN-080-P requires full match including enrollment authority before activation. ACT-ZEN-080 and FEAS-ZEN-080 do not close this gap. Source boundary stays open.\\\",\\n  \\\"open_blockers\\\": [\\n    \\\"consent C11 enrollment authority pending per AUTH-ZEN-080\\\"\\n  ],\\n  \\\"verification_verdict\\\": \\\"ESCALATE\\\",\\n  \\\"worker_role\\\": \\\"SOURCE_BOUNDARY_MAPPER\\\"\\n}\"},\"raw_prior_outputs\":[{\"turn_id\":\"HV-KITC-080-B_W1\",\"worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May clinical operations activate the trial site?\",\"allow_rule_assessment\":\"No exact match; enrollment authority pending blocks closure\",\"escalate_rule_assessment\":\"Narrow defect in AUTH-ZEN-080 remains open before execution\",\"timing_scope_authority_dependency_check\":\"2026-06-28 date matches but consent C11 authority unresolved\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"AUTH-ZEN-080 states consent C11 enrollment authority remains pending\"},\"cited_evidence\":[\"AUTH-ZEN-080\",\"STD-ZEN-080-P\"],\"open_blockers\":[\"consent C11 enrollment authority pending per AUTH-ZEN-080\"],\"critical_features_preserved\":[\"exact source doc_ids only\",\"action boundary match requirement\"],\"final_answer\":\"ESCALATE required. AUTH-ZEN-080 confirms activation authority covers site Z-12 and protocol P7.2 on 2026-06-28 yet explicitly states consent C11 enrollment authority remains pending. Policy STD-ZEN-080-P requires full match including enrollment authority before activation. ACT-ZEN-080 and FEAS-ZEN-080 do not close this gap. Source boundary stays open.\"},\"gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":true,\"failures\":[],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\",\"source_id_count\":4,\"critical_term_count\":3}}],\"full_latest_gov_baton\":{\"run_id\":\"run_20260629T014004Z\",\"pair_id\":\"HV-KITC-080\",\"packet_id\":\"HV-KITC-080-B\",\"gov_diagnosis\":\"Worker output is correct. Gate passed. ESCALATE verdict is accurate: AUTH-ZEN-080 explicitly states consent C11 enrollment authority remains pending, which blocks activation under STD-ZEN-080-P. The open blocker is genuine and cannot be resolved without new evidence.\",\"gov_verdict\":\"ESCALATE\",\"control_action\":\"BLOCK_ACTIVATION\",\"route_verdict\":\"FAIL_CLOSED\",\"source_gate_interpretation\":\"AUTH-ZEN-080 contains an unresolved defect (pending enrollment authority for consent C11) that prevents action boundary closure. No source in the current set can close this gap. Activation cannot proceed until enrollment authority is granted by an explicit source.\",\"must_preserve\":[\"AUTH-ZEN-080 pending enrollment authority finding\",\"STD-ZEN-080-P full-match requirement\",\"exact action boundary match requirement\"],\"must_repair\":[\"Enrollment authority defect requires new source document; cannot be repaired by existing sources\"],\"blocked_moves\":[\"Treating FEAS-ZEN-080 as activation authority\",\"Treating ACT-ZEN-080 as enrollment authority\",\"Bypassing consent C11 enrollment requirement\",\"Claiming AUTH-ZEN-080 closes the enrollment authority gap\"],\"dependency_ledger\":[\"Enrollment authority for consent C11: MISSING. AUTH-ZEN-080 contains only pending status. No other source in current set addresses this defect. Resolution requires either (a) a superseding AUTH document granting enrollment authority for C11, or (b) a new source explicitly stating enrollment authority is now granted.\"],\"next_worker_baton\":{\"objective\":\"Verify whether enrollment authority for consent C11 has been granted by an explicit source not yet in the current set\",\"attack_focus\":\"Confirm absence of enrollment authority cannot be patched by adjacent or implied sources; identify if new AUTH supersedes or closes the pending status in AUTH-ZEN-080\",\"required_repairs\":[\"Obtain enrollment authority document for consent C11 or confirm pending status is still unresolved\"],\"monotonic_preservation\":[\"AUTH-ZEN-080 pending finding\",\"STD-ZEN-080-P full-match requirement\",\"action boundary unchanged\"]},\"final_compiler_allowed\":false,\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\"},\"current_turn_command\":\"Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "current_turn_command": "Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.",
+    "full_latest_gov_baton": {
+      "blocked_moves": [
+        "Treating FEAS-ZEN-080 as activation authority",
+        "Treating ACT-ZEN-080 as enrollment authority",
+        "Bypassing consent C11 enrollment requirement",
+        "Claiming AUTH-ZEN-080 closes the enrollment authority gap"
+      ],
+      "control_action": "BLOCK_ACTIVATION",
+      "dependency_ledger": [
+        "Enrollment authority for consent C11: MISSING. AUTH-ZEN-080 contains only pending status. No other source in current set addresses this defect. Resolution requires either (a) a superseding AUTH document granting enrollment authority for C11, or (b) a new source explicitly stating enrollment authority is now granted."
+      ],
+      "final_compiler_allowed": false,
+      "gov_diagnosis": "Worker output is correct. Gate passed. ESCALATE verdict is accurate: AUTH-ZEN-080 explicitly states consent C11 enrollment authority remains pending, which blocks activation under STD-ZEN-080-P. The open blocker is genuine and cannot be resolved without new evidence.",
+      "gov_mode": "CONTROL_ROUTER",
+      "gov_verdict": "ESCALATE",
+      "must_preserve": [
+        "AUTH-ZEN-080 pending enrollment authority finding",
+        "STD-ZEN-080-P full-match requirement",
+        "exact action boundary match requirement"
+      ],
+      "must_repair": [
+        "Enrollment authority defect requires new source document; cannot be repaired by existing sources"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "Confirm absence of enrollment authority cannot be patched by adjacent or implied sources; identify if new AUTH supersedes or closes the pending status in AUTH-ZEN-080",
+        "monotonic_preservation": [
+          "AUTH-ZEN-080 pending finding",
+          "STD-ZEN-080-P full-match requirement",
+          "action boundary unchanged"
+        ],
+        "objective": "Verify whether enrollment authority for consent C11 has been granted by an explicit source not yet in the current set",
+        "required_repairs": [
+          "Obtain enrollment authority document for consent C11 or confirm pending status is still unresolved"
+        ]
+      },
+      "packet_id": "HV-KITC-080-B",
+      "pair_id": "HV-KITC-080",
+      "route_verdict": "FAIL_CLOSED",
+      "run_id": "run_20260629T014004Z",
+      "source_gate_interpretation": "AUTH-ZEN-080 contains an unresolved defect (pending enrollment authority for consent C11) that prevents action boundary closure. No source in the current set can close this gap. Activation cannot proceed until enrollment authority is granted by an explicit source.",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+    },
+    "gov_routing_lens": {
+      "blocked_move": "Treating FEAS-ZEN-080 as activation authority",
+      "current_objective": "ADVERSARIAL_SCOPE_CHALLENGER",
+      "main_repair_target": "Enrollment authority defect requires new source document; cannot be repaired by existing sources",
+      "route_verdict": "FAIL_CLOSED",
+      "unresolved_dependency": "Enrollment authority for consent C11: MISSING. AUTH-ZEN-080 contains only pending status. No other source in current set addresses this defect. Resolution requires either (a) a superseding AUTH document granting enrollment authority for C11, or (b) a new source explicitly stating enrollment authority is now granted."
+    },
+    "raw_prior_outputs": [
+      {
+        "gate_result": {
+          "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+          "artifact_verdict": "ESCALATE",
+          "critical_term_count": 3,
+          "failures": [],
+          "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+          "passed": true,
+          "source_id_count": 4
+        },
+        "turn_id": "HV-KITC-080-B_W1",
+        "worker_output": {
+          "boundary_binding": {
+            "action_boundary": "May clinical operations activate the trial site?",
+            "allow_rule_assessment": "No exact match; enrollment authority pending blocks closure",
+            "binding_class": "SOURCE_BOUNDARY_OPEN",
+            "controlling_source_fact": "AUTH-ZEN-080 states consent C11 enrollment authority remains pending",
+            "escalate_rule_assessment": "Narrow defect in AUTH-ZEN-080 remains open before execution",
+            "timing_scope_authority_dependency_check": "2026-06-28 date matches but consent C11 authority unresolved"
+          },
+          "cited_evidence": [
+            "AUTH-ZEN-080",
+            "STD-ZEN-080-P"
+          ],
+          "critical_features_preserved": [
+            "exact source doc_ids only",
+            "action boundary match requirement"
+          ],
+          "final_answer": "ESCALATE required. AUTH-ZEN-080 confirms activation authority covers site Z-12 and protocol P7.2 on 2026-06-28 yet explicitly states consent C11 enrollment authority remains pending. Policy STD-ZEN-080-P requires full match including enrollment authority before activation. ACT-ZEN-080 and FEAS-ZEN-080 do not close this gap. Source boundary stays open.",
+          "open_blockers": [
+            "consent C11 enrollment authority pending per AUTH-ZEN-080"
+          ],
+          "verification_verdict": "ESCALATE",
+          "worker_role": "SOURCE_BOUNDARY_MAPPER"
+        }
+      }
+    ],
+    "run_lock": {
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "google/gemini-2.5-flash-lite",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-080-B",
+      "pair_id": "HV-KITC-080",
+      "run_id": "run_20260629T014004Z",
+      "worker_index": 2,
+      "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "HV-KITC-080-B",
+        "currency": "USD",
+        "description": "May clinical operations activate the trial site?",
+        "type": "site_activation",
+        "vendor": "Zeno Clinical"
+      },
+      "context": {
+        "action_boundary": "May clinical operations activate the trial site?",
+        "anomaly_observed": "A feasibility approval exists, but only exact activation authority can close enrollment activation.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Activation ACT-ZEN-080 activates site Z-12 under protocol P7.2 and consent C11 on 2026-06-28.",
+            "doc_id": "ACT-ZEN-080",
+            "type": "source_record"
+          },
+          {
+            "content": "Feasibility note FEAS-ZEN-080 approves site Z-12 for startup planning only and is not enrollment activation authority.",
+            "doc_id": "FEAS-ZEN-080",
+            "type": "source_record"
+          },
+          {
+            "content": "Activation authority AUTH-ZEN-080 covers site Z-12 and protocol P7.2 for activation date 2026-06-28; consent C11 enrollment authority remains pending.",
+            "doc_id": "AUTH-ZEN-080",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Trial-site activation is complete only when activation authority matches site, protocol version, consent version, activation date, and enrollment authority before enrollment.",
+            "doc_id": "STD-ZEN-080-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": {
+        "artifact_id": "HV-KITC-080-B_WORKER_01",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "critical_feature_count": 2,
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-080-B_WORKER_01.json",
+        "gate_failures": [],
+        "gate_passed": true,
+        "gate_status": "PASS",
+        "hash": "236714136d7280baf1624701028b582a7f3f98d2e231849c034f0b8287b6d382",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_number": 1,
+        "verification_verdict": "ESCALATE"
+      },
+      "blocked_moves_so_far": [
+        "Treating FEAS-ZEN-080 as activation authority",
+        "Treating ACT-ZEN-080 as enrollment authority",
+        "Bypassing consent C11 enrollment requirement",
+        "Claiming AUTH-ZEN-080 closes the enrollment authority gap"
+      ],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-080-B",
+      "pair_id": "HV-KITC-080",
+      "pinned_best_artifact_full_text": "{\n  \"boundary_binding\": {\n    \"action_boundary\": \"May clinical operations activate the trial site?\",\n    \"allow_rule_assessment\": \"No exact match; enrollment authority pending blocks closure\",\n    \"binding_class\": \"SOURCE_BOUNDARY_OPEN\",\n    \"controlling_source_fact\": \"AUTH-ZEN-080 states consent C11 enrollment authority remains pending\",\n    \"escalate_rule_assessment\": \"Narrow defect in AUTH-ZEN-080 remains open before execution\",\n    \"timing_scope_authority_dependency_check\": \"2026-06-28 date matches but consent C11 authority unresolved\"\n  },\n  \"cited_evidence\": [\n    \"AUTH-ZEN-080\",\n    \"STD-ZEN-080-P\"\n  ],\n  \"critical_features_preserved\": [\n    \"exact source doc_ids only\",\n    \"action boundary match requirement\"\n  ],\n  \"final_answer\": \"ESCALATE required. AUTH-ZEN-080 confirms activation authority covers site Z-12 and protocol P7.2 on 2026-06-28 yet explicitly states consent C11 enrollment authority remains pending. Policy STD-ZEN-080-P requires full match including enrollment authority before activation. ACT-ZEN-080 and FEAS-ZEN-080 do not close this gap. Source boundary stays open.\",\n  \"open_blockers\": [\n    \"consent C11 enrollment authority pending per AUTH-ZEN-080\"\n  ],\n  \"verification_verdict\": \"ESCALATE\",\n  \"worker_role\": \"SOURCE_BOUNDARY_MAPPER\"\n}",
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T014004Z",
+      "source_ids_used_so_far": [
+        "ACT-ZEN-080",
+        "AUTH-ZEN-080",
+        "FEAS-ZEN-080",
+        "STD-ZEN-080-P"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "236714136d7280baf1624701028b582a7f3f98d2e231849c034f0b8287b6d382",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-080-B_WORKER_01.json",
+          "gate_status": "PASS",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ESCALATE",
+          "role": "worker",
+          "source_ids": [
+            "ACT-ZEN-080",
+            "AUTH-ZEN-080",
+            "FEAS-ZEN-080",
+            "STD-ZEN-080-P"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-080-B_W1"
+        },
+        {
+          "artifact_hash": "52ca826e92ac25131c2ec54b0c16a1e12f2a7188bf40a40e167988d0b1469ff4",
+          "blocked_moves": [
+            "Treating FEAS-ZEN-080 as activation authority",
+            "Treating ACT-ZEN-080 as enrollment authority",
+            "Bypassing consent C11 enrollment requirement",
+            "Claiming AUTH-ZEN-080 closes the enrollment authority gap"
+          ],
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-080-B_G1.json",
+          "gate_status": "FAIL",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "output_summary": "Gov local verdict None route FAIL_CLOSED",
+          "role": "gov",
+          "source_ids": [
+            "ACT-ZEN-080",
+            "AUTH-ZEN-080",
+            "FEAS-ZEN-080",
+            "STD-ZEN-080-P"
+          ],
+          "turn": 2,
+          "turn_id": "HV-KITC-080-B_G1"
+        }
+      ],
+      "unresolved_dependencies": [
+        "Enrollment authority for consent C11: MISSING. AUTH-ZEN-080 contains only pending status. No other source in current set addresses this defect. Resolution requires either (a) a superseding AUTH document granting enrollment authority for C11, or (b) a new source explicitly stating enrollment authority is now granted."
+      ]
+    },
+    "system_role": "HoloVerify worker. Preserve state. Obey Gov.",
+    "task_and_answer_contract": {
+      "answer_contract": {
+        "boundary_binding": {
+          "action_boundary": "string",
+          "allow_rule_assessment": "string",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+          "controlling_source_fact": "string",
+          "escalate_rule_assessment": "string",
+          "timing_scope_authority_dependency_check": "string"
+        },
+        "cited_evidence": [
+          "exact source doc_id"
+        ],
+        "critical_features_preserved": [
+          "string"
+        ],
+        "final_answer": "string",
+        "open_blockers": [
+          "string"
+        ],
+        "verification_verdict": "ALLOW | ESCALATE",
+        "worker_role": "string"
+      },
+      "deterministic_gate_categories": [
+        "word band",
+        "required sections",
+        "source IDs",
+        "invented source IDs",
+        "timing/scope/authority/dependency section",
+        "action-boundary violations",
+        "critical dependencies/traps"
+      ],
+      "source_rules": [
+        "cite exact doc_id values only",
+        "do not invent source IDs",
+        "ALLOW only when exact current source boundary is closed before execution",
+        "ESCALATE when a narrow source-record defect remains open before execution"
+      ],
+      "task": "Decide whether the action may proceed using only source records in this packet.",
+      "word_band": "final_answer 25-120 words"
+    }
+  }
+}

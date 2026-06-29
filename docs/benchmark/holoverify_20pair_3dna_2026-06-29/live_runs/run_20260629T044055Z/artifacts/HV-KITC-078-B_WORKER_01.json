@@ -1,0 +1,25 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May quality release the clinical batch?",
+    "allow_rule_assessment": "No exact match on batch ID",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-XOR-078-P requires exact batch match",
+    "escalate_rule_assessment": "Closure covers X-79 not X-78",
+    "timing_scope_authority_dependency_check": "Release date matches but batch fails"
+  },
+  "cited_evidence": [
+    "BATCH-XOR-078",
+    "CLOSE-XOR-078",
+    "STD-XOR-078-P"
+  ],
+  "critical_features_preserved": [
+    "source doc exact match",
+    "policy boundary rule"
+  ],
+  "final_answer": "Action may not proceed. CLOSE-XOR-078 covers batch X-79 while BATCH-XOR-078 targets X-78. Policy STD-XOR-078-P requires exact match on batch, assay, criterion, and date. Visible deviation DEV-XOR-078 remains unresolved for the target batch. Source boundary stays open.",
+  "open_blockers": [
+    "Batch ID mismatch X-78 vs X-79"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

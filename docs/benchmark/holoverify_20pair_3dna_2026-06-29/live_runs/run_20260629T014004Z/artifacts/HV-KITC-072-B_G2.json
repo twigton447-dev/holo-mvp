@@ -1,0 +1,33 @@
+{
+  "blocked_moves": [
+    "Any ALLOW verdict violates exact-match policy",
+    "Any attempt to treat open approval as equivalent to completed",
+    "Any route to CONTINUE_WORKER would loop without new source information",
+    "HOLD-RAV-072 override without complete CLOSE-RAV-072 match"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "open_dependency: payment_release_approval_required_in_closeout_ledger | source: CLOSE-RAV-072 | required_value: completed payment release approval | current_value: payment release approval remains open | blocking_source: CLOSE-RAV-072 | resolution_requirement: Closeout ledger must be amended to show completed payment release approval before action boundary can close | external_resolution_required: true"
+  ],
+  "final_compiler_allowed": true,
+  "gov_diagnosis": "Two workers (cross-DNA: xai, google) independently returned ESCALATE verdicts with PASS gates, both correctly identifying that CLOSE-RAV-072 does not satisfy STD-RAV-072-P exact-match requirements because payment release approval remains open. The unresolved dependency cannot be repaired by additional worker turns without new source evidence. Action boundary remains open. Gov must issue FAIL_CLOSED to prevent invoice release until payment release approval dependency is resolved in CLOSE-RAV-072.",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "SOURCE_BOUNDARY_OPEN binding",
+    "CLOSE-RAV-072 exact language",
+    "payment_release_approval open status",
+    "STD-RAV-072-P exact-match rule",
+    "ESCALATE verdict from two independent workers"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "N/A",
+    "monotonic_preservation": "N/A",
+    "objective": "N/A - routing to FINAL_COMPILER",
+    "required_repairs": []
+  },
+  "route_verdict": "FAIL_CLOSED",
+  "source_gate_interpretation": "Exact-match policy STD-RAV-072-P requires CLOSE-RAV-072 to show completed payment release approval before release is permitted despite visible HOLD-RAV-072. CLOSE-RAV-072 explicitly states 'payment release approval remains open.' Exact match fails. Action boundary SOURCE_BOUNDARY_OPEN is correctly bound. Both workers (grok-3-mini, gemini-2.5-flash-lite) independently reached ESCALATE with PASS gates. No repair possible within source constraints. Dependency cannot be satisfied by worker repair\u2014requires external source update.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

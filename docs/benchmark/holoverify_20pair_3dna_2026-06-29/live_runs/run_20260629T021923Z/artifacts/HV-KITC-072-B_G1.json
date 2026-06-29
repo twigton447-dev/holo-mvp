@@ -1,0 +1,66 @@
+{
+  "binding_class_correct": "YES",
+  "blocked_moves": [
+    "CONTINUE_WORKER with authorization override - policy requires exact match, not visible-hold override",
+    "Any ALLOW verdict - controlling source fact explicitly violates policy rule",
+    "Treating HOLD-RAV-072 visibility as sufficient without closeout ledger exact-match completion",
+    "Ignoring payment release approval open status as minor discrepancy"
+  ],
+  "dependency_ledger": [
+    "HV-KITC-072-B_STATUS: SOURCE_BOUNDARY_OPEN_BLOCKED",
+    "blocking_condition: Payment release approval remains open in CLOSE-RAV-072",
+    "policy_requirement_violated: STD-RAV-072-P exact-match for payment release approval",
+    "required_resolution: Payment release approval must be completed in closeout ledger before invoice release may proceed",
+    "erp_hold_status: Visible but superseded by closeout ledger deficiency per policy"
+  ],
+  "escalation_trigger_valid": "YES",
+  "final_compiler_allowed": true,
+  "final_compiler_directive": "Compile ESCALATE verdict for HV-KITC-072-B. Action boundary is not satisfied. CLOSE-RAV-072 shows payment release approval open, violating STD-RAV-072-P. HOLD-RAV-072 visibility alone is insufficient per policy. Recommend AP await payment release approval completion in closeout ledger before re-submitting for verification.",
+  "gate_result": "PASS",
+  "gov_artifact_meta": {
+    "artifact_id": "HV-KITC-072-B_GOV_01",
+    "gov_role": "CONTROL_ROUTER",
+    "source_ids_cited": [
+      "CLOSE-RAV-072",
+      "STD-RAV-072-P",
+      "HOLD-RAV-072",
+      "INV-RAV-072"
+    ],
+    "turn_number": 1,
+    "verdict_preserved": true,
+    "verdict_reason": "Gate passed. No failures to repair. Worker correctly identified payment release approval open status as blocking condition per policy exact-match rule."
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "governance_action": "PRESERVE_VERDICT_NO_REPAIR_REQUIRED",
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "Payment release approval open as controlling blocker",
+    "STD-RAV-072-P exact-match rule",
+    "CLOSE-RAV-072 as controlling source over HOLD-RAV-072 appearance"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "SOURCE_BOUNDARY_OPEN - Payment release approval open in closeout ledger violates policy exact-match requirement. Action boundary is not satisfied. No gate failures to repair. Worker correctly identified the blocking condition.",
+    "monotonic_preservation": [
+      "ESCALATE verdict",
+      "SOURCE_BOUNDARY_OPEN binding class",
+      "Payment release approval open as controlling blocker",
+      "STD-RAV-072-P exact-match rule",
+      "CLOSE-RAV-072 as controlling source over HOLD-RAV-072 appearance"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "run_id": "run_20260629T021923Z",
+  "source_facts_confirmed": [
+    "CLOSE-RAV-072 states payment release approval remains open",
+    "STD-RAV-072-P requires payment release approval before payment release",
+    "HOLD-RAV-072 remains visible with payment-release queue in reason",
+    "Invoice-vendor-amount match confirmed across INV-RAV-072 and CLOSE-RAV-072"
+  ],
+  "source_gate_interpretation": "SOURCE_BOUNDARY_OPEN - Payment release approval open in closeout ledger violates policy exact-match requirement. Action boundary is not satisfied. No gate failures to repair. Worker correctly identified the blocking condition.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "worker_verdict_integrity": "SOUND"
+}

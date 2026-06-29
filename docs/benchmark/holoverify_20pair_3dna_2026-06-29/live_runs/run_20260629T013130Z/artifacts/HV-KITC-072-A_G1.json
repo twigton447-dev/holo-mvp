@@ -1,0 +1,77 @@
+{
+  "blocked_moves": [
+    "{'move': 'Any alteration of ALLOW verdict', 'block_reason': 'Verdict is substantiated by exact source match per policy; gate failure is output completeness, not substantive error'}",
+    "{'move': 'Any substitution of controlling source from CLOSE-RAV-072 to HOLD-RAV-072', 'block_reason': 'Policy STD-RAV-072-P explicitly allows hold override when closeout ledger matches; HOLD-RAV-072 is not controlling authority'}",
+    "{'move': 'Any attempt to escalate to ESCALATE', 'block_reason': 'Boundary binding is determinable from exact source match; no genuine ambiguity exists'}",
+    "{'move': 'Any use of alternative model', 'block_reason': 'gov_may_select_models=false; no_substitutions=true'}"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Unresolved dependency 'Targets visible-hold fixation versus closeout-ledger binding' resolved: CLOSE-RAV-072 is controlling per STD-RAV-072-P exact-match rule; HOLD-RAV-072 is visible but overridden by source-boundary closure."
+  ],
+  "deterministic_gate_diagnosis": {
+    "analysis": "Worker output correctly binds SOURCE_BOUNDARY_CLOSED with ALLOW verdict using CLOSE-RAV-072 as controlling source. All policy elements per STD-RAV-072-P are satisfied. However, deterministic gate requires explicit presence of critical term '51600' in artifact text. The amount appears in INV-RAV-072 and CLOSE-RAV-072 but is not explicitly cited in the worker's verification output.",
+    "failures": [
+      "missing_critical_term:51600"
+    ],
+    "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+    "passed": false,
+    "verdict_integrity": "Preserved - ALLOW verdict is substantiated by exact source match; source binding SOURCE_BOUNDARY_CLOSED is correct"
+  },
+  "final_compiler_allowed": false,
+  "gate_failure_repair": {
+    "repair_action": "Insert explicit amount '51600' into artifact text, citing INV-RAV-072 and CLOSE-RAV-072 as source references",
+    "required_artifact_content": [
+      "Amount USD 51600 explicitly stated",
+      "Source reference to INV-RAV-072 for amount basis",
+      "Source reference to CLOSE-RAV-072 for amount confirmation",
+      "Statement that CLOSE-RAV-072 confirms USD 51600 for INV-RAV-072"
+    ],
+    "target": "missing_critical_term:51600"
+  },
+  "gate_repair_verification_criteria": [
+    "Artifact text explicitly contains '51600'",
+    "Artifact cites INV-RAV-072 as amount source",
+    "Artifact cites CLOSE-RAV-072 as confirmation of amount match",
+    "Critical term count in artifact output >= 6"
+  ],
+  "gov_command": "CONTINUE_REPAIR",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Ensure deterministic gate critical term requirement satisfied by explicit amount citation in artifact text",
+    "monotonic_preservation": [
+      "ALLOW verdict",
+      "SOURCE_BOUNDARY_CLOSED binding",
+      "CLOSE-RAV-072 as controlling source",
+      "STD-RAV-072-P as policy authority",
+      "Exact match to INV-RAV-072, vendor, amount, tax review, quality signoff, payment release approval"
+    ],
+    "objective": "Repair artifact output to include explicit critical term '51600'",
+    "required_repairs": [
+      "missing_critical_term:51600"
+    ]
+  },
+  "preserved_correct_bindings": {
+    "boundary_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source": "CLOSE-RAV-072",
+    "matched_criteria": [
+      "INV-RAV-072 exact match",
+      "vendor Ravel Packaging",
+      "amount USD 51600",
+      "completed tax review",
+      "completed quality signoff",
+      "payment release approval before payment"
+    ],
+    "policy_authority": "STD-RAV-072-P",
+    "verdict": "ALLOW"
+  },
+  "required_artifact_references": [
+    "INV-RAV-072",
+    "CLOSE-RAV-072",
+    "STD-RAV-072-P"
+  ],
+  "route_verdict": "CONTINUE_REPAIR",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release the invoice while the ERP hold remains visible?",
+    "allow_rule_assessment": "Policy STD-RAV-072-P requires payment release approval to be closed before release, even if other items are matched.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLOSE-RAV-072: 'payment release approval remains open.'",
+    "escalate_rule_assessment": "CLOSE-RAV-072 explicitly states 'payment release approval remains open', directly contradicting the policy's requirement for closure.",
+    "timing_scope_authority_dependency_check": "The 'payment release approval open' dependency remains unresolved and blocks timely action execution."
+  },
+  "cited_evidence": [
+    "CLOSE-RAV-072",
+    "STD-RAV-072-P",
+    "HOLD-RAV-072"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "timing/scope/authority/dependency"
+  ],
+  "final_answer": "ESCALATE. The closeout ledger CLOSE-RAV-072 confirms that 'payment release approval remains open,' directly violating policy STD-RAV-072-P. This unresolved dependency, despite other items being matched, means the source boundary is not closed. The visible ERP hold HOLD-RAV-072 further supports this open state, preventing invoice release.",
+  "open_blockers": [
+    "payment release approval open",
+    "visible hold fixation vs closeout-ledger binding"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

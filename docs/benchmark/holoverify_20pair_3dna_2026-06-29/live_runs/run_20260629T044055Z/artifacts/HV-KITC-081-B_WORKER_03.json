@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "allow_rule_assessment": "Cannot allow - hazard-control status not confirmed",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-AST-081-P requires hazard-control status confirmed before PO execution; REL-AST-081 shows controls pending",
+    "escalate_rule_assessment": "Pending hazard controls block execution",
+    "timing_scope_authority_dependency_check": "REL-AST-081 confirms timing/scope/authority match but hazard-control dependency unresolved"
+  },
+  "cited_evidence": [
+    "PO-AST-081",
+    "REL-AST-081",
+    "STD-AST-081-P",
+    "WARN-AST-081"
+  ],
+  "critical_features_preserved": [
+    "exact source doc_id values",
+    "action boundary preserved verbatim",
+    "hazard-control status dependency",
+    "timing/scope/authority match confirmed",
+    "binding_class SOURCE_BOUNDARY_OPEN"
+  ],
+  "final_answer": "The controlled-solvent purchase cannot proceed. Source records confirm material, quantity band, facility, and purchase order match between REL-AST-081 and PO-AST-081. However, STD-AST-081-P mandates hazard-control status confirmation before execution, and REL-AST-081 explicitly states active cabinet/handler controls remain pending. The source boundary remains open. This matches the 047-style abstract-field trap pattern where generic approval language substitutes for exact hazard-control evidence.",
+  "open_blockers": [
+    "Active cabinet/handler controls remain pending per REL-AST-081",
+    "STD-AST-081-P hazard-control status requirement unsatisfied",
+    "047-style abstract-field trap unresolved"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

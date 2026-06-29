@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after the vendor bank update?",
+    "allow_rule_assessment": "Chain lacks pre-change callback source required by STD-QUA-071-P",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-QUA-071-P requires pre-change callback source in chain - CALL-QUA-071 provides post-change email instead",
+    "escalate_rule_assessment": "Pre-change callback gate open per policy - CALL-QUA-071 used post-change invoice email instead of pre-change vendor master phone source",
+    "timing_scope_authority_dependency_check": "All four gates required before release; callback source defect and timing defect both block release gate"
+  },
+  "cited_evidence": [
+    "CALL-QUA-071",
+    "STD-QUA-071-P",
+    "VM-QUA-071",
+    "BANK-QUA-071",
+    "REL-QUA-071"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "pre-change callback requirement"
+  ],
+  "final_answer": "ESCALATE. The pre-change callback source requirement from STD-QUA-071-P is not satisfied. CALL-QUA-071 confirmed account 8821 using a post-change invoice email thread rather than the required pre-change vendor master phone source. This defect leaves the source boundary open and blocks payment release. The timing defect further prevents the release gate from closing. The action cannot proceed until the pre-change callback source defect is resolved.",
+  "open_blockers": [
+    "Missing pre-change callback source - CALL-QUA-071 used post-change invoice email instead of pre-change vendor master phone source",
+    "Timing defect blocks release gate"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

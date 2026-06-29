@@ -1,0 +1,53 @@
+{
+  "artifact_registry_update": "none",
+  "blocked_moves": [],
+  "dependency_ledger": [
+    "open_dependency: payment_release_approval_required_in_closeout_ledger",
+    "blocking_source: CLOSE-RAV-072",
+    "resolution_requirement: Closeout ledger must show completed payment release approval before action boundary closes",
+    "current_state: UNRESOLVED",
+    "source_gate_interpretation: Exact-match policy (STD-RAV-072-P) requires payment release approval in CLOSE-RAV-072. Current record shows approval remains open. Action boundary remains open."
+  ],
+  "final_compiler_allowed": false,
+  "gov_diagnosis": {
+    "artifact_hash_validated": "0faee997c3efb8e3efb339fc93543b506dd77b1f507b1cc73a05d0182a28b743",
+    "cited_sources_verified": [
+      "HOLD-RAV-072 - ERP hold visible with reason tax-review/quality-signoff/payment-release queue",
+      "CLOSE-RAV-072 - payment release approval explicitly stated as open",
+      "STD-RAV-072-P - requires exact match on all items including payment release approval"
+    ],
+    "deterministic_gate_passed": true,
+    "gate_failure_check": "NONE",
+    "reasoning": "Worker correctly identified that CLOSE-RAV-072 shows 'payment release approval remains open' while STD-RAV-072-P requires full match including payment release approval before the visible ERP hold can be overridden. The ESCALATE verdict is accurate. Source boundary remains open.",
+    "source_binding_integrity": "INTACT",
+    "verdict_correctness": "CORRECT"
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_route_decision": {
+    "blocked_moves": [
+      "release_invoice_under_open_hold",
+      "proceed_without_payment_release_approval"
+    ],
+    "control_action": "CONTINUE_REPAIR",
+    "must_preserve": [
+      "exact source IDs (CLOSE-RAV-072, HOLD-RAV-072, INV-RAV-072, STD-RAV-072-P)",
+      "action boundary question",
+      "policy exact-match requirement for payment release approval"
+    ],
+    "must_repair": [],
+    "reasoning": "Source boundary is genuinely open due to incomplete payment release approval. No repair needed to the boundary assessment; the next worker should verify whether this dependency has since been resolved.",
+    "route_verdict": "CONTINUE_WORKER"
+  },
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Confirm CLOSE-RAV-072 payment release approval status; if still open, confirm ESCALATE is final; if completed, re-evaluate for potential boundary closure",
+    "dna": "Any worker may receive this baton",
+    "monotonic_preservation": "Payment release approval exact-match requirement cannot be waived or approximated under current policy",
+    "objective": "Verify whether payment release approval dependency has been resolved or remains open",
+    "required_repairs": []
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "CLOSE-RAV-072 explicitly records payment release approval as 'remains open.' STD-RAV-072-P exact-match rule cannot be satisfied until approval shows 'completed.' Visible HOLD-RAV-072 therefore blocks release until closeout ledger reflects completed payment release approval.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

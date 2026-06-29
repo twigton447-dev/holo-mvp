@@ -1,0 +1,24 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May IAM execute the emergency admin enablement?",
+    "allow_rule_assessment": "No exact match; breakglass approval incomplete per policy.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-UMA-075-P requires breakglass execution approval to match user, system, privilege, time window, and audit-control assignment before enablement.",
+    "escalate_rule_assessment": "Audit-control assignment pending blocks closure.",
+    "timing_scope_authority_dependency_check": "Time window matches but authority incomplete without audit assignment."
+  },
+  "cited_evidence": [
+    "BG-UMA-075",
+    "STD-UMA-075-P"
+  ],
+  "critical_features_preserved": [
+    "exact source doc_id binding",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Action may not proceed. BG-UMA-075 shows audit-control assignment pending while STD-UMA-075-P mandates full match including that assignment for boundary closure. REQ-UMA-075 and WARN-UMA-075 do not override this defect. SOURCE_BOUNDARY_OPEN requires ESCALATE before execution.",
+  "open_blockers": [
+    "audit-control assignment remains pending in BG-UMA-075"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

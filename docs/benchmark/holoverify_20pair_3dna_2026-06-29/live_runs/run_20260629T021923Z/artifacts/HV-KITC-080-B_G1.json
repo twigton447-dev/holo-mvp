@@ -1,0 +1,41 @@
+{
+  "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+  "artifact_verdict": "ESCALATE",
+  "blocked_moves": [
+    "Treating FEAS-ZEN-080 as activation authority (it is startup planning only)",
+    "Treating ACT-ZEN-080 alone as sufficient activation (enrollment authority pending)",
+    "Reducing scope to skip enrollment authority requirement",
+    "Accepting partial activation when policy requires full match"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Consent C11 enrollment authority is pending per AUTH-ZEN-080. Policy STD-ZEN-080-P requires enrollment authority as prerequisite. This is a genuine unresolved dependency, not a repairable defect."
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "CONTROL_ROUTER",
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_reasoning": "Gate passed with no failures. Worker correctly identified that AUTH-ZEN-080 explicitly states consent C11 enrollment authority remains pending, and STD-ZEN-080-P requires exact match including enrollment authority before activation. The source boundary is correctly bound. The open blocker is genuine and cannot be repaired to ALLOW without evidence of enrollment authority. Next worker must either find enrollment authority evidence or confirm permanent block.",
+  "must_preserve": [
+    "AUTH-ZEN-080 pending enrollment authority finding",
+    "STD-ZEN-080-P exact-match rule requirement",
+    "action boundary: 'May clinical operations activate the trial site?'",
+    "ESCALATE verdict with SOURCE_BOUNDARY_OPEN binding"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "artifact_preservation": [
+      "ACT-ZEN-080",
+      "AUTH-ZEN-080",
+      "FEAS-ZEN-080",
+      "STD-ZEN-080-P"
+    ],
+    "attack_focus": "Adversarial cross-examination: verify no other document provides enrollment authority; confirm FEAS-ZEN-080 does not grant enrollment activation; check if pending status has temporal bounds or resolution path",
+    "monotonic_preservation": "ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding must persist until enrollment authority is confirmed or action is permanently blocked",
+    "objective": "Continue source-boundary verification to determine if pending enrollment authority can be resolved or if action must remain blocked",
+    "required_repairs": []
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate passed; worker correctly identified open boundary on enrollment authority pending. Source IDs and policy citations are accurate. No gate failures require repair.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

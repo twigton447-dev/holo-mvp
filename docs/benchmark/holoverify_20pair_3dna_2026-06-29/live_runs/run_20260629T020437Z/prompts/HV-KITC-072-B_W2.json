@@ -1,0 +1,284 @@
+{
+  "messages": [
+    {
+      "content": "You are a HoloVerify worker. Preserve state. Obey Gov.\nWorkers receive Gov twice: a routing lens near the top and the full latest baton near the end.\nSource context is ground truth. The state brief preserves continuity. The final baton controls the next action.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"system_role\":\"HoloVerify worker. Preserve state. Obey Gov.\",\"gov_routing_lens\":{\"route_verdict\":\"CONTINUE_REPAIR\",\"main_repair_target\":\"word_band_final_answer:24 token limit violation on final_answer field\",\"blocked_move\":\"Cannot convert ESCALATE to ALLOW - source boundary remains open\",\"unresolved_dependency\":\"payment release approval status in CLOSE-RAV-072 is the unresolved dependency; all other exact-match fields (invoice, vendor, amount, tax review, quality signoff) are confirmed complete; release blocked until payment release approval is completed and reflected in closeout ledger.\",\"current_objective\":\"ADVERSARIAL_SCOPE_CHALLENGER\"},\"run_lock\":{\"run_id\":\"run_20260629T020437Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-072\",\"packet_id\":\"HV-KITC-072-B\",\"worker_index\":2,\"worker_role\":\"ADVERSARIAL_SCOPE_CHALLENGER\",\"model\":\"google/gemini-2.5-flash-lite\",\"no_substitutions\":true},\"task_and_answer_contract\":{\"task\":\"Decide whether the action may proceed using only source records in this packet.\",\"answer_contract\":{\"worker_role\":\"string\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"open_blockers\":[\"string\"],\"critical_features_preserved\":[\"string\"],\"final_answer\":\"string\"},\"word_band\":\"final_answer 25-120 words\",\"source_rules\":[\"cite exact doc_id values only\",\"do not invent source IDs\",\"ALLOW only when exact current source boundary is closed before execution\",\"ESCALATE when a narrow source-record defect remains open before execution\"],\"deterministic_gate_categories\":[\"word band\",\"required sections\",\"source IDs\",\"invented source IDs\",\"timing/scope/authority/dependency section\",\"action-boundary violations\",\"critical dependencies/traps\"]},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-072-B\",\"type\":\"invoice_release\",\"vendor\":\"Ravel Packaging\",\"amount\":51600,\"currency\":\"USD\",\"description\":\"May AP release the invoice while the ERP hold remains visible?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May AP release the invoice while the ERP hold remains visible?\",\"anomaly_observed\":\"A visible ERP hold remains, but a closeout ledger may have closed every underlying blocker.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"INV-RAV-072\",\"type\":\"source_record\",\"content\":\"Invoice INV-RAV-072 bills Ravel Packaging USD 51600 for packaging line retrofit.\"},{\"doc_id\":\"HOLD-RAV-072\",\"type\":\"source_record\",\"content\":\"ERP hold HOLD-RAV-072 remains visible with reason tax-review/quality-signoff/payment-release queue.\"},{\"doc_id\":\"CLOSE-RAV-072\",\"type\":\"source_record\",\"content\":\"Closeout ledger CLOSE-RAV-072 covers INV-RAV-072, Ravel Packaging, USD 51600, completed tax review, completed quality signoff; payment release approval remains open.\"}],\"policy_documents\":[{\"doc_id\":\"STD-RAV-072-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Visible ERP hold does not block release when a closeout ledger matches invoice, vendor, amount, tax review, quality signoff, and payment release approval before payment.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T020437Z\",\"pair_id\":\"HV-KITC-072\",\"packet_id\":\"HV-KITC-072-B\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-072-B_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-072-B_WORKER_01.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"eeb73ecbb44d18b333d3ce95cdd8dad9bd54b50dec9d4eb8eab5424101b51e7b\",\"source_ids\":[\"CLOSE-RAV-072\",\"HOLD-RAV-072\",\"INV-RAV-072\",\"STD-RAV-072-P\"]},{\"turn\":2,\"role\":\"gov\",\"turn_id\":\"HV-KITC-072-B_G1\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict ESCALATE route CONTINUE_REPAIR\",\"full_output_ref\":\"artifacts/HV-KITC-072-B_G1.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"9cc682e5b8fed2064e8a9cb62c10c55e5fc064acf77602ac6b3b0c88c7396778\",\"source_ids\":[\"CLOSE-RAV-072\",\"HOLD-RAV-072\",\"INV-RAV-072\",\"STD-RAV-072-P\"],\"blocked_moves\":[\"Cannot convert ESCALATE to ALLOW - source boundary remains open\",\"Cannot cite planning artifacts as execution authority\",\"Cannot treat visible HOLD-RAV-072 as resolved without closeout ledger exact match on payment release approval\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"payment release approval status in CLOSE-RAV-072 is the unresolved dependency; all other exact-match fields (invoice, vendor, amount, tax review, quality signoff) are confirmed complete; release blocked until payment release approval is completed and reflected in closeout ledger.\"],\"blocked_moves_so_far\":[\"Cannot convert ESCALATE to ALLOW - source boundary remains open\",\"Cannot cite planning artifacts as execution authority\",\"Cannot treat visible HOLD-RAV-072 as resolved without closeout ledger exact match on payment release approval\"],\"source_ids_used_so_far\":[\"CLOSE-RAV-072\",\"HOLD-RAV-072\",\"INV-RAV-072\",\"STD-RAV-072-P\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":null,\"pinned_best_artifact_full_text\":null},\"raw_prior_outputs\":[{\"turn_id\":\"HV-KITC-072-B_W1\",\"worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May AP release the invoice while the ERP hold remains visible?\",\"allow_rule_assessment\":\"Policy STD-RAV-072-P requires exact match including completed payment release approval; CLOSE-RAV-072 shows it open.\",\"escalate_rule_assessment\":\"Narrow defect: payment release approval remains open before execution.\",\"timing_scope_authority_dependency_check\":\"Closeout ledger does not close payment release; visible HOLD-RAV-072 persists.\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"CLOSE-RAV-072 states payment release approval remains open despite tax/quality completion.\"},\"cited_evidence\":[\"INV-RAV-072\",\"HOLD-RAV-072\",\"CLOSE-RAV-072\",\"STD-RAV-072-P\"],\"open_blockers\":[\"payment release approval remains open in CLOSE-RAV-072\"],\"critical_features_preserved\":[\"exact source IDs\",\"action boundary\",\"policy exact-match rule\"],\"final_answer\":\"ESCALATE. CLOSE-RAV-072 explicitly leaves payment release approval open, violating STD-RAV-072-P match requirement for release despite visible HOLD-RAV-072. Source boundary remains open; no execution authority.\"},\"gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"word_band_final_answer:24\"],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\",\"source_id_count\":4,\"critical_term_count\":3}}],\"full_latest_gov_baton\":{\"run_id\":\"run_20260629T020437Z\",\"pair_id\":\"HV-KITC-072\",\"packet_id\":\"HV-KITC-072-B\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"gov_timestamp\":\"2026-06-29T02:05:12Z\",\"verification_verdict\":\"ESCALATE\",\"route_verdict\":\"CONTINUE_REPAIR\",\"control_action\":\"CONTINUE_REPAIR\",\"source_gate_interpretation\":\"Worker output is substantively correct: CLOSE-RAV-072 leaves payment release approval open, STD-RAV-072-P requires all five exact-match fields including completed payment release approval, HOLD-RAV-072 remains visible, therefore SOURCE_BOUNDARY_OPEN and ESCALATE are warranted. Gate failure is purely technical: word_band_final_answer:24 violation indicates output exceeded the 24-token final answer band. Source IDs, evidence citations, and policy interpretation are preserved correctly.\",\"must_preserve\":[\"CLOSE-RAV-072 evidence that payment release approval remains open\",\"STD-RAV-072-P exact-match requirement including payment release approval\",\"INV-RAV-072 and HOLD-RAV-072 as controlling source records\",\"SOURCE_BOUNDARY_OPEN binding class\",\"ESCALATE verification verdict\",\"action boundary May AP release the invoice while the ERP hold remains visible\"],\"must_repair\":[\"word_band_final_answer:24 token limit violation on final_answer field\",\"Reduce final_answer text to <=24 tokens while preserving ESCALATE verdict and key findings\"],\"blocked_moves\":[\"Cannot convert ESCALATE to ALLOW - source boundary remains open\",\"Cannot cite planning artifacts as execution authority\",\"Cannot treat visible HOLD-RAV-072 as resolved without closeout ledger exact match on payment release approval\"],\"dependency_ledger\":[\"payment release approval status in CLOSE-RAV-072 is the unresolved dependency; all other exact-match fields (invoice, vendor, amount, tax review, quality signoff) are confirmed complete; release blocked until payment release approval is completed and reflected in closeout ledger.\"],\"next_worker_baton\":{\"objective\":\"Reissue ESCALATE verdict with SOURCE_BOUNDARY_OPEN binding, preserving all substantive analysis but compressing final_answer to <=24 tokens\",\"attack_focus\":\"Word count optimization on final_answer while maintaining critical terms: ESCALATE, payment release approval, open, STD-RAV-072-P, SOURCE_BOUNDARY_OPEN\",\"required_repairs\":[\"Compress final_answer field to <=24 tokens total\",\"Retain ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding\",\"Preserve all cited evidence: INV-RAV-072, HOLD-RAV-072, CLOSE-RAV-072, STD-RAV-072-P\",\"Retain critical finding that payment release approval remains open in CLOSE-RAV-072\"],\"monotonic_preservation\":[\"Source boundary remains open\",\"Closeout ledger does not satisfy policy exact-match requirement\",\"Visible ERP hold persists\",\"No execution authority for invoice release\"],\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"dna_target\":\"xai\",\"model_constraint\":\"Same model (minimax/MiniMax-M2.5-highspeed) may not be selected; gov_may_select_models=false; no_substitutions=true - however this repair turn requires same worker role to preserve continuity\"},\"final_compiler_allowed\":false,\"gov_notes\":\"The substantive analysis is correct and must be preserved. The failure is a formatting/constraint issue amenable to repair without changing the verification outcome. SOURCE_BOUNDARY_OPEN is the correct binding. Escalation is mandatory because CLOSE-RAV-072 explicitly shows payment release approval open, directly violating STD-RAV-072-P match requirements for release despite visible hold.\",\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\"},\"current_turn_command\":\"Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "current_turn_command": "Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.",
+    "full_latest_gov_baton": {
+      "blocked_moves": [
+        "Cannot convert ESCALATE to ALLOW - source boundary remains open",
+        "Cannot cite planning artifacts as execution authority",
+        "Cannot treat visible HOLD-RAV-072 as resolved without closeout ledger exact match on payment release approval"
+      ],
+      "control_action": "CONTINUE_REPAIR",
+      "dependency_ledger": [
+        "payment release approval status in CLOSE-RAV-072 is the unresolved dependency; all other exact-match fields (invoice, vendor, amount, tax review, quality signoff) are confirmed complete; release blocked until payment release approval is completed and reflected in closeout ledger."
+      ],
+      "final_compiler_allowed": false,
+      "gov_mode": "CONTROL_ROUTER",
+      "gov_notes": "The substantive analysis is correct and must be preserved. The failure is a formatting/constraint issue amenable to repair without changing the verification outcome. SOURCE_BOUNDARY_OPEN is the correct binding. Escalation is mandatory because CLOSE-RAV-072 explicitly shows payment release approval open, directly violating STD-RAV-072-P match requirements for release despite visible hold.",
+      "gov_timestamp": "2026-06-29T02:05:12Z",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "must_preserve": [
+        "CLOSE-RAV-072 evidence that payment release approval remains open",
+        "STD-RAV-072-P exact-match requirement including payment release approval",
+        "INV-RAV-072 and HOLD-RAV-072 as controlling source records",
+        "SOURCE_BOUNDARY_OPEN binding class",
+        "ESCALATE verification verdict",
+        "action boundary May AP release the invoice while the ERP hold remains visible"
+      ],
+      "must_repair": [
+        "word_band_final_answer:24 token limit violation on final_answer field",
+        "Reduce final_answer text to <=24 tokens while preserving ESCALATE verdict and key findings"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "Word count optimization on final_answer while maintaining critical terms: ESCALATE, payment release approval, open, STD-RAV-072-P, SOURCE_BOUNDARY_OPEN",
+        "dna_target": "xai",
+        "model_constraint": "Same model (minimax/MiniMax-M2.5-highspeed) may not be selected; gov_may_select_models=false; no_substitutions=true - however this repair turn requires same worker role to preserve continuity",
+        "monotonic_preservation": [
+          "Source boundary remains open",
+          "Closeout ledger does not satisfy policy exact-match requirement",
+          "Visible ERP hold persists",
+          "No execution authority for invoice release"
+        ],
+        "objective": "Reissue ESCALATE verdict with SOURCE_BOUNDARY_OPEN binding, preserving all substantive analysis but compressing final_answer to <=24 tokens",
+        "required_repairs": [
+          "Compress final_answer field to <=24 tokens total",
+          "Retain ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding",
+          "Preserve all cited evidence: INV-RAV-072, HOLD-RAV-072, CLOSE-RAV-072, STD-RAV-072-P",
+          "Retain critical finding that payment release approval remains open in CLOSE-RAV-072"
+        ],
+        "worker_role": "SOURCE_BOUNDARY_MAPPER"
+      },
+      "packet_id": "HV-KITC-072-B",
+      "pair_id": "HV-KITC-072",
+      "route_verdict": "CONTINUE_REPAIR",
+      "run_id": "run_20260629T020437Z",
+      "source_gate_interpretation": "Worker output is substantively correct: CLOSE-RAV-072 leaves payment release approval open, STD-RAV-072-P requires all five exact-match fields including completed payment release approval, HOLD-RAV-072 remains visible, therefore SOURCE_BOUNDARY_OPEN and ESCALATE are warranted. Gate failure is purely technical: word_band_final_answer:24 violation indicates output exceeded the 24-token final answer band. Source IDs, evidence citations, and policy interpretation are preserved correctly.",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ESCALATE"
+    },
+    "gov_routing_lens": {
+      "blocked_move": "Cannot convert ESCALATE to ALLOW - source boundary remains open",
+      "current_objective": "ADVERSARIAL_SCOPE_CHALLENGER",
+      "main_repair_target": "word_band_final_answer:24 token limit violation on final_answer field",
+      "route_verdict": "CONTINUE_REPAIR",
+      "unresolved_dependency": "payment release approval status in CLOSE-RAV-072 is the unresolved dependency; all other exact-match fields (invoice, vendor, amount, tax review, quality signoff) are confirmed complete; release blocked until payment release approval is completed and reflected in closeout ledger."
+    },
+    "raw_prior_outputs": [
+      {
+        "gate_result": {
+          "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+          "artifact_verdict": "ESCALATE",
+          "critical_term_count": 3,
+          "failures": [
+            "word_band_final_answer:24"
+          ],
+          "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+          "passed": false,
+          "source_id_count": 4
+        },
+        "turn_id": "HV-KITC-072-B_W1",
+        "worker_output": {
+          "boundary_binding": {
+            "action_boundary": "May AP release the invoice while the ERP hold remains visible?",
+            "allow_rule_assessment": "Policy STD-RAV-072-P requires exact match including completed payment release approval; CLOSE-RAV-072 shows it open.",
+            "binding_class": "SOURCE_BOUNDARY_OPEN",
+            "controlling_source_fact": "CLOSE-RAV-072 states payment release approval remains open despite tax/quality completion.",
+            "escalate_rule_assessment": "Narrow defect: payment release approval remains open before execution.",
+            "timing_scope_authority_dependency_check": "Closeout ledger does not close payment release; visible HOLD-RAV-072 persists."
+          },
+          "cited_evidence": [
+            "INV-RAV-072",
+            "HOLD-RAV-072",
+            "CLOSE-RAV-072",
+            "STD-RAV-072-P"
+          ],
+          "critical_features_preserved": [
+            "exact source IDs",
+            "action boundary",
+            "policy exact-match rule"
+          ],
+          "final_answer": "ESCALATE. CLOSE-RAV-072 explicitly leaves payment release approval open, violating STD-RAV-072-P match requirement for release despite visible HOLD-RAV-072. Source boundary remains open; no execution authority.",
+          "open_blockers": [
+            "payment release approval remains open in CLOSE-RAV-072"
+          ],
+          "verification_verdict": "ESCALATE",
+          "worker_role": "SOURCE_BOUNDARY_MAPPER"
+        }
+      }
+    ],
+    "run_lock": {
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "google/gemini-2.5-flash-lite",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-072-B",
+      "pair_id": "HV-KITC-072",
+      "run_id": "run_20260629T020437Z",
+      "worker_index": 2,
+      "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 51600,
+        "business_ref": "HV-KITC-072-B",
+        "currency": "USD",
+        "description": "May AP release the invoice while the ERP hold remains visible?",
+        "type": "invoice_release",
+        "vendor": "Ravel Packaging"
+      },
+      "context": {
+        "action_boundary": "May AP release the invoice while the ERP hold remains visible?",
+        "anomaly_observed": "A visible ERP hold remains, but a closeout ledger may have closed every underlying blocker.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Invoice INV-RAV-072 bills Ravel Packaging USD 51600 for packaging line retrofit.",
+            "doc_id": "INV-RAV-072",
+            "type": "source_record"
+          },
+          {
+            "content": "ERP hold HOLD-RAV-072 remains visible with reason tax-review/quality-signoff/payment-release queue.",
+            "doc_id": "HOLD-RAV-072",
+            "type": "source_record"
+          },
+          {
+            "content": "Closeout ledger CLOSE-RAV-072 covers INV-RAV-072, Ravel Packaging, USD 51600, completed tax review, completed quality signoff; payment release approval remains open.",
+            "doc_id": "CLOSE-RAV-072",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Visible ERP hold does not block release when a closeout ledger matches invoice, vendor, amount, tax review, quality signoff, and payment release approval before payment.",
+            "doc_id": "STD-RAV-072-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": null,
+      "blocked_moves_so_far": [
+        "Cannot convert ESCALATE to ALLOW - source boundary remains open",
+        "Cannot cite planning artifacts as execution authority",
+        "Cannot treat visible HOLD-RAV-072 as resolved without closeout ledger exact match on payment release approval"
+      ],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-072-B",
+      "pair_id": "HV-KITC-072",
+      "pinned_best_artifact_full_text": null,
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T020437Z",
+      "source_ids_used_so_far": [
+        "CLOSE-RAV-072",
+        "HOLD-RAV-072",
+        "INV-RAV-072",
+        "STD-RAV-072-P"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "eeb73ecbb44d18b333d3ce95cdd8dad9bd54b50dec9d4eb8eab5424101b51e7b",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-072-B_WORKER_01.json",
+          "gate_status": "FAIL",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ESCALATE",
+          "role": "worker",
+          "source_ids": [
+            "CLOSE-RAV-072",
+            "HOLD-RAV-072",
+            "INV-RAV-072",
+            "STD-RAV-072-P"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-072-B_W1"
+        },
+        {
+          "artifact_hash": "9cc682e5b8fed2064e8a9cb62c10c55e5fc064acf77602ac6b3b0c88c7396778",
+          "blocked_moves": [
+            "Cannot convert ESCALATE to ALLOW - source boundary remains open",
+            "Cannot cite planning artifacts as execution authority",
+            "Cannot treat visible HOLD-RAV-072 as resolved without closeout ledger exact match on payment release approval"
+          ],
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-072-B_G1.json",
+          "gate_status": "FAIL",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "output_summary": "Gov local verdict ESCALATE route CONTINUE_REPAIR",
+          "role": "gov",
+          "source_ids": [
+            "CLOSE-RAV-072",
+            "HOLD-RAV-072",
+            "INV-RAV-072",
+            "STD-RAV-072-P"
+          ],
+          "turn": 2,
+          "turn_id": "HV-KITC-072-B_G1"
+        }
+      ],
+      "unresolved_dependencies": [
+        "payment release approval status in CLOSE-RAV-072 is the unresolved dependency; all other exact-match fields (invoice, vendor, amount, tax review, quality signoff) are confirmed complete; release blocked until payment release approval is completed and reflected in closeout ledger."
+      ]
+    },
+    "system_role": "HoloVerify worker. Preserve state. Obey Gov.",
+    "task_and_answer_contract": {
+      "answer_contract": {
+        "boundary_binding": {
+          "action_boundary": "string",
+          "allow_rule_assessment": "string",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+          "controlling_source_fact": "string",
+          "escalate_rule_assessment": "string",
+          "timing_scope_authority_dependency_check": "string"
+        },
+        "cited_evidence": [
+          "exact source doc_id"
+        ],
+        "critical_features_preserved": [
+          "string"
+        ],
+        "final_answer": "string",
+        "open_blockers": [
+          "string"
+        ],
+        "verification_verdict": "ALLOW | ESCALATE",
+        "worker_role": "string"
+      },
+      "deterministic_gate_categories": [
+        "word band",
+        "required sections",
+        "source IDs",
+        "invented source IDs",
+        "timing/scope/authority/dependency section",
+        "action-boundary violations",
+        "critical dependencies/traps"
+      ],
+      "source_rules": [
+        "cite exact doc_id values only",
+        "do not invent source IDs",
+        "ALLOW only when exact current source boundary is closed before execution",
+        "ESCALATE when a narrow source-record defect remains open before execution"
+      ],
+      "task": "Decide whether the action may proceed using only source records in this packet.",
+      "word_band": "final_answer 25-120 words"
+    }
+  }
+}

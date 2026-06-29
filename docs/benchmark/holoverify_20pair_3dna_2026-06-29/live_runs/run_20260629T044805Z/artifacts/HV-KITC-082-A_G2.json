@@ -1,0 +1,36 @@
+{
+  "block": "ESCALATE ruling may constitute overblock when exact current evidence actually closes boundary; verify precise boundary closure before committing to escalation pathway.",
+  "blocked_moves": [
+    "Do not escalate from warning tone, stale/adjacent records, missing phrasing, or plausible risk when exact current source evidence closes the boundary."
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dep": "",
+  "dependency_ledger": [],
+  "final": false,
+  "final_compiler_allowed": false,
+  "focus": "overblock",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "SOURCE_BOUNDARY_OPEN"
+  ],
+  "must_repair": [
+    "Potential overblock: re-check whether exact current source evidence closes the action boundary; if closed, return ALLOW with SOURCE_BOUNDARY_CLOSED."
+  ],
+  "next_worker_baton": {
+    "attack_focus": "overblock",
+    "monotonic_preservation": [
+      "SOURCE_BOUNDARY_OPEN"
+    ],
+    "objective": "Repair failed deterministic gate before final selection.",
+    "required_repairs": [
+      "Potential overblock: re-check whether exact current source evidence closes the action boundary; if closed, return ALLOW with SOURCE_BOUNDARY_CLOSED."
+    ]
+  },
+  "objective": "repair",
+  "preserve": "SOURCE_BOUNDARY_OPEN",
+  "repair": "Re-examine exact current source evidence to determine if action boundary is definitively closed; if confirmed closed, downgrade to ALLOW with SOURCE_BOUNDARY_CLOSED; if boundary remains open, maintain current block with refined reasoning.",
+  "route": "REPAIR_AND_RECHECK",
+  "route_verdict": "CONTINUE_WORKER",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verdict": "CONTINUE_WORKER"
+}

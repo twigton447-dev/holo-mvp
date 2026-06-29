@@ -1,0 +1,60 @@
+{
+  "binding_class": "SOURCE_BOUNDARY_OPEN",
+  "blocked_moves": [
+    "ALLOW verdict blocked by SOURCE_BOUNDARY_OPEN state with unresolved open blockers",
+    "any repair attempt that relaxes exact-match requirements from STD-TES-074-P",
+    "treating adjacent source CLR-TES-074 as if it validates mismatched account 7205",
+    "treating planning artifact as execution authority without source binding",
+    "authority-chain shortcut bypassing FLAG-TES-074 residual visibility requirement",
+    "ESCALATE-to-ALLOW transition without monotonic resolution of both blockers"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "[\"residual sanctions flag FLAG-TES-074 versus exact clearance CLR-TES-074: CLR-TES-074 disposition is monitor-only no-block but applies to account ending 7025; FLAG-TES-074 has no tax ID or account disposition recorded; PAY-TES-074 uses account 7205; resolution requires authoritative confirmation that CLR-TES-074 clearance either (a) extends to account 7205 or (b) does not apply to this payment; partial resolution insufficient for ALLOW\"]"
+  ],
+  "deterministic_gate_interpretation": "Worker artifact PASSED local gates with ESCALATE verdict. SOURCE_BOUNDARY_OPEN binding correctly propagated. Two open blockers identified (residual flag AND account mismatch). No gate failures to repair. Source IDs exact. Policy citation valid.",
+  "final_compiler_allowed": false,
+  "gov_command_meta": {
+    "artifact_references": [
+      "artifacts/HV-KITC-074-B_WORKER_01.json"
+    ],
+    "gov_mode": "CONTROL_ROUTER",
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "pair_id": "HV-KITC-074-B",
+    "run_id": "run_20260629T014004Z",
+    "turn_timestamp": "2026-06-29T01:40:04Z"
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_reasoning": "Turn 1 worker correctly identified SOURCE_BOUNDARY_OPEN with two open blockers (residual flag, account mismatch). Gate passed with no failures. The unresolved dependency between FLAG-TES-074 and CLR-TES-074 requires authoritative resolution before FINAL_COMPILER can determine ALLOW or FAIL_CLOSED. CONTINUE_REPAIR is appropriate because: (1) account mismatch may be resolvable through clarification of CLR-TES-074 scope, (2) flag disposition clarity may distinguish between blocking and informational status, (3) monitor-only no-block from CLR-TES-074 may or may not cover this specific transaction. Gov preserves all exact-match requirements and blocks premature ALLOW transitions. Next worker must operate in SOURCE_BOUNDARY_RESOLVER role to obtain authoritative disposition on both blockers.",
+  "must_preserve": [
+    "exact source IDs from turn 1 worker (FLAG-TES-074, CLR-TES-074, PAY-TES-074, STD-TES-074-P)",
+    "policy exact-match rule from STD-TES-074-P",
+    "visible anomaly separation between FLAG-TES-074 and CLR-TES-074",
+    "account number as critical blocker (7205 vs 7025)",
+    "monotonic source binding integrity"
+  ],
+  "must_repair": [
+    "account number mismatch between PAY-TES-074 (7205) and CLR-TES-074 (7025) requires resolution or confirmation that payment should not proceed",
+    "residual flag requires explicit disposition closure or confirmation of monitor-only no-block applicability to this specific transaction",
+    "dependency ledger entry: residual compliance flag versus exact clearance requires authoritative resolution before FINAL_COMPILER can deliver ALLOW or FAIL_CLOSED"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Test whether CLR-TES-074 clearance is transaction-specific to account 7025 only or whether it provides blanket monitor-only no-block for Tessa Medical GmbH across all accounts; test whether FLAG-TES-074 residual visibility is addressable through the clearance disposition or requires separate flag closure; adversarial cross-DNA repair must not relax exact-match requirements.",
+    "dna_constraint": "cross-DNA adversarial repair required; next worker should stress-test clearance applicability and flag disposition against exact-match policy",
+    "monotonic_preservation": "All exact-match requirements from STD-TES-074-P must remain binding; no partial matches or disposition relaxations permitted; verification must preserve separation between flag visibility and clearance authorization.",
+    "objective": "Resolve whether payment PAY-TES-074 using account 7205 can proceed under CLR-TES-074 clearance that specifies account 7025, and whether FLAG-TES-074 residual visibility blocks execution despite monitor-only no-block disposition.",
+    "required_repairs": [
+      "account number resolution: obtain authoritative determination whether CLR-TES-074 clearance extends to account 7205 or whether PAY-TES-074 must be rejected",
+      "flag disposition resolution: determine whether FLAG-TES-074 can be overridden by CLR-TES-074 monitor-only no-block for this specific payment or requires separate closure action",
+      "dependency resolution: resolve the tension between FLAG-TES-074 residual visibility and CLR-TES-074 clearance disposition before source boundary can close"
+    ],
+    "worker_role_target": "SOURCE_BOUNDARY_RESOLVER"
+  },
+  "open_blockers_from_turn_1": [
+    "residual visible sanctions flag FLAG-TES-074 with no tax ID or account disposition",
+    "account number mismatch 7205 (PAY-TES-074) vs 7025 (CLR-TES-074)"
+  ],
+  "route_verdict": "CONTINUE_WORKER",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

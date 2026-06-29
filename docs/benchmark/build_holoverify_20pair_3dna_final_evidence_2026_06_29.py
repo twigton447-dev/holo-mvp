@@ -93,6 +93,58 @@ def compact_failures(failures: list[str], limit: int = 4) -> str:
     return "; ".join(clipped) + suffix
 
 
+def call_label(row: dict[str, Any]) -> str:
+    verdict = row.get("local_verdict")
+    verdict_text = verdict if verdict is not None else "NO_USABLE_VERDICT"
+    return f"{row['provider']}:{row['solo_label']}:{verdict_text}"
+
+
+def bool_pass(value: bool) -> str:
+    return "PASS" if value else "FAIL"
+
+
+def trace_refs_for_packet(rows: list[dict[str, Any]], packet_id: str) -> list[dict[str, Any]]:
+    refs = []
+    for row in rows:
+        if row.get("packet_id") != packet_id:
+            continue
+        refs.append(
+            {
+                "turn_id": row.get("turn_id"),
+                "call_kind": row.get("call_kind"),
+                "provider": row.get("provider"),
+                "model": row.get("model"),
+                "prompt_ref": row.get("prompt_ref"),
+                "prompt_hash": row.get("prompt_hash"),
+                "artifact_id": row.get("artifact_id"),
+                "artifact_hash": row.get("artifact_hash"),
+                "response_id": row.get("response_id"),
+            }
+        )
+    return refs
+
+
+def solo_refs_for_packet(rows: list[dict[str, Any]], packet_id: str) -> list[dict[str, Any]]:
+    refs = []
+    for row in sorted([item for item in rows if item.get("packet_id") == packet_id], key=lambda item: item["provider"]):
+        refs.append(
+            {
+                "provider": row.get("provider"),
+                "model": row.get("model"),
+                "solo_label": row.get("solo_label"),
+                "local_verdict": row.get("local_verdict"),
+                "admissible": row.get("admissible"),
+                "verdict_correct": row.get("local_verdict_matches_packet_truth"),
+                "prompt_ref": row.get("prompt_ref"),
+                "prompt_hash": row.get("prompt_hash"),
+                "response_id": row.get("response_id"),
+                "raw_output_in_locked_trace": bool(row.get("text")),
+                "prompt_leakage_violations": row.get("prompt_leakage_violations") or [],
+            }
+        )
+    return refs
+
+
 def prompt_scan(run_dir: Path) -> dict[str, Any]:
     hits = []
     files = []
@@ -105,6 +157,197 @@ def prompt_scan(run_dir: Path) -> dict[str, Any]:
                 if term.lower() in text:
                     hits.append({"file": str(path.relative_to(run_dir)), "term": term})
     return {"prompt_files_scanned": len(files), "forbidden_hits": hits, "forbidden_hit_count": len(hits)}
+
+
+def build_clean_subset(
+    *,
+    lock_records: dict[str, dict[str, Any]],
+    holo_packets: dict[str, dict[str, Any]],
+    solo_trace: list[dict[str, Any]],
+    holo_trace: list[dict[str, Any]],
+    autopsy: dict[str, Any],
+    prompt_scan_result: dict[str, Any],
+) -> dict[str, Any]:
+    pair_rows = []
+    records_by_pair: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for record in lock_records.values():
+        records_by_pair[record["pair_id"]].append(record)
+
+    autopsy_pairs = {
+        row["pair_id"]: row
+        for row in autopsy["registry_candidate_pairs"]
+        if row["pair_class"] == "PAIR_ALL_SIX_SOLOS_FAILED"
+    }
+
+    for pair_id in sorted(autopsy_pairs):
+        siblings = records_by_pair[pair_id]
+        allow_record = next(record for record in siblings if record["expected_verdict_for_local_audit"] == "ALLOW")
+        escalate_record = next(record for record in siblings if record["expected_verdict_for_local_audit"] == "ESCALATE")
+        ordered_siblings = [allow_record, escalate_record]
+        six_outcomes = []
+        sibling_rows = []
+        for record in ordered_siblings:
+            packet_id = record["packet_id"]
+            solo_rows = [row for row in solo_trace if row["packet_id"] == packet_id]
+            for row in sorted(solo_rows, key=lambda item: item["provider"]):
+                six_outcomes.append(
+                    {
+                        "packet_id": packet_id,
+                        "sibling": record["suffix"],
+                        "provider": row["provider"],
+                        "model": row["model"],
+                        "solo_label": row["solo_label"],
+                        "local_verdict": row["local_verdict"],
+                        "admissible": row["admissible"],
+                        "verdict_correct": row["local_verdict_matches_packet_truth"],
+                        "gate_failures": (row.get("gate_result") or {}).get("failures") or [],
+                        "prompt_ref": row["prompt_ref"],
+                        "prompt_hash": row["prompt_hash"],
+                        "response_id": row["response_id"],
+                    }
+                )
+            sibling_rows.append(
+                {
+                    "packet_id": packet_id,
+                    "suffix": record["suffix"],
+                    "packet_truth": record["expected_verdict_for_local_audit"],
+                    "payload_sha256": record["payload_sha256"],
+                    "holo_final_verdict": record["holo_final_verdict"],
+                    "holo_final_admissible": record["holo_final_admissible"],
+                    "holo_selection_reason": record["holo_selection_reason"],
+                    "holo_trace_refs": trace_refs_for_packet(holo_trace, packet_id),
+                    "solo_prompt_hash_refs": solo_refs_for_packet(solo_trace, packet_id),
+                }
+            )
+
+        leakage_status = "PASS" if (
+            autopsy["prompt_leakage_status"] == "PASS"
+            and prompt_scan_result["forbidden_hit_count"] == 0
+            and all(not outcome["prompt_hash"] is None for outcome in six_outcomes)
+            and all(not row.get("prompt_leakage_violations") for row in solo_trace if row["pair_id"] == pair_id)
+        ) else "FAIL"
+
+        pair_rows.append(
+            {
+                "pair_id": pair_id,
+                "allow_sibling_id": allow_record["packet_id"],
+                "escalate_sibling_id": escalate_record["packet_id"],
+                "packet_truth": {
+                    allow_record["packet_id"]: allow_record["expected_verdict_for_local_audit"],
+                    escalate_record["packet_id"]: escalate_record["expected_verdict_for_local_audit"],
+                },
+                "six_solo_outcomes": six_outcomes,
+                "holo_final_verdicts": {
+                    allow_record["packet_id"]: allow_record["holo_final_verdict"],
+                    escalate_record["packet_id"]: escalate_record["holo_final_verdict"],
+                },
+                "holo_final_admissible": {
+                    allow_record["packet_id"]: allow_record["holo_final_admissible"],
+                    escalate_record["packet_id"]: escalate_record["holo_final_admissible"],
+                },
+                "evidence_class": "PAIR_ALL_SIX_SOLOS_FAILED_HOLO_SOLVED_BOTH",
+                "prompt_hash_references": {
+                    "payload_hashes": {
+                        record["packet_id"]: record["payload_sha256"]
+                        for record in ordered_siblings
+                    },
+                    "siblings": sibling_rows,
+                },
+                "leakage_status": leakage_status,
+            }
+        )
+
+    return {
+        "classification": "HOLOVERIFY_14PAIR_CLEAN_SOLO_COLLAPSE_SUBSET",
+        "subset_rule": "Include only sibling pairs where all six solo one-shot attempts failed while HoloVerify solved both siblings.",
+        "pair_count": len(pair_rows),
+        "packet_count": sum(len(row["packet_truth"]) for row in pair_rows),
+        "solo_call_count": sum(len(row["six_solo_outcomes"]) for row in pair_rows),
+        "leakage_status": "PASS" if all(row["leakage_status"] == "PASS" for row in pair_rows) else "FAIL",
+        "rows": pair_rows,
+    }
+
+
+def build_no_provider_local_audit(
+    *,
+    holo: dict[str, Any],
+    holo_trace: list[dict[str, Any]],
+    solo: dict[str, Any],
+    solo_trace: list[dict[str, Any]],
+    freeze_lock: dict[str, Any],
+    freeze_validation: dict[str, Any],
+    solo_lock_validation: dict[str, Any],
+    autopsy: dict[str, Any],
+    autopsy_validation: dict[str, Any],
+    clean_subset: dict[str, Any],
+    packet_identity: dict[str, Any],
+    prompt_scan_result: dict[str, Any],
+    comparison_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    packet_records = freeze_lock["packet_records"]
+    payload_hashes_match = []
+    for record in packet_records:
+        freeze_payload = FREEZE_ROOT / record["payload_ref"]
+        source_payload = RUN_ROOT / "frozen_packets" / Path(record["payload_ref"]).name
+        payload_hashes_match.append(
+            freeze_payload.exists()
+            and source_payload.exists()
+            and sha256_file(freeze_payload) == record["payload_sha256"]
+            and sha256_file(source_payload) == record["payload_sha256"]
+        )
+
+    solo_text_rows = [row for row in solo_trace if row.get("text")]
+    raw_outputs_dir = SOLO_RUN / "raw_outputs"
+    assertions = {
+        "frozen_holo_run_present": freeze_validation["validation_status"] == "PASS" and (HOLO_RUN / "live_results.json").exists(),
+        "solo_run_present": solo["classification"] == "SOLO_ONE_SHOT_3MINI_40_COMPLETE" and solo_lock_validation["validation_status"] == "PASS",
+        "same_40_packet_hashes": len(packet_records) == 40 and all(payload_hashes_match) and packet_identity["comparative_proof_valid"],
+        "solo_calls_120": solo["provider_calls"] == 120 and len(solo_trace) == 120,
+        "holo_calls_200": holo["provider_calls"] == 200 and len(holo_trace) == 200,
+        "no_judges": holo["judge_calls"] == 0 and solo["judge_calls"] == 0,
+        "no_leakage": autopsy["prompt_leakage_status"] == "PASS" and prompt_scan_result["prompt_files_scanned"] == 240 and prompt_scan_result["forbidden_hit_count"] == 0 and not autopsy["independent_forbidden_prompt_scan_hits"],
+        "clean_all_six_solo_fail_pairs_14": clean_subset["pair_count"] == 14 and clean_subset["solo_call_count"] == 84,
+        "total_valid_holo_pairs_20": holo["readiness_assertions"].get("total_valid_pairs") == 20,
+        "evidence_categories_separated": all("external_evidence_class" in row and "intra_holo_evidence_classes" in row for row in comparison_rows),
+        "invalid_hardening_runs_preserved": holo["readiness_assertions"].get("invalid_runs_preserved") == "PASS",
+        "autopsy_lock_passed": autopsy_validation["validation_status"] == "PASS" and autopsy_validation["root_signature"] == "730c31344a7d38ab2feb3c4d7c4b38127794c295d021f7c5b02c3f9e059b99b6",
+        "solo_raw_outputs_preserved_in_locked_trace": len(solo_text_rows) == 120 and all(row.get("response_id") for row in solo_trace),
+    }
+    return {
+        "classification": "HOLOVERIFY_20PAIR_NO_PROVIDER_LOCAL_AUDIT",
+        "status": "PASS" if all(assertions.values()) else "FAIL",
+        "provider_calls_run_by_audit": 0,
+        "assertions": {key: bool_pass(value) for key, value in assertions.items()},
+        "counts": {
+            "frozen_packet_count": len(packet_records),
+            "holo_trace_rows": len(holo_trace),
+            "solo_trace_rows": len(solo_trace),
+            "holo_provider_calls": holo["provider_calls"],
+            "solo_provider_calls": solo["provider_calls"],
+            "holo_worker_calls": holo["worker_calls"],
+            "holo_gov_calls": holo["gov_calls"],
+            "holo_judge_calls": holo["judge_calls"],
+            "solo_judge_calls": solo["judge_calls"],
+            "prompt_files_scanned": prompt_scan_result["prompt_files_scanned"],
+            "forbidden_prompt_hits": prompt_scan_result["forbidden_hit_count"],
+            "clean_pair_count": clean_subset["pair_count"],
+            "valid_holo_pair_count": holo["readiness_assertions"].get("total_valid_pairs"),
+            "holo_tokens": holo["totals"]["total_tokens"],
+            "solo_tokens": solo["totals"]["total_tokens"],
+        },
+        "raw_output_note": {
+            "raw_outputs_directory_present": raw_outputs_dir.exists(),
+            "raw_outputs_preserved_in_solo_trace": len(solo_text_rows) == 120,
+            "trace_path": str(SOLO_RUN / "SOLO_ONE_SHOT_TRACE.jsonl"),
+        },
+        "locked_signatures": {
+            "holo_freeze_root_signature": freeze_lock["root_signature"],
+            "holo_trace_hash": holo["trace_hash"],
+            "solo_trace_hash": solo["trace_hash"],
+            "solo_run_lock_root_signature": solo_lock_validation["root_signature"],
+            "autopsy_lock_root_signature": autopsy_validation["root_signature"],
+        },
+    }
 
 
 def evidence_class_for_row(solo_row: dict[str, Any], holo_correct: bool, intra_classes: list[str], selector_used: bool) -> list[str]:
@@ -135,6 +378,8 @@ def build_package() -> dict[str, Any]:
     freeze_validation = load_json(FREEZE_ROOT / "LOCK_VALIDATION.json")
     solo_lock_validation = load_json(SOLO_RUN / "RUN_LOCK_VALIDATION.json")
     solo_lock = load_json(SOLO_RUN / "RUN_LOCK_MANIFEST.json")
+    autopsy = load_json(SOLO_RUN / "comparison_autopsy_no_leakage.json")
+    autopsy_validation = load_json(SOLO_RUN / "AUTOPSY_LOCK_VALIDATION.json")
 
     lock_records = {record["packet_id"]: record for record in freeze_lock["packet_records"]}
     holo_packets = {record["packet_id"]: record for record in holo["packet_results"]}
@@ -366,6 +611,31 @@ def build_package() -> dict[str, Any]:
         ]
     ) else "FAIL"
 
+    clean_subset = build_clean_subset(
+        lock_records=lock_records,
+        holo_packets=holo_packets,
+        solo_trace=solo_trace,
+        holo_trace=holo_trace,
+        autopsy=autopsy,
+        prompt_scan_result=prompt_scan_result,
+    )
+
+    local_audit = build_no_provider_local_audit(
+        holo=holo,
+        holo_trace=holo_trace,
+        solo=solo,
+        solo_trace=solo_trace,
+        freeze_lock=freeze_lock,
+        freeze_validation=freeze_validation,
+        solo_lock_validation=solo_lock_validation,
+        autopsy=autopsy,
+        autopsy_validation=autopsy_validation,
+        clean_subset=clean_subset,
+        packet_identity=packet_identity,
+        prompt_scan_result=prompt_scan_result,
+        comparison_rows=comparison_rows,
+    )
+
     summary = {
         "classification": "HOLOVERIFY_20PAIR_3DNA_FINAL_EVIDENCE_PACKAGE",
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -390,6 +660,8 @@ def build_package() -> dict[str, Any]:
         "holo_metrics": holo_metrics,
         "comparative_metrics": comparative_metrics,
         "comparison_rows": comparison_rows,
+        "clean_subset_14pair": clean_subset,
+        "local_audit": local_audit,
     }
 
     readiness_assertions = {
@@ -411,6 +683,8 @@ def build_package() -> dict[str, Any]:
         "external_solo_and_intra_holo_evidence_separated": "PASS" if all("external_evidence_class" in row and "intra_holo_evidence_classes" in row for row in comparison_rows) else "FAIL",
         "invalid_runs_preserved": holo["readiness_assertions"].get("invalid_runs_preserved", "FAIL"),
         "final_evidence_memo_present": "PASS",
+        "fourteen_pair_clean_subset": "PASS" if clean_subset["pair_count"] == 14 and clean_subset["leakage_status"] == "PASS" else "FAIL",
+        "no_provider_local_audit": local_audit["status"],
     }
     readiness = {
         "classification": "HOLOVERIFY_20PAIR_3DNA_FINAL_READINESS_ASSERTIONS",
@@ -455,6 +729,42 @@ def write_outputs(summary: dict[str, Any], readiness: dict[str, Any]) -> None:
     write_json("HOLOVERIFY_20PAIR_3DNA_FINAL_EVIDENCE_MEMO_2026_06_29.json", memo)
     write_md("HOLOVERIFY_20PAIR_3DNA_FINAL_EVIDENCE_MEMO_2026_06_29.md", memo_md(summary, readiness))
 
+    public_safe_memo = {
+        "classification": "HOLOVERIFY_20PAIR_FINAL_EVIDENCE_MEMO",
+        "claim_shape": "On a frozen 40-packet action-boundary benchmark, HoloVerify's 3-DNA governed architecture solved 40/40 packets. Matching one-shot solo baselines using the same mini-model families completed 120/120 calls but produced only 6/120 KNEW/admissible outputs. Fourteen sibling pairs showed complete solo collapse across all six one-shot solo attempts while Holo solved both the hard-ALLOW and hard-ESCALATE siblings. The Holo run used about 2.06x the solo token budget and passed no-leakage checks.",
+        "locked_evidence": memo["locked_evidence"],
+        "metrics": {
+            "holo_solved_packets": summary["holo_metrics"]["correct_count"],
+            "frozen_packets": 40,
+            "valid_sibling_pairs": summary["holo_metrics"]["hard_allow_correct_count"],
+            "solo_calls_completed": summary["solo_audit"]["solo_provider_calls"],
+            "solo_knew_admissible": summary["solo_metrics"]["label_counts"].get("KNEW", 0),
+            "clean_all_six_solo_fail_pairs": summary["clean_subset_14pair"]["pair_count"],
+            "mixed_pairs": summary["local_audit"]["counts"]["valid_holo_pair_count"] - summary["clean_subset_14pair"]["pair_count"],
+            "leakage_scan_prompt_files": summary["solo_audit"]["prompt_scan"]["prompt_files_scanned"],
+            "leakage_scan_forbidden_hits": summary["solo_audit"]["prompt_scan"]["forbidden_hit_count"],
+            "holo_tokens": summary["comparative_metrics"]["holo_total_tokens"],
+            "solo_tokens": summary["comparative_metrics"]["solo_total_tokens"],
+            "holo_solo_token_ratio": round(summary["comparative_metrics"]["holo_total_tokens"] / summary["comparative_metrics"]["solo_total_tokens"], 3),
+        },
+        "claim_boundaries": [
+            "Does not claim Holo beats all models.",
+            "Does not claim Holo is generally superior.",
+            "Does not claim Holo solved safety.",
+            "Does not claim solo models cannot do this universally.",
+            "Does not treat internal Holo misses as standalone solo failures.",
+        ],
+        "local_audit": summary["local_audit"],
+    }
+    write_json("HOLOVERIFY_20PAIR_FINAL_EVIDENCE_MEMO_2026_06_29.json", public_safe_memo)
+    write_md("HOLOVERIFY_20PAIR_FINAL_EVIDENCE_MEMO_2026_06_29.md", final_public_safe_memo_md(summary, readiness))
+
+    write_json("HOLOVERIFY_14PAIR_CLEAN_SOLO_COLLAPSE_SUBSET_2026_06_29.json", summary["clean_subset_14pair"])
+    write_md("HOLOVERIFY_14PAIR_CLEAN_SOLO_COLLAPSE_SUBSET_2026_06_29.md", clean_subset_md(summary["clean_subset_14pair"]))
+    write_md("HOLOVERIFY_14PAIR_PUBLIC_PROOF_SUMMARY_2026_06_29.md", public_14pair_summary_md(summary))
+    write_json("HOLOVERIFY_20PAIR_NO_PROVIDER_LOCAL_AUDIT_2026_06_29.json", summary["local_audit"])
+    write_md("HOLOVERIFY_20PAIR_NO_PROVIDER_LOCAL_AUDIT_2026_06_29.md", local_audit_md(summary["local_audit"]))
+
     write_md("HOLOVERIFY_20PAIR_PUBLIC_PROOF_SUMMARY_2026_06_29.md", public_summary_md(summary))
     write_json("HOLOVERIFY_20PAIR_3DNA_FINAL_READINESS_ASSERTIONS_2026_06_29.json", readiness)
     write_md("HOLOVERIFY_20PAIR_3DNA_FINAL_READINESS_ASSERTIONS_2026_06_29.md", readiness_md(readiness))
@@ -466,6 +776,8 @@ def write_json(filename: str, value: Any) -> None:
 
 
 def write_md(filename: str, lines: list[str]) -> None:
+    while lines and lines[-1] == "":
+        lines.pop()
     (OUT / filename).write_text("\n".join(lines) + "\n")
 
 
@@ -700,6 +1012,184 @@ def public_summary_md(summary: dict[str, Any]) -> list[str]:
     lines.append("- This does not claim general superiority beyond this frozen packet family.")
     lines.append("- This does not claim deterministic normalization corrected model reasoning.")
     lines.append("- This does not treat internal Holo misses as standalone solo failures.")
+    return lines
+
+
+def final_public_safe_memo_md(summary: dict[str, Any], readiness: dict[str, Any]) -> list[str]:
+    comp = summary["comparative_metrics"]
+    solo_knew = summary["solo_metrics"]["label_counts"].get("KNEW", 0)
+    token_ratio = comp["holo_total_tokens"] / comp["solo_total_tokens"]
+    lines = ["# HoloVerify 20-Pair Final Evidence Memo", ""]
+    lines.append("On a frozen 40-packet action-boundary benchmark, HoloVerify's 3-DNA governed architecture solved 40/40 packets. Matching one-shot solo baselines using the same mini-model families completed 120/120 calls but produced only 6/120 KNEW/admissible outputs. Fourteen sibling pairs showed complete solo collapse across all six one-shot solo attempts while Holo solved both the hard-ALLOW and hard-ESCALATE siblings. The Holo run used about 2.06x the solo token budget and passed no-leakage checks.")
+    lines += ["", "## Locked Result", ""]
+    lines += md_table(
+        ["Measure", "Value"],
+        [
+            ["Frozen packets", 40],
+            ["Valid sibling pairs", 20],
+            ["Holo solved/admissible packets", summary["holo_metrics"]["correct_count"]],
+            ["Solo one-shot calls completed", summary["solo_audit"]["solo_provider_calls"]],
+            ["Solo KNEW/admissible outputs", solo_knew],
+            ["Clean all-six-solo-fail pairs", summary["clean_subset_14pair"]["pair_count"]],
+            ["Mixed pairs", 20 - summary["clean_subset_14pair"]["pair_count"]],
+            ["Leakage scan prompt files", summary["solo_audit"]["prompt_scan"]["prompt_files_scanned"]],
+            ["Forbidden leakage hits", summary["solo_audit"]["prompt_scan"]["forbidden_hit_count"]],
+            ["Holo tokens", comp["holo_total_tokens"]],
+            ["Solo tokens", comp["solo_total_tokens"]],
+            ["Holo/Solo token ratio", f"{token_ratio:.3f}x"],
+            ["No-provider local audit", f"`{summary['local_audit']['status']}`"],
+            ["Readiness assertions", f"`{readiness['status']}`"],
+        ],
+    )
+    lines += ["", "## Evidence Locks", ""]
+    lines += md_table(
+        ["Artifact", "Hash / Status"],
+        [
+            ["Holo freeze root signature", f"`{summary['holo_freeze_root_signature']}`"],
+            ["Holo trace hash", f"`{summary['holo_trace_hash']}`"],
+            ["Solo trace hash", f"`{summary['solo_trace_hash']}`"],
+            ["Autopsy lock", "`730c31344a7d38ab2feb3c4d7c4b38127794c295d021f7c5b02c3f9e059b99b6`"],
+            ["Solo run-lock validation", f"`{summary['solo_audit']['run_lock_validation']['validation_status']}`"],
+        ],
+    )
+    lines += ["", "## Claim Boundaries", ""]
+    lines.append("- Does not claim Holo beats all models.")
+    lines.append("- Does not claim Holo is generally superior.")
+    lines.append("- Does not claim Holo solved safety.")
+    lines.append("- Does not claim solo models cannot do this universally.")
+    lines.append("- Does not treat internal Holo misses as standalone solo failures.")
+    lines += ["", "## Evidence Separation", ""]
+    lines.append("External solo failures are reported separately from intra-Holo misses. Internal Holo worker misses are architecture repair evidence, not standalone solo-baseline failures.")
+    return lines
+
+
+def clean_subset_md(clean_subset: dict[str, Any]) -> list[str]:
+    lines = ["# HoloVerify 14-Pair Clean Solo-Collapse Subset", ""]
+    lines.append("This subset includes only sibling pairs where all six one-shot solo attempts failed while HoloVerify solved both the hard-ALLOW and hard-ESCALATE siblings.")
+    lines += ["", "## Summary", ""]
+    lines += md_table(
+        ["Measure", "Value"],
+        [
+            ["Pair count", clean_subset["pair_count"]],
+            ["Packet count", clean_subset["packet_count"]],
+            ["Solo calls represented", clean_subset["solo_call_count"]],
+            ["Leakage status", f"`{clean_subset['leakage_status']}`"],
+            ["Evidence class", "`PAIR_ALL_SIX_SOLOS_FAILED_HOLO_SOLVED_BOTH`"],
+        ],
+    )
+    lines += ["", "## Rows", ""]
+    rows = []
+    for row in clean_subset["rows"]:
+        allow_id = row["allow_sibling_id"]
+        escalate_id = row["escalate_sibling_id"]
+        solo_allow = ", ".join(
+            call_label(outcome)
+            for outcome in row["six_solo_outcomes"]
+            if outcome["packet_id"] == allow_id
+        )
+        solo_escalate = ", ".join(
+            call_label(outcome)
+            for outcome in row["six_solo_outcomes"]
+            if outcome["packet_id"] == escalate_id
+        )
+        rows.append(
+            [
+                f"`{row['pair_id']}`",
+                f"`{allow_id}`",
+                f"`{escalate_id}`",
+                f"{row['packet_truth'][allow_id]} / {row['packet_truth'][escalate_id]}",
+                solo_allow,
+                solo_escalate,
+                f"{row['holo_final_verdicts'][allow_id]} / {row['holo_final_verdicts'][escalate_id]}",
+                f"`{row['evidence_class']}`",
+                f"`{row['leakage_status']}`",
+            ]
+        )
+    lines += md_table(
+        [
+            "Pair ID",
+            "ALLOW sibling",
+            "ESCALATE sibling",
+            "Packet truth",
+            "ALLOW solo outcomes",
+            "ESCALATE solo outcomes",
+            "Holo final verdicts",
+            "Evidence class",
+            "Leakage",
+        ],
+        rows,
+    )
+    lines += ["", "## Prompt And Hash References", ""]
+    for row in clean_subset["rows"]:
+        lines.append(f"### `{row['pair_id']}`")
+        lines.append("")
+        for sibling in row["prompt_hash_references"]["siblings"]:
+            lines.append(f"- `{sibling['packet_id']}` payload `{sibling['payload_sha256']}`")
+            for ref in sibling["solo_prompt_hash_refs"]:
+                lines.append(f"  - solo `{ref['provider']}` prompt `{ref['prompt_ref']}` hash `{ref['prompt_hash']}` response `{ref['response_id']}`")
+            holo_refs = ", ".join(
+                f"{ref['turn_id']}:{ref['call_kind']}:{ref['prompt_hash']}"
+                for ref in sibling["holo_trace_refs"]
+            )
+            lines.append(f"  - Holo trace refs: {holo_refs}")
+        lines.append("")
+    return lines
+
+
+def public_14pair_summary_md(summary: dict[str, Any]) -> list[str]:
+    clean_subset = summary["clean_subset_14pair"]
+    comp = summary["comparative_metrics"]
+    token_ratio = comp["holo_total_tokens"] / comp["solo_total_tokens"]
+    lines = ["# HoloVerify 14-Pair Public Proof Summary", ""]
+    lines.append("Fourteen sibling pairs form the clean solo-collapse subset: every one of the six one-shot solo attempts in each pair failed, while HoloVerify solved both the hard-ALLOW and hard-ESCALATE siblings.")
+    lines += ["", "## Public-Safe Claim", ""]
+    lines.append("On a frozen 40-packet action-boundary benchmark, HoloVerify's 3-DNA governed architecture solved 40/40 packets. Matching one-shot solo baselines using the same mini-model families completed 120/120 calls but produced only 6/120 KNEW/admissible outputs. Fourteen sibling pairs showed complete solo collapse across all six one-shot solo attempts while Holo solved both the hard-ALLOW and hard-ESCALATE siblings. The Holo run used about 2.06x the solo token budget and passed no-leakage checks.")
+    lines += ["", "## Clean Subset", ""]
+    lines += md_table(
+        ["Measure", "Value"],
+        [
+            ["Clean pairs", clean_subset["pair_count"]],
+            ["Clean packets", clean_subset["packet_count"]],
+            ["Solo calls in clean subset", clean_subset["solo_call_count"]],
+            ["Holo tokens, full 20-pair run", comp["holo_total_tokens"]],
+            ["Solo tokens, full 20-pair run", comp["solo_total_tokens"]],
+            ["Token ratio, full 20-pair run", f"{token_ratio:.3f}x"],
+            ["Leakage status", f"`{clean_subset['leakage_status']}`"],
+        ],
+    )
+    lines += ["", "## Pair IDs", ""]
+    for row in clean_subset["rows"]:
+        lines.append(f"- `{row['pair_id']}`")
+    lines += ["", "## Claim Boundaries", ""]
+    lines.append("- Does not claim Holo beats all models.")
+    lines.append("- Does not claim Holo is generally superior.")
+    lines.append("- Does not claim Holo solved safety.")
+    lines.append("- Does not claim solo models cannot do this universally.")
+    lines.append("- Does not treat internal Holo misses as standalone solo failures.")
+    return lines
+
+
+def local_audit_md(local_audit: dict[str, Any]) -> list[str]:
+    lines = ["# HoloVerify 20-Pair No-Provider Local Audit", ""]
+    lines.append(f"Status: `{local_audit['status']}`")
+    lines.append("")
+    lines.append("This audit reads only local frozen artifacts. It does not call providers, run judges, mutate packets, or rerun Holo/Solo.")
+    lines += ["", "## Assertions", ""]
+    lines += md_table(["Assertion", "Status"], [[key, f"`{value}`"] for key, value in local_audit["assertions"].items()])
+    lines += ["", "## Counts", ""]
+    lines += md_table(["Count", "Value"], [[key, value] for key, value in local_audit["counts"].items()])
+    lines += ["", "## Raw Output Preservation", ""]
+    note = local_audit["raw_output_note"]
+    lines += md_table(
+        ["Field", "Value"],
+        [
+            ["raw_outputs_directory_present", note["raw_outputs_directory_present"]],
+            ["raw_outputs_preserved_in_solo_trace", note["raw_outputs_preserved_in_solo_trace"]],
+            ["trace_path", f"`{note['trace_path']}`"],
+        ],
+    )
+    lines += ["", "## Locked Signatures", ""]
+    lines += md_table(["Artifact", "Signature"], [[key, f"`{value}`"] for key, value in local_audit["locked_signatures"].items()])
     return lines
 
 

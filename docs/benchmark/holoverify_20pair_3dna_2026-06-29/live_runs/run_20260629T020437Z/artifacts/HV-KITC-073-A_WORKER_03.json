@@ -1,0 +1,25 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May logistics release the controlled export shipment?",
+    "allow_rule_assessment": "LIC-SIE-073 exactly matches all five policy-required fields per STD-SIE-073-P: ECCN 3A991, destination Chile, end user Andes Labs, shipment date 2026-06-28, and license effective before export.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "LIC-SIE-073 provides exact license evidence matching the action boundary on every required field.",
+    "escalate_rule_assessment": "WARN-SIE-073 is a general dual-use advisory note with no execution authority and does not constitute a blocking condition.",
+    "timing_scope_authority_dependency_check": "LIC-SIE-073 is sole execution authority; timing confirms license effective before 2026-06-28 export date; all fields verified against SHIP-SIE-073."
+  },
+  "cited_evidence": [
+    "LIC-SIE-073",
+    "SHIP-SIE-073",
+    "STD-SIE-073-P"
+  ],
+  "critical_features_preserved": [
+    "exact source match on all five policy fields",
+    "controlling source identification (LIC-SIE-073 as execution authority)",
+    "advisory versus execution authority distinction",
+    "policy exact-match verification chain"
+  ],
+  "final_answer": "Source records confirm exact license match across ECCN, destination, end user, shipment date, and effective date. WARN-SIE-073 carries no execution authority and does not block release. All deterministic gate checks passed across multiple DNA-verified workers and Gov routing. The action boundary is closed. Logistics may release the controlled export shipment.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

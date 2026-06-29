@@ -1,0 +1,43 @@
+{
+  "blocked_moves": [
+    "release authorization",
+    "clearance override",
+    "flag dismissal without resolution"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "CLR-TES-074 account (7025) does not match PAY-TES-074 account (7205)",
+    "FLAG-TES-074 lacks matching disposition in CLR-TES-074",
+    "STD-TES-074-P requires exact match of all five fields before release"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "Account number discrepancy finding (7205 vs 7025)",
+    "Visible flag blocker FLAG-TES-074",
+    "STD-TES-074-P exact-match requirement for release"
+  ],
+  "must_repair": [
+    "CLR-TES-074 account applicability to PAY-TES-074",
+    "Flag-to-clearance disposition linkage",
+    "Release authorization precondition completeness"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Account mismatch validity, flag-clearance correlation, release preconditions",
+    "monotonic_preservation": [
+      "Account discrepancy finding",
+      "Visible flag blocker",
+      "Exact-match policy requirement"
+    ],
+    "objective": "Challenge CLR-TES-074 scope boundaries and flag disposition linkage",
+    "required_repairs": [
+      "Confirm if CLR-TES-074 covers account 7205 or only 7025",
+      "Establish whether FLAG-TES-074 disposition aligns with CLR-TES-074",
+      "Verify all five STD-TES-074-P fields match before any release"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate passed; ESCALATE verdict preserved. Account mismatch and flag visibility remain unresolved open blockers requiring further adversarial challenge.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

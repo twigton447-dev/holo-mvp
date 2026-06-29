@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-042-A",
+    "currency": "USD",
+    "description": "May procurement issue the purchase order for a controlled solvent?",
+    "type": "controlled_purchase",
+    "vendor": "Novalab Solvents"
+  },
+  "context": {
+    "action_boundary": "May procurement issue the purchase order for a controlled solvent?",
+    "anomaly_observed": "An EHS note says the item may proceed for sourcing work, but execution authority may require a separate release.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Purchase order PO-NOV-042 buys 18 liters of NS-55 solvent for Facility R2.",
+        "doc_id": "PO-NOV-042",
+        "type": "source_record"
+      },
+      {
+        "content": "Sourcing note SRC-NOV-042 says NS-55 may proceed for supplier quote collection only.",
+        "doc_id": "SRC-NOV-042",
+        "type": "source_record"
+      },
+      {
+        "content": "EHS execution release EHS-NOV-042 covers NS-55 solvent, 0-25 liter band, Facility R2, and PO-NOV-042 before PO issuance.",
+        "doc_id": "EHS-NOV-042",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Controlled-solvent purchase is complete only when EHS execution release matches chemical, quantity band, facility, and purchase order before PO issuance.",
+        "doc_id": "STD-NOV-042-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are HoloGov-V in the complete HoloVerify architecture.\nGov does not choose models. Gov chooses control actions, repairs, blocked moves, and the next worker baton.\nYou receive deterministic gate results. You cannot call an artifact ready if local gates fail.\nIf the prior worker verdict is source-plausible but the gate failed only proof, source-term, section, or word-band checks, preserve that verdict and repair the failed fields. Do not invert the verdict unless the source boundary itself is wrong.\nReturn only valid JSON. No markdown fences."
+    },
+    {
+      "role": "user",
+      "content": "{\"run_lock\":{\"run_id\":\"run_20260629T021923Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-075\",\"packet_id\":\"HV-KITC-075-A\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"gov_may_select_models\":false,\"no_substitutions\":true},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-075-A\",\"type\":\"emergency_access\",\"vendor\":\"Uma IAM\",\"amount\":0,\"currency\":\"USD\",\"description\":\"May IAM execute the emergency admin enablement?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May IAM execute the emergency admin enablement?\",\"anomaly_observed\":\"Standard admin controls warn against committee bypass, but breakglass approval may cover the complete action.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"REQ-UMA-075\",\"type\":\"source_record\",\"content\":\"Request REQ-UMA-075 enables emergency admin for user Leena Park on UMA-ERP, privilege breakglass-admin, time window 13:00-14:00.\"},{\"doc_id\":\"WARN-UMA-075\",\"type\":\"source_record\",\"content\":\"Standard-admin warning WARN-UMA-075 says admin access normally requires committee review unless breakglass approval covers the full action.\"},{\"doc_id\":\"BG-UMA-075\",\"type\":\"source_record\",\"content\":\"Breakglass execution approval BG-UMA-075 covers Leena Park, UMA-ERP, breakglass-admin, 13:00-14:00, and audit-control assignment AUD-7 before enablement.\"}],\"policy_documents\":[{\"doc_id\":\"STD-UMA-075-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Emergency admin enablement is complete only when breakglass execution approval matches user, system, privilege, time window, and audit-control assignment before enablement.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T021923Z\",\"pair_id\":\"HV-KITC-075\",\"packet_id\":\"HV-KITC-075-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-075-A_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ALLOW\",\"full_output_ref\":\"artifacts/HV-KITC-075-A_WORKER_01.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"4385446a0476230eee6c03c85c9ea1df074b8f37e7d8bf46621e4114daab2094\",\"source_ids\":[\"BG-UMA-075\",\"REQ-UMA-075\",\"STD-UMA-075-P\",\"WARN-UMA-075\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"Targets standard-control fixation versus breakglass authorization.\"],\"blocked_moves_so_far\":[],\"source_ids_used_so_far\":[\"BG-UMA-075\",\"REQ-UMA-075\",\"STD-UMA-075-P\",\"WARN-UMA-075\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":null,\"pinned_best_artifact_full_text\":null},\"latest_worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ALLOW\",\"boundary_binding\":{\"action_boundary\":\"May IAM execute the emergency admin enablement?\",\"allow_rule_assessment\":\"BG-UMA-075 exactly matches user, system, privilege, time window, and audit-control assignment per STD-UMA-075-P before enablement\",\"escalate_rule_assessment\":\"No narrow source-record defect remains open\",\"timing_scope_authority_dependency_check\":\"Breakglass covers 13:00-14:00 window with AUD-7 assignment; no unresolved dependency on committee review\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\",\"controlling_source_fact\":\"STD-UMA-075-P requires exact match of breakglass execution approval to all listed elements\"},\"cited_evidence\":[\"REQ-UMA-075\",\"BG-UMA-075\",\"STD-UMA-075-P\"],\"open_blockers\":[],\"critical_features_preserved\":[\"source IDs\",\"action boundary\",\"policy exact-match rule\"],\"final_answer\":\"Action may proceed. BG-UMA-075 provides exact match to REQ-UMA-075 parameters and STD-UMA-075-P requirements including AUD-7 assignment. Boundary is closed with no open defects. WARN-UMA-075 is superseded by the matching breakglass record.\"},\"deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"missing_critical_term:Leena Park\",\"missing_critical_term:UMA-ERP\"],\"artifact_verdict\":\"ALLOW\",\"artifact_binding\":\"SOURCE_BOUNDARY_CLOSED\",\"source_id_count\":4,\"critical_term_count\":5},\"artifact_registry\":[{\"artifact_id\":\"HV-KITC-075-A_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-075-A_WORKER_01.json\",\"hash\":\"4385446a0476230eee6c03c85c9ea1df074b8f37e7d8bf46621e4114daab2094\",\"gate_status\":\"FAIL\",\"gate_passed\":false,\"gate_failures\":[\"missing_critical_term:Leena Park\",\"missing_critical_term:UMA-ERP\"],\"critical_feature_count\":3,\"verification_verdict\":\"ALLOW\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\"}],\"required_gov_schema\":{\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"control_action\":\"CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED\",\"route_verdict\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"source_gate_interpretation\":\"string\",\"must_preserve\":[\"string\"],\"must_repair\":[\"string\"],\"blocked_moves\":[\"string\"],\"dependency_ledger\":[\"string\"],\"next_worker_baton\":{\"objective\":\"string\",\"attack_focus\":\"string\",\"required_repairs\":[\"string\"],\"monotonic_preservation\":[\"string\"]},\"final_compiler_allowed\":\"boolean\"},\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.\"}"
+    }
+  ],
+  "prompt_object": {
+    "run_lock": {
+      "run_id": "run_20260629T021923Z",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "pair_id": "HV-KITC-075",
+      "packet_id": "HV-KITC-075-A",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "gov_may_select_models": false,
+      "no_substitutions": true
+    },
+    "source_context": {
+      "action": {
+        "business_ref": "HV-KITC-075-A",
+        "type": "emergency_access",
+        "vendor": "Uma IAM",
+        "amount": 0,
+        "currency": "USD",
+        "description": "May IAM execute the emergency admin enablement?",
+        "action_date": "2026-06-28"
+      },
+      "context": {
+        "action_boundary": "May IAM execute the emergency admin enablement?",
+        "anomaly_observed": "Standard admin controls warn against committee bypass, but breakglass approval may cover the complete action.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "doc_id": "REQ-UMA-075",
+            "type": "source_record",
+            "content": "Request REQ-UMA-075 enables emergency admin for user Leena Park on UMA-ERP, privilege breakglass-admin, time window 13:00-14:00."
+          },
+          {
+            "doc_id": "WARN-UMA-075",
+            "type": "source_record",
+            "content": "Standard-admin warning WARN-UMA-075 says admin access normally requires committee review unless breakglass approval covers the full action."
+          },
+          {
+            "doc_id": "BG-UMA-075",
+            "type": "source_record",
+            "content": "Breakglass execution approval BG-UMA-075 covers Leena Park, UMA-ERP, breakglass-admin, 13:00-14:00, and audit-control assignment AUD-7 before enablement."
+          }
+        ],
+        "policy_documents": [
+          {
+            "doc_id": "STD-UMA-075-P",
+            "title": "Exact source-boundary policy",
+            "content": "Emergency admin enablement is complete only when breakglass execution approval matches user, system, privilege, time window, and audit-control assignment before enablement."
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "run_id": "run_20260629T021923Z",
+      "pair_id": "HV-KITC-075",
+      "packet_id": "HV-KITC-075-A",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "turns_completed": [
+        {
+          "turn": 1,
+          "role": "worker",
+          "turn_id": "HV-KITC-075-A_W1",
+          "model": "xai/grok-3-mini",
+          "dna": "xai",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ALLOW",
+          "full_output_ref": "artifacts/HV-KITC-075-A_WORKER_01.json",
+          "gate_status": "FAIL",
+          "artifact_hash": "4385446a0476230eee6c03c85c9ea1df074b8f37e7d8bf46621e4114daab2094",
+          "source_ids": [
+            "BG-UMA-075",
+            "REQ-UMA-075",
+            "STD-UMA-075-P",
+            "WARN-UMA-075"
+          ]
+        }
+      ],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "resolved_dependencies": [],
+      "unresolved_dependencies": [
+        "Targets standard-control fixation versus breakglass authorization."
+      ],
+      "blocked_moves_so_far": [],
+      "source_ids_used_so_far": [
+        "BG-UMA-075",
+        "REQ-UMA-075",
+        "STD-UMA-075-P",
+        "WARN-UMA-075"
+      ],
+      "claims_requiring_support": [],
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "best_artifact_registry": null,
+      "pinned_best_artifact_full_text": null
+    },
+    "latest_worker_output": {
+      "worker_role": "SOURCE_BOUNDARY_MAPPER",
+      "verification_verdict": "ALLOW",
+      "boundary_binding": {
+        "action_boundary": "May IAM execute the emergency admin enablement?",
+        "allow_rule_assessment": "BG-UMA-075 exactly matches user, system, privilege, time window, and audit-control assignment per STD-UMA-075-P before enablement",
+        "escalate_rule_assessment": "No narrow source-record defect remains open",
+        "timing_scope_authority_dependency_check": "Breakglass covers 13:00-14:00 window with AUD-7 assignment; no unresolved dependency on committee review",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED",
+        "controlling_source_fact": "STD-UMA-075-P requires exact match of breakglass execution approval to all listed elements"
+      },
+      "cited_evidence": [
+        "REQ-UMA-075",
+        "BG-UMA-075",
+        "STD-UMA-075-P"
+      ],
+      "open_blockers": [],
+      "critical_features_preserved": [
+        "source IDs",
+        "action boundary",
+        "policy exact-match rule"
+      ],
+      "final_answer": "Action may proceed. BG-UMA-075 provides exact match to REQ-UMA-075 parameters and STD-UMA-075-P requirements including AUD-7 assignment. Boundary is closed with no open defects. WARN-UMA-075 is superseded by the matching breakglass record."
+    },
+    "deterministic_gate_result": {
+      "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+      "passed": false,
+      "failures": [
+        "missing_critical_term:Leena Park",
+        "missing_critical_term:UMA-ERP"
+      ],
+      "artifact_verdict": "ALLOW",
+      "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+      "source_id_count": 4,
+      "critical_term_count": 5
+    },
+    "artifact_registry": [
+      {
+        "artifact_id": "HV-KITC-075-A_WORKER_01",
+        "turn_number": 1,
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-075-A_WORKER_01.json",
+        "hash": "4385446a0476230eee6c03c85c9ea1df074b8f37e7d8bf46621e4114daab2094",
+        "gate_status": "FAIL",
+        "gate_passed": false,
+        "gate_failures": [
+          "missing_critical_term:Leena Park",
+          "missing_critical_term:UMA-ERP"
+        ],
+        "critical_feature_count": 3,
+        "verification_verdict": "ALLOW",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED"
+      }
+    ],
+    "required_gov_schema": {
+      "gov_mode": "CONTROL_ROUTER",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ALLOW | ESCALATE",
+      "control_action": "CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED",
+      "route_verdict": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "source_gate_interpretation": "string",
+      "must_preserve": [
+        "string"
+      ],
+      "must_repair": [
+        "string"
+      ],
+      "blocked_moves": [
+        "string"
+      ],
+      "dependency_ledger": [
+        "string"
+      ],
+      "next_worker_baton": {
+        "objective": "string",
+        "attack_focus": "string",
+        "required_repairs": [
+          "string"
+        ],
+        "monotonic_preservation": [
+          "string"
+        ]
+      },
+      "final_compiler_allowed": "boolean"
+    },
+    "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models."
+  }
+}

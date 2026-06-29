@@ -1,0 +1,36 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?",
+    "allow_rule_assessment": "Evidence in CAL-ACR-022 matches device group DG-41B, site 18-P, release condition RC-7, and timing before activation ACT-ACR-2026-8022, satisfying STD-ACR-022-P matching requirements.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-ACR-022-P requires exact device group, site, release condition, and timing match; source records show exact match across CAL-ACR-022, ACT-ACR-022, SITE-ACR-022, RC-ACR-022, and LOG-ACR-022.",
+    "escalate_rule_assessment": "Source records appear to support ALLOW, but gov baton blocks final compiler verdict with final_compiler_allowed:false and CONTROL_ACTION:CONTINUE_REPAIR, creating role-authority conflict.",
+    "timing_scope_authority_dependency_check": "Timing: calibration completed before activation (CAL-ACR-022). Scope: DG-41B production telemetry units match across ACT-ACR-022 and CAL-ACR-022. Authority: ENT-ACR-022 entitlement verified in LOG-ACR-022. Dependency: RC-ACR-022 requires calibration attachment\u2014attached per ALERT-ACR-DEP-022. All SOURCE_BOUNDARY_CLOSED conditions appear satisfied in source records."
+  },
+  "cited_evidence": [
+    "ACT-ACR-022",
+    "CAL-ACR-022",
+    "RC-ACR-022",
+    "SITE-ACR-022",
+    "LOG-ACR-022",
+    "STD-ACR-022",
+    "STD-ACR-022-P",
+    "ENT-ACR-022",
+    "ALERT-ACR-DEP-022"
+  ],
+  "critical_features_preserved": [
+    "SOURCE_BOUNDARY_OPEN preserved per gov baton",
+    "exact source doc_id values used only",
+    "no invented source IDs",
+    "timing/scope/authority/dependency section completed",
+    "word_band compliance: final_answer within 25-120 words"
+  ],
+  "final_answer": "Source records show calibration evidence (CAL-ACR-022) matches activation requirements (ACT-ACR-022) across device group, site, release condition, and timing, satisfying STD-ACR-022-P. All dependency conditions appear SOURCE_BOUNDARY_CLOSED. However, gov baton blocks final compilation with final_compiler_allowed:false and CONTINUE_REPAIR directive, creating unresolved role-authority conflict that prevents final ALLOW verdict. Open blocker: state conflict between worker role FINAL_COMPILER and gov block on final verdicts.",
+  "open_blockers": [
+    "gov baton final_compiler_allowed:false conflicts with worker role FINAL_COMPILER\u2014cannot issue final verdict per gov directive",
+    "action_boundary_verdict_mismatch: source records support ALLOW but gov blocks final compilation",
+    "STATE_CONFLICT: role_frame=worker.goal says 'Decide whether the action may proceed' but gov baton says CONTINUE_REPAIR, not final decision"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

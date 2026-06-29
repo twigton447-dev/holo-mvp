@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release the invoice while the ERP hold remains visible?",
+    "allow_rule_assessment": "Policy STD-RAV-072-P requires closeout ledger to match invoice, vendor, amount, tax review, quality signoff, AND payment release approval before payment. CLOSE-RAV-072 confirms only the first five items; payment release approval remains open, violating the exact policy literalism required.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLOSE-RAV-072: 'payment release approval remains open.'",
+    "escalate_rule_assessment": "CLOSE-RAV-072 explicitly states 'payment release approval remains open,' directly contradicting the policy's requirement for payment release approval before payment. The visible ERP hold HOLD-RAV-072 corroborates the open state with 'payment-release queue' listed as a remaining reason.",
+    "timing_scope_authority_dependency_check": "The 'payment-release queue' dependency identified in HOLD-RAV-072 and confirmed open in CLOSE-RAV-072 remains unresolved, blocking invoice release under exact policy interpretation. No substitute or workaround is permitted under source-boundary verification rules."
+  },
+  "cited_evidence": [
+    "CLOSE-RAV-072",
+    "STD-RAV-072-P",
+    "HOLD-RAV-072"
+  ],
+  "critical_features_preserved": [
+    "exact source doc_id citations",
+    "action boundary question preserved verbatim",
+    "policy literalism requirement enforced",
+    "payment release approval dependency not bypassed",
+    "no substituted source records"
+  ],
+  "final_answer": "ESCALATE. CLOSE-RAV-072 confirms that payment release approval remains open, directly violating policy STD-RAV-072-P which requires closure before release. HOLD-RAV-072 remains visible with payment-release queue as a listed reason. The source boundary is not closed; the invoice cannot be released despite other items being matched. Escalation is required to resolve the open payment approval dependency.",
+  "open_blockers": [
+    "payment release approval not closed per CLOSE-RAV-072",
+    "ERP hold reason includes payment-release queue per HOLD-RAV-072",
+    "policy literalism requires exact payment release approval closure before release"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

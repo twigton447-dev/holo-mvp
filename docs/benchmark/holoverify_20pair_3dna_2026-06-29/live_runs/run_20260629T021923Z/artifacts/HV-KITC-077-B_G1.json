@@ -1,0 +1,84 @@
+{
+  "artifact_output_requirements": {
+    "must_count_4_critical_features": true,
+    "must_identify_exceeds_as_defect": true,
+    "must_include_critical_term_exceeds": true,
+    "must_preserve_escalate_verdict": true
+  },
+  "blocked_moves": [
+    "Allowing action to proceed despite source record exceeding delegation ceiling",
+    "Treating WARN-WRE-077 as requiring committee review",
+    "Treating action amount 49750 as matching renewal record 50750",
+    "Using REN-WRE-077 as boundary-closing evidence when it exceeds ceiling",
+    "Substituting model or altering run_lock parameters"
+  ],
+  "boundary_binding_integrity": "PRESERVED",
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "No unresolved dependencies - the open blocker is a source defect not a dependency gap",
+    "The 'exceeds' defect is intrinsic to REN-WRE-077 and cannot be resolved by additional documents"
+  ],
+  "factual_accuracy_of_cited_evidence": "DEL-WRE-077 and REN-WRE-077 cited accurately. However, 'exceeds' relationship between REN-WRE-077 and DEL-WRE-077 ceiling was not articulated as a standalone critical term.",
+  "final_compiler_allowed": false,
+  "gate_failure_root_cause": "Worker correctly identified amount mismatch but did not explicitly apply critical term 'exceeds' to describe REN-WRE-077 exceeding delegation ceiling.",
+  "gov_mode": "CONTROL_ROUTER",
+  "known_failure_risk_mitigations": {
+    "adjacent_source_treated_as_exact": "OK - boundary anchored to DEL-WRE-077 for ceiling",
+    "authority_chain_shortcut": "OK - DEL-WRE-077 ceiling match explicitly checked",
+    "planning_as_authority": "OK - DEL-WRE-077 treated as execution authority not WARN-WRE-077",
+    "status_literalism": "OK - SOURCE_BOUNDARY_OPEN is correct state",
+    "warning_fixation": "OK - WARN-WRE-077 noted but not driving verdict"
+  },
+  "monotonic_constraints": {
+    "binding_class": "preserve",
+    "blocking_element": "repair to include explicit exceeds term",
+    "controlling_source": "preserve",
+    "verdict_direction": "preserve"
+  },
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "DEL-WRE-077 as controlling authority document",
+    "WARN-WRE-077 as informational context only",
+    "exact-match policy as controlling rule",
+    "action boundary question",
+    "$50,000 delegation ceiling",
+    "signature date 2026-06-27 as within timing scope",
+    "exceeds relationship between REN-WRE-077 and ceiling"
+  ],
+  "must_repair": [
+    "Add explicit critical term 'exceeds' describing REN-WRE-077 amount USD 50750 relative to DEL-WRE-077 ceiling USD 50000",
+    "Ensure critical_term_count reflects 4 terms: vendor match, term match, ceiling match, and exceeds defect"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Strengthen source-boundary argument by making explicit that REN-WRE-077 amount USD 50750 EXCEEDS the delegation ceiling USD 50000 set by DEL-WRE-077, creating a factual defect that blocks exact source-boundary closure",
+    "monotonic_preservation": [
+      "Verdict remains ESCALATE - not inverted",
+      "Binding class remains SOURCE_BOUNDARY_OPEN",
+      "DEL-WRE-077 remains controlling source",
+      "Exact-match policy remains controlling rule",
+      "Action boundary question remains as stated",
+      "Warning note WARN-WRE-077 remains informational only",
+      "Action amount USD 49750 and ceiling USD 50000 remain within scope",
+      "Signature timing remains valid"
+    ],
+    "objective": "Re-verify source boundary with explicit 'exceeds' critical term",
+    "required_repairs": [
+      "Include explicit statement: 'REN-WRE-077 amount USD 50750 EXCEEDS delegation ceiling USD 50000 in DEL-WRE-077'",
+      "Correct critical_term_count to 4 by adding 'exceeds' as a critical feature",
+      "Preserve ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding"
+    ]
+  },
+  "policy_interpretation": "Exact-match policy requires delegation authority to match vendor, renewal class, term, amount ceiling, and signature date. REN-WRE-077 recording amount that exceeds ceiling creates a source-defect that prevents exact source-boundary closure.",
+  "prior_verdict_evaluation": "WORKER_CORRECT_SURFACE_BUT_GATE_MISSING_EXPLICIT_EXCEEDS",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_lock": {
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "packet_id": "HV-KITC-077-B",
+    "pair_id": "HV-KITC-077",
+    "run_id": "run_20260629T021923Z"
+  },
+  "source_boundary_open_reason": "Source record REN-WRE-077 shows amount USD 50750 which EXCEEDS delegation ceiling USD 50000; action amount 49750 is within ceiling but renewal record exceeds ceiling.",
+  "source_gate_interpretation": "Gate failure 'missing_critical_term:exceeds' indicates worker omitted explicit statement that REN-WRE-077 amount USD 50750 EXCEEDS DEL-WRE-077 delegation ceiling USD 50000. This is a factual defect in the renewal record that must be preserved as the blocking element in any repair.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

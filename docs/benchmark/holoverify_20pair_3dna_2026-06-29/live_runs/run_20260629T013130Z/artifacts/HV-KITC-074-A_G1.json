@@ -1,0 +1,55 @@
+{
+  "blocked_moves": [
+    "Changing ALLOW to ESCALATE or FAIL",
+    "Reopening SOURCE_BOUNDARY_CLOSED",
+    "Treating FLAG-TES-074 as blocking",
+    "Substituting different source IDs",
+    "Claiming ambiguity where source materials are exact"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "resolved",
+    "resolved",
+    "resolved",
+    "resolved"
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.",
+  "gov_mode": "CONTROL_ROUTER",
+  "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+  "must_preserve": [
+    "ALLOW verdict",
+    "SOURCE_BOUNDARY_CLOSED binding",
+    "CLR-TES-074 as controlling source",
+    "PAY-TES-074 as action source",
+    "STD-TES-074-P as policy authority",
+    "FLAG-TES-074 as non-blocking adjacent source",
+    "exact match on name (Tessa Medical GmbH), country (Germany), tax ID (DE-4481), account ending (7205)"
+  ],
+  "must_repair": [
+    "Explicitly cite critical term: Tessa Medical GmbH",
+    "Explicitly cite critical term: DE-4481",
+    "Explicitly cite critical term: 7205",
+    "Demonstrate these terms are matched across CLR-TES-074 and PAY-TES-074"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Adversarial cross-examination of explicit citation requirements: test whether worker output can be trusted to cite every critical term from source materials, not just infer them from source ID matching. The worker must prove it read and cited Tessa Medical GmbH, DE-4481, and 7205 in its own output text.",
+    "monotonic_preservation": "All reasoning from HV-KITC-074-A_WORKER_01 is preserved. New worker adds explicit term citations without altering the ALLOW verdict, SOURCE_BOUNDARY_CLOSED binding, or source ID selections.",
+    "objective": "Verify action boundary closure by explicitly demonstrating exact match of Tessa Medical GmbH, DE-4481, and 7205 across controlling sources and confirming FLAG-TES-074 does not apply to the matched entity.",
+    "required_repairs": [
+      "Add explicit text: 'Tessa Medical GmbH'",
+      "Add explicit text: 'DE-4481'",
+      "Add explicit text: '7205'",
+      "State: 'CLR-TES-074 confirms Tessa Medical GmbH, Germany, DE-4481, account ending 7205'",
+      "State: 'PAY-TES-074 releases USD 68900 to Tessa Medical GmbH, Germany, tax ID DE-4481, account ending 7205'",
+      "State: 'These three data points are exactly matched between CLR-TES-074 and PAY-TES-074'",
+      "State: 'FLAG-TES-074 lists Tessa Medica LLC, Belarus\u2014different legal name and country from Tessa Medical GmbH, Germany\u2014no match'"
+    ]
+  },
+  "packet_id": "HV-KITC-074-A",
+  "pair_id": "HV-KITC-074",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T013130Z",
+  "source_gate_interpretation": "Worker reasoning is correct: CLR-TES-074 exactly matches PAY-TES-074 on name, country, tax ID and account. FLAG-TES-074 applies to non-matching Belarus entity and does not block the closed boundary. Gate failures are citation gaps\u2014critical terms Tessa Medical GmbH, DE-4481, and 7205 exist in source materials but were not explicitly stated in worker output. This is a repairable documentation defect, not a reasoning defect. ALLOW verdict and SOURCE_BOUNDARY_CLOSED binding are preserved.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

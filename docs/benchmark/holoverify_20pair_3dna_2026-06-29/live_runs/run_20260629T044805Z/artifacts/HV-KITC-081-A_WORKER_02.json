@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "allow_rule_assessment": "N/A",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "The execution release (REL-AST-081) does not contain the exact hazard-control status required by the policy (STD-AST-081-P) and warning (WARN-AST-081) for controlled solvents.",
+    "escalate_rule_assessment": "The action boundary requires exact hazard-control evidence for controlled solvents. REL-AST-081 mentions 'active cabinet/handler controls' but does not provide the exact hazard-control status required by STD-AST-081-P and WARN-AST-081.",
+    "timing_scope_authority_dependency_check": "The execution release (REL-AST-081) must confirm exact hazard-control status before PO execution, as per STD-AST-081-P. This confirmation is missing."
+  },
+  "cited_evidence": [
+    "STD-AST-081-P",
+    "WARN-AST-081",
+    "REL-AST-081"
+  ],
+  "critical_features_preserved": [
+    "Action boundary defined.",
+    "Source context used.",
+    "Gov baton followed."
+  ],
+  "final_answer": "The controlled-solvent purchase cannot proceed because the execution release (REL-AST-081) fails to provide the exact hazard-control status required by policy (STD-AST-081-P) and the safety warning (WARN-AST-081). While the release mentions active controls, it does not explicitly confirm the specific hazard-control status needed for this regulated solvent. Therefore, the source boundary remains open, necessitating escalation.",
+  "open_blockers": [
+    "Exact hazard-control status is not confirmed in the execution release."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

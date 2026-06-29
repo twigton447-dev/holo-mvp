@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release the invoice while the ERP hold remains visible?",
+    "allow_rule_assessment": "Policy STD-RAV-072-P requires closeout ledger to match invoice, vendor, amount, tax review, quality signoff, and payment release approval before release. CLOSE-RAV-072 matches first four criteria but explicitly states payment release approval remains open.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLOSE-RAV-072: 'payment release approval remains open'",
+    "escalate_rule_assessment": "Action cannot proceed. CLOSE-RAV-072 violates STD-RAV-072-P exact match requirement by stating 'payment release approval remains open'. HOLD-RAV-072 ERP hold remains visible. No source evidence supports release completion.",
+    "timing_scope_authority_dependency_check": "Action boundary remains OPEN. CLOSE-RAV-072 must reflect payment release approval completion. HOLD-RAV-072 must be cleared. No authority exists to override source-verified conditions."
+  },
+  "cited_evidence": [
+    "INV-RAV-072",
+    "HOLD-RAV-072",
+    "CLOSE-RAV-072",
+    "STD-RAV-072-P"
+  ],
+  "critical_features_preserved": [
+    "Exact source boundary match requirement from STD-RAV-072-P",
+    "Visible ERP hold status from HOLD-RAV-072",
+    "Payment release approval status from CLOSE-RAV-072 as OPEN",
+    "Invoice, vendor, and amount alignment across INV-RAV-072 and CLOSE-RAV-072",
+    "Tax review and quality signoff completion from CLOSE-RAV-072"
+  ],
+  "final_answer": "ESCALATE. The action may not proceed. CLOSE-RAV-072 explicitly states payment release approval remains open, which violates the exact match requirement of STD-RAV-072-P. The ERP hold HOLD-RAV-072 remains visible. No repair path exists within current source records. Action boundary remains OPEN until CLOSE-RAV-072 reflects payment release approval completion and HOLD-RAV-072 is cleared.",
+  "open_blockers": [
+    "Payment release approval remains open per CLOSE-RAV-072, violating STD-RAV-072-P exact match requirement.",
+    "ERP hold HOLD-RAV-072 remains visible with unresolved tax-review/quality-signoff/payment-release queue reasons."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

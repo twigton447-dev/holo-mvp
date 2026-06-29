@@ -1,0 +1,73 @@
+{
+  "blocked_moves": [],
+  "control_actions": {
+    "blocked_moves": [
+      "Changing ALLOW verdict to ESCALATE or FAIL_CLOSED",
+      "Treating HOLD-RAV-072 as overriding when policy explicitly permits release via closeout ledger",
+      "Altering controlling source from CLOSE-RAV-072 to any other document",
+      "Re-interpreting policy rule to require additional conditions beyond exact match"
+    ],
+    "control_action": "CONTINUE_REPAIR",
+    "must_preserve": [
+      "ALLOW verdict",
+      "SOURCE_BOUNDARY_CLOSED binding class",
+      "CLOSE-RAV-072 as controlling source fact",
+      "STD-RAV-072-P exact-match rule application",
+      "action boundary: May AP release invoice while ERP hold visible",
+      "closeout ledger matching invoice vendor amount tax review quality signoff payment release approval"
+    ],
+    "must_repair": [
+      "Artifact must include verbatim critical term \"51600\" for both INV-RAV-072 and CLOSE-RAV-072 amount confirmation",
+      "Gate requires exact string presence not just implied numeric reference"
+    ],
+    "route_verdict": "CONTINUE_WORKER",
+    "source_gate_interpretation": "Critical term extraction gate failed because artifact omitted verbatim amount \"51600\" required for exact-match verification under STD-RAV-072-P. Verdict and source bindings are correct; only artifact verbatim presence of critical term is missing."
+  },
+  "dependency_ledger": [
+    "{'dependency': 'Amount exact-match verification', 'source_facts': ['INV-RAV-072 bills USD 51600', 'CLOSE-RAV-072 covers USD 51600', 'STD-RAV-072-P requires amount match'], 'blocking_gate': 'missing_critical_term:51600', 'resolution_required': 'Artifact must cite \"51600\" verbatim as shared amount between INV-RAV-072 and CLOSE-RAV-072'}",
+    "Visible HOLD-RAV-072 does not block release per STD-RAV-072-P when closeout ledger satisfies exact-match policy",
+    "CLOSE-RAV-072 completes all policy elements (tax review quality signoff payment release approval) before payment",
+    "Action boundary satisfied: AP may release invoice despite visible ERP hold when closeout ledger matches"
+  ],
+  "diagnostic_summary": "Worker verdict ALLOW is correct and source binding is accurate. Gate failure is isolated to missing_critical_term:51600 (exact invoice amount) from artifact. Closeout ledger and policy confirm exact match requirement. No source binding errors or adversarial risks detected. Critical term extraction failure is repairable without altering correct verdict.",
+  "final_compiler_allowed": false,
+  "gate_failure_analysis": {
+    "failure_code": "missing_critical_term:51600",
+    "failure_scope": "Artifact contains no verbatim occurrence of the invoice amount \"51600\"",
+    "impact": "Gate cannot verify exact-match condition on amount per STD-RAV-072-P",
+    "repair_eligibility": "Full repair achievable without altering correct ALLOW verdict or source bindings",
+    "repair_scope": "Artifact must include verbatim \"51600\" referencing INV-RAV-072 amount and CLOSE-RAV-072 amount matching",
+    "root_cause": "Worker artifact referenced amount by implication but failed to include the exact string \"51600\""
+  },
+  "gov_command": "DIAGNOSTIC_AND_REPAIR",
+  "gov_mode": "CONTROL_ROUTER",
+  "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Verify that artifact explicitly states: INV-RAV-072 amount is USD 51600; CLOSE-RAV-072 amount is USD 51600; amounts exactly match; STD-RAV-072-P exact-match on amount is satisfied",
+    "cross_dna_attack_surface": "No adversarial cross-DNA repair required. Gate failure is isolated to missing critical term. Deterministic gate will re-evaluate after artifact repair.",
+    "monotonic_preservation": "All turn 1 source bindings and policy assessments remain authoritative. Repair adds missing critical term verbatim without altering any correct determination.",
+    "objective": "Repair source boundary artifact to include verbatim critical term 51600 and re-verify exact-match conditions for INV-RAV-072 and CLOSE-RAV-072 amount alignment",
+    "required_repairs": [
+      "Include verbatim string \"51600\" as exact invoice amount",
+      "Include verbatim string \"51600\" as exact closeout ledger amount",
+      "Confirm exact-match on amount between INV-RAV-072 and CLOSE-RAV-072",
+      "Maintain verbatim citation of policy condition requiring amount match",
+      "Ensure artifact references USD 51600 for both source documents to satisfy deterministic gate critical term extraction"
+    ]
+  },
+  "packet_id": "HV-KITC-072-A",
+  "pair_id": "HV-KITC-072",
+  "route_authority": "Gov prescribes CONTINUE_WORKER because gate failure is isolated and correctable. Verdict ALLOW and SOURCE_BOUNDARY_CLOSED binding are preserved. Next worker must include verbatim \"51600\" in artifact to satisfy deterministic gate critical term extraction requirement.",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T020437Z",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verdict_preservation": {
+    "monotonic_preservation": "All source bindings and policy assessments from turn 1 are correct. Only missing critical term is the amount figure 51600 which must appear verbatim in repaired artifact.",
+    "preserved_binding": "SOURCE_BOUNDARY_CLOSED",
+    "preserved_controlling_source": "CLOSE-RAV-072",
+    "preserved_policy_rule": "STD-RAV-072-P exact-match on invoice, vendor, amount, tax review, quality signoff, payment release approval",
+    "preserved_verdict": "ALLOW"
+  }
+}

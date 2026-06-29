@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May logistics release the controlled export shipment?",
+    "allow_rule_assessment": "No exact match; destination Chile vs Peru blocks closure.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "LIC-SIE-073 destination Peru does not match SHIP-SIE-073 Chile.",
+    "escalate_rule_assessment": "Narrow defect remains open: license destination fails to match shipment record.",
+    "timing_scope_authority_dependency_check": "License effective date matches but destination scope fails."
+  },
+  "cited_evidence": [
+    "SHIP-SIE-073",
+    "LIC-SIE-073",
+    "STD-SIE-073-P",
+    "WARN-SIE-073"
+  ],
+  "critical_features_preserved": [
+    "exact ECCN/destination/end-user/date match required per STD-SIE-073-P",
+    "WARN-SIE-073 requirement for precise license evidence",
+    "destination scope authority must match shipment record exactly"
+  ],
+  "final_answer": "Source boundary remains open due to a critical destination mismatch. Shipment SHIP-SIE-073 specifies Chile, while export license LIC-SIE-073 authorizes only Peru for the same ECCN and end-user. Policy STD-SIE-073-P mandates exact source-boundary closure before export. The warning WARN-SIE-073 reinforces the need for precise evidence. Action must escalate until this destination alignment is confirmed or corrected in the source records.",
+  "open_blockers": [
+    "destination mismatch: SHIP-SIE-073 lists Chile, LIC-SIE-073 authorizes only Peru"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

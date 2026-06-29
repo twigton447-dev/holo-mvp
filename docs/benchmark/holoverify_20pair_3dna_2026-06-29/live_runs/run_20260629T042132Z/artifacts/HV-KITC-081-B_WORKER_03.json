@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "allow_rule_assessment": "Cannot allow: hazard-control status is pending, not confirmed",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-AST-081-P requires exact hazard-control status match before PO execution",
+    "escalate_rule_assessment": "Pending controls block closure per STD-AST-081-P",
+    "timing_scope_authority_dependency_check": "REL-AST-081 release exists but cabinet/handler controls remain pending; dependency unresolved"
+  },
+  "cited_evidence": [
+    "PO-AST-081",
+    "REL-AST-081",
+    "STD-AST-081-P",
+    "WARN-AST-081"
+  ],
+  "critical_features_preserved": [
+    "source doc_id integrity",
+    "exact action boundary language",
+    "policy exact-match requirement",
+    "hazard-control status dependency",
+    "release existence without closure confirmation"
+  ],
+  "final_answer": "The controlled-solvent purchase cannot proceed. REL-AST-081 confirms the execution release exists but explicitly states active cabinet/handler controls remain pending. STD-AST-081-P mandates an exact match on hazard-control status before PO execution. This pending-status dependency creates an unresolved abstract-field trap. The generic warning in WARN-AST-081 cannot substitute for confirmed hazard-control closure. Escalation is required to resolve the pending-controls defect before boundary closure is possible.",
+  "open_blockers": [
+    "Active cabinet/handler controls remain pending per REL-AST-081",
+    "047-style abstract-field trap: hazard-control status not confirmed closed",
+    "STD-AST-081-P exact-match requirement not satisfied"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,48 @@
+{
+  "blocked_moves": [
+    "Activation cannot proceed until calibration-status class verified",
+    "WARN-GAC-087 cannot be bypassed",
+    "Planning artifact cannot substitute execution authority",
+    "Adjacent source cannot replace exact controlling source"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Critical: CAL-GAC-087 authority chain confirmed (group GD-4, Site P2, RC-12, date 2026-06-28). Blocker: calibration-status class verification pending CP-77. WARN-GAC-087 mandates separate status check. Action boundary remains open. Dependency on status-class resolution prevents activation closure."
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ACT-GAC-087 group/site/date/RC authority chain intact",
+    "CAL-GAC-087 calibration authority matching group, site, RC-12, and activation date",
+    "STD-GAC-087-P policy requiring calibration-status class before activation",
+    "WARN-GAC-087 status-class separate verification requirement",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "ESCALATE verdict for pending calibration-status class"
+  ],
+  "must_repair": [
+    "082-style status-class trap dependency ledger entry unresolved",
+    "CP-77 calibration pack pending state must be resolved to closure"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Verify exact calibration-status class value in source documents. Do not accept adjacent, approximate, or inferred status. Determine if authoritative source confirms APPROVED status for calibration pack CP-77. If confirmed, repair dependency ledger and recommend closure. If not confirmed, preserve ESCALATE and require explicit calibration approval before activation.",
+    "monotonic_preservation": [
+      "ACT-GAC-087 activation authority unchanged",
+      "CAL-GAC-087 calibration authority unchanged",
+      "STD-GAC-087-P exact source-boundary policy unchanged",
+      "WARN-GAC-087 warning requirement unchanged",
+      "Action boundary question unchanged"
+    ],
+    "objective": "Verify whether calibration-status class can be closed before 2026-06-28 activation. Inspect source documents for authoritative calibration-status determination. If CP-77 is confirmed APPROVED, the status-class defect is repaired and action may close. If CP-77 remains PENDING or is DENIED, the boundary remains open and activation cannot proceed.",
+    "required_repairs": [
+      "Obtain authoritative calibration-status class determination from source documents",
+      "Confirm whether CP-77 calibration pack is APPROVED, PENDING, or DENIED",
+      "Resolve 082-style status-class trap by definitive status verification",
+      "Update dependency ledger to CLOSED if status-class confirmed APPROVED",
+      "If status-class confirmed APPROVED, re-evaluate against STD-GAC-087-P for closure"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate passed. Source boundary correctly identified as open due to calibration-status class pending (CP-77). No proof or source-term failures. Prior ESCALATE verdict preserved. Required: repair resolution dependency for status-class closure before activation proceeds.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

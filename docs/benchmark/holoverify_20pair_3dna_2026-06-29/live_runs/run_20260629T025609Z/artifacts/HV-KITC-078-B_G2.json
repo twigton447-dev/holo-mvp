@@ -1,0 +1,43 @@
+{
+  "blocked_moves": [
+    "Treat CLOSE-XOR-078 as valid closure for X-78",
+    "Execute release despite batch mismatch",
+    "Substitute adjacent batch closure as equivalent"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Require closure covering exactly X-78, assay AX-22, criterion Cq<=31, date 2026-06-28",
+    "Require confirmation DEV-XOR-078 is closed for X-78 specifically",
+    "Cannot proceed without exact batch match per STD-XOR-078-P"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "Batch mismatch X-78 vs X-79 finding",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "Policy exact-match requirement"
+  ],
+  "must_repair": [
+    "Confirm no closure exists for X-78 specifically",
+    "Verify DEV-XOR-078 remains open for X-78 only",
+    "Obtain closure for X-78 or confirm escalation"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Verify CLOSE-XOR-078 applies only to X-79, not X-78",
+    "monotonic_preservation": [
+      "X-78 vs X-79 batch mismatch",
+      "SOURCE_BOUNDARY_OPEN binding",
+      "Policy exact-match requirement"
+    ],
+    "objective": "Find exact closure for X-78 or confirm no valid closure exists",
+    "required_repairs": [
+      "Confirm DEV-XOR-078 remains unresolved for X-78",
+      "Verify CLOSE-XOR-078 batch reference is X-79 only",
+      "Obtain X-78-specific closure or escalation confirmation"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Closure CLOSE-XOR-078 covers X-79 not X-78; no valid closure exists for target batch X-78 per policy.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

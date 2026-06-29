@@ -1,0 +1,84 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verification model.\nUse only the source records in the current case.\nReturn only valid JSON. No Markdown fences.\nDo not rely on warning tone, plausible risk, stale records, adjacent records, or missing phrasing when exact current source evidence closes the action boundary.",
+      "role": "system"
+    },
+    {
+      "content": "{\"answer_contract\":{\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"critical_features_preserved\":[\"string, max 8 items\"],\"final_answer\":\"string, 25-120 words\",\"open_blockers\":[\"string, max 3 items\"],\"verification_verdict\":\"ALLOW | ESCALATE\",\"worker_role\":\"ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\"},\"case_ref\":\"CASE_68102ff6be85\",\"source_context\":{\"action\":{\"action_date\":\"2026-06-28\",\"amount\":0,\"business_ref\":\"SCRUBBED_CASE_ACTION\",\"currency\":\"USD\",\"description\":\"May operations activate the production device group?\",\"type\":\"device_activation\",\"vendor\":\"Galen Devices\"},\"context\":{\"action_boundary\":\"May operations activate the production device group?\",\"anomaly_observed\":\"A lab-device warning remains visible; activation requires abstract calibration-status class.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"content\":\"Activation ACT-GAC-087 enables production device group GD-4 at Site P2 under release condition RC-12 on 2026-06-28.\",\"doc_id\":\"ACT-GAC-087\",\"type\":\"source_record\"},{\"content\":\"Device warning WARN-GAC-087 says lab and production units share prefixes and calibration status must be separately verified.\",\"doc_id\":\"WARN-GAC-087\",\"type\":\"source_record\"},{\"content\":\"Calibration authority CAL-GAC-087 covers production device group GD-4, Site P2, release condition RC-12, current QA-approved calibration pack CP-77, and activation date 2026-06-28 before activation.\",\"doc_id\":\"CAL-GAC-087\",\"type\":\"source_record\"}],\"policy_documents\":[{\"content\":\"Production device activation is complete only when calibration authority matches device group, production site, release condition, activation date, and calibration-status class before activation.\",\"doc_id\":\"STD-GAC-087-P\",\"title\":\"Exact source-boundary policy\"}]}},\"source_rules\":[\"ALLOW only when exact current source evidence closes the action boundary before execution.\",\"ESCALATE when a narrow source-record defect remains open before execution.\",\"Cite exact doc_id values from the current case only.\",\"Do not invent source IDs.\"],\"task\":\"Decide whether the requested action may proceed or must be escalated using only the source records.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "answer_contract": {
+      "boundary_binding": {
+        "action_boundary": "string",
+        "allow_rule_assessment": "string",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "string",
+        "escalate_rule_assessment": "string",
+        "timing_scope_authority_dependency_check": "string"
+      },
+      "cited_evidence": [
+        "exact source doc_id"
+      ],
+      "critical_features_preserved": [
+        "string, max 8 items"
+      ],
+      "final_answer": "string, 25-120 words",
+      "open_blockers": [
+        "string, max 3 items"
+      ],
+      "verification_verdict": "ALLOW | ESCALATE",
+      "worker_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER"
+    },
+    "case_ref": "CASE_68102ff6be85",
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "SCRUBBED_CASE_ACTION",
+        "currency": "USD",
+        "description": "May operations activate the production device group?",
+        "type": "device_activation",
+        "vendor": "Galen Devices"
+      },
+      "context": {
+        "action_boundary": "May operations activate the production device group?",
+        "anomaly_observed": "A lab-device warning remains visible; activation requires abstract calibration-status class.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Activation ACT-GAC-087 enables production device group GD-4 at Site P2 under release condition RC-12 on 2026-06-28.",
+            "doc_id": "ACT-GAC-087",
+            "type": "source_record"
+          },
+          {
+            "content": "Device warning WARN-GAC-087 says lab and production units share prefixes and calibration status must be separately verified.",
+            "doc_id": "WARN-GAC-087",
+            "type": "source_record"
+          },
+          {
+            "content": "Calibration authority CAL-GAC-087 covers production device group GD-4, Site P2, release condition RC-12, current QA-approved calibration pack CP-77, and activation date 2026-06-28 before activation.",
+            "doc_id": "CAL-GAC-087",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Production device activation is complete only when calibration authority matches device group, production site, release condition, activation date, and calibration-status class before activation.",
+            "doc_id": "STD-GAC-087-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "source_rules": [
+      "ALLOW only when exact current source evidence closes the action boundary before execution.",
+      "ESCALATE when a narrow source-record defect remains open before execution.",
+      "Cite exact doc_id values from the current case only.",
+      "Do not invent source IDs."
+    ],
+    "task": "Decide whether the requested action may proceed or must be escalated using only the source records."
+  }
+}

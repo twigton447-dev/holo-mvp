@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release the invoice while the ERP hold remains visible?",
+    "allow_rule_assessment": "Policy STD-RAV-072-P requires CLOSE-RAV-072 to match all fields including completed payment release approval before visible HOLD-RAV-072 can be overridden. Exact match fails; release not permitted on current source records.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLOSE-RAV-072 states payment release approval remains open, blocking exact-match satisfaction required by STD-RAV-072-P.",
+    "escalate_rule_assessment": "CLOSE-RAV-072 payment release approval status is explicitly open, not completed; exact-match policy cannot be satisfied with current source records.",
+    "timing_scope_authority_dependency_check": "External resolution required. CLOSE-RAV-072 must be amended to show completed payment release approval before action boundary can close."
+  },
+  "cited_evidence": [
+    "CLOSE-RAV-072",
+    "STD-RAV-072-P",
+    "HOLD-RAV-072"
+  ],
+  "critical_features_preserved": [
+    "exact source IDs (CLOSE-RAV-072, STD-RAV-072-P, HOLD-RAV-072)",
+    "action boundary question",
+    "STD-RAV-072-P exact-match rule requiring completed payment release approval",
+    "ESCALATE verdicts from two independent cross-DNA workers",
+    "FAIL_CLOSED routing from gov"
+  ],
+  "final_answer": "ESCALATE required. CLOSE-RAV-072 shows payment release approval remains open, failing STD-RAV-072-P exact-match requirements. Two independent workers (xai/grok-3-mini, google/gemini-2.5-flash-lite) both reached ESCALATE with PASS gates. Gov confirms FAIL_CLOSED routing. Closeout ledger must be amended externally to show completed payment release approval before invoice release can proceed despite visible HOLD-RAV-072.",
+  "open_blockers": [
+    "payment_release_approval_required_in_closeout_ledger: CLOSE-RAV-072 shows 'payment release approval remains open' but STD-RAV-072-P requires completed status for exact match",
+    "CLOSE-RAV-072 amendment required before SOURCE_BOUNDARY_OPEN can close"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

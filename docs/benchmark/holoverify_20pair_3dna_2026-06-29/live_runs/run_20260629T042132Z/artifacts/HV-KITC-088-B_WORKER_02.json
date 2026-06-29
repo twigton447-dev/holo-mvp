@@ -1,0 +1,24 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations execute the privacy-regulated export?",
+    "allow_rule_assessment": "The action boundary requires a verified privacy-status class, which is explicitly stated as pending in REL-HEL-088 and warned against in DPIA-HEL-088.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "DPIA planning note DPIA-HEL-088 approves assessment planning only and warns that privacy status must be separately verified before transfer.",
+    "escalate_rule_assessment": "The privacy-regulated export cannot proceed because the 'privacy-status class' is pending, violating STD-HEL-088-P which mandates this status be verified before transfer.",
+    "timing_scope_authority_dependency_check": "The export date is 2026-06-28, and the release authority REL-HEL-088 is provided, but the critical dependency on a verified privacy-status class remains unmet."
+  },
+  "cited_evidence": [
+    "DPIA-HEL-088",
+    "REL-HEL-088",
+    "STD-HEL-088-P"
+  ],
+  "critical_features_preserved": [
+    "SOURCE_BOUNDARY_OPEN"
+  ],
+  "final_answer": "The privacy-regulated export action is blocked because a critical term, the privacy-status class, remains unverified. Both the DPIA planning note and the release authority explicitly indicate this status is pending. According to the source-boundary policy, this verification must occur before the transfer can proceed, thus the source boundary remains open.",
+  "open_blockers": [
+    "missing_critical_term:privacy status"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

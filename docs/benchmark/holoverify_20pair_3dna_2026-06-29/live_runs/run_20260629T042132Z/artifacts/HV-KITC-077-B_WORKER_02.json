@@ -1,0 +1,25 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement release the near-threshold renewal?",
+    "allow_rule_assessment": "Delegation DEL-WRE-077 sets a USD 50000 ceiling, but renewal REN-WRE-077 is for USD 50750. This violates the exact match requirement.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "DEL-WRE-077 sets USD 50000 ceiling; REN-WRE-077 states USD 50750.",
+    "escalate_rule_assessment": "The renewal amount exceeds the authorized delegation ceiling, creating a narrow defect.",
+    "timing_scope_authority_dependency_check": "Signature date on DEL-WRE-077 precedes release, but the amount mismatch is a critical dependency failure."
+  },
+  "cited_evidence": [
+    "DEL-WRE-077",
+    "REN-WRE-077"
+  ],
+  "critical_features_preserved": [
+    "source doc_ids",
+    "policy exact-match rule",
+    "delegation amount ceiling"
+  ],
+  "final_answer": "Action remains open due to a source boundary defect. The delegation ceiling of USD 50000 from DEL-WRE-077 is exceeded by the renewal amount of USD 50750 in REN-WRE-077. Policy requires an exact match on the amount ceiling before release. The near-threshold warning does not override this critical defect. ESCALATE for resolution.",
+  "open_blockers": [
+    "Amount ceiling mismatch"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

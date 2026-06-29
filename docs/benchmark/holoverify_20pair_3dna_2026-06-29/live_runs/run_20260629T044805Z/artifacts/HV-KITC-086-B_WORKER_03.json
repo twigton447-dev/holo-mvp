@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May quality release the clinical batch?",
+    "allow_rule_assessment": "No. Source record CLOSE-FJO-086 confirms accepted retest result remains pending, leaving assay-acceptance status unverified despite matching batch, assay, criterion, and release date.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLOSE-FJO-086 states accepted retest result pending; STD-FJO-086-P requires assay-acceptance verification before execution.",
+    "escalate_rule_assessment": "Release blocked by unresolved assay-acceptance dependency. Policy STD-FJO-086-P explicitly requires verified assay-acceptance status before shipment.",
+    "timing_scope_authority_dependency_check": "Release date and all scope elements match; timing authority is valid, but dependency on assay-acceptance status remains open."
+  },
+  "cited_evidence": [
+    "CLOSE-FJO-086",
+    "STD-FJO-086-P"
+  ],
+  "critical_features_preserved": [
+    "source IDs exact",
+    "action boundary exact",
+    "policy exact-match requirement",
+    "no invented sources",
+    "current source boundary status"
+  ],
+  "final_answer": "The clinical batch release cannot proceed. Source record CLOSE-FJO-086 confirms the accepted retest result remains pending, leaving assay-acceptance status unverified despite matching batch, assay, criterion, and release date. Policy STD-FJO-086-P explicitly requires verified assay-acceptance status before shipment. The source boundary remains open until assay acceptance is confirmed by source record.",
+  "open_blockers": [
+    "assay acceptance pending"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

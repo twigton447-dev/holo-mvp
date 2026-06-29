@@ -1,0 +1,209 @@
+{
+  "messages": [
+    {
+      "content": "You are HoloGov-V in the complete HoloVerify architecture.\nGov does not choose models. Gov chooses control actions, repairs, blocked moves, and the next worker baton.\nYou receive deterministic gate results. You cannot call an artifact ready if local gates fail.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"run_lock\":{\"run_id\":\"run_20260629T014004Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-076\",\"packet_id\":\"HV-KITC-076-B\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"gov_may_select_models\":false,\"no_substitutions\":true},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-076-B\",\"type\":\"milestone_invoice_release\",\"vendor\":\"Vanta Field Services\",\"amount\":42800,\"currency\":\"USD\",\"description\":\"May AP release a duplicate-looking milestone invoice?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May AP release a duplicate-looking milestone invoice?\",\"anomaly_observed\":\"The invoice matches a prior payment on vendor and amount, but may represent a separate milestone/release.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"INV-VAN-076\",\"type\":\"source_record\",\"content\":\"Invoice INV-VAN-076 bills Vanta Field Services USD 42800 for milestone M-4 release R4.\"},{\"doc_id\":\"PRIOR-VAN-076\",\"type\":\"source_record\",\"content\":\"Prior invoice PRIOR-VAN-076 paid Vanta Field Services USD 42800 for milestone M-4 release R4.\"},{\"doc_id\":\"MS-VAN-076\",\"type\":\"source_record\",\"content\":\"Milestone register MS-VAN-076 lists M-4/R4 as a single billable release already paid by PRIOR-VAN-076.\"}],\"policy_documents\":[{\"doc_id\":\"STD-VAN-076-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Duplicate-looking milestone invoice is complete only when milestone ID, release number, vendor, amount, and credit/reversal status distinguish it from the prior paid invoice.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T014004Z\",\"pair_id\":\"HV-KITC-076\",\"packet_id\":\"HV-KITC-076-B\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-076-B_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-076-B_WORKER_01.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"e6114fc9ee8dca50c5648883387e42d1f414840cd5f3ec5fd85778c67f2c8cae\",\"source_ids\":[\"INV-VAN-076\",\"MS-VAN-076\",\"PRIOR-VAN-076\",\"STD-VAN-076-P\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"Targets duplicate-looking invoice over-escalation.\"],\"blocked_moves_so_far\":[],\"source_ids_used_so_far\":[\"INV-VAN-076\",\"MS-VAN-076\",\"PRIOR-VAN-076\",\"STD-VAN-076-P\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":{\"artifact_id\":\"HV-KITC-076-B_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-076-B_WORKER_01.json\",\"hash\":\"e6114fc9ee8dca50c5648883387e42d1f414840cd5f3ec5fd85778c67f2c8cae\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":3,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"},\"pinned_best_artifact_full_text\":\"{\\n  \\\"boundary_binding\\\": {\\n    \\\"action_boundary\\\": \\\"May AP release a duplicate-looking milestone invoice?\\\",\\n    \\\"allow_rule_assessment\\\": \\\"Policy requires milestone ID, release number, vendor, amount, and credit/reversal status to distinguish from prior paid invoice.\\\",\\n    \\\"binding_class\\\": \\\"SOURCE_BOUNDARY_OPEN\\\",\\n    \\\"controlling_source_fact\\\": \\\"STD-VAN-076-P requires explicit distinction from PRIOR-VAN-076 for duplicate-looking invoice.\\\",\\n    \\\"escalate_rule_assessment\\\": \\\"No distinguishing credit/reversal status present; same M-4/R4 already paid.\\\",\\n    \\\"timing_scope_authority_dependency_check\\\": \\\"Current source boundary open; execution requires closed distinction before release.\\\"\\n  },\\n  \\\"cited_evidence\\\": [\\n    \\\"INV-VAN-076\\\",\\n    \\\"PRIOR-VAN-076\\\",\\n    \\\"MS-VAN-076\\\",\\n    \\\"STD-VAN-076-P\\\"\\n  ],\\n  \\\"critical_features_preserved\\\": [\\n    \\\"exact source IDs\\\",\\n    \\\"action boundary\\\",\\n    \\\"policy exact-match rule\\\"\\n  ],\\n  \\\"final_answer\\\": \\\"ESCALATE. Sources show INV-VAN-076 matches PRIOR-VAN-076 and MS-VAN-076 on M-4/R4 with no credit/reversal distinction per STD-VAN-076-P. Source boundary remains open; release may not proceed until defect resolved by exact distinguishing record.\\\",\\n  \\\"open_blockers\\\": [\\n    \\\"No credit/reversal status distinguishes duplicate invoice from prior paid M-4/R4\\\"\\n  ],\\n  \\\"verification_verdict\\\": \\\"ESCALATE\\\",\\n  \\\"worker_role\\\": \\\"SOURCE_BOUNDARY_MAPPER\\\"\\n}\"},\"latest_worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May AP release a duplicate-looking milestone invoice?\",\"allow_rule_assessment\":\"Policy requires milestone ID, release number, vendor, amount, and credit/reversal status to distinguish from prior paid invoice.\",\"escalate_rule_assessment\":\"No distinguishing credit/reversal status present; same M-4/R4 already paid.\",\"timing_scope_authority_dependency_check\":\"Current source boundary open; execution requires closed distinction before release.\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"STD-VAN-076-P requires explicit distinction from PRIOR-VAN-076 for duplicate-looking invoice.\"},\"cited_evidence\":[\"INV-VAN-076\",\"PRIOR-VAN-076\",\"MS-VAN-076\",\"STD-VAN-076-P\"],\"open_blockers\":[\"No credit/reversal status distinguishes duplicate invoice from prior paid M-4/R4\"],\"critical_features_preserved\":[\"exact source IDs\",\"action boundary\",\"policy exact-match rule\"],\"final_answer\":\"ESCALATE. Sources show INV-VAN-076 matches PRIOR-VAN-076 and MS-VAN-076 on M-4/R4 with no credit/reversal distinction per STD-VAN-076-P. Source boundary remains open; release may not proceed until defect resolved by exact distinguishing record.\"},\"deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":true,\"failures\":[],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\",\"source_id_count\":4,\"critical_term_count\":4},\"artifact_registry\":[{\"artifact_id\":\"HV-KITC-076-B_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-076-B_WORKER_01.json\",\"hash\":\"e6114fc9ee8dca50c5648883387e42d1f414840cd5f3ec5fd85778c67f2c8cae\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":3,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"}],\"required_gov_schema\":{\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"control_action\":\"CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED\",\"route_verdict\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"source_gate_interpretation\":\"string\",\"must_preserve\":[\"string\"],\"must_repair\":[\"string\"],\"blocked_moves\":[\"string\"],\"dependency_ledger\":[\"string\"],\"next_worker_baton\":{\"objective\":\"string\",\"attack_focus\":\"string\",\"required_repairs\":[\"string\"],\"monotonic_preservation\":[\"string\"]},\"final_compiler_allowed\":\"boolean\"},\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "artifact_registry": [
+      {
+        "artifact_id": "HV-KITC-076-B_WORKER_01",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "critical_feature_count": 3,
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-076-B_WORKER_01.json",
+        "gate_failures": [],
+        "gate_passed": true,
+        "gate_status": "PASS",
+        "hash": "e6114fc9ee8dca50c5648883387e42d1f414840cd5f3ec5fd85778c67f2c8cae",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_number": 1,
+        "verification_verdict": "ESCALATE"
+      }
+    ],
+    "deterministic_gate_result": {
+      "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+      "artifact_verdict": "ESCALATE",
+      "critical_term_count": 4,
+      "failures": [],
+      "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+      "passed": true,
+      "source_id_count": 4
+    },
+    "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.",
+    "latest_worker_output": {
+      "boundary_binding": {
+        "action_boundary": "May AP release a duplicate-looking milestone invoice?",
+        "allow_rule_assessment": "Policy requires milestone ID, release number, vendor, amount, and credit/reversal status to distinguish from prior paid invoice.",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "STD-VAN-076-P requires explicit distinction from PRIOR-VAN-076 for duplicate-looking invoice.",
+        "escalate_rule_assessment": "No distinguishing credit/reversal status present; same M-4/R4 already paid.",
+        "timing_scope_authority_dependency_check": "Current source boundary open; execution requires closed distinction before release."
+      },
+      "cited_evidence": [
+        "INV-VAN-076",
+        "PRIOR-VAN-076",
+        "MS-VAN-076",
+        "STD-VAN-076-P"
+      ],
+      "critical_features_preserved": [
+        "exact source IDs",
+        "action boundary",
+        "policy exact-match rule"
+      ],
+      "final_answer": "ESCALATE. Sources show INV-VAN-076 matches PRIOR-VAN-076 and MS-VAN-076 on M-4/R4 with no credit/reversal distinction per STD-VAN-076-P. Source boundary remains open; release may not proceed until defect resolved by exact distinguishing record.",
+      "open_blockers": [
+        "No credit/reversal status distinguishes duplicate invoice from prior paid M-4/R4"
+      ],
+      "verification_verdict": "ESCALATE",
+      "worker_role": "SOURCE_BOUNDARY_MAPPER"
+    },
+    "required_gov_schema": {
+      "blocked_moves": [
+        "string"
+      ],
+      "control_action": "CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED",
+      "dependency_ledger": [
+        "string"
+      ],
+      "final_compiler_allowed": "boolean",
+      "gov_mode": "CONTROL_ROUTER",
+      "must_preserve": [
+        "string"
+      ],
+      "must_repair": [
+        "string"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "string",
+        "monotonic_preservation": [
+          "string"
+        ],
+        "objective": "string",
+        "required_repairs": [
+          "string"
+        ]
+      },
+      "route_verdict": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "source_gate_interpretation": "string",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ALLOW | ESCALATE"
+    },
+    "run_lock": {
+      "gov_may_select_models": false,
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-076-B",
+      "pair_id": "HV-KITC-076",
+      "run_id": "run_20260629T014004Z"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 42800,
+        "business_ref": "HV-KITC-076-B",
+        "currency": "USD",
+        "description": "May AP release a duplicate-looking milestone invoice?",
+        "type": "milestone_invoice_release",
+        "vendor": "Vanta Field Services"
+      },
+      "context": {
+        "action_boundary": "May AP release a duplicate-looking milestone invoice?",
+        "anomaly_observed": "The invoice matches a prior payment on vendor and amount, but may represent a separate milestone/release.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Invoice INV-VAN-076 bills Vanta Field Services USD 42800 for milestone M-4 release R4.",
+            "doc_id": "INV-VAN-076",
+            "type": "source_record"
+          },
+          {
+            "content": "Prior invoice PRIOR-VAN-076 paid Vanta Field Services USD 42800 for milestone M-4 release R4.",
+            "doc_id": "PRIOR-VAN-076",
+            "type": "source_record"
+          },
+          {
+            "content": "Milestone register MS-VAN-076 lists M-4/R4 as a single billable release already paid by PRIOR-VAN-076.",
+            "doc_id": "MS-VAN-076",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Duplicate-looking milestone invoice is complete only when milestone ID, release number, vendor, amount, and credit/reversal status distinguish it from the prior paid invoice.",
+            "doc_id": "STD-VAN-076-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": {
+        "artifact_id": "HV-KITC-076-B_WORKER_01",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "critical_feature_count": 3,
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-076-B_WORKER_01.json",
+        "gate_failures": [],
+        "gate_passed": true,
+        "gate_status": "PASS",
+        "hash": "e6114fc9ee8dca50c5648883387e42d1f414840cd5f3ec5fd85778c67f2c8cae",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_number": 1,
+        "verification_verdict": "ESCALATE"
+      },
+      "blocked_moves_so_far": [],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-076-B",
+      "pair_id": "HV-KITC-076",
+      "pinned_best_artifact_full_text": "{\n  \"boundary_binding\": {\n    \"action_boundary\": \"May AP release a duplicate-looking milestone invoice?\",\n    \"allow_rule_assessment\": \"Policy requires milestone ID, release number, vendor, amount, and credit/reversal status to distinguish from prior paid invoice.\",\n    \"binding_class\": \"SOURCE_BOUNDARY_OPEN\",\n    \"controlling_source_fact\": \"STD-VAN-076-P requires explicit distinction from PRIOR-VAN-076 for duplicate-looking invoice.\",\n    \"escalate_rule_assessment\": \"No distinguishing credit/reversal status present; same M-4/R4 already paid.\",\n    \"timing_scope_authority_dependency_check\": \"Current source boundary open; execution requires closed distinction before release.\"\n  },\n  \"cited_evidence\": [\n    \"INV-VAN-076\",\n    \"PRIOR-VAN-076\",\n    \"MS-VAN-076\",\n    \"STD-VAN-076-P\"\n  ],\n  \"critical_features_preserved\": [\n    \"exact source IDs\",\n    \"action boundary\",\n    \"policy exact-match rule\"\n  ],\n  \"final_answer\": \"ESCALATE. Sources show INV-VAN-076 matches PRIOR-VAN-076 and MS-VAN-076 on M-4/R4 with no credit/reversal distinction per STD-VAN-076-P. Source boundary remains open; release may not proceed until defect resolved by exact distinguishing record.\",\n  \"open_blockers\": [\n    \"No credit/reversal status distinguishes duplicate invoice from prior paid M-4/R4\"\n  ],\n  \"verification_verdict\": \"ESCALATE\",\n  \"worker_role\": \"SOURCE_BOUNDARY_MAPPER\"\n}",
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T014004Z",
+      "source_ids_used_so_far": [
+        "INV-VAN-076",
+        "MS-VAN-076",
+        "PRIOR-VAN-076",
+        "STD-VAN-076-P"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "e6114fc9ee8dca50c5648883387e42d1f414840cd5f3ec5fd85778c67f2c8cae",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-076-B_WORKER_01.json",
+          "gate_status": "PASS",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ESCALATE",
+          "role": "worker",
+          "source_ids": [
+            "INV-VAN-076",
+            "MS-VAN-076",
+            "PRIOR-VAN-076",
+            "STD-VAN-076-P"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-076-B_W1"
+        }
+      ],
+      "unresolved_dependencies": [
+        "Targets duplicate-looking invoice over-escalation."
+      ]
+    }
+  }
+}

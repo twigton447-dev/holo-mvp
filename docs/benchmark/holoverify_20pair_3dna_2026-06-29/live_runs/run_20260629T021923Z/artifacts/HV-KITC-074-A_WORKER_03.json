@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "Clearance CLR-TES-074 provides exact match for Tessa Medical GmbH (Germany, DE-4481, account 7205). The disposition monitor-only no-block per STD-TES-074-P permits release when exact counterparty and account match exist. FLAG-TES-074 applies to distinct Belarus entity Tessa Medica LLC and does not block this payment.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "CLR-TES-074 controls by exact match of Tessa Medical GmbH, DE-4481, 7205 and monitor-only no-block disposition per STD-TES-074-P.",
+    "escalate_rule_assessment": "Entity mismatch between German GmbH and Belarus LLC resolves the dependency. No blocking condition exists under CLR-TES-074 and STD-TES-074-P. Escalation is not required.",
+    "timing_scope_authority_dependency_check": "Source boundary closed by exact match of critical terms (legal name, country, tax ID, account) and permitting disposition before execution. FLAG-TES-074 vs CLR-TES-074 dependency resolved through entity differentiation."
+  },
+  "cited_evidence": [
+    "CLR-TES-074",
+    "PAY-TES-074",
+    "STD-TES-074-P",
+    "FLAG-TES-074"
+  ],
+  "critical_features_preserved": [
+    "ALLOW verdict",
+    "SOURCE_BOUNDARY_CLOSED binding",
+    "CLR-TES-074 as controlling source",
+    "Exact match verification for Tessa Medical GmbH, DE-4481, 7205",
+    "Monitor-only no-block disposition as permitting rule",
+    "Entity mismatch between Germany GmbH and Belarus LLC as non-blocking"
+  ],
+  "final_answer": "ALLOW. The payment of USD 68900 to Tessa Medical GmbH may proceed. Clearance CLR-TES-074 provides exact match for the counterparty, country DE-4481, and account 7205. The monitor-only no-block disposition per STD-TES-074-P permits release under these exact-match conditions. FLAG-TES-074 applies to Tessa Medica LLC (Belarus), a distinct entity, and does not block this payment. Source boundary is closed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

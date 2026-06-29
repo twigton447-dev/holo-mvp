@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "Exact clearance matches legal name, country, tax ID, and account with monitor-only no-block disposition; policy permits release on exact match. The critical terms Tessa Medical GmbH, DE-4481, and 7205 are explicitly matched across CLR-TES-074 and PAY-TES-074.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "CLR-TES-074 confirms Tessa Medical GmbH, Germany, DE-4481, account ending 7205. PAY-TES-074 releases USD 68900 to Tessa Medical GmbH, Germany, tax ID DE-4481, account ending 7205. These three data points are exactly matched between CLR-TES-074 and PAY-TES-074. FLAG-TES-074 lists Tessa Medica LLC, Belarus\u2014a different legal name and country from Tessa Medical GmbH, Germany\u2014indicating no match.",
+    "escalate_rule_assessment": "The visible flag FLAG-TES-074 applies to a non-matching entity (Tessa Medica LLC, Belarus) and does not open a defect on the closed boundary for the matched counterparty (Tessa Medical GmbH, Germany).",
+    "timing_scope_authority_dependency_check": "Clearance (CLR-TES-074) and policy (STD-TES-074-P) both predate the action date. No open dependency exists on FLAG-TES-074 for the matched counterparty."
+  },
+  "cited_evidence": [
+    "CLR-TES-074",
+    "PAY-TES-074",
+    "STD-TES-074-P",
+    "FLAG-TES-074"
+  ],
+  "critical_features_preserved": [
+    "exact source IDs only",
+    "action boundary",
+    "policy exact-match rule",
+    "explicit citation of critical terms: Tessa Medical GmbH, DE-4481, 7205"
+  ],
+  "final_answer": "Payment release is ALLOWED. The source boundary is CLOSED. CLR-TES-074 exactly matches PAY-TES-074 on legal name (Tessa Medical GmbH), country (Germany), tax ID (DE-4481), and account ending (7205), with a monitor-only no-block disposition. Policy STD-TES-074-P authorizes release under these conditions. The sanctions flag FLAG-TES-074 applies to a different entity (Tessa Medica LLC, Belarus) and does not block the release for the matched counterparty.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

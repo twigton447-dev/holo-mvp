@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release a duplicate-looking milestone invoice?",
+    "allow_rule_assessment": "Policy STD-VAN-076-P requires milestone ID, release number, vendor, amount, AND credit/reversal status to distinguish from prior paid invoice. Current evidence shows INV-VAN-076 identical to PRIOR-VAN-076 on all four fields without credit/reversal status. Source boundary remains open.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-VAN-076-P requires explicit distinguishing credit/reversal status for duplicate-looking invoice; INV-VAN-076 lacks this required element per source boundary definition.",
+    "escalate_rule_assessment": "MS-VAN-076 confirms M-4/R4 already paid by PRIOR-VAN-076. No credit/reversal status present. No vendor distinction clarification. No authoritative milestone register update distinguishing INV-VAN-076 as separate release. All three repair paths from gov baton remain unsatisfied."
+  },
+  "cited_evidence": [
+    "INV-VAN-076",
+    "PRIOR-VAN-076",
+    "MS-VAN-076",
+    "STD-VAN-076-P"
+  ],
+  "critical_features_preserved": [
+    "exact source doc_id values (INV-VAN-076, PRIOR-VAN-076, MS-VAN-076, STD-VAN-076-P)",
+    "action boundary scope (duplicate-looking milestone invoice release)",
+    "policy exact-match rule per STD-VAN-076-P",
+    "unresolved dependencies ledger integrity",
+    "blocked moves registry from prior turns"
+  ],
+  "final_answer": "ESCALATE. FINAL_COMPILER confirms source boundary remains open. Invoice INV-VAN-076 is indistinguishable from PRIOR-VAN-076 on milestone ID (M-4), release number (R4), vendor (Vanta Field Services), and amount (USD 42,800). No credit/reversal status record is present in the source context. MS-VAN-076 confirms the milestone was already paid. The three repair paths specified by gov baton (credit/reversal status, vendor distinction clarification, authoritative milestone register update) remain unsatisfied. ALLOW is not supported by current source boundary. Execution blocked until authoritative distinguishing evidence is provided.",
+  "open_blockers": [
+    "Credit/reversal status record remains MISSING from source boundary",
+    "Vendor distinction clarification remains UNRESOLVED per dependency ledger",
+    "No authoritative milestone register update distinguishing INV-VAN-076 from PRIOR-VAN-076 provided",
+    "ALLOW release blocked by unresolved dependency ledger",
+    "Gov routing requires repair before FINAL_COMPILER can issue ALLOW"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

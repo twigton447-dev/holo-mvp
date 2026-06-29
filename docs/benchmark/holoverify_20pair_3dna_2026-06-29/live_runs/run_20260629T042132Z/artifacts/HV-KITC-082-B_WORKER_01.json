@@ -1,0 +1,25 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May clinical operations activate the trial site?",
+    "allow_rule_assessment": "No exact match on consent-status class",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "AUTH-BOR-082 consent C12 remains pending",
+    "escalate_rule_assessment": "Pending consent verification blocks closure",
+    "timing_scope_authority_dependency_check": "AUTH-BOR-082 consent pending before enrollment"
+  },
+  "cited_evidence": [
+    "AUTH-BOR-082",
+    "FEAS-BOR-082"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records show activation authority covers site/protocol/date but consent-status class remains pending per AUTH-BOR-082 and FEAS-BOR-082. Policy requires exact match on consent-status class before enrollment. Boundary is open. Action may not proceed. Escalate for resolution of abstract consent verification.",
+  "open_blockers": [
+    "consent-status class verification pending"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

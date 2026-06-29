@@ -1,0 +1,47 @@
+{
+  "blocked_moves": [
+    "treating WARN-SIE-073 as execution authority",
+    "treating any single record as conclusive without exact match",
+    "approving release despite open destination blocker",
+    "expanding license scope without documented authorization",
+    "inferring Chile coverage from Peru-only license",
+    "applying Peru authorization to Chile shipment",
+    "treating partial field matches as sufficient closure"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "[{dependency: destination alignment, status: UNRESOLVED, blocker: SHIP-SIE-073 destination Chile vs LIC-SIE-073 authorized Peru, resolution_required: corrected license covering Chile OR corrected shipment record matching Peru}]"
+  ],
+  "final_compiler_allowed": true,
+  "final_compiler_disposition": "FAIL_CLOSED",
+  "final_compiler_rationale": "Source boundary cannot close. The export license LIC-SIE-073 authorizes Peru only, while shipment SHIP-SIE-073 targets Chile. Policy STD-SIE-073-P mandates exact destination match. No worker iteration can resolve source record misalignment. Release must remain blocked until source documents are corrected and re-verified. The warning WARN-SIE-073 correctly flagged this precision requirement. All other fields (ECCN, end-user, dates) match exactly, confirming the only defect is destination scope.",
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact ECCN match (3A991)",
+    "exact end-user match (Andes Labs)",
+    "exact shipment date match (2026-06-28)",
+    "license effective date timing confirmation",
+    "destination mismatch identification as sole blocker"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "N/A",
+    "monotonic_preservation": [
+      "ECC 3A991 sensor array",
+      "End user Andes Labs",
+      "Shipment date 2026-06-28",
+      "License effective date 2026-06-28",
+      "Destination mismatch as sole open blocker"
+    ],
+    "objective": "Not applicable\u2014source-boundary open state requires external source correction, not worker iteration",
+    "required_repairs": [
+      "Source record repair required: either LIC-SIE-073 amended to authorize Chile, or SHIP-SIE-073 corrected to Peru\u2014workers cannot repair source records",
+      "Human review required to determine whether shipment destination should change to Peru or license should be expanded to Chile"
+    ]
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "Both workers (xai/grok-3-mini, google/gemini-2.5-flash-lite) correctly identified destination mismatch as the sole open blocker. Worker 2 artifact passed deterministic gate with critical_feature_count=3. Source-boundary cannot close due to destination scope misalignment (SHIP-SIE-073 Chile vs LIC-SIE-073 Peru). Workers cannot repair source records\u2014only compile final fail-closed disposition.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

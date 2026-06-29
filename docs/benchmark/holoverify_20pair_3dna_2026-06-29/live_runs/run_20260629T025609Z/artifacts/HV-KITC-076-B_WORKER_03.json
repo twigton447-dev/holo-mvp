@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release a duplicate-looking milestone invoice?",
+    "allow_rule_assessment": "No distinguishing credit/reversal status in INV-VAN-076, and policy STD-VAN-076-P requires explicit distinction evidence for duplicate-looking invoices.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "MS-VAN-076 confirms M-4/R4 already paid via PRIOR-VAN-076, and INV-VAN-076 does not provide distinguishing credit/reversal status to separate it from the prior paid invoice.",
+    "escalate_rule_assessment": "INV-VAN-076 lacks distinguishing credit/reversal status, and policy STD-VAN-076-P mandates explicit distinction evidence for duplicate-looking invoices before release.",
+    "timing_scope_authority_dependency_check": "Open blocker on invoice status field requires resolution before AP release. MS-VAN-076 confirms prior payment via PRIOR-VAN-076 creates dependency that INV-VAN-076 must explicitly distinguish."
+  },
+  "cited_evidence": [
+    "INV-VAN-076",
+    "MS-VAN-076",
+    "PRIOR-VAN-076",
+    "STD-VAN-076-P"
+  ],
+  "critical_features_preserved": [
+    "milestone ID match",
+    "release number match",
+    "amount/vendor match",
+    "policy STD-VAN-076-P distinction requirement",
+    "prior payment confirmation via MS-VAN-076 and PRIOR-VAN-076"
+  ],
+  "final_answer": "The action may not proceed. INV-VAN-076 is a duplicate-looking invoice for milestone M-4 release R4 already paid per MS-VAN-076 and PRIOR-VAN-076. Policy STD-VAN-076-P requires explicit distinction evidence, specifically credit/reversal status, which is missing in INV-VAN-076. This unresolved duplicate invoice boundary blocks AP release pending distinguishing status.",
+  "open_blockers": [
+    "No distinguishing credit/reversal status in INV-VAN-076",
+    "Duplicate invoice boundary requires resolution before AP release"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,45 @@
+{
+  "blocked_moves": [
+    "FINAL_COMPILER disallowed until deterministic gate passes",
+    "FAIL_CLOSED inappropriate since source chain is substantively correct and all four gates closed"
+  ],
+  "dependency_ledger": [
+    "Repair 041 from prior unresolved dependency: critical_term:8821 tracking requires explicit artifact annotation. This repair must be completed before final verdict. New: Worker 2 ESCALATE verdict mismatch with SOURCE_BOUNDARY_CLOSED binding requires correction to ALLOW once repair complete."
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "CONTINUE_WORKER",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact source IDs ALERT-QUA-071, BANK-QUA-071, CALL-QUA-071, PAY-QUA-071, REL-QUA-071, STD-QUA-071-P, VM-QUA-071",
+    "action boundary May AP release payment after the vendor bank update",
+    "policy STD-QUA-071-P exact-match requirement",
+    "chain of four gates closure",
+    "binding class SOURCE_BOUNDARY_CLOSED",
+    "critical_term 8821 across all cited sources"
+  ],
+  "must_repair": [
+    "explicit critical_term:8821 preservation annotation across all source IDs",
+    "verdict-alignment-with-binding-class conflict resolution",
+    "deterministic gate failure on action_boundary_verdict_mismatch",
+    "deterministic gate failure on escalate_requires_source_boundary_open"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Resolve binding-class-to-verdict mismatch by ensuring ALLOW verdict aligns with SOURCE_BOUNDARY_CLOSED when all gates are substantively closed; explicitly track 8821 across all seven cited sources; satisfy deterministic gate requirements",
+    "monotonic_preservation": [
+      "exact source IDs",
+      "action boundary",
+      "policy exact-match",
+      "four-gate chain closure",
+      "SOURCE_BOUNDARY_CLOSED binding class"
+    ],
+    "objective": "Produce final ALLOW artifact after completing critical_term:8821 explicit annotation repair",
+    "required_repairs": [
+      "critical_term:8821 explicit preservation annotation across ALERT-QUA-071, BANK-QUA-071, CALL-QUA-071, PAY-QUA-071, REL-QUA-071, VM-QUA-071",
+      "verdict correction from ESCALATE to ALLOW given closed source boundary",
+      "deterministic gate pass criteria met"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "The source chain correctly closes all four policy gates per STD-QUA-071-P. CALL-QUA-071 provides pre-change callback, VM-QUA-071 provides vendor-master approval, BANK-QUA-071 provides bank ownership validation, and REL-QUA-071 provides payment-release authority matching vendor Quanta Field Services, amount USD 73400, account ending 8821, and release date 2026-06-28 before payment. ALERT-QUA-071 acknowledges the bank change. The chain is substantively correct. Worker 2 ESCALATE verdict conflicts with SOURCE_BOUNDARY_CLOSED binding class and is not the appropriate response when all gates are closed. ALLOW is the correct final verdict once annotation repairs are complete.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

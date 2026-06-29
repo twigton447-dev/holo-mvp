@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May quality release the clinical batch?",
+    "allow_rule_assessment": "No match on batch ID",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-XOR-078-P requires deviation closure match batch, assay, criterion, date",
+    "escalate_rule_assessment": "Closure covers X-79 not X-78",
+    "timing_scope_authority_dependency_check": "Exact match required before release"
+  },
+  "cited_evidence": [
+    "BATCH-XOR-078",
+    "DEV-XOR-078",
+    "CLOSE-XOR-078",
+    "STD-XOR-078-P"
+  ],
+  "critical_features_preserved": [
+    "source doc exact match",
+    "policy boundary rule"
+  ],
+  "final_answer": "The clinical batch release cannot proceed. The deviation closure (CLOSE-XOR-078) pertains to batch X-79, not the target batch X-78. The policy (STD-XOR-078-P) mandates an exact match on batch, assay, criterion, and release date for deviation closure before release. The visible deviation alert (DEV-XOR-078) and the batch mismatch create an open source boundary.",
+  "open_blockers": [
+    "Batch mismatch X-78 vs X-79",
+    "Anomaly tone alone is insufficient for decision"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

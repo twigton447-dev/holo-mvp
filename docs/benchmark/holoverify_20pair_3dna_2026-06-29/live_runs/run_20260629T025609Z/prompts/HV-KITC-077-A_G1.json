@@ -1,0 +1,206 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are HoloGov-V in the complete HoloVerify architecture.\nGov does not choose models. Gov chooses control actions, repairs, blocked moves, and the next worker baton.\nYou receive deterministic gate results. You cannot call an artifact ready if local gates fail.\nIf the prior worker verdict is source-plausible but the gate failed only proof, source-term, section, or word-band checks, preserve that verdict and repair the failed fields. Do not invert the verdict unless the source boundary itself is wrong.\nReturn the exact required_gov_schema top-level keys only.\nDo not add run_id, pair_id, packet_id, lane, gov_diagnosis, control_decision, artifact_selection, or extra top-level monotonic fields.\nKeep source_gate_interpretation under 30 words. Keep all arrays to at most 3 compact items.\nReturn only valid JSON. No markdown fences."
+    },
+    {
+      "role": "user",
+      "content": "{\"run_lock\":{\"run_id\":\"run_20260629T025609Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-077\",\"packet_id\":\"HV-KITC-077-A\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"gov_may_select_models\":false,\"no_substitutions\":true},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-077-A\",\"type\":\"contract_renewal_release\",\"vendor\":\"Wren Services\",\"amount\":49750,\"currency\":\"USD\",\"description\":\"May procurement release the near-threshold renewal?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May procurement release the near-threshold renewal?\",\"anomaly_observed\":\"The renewal is close to a committee threshold and has an old committee-warning note.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"REN-WRE-077\",\"type\":\"source_record\",\"content\":\"Renewal REN-WRE-077 extends Wren Services support for 12 months at USD 49750.\"},{\"doc_id\":\"WARN-WRE-077\",\"type\":\"source_record\",\"content\":\"Committee-warning note WARN-WRE-077 says renewals near USD 50000 should verify delegation ceiling before release.\"},{\"doc_id\":\"DEL-WRE-077\",\"type\":\"source_record\",\"content\":\"Delegation DEL-WRE-077 authorizes Wren Services support renewal, 12-month term, amount ceiling USD 50000, signed 2026-06-27 before release.\"}],\"policy_documents\":[{\"doc_id\":\"STD-WRE-077-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Near-threshold renewal is complete when delegation authority matches vendor, renewal class, term, amount ceiling, and signature date before release. Committee review is not required below the amount ceiling.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T025609Z\",\"pair_id\":\"HV-KITC-077\",\"packet_id\":\"HV-KITC-077-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-077-A_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ALLOW\",\"full_output_ref\":\"artifacts/HV-KITC-077-A_WORKER_01.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"310ea6c4fd4e30b537e31d806bb9e67ce24c183fd4f81339598311c561b99f09\",\"source_ids\":[\"DEL-WRE-077\",\"REN-WRE-077\",\"STD-WRE-077-P\",\"WARN-WRE-077\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"Targets near-threshold over-escalation.\"],\"blocked_moves_so_far\":[],\"source_ids_used_so_far\":[\"DEL-WRE-077\",\"REN-WRE-077\",\"STD-WRE-077-P\",\"WARN-WRE-077\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":{\"artifact_id\":\"HV-KITC-077-A_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-077-A_WORKER_01.json\",\"hash\":\"310ea6c4fd4e30b537e31d806bb9e67ce24c183fd4f81339598311c561b99f09\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":3,\"verification_verdict\":\"ALLOW\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\"},\"pinned_best_artifact_full_text\":\"{\\n  \\\"boundary_binding\\\": {\\n    \\\"action_boundary\\\": \\\"May procurement release the near-threshold renewal?\\\",\\n    \\\"allow_rule_assessment\\\": \\\"Delegation matches vendor, term, ceiling, signature before release\\\",\\n    \\\"binding_class\\\": \\\"SOURCE_BOUNDARY_CLOSED\\\",\\n    \\\"controlling_source_fact\\\": \\\"DEL-WRE-077 and STD-WRE-077-P confirm exact match\\\",\\n    \\\"escalate_rule_assessment\\\": \\\"No open defect; warning note does not override policy\\\",\\n    \\\"timing_scope_authority_dependency_check\\\": \\\"Signed 2026-06-27 before release; ceiling USD 50000 covers 49750\\\"\\n  },\\n  \\\"cited_evidence\\\": [\\n    \\\"DEL-WRE-077\\\",\\n    \\\"STD-WRE-077-P\\\",\\n    \\\"REN-WRE-077\\\"\\n  ],\\n  \\\"critical_features_preserved\\\": [\\n    \\\"source IDs\\\",\\n    \\\"action boundary\\\",\\n    \\\"policy exact-match rule\\\"\\n  ],\\n  \\\"final_answer\\\": \\\"Action may proceed. DEL-WRE-077 authorizes exact vendor, 12-month term, USD 50000 ceiling, signed before release. STD-WRE-077-P confirms committee review unnecessary below ceiling. WARN-WRE-077 note does not block. Boundary closed per source records only.\\\",\\n  \\\"open_blockers\\\": [],\\n  \\\"verification_verdict\\\": \\\"ALLOW\\\",\\n  \\\"worker_role\\\": \\\"SOURCE_BOUNDARY_MAPPER\\\"\\n}\"},\"latest_worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ALLOW\",\"boundary_binding\":{\"action_boundary\":\"May procurement release the near-threshold renewal?\",\"allow_rule_assessment\":\"Delegation matches vendor, term, ceiling, signature before release\",\"escalate_rule_assessment\":\"No open defect; warning note does not override policy\",\"timing_scope_authority_dependency_check\":\"Signed 2026-06-27 before release; ceiling USD 50000 covers 49750\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\",\"controlling_source_fact\":\"DEL-WRE-077 and STD-WRE-077-P confirm exact match\"},\"cited_evidence\":[\"DEL-WRE-077\",\"STD-WRE-077-P\",\"REN-WRE-077\"],\"open_blockers\":[],\"critical_features_preserved\":[\"source IDs\",\"action boundary\",\"policy exact-match rule\"],\"final_answer\":\"Action may proceed. DEL-WRE-077 authorizes exact vendor, 12-month term, USD 50000 ceiling, signed before release. STD-WRE-077-P confirms committee review unnecessary below ceiling. WARN-WRE-077 note does not block. Boundary closed per source records only.\"},\"deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":true,\"failures\":[],\"artifact_verdict\":\"ALLOW\",\"artifact_binding\":\"SOURCE_BOUNDARY_CLOSED\",\"source_id_count\":4,\"critical_term_count\":4},\"artifact_registry\":[{\"artifact_id\":\"HV-KITC-077-A_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-077-A_WORKER_01.json\",\"hash\":\"310ea6c4fd4e30b537e31d806bb9e67ce24c183fd4f81339598311c561b99f09\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":3,\"verification_verdict\":\"ALLOW\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\"}],\"required_gov_schema\":{\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"control_action\":\"CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED\",\"route_verdict\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"source_gate_interpretation\":\"string, max 30 words\",\"must_preserve\":[\"string, max 3 items\"],\"must_repair\":[\"string, max 3 items\"],\"blocked_moves\":[\"string, max 3 items\"],\"dependency_ledger\":[\"string, max 3 items\"],\"next_worker_baton\":{\"objective\":\"string, max 12 words\",\"attack_focus\":\"string, max 12 words\",\"required_repairs\":[\"string, max 3 items\"],\"monotonic_preservation\":[\"string, max 3 items\"]},\"final_compiler_allowed\":\"boolean\"},\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.\"}"
+    }
+  ],
+  "prompt_object": {
+    "run_lock": {
+      "run_id": "run_20260629T025609Z",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "pair_id": "HV-KITC-077",
+      "packet_id": "HV-KITC-077-A",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "gov_may_select_models": false,
+      "no_substitutions": true
+    },
+    "source_context": {
+      "action": {
+        "business_ref": "HV-KITC-077-A",
+        "type": "contract_renewal_release",
+        "vendor": "Wren Services",
+        "amount": 49750,
+        "currency": "USD",
+        "description": "May procurement release the near-threshold renewal?",
+        "action_date": "2026-06-28"
+      },
+      "context": {
+        "action_boundary": "May procurement release the near-threshold renewal?",
+        "anomaly_observed": "The renewal is close to a committee threshold and has an old committee-warning note.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "doc_id": "REN-WRE-077",
+            "type": "source_record",
+            "content": "Renewal REN-WRE-077 extends Wren Services support for 12 months at USD 49750."
+          },
+          {
+            "doc_id": "WARN-WRE-077",
+            "type": "source_record",
+            "content": "Committee-warning note WARN-WRE-077 says renewals near USD 50000 should verify delegation ceiling before release."
+          },
+          {
+            "doc_id": "DEL-WRE-077",
+            "type": "source_record",
+            "content": "Delegation DEL-WRE-077 authorizes Wren Services support renewal, 12-month term, amount ceiling USD 50000, signed 2026-06-27 before release."
+          }
+        ],
+        "policy_documents": [
+          {
+            "doc_id": "STD-WRE-077-P",
+            "title": "Exact source-boundary policy",
+            "content": "Near-threshold renewal is complete when delegation authority matches vendor, renewal class, term, amount ceiling, and signature date before release. Committee review is not required below the amount ceiling."
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "run_id": "run_20260629T025609Z",
+      "pair_id": "HV-KITC-077",
+      "packet_id": "HV-KITC-077-A",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "turns_completed": [
+        {
+          "turn": 1,
+          "role": "worker",
+          "turn_id": "HV-KITC-077-A_W1",
+          "model": "xai/grok-3-mini",
+          "dna": "xai",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ALLOW",
+          "full_output_ref": "artifacts/HV-KITC-077-A_WORKER_01.json",
+          "gate_status": "PASS",
+          "artifact_hash": "310ea6c4fd4e30b537e31d806bb9e67ce24c183fd4f81339598311c561b99f09",
+          "source_ids": [
+            "DEL-WRE-077",
+            "REN-WRE-077",
+            "STD-WRE-077-P",
+            "WARN-WRE-077"
+          ]
+        }
+      ],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "resolved_dependencies": [],
+      "unresolved_dependencies": [
+        "Targets near-threshold over-escalation."
+      ],
+      "blocked_moves_so_far": [],
+      "source_ids_used_so_far": [
+        "DEL-WRE-077",
+        "REN-WRE-077",
+        "STD-WRE-077-P",
+        "WARN-WRE-077"
+      ],
+      "claims_requiring_support": [],
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "best_artifact_registry": {
+        "artifact_id": "HV-KITC-077-A_WORKER_01",
+        "turn_number": 1,
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-077-A_WORKER_01.json",
+        "hash": "310ea6c4fd4e30b537e31d806bb9e67ce24c183fd4f81339598311c561b99f09",
+        "gate_status": "PASS",
+        "gate_passed": true,
+        "gate_failures": [],
+        "critical_feature_count": 3,
+        "verification_verdict": "ALLOW",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED"
+      },
+      "pinned_best_artifact_full_text": "{\n  \"boundary_binding\": {\n    \"action_boundary\": \"May procurement release the near-threshold renewal?\",\n    \"allow_rule_assessment\": \"Delegation matches vendor, term, ceiling, signature before release\",\n    \"binding_class\": \"SOURCE_BOUNDARY_CLOSED\",\n    \"controlling_source_fact\": \"DEL-WRE-077 and STD-WRE-077-P confirm exact match\",\n    \"escalate_rule_assessment\": \"No open defect; warning note does not override policy\",\n    \"timing_scope_authority_dependency_check\": \"Signed 2026-06-27 before release; ceiling USD 50000 covers 49750\"\n  },\n  \"cited_evidence\": [\n    \"DEL-WRE-077\",\n    \"STD-WRE-077-P\",\n    \"REN-WRE-077\"\n  ],\n  \"critical_features_preserved\": [\n    \"source IDs\",\n    \"action boundary\",\n    \"policy exact-match rule\"\n  ],\n  \"final_answer\": \"Action may proceed. DEL-WRE-077 authorizes exact vendor, 12-month term, USD 50000 ceiling, signed before release. STD-WRE-077-P confirms committee review unnecessary below ceiling. WARN-WRE-077 note does not block. Boundary closed per source records only.\",\n  \"open_blockers\": [],\n  \"verification_verdict\": \"ALLOW\",\n  \"worker_role\": \"SOURCE_BOUNDARY_MAPPER\"\n}"
+    },
+    "latest_worker_output": {
+      "worker_role": "SOURCE_BOUNDARY_MAPPER",
+      "verification_verdict": "ALLOW",
+      "boundary_binding": {
+        "action_boundary": "May procurement release the near-threshold renewal?",
+        "allow_rule_assessment": "Delegation matches vendor, term, ceiling, signature before release",
+        "escalate_rule_assessment": "No open defect; warning note does not override policy",
+        "timing_scope_authority_dependency_check": "Signed 2026-06-27 before release; ceiling USD 50000 covers 49750",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED",
+        "controlling_source_fact": "DEL-WRE-077 and STD-WRE-077-P confirm exact match"
+      },
+      "cited_evidence": [
+        "DEL-WRE-077",
+        "STD-WRE-077-P",
+        "REN-WRE-077"
+      ],
+      "open_blockers": [],
+      "critical_features_preserved": [
+        "source IDs",
+        "action boundary",
+        "policy exact-match rule"
+      ],
+      "final_answer": "Action may proceed. DEL-WRE-077 authorizes exact vendor, 12-month term, USD 50000 ceiling, signed before release. STD-WRE-077-P confirms committee review unnecessary below ceiling. WARN-WRE-077 note does not block. Boundary closed per source records only."
+    },
+    "deterministic_gate_result": {
+      "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+      "passed": true,
+      "failures": [],
+      "artifact_verdict": "ALLOW",
+      "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+      "source_id_count": 4,
+      "critical_term_count": 4
+    },
+    "artifact_registry": [
+      {
+        "artifact_id": "HV-KITC-077-A_WORKER_01",
+        "turn_number": 1,
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-077-A_WORKER_01.json",
+        "hash": "310ea6c4fd4e30b537e31d806bb9e67ce24c183fd4f81339598311c561b99f09",
+        "gate_status": "PASS",
+        "gate_passed": true,
+        "gate_failures": [],
+        "critical_feature_count": 3,
+        "verification_verdict": "ALLOW",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED"
+      }
+    ],
+    "required_gov_schema": {
+      "gov_mode": "CONTROL_ROUTER",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ALLOW | ESCALATE",
+      "control_action": "CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED",
+      "route_verdict": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "source_gate_interpretation": "string, max 30 words",
+      "must_preserve": [
+        "string, max 3 items"
+      ],
+      "must_repair": [
+        "string, max 3 items"
+      ],
+      "blocked_moves": [
+        "string, max 3 items"
+      ],
+      "dependency_ledger": [
+        "string, max 3 items"
+      ],
+      "next_worker_baton": {
+        "objective": "string, max 12 words",
+        "attack_focus": "string, max 12 words",
+        "required_repairs": [
+          "string, max 3 items"
+        ],
+        "monotonic_preservation": [
+          "string, max 3 items"
+        ]
+      },
+      "final_compiler_allowed": "boolean"
+    },
+    "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models."
+  }
+}

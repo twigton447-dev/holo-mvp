@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "The clearance record CLR-TES-074 provides an exact match for the payment action's counterparty (Tessa Medical GmbH), country (Germany), tax ID (DE-4481), and account number (7205). The disposition 'monitor-only no-block' in CLR-TES-074, as per STD-TES-074-P, permits release when these exact matches are present.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "CLR-TES-074 is the controlling source for this payment release due to its exact match of critical terms (Tessa Medical GmbH, DE-4481, 7205) and the 'monitor-only no-block' disposition, as stipulated by STD-TES-074-P.",
+    "escalate_rule_assessment": "The entity mismatch between Tessa Medical GmbH (Germany) in CLR-TES-074 and Tessa Medica LLC (Belarus) in FLAG-TES-074 confirms that FLAG-TES-074 does not block the payment to the German entity. Therefore, no escalation is required based on this dependency.",
+    "timing_scope_authority_dependency_check": "CLR-TES-074 confirms the exact counterparty match and the 'monitor-only no-block' disposition, satisfying the requirements of STD-TES-074-P for releasing the payment. The dependency on FLAG-TES-074 is resolved due to the entity mismatch, confirming it does not apply to the German payment."
+  },
+  "cited_evidence": [
+    "CLR-TES-074",
+    "PAY-TES-074",
+    "STD-TES-074-P"
+  ],
+  "critical_features_preserved": [
+    "SOURCE_BOUNDARY_CLOSED binding",
+    "CLR-TES-074 as controlling source",
+    "FLAG-TES-074 entity mismatch as non-blocking",
+    "STD-TES-074-P monitor-only no-block disposition as permitting rule",
+    "ALLOW verdict for exact counterparty match"
+  ],
+  "final_answer": "ALLOW. The action may proceed. The clearance record CLR-TES-074 provides an exact match for the payment action's counterparty, country, tax ID, and account number. The disposition 'monitor-only no-block' in CLR-TES-074, as per STD-TES-074-P, permits release when these exact matches are present. The entity mismatch between the German entity in CLR-TES-074 and the Belarus entity in FLAG-TES-074 confirms that FLAG-TES-074 does not block this payment. The source boundary is closed.",
+  "open_blockers": [
+    "Worker output must explicitly cite Tessa Medical GmbH from CLR-TES-074 in analysis text.",
+    "Worker output must explicitly cite DE-4481 from CLR-TES-074 in analysis text.",
+    "Worker output must explicitly cite 7205 from CLR-TES-074 in analysis text.",
+    "Worker output must show the verbatim alignment between payment PAY-TES-074 fields and clearance CLR-TES-074 fields."
+  ],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

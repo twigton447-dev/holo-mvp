@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement issue the purchase order for a controlled solvent?",
+    "allow_rule_assessment": "No exact EHS execution release matches PO, chemical, quantity, and facility.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-NOV-042-P requires EHS execution release match before PO issuance.",
+    "escalate_rule_assessment": "Policy requires matching EHS release before PO issuance; defect remains open.",
+    "timing_scope_authority_dependency_check": "Execution authority pending separate EHS release; no current closure."
+  },
+  "cited_evidence": [
+    "EHS-NOV-042",
+    "STD-NOV-042-P",
+    "PO-NOV-042",
+    "SRC-NOV-042"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "EHS-NOV-042",
+    "sourcing review|quote collection",
+    "execution release",
+    "scheduled"
+  ],
+  "final_answer": "The action remains blocked. The EHS note indicates that a purchase execution release is still pending scheduling. The governing policy requires an exact match on chemical, quantity, facility, and PO from the EHS release before the purchase order can be issued. Therefore, the source boundary is open, and the action cannot proceed.",
+  "open_blockers": [
+    "EHS execution release pending"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

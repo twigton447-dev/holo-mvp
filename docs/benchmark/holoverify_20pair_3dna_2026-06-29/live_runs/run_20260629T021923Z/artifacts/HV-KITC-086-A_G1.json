@@ -1,0 +1,90 @@
+{
+  "blocked_moves": [
+    "{'move': 'Worker may not treat planning artifact or analysis summary as execution authority.', 'block_reason': 'STD-FJO-086-P requires exact source-boundary match from authoritative source records only.'}",
+    "{'move': 'Worker may not cite adjacent or related source as exact match for critical term when source document provides direct citation.', 'block_reason': 'FJ-86, AX-41, Cq<=31 appear directly in CLOSE-FJO-086; indirect inference insufficient.'}",
+    "{'move': 'Worker may not resolve 047-style abstract-field trap by substituting retest result for abstract acceptance status.', 'block_reason': 'STD-FJO-086-P explicitly requires assay-acceptance status; retest result and acceptance status are distinct fields.'}"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "open_dependency_1: {\"blocks\": \"execution\", \"dependency_id\": \"DPT-047-ABSTRACT\", \"description\": \"CLOSE-FJO-086 provides retest result but omits explicit abstract assay-acceptance status required by STD-FJO-086-P.\", \"resolution_required\": \"Source document must confirm abstract assay-acceptance status before shipment.\", \"status\": \"UNRESOLVED\", \"type\": \"abstract_field_trap\"}"
+  ],
+  "diagnosis": {
+    "gate_failure_analysis": {
+      "failure_1": "action_boundary_verdict_mismatch - Worker output structure or extraction format did not satisfy deterministic gate parsing requirements for verdict consistency.",
+      "failure_2": "missing_critical_term:FJ-86 - Batch identifier FJ-86 present in source documents (BATCH-FJO-086, CLOSE-FJO-086) but not properly extracted/cited in worker output for gate verification.",
+      "failure_3": "missing_critical_term:AX-41 - Assay identifier AX-41 present in source documents (DEV-FJO-086, CLOSE-FJO-086) but not properly extracted/cited in worker output for gate verification.",
+      "failure_4": "missing_critical_term:Cq<=31 - Criterion Cq<=31 present in CLOSE-FJO-086 but not properly extracted/cited in worker output for gate verification."
+    },
+    "gate_status": "FAIL",
+    "prior_verdict_correctness": "DIRECTIONALLY_CORRECT",
+    "prior_verdict_reasoning": "Worker correctly identified source boundary remains open due to abstract assay-acceptance field trap. DEV-FJO-086 alert remains visible and no source record provides explicit abstract acceptance confirmation before shipment.",
+    "prior_worker_verdict": "ESCALATE",
+    "root_cause": "Worker reasoning captured correct ESCALATE direction but failed to output critical terms in gate-compatible citation format. Terms exist in source documents but extraction fidelity insufficient for deterministic gate validation."
+  },
+  "final_compiler_allowed": false,
+  "gate_failure_repairs": {
+    "monotonic_repair_constraint": "Repairs must extract existing source content more precisely; cannot alter ESCALATE direction or SOURCE_BOUNDARY_OPEN binding.",
+    "repair_type": "CRITICAL_TERM_EXTRACTION_FIDELITY",
+    "required_repairs": [
+      "Extract and cite batch identifier FJ-86 from CLOSE-FJO-086 with explicit verbatim match to source document.",
+      "Extract and cite assay identifier AX-41 from CLOSE-FJO-086 and DEV-FJO-086 with explicit verbatim match to source documents.",
+      "Extract and cite criterion Cq<=31 from CLOSE-FJO-086 with explicit verbatim match to source document.",
+      "Structure output so deterministic gate can parse verdict consistency with action boundary."
+    ]
+  },
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.",
+  "gov_mode": "CONTROL_ROUTER",
+  "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Critical term extraction fidelity - must verbatim-cite FJ-86, AX-41, and Cq<=31 from source documents in output structure accessible to deterministic gate.",
+    "gov_may_select_models": false,
+    "model_constraint": "Must use next available worker in lane HOLOVERIFY_20PAIR_3DNA_FULL_ARCH; gov does not choose models.",
+    "monotonic_preservation": [
+      "ESCALATE verdict",
+      "SOURCE_BOUNDARY_OPEN binding",
+      "047-style trap remains open",
+      "No resolution of abstract acceptance field",
+      "No execution authority granted"
+    ],
+    "must_not_do": [
+      "Treat retest result as equivalent to abstract acceptance status",
+      "Cite adjacent documents as exact match for critical terms",
+      "Invert ESCALATE to ALLOW",
+      "Close source boundary prematurely"
+    ],
+    "objective": "Re-extract critical terms from source documents with gate-compatible citation format while preserving ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding.",
+    "required_repairs": [
+      "Cite FJ-86 verbatim from CLOSE-FJO-086: 'covers batch FJ-86'",
+      "Cite AX-41 verbatim from CLOSE-FJO-086: 'assay AX-41'",
+      "Cite Cq<=31 verbatim from CLOSE-FJO-086: 'criterion Cq<=31'",
+      "Structure output so gate can verify action_boundary_verdict_consistency"
+    ]
+  },
+  "packet_id": "HV-KITC-086-A",
+  "pair_id": "HV-KITC-086",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T021923Z",
+  "source_gate_interpretation": "Worker correctly identified ESCALATE direction but failed deterministic gate on critical term extraction fidelity. Gate failures indicate terms exist in source but worker output did not cite them in gate-compatible format. Repair must extract verbatim source terms without altering verdict direction.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verdict_preservation": {
+    "monotonic_features": [
+      "source IDs",
+      "action boundary",
+      "policy exact-match rule",
+      "direction toward ESCALATE"
+    ],
+    "preserve_binding_class": true,
+    "preserve_binding_class_value": "SOURCE_BOUNDARY_OPEN",
+    "preserve_cited_evidence": [
+      "BATCH-FJO-086",
+      "DEV-FJO-086",
+      "CLOSE-FJO-086",
+      "STD-FJO-086-P"
+    ],
+    "preserve_reason": "Worker correctly identified source boundary remains open. 047-style abstract-field trap unresolved. CLOSE-FJO-086 provides retest result but omits explicit abstract assay-acceptance status. DEV-FJO-086 alert visible. Policy STD-FJO-086-P requires exact match on assay-acceptance status before shipment.",
+    "preserve_verdict": true,
+    "preserve_verdict_value": "ESCALATE"
+  }
+}

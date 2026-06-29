@@ -1,0 +1,70 @@
+{
+  "blocked_moves": [
+    "worker attempting to close source boundary despite absent calibration-status class evidence",
+    "any move to ALLOW activation of GD-4 before calibration-status class verification is documented"
+  ],
+  "dependency_ledger": [
+    "CAL-GAC-087 establishes device group, site, release condition, date, and calibration pack coverage",
+    "WARN-GAC-087 establishes that calibration-status class requires separate verification not covered by CAL-GAC-087",
+    "STD-GAC-087-P establishes that calibration-status class match is mandatory for closure",
+    "No source documents that calibration-status class verification has occurred for GD-4 before activation date 2026-06-28"
+  ],
+  "final_compiler_allowed": false,
+  "gate_failures_repaired": [
+    {
+      "failure": "missing_critical_term:Site P2",
+      "repair": "ACT-GAC-087 explicitly states 'Site P2' \u2014 citation present but term not flagged in gate pass. Worker output preserved Site P2 in device group context but gate requires explicit critical-term acknowledgment.",
+      "source_doc": "ACT-GAC-087",
+      "term_extracted": "Site P2"
+    },
+    {
+      "failure": "missing_critical_term:RC-12",
+      "repair": "ACT-GAC-087 explicitly states 'RC-12' \u2014 citation present but term not flagged. Worker correctly cited release condition but gate requires explicit critical-term extraction.",
+      "source_doc": "ACT-GAC-087",
+      "term_extracted": "RC-12"
+    },
+    {
+      "failure": "missing_critical_term:QA-approved|calibration pack",
+      "repair": "CAL-GAC-087 explicitly states 'QA-approved calibration pack CP-77' \u2014 worker cited calibration pack but gate requires explicit acknowledgment of QA-approved qualifier. Repair adds QA-approved calibration pack as critical term.",
+      "source_doc": "CAL-GAC-087",
+      "term_extracted": "QA-approved calibration pack CP-77"
+    },
+    {
+      "failure": "action_boundary_verdict_mismatch",
+      "legitimate_verdict": true,
+      "repair": "Worker verdict ESCALATE is correct; calibration-status class verification not evidenced. Gate failure is terminology mismatch between worker reasoning and gate critical-term registry, not substantive verdict error. Verdict preserved."
+    }
+  ],
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_note": "Gate failures are citation-extraction failures, not substantive verdict errors. Worker correctly identified the 082-style trap. Repairs add critical-term acknowledgment without altering the legitimate ESCALATE verdict. Next worker must preserve the trap while completing term extraction.",
+  "gov_verdict": "CONTINUE_REPAIR",
+  "monotonic_preservations": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "calibration-status class as legitimate blocker per STD-GAC-087-P",
+    "WARN-GAC-087 as the authoritative source establishing separate verification requirement",
+    "block on activation until calibration-status class is evidenced"
+  ],
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Source-boundary trap: confirm that availability of site, release condition, and calibration pack in sources does not satisfy the separate calibration-status class requirement flagged by WARN-GAC-087. The trap is real; closure requires evidence not currently in any source document.",
+    "monotonic_preservation": [
+      "ESCALATE verdict",
+      "SOURCE_BOUNDARY_OPEN binding",
+      "WARN-GAC-087 as controlling authority on separate verification requirement",
+      "No activation of GD-4 until calibration-status class is evidenced"
+    ],
+    "objective": "Re-issue ESCALATE with complete critical-term extraction. Acknowledge that ACT-GAC-087 provides Site P2 and RC-12; CAL-GAC-087 provides QA-approved calibration pack CP-77; confirm these terms are satisfied but calibration-status class verification remains absent per WARN-GAC-087 and STD-GAC-087-P. Do not attempt to close the boundary.",
+    "required_repairs": [
+      "Explicitly extract Site P2 as critical term from ACT-GAC-087",
+      "Explicitly extract RC-12 as critical term from ACT-GAC-087",
+      "Explicitly extract QA-approved calibration pack as critical term from CAL-GAC-087",
+      "Acknowledge these terms are satisfied while affirming calibration-status class is not"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verdict_preserved": true,
+  "verdict_preserved_reason": "ESCALATE is correct. The 082-style status-class trap is legitimate per STD-GAC-087-P; no source confirms calibration-status class verification before activation. Blocking status must remain."
+}

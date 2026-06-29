@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May clinical operations activate the trial site?",
+    "allow_rule_assessment": "No exact match on consent-status class in source records; AUTH-BOR-082 explicitly marks consent C12 as pending",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "AUTH-BOR-082 states consent C12 remains pending; FEAS-BOR-082 confirms consent-status verification is separate pre-enrollment requirement",
+    "escalate_rule_assessment": "Pending consent verification blocks closure; policy STD-BOR-082-P requires exact consent-status class match before enrollment",
+    "timing_scope_authority_dependency_check": "AUTH-BOR-082 consent pending; enrollment cannot proceed until consent-status class verified"
+  },
+  "cited_evidence": [
+    "ACT-BOR-082",
+    "AUTH-BOR-082",
+    "FEAS-BOR-082",
+    "STD-BOR-082-P"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "consent-status pending status",
+    "enrollment dependency chain"
+  ],
+  "final_answer": "Source records confirm activation authority covers site B-18, protocol P8.1, and activation date 2026-06-28. However, AUTH-BOR-082 explicitly states consent C12 remains pending, and FEAS-BOR-082 confirms consent-status verification is a separate pre-enrollment requirement. Policy STD-BOR-082-P requires an exact match on consent-status class before enrollment. This abstract-field trap leaves the boundary open. The action may not proceed. Escalate for consent-status resolution.",
+  "open_blockers": [
+    "consent-status class verification pending in AUTH-BOR-082",
+    "047-style abstract-field trap in clinical activation",
+    "abstract consent field blocks enrollment closure"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

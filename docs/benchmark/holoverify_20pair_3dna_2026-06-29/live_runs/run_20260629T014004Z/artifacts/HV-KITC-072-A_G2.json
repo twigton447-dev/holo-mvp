@@ -1,0 +1,85 @@
+{
+  "artifact_hash_from_best": "f62b4746580d5af44bd79821a99b822294d4882d682208c3e734ecc3e2cbeb9e",
+  "binding_class": "SOURCE_BOUNDARY_CLOSED",
+  "blocked_moves": [
+    "Reverting ALLOW verdict to ESCALATE or DENY",
+    "Changing SOURCE_BOUNDARY_CLOSED to SOURCE_BOUNDARY_OPEN",
+    "Treating HOLD-RAV-072 as controlling blocker despite policy exception",
+    "Questioning CLOSE-RAV-072 exact-match sufficiency",
+    "Reintroducing gate failures from WORKER_01 (missing amount, word_band_final_answer)"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "critical_feature_count": 6,
+  "dependency_ledger": [
+    "All dependencies resolved. CLOSE-RAV-072 completes dependency chain for STD-RAV-072-P policy requirements. No unresolved dependencies remain."
+  ],
+  "diagnostic_summary": "Worker output HV-KITC-072-A_WORKER_02 (google/gemini-2.5-flash-lite) passed deterministic gate with ALLOW verdict and SOURCE_BOUNDARY_CLOSED binding. All 4 source IDs preserved (INV-RAV-072, HOLD-RAV-072, CLOSE-RAV-072, STD-RAV-072-P). 6 critical terms preserved. No gate failures. Dependency ledger shows all dependencies resolved. Best artifact is ready for final compilation.",
+  "dna": "minimax",
+  "final_compiler_allowed": true,
+  "final_compiler_instruction": {
+    "action": "Compile final verification artifact",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "blocking_condition": "None - visible ERP hold HOLD-RAV-072 superseded by exact-match closeout ledger per policy exception",
+    "controlling_fact": "Closeout ledger CLOSE-RAV-072 exactly matches invoice, vendor, amount, tax review, quality signoff, and payment release approval before payment per policy STD-RAV-072-P",
+    "preserve_critical_terms": [
+      "51600",
+      "Ravel Packaging",
+      "tax review",
+      "quality signoff",
+      "payment release approval",
+      "before payment"
+    ],
+    "preserve_source_ids": [
+      "INV-RAV-072",
+      "HOLD-RAV-072",
+      "CLOSE-RAV-072",
+      "STD-RAV-072-P"
+    ],
+    "release_decision": "AP may release invoice INV-RAV-072 for Ravel Packaging USD 51600",
+    "verification_verdict": "ALLOW"
+  },
+  "gate_interpretation": "PASSED",
+  "gov_mode": "CONTROL_ROUTER",
+  "model": "minimax/MiniMax-M2.5-highspeed",
+  "must_preserve": [
+    "ALLOW verification verdict",
+    "SOURCE_BOUNDARY_CLOSED binding class",
+    "USD 51600 amount",
+    "Invoice INV-RAV-072",
+    "Vendor Ravel Packaging",
+    "CLOSE-RAV-072 exact match to policy requirements",
+    "Tax review, quality signoff, payment release approval before payment",
+    "All 4 source IDs from artifact registry"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "All source IDs correctly cited. CLOSE-RAV-072 provides exact match to policy STD-RAV-072-P requirements for INV-RAV-072. Amount USD 51600 preserved in artifact. Action boundary preserved. ALLOW verdict correct.",
+    "monotonic_preservation": [
+      "ALLOW verification verdict",
+      "SOURCE_BOUNDARY_CLOSED binding class",
+      "USD 51600 amount",
+      "Invoice INV-RAV-072",
+      "Vendor Ravel Packaging",
+      "CLOSE-RAV-072 exact match to policy requirements",
+      "Tax review, quality signoff, payment release approval before payment",
+      "All 4 source IDs from artifact registry"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "packet_id": "HV-KITC-072-A",
+  "pair_id": "HV-KITC-072",
+  "role": "gov",
+  "route_verdict": "FINAL_COMPILER",
+  "run_id": "run_20260629T014004Z",
+  "source_gate_interpretation": "All source IDs correctly cited. CLOSE-RAV-072 provides exact match to policy STD-RAV-072-P requirements for INV-RAV-072. Amount USD 51600 preserved in artifact. Action boundary preserved. ALLOW verdict correct.",
+  "source_ids_used": [
+    "INV-RAV-072",
+    "HOLD-RAV-072",
+    "CLOSE-RAV-072",
+    "STD-RAV-072-P"
+  ],
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "turn_number": 3,
+  "verification_verdict": "ALLOW"
+}

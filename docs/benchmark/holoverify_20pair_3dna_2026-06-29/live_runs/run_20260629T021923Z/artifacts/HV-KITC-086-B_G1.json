@@ -1,0 +1,78 @@
+{
+  "blocked_moves": [
+    "ALLOW release despite pending retest",
+    "Treat 'accepted retest result remains pending' as equivalent to 'assay acceptance confirmed",
+    "Bypass policy requirement for exact assay-acceptance status",
+    "Treat batch FJ-86 release as authorized without resolved deviation closure"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "HV-KITC-086-B: RESOLVED_ESCALATE"
+  ],
+  "diagnosis": {
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "correct_findings": [
+      "CLOSE-FJO-086 explicitly states accepted retest result remains pending",
+      "DEV-FJO-086 confirms deviation alert remains visible for assay AX-41",
+      "STD-FJO-086-P policy requires exact match on assay-acceptance status before shipment",
+      "Pending retest is a legitimate abstract-field blocker (047-style trap)"
+    ],
+    "gate_failures": [],
+    "gate_status": "PASS",
+    "repair_needed": false,
+    "source_integrity": "INTACT",
+    "verdict_correctness": "CORRECT",
+    "worker_verdict": "ESCALATE"
+  },
+  "final_compiler_allowed": true,
+  "final_compiler_instruction": {
+    "action_permitted_when": [
+      "Retest result is documented and accepted",
+      "CLOSE-FJO-086 is updated to reflect confirmed acceptance",
+      "Assay AX-41 acceptance is explicitly recorded in source records",
+      "DEV-FJO-086 deviation alert is closed with verified acceptance"
+    ],
+    "action_prohibited": "May NOT quality release clinical batch FJ-86",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "blocking_evidence": [
+      "CLOSE-FJO-086: 'accepted retest result remains pending' for assay AX-41",
+      "DEV-FJO-086: deviation alert remains visible",
+      "STD-FJO-086-P: requires assay-acceptance status before shipment"
+    ],
+    "objective": "Compile final verification record for HV-KITC-086-B",
+    "verification_verdict": "ESCALATE"
+  },
+  "gov_command_meta": {
+    "gov_mode": "CONTROL_ROUTER",
+    "gov_role": "CONTROL_ROUTER",
+    "lane": "HOLOVERIFY_3DNA_FULL_ARCH",
+    "packet_id": "HV-KITC-086-B",
+    "pair_id": "HV-KITC-086",
+    "run_id": "run_20260629T021923Z",
+    "turn": 2
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "CLOSE-FJO-086 cited evidence",
+    "047-style abstract-field trap identification",
+    "Policy exact-match requirement"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "CLOSE-FJO-086 covers batch FJ-86, assay AX-41, criterion Cq<=31, and release date 2026-06-28. However, the closure explicitly states accepted retest result remains pending. STD-FJO-086-P requires assay-acceptance status before shipment. The source boundary is not satisfied because the abstract assay-acceptance field is unresolved. Release must be blocked pending retest completion and documented acceptance.",
+    "monotonic_preservation": [
+      "ESCALATE verdict",
+      "SOURCE_BOUNDARY_OPEN binding",
+      "CLOSE-FJO-086 cited evidence",
+      "047-style abstract-field trap identification",
+      "Policy exact-match requirement"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "route_verdict": "ESCALATE",
+  "source_gate_interpretation": "CLOSE-FJO-086 covers batch FJ-86, assay AX-41, criterion Cq<=31, and release date 2026-06-28. However, the closure explicitly states accepted retest result remains pending. STD-FJO-086-P requires assay-acceptance status before shipment. The source boundary is not satisfied because the abstract assay-acceptance field is unresolved. Release must be blocked pending retest completion and documented acceptance.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

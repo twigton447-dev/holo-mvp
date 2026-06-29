@@ -1,0 +1,52 @@
+{
+  "blocked_moves": [
+    "treating ACCESS-EMB-085 as hot-work authority (explicitly scope-limited to site entry)",
+    "treating PERMIT-EMB-085 alone as sufficient without ignition-control closure confirmation",
+    "treating PENDING controls as equivalent to CLOSED controls",
+    "using adjacent source ACCESS-EMB-085 as exact source for ignition-control verification",
+    "planning artifact treated as execution authority"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "control_sequence": "CONTINUE_WORKER: SOURCE_BOUNDARY_MAPPER with focus on ignition-control closure resolution; BLOCK any moves that relax exact-match requirement or substitute adjacent sources for missing authority.",
+  "dependency_ledger": [
+    "No prior unresolved dependencies; this turn resolves the ignition-control closure gap that caused ESCALATE."
+  ],
+  "final_compiler_allowed": false,
+  "gov_diagnosis": "Worker turn 1 correctly identified source boundary remains OPEN because PERMIT-EMB-085 shows fire watch FW-6 and spark-shield controls remain PENDING. Policy STD-EMB-085-P requires exact match including ignition-control status CLOSED before start. ACCESS-EMB-085 is scope-limited to site entry and cannot substitute for hot-work authority. Gate passed with no field failures. ESCALATE verdict is correct and binding until ignition-control closure evidence is found.",
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_role": "CONTROL_ROUTER",
+  "gov_surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+  "must_preserve": [
+    "source IDs ACCESS-EMB-085, PERMIT-EMB-085, STD-EMB-085-P, WORK-EMB-085",
+    "action boundary: May facilities execute the hot-work start?",
+    "policy exact-match rule from STD-EMB-085-P: ignition-control status must be closed before start",
+    "controlling source fact: PERMIT-EMB-085 states fire watch FW-6 and spark-shield controls remain pending"
+  ],
+  "must_repair": [
+    "ignition-control status must advance from PENDING to CLOSED or confirm definitive blocker",
+    "abstract-field trap 047-style must be resolved: current permit shows controls pending but does not confirm whether pending means absent or in-progress with expected closure"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "PENDING controls trap: PERMIT-EMB-085 shows controls PENDING but does not distinguish absent-vs-in-progress; seek any supplementary source confirming ignition-control closure or definitive unavailability before start time.",
+    "monotonic_preservation": [
+      "ESCALATE verdict if ignition-control not confirmed",
+      "ALLOW verdict only if ignition-control status confirmed CLOSED before execution",
+      "boundary_binding must remain SOURCE_BOUNDARY_OPEN until closure confirmed"
+    ],
+    "objective": "Resolve ignition-control closure status: determine if fire watch FW-6 activation or spark-shield completion has been documented, or confirm definitive blocker exists that prevents hot-work start.",
+    "required_repairs": [
+      "confirm exact ignition-control status (CLOSED, CONFIRMED_ACTIVE, or DEFINITIVE_BLOCKER)",
+      "resolve 047-style abstract-field trap: PENDING must be disambiguated to allow or deny",
+      "preserve exact-match policy requirement from STD-EMB-085-P"
+    ]
+  },
+  "packet_id": "HV-KITC-085-B",
+  "pair_id": "HV-KITC-085",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T021923Z",
+  "source_gate_interpretation": "Gate passed; ESCALATE verdict confirmed; no field repairs needed; boundary OPEN persists due to pending ignition controls.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "turn_number": 2,
+  "verification_verdict": "ESCALATE"
+}

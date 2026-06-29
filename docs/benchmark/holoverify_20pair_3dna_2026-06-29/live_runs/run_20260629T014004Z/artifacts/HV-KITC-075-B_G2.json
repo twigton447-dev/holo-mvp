@@ -1,0 +1,39 @@
+{
+  "blocked_moves": [
+    "treating WARN-UMA-075 as execution authority instead of advisory warning",
+    "treating REQ-UMA-075 planning artifact as substitute for BG-UMA-075 execution approval",
+    "claiming allow verdict despite open source boundary",
+    "resolving audit-control assignment by inference rather than exact source record",
+    "bypassing BG-UMA-075 requirement based on breakglass exception alone"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "audit-control assignment must be confirmed in exact source record (e.g., updated BG-UMA-075 or separate audit-control record) before source boundary can close"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact source doc_ids only",
+    "policy exact-match rule",
+    "breakglass approval must be matched for user, system, privilege, time window, and audit-control assignment"
+  ],
+  "must_repair": [
+    "audit-control assignment pending in BG-UMA-075 must be resolved via exact source record before source boundary can close"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Challenge any attempts to infer audit-control assignment or treat other documents as sufficient; verify exact match of audit-control field against BG-UMA-075",
+    "monotonic_preservation": [
+      "Preserve exact source doc_ids: BG-UMA-075, REQ-UMA-075, STD-UMA-075-P, WARN-UMA-075",
+      "Preserve policy requirement that emergency admin enablement requires audit-control assignment to be complete",
+      "Preserve ESCALATE verdict until dependency resolved"
+    ],
+    "objective": "Confirm whether audit-control assignment has been recorded in an exact source document; if not, request authoritative source record to close source boundary",
+    "required_repairs": [
+      "Obtain exact source record indicating audit-control assignment status (e.g., confirmation of assignment completion, or updated BG-UMA-075 with audit-control assignment)"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Source boundary remains open due to pending audit-control assignment. All source IDs used are correct. Must resolve pending assignment via exact source record before closure.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

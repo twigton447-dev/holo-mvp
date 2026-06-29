@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May clinical operations activate the trial site?",
+    "allow_rule_assessment": "Cannot ALLOW. AUTH-BOR-082 explicitly scopes activation to 'before enrollment' and requires consent-status class verification per STD-BOR-082-P. FEAS-BOR-082 is planning-only and does not provide execution authority.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "AUTH-BOR-082 scopes authority to 'current IRB-approved consent C12' before enrollment per STD-BOR-082-P consent-status class requirement.",
+    "escalate_rule_assessment": "Must ESCALATE. The critical term 'current IRB-approved' from AUTH-BOR-082 is cited in boundary_binding but source records do not confirm consent-status class verification. Dependency unresolved.",
+    "timing_scope_authority_dependency_check": "AUTH-BOR-082 controls activation scope: site B-18, protocol P8.1, current IRB-approved consent C12, activation date 2026-06-28 before enrollment. Consent-status class confirmation is a prerequisite that remains unverified in source records. FEAS-BOR-082 is planning artifact only per STD-BOR-082-P."
+  },
+  "cited_evidence": [
+    "AUTH-BOR-082",
+    "ACT-BOR-082",
+    "FEAS-BOR-082",
+    "STD-BOR-082-P"
+  ],
+  "critical_features_preserved": [
+    "ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding per gov monotonic preservation",
+    "Explicit citation of 'current IRB-approved' from AUTH-BOR-082 per gov must_repair directive",
+    "FEAS-BOR-082 treated as planning artifact only per blocked_move flag",
+    "Consent-status class dependency tracked per unresolved_dependency ledger"
+  ],
+  "final_answer": "Cannot finalize. AUTH-BOR-082 authorizes site activation before enrollment contingent on consent-status class verification per STD-BOR-082-P. Source records do not confirm consent-status class. FEAS-BOR-082 is planning-only. Gov routing CONTINUE_WORKER indicates final_compiler_allowed=false. State conflict flagged in open_blockers.",
+  "open_blockers": [
+    "Consent-status class verification must be confirmed before enrollment authorization per AUTH-BOR-082 and STD-BOR-082-P dependency ledger",
+    "FEAS-BOR-082 is planning artifact only and cannot serve as execution authority",
+    "Gov routing CONTINUE_WORKER indicates final_compiler_allowed=false in gov_adversarial_baton - this turn cannot produce final compilation"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

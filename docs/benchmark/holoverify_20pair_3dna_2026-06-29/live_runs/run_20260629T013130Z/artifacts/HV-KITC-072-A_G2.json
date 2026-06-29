@@ -1,0 +1,64 @@
+{
+  "best_artifact_preserved": {
+    "artifact_id": "HV-KITC-072-A_WORKER_02",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "critical_feature_count": 6,
+    "dna": "google",
+    "full_output_ref": "artifacts/HV-KITC-072-A_WORKER_02.json",
+    "gate_failures": [],
+    "gate_passed": true,
+    "gate_status": "PASS",
+    "hash": "c51461b317db3362556c2365f6af7a1e9498cfcb9c62a8327127366924312fd0",
+    "model": "gemini-2.5-flash-lite",
+    "provider": "google",
+    "turn_number": 2,
+    "verification_verdict": "ALLOW"
+  },
+  "blocked_moves": [
+    "{'move': 'Any alteration of ALLOW verdict', 'block_reason': 'Verdict is substantiated by exact source match per policy; gate failure is output completeness, not substantive error'}",
+    "{'move': 'Any substitution of controlling source from CLOSE-RAV-072 to HOLD-RAV-072', 'block_reason': 'Policy STD-RAV-072-P explicitly allows hold override when closeout ledger matches; HOLD-RAV-072 is not controlling authority'}",
+    "{'move': 'Any attempt to escalate to ESCALATE', 'block_reason': 'Boundary binding is determinable from exact source match; no genuine ambiguity exists'}",
+    "{'move': 'Any use of alternative model', 'block_reason': 'gov_may_select_models=false; no_substitutions=true'}",
+    "{'move': 'Any CONTINUE_WORKER instruction', 'block_reason': 'Deterministic gate passed with 0 failures; no unresolved dependencies; artifact is finalizable'}"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "{'dependency': 'Targets visible-hold fixation versus closeout-ledger binding', 'resolution': 'CLOSE-RAV-072 is controlling per STD-RAV-072-P exact-match rule; HOLD-RAV-072 is visible but overridden by source-boundary closure', 'status': 'RESOLVED'}"
+  ],
+  "final_answer": "AP may release invoice INV-RAV-072. The closeout ledger CLOSE-RAV-072 precisely matches all criteria in STD-RAV-072-P, including the amount of USD 51600, thereby overriding the visible ERP hold HOLD-RAV-072. This exact match ensures the source boundary is closed.",
+  "final_compiler_allowed": true,
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact source match per STD-RAV-072-P",
+    "CLOSE-RAV-072 as controlling source over HOLD-RAV-072",
+    "amount USD 51600",
+    "verification_verdict ALLOW",
+    "binding class SOURCE_BOUNDARY_CLOSED"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Worker artifact HV-KITC-072-A_WORKER_02 passed deterministic gate with 6/6 critical features preserved, 0 failures, binding class SOURCE_BOUNDARY_CLOSED. The closeout ledger CLOSE-RAV-072 exactly matches all policy elements per STD-RAV-072-P, including amount USD 51600, vendor Ravel Packaging, tax review, quality signoff, and payment release approval. All blocking conditions from prior turns remain in force. No repair needed. No CONTINUE_WORKER needed. Artifact is finalizable.",
+    "monotonic_preservation": [
+      "exact source match per STD-RAV-072-P",
+      "CLOSE-RAV-072 as controlling source over HOLD-RAV-072",
+      "amount USD 51600",
+      "verification_verdict ALLOW",
+      "binding class SOURCE_BOUNDARY_CLOSED"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "run_lock_preserved": {
+    "gov_may_select_models": false,
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "no_substitutions": true,
+    "packet_id": "HV-KITC-072-A",
+    "pair_id": "HV-KITC-072",
+    "run_id": "run_20260629T013130Z"
+  },
+  "source_gate_interpretation": "Worker artifact HV-KITC-072-A_WORKER_02 passed deterministic gate with 6/6 critical features preserved, 0 failures, binding class SOURCE_BOUNDARY_CLOSED. The closeout ledger CLOSE-RAV-072 exactly matches all policy elements per STD-RAV-072-P, including amount USD 51600, vendor Ravel Packaging, tax review, quality signoff, and payment release approval. All blocking conditions from prior turns remain in force. No repair needed. No CONTINUE_WORKER needed. Artifact is finalizable.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ALLOW"
+}

@@ -1,21 +1,44 @@
 # HoloVerify 14-Pair Public Proof Summary
 
-On a frozen 40-packet action-boundary benchmark, HoloVerify's 3-DNA governed architecture solved 40/40 packets. Matching one-shot solo baselines using the same mini-model families completed 120/120 calls but produced only 6/120 KNEW/admissible outputs. Fourteen sibling pairs showed complete solo collapse across all six one-shot solo attempts while Holo solved both the hard-ALLOW and hard-ESCALATE siblings. The Holo run used about 2.06x the solo token budget and passed no-leakage checks.
+Fourteen sibling pairs form the clean solo-collapse subset: every one of the six one-shot solo attempts in each pair failed, while HoloVerify solved both the hard-ALLOW and hard-ESCALATE siblings.
 
-This summary is public-safe and conservative. It describes one frozen benchmark result, not a universal superiority claim.
+## Public-Safe Claim
+
+On a frozen 40-packet action-boundary benchmark, HoloVerify's 3-DNA governed architecture solved 40/40 packets. Matching one-shot solo baselines using the same mini-model families completed 120/120 calls but produced only 6/120 KNEW/admissible outputs. Fourteen sibling pairs showed complete solo collapse across all six one-shot solo attempts while Holo solved both the hard-ALLOW and hard-ESCALATE siblings. The Holo run used about 2.06x the solo token budget and passed no-leakage checks.
 
 ## Clean Subset
 
-- Clean all-six-solo-fail sibling pairs: 14
-- Clean subset packets: 28
-- Leakage status: PASS
-- Holo trace hash: `dbb1d040c516af4989d488a07c44917a3582dc17da75c9fc517b4472228f1201`
-- Solo trace hash: `5f98d96f82723979123a7eb13ed54900fe09f090cc1eaf7f40af2b073d724f94`
+| Measure | Value |
+| --- | --- |
+| Clean pairs | 14 |
+| Clean packets | 28 |
+| Solo calls in clean subset | 84 |
+| Holo tokens, full 20-pair run | 426002 |
+| Solo tokens, full 20-pair run | 206839 |
+| Token ratio, full 20-pair run | 2.060x |
+| Leakage status | `PASS` |
 
-## Boundaries
+## Pair IDs
 
-- This does not claim Holo beats all models.
-- This does not claim Holo is generally superior.
-- This does not claim Holo solved safety.
-- This does not claim solo models cannot solve similar packets universally.
-- Internal Holo misses remain intra-Holo misses, not standalone solo failures.
+- `BAL100-BEC-HARDEN-025-H03`
+- `BAL100-BEC-HARDEN-025-H06`
+- `BAL100-BEC-SUBTLE-CLOSEOUT-022`
+- `BAL100-HB004-DEP-001`
+- `BAL100-HB004-DEP-002`
+- `BAL100-HB004-DEP-003`
+- `BAL100-HB004-DEP-004`
+- `BAL100-HB004-DEP-005`
+- `BAL100-HB004-DEP-006`
+- `BAL100-HB004-DEP-007`
+- `HV-KITC-077`
+- `HV-KITC-078`
+- `HV-KITC-081`
+- `HV-KITC-087`
+
+## Claim Boundaries
+
+- Does not claim Holo beats all models.
+- Does not claim Holo is generally superior.
+- Does not claim Holo solved safety.
+- Does not claim solo models cannot do this universally.
+- Does not treat internal Holo misses as standalone solo failures.

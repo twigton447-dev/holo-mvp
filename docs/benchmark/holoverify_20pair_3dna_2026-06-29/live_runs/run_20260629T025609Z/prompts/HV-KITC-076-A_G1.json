@@ -1,0 +1,196 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are HoloGov-V in the complete HoloVerify architecture.\nGov does not choose models. Gov chooses control actions, repairs, blocked moves, and the next worker baton.\nYou receive deterministic gate results. You cannot call an artifact ready if local gates fail.\nIf the prior worker verdict is source-plausible but the gate failed only proof, source-term, section, or word-band checks, preserve that verdict and repair the failed fields. Do not invert the verdict unless the source boundary itself is wrong.\nReturn the exact required_gov_schema top-level keys only.\nDo not add run_id, pair_id, packet_id, lane, gov_diagnosis, control_decision, artifact_selection, or extra top-level monotonic fields.\nKeep source_gate_interpretation under 30 words. Keep all arrays to at most 3 compact items.\nReturn only valid JSON. No markdown fences."
+    },
+    {
+      "role": "user",
+      "content": "{\"run_lock\":{\"run_id\":\"run_20260629T025609Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-076\",\"packet_id\":\"HV-KITC-076-A\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"gov_may_select_models\":false,\"no_substitutions\":true},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-076-A\",\"type\":\"milestone_invoice_release\",\"vendor\":\"Vanta Field Services\",\"amount\":42800,\"currency\":\"USD\",\"description\":\"May AP release a duplicate-looking milestone invoice?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May AP release a duplicate-looking milestone invoice?\",\"anomaly_observed\":\"The invoice matches a prior payment on vendor and amount, but may represent a separate milestone/release.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"INV-VAN-076\",\"type\":\"source_record\",\"content\":\"Invoice INV-VAN-076 bills Vanta Field Services USD 42800 for milestone M-4 release R4.\"},{\"doc_id\":\"PRIOR-VAN-076\",\"type\":\"source_record\",\"content\":\"Prior invoice PRIOR-VAN-076 paid Vanta Field Services USD 42800 for milestone M-3 release R3.\"},{\"doc_id\":\"MS-VAN-076\",\"type\":\"source_record\",\"content\":\"Milestone register MS-VAN-076 lists M-3/R3 and M-4/R4 as separate billable releases with the same vendor and amount.\"}],\"policy_documents\":[{\"doc_id\":\"STD-VAN-076-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Duplicate-looking milestone invoice is complete only when milestone ID, release number, vendor, amount, and credit/reversal status distinguish it from the prior paid invoice.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T025609Z\",\"pair_id\":\"HV-KITC-076\",\"packet_id\":\"HV-KITC-076-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-076-A_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ALLOW\",\"full_output_ref\":\"artifacts/HV-KITC-076-A_WORKER_01.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"a58a1369f052df45e391f2b98a9a56eb738ee64c035e7e54c5c8e0cc5842104b\",\"source_ids\":[\"INV-VAN-076\",\"MS-VAN-076\",\"PRIOR-VAN-076\",\"STD-VAN-076-P\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"Targets duplicate-looking invoice over-escalation.\"],\"blocked_moves_so_far\":[],\"source_ids_used_so_far\":[\"INV-VAN-076\",\"MS-VAN-076\",\"PRIOR-VAN-076\",\"STD-VAN-076-P\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":null,\"pinned_best_artifact_full_text\":null},\"latest_worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ALLOW\",\"boundary_binding\":{\"action_boundary\":\"May AP release a duplicate-looking milestone invoice?\",\"allow_rule_assessment\":\"Milestone IDs and releases distinguish invoices per policy\",\"escalate_rule_assessment\":\"No open defect in source distinction\",\"timing_scope_authority_dependency_check\":\"Current sources close boundary before release\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\",\"controlling_source_fact\":\"STD-VAN-076-P requires milestone/release distinction\"},\"cited_evidence\":[\"INV-VAN-076\",\"PRIOR-VAN-076\",\"MS-VAN-076\",\"STD-VAN-076-P\"],\"open_blockers\":[],\"critical_features_preserved\":[\"source IDs\",\"milestone distinction\"],\"final_answer\":\"Sources confirm M-4/R4 is distinct from paid M-3/R3 by milestone ID, release, and register. Policy STD-VAN-076-P is satisfied. Action boundary closed. Release may proceed.\"},\"deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"word_band_final_answer:24\"],\"artifact_verdict\":\"ALLOW\",\"artifact_binding\":\"SOURCE_BOUNDARY_CLOSED\",\"source_id_count\":4,\"critical_term_count\":5},\"artifact_registry\":[{\"artifact_id\":\"HV-KITC-076-A_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-076-A_WORKER_01.json\",\"hash\":\"a58a1369f052df45e391f2b98a9a56eb738ee64c035e7e54c5c8e0cc5842104b\",\"gate_status\":\"FAIL\",\"gate_passed\":false,\"gate_failures\":[\"word_band_final_answer:24\"],\"critical_feature_count\":2,\"verification_verdict\":\"ALLOW\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\"}],\"required_gov_schema\":{\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"control_action\":\"CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED\",\"route_verdict\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"source_gate_interpretation\":\"string, max 30 words\",\"must_preserve\":[\"string, max 3 items\"],\"must_repair\":[\"string, max 3 items\"],\"blocked_moves\":[\"string, max 3 items\"],\"dependency_ledger\":[\"string, max 3 items\"],\"next_worker_baton\":{\"objective\":\"string, max 12 words\",\"attack_focus\":\"string, max 12 words\",\"required_repairs\":[\"string, max 3 items\"],\"monotonic_preservation\":[\"string, max 3 items\"]},\"final_compiler_allowed\":\"boolean\"},\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.\"}"
+    }
+  ],
+  "prompt_object": {
+    "run_lock": {
+      "run_id": "run_20260629T025609Z",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "pair_id": "HV-KITC-076",
+      "packet_id": "HV-KITC-076-A",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "gov_may_select_models": false,
+      "no_substitutions": true
+    },
+    "source_context": {
+      "action": {
+        "business_ref": "HV-KITC-076-A",
+        "type": "milestone_invoice_release",
+        "vendor": "Vanta Field Services",
+        "amount": 42800,
+        "currency": "USD",
+        "description": "May AP release a duplicate-looking milestone invoice?",
+        "action_date": "2026-06-28"
+      },
+      "context": {
+        "action_boundary": "May AP release a duplicate-looking milestone invoice?",
+        "anomaly_observed": "The invoice matches a prior payment on vendor and amount, but may represent a separate milestone/release.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "doc_id": "INV-VAN-076",
+            "type": "source_record",
+            "content": "Invoice INV-VAN-076 bills Vanta Field Services USD 42800 for milestone M-4 release R4."
+          },
+          {
+            "doc_id": "PRIOR-VAN-076",
+            "type": "source_record",
+            "content": "Prior invoice PRIOR-VAN-076 paid Vanta Field Services USD 42800 for milestone M-3 release R3."
+          },
+          {
+            "doc_id": "MS-VAN-076",
+            "type": "source_record",
+            "content": "Milestone register MS-VAN-076 lists M-3/R3 and M-4/R4 as separate billable releases with the same vendor and amount."
+          }
+        ],
+        "policy_documents": [
+          {
+            "doc_id": "STD-VAN-076-P",
+            "title": "Exact source-boundary policy",
+            "content": "Duplicate-looking milestone invoice is complete only when milestone ID, release number, vendor, amount, and credit/reversal status distinguish it from the prior paid invoice."
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "run_id": "run_20260629T025609Z",
+      "pair_id": "HV-KITC-076",
+      "packet_id": "HV-KITC-076-A",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "turns_completed": [
+        {
+          "turn": 1,
+          "role": "worker",
+          "turn_id": "HV-KITC-076-A_W1",
+          "model": "xai/grok-3-mini",
+          "dna": "xai",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ALLOW",
+          "full_output_ref": "artifacts/HV-KITC-076-A_WORKER_01.json",
+          "gate_status": "FAIL",
+          "artifact_hash": "a58a1369f052df45e391f2b98a9a56eb738ee64c035e7e54c5c8e0cc5842104b",
+          "source_ids": [
+            "INV-VAN-076",
+            "MS-VAN-076",
+            "PRIOR-VAN-076",
+            "STD-VAN-076-P"
+          ]
+        }
+      ],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "resolved_dependencies": [],
+      "unresolved_dependencies": [
+        "Targets duplicate-looking invoice over-escalation."
+      ],
+      "blocked_moves_so_far": [],
+      "source_ids_used_so_far": [
+        "INV-VAN-076",
+        "MS-VAN-076",
+        "PRIOR-VAN-076",
+        "STD-VAN-076-P"
+      ],
+      "claims_requiring_support": [],
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "best_artifact_registry": null,
+      "pinned_best_artifact_full_text": null
+    },
+    "latest_worker_output": {
+      "worker_role": "SOURCE_BOUNDARY_MAPPER",
+      "verification_verdict": "ALLOW",
+      "boundary_binding": {
+        "action_boundary": "May AP release a duplicate-looking milestone invoice?",
+        "allow_rule_assessment": "Milestone IDs and releases distinguish invoices per policy",
+        "escalate_rule_assessment": "No open defect in source distinction",
+        "timing_scope_authority_dependency_check": "Current sources close boundary before release",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED",
+        "controlling_source_fact": "STD-VAN-076-P requires milestone/release distinction"
+      },
+      "cited_evidence": [
+        "INV-VAN-076",
+        "PRIOR-VAN-076",
+        "MS-VAN-076",
+        "STD-VAN-076-P"
+      ],
+      "open_blockers": [],
+      "critical_features_preserved": [
+        "source IDs",
+        "milestone distinction"
+      ],
+      "final_answer": "Sources confirm M-4/R4 is distinct from paid M-3/R3 by milestone ID, release, and register. Policy STD-VAN-076-P is satisfied. Action boundary closed. Release may proceed."
+    },
+    "deterministic_gate_result": {
+      "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+      "passed": false,
+      "failures": [
+        "word_band_final_answer:24"
+      ],
+      "artifact_verdict": "ALLOW",
+      "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+      "source_id_count": 4,
+      "critical_term_count": 5
+    },
+    "artifact_registry": [
+      {
+        "artifact_id": "HV-KITC-076-A_WORKER_01",
+        "turn_number": 1,
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-076-A_WORKER_01.json",
+        "hash": "a58a1369f052df45e391f2b98a9a56eb738ee64c035e7e54c5c8e0cc5842104b",
+        "gate_status": "FAIL",
+        "gate_passed": false,
+        "gate_failures": [
+          "word_band_final_answer:24"
+        ],
+        "critical_feature_count": 2,
+        "verification_verdict": "ALLOW",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED"
+      }
+    ],
+    "required_gov_schema": {
+      "gov_mode": "CONTROL_ROUTER",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ALLOW | ESCALATE",
+      "control_action": "CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED",
+      "route_verdict": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "source_gate_interpretation": "string, max 30 words",
+      "must_preserve": [
+        "string, max 3 items"
+      ],
+      "must_repair": [
+        "string, max 3 items"
+      ],
+      "blocked_moves": [
+        "string, max 3 items"
+      ],
+      "dependency_ledger": [
+        "string, max 3 items"
+      ],
+      "next_worker_baton": {
+        "objective": "string, max 12 words",
+        "attack_focus": "string, max 12 words",
+        "required_repairs": [
+          "string, max 3 items"
+        ],
+        "monotonic_preservation": [
+          "string, max 3 items"
+        ]
+      },
+      "final_compiler_allowed": "boolean"
+    },
+    "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models."
+  }
+}

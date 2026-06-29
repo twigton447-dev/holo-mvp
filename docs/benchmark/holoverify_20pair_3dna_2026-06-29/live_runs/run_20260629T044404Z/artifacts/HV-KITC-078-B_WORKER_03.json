@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May quality release the clinical batch?",
+    "allow_rule_assessment": "No exact match on batch ID between closure and target batch",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-XOR-078-P mandates deviation closure must match batch X-78 exactly; CLOSE-XOR-078 covers batch X-79, creating open boundary",
+    "escalate_rule_assessment": "Closure covers X-79 not X-78; visible deviation alert DEV-XOR-078 remains unresolved for target batch",
+    "timing_scope_authority_dependency_check": "Exact match on batch, assay, criterion, and date required before release per policy STD-XOR-078-P"
+  },
+  "cited_evidence": [
+    "BATCH-XOR-078",
+    "CLOSE-XOR-078",
+    "DEV-XOR-078",
+    "STD-XOR-078-P"
+  ],
+  "critical_features_preserved": [
+    "source doc exact match",
+    "policy boundary rule",
+    "no batch ID substitution",
+    "visible anomaly preservation"
+  ],
+  "final_answer": "The clinical batch release cannot proceed. The deviation closure (CLOSE-XOR-078) pertains to batch X-79, while the target batch for release (BATCH-XOR-078) is X-78. Policy STD-XOR-078-P requires an exact match on batch, assay, criterion, and release date before release. The closure matches assay AX-22, criterion Cq<=31, and date 2026-06-28, but the batch numbers differ. The visible deviation alert (DEV-XOR-078) confirms an open anomaly for the target batch. The source boundary remains open and the action must be escalated.",
+  "open_blockers": [
+    "Batch mismatch: closure covers X-79, target is X-78",
+    "Visible deviation alert DEV-XOR-078 for target batch remains unresolved",
+    "Exact match requirement not satisfied"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

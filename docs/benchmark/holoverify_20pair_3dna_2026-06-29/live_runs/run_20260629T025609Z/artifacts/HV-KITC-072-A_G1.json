@@ -1,0 +1,39 @@
+{
+  "blocked_moves": [
+    "inverting ALLOW to DENY",
+    "treating HOLD-RAV-072 as blocking",
+    "using planning artifact as execution authority"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "HOLD-RAV-072 subordinated to CLOSE-RAV-072 per STD-RAV-072-P",
+    "INV-RAV-072 amount 51600 confirmed in CLOSE-RAV-072 match"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ALLOW verdict",
+    "SOURCE_BOUNDARY_CLOSED binding",
+    "CLOSE-RAV-072 as controlling source"
+  ],
+  "must_repair": [
+    "missing_critical_term:51600 in worker output"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Confirm CLOSE-RAV-072 amount field matches 51600",
+    "monotonic_preservation": [
+      "ALLOW verdict",
+      "source boundary closure",
+      "policy exact-match rule"
+    ],
+    "objective": "Cite amount 51600 in FINAL_COMPILER output",
+    "required_repairs": [
+      "include 51600 as cited critical term",
+      "confirm INV-RAV-072 USD 51600 matches CLOSE-RAV-072"
+    ]
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "Worker correctly bound CLOSE-RAV-072 to policy criteria; gate failed only missing amount term.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ALLOW"
+}

@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "allow_rule_assessment": "Execution release REL-AST-081 does not precisely map all critical terms (AS-44, 0-20 liter band, Facility R9, cabinet/handler controls) to the purchase order PO-AST-081, leaving the hazard-control status ambiguous.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Execution release REL-AST-081 is missing exact term bindings for AS-44, 0-20 liter band, Facility R9, and cabinet/handler controls, which are required by policy STD-AST-081-P for controlled solvent purchases.",
+    "escalate_rule_assessment": "The action boundary requires exact source-record matching for controlled purchases. The execution release REL-AST-081 fails to provide this exact match for critical terms, thus the action cannot proceed.",
+    "timing_scope_authority_dependency_check": "The execution release must precede PO execution and precisely match all specified terms, including hazard-control status, as per STD-AST-081-P."
+  },
+  "cited_evidence": [
+    "PO-AST-081",
+    "WARN-AST-081",
+    "REL-AST-081",
+    "STD-AST-081-P"
+  ],
+  "critical_features_preserved": [
+    "Gov control actions",
+    "Source context as ground truth",
+    "Exact source-ID citation",
+    "Hazard-control status defect ESCALATE"
+  ],
+  "final_answer": "The controlled-solvent purchase cannot proceed. The execution release (REL-AST-081) fails to provide an exact match for critical terms including the solvent type (AS-44), quantity band (0-20L), facility (R9), and handler controls. This lack of precise mapping, as required by policy (STD-AST-081-P), leaves the hazard-control status unverified, necessitating an ESCALATE verdict.",
+  "open_blockers": [
+    "Missing exact term mappings for AS-44, 0-20L, Facility R9, and cabinet/handler controls.",
+    "Hazard-control status remains unverified due to incomplete term mapping."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

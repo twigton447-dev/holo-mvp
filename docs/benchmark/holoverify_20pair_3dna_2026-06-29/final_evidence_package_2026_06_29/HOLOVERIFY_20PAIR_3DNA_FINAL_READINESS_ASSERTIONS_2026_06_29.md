@@ -24,3 +24,5 @@ Status: `PASS`
 | external_solo_and_intra_holo_evidence_separated | `PASS` |
 | invalid_runs_preserved | `PASS` |
 | final_evidence_memo_present | `PASS` |
+| fourteen_pair_clean_subset | `PASS` |
+| no_provider_local_audit | `PASS` |

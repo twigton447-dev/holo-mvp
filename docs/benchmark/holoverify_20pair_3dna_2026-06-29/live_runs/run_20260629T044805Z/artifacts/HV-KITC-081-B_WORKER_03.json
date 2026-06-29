@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "allow_rule_assessment": "No. STD-AST-081-P requires hazard-control status match before execution. REL-AST-081 confirms controls are pending. No source record resolves the pending status.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-AST-081-P mandates complete hazard-control status match across material, band, facility, PO, and controls before execution. REL-AST-081 shows controls pending.",
+    "escalate_rule_assessment": "Pending cabinet/handler controls block closure. Abstract-field trap (047-style) remains unresolved in source records.",
+    "timing_scope_authority_dependency_check": "REL-AST-081 specifies controls pending before PO-AST-081 execution. Timing defect confirmed."
+  },
+  "cited_evidence": [
+    "PO-AST-081",
+    "REL-AST-081",
+    "STD-AST-081-P",
+    "WARN-AST-081"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "timing defect",
+    "pending-controls blocker"
+  ],
+  "final_answer": "ESCALATE. STD-AST-081-P mandates hazard-control status match before PO execution. REL-AST-081 explicitly states active cabinet/handler controls remain pending. No source record resolves this pending status to completed. WARN-AST-081 confirms controlled solvents require exact hazard-control evidence. PO-AST-081 matches material, band, facility, and PO, but the hazard-control field remains an unresolved abstract trap. Execution must not proceed until source records confirm controls resolved.",
+  "open_blockers": [
+    "cabinet/handler controls pending (REL-AST-081)",
+    "hazard-control status unresolved",
+    "abstract-field trap unresolved"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,418 @@
+{
+  "messages": [
+    {
+      "content": "You are a HoloVerify worker. Preserve state. Obey Gov.\nWorkers receive Gov twice: a routing lens near the top and the full latest baton near the end.\nSource context is ground truth. The state brief preserves continuity. The final baton controls the next action.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"system_role\":\"HoloVerify worker. Preserve state. Obey Gov.\",\"gov_routing_lens\":{\"route_verdict\":\"CONTINUE_WORKER\",\"main_repair_target\":\"Authority-chain gap: no document confirms closure of workspace YAR-RISK-2 transfer authority pending status\",\"blocked_move\":\"FAIL_CLOSED\",\"unresolved_dependency\":\"TRANSFER_AUTHORITY_PENDING: Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement; dependency status UNRESOLVED\",\"current_objective\":\"FINAL_COMPILER\"},\"run_lock\":{\"run_id\":\"run_20260629T014004Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-079\",\"packet_id\":\"HV-KITC-079-B\",\"worker_index\":3,\"worker_role\":\"FINAL_COMPILER\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"no_substitutions\":true},\"task_and_answer_contract\":{\"task\":\"Decide whether the action may proceed using only source records in this packet.\",\"answer_contract\":{\"worker_role\":\"string\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"open_blockers\":[\"string\"],\"critical_features_preserved\":[\"string\"],\"final_answer\":\"string\"},\"word_band\":\"final_answer 25-120 words\",\"source_rules\":[\"cite exact doc_id values only\",\"do not invent source IDs\",\"ALLOW only when exact current source boundary is closed before execution\",\"ESCALATE when a narrow source-record defect remains open before execution\"],\"deterministic_gate_categories\":[\"word band\",\"required sections\",\"source IDs\",\"invented source IDs\",\"timing/scope/authority/dependency section\",\"action-boundary violations\",\"critical dependencies/traps\"]},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-079-B\",\"type\":\"data_export\",\"vendor\":\"Yara Analytics\",\"amount\":0,\"currency\":\"USD\",\"description\":\"May operations execute the regulated data export?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May operations execute the regulated data export?\",\"anomaly_observed\":\"A design review note exists but is limited to architecture planning; a transfer release may close execution.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"EXP-YAR-079\",\"type\":\"source_record\",\"content\":\"Export EXP-YAR-079 transfers dataset DS-19 to workspace YAR-RISK-2 for Yara Analytics on 2026-06-28.\"},{\"doc_id\":\"DES-YAR-079\",\"type\":\"source_record\",\"content\":\"Design review DES-YAR-079 approves workspace architecture for planning only and is not transfer execution authority.\"},{\"doc_id\":\"REL-YAR-079\",\"type\":\"source_record\",\"content\":\"Transfer release REL-YAR-079 covers dataset DS-19 and Yara Analytics for export date 2026-06-28; workspace YAR-RISK-2 transfer authority remains pending.\"}],\"policy_documents\":[{\"doc_id\":\"STD-YAR-079-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Regulated data export is complete only when transfer release matches dataset, destination workspace, recipient entity, export date, and transfer authority before execution.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T014004Z\",\"pair_id\":\"HV-KITC-079\",\"packet_id\":\"HV-KITC-079-B\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-079-B_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-079-B_WORKER_01.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"7ac2ec84dd4c4eca16aabfefee0c96ac042dd4153c391d0e0eb7a3a0b116656f\",\"source_ids\":[\"DES-YAR-079\",\"EXP-YAR-079\",\"REL-YAR-079\",\"STD-YAR-079-P\"]},{\"turn\":2,\"role\":\"gov\",\"turn_id\":\"HV-KITC-079-B_G1\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict ESCALATE route CONTINUE_WORKER\",\"full_output_ref\":\"artifacts/HV-KITC-079-B_G1.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"4c39a0d35479cc06d82115ba72b923e3369d9cbd016c4a1b7695e433b11ca86f\",\"source_ids\":[\"DES-YAR-079\",\"EXP-YAR-079\",\"REL-YAR-079\",\"STD-YAR-079-P\"],\"blocked_moves\":[\"FAIL_CLOSED\",\"FINAL_COMPILER\",\"Claiming DES-YAR-079 satisfies execution authority requirement\",\"Treating planning approval as transfer release\",\"Selecting alternative model\",\"Accepting placeholder authority as resolved\"]},{\"turn\":3,\"role\":\"worker\",\"turn_id\":\"HV-KITC-079-B_W2\",\"model\":\"google/gemini-2.5-flash-lite\",\"dna\":\"google\",\"output_summary\":\"ADVERSARIAL_SCOPE_CHALLENGER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-079-B_WORKER_02.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"45d8544993105adc3662ddad010ce7214c0bf455be7532b1485f5d470d400c78\",\"source_ids\":[\"DES-YAR-079\",\"EXP-YAR-079\",\"REL-YAR-079\",\"STD-YAR-079-P\"]},{\"turn\":4,\"role\":\"gov\",\"turn_id\":\"HV-KITC-079-B_G2\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict ESCALATE route CONTINUE_WORKER\",\"full_output_ref\":\"artifacts/HV-KITC-079-B_G2.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"91b7d4d9990f7e959efa3f5e8c36caab79e8fbc734d6658d2d8ac0bb91d10950\",\"source_ids\":[\"DES-YAR-079\",\"EXP-YAR-079\",\"REL-YAR-079\",\"STD-YAR-079-P\"],\"blocked_moves\":[\"FAIL_CLOSED\",\"FINAL_COMPILER\",\"Claiming DES-YAR-079 satisfies execution authority requirement\",\"Treating planning approval as transfer release\",\"Accepting placeholder authority as resolved\",\"Closing source boundary without authority closure document\",\"Asserting pending status is acceptable under STD-YAR-079-P exact-match rule\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"TRANSFER_AUTHORITY_PENDING: Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement; dependency status UNRESOLVED\"],\"blocked_moves_so_far\":[\"FAIL_CLOSED\",\"FINAL_COMPILER\",\"Claiming DES-YAR-079 satisfies execution authority requirement\",\"Treating planning approval as transfer release\",\"Selecting alternative model\",\"Accepting placeholder authority as resolved\",\"FAIL_CLOSED\",\"FINAL_COMPILER\",\"Claiming DES-YAR-079 satisfies execution authority requirement\",\"Treating planning approval as transfer release\",\"Accepting placeholder authority as resolved\",\"Closing source boundary without authority closure document\",\"Asserting pending status is acceptable under STD-YAR-079-P exact-match rule\"],\"source_ids_used_so_far\":[\"DES-YAR-079\",\"EXP-YAR-079\",\"REL-YAR-079\",\"STD-YAR-079-P\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":{\"artifact_id\":\"HV-KITC-079-B_WORKER_02\",\"turn_number\":2,\"provider\":\"google\",\"model\":\"gemini-2.5-flash-lite\",\"dna\":\"google\",\"full_output_ref\":\"artifacts/HV-KITC-079-B_WORKER_02.json\",\"hash\":\"45d8544993105adc3662ddad010ce7214c0bf455be7532b1485f5d470d400c78\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":4,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"},\"pinned_best_artifact_full_text\":\"{\\n  \\\"boundary_binding\\\": {\\n    \\\"action_boundary\\\": \\\"May operations execute the regulated data export?\\\",\\n    \\\"allow_rule_assessment\\\": \\\"No match; REL-YAR-079 states workspace YAR-RISK-2 transfer authority remains pending.\\\",\\n    \\\"binding_class\\\": \\\"SOURCE_BOUNDARY_OPEN\\\",\\n    \\\"controlling_source_fact\\\": \\\"REL-YAR-079: workspace YAR-RISK-2 transfer authority remains pending.\\\",\\n    \\\"escalate_rule_assessment\\\": \\\"Authority pending blocks execution per STD-YAR-079-P exact-match rule.\\\",\\n    \\\"timing_scope_authority_dependency_check\\\": \\\"Transfer authority unresolved for 2026-06-28 export.\\\"\\n  },\\n  \\\"cited_evidence\\\": [\\n    \\\"REL-YAR-079\\\",\\n    \\\"DES-YAR-079\\\",\\n    \\\"STD-YAR-079-P\\\"\\n  ],\\n  \\\"critical_features_preserved\\\": [\\n    \\\"exact source IDs\\\",\\n    \\\"action boundary\\\",\\n    \\\"policy exact-match rule\\\",\\n    \\\"pending authority finding\\\"\\n  ],\\n  \\\"final_answer\\\": \\\"ESCALATE. REL-YAR-079 explicitly leaves workspace YAR-RISK-2 transfer authority pending despite matching dataset, recipient, and date. DES-YAR-079 confirms planning-only scope. STD-YAR-079-P requires full authority closure before execution. Source boundary remains open due to unresolved transfer authority.\\\",\\n  \\\"open_blockers\\\": [\\n    \\\"Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement.\\\"\\n  ],\\n  \\\"verification_verdict\\\": \\\"ESCALATE\\\",\\n  \\\"worker_role\\\": \\\"SOURCE_BOUNDARY_MAPPER\\\"\\n}\"},\"raw_prior_outputs\":[{\"turn_id\":\"HV-KITC-079-B_W1\",\"worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May operations execute the regulated data export?\",\"allow_rule_assessment\":\"No match; REL-YAR-079 states workspace YAR-RISK-2 transfer authority remains pending\",\"escalate_rule_assessment\":\"Authority pending blocks execution per STD-YAR-079-P exact-match rule\",\"timing_scope_authority_dependency_check\":\"Transfer authority unresolved for 2026-06-28 export\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"REL-YAR-079: workspace YAR-RISK-2 transfer authority remains pending\"},\"cited_evidence\":[\"REL-YAR-079\",\"DES-YAR-079\",\"STD-YAR-079-P\"],\"open_blockers\":[\"transfer authority remains pending\"],\"critical_features_preserved\":[\"exact source IDs\",\"action boundary\",\"policy exact-match rule\"],\"final_answer\":\"ESCALATE. REL-YAR-079 explicitly leaves workspace YAR-RISK-2 transfer authority pending despite matching dataset, recipient, and date. DES-YAR-079 confirms planning-only scope. STD-YAR-079-P requires full authority closure before execution. Source boundary remains open.\"},\"gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":true,\"failures\":[],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\",\"source_id_count\":4,\"critical_term_count\":3}},{\"turn_id\":\"HV-KITC-079-B_W2\",\"worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May operations execute the regulated data export?\",\"allow_rule_assessment\":\"No match; REL-YAR-079 states workspace YAR-RISK-2 transfer authority remains pending.\",\"escalate_rule_assessment\":\"Authority pending blocks execution per STD-YAR-079-P exact-match rule.\",\"timing_scope_authority_dependency_check\":\"Transfer authority unresolved for 2026-06-28 export.\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"REL-YAR-079: workspace YAR-RISK-2 transfer authority remains pending.\"},\"cited_evidence\":[\"REL-YAR-079\",\"DES-YAR-079\",\"STD-YAR-079-P\"],\"open_blockers\":[\"Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement.\"],\"critical_features_preserved\":[\"exact source IDs\",\"action boundary\",\"policy exact-match rule\",\"pending authority finding\"],\"final_answer\":\"ESCALATE. REL-YAR-079 explicitly leaves workspace YAR-RISK-2 transfer authority pending despite matching dataset, recipient, and date. DES-YAR-079 confirms planning-only scope. STD-YAR-079-P requires full authority closure before execution. Source boundary remains open due to unresolved transfer authority.\"},\"gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":true,\"failures\":[],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\",\"source_id_count\":4,\"critical_term_count\":3}}],\"full_latest_gov_baton\":{\"gov_command\":\"CONTROL_ROUTER\",\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"verification_verdict\":\"ESCALATE\",\"control_action\":\"CONTINUE_REPAIR\",\"route_verdict\":\"CONTINUE_WORKER\",\"source_gate_interpretation\":\"Both worker outputs correctly identify REL-YAR-079 transfer authority for workspace YAR-RISK-2 as pending. Deterministic gate passed with ESCALATE binding SOURCE_BOUNDARY_OPEN. Full authority closure document absent from source_ids_used_so_far.\",\"must_preserve\":[\"exact source IDs (REL-YAR-079, DES-YAR-079, EXP-YAR-079, STD-YAR-079-P)\",\"action boundary: May operations execute the regulated data export?\",\"pending transfer authority finding per REL-YAR-079\",\"STD-YAR-079-P exact-match rule requiring all conditions before execution\",\"SOURCE_BOUNDARY_OPEN binding class\",\"critical features preserved across both workers: exact source IDs, action boundary, policy exact-match rule, pending authority finding\"],\"must_repair\":[\"Authority-chain gap: no document confirms closure of workspace YAR-RISK-2 transfer authority pending status\",\"Source boundary remains open due to unresolved transfer authority dependency\"],\"blocked_moves\":[\"FAIL_CLOSED\",\"FINAL_COMPILER\",\"Claiming DES-YAR-079 satisfies execution authority requirement\",\"Treating planning approval as transfer release\",\"Accepting placeholder authority as resolved\",\"Closing source boundary without authority closure document\",\"Asserting pending status is acceptable under STD-YAR-079-P exact-match rule\"],\"dependency_ledger\":[\"TRANSFER_AUTHORITY_PENDING: Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement; dependency status UNRESOLVED\"],\"next_worker_baton\":{\"objective\":\"Repair SOURCE_BOUNDARY_OPEN by verifying whether any authority closure document exists or whether pending status can be resolved under governance rules\",\"attack_focus\":\"Challenge any claim that pending status satisfies exact-match rule; verify source boundary remains open absent explicit authority closure; prevent assumption of resolution without documented evidence\",\"required_repairs\":[\"Document the specific gap: REL-YAR-079 pending status leaves STD-YAR-079-P exact-match rule unsatisfied\",\"Identify whether governance rules permit conditional execution or require absolute authority closure before proceeding\",\"Verify no additional source document in available sources closes the transfer authority dependency\"],\"monotonic_preservation\":[\"ESCALATE verdict for SOURCE_BOUNDARY_OPEN\",\"Pending transfer authority finding per REL-YAR-079\",\"All critical features from prior worker outputs\",\"STD-YAR-079-P exact-match requirement\",\"YAR-RISK-2 workspace transfer authority remains unresolved\"]},\"final_compiler_allowed\":false,\"artifact_requirements\":{\"source_ids_used_so_far\":[\"DES-YAR-079\",\"EXP-YAR-079\",\"REL-YAR-079\",\"STD-YAR-079-P\"],\"existing_source_ids\":[\"DES-YAR-079\",\"EXP-YAR-079\",\"REL-YAR-079\",\"STD-YAR-079-P\"],\"may_request_additional_sources\":false,\"must_cite_all_critical\":\"true\"},\"critical_verification_requirements\":{\"policy_name\":\"STD-YAR-079-P\",\"policy_requirement\":\"Regulated data export is complete only when transfer release matches dataset, destination workspace, recipient entity, export date, and transfer authority before execution.\",\"matched_conditions\":[\"dataset DS-19\",\"recipient Yara Analytics\",\"export date 2026-06-28\",\"workspace YAR-RISK-2\"],\"unmatched_conditions\":[\"transfer authority for workspace YAR-RISK-2 marked PENDING\"],\"verification_status\":\"INCOMPLETE\",\"blocking_condition\":\"Transfer authority unresolved\"},\"control_directive\":\"Maintain ESCALATE route with CONTINUE_WORKER to preserve source boundary verification integrity. Do not permit FINAL_COMPILER or FAIL_CLOSED. Block any move that treats pending authority as resolved or substitutes planning approval for execution authority. All prior blocked moves remain in effect.\"},\"current_turn_command\":\"Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "current_turn_command": "Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.",
+    "full_latest_gov_baton": {
+      "artifact_requirements": {
+        "existing_source_ids": [
+          "DES-YAR-079",
+          "EXP-YAR-079",
+          "REL-YAR-079",
+          "STD-YAR-079-P"
+        ],
+        "may_request_additional_sources": false,
+        "must_cite_all_critical": "true",
+        "source_ids_used_so_far": [
+          "DES-YAR-079",
+          "EXP-YAR-079",
+          "REL-YAR-079",
+          "STD-YAR-079-P"
+        ]
+      },
+      "blocked_moves": [
+        "FAIL_CLOSED",
+        "FINAL_COMPILER",
+        "Claiming DES-YAR-079 satisfies execution authority requirement",
+        "Treating planning approval as transfer release",
+        "Accepting placeholder authority as resolved",
+        "Closing source boundary without authority closure document",
+        "Asserting pending status is acceptable under STD-YAR-079-P exact-match rule"
+      ],
+      "control_action": "CONTINUE_REPAIR",
+      "control_directive": "Maintain ESCALATE route with CONTINUE_WORKER to preserve source boundary verification integrity. Do not permit FINAL_COMPILER or FAIL_CLOSED. Block any move that treats pending authority as resolved or substitutes planning approval for execution authority. All prior blocked moves remain in effect.",
+      "critical_verification_requirements": {
+        "blocking_condition": "Transfer authority unresolved",
+        "matched_conditions": [
+          "dataset DS-19",
+          "recipient Yara Analytics",
+          "export date 2026-06-28",
+          "workspace YAR-RISK-2"
+        ],
+        "policy_name": "STD-YAR-079-P",
+        "policy_requirement": "Regulated data export is complete only when transfer release matches dataset, destination workspace, recipient entity, export date, and transfer authority before execution.",
+        "unmatched_conditions": [
+          "transfer authority for workspace YAR-RISK-2 marked PENDING"
+        ],
+        "verification_status": "INCOMPLETE"
+      },
+      "dependency_ledger": [
+        "TRANSFER_AUTHORITY_PENDING: Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement; dependency status UNRESOLVED"
+      ],
+      "final_compiler_allowed": false,
+      "gov_command": "CONTROL_ROUTER",
+      "gov_mode": "CONTROL_ROUTER",
+      "must_preserve": [
+        "exact source IDs (REL-YAR-079, DES-YAR-079, EXP-YAR-079, STD-YAR-079-P)",
+        "action boundary: May operations execute the regulated data export?",
+        "pending transfer authority finding per REL-YAR-079",
+        "STD-YAR-079-P exact-match rule requiring all conditions before execution",
+        "SOURCE_BOUNDARY_OPEN binding class",
+        "critical features preserved across both workers: exact source IDs, action boundary, policy exact-match rule, pending authority finding"
+      ],
+      "must_repair": [
+        "Authority-chain gap: no document confirms closure of workspace YAR-RISK-2 transfer authority pending status",
+        "Source boundary remains open due to unresolved transfer authority dependency"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "Challenge any claim that pending status satisfies exact-match rule; verify source boundary remains open absent explicit authority closure; prevent assumption of resolution without documented evidence",
+        "monotonic_preservation": [
+          "ESCALATE verdict for SOURCE_BOUNDARY_OPEN",
+          "Pending transfer authority finding per REL-YAR-079",
+          "All critical features from prior worker outputs",
+          "STD-YAR-079-P exact-match requirement",
+          "YAR-RISK-2 workspace transfer authority remains unresolved"
+        ],
+        "objective": "Repair SOURCE_BOUNDARY_OPEN by verifying whether any authority closure document exists or whether pending status can be resolved under governance rules",
+        "required_repairs": [
+          "Document the specific gap: REL-YAR-079 pending status leaves STD-YAR-079-P exact-match rule unsatisfied",
+          "Identify whether governance rules permit conditional execution or require absolute authority closure before proceeding",
+          "Verify no additional source document in available sources closes the transfer authority dependency"
+        ]
+      },
+      "route_verdict": "CONTINUE_WORKER",
+      "source_gate_interpretation": "Both worker outputs correctly identify REL-YAR-079 transfer authority for workspace YAR-RISK-2 as pending. Deterministic gate passed with ESCALATE binding SOURCE_BOUNDARY_OPEN. Full authority closure document absent from source_ids_used_so_far.",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ESCALATE"
+    },
+    "gov_routing_lens": {
+      "blocked_move": "FAIL_CLOSED",
+      "current_objective": "FINAL_COMPILER",
+      "main_repair_target": "Authority-chain gap: no document confirms closure of workspace YAR-RISK-2 transfer authority pending status",
+      "route_verdict": "CONTINUE_WORKER",
+      "unresolved_dependency": "TRANSFER_AUTHORITY_PENDING: Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement; dependency status UNRESOLVED"
+    },
+    "raw_prior_outputs": [
+      {
+        "gate_result": {
+          "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+          "artifact_verdict": "ESCALATE",
+          "critical_term_count": 3,
+          "failures": [],
+          "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+          "passed": true,
+          "source_id_count": 4
+        },
+        "turn_id": "HV-KITC-079-B_W1",
+        "worker_output": {
+          "boundary_binding": {
+            "action_boundary": "May operations execute the regulated data export?",
+            "allow_rule_assessment": "No match; REL-YAR-079 states workspace YAR-RISK-2 transfer authority remains pending",
+            "binding_class": "SOURCE_BOUNDARY_OPEN",
+            "controlling_source_fact": "REL-YAR-079: workspace YAR-RISK-2 transfer authority remains pending",
+            "escalate_rule_assessment": "Authority pending blocks execution per STD-YAR-079-P exact-match rule",
+            "timing_scope_authority_dependency_check": "Transfer authority unresolved for 2026-06-28 export"
+          },
+          "cited_evidence": [
+            "REL-YAR-079",
+            "DES-YAR-079",
+            "STD-YAR-079-P"
+          ],
+          "critical_features_preserved": [
+            "exact source IDs",
+            "action boundary",
+            "policy exact-match rule"
+          ],
+          "final_answer": "ESCALATE. REL-YAR-079 explicitly leaves workspace YAR-RISK-2 transfer authority pending despite matching dataset, recipient, and date. DES-YAR-079 confirms planning-only scope. STD-YAR-079-P requires full authority closure before execution. Source boundary remains open.",
+          "open_blockers": [
+            "transfer authority remains pending"
+          ],
+          "verification_verdict": "ESCALATE",
+          "worker_role": "SOURCE_BOUNDARY_MAPPER"
+        }
+      },
+      {
+        "gate_result": {
+          "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+          "artifact_verdict": "ESCALATE",
+          "critical_term_count": 3,
+          "failures": [],
+          "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+          "passed": true,
+          "source_id_count": 4
+        },
+        "turn_id": "HV-KITC-079-B_W2",
+        "worker_output": {
+          "boundary_binding": {
+            "action_boundary": "May operations execute the regulated data export?",
+            "allow_rule_assessment": "No match; REL-YAR-079 states workspace YAR-RISK-2 transfer authority remains pending.",
+            "binding_class": "SOURCE_BOUNDARY_OPEN",
+            "controlling_source_fact": "REL-YAR-079: workspace YAR-RISK-2 transfer authority remains pending.",
+            "escalate_rule_assessment": "Authority pending blocks execution per STD-YAR-079-P exact-match rule.",
+            "timing_scope_authority_dependency_check": "Transfer authority unresolved for 2026-06-28 export."
+          },
+          "cited_evidence": [
+            "REL-YAR-079",
+            "DES-YAR-079",
+            "STD-YAR-079-P"
+          ],
+          "critical_features_preserved": [
+            "exact source IDs",
+            "action boundary",
+            "policy exact-match rule",
+            "pending authority finding"
+          ],
+          "final_answer": "ESCALATE. REL-YAR-079 explicitly leaves workspace YAR-RISK-2 transfer authority pending despite matching dataset, recipient, and date. DES-YAR-079 confirms planning-only scope. STD-YAR-079-P requires full authority closure before execution. Source boundary remains open due to unresolved transfer authority.",
+          "open_blockers": [
+            "Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement."
+          ],
+          "verification_verdict": "ESCALATE",
+          "worker_role": "SOURCE_BOUNDARY_MAPPER"
+        }
+      }
+    ],
+    "run_lock": {
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-079-B",
+      "pair_id": "HV-KITC-079",
+      "run_id": "run_20260629T014004Z",
+      "worker_index": 3,
+      "worker_role": "FINAL_COMPILER"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "HV-KITC-079-B",
+        "currency": "USD",
+        "description": "May operations execute the regulated data export?",
+        "type": "data_export",
+        "vendor": "Yara Analytics"
+      },
+      "context": {
+        "action_boundary": "May operations execute the regulated data export?",
+        "anomaly_observed": "A design review note exists but is limited to architecture planning; a transfer release may close execution.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Export EXP-YAR-079 transfers dataset DS-19 to workspace YAR-RISK-2 for Yara Analytics on 2026-06-28.",
+            "doc_id": "EXP-YAR-079",
+            "type": "source_record"
+          },
+          {
+            "content": "Design review DES-YAR-079 approves workspace architecture for planning only and is not transfer execution authority.",
+            "doc_id": "DES-YAR-079",
+            "type": "source_record"
+          },
+          {
+            "content": "Transfer release REL-YAR-079 covers dataset DS-19 and Yara Analytics for export date 2026-06-28; workspace YAR-RISK-2 transfer authority remains pending.",
+            "doc_id": "REL-YAR-079",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Regulated data export is complete only when transfer release matches dataset, destination workspace, recipient entity, export date, and transfer authority before execution.",
+            "doc_id": "STD-YAR-079-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": {
+        "artifact_id": "HV-KITC-079-B_WORKER_02",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "critical_feature_count": 4,
+        "dna": "google",
+        "full_output_ref": "artifacts/HV-KITC-079-B_WORKER_02.json",
+        "gate_failures": [],
+        "gate_passed": true,
+        "gate_status": "PASS",
+        "hash": "45d8544993105adc3662ddad010ce7214c0bf455be7532b1485f5d470d400c78",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_number": 2,
+        "verification_verdict": "ESCALATE"
+      },
+      "blocked_moves_so_far": [
+        "FAIL_CLOSED",
+        "FINAL_COMPILER",
+        "Claiming DES-YAR-079 satisfies execution authority requirement",
+        "Treating planning approval as transfer release",
+        "Selecting alternative model",
+        "Accepting placeholder authority as resolved",
+        "FAIL_CLOSED",
+        "FINAL_COMPILER",
+        "Claiming DES-YAR-079 satisfies execution authority requirement",
+        "Treating planning approval as transfer release",
+        "Accepting placeholder authority as resolved",
+        "Closing source boundary without authority closure document",
+        "Asserting pending status is acceptable under STD-YAR-079-P exact-match rule"
+      ],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-079-B",
+      "pair_id": "HV-KITC-079",
+      "pinned_best_artifact_full_text": "{\n  \"boundary_binding\": {\n    \"action_boundary\": \"May operations execute the regulated data export?\",\n    \"allow_rule_assessment\": \"No match; REL-YAR-079 states workspace YAR-RISK-2 transfer authority remains pending.\",\n    \"binding_class\": \"SOURCE_BOUNDARY_OPEN\",\n    \"controlling_source_fact\": \"REL-YAR-079: workspace YAR-RISK-2 transfer authority remains pending.\",\n    \"escalate_rule_assessment\": \"Authority pending blocks execution per STD-YAR-079-P exact-match rule.\",\n    \"timing_scope_authority_dependency_check\": \"Transfer authority unresolved for 2026-06-28 export.\"\n  },\n  \"cited_evidence\": [\n    \"REL-YAR-079\",\n    \"DES-YAR-079\",\n    \"STD-YAR-079-P\"\n  ],\n  \"critical_features_preserved\": [\n    \"exact source IDs\",\n    \"action boundary\",\n    \"policy exact-match rule\",\n    \"pending authority finding\"\n  ],\n  \"final_answer\": \"ESCALATE. REL-YAR-079 explicitly leaves workspace YAR-RISK-2 transfer authority pending despite matching dataset, recipient, and date. DES-YAR-079 confirms planning-only scope. STD-YAR-079-P requires full authority closure before execution. Source boundary remains open due to unresolved transfer authority.\",\n  \"open_blockers\": [\n    \"Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement.\"\n  ],\n  \"verification_verdict\": \"ESCALATE\",\n  \"worker_role\": \"SOURCE_BOUNDARY_MAPPER\"\n}",
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T014004Z",
+      "source_ids_used_so_far": [
+        "DES-YAR-079",
+        "EXP-YAR-079",
+        "REL-YAR-079",
+        "STD-YAR-079-P"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "7ac2ec84dd4c4eca16aabfefee0c96ac042dd4153c391d0e0eb7a3a0b116656f",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-079-B_WORKER_01.json",
+          "gate_status": "PASS",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ESCALATE",
+          "role": "worker",
+          "source_ids": [
+            "DES-YAR-079",
+            "EXP-YAR-079",
+            "REL-YAR-079",
+            "STD-YAR-079-P"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-079-B_W1"
+        },
+        {
+          "artifact_hash": "4c39a0d35479cc06d82115ba72b923e3369d9cbd016c4a1b7695e433b11ca86f",
+          "blocked_moves": [
+            "FAIL_CLOSED",
+            "FINAL_COMPILER",
+            "Claiming DES-YAR-079 satisfies execution authority requirement",
+            "Treating planning approval as transfer release",
+            "Selecting alternative model",
+            "Accepting placeholder authority as resolved"
+          ],
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-079-B_G1.json",
+          "gate_status": "PASS",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "output_summary": "Gov local verdict ESCALATE route CONTINUE_WORKER",
+          "role": "gov",
+          "source_ids": [
+            "DES-YAR-079",
+            "EXP-YAR-079",
+            "REL-YAR-079",
+            "STD-YAR-079-P"
+          ],
+          "turn": 2,
+          "turn_id": "HV-KITC-079-B_G1"
+        },
+        {
+          "artifact_hash": "45d8544993105adc3662ddad010ce7214c0bf455be7532b1485f5d470d400c78",
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-079-B_WORKER_02.json",
+          "gate_status": "PASS",
+          "model": "google/gemini-2.5-flash-lite",
+          "output_summary": "ADVERSARIAL_SCOPE_CHALLENGER local verdict ESCALATE",
+          "role": "worker",
+          "source_ids": [
+            "DES-YAR-079",
+            "EXP-YAR-079",
+            "REL-YAR-079",
+            "STD-YAR-079-P"
+          ],
+          "turn": 3,
+          "turn_id": "HV-KITC-079-B_W2"
+        },
+        {
+          "artifact_hash": "91b7d4d9990f7e959efa3f5e8c36caab79e8fbc734d6658d2d8ac0bb91d10950",
+          "blocked_moves": [
+            "FAIL_CLOSED",
+            "FINAL_COMPILER",
+            "Claiming DES-YAR-079 satisfies execution authority requirement",
+            "Treating planning approval as transfer release",
+            "Accepting placeholder authority as resolved",
+            "Closing source boundary without authority closure document",
+            "Asserting pending status is acceptable under STD-YAR-079-P exact-match rule"
+          ],
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-079-B_G2.json",
+          "gate_status": "PASS",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "output_summary": "Gov local verdict ESCALATE route CONTINUE_WORKER",
+          "role": "gov",
+          "source_ids": [
+            "DES-YAR-079",
+            "EXP-YAR-079",
+            "REL-YAR-079",
+            "STD-YAR-079-P"
+          ],
+          "turn": 4,
+          "turn_id": "HV-KITC-079-B_G2"
+        }
+      ],
+      "unresolved_dependencies": [
+        "TRANSFER_AUTHORITY_PENDING: Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement; dependency status UNRESOLVED"
+      ]
+    },
+    "system_role": "HoloVerify worker. Preserve state. Obey Gov.",
+    "task_and_answer_contract": {
+      "answer_contract": {
+        "boundary_binding": {
+          "action_boundary": "string",
+          "allow_rule_assessment": "string",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+          "controlling_source_fact": "string",
+          "escalate_rule_assessment": "string",
+          "timing_scope_authority_dependency_check": "string"
+        },
+        "cited_evidence": [
+          "exact source doc_id"
+        ],
+        "critical_features_preserved": [
+          "string"
+        ],
+        "final_answer": "string",
+        "open_blockers": [
+          "string"
+        ],
+        "verification_verdict": "ALLOW | ESCALATE",
+        "worker_role": "string"
+      },
+      "deterministic_gate_categories": [
+        "word band",
+        "required sections",
+        "source IDs",
+        "invented source IDs",
+        "timing/scope/authority/dependency section",
+        "action-boundary violations",
+        "critical dependencies/traps"
+      ],
+      "source_rules": [
+        "cite exact doc_id values only",
+        "do not invent source IDs",
+        "ALLOW only when exact current source boundary is closed before execution",
+        "ESCALATE when a narrow source-record defect remains open before execution"
+      ],
+      "task": "Decide whether the action may proceed using only source records in this packet.",
+      "word_band": "final_answer 25-120 words"
+    }
+  }
+}

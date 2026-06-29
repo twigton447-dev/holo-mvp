@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 68900,
+    "business_ref": "HV-KITC-074-A",
+    "currency": "USD",
+    "description": "May AP release payment after a sanctions near-match remains visible?",
+    "type": "payment_release",
+    "vendor": "Tessa Medical GmbH"
+  },
+  "context": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "anomaly_observed": "A sanctions monitoring flag remains visible after compliance review.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Payment PAY-TES-074 releases USD 68900 to Tessa Medical GmbH, Germany, tax ID DE-4481, account ending 7205.",
+        "doc_id": "PAY-TES-074",
+        "type": "source_record"
+      },
+      {
+        "content": "Monitoring flag FLAG-TES-074 remains visible for Tessa Medica LLC, Belarus, no tax ID match, no account match.",
+        "doc_id": "FLAG-TES-074",
+        "type": "source_record"
+      },
+      {
+        "content": "Clearance CLR-TES-074 covers Tessa Medical GmbH, Germany, tax ID DE-4481, account ending 7205, and disposition monitor-only no-block before release.",
+        "doc_id": "CLR-TES-074",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Sanctions near-match is closed only when clearance matches legal name, country, tax ID, account, and monitoring disposition before release. Monitor-only no-block disposition permits release when the exact counterparty and account match.",
+        "doc_id": "STD-TES-074-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

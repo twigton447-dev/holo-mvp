@@ -1,0 +1,41 @@
+{
+  "blocked_moves": [
+    "FINAL_COMPILER disallowed until gate passes",
+    "FAIL_CLOSED inappropriate since source chain is substantively correct"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Repair 041 remains open per previous unresolved dependency; added: missing critical_term:8821 tracking requires explicit artifact annotation."
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+  "must_preserve": [
+    "exact source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "SOURCE_BOUNDARY_CLOSED binding class",
+    "chain of four gates (pre-change callback + vendor-master approval + bank ownership + release authority)"
+  ],
+  "must_repair": [
+    "critical_term:8821 must be explicitly noted as preserved across all source IDs in artifact output",
+    "critical feature count mismatch: gate expects 6 but artifact provides incomplete tracking",
+    "ALERT-QUA-071 bank-change alert should be explicitly referenced in chain closure"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Ensure every cited source ID is explicitly linked to the critical account number 8821; confirm ALERT-QUA-071 closure in the context of the updated account; annotate critical feature preservation explicitly in output",
+    "monotonic_preservation": "All four policy gates closed correctly; no source bindings disputed; vendor/amount/currency/date/account all verified across chain",
+    "objective": "Repair the deterministic gate failure by explicitly extracting and preserving critical term 8821 (bank account ending) across all four gate-closing source records",
+    "required_repairs": [
+      "Add explicit critical_term annotation: account number 8821 preserved in CALL-QUA-071, VM-QUA-071, BANK-QUA-071, REL-QUA-071, and PAY-QUA-071",
+      "Include ALERT-QUA-071 in cited evidence chain to acknowledge bank-change context",
+      "Increase critical_feature_count to match gate expectation of 6"
+    ]
+  },
+  "packet_id": "HV-KITC-071-A",
+  "pair_id": "HV-KITC-071",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T013130Z",
+  "source_gate_interpretation": "Deterministic gate FAIL reveals artifact preserved source IDs and binding class but failed to explicitly track critical term 8821 across the chain. The source evidence chain is sound (CALL-QUA-071, VM-QUA-071, BANK-QUA-071, REL-QUA-071 all confirm account ending 8821). Gate failure is due to incomplete critical feature annotation, not incorrect source binding.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

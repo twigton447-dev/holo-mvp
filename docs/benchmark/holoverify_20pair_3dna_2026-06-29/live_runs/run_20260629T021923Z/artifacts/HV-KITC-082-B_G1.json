@@ -1,0 +1,39 @@
+{
+  "blocked_moves": [
+    "treating FEAS-BOR-082 as execution authority",
+    "treating planning artifact as closure evidence",
+    "authority-chain shortcut bypassing consent-status check"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "[UNRESOLVED] 047-style abstract-field trap in clinical activation: consent-status class remains unproven. Source AUTH-BOR-082 confirms C12 pending; FEAS-BOR-082 confirms separate verification required; STD-BOR-082-P confirms consent-status class match required. No closure evidence exists for abstract consent-status class."
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "source IDs (ACT-BOR-082, AUTH-BOR-082, FEAS-BOR-082, STD-BOR-082-P)",
+    "action boundary (May clinical operations activate the trial site?)",
+    "policy exact-match rule (consent-status class before enrollment)",
+    "pending consent C12 finding per AUTH-BOR-082",
+    "abstract consent-status class unproven before enrollment"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Verify no alternative source supersedes pending consent status; confirm FEAS-BOR-082 is planning artifact only, not execution authority.",
+    "monotonic_preservation": "Maintain all 4 source IDs, action boundary, policy rule, and pending-consent finding. Do not invert ESCALATE to ALLOW without new consent-status closure evidence.",
+    "objective": "Compile final boundary-closure record: confirm action blocked pending consent-status class resolution; log escalation for consent-status closure workflow.",
+    "required_repairs": [
+      "Resolve abstract consent-status class (pending C12) through formal consent-status closure document or updated AUTH-BOR-082 superseding document"
+    ],
+    "source_ids_to_invoke": [
+      "ACT-BOR-082",
+      "AUTH-BOR-082",
+      "FEAS-BOR-082",
+      "STD-BOR-082-P"
+    ]
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "Gate PASSED. Worker ESCALATE verdict is source-consistent: AUTH-BOR-082 states consent C12 remains pending; FEAS-BOR-082 mandates separate verification before enrollment; STD-BOR-082-P requires consent-status class match. No repair needed; verdict stands.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

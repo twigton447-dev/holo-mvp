@@ -1,0 +1,60 @@
+{
+  "blocked_moves": [
+    "treating WARN-JAD-090 as resolution of status-class dependency",
+    "treating CERT-JAD-090 TX-44 listing as exemption-status class confirmation",
+    "inferring exemption-status class without explicit CERT-JAD-090 statement",
+    "proceeding to ALLOW without status-class closure",
+    "citing ORD-JAD-090 as authority for tax exemption"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "082_style_status_class_trap: UNRESOLVED - CERT-JAD-090 lists TX-44 certificate but does not explicitly confirm exemption-status class. WARN-JAD-090 warning remains active. Status-class dependency per STD-JAD-090-P requires explicit confirmation before sale can proceed."
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "CONTROL_ROUTER",
+  "gov_diagnosis": "Worker correctly identified open exemption-status class dependency and produced ESCALATE verdict with SOURCE_BOUNDARY_OPEN binding. Gate failures stem from artifact presentation deficiencies (missing critical term extraction) rather than source boundary errors. CERT-JAD-090 source material contains all required critical terms but worker output failed to explicitly extract them. The 082-style status-class trap remains unresolved per STD-JAD-090-P. Repair artifact to surface source-boundary evidence without changing verdict.",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "exemption-status class dependency (082-style trap)",
+    "action boundary: May order operations release the tax-exempt sale?",
+    "CERT-JAD-090 as controlling source for exemption authority verification",
+    "WARN-JAD-090 as open blocker",
+    "STD-JAD-090-P exact-match policy requirement",
+    "sale date 2026-06-28 match",
+    "buyer: Jade University from CERT-JAD-090",
+    "ship-to state: Texas from CERT-JAD-090",
+    "tax category: lab equipment from CERT-JAD-090"
+  ],
+  "must_repair": [
+    "missing_critical_term:Jade University (explicit extraction from CERT-JAD-090)",
+    "missing_critical_term:Texas (explicit extraction from CERT-JAD-090)",
+    "missing_critical_term:lab equipment (explicit extraction from CERT-JAD-090)",
+    "action_boundary_verdict_mismatch (align artifact output with source-boundary binding)"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Verify CERT-JAD-090 contains explicit language confirming exemption-status class. If no such language exists, document the exact gap and maintain ESCALATE.",
+    "monotonic_preservation": [
+      "ESCALATE verdict for unresolved exemption-status class",
+      "SOURCE_BOUNDARY_OPEN binding",
+      "WARN-JAD-090 as open blocker",
+      "STD-JAD-090-P as controlling policy",
+      "CERT-JAD-090 as primary evidence with documented gap"
+    ],
+    "objective": "Extract and explicitly cite the critical terms from CERT-JAD-090 to repair artifact presentation. Confirm whether CERT-JAD-090 resolves or leaves open the exemption-status class dependency.",
+    "required_repairs": [
+      "Explicitly cite Jade University from CERT-JAD-090 exemption authority",
+      "Explicitly cite Texas ship-to from CERT-JAD-090 exemption authority",
+      "Explicitly cite lab equipment category from CERT-JAD-090 exemption authority",
+      "Align action_boundary verdict output with SOURCE_BOUNDARY_OPEN binding"
+    ]
+  },
+  "packet_id": "HV-KITC-090-A",
+  "pair_id": "HV-KITC-090",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T021923Z",
+  "source_gate_interpretation": "Worker verdict ESCALATE and binding SOURCE_BOUNDARY_OPEN are correct. Gate failures indicate artifact presentation defects (missing critical terms), not source boundary errors. CERT-JAD-090 source material contains Jade University, Texas, and lab equipment. The unresolved exemption-status class dependency justifies ESCALATE. Proceed with repair of artifact presentation only.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

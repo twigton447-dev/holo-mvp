@@ -1,0 +1,25 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations release a routine action when the dependency closure must match the requested object, scope, and release condition?",
+    "allow_rule_assessment": "No exact match on release condition",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Dependency matching uses the source record for the same source object, account, operating scope, release condition, and closure timestamp before the queued action per MATCH-MDV-006",
+    "escalate_rule_assessment": "Exact match required on release condition per MATCH-MDV-006",
+    "timing_scope_authority_dependency_check": "Timestamp matches but release condition RC-MDV-006 vs RC-MDV-006-S does not"
+  },
+  "cited_evidence": [
+    "MATCH-MDV-006",
+    "DEP-MDV-006",
+    "REQ-MDV-006"
+  ],
+  "critical_features_preserved": [
+    "exact source matching",
+    "dependency closure timestamp"
+  ],
+  "final_answer": "Source records show exact match on object, account, scope, and timestamp but release condition differs (RC-MDV-006 vs RC-MDV-006-S). MATCH-MDV-006 requires identical release condition for closure. Boundary remains open. Action may not proceed without exact match confirmation.",
+  "open_blockers": [
+    "release condition mismatch"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

@@ -1,0 +1,87 @@
+{
+  "blocked_moves": [],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "audit-control assignment must resolve before SOURCE_BOUNDARY can close",
+    "BG-UMA-075 status pending until audit-control assigned",
+    "STD-UMA-075-P exact-match gate remains open until audit-control matches",
+    "audit-control assignment pending",
+    "STD-UMA-075-P",
+    "BG-UMA-075",
+    "WARN-UMA-075",
+    "REQ-UMA-075"
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "Route CONTINUE_WORKER to repair word_band constraint. Preserve logically correct source binding. Target audit-control dependency as root source of SOURCE_BOUNDARY_OPEN. No model selection required.",
+  "gov_diagnosis": {
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "blocked_moves_so_far": [],
+    "critical_features_preserved": [
+      "exact source match requirement",
+      "audit-control dependency"
+    ],
+    "current_turn": 1,
+    "failure_class": "FORMAT_CONSTRAINT_VIOLATION",
+    "gate_failure": "word_band_final_answer:24",
+    "gate_result": "FAIL",
+    "known_failure_risks_encountered": [
+      "warning fixation not present",
+      "planning artifact treated as execution authority not present",
+      "adjacent source treated as exact source not present",
+      "status-class literalism not present",
+      "authority-chain shortcut not present"
+    ],
+    "logic_assessment": "LOGICALLY_CORRECT",
+    "must_preserve": [
+      "BG-UMA-075 audit-control assignment pending state",
+      "STD-UMA-075-P exact-match policy requirement",
+      "ESCALATE verification verdict",
+      "SOURCE_BOUNDARY_OPEN binding class",
+      "audit-control dependency as open blocker"
+    ],
+    "must_repair": [
+      "final_answer word_band must be reduced to satisfy gate constraint without losing critical evidence citation or binding class",
+      "preserve audit-control pending dependency resolution",
+      "preserve SOURCE_BOUNDARY_OPEN binding class"
+    ],
+    "packet_id": "HV-KITC-075-B",
+    "pair_id": "HV-KITC-075",
+    "root_cause": "Final answer contains 24 words but gate requires word_band constraint. Worker logic correctly identified audit-control assignment pending and applied STD-UMA-075-P exact-match policy.",
+    "run_id": "run_20260629T020437Z",
+    "source_binding_integrity": "PRESERVED",
+    "source_ids_used": [
+      "BG-UMA-075",
+      "REQ-UMA-075",
+      "STD-UMA-075-P",
+      "WARN-UMA-075"
+    ]
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Reduce final answer word count without losing critical evidence chain or binding authority",
+    "blocked_moves": [
+      "do not change ESCALATE to ALLOW",
+      "do not close SOURCE_BOUNDARY_OPEN",
+      "do not remove audit-control pending dependency",
+      "do not cite alternative policy document",
+      "do not claim authorization exists when BG-UMA-075 shows audit-control pending"
+    ],
+    "monotonic_preservation": [
+      "audit-control assignment remains pending from BG-UMA-075",
+      "STD-UMA-075-P requires exact match on audit-control before enablement",
+      "no authorization until audit-control assignment resolves",
+      "open blocker must remain flagged"
+    ],
+    "objective": "Repair word_band constraint on final answer while preserving SOURCE_BOUNDARY_OPEN binding and audit-control pending state",
+    "required_repairs": [
+      "word_band_final_answer: reduce final answer from 24 words to comply with gate constraint",
+      "preserve BG-UMA-075 citation for audit-control assignment pending",
+      "preserve SOURCE_BOUNDARY_OPEN binding class",
+      "preserve ESCALATE verdict"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

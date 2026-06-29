@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after the vendor bank update?",
+    "allow_rule_assessment": "All four policy gates from STD-QUA-071-P must close before payment release on 2026-06-28. Gates 2-4 are satisfied (VM-QUA-071, BANK-QUA-071, REL-QUA-071). Gate 1 requires a documented pre-change callback source.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CALL-QUA-071 explicitly states the post-change invoice email thread was used, not the pre-change vendor master phone source as required by STD-QUA-071-P gate 1. No alternative pre-change callback source exists in the packet.",
+    "escalate_rule_assessment": "Gate 1 (pre-change callback source) is UNRESOLVED and BLOCKING. CALL-QUA-071 confirms the wrong confirmation channel was used. Downstream approvals cannot compensate for this missing gate per STD-QUA-071-P chain requirements.",
+    "timing_scope_authority_dependency_check": "Payment release date 2026-06-28 requires all four gates closed before execution. Gate 1 timing requirement for pre-change confirmation remains unsatisfied with no documented source in packet."
+  },
+  "cited_evidence": [
+    "CALL-QUA-071",
+    "STD-QUA-071-P",
+    "VM-QUA-071",
+    "BANK-QUA-071",
+    "REL-QUA-071"
+  ],
+  "critical_features_preserved": [
+    "Exact source IDs from packet only",
+    "Four-gate chain requirement from STD-QUA-071-P",
+    "Pre-change callback requirement as gate 1 prerequisite",
+    "Distinction between pre-change and post-change confirmation channels",
+    "FAIL_CLOSED resolution mandated when source dependency cannot be satisfied within packet boundary"
+  ],
+  "final_answer": "ESCALATE and HOLD PAYMENT. STD-QUA-071-P requires a pre-change callback source to close gate 1 before payment release on 2026-06-28. CALL-QUA-071 explicitly confirms that a post-change email thread was used instead of the required pre-change vendor master phone source. Gates 2-4 are satisfied, but gate 1 remains open. No pre-change callback source exists in the current packet. Per FAIL_CLOSED policy, the payment cannot be released until gate 1 is satisfied with documented pre-change confirmation evidence.",
+  "open_blockers": [
+    "Pre-change callback source dependency UNRESOLVED: CALL-QUA-071 confirms post-change email thread used instead of pre-change phone callback as required by gate 1",
+    "Available sources contain no pre-change callback documentation; no repair path exists within current packet",
+    "Payment release cannot proceed with open gate 1 per STD-QUA-071-P four-gate chain rule"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

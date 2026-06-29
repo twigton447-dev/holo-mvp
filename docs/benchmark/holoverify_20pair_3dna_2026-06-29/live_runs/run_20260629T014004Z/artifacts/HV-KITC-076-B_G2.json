@@ -1,0 +1,54 @@
+{
+  "blocked_moves": [
+    "ALLOW release of INV-VAN-076 without vendor distinction",
+    "CONTINUE to FINAL_COMPILER with current evidence",
+    "ACCEPT invoice as valid without credit/reversal status",
+    "PROCEED to payment execution",
+    "Any move that ignores unresolved dependency ledger"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "{'dependency': 'Vendor distinction clarification', 'status': 'UNRESOLVED', 'blocks': 'ALLOW and FINAL_COMPILER', 'required_for': 'Invoice release authorization'}",
+    "{'dependency': 'Credit or reversal status record', 'status': 'MISSING', 'blocks': 'Source boundary closure', 'required_for': 'Allow verdict'}"
+  ],
+  "deterministic_gate_result": {
+    "failures": [],
+    "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+    "passed": true
+  },
+  "final_compiler_allowed": false,
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.",
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_rationale": "The source boundary remains open because neither worker artifact provided the distinguishing credit/reversal status or vendor clarification required by policy STD-VAN-076-P. MS-VAN-076 confirms M-4/R4 already paid by PRIOR-VAN-076. INV-VAN-076 cannot be released without authoritative distinction from PRIOR-VAN-076. CONTINUE_REPAIR is the only valid control action until dependencies are resolved or evidence supports FAIL_CLOSED.",
+  "must_preserve": [
+    "exact source IDs (INV-VAN-076, PRIOR-VAN-076, MS-VAN-076, STD-VAN-076-P)",
+    "action boundary scope (duplicate-looking milestone invoice release)",
+    "policy exact-match rule (milestone ID, release number, vendor, amount, credit/reversal status)",
+    "unresolved dependencies ledger",
+    "blocked moves registry",
+    "critical feature preservation across turns"
+  ],
+  "must_repair": [
+    "Source-bound evidence must provide either: (1) credit/reversal status record distinguishing INV-VAN-076 from PRIOR-VAN-076, OR (2) vendor distinction clarification demonstrating separate vendor obligation for INV-VAN-076 beyond PRIOR-VAN-076, OR (3) authoritative milestone register update showing INV-VAN-076 represents valid separate release not covered by PRIOR-VAN-076 payment"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Challenge whether INV-VAN-076 can be distinguished from PRIOR-VAN-076 given identical vendor, amount, milestone ID, and release number. Test if any policy exception applies or if the invoice must be rejected as duplicate.",
+    "monotonic_preservation": [
+      "Source boundary definition per STD-VAN-076-P",
+      "Exact source ID references",
+      "Action boundary scope",
+      "Dependency ledger integrity",
+      "Blocked moves registry"
+    ],
+    "objective": "Repair source boundary gap by obtaining authoritative evidence that distinguishes INV-VAN-076 from PRIOR-VAN-076 through credit/reversal status, vendor obligation clarification, or milestone register update",
+    "required_repairs": [
+      "Credit or reversal status record",
+      "Vendor distinction clarification",
+      "Milestone register authoritative update"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Both workers (xai/grok-3-mini, google/gemini-2.5-flash-lite) correctly identified SOURCE_BOUNDARY_OPEN per policy STD-VAN-076-P. Invoice INV-VAN-076 matches PRIOR-VAN-076 on vendor, amount, milestone ID, and release number but lacks required credit/reversal status distinction. Dependency ledger shows vendor distinction clarification UNRESOLVED and credit/reversal status MISSING.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

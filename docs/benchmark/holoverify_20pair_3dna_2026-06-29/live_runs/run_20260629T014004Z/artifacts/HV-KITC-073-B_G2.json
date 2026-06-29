@@ -1,0 +1,54 @@
+{
+  "artifacts_considered": [
+    "HV-KITC-073-B_WORKER_01 (critical_features: 1)",
+    "HV-KITC-073-B_WORKER_02 (critical_features: 3) - SELECTED BEST"
+  ],
+  "best_artifact_hash": "0ff08a6ef96b4bfafc22a25076ea8c09c724ba944b0b7bec24d03e9ccef02846",
+  "best_artifact_id": "HV-KITC-073-B_WORKER_02",
+  "blocked_moves": [
+    "interpreting license scope as covering South America broadly",
+    "treating product family ECCN match as sufficient for release",
+    "invoking WARN-SIE-073 as execution authority",
+    "using policy statement as license substitute",
+    "assuming end-user alignment compensates for destination mismatch",
+    "proposing ' Peru-adjacent' or 'regional' interpretation of destination field"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "License scope (Peru) \u22a5 Shipment destination (Chile) | Unresolvable within current corpus | Requires external evidence or amended license | Blocks closure"
+  ],
+  "dna": "minimax",
+  "final_compiler_allowed": true,
+  "final_compiler_directive": "FAIL_CLOSED. Destination mismatch is terminal. License LIC-SIE-073 explicitly authorizes Peru. Shipment SHIP-SIE-073 routes to Chile. Policy STD-SIE-073-P mandates exact match on destination. No source record bridges this gap. No repair path exists. Advise human compliance officer to either (a) obtain license amendment covering Chile, or (b) reroute shipment to Peru under LIC-SIE-073, or (c) cancel shipment. Do not release.",
+  "gov_command": "CONTROL_ROUTER",
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_verdict": "ESCALATE",
+  "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+  "model": "minimax/MiniMax-M2.5-highspeed",
+  "must_preserve": [
+    "License destination = Peru (LIC-SIE-073)",
+    "Shipment destination = Chile (SHIP-SIE-073)",
+    "Exact-match policy requirement (STD-SIE-073-P)",
+    "Advisory status of warning (WARN-SIE-073 cannot authorize)"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "All artifacts pass deterministic gate. Both workers independently identify identical open blocker: destination mismatch between license (Peru) and shipment (Chile). No repair path exists within source corpus. No bridge source identified. Continued iteration offers no value.",
+    "monotonic_preservation": [
+      "License destination = Peru (LIC-SIE-073)",
+      "Shipment destination = Chile (SHIP-SIE-073)",
+      "Exact-match policy requirement (STD-SIE-073-P)",
+      "Advisory status of warning (WARN-SIE-073 cannot authorize)"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "packet_id": "HV-KITC-073-B",
+  "pair_id": "HV-KITC-073",
+  "rationale": "Both SOURCE_BOUNDARY_MAPPER and ADVERSARIAL_SCOPE_CHALLENGER independently reach identical ESCALATE verdict with identical open blocker. Deterministic gates pass on both artifacts. No adversarial repair or scope challenge produces new evidence. Destination field mismatch is binary and unbridgeable from current source corpus. Gov governance rule terminates when no repair path exists and continuation would violate monotonic preservation. FINAL_COMPILER authority invoked.",
+  "route_verdict": "FINAL_COMPILER",
+  "run_id": "run_20260629T014004Z",
+  "source_gate_interpretation": "All artifacts pass deterministic gate. Both workers independently identify identical open blocker: destination mismatch between license (Peru) and shipment (Chile). No repair path exists within source corpus. No bridge source identified. Continued iteration offers no value.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "turn": 3
+}

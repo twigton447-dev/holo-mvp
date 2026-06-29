@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?",
+    "allow_rule_assessment": "N/A",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-ACR-022-P: 'Shared naming prefixes are not enough by themselves.' The lab/production distinction and site mismatch prevent closure.",
+    "escalate_rule_assessment": "The calibration evidence (CAL-ACR-022) covers DG-41B lab telemetry units at Site 18-L. The activation (ACT-ACR-022) targets DG-41B production telemetry units at Site 18-P. Per STD-ACR-022-P, shared naming prefixes are insufficient; device group AND site must precisely match. The NOTE-ACR-022 note about shared naming is overridden by the binding policy standard.",
+    "timing_scope_authority_dependency_check": "The calibration evidence does not satisfy the activation dependency. The device group designation (lab vs. production) and site (18-L vs. 18-P) create a source-record mismatch that cannot be resolved by naming prefix alone."
+  },
+  "cited_evidence": [
+    "ACT-ACR-022",
+    "CAL-ACR-022",
+    "STD-ACR-022-P",
+    "NOTE-ACR-022",
+    "RC-ACR-022"
+  ],
+  "critical_features_preserved": [
+    "Gov mode: CONTROL_ROUTER",
+    "Preserve: SOURCE_BOUNDARY_OPEN",
+    "Objective: final",
+    "Attack focus: source",
+    "Binding policy authority: STD-ACR-022-P"
+  ],
+  "final_answer": "The action must remain escalated. Calibration packet CAL-ACR-022 covers DG-41B lab telemetry units at Site 18-L, while service activation ACT-ACR-2026-8022 targets DG-41B production telemetry units at Site 18-P. The device group designation (lab vs. production) and site (18-L vs. 18-P) do not match. Per binding policy STD-ACR-022-P, shared naming prefixes are insufficient. The source boundary remains open; activation cannot proceed with mismatched dependency evidence.",
+  "open_blockers": [
+    "CAL-ACR-022 covers DG-41B lab units (Site 18-L); activation targets DG-41B production units (Site 18-P)",
+    "Site mismatch: calibration is Site 18-L, activation is Site 18-P",
+    "NOTE-ACR-022 shared-prefix note is insufficient per binding policy STD-ACR-022-P"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

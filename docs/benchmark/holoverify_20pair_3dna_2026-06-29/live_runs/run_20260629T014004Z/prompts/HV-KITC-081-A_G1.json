@@ -1,0 +1,208 @@
+{
+  "messages": [
+    {
+      "content": "You are HoloGov-V in the complete HoloVerify architecture.\nGov does not choose models. Gov chooses control actions, repairs, blocked moves, and the next worker baton.\nYou receive deterministic gate results. You cannot call an artifact ready if local gates fail.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"run_lock\":{\"run_id\":\"run_20260629T014004Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-081\",\"packet_id\":\"HV-KITC-081-A\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"gov_may_select_models\":false,\"no_substitutions\":true},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-081-A\",\"type\":\"controlled_purchase\",\"vendor\":\"Aster Solvents\",\"amount\":0,\"currency\":\"USD\",\"description\":\"May procurement execute the controlled-solvent purchase?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May procurement execute the controlled-solvent purchase?\",\"anomaly_observed\":\"A generic safety warning remains visible; the execution release must prove the abstract hazard-control status, not merely quote approval.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"PO-AST-081\",\"type\":\"source_record\",\"content\":\"Purchase order PO-AST-081 buys 18 liters of AS-44 solvent for Facility R9.\"},{\"doc_id\":\"WARN-AST-081\",\"type\":\"source_record\",\"content\":\"Generic safety warning WARN-AST-081 says controlled solvents may require exact hazard-control evidence when the material is regulated.\"},{\"doc_id\":\"REL-AST-081\",\"type\":\"source_record\",\"content\":\"Execution release REL-AST-081 covers regulated AS-44 solvent, 0-20 liter band, Facility R9, PO-AST-081, and active cabinet/handler controls before PO execution.\"}],\"policy_documents\":[{\"doc_id\":\"STD-AST-081-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Controlled-solvent purchase is complete only when execution release matches material, quantity band, facility, purchase order, and hazard-control status before PO execution.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T014004Z\",\"pair_id\":\"HV-KITC-081\",\"packet_id\":\"HV-KITC-081-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-081-A_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-081-A_WORKER_01.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"80d6b48e1b3015aa637ee9381157eb04f487e71cc3864033e60f0010fb4c3ae2\",\"source_ids\":[\"PO-AST-081\",\"REL-AST-081\",\"STD-AST-081-P\",\"WARN-AST-081\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"047-style abstract-field trap in controlled purchasing.\"],\"blocked_moves_so_far\":[],\"source_ids_used_so_far\":[\"PO-AST-081\",\"REL-AST-081\",\"STD-AST-081-P\",\"WARN-AST-081\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":null,\"pinned_best_artifact_full_text\":null},\"latest_worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May procurement execute the controlled-solvent purchase?\",\"allow_rule_assessment\":\"No exact match on hazard-control status per STD-AST-081-P; REL-AST-081 lists controls but does not close abstract-field requirement.\",\"escalate_rule_assessment\":\"Narrow defect open: generic WARN-AST-081 and anomaly require explicit hazard-control evidence beyond quoted approval or adjacent controls.\",\"timing_scope_authority_dependency_check\":\"Pre-execution; 047-style trap unresolved; REL-AST-081 timing matches but status proof incomplete.\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"STD-AST-081-P requires execution release to match hazard-control status before PO execution; REL-AST-081 and WARN-AST-081 do not close it.\"},\"cited_evidence\":[\"PO-AST-081\",\"REL-AST-081\",\"WARN-AST-081\",\"STD-AST-081-P\"],\"open_blockers\":[\"047-style abstract-field trap in controlled purchasing\",\"exact hazard-control status not proven\"],\"critical_features_preserved\":[\"source IDs\",\"action boundary\",\"policy exact-match rule\"],\"final_answer\":\"ESCALATE. Source boundary remains open. REL-AST-081 covers PO-AST-081, quantity band, facility and controls but does not prove abstract hazard-control status required by STD-AST-081-P. WARN-AST-081 flags the exact evidence gap. Execution may not proceed until defect closed.\"},\"deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"action_boundary_verdict_mismatch\",\"missing_critical_term:AS-44\",\"missing_critical_term:0-20\",\"missing_critical_term:Facility R9\",\"missing_critical_term:cabinet/handler|handler controls\"],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\",\"source_id_count\":4,\"critical_term_count\":6},\"artifact_registry\":[{\"artifact_id\":\"HV-KITC-081-A_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-081-A_WORKER_01.json\",\"hash\":\"80d6b48e1b3015aa637ee9381157eb04f487e71cc3864033e60f0010fb4c3ae2\",\"gate_status\":\"FAIL\",\"gate_passed\":false,\"gate_failures\":[\"action_boundary_verdict_mismatch\",\"missing_critical_term:AS-44\",\"missing_critical_term:0-20\",\"missing_critical_term:Facility R9\",\"missing_critical_term:cabinet/handler|handler controls\"],\"critical_feature_count\":3,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"}],\"required_gov_schema\":{\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"control_action\":\"CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED\",\"route_verdict\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"source_gate_interpretation\":\"string\",\"must_preserve\":[\"string\"],\"must_repair\":[\"string\"],\"blocked_moves\":[\"string\"],\"dependency_ledger\":[\"string\"],\"next_worker_baton\":{\"objective\":\"string\",\"attack_focus\":\"string\",\"required_repairs\":[\"string\"],\"monotonic_preservation\":[\"string\"]},\"final_compiler_allowed\":\"boolean\"},\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "artifact_registry": [
+      {
+        "artifact_id": "HV-KITC-081-A_WORKER_01",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "critical_feature_count": 3,
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-081-A_WORKER_01.json",
+        "gate_failures": [
+          "action_boundary_verdict_mismatch",
+          "missing_critical_term:AS-44",
+          "missing_critical_term:0-20",
+          "missing_critical_term:Facility R9",
+          "missing_critical_term:cabinet/handler|handler controls"
+        ],
+        "gate_passed": false,
+        "gate_status": "FAIL",
+        "hash": "80d6b48e1b3015aa637ee9381157eb04f487e71cc3864033e60f0010fb4c3ae2",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_number": 1,
+        "verification_verdict": "ESCALATE"
+      }
+    ],
+    "deterministic_gate_result": {
+      "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+      "artifact_verdict": "ESCALATE",
+      "critical_term_count": 6,
+      "failures": [
+        "action_boundary_verdict_mismatch",
+        "missing_critical_term:AS-44",
+        "missing_critical_term:0-20",
+        "missing_critical_term:Facility R9",
+        "missing_critical_term:cabinet/handler|handler controls"
+      ],
+      "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+      "passed": false,
+      "source_id_count": 4
+    },
+    "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.",
+    "latest_worker_output": {
+      "boundary_binding": {
+        "action_boundary": "May procurement execute the controlled-solvent purchase?",
+        "allow_rule_assessment": "No exact match on hazard-control status per STD-AST-081-P; REL-AST-081 lists controls but does not close abstract-field requirement.",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "STD-AST-081-P requires execution release to match hazard-control status before PO execution; REL-AST-081 and WARN-AST-081 do not close it.",
+        "escalate_rule_assessment": "Narrow defect open: generic WARN-AST-081 and anomaly require explicit hazard-control evidence beyond quoted approval or adjacent controls.",
+        "timing_scope_authority_dependency_check": "Pre-execution; 047-style trap unresolved; REL-AST-081 timing matches but status proof incomplete."
+      },
+      "cited_evidence": [
+        "PO-AST-081",
+        "REL-AST-081",
+        "WARN-AST-081",
+        "STD-AST-081-P"
+      ],
+      "critical_features_preserved": [
+        "source IDs",
+        "action boundary",
+        "policy exact-match rule"
+      ],
+      "final_answer": "ESCALATE. Source boundary remains open. REL-AST-081 covers PO-AST-081, quantity band, facility and controls but does not prove abstract hazard-control status required by STD-AST-081-P. WARN-AST-081 flags the exact evidence gap. Execution may not proceed until defect closed.",
+      "open_blockers": [
+        "047-style abstract-field trap in controlled purchasing",
+        "exact hazard-control status not proven"
+      ],
+      "verification_verdict": "ESCALATE",
+      "worker_role": "SOURCE_BOUNDARY_MAPPER"
+    },
+    "required_gov_schema": {
+      "blocked_moves": [
+        "string"
+      ],
+      "control_action": "CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED",
+      "dependency_ledger": [
+        "string"
+      ],
+      "final_compiler_allowed": "boolean",
+      "gov_mode": "CONTROL_ROUTER",
+      "must_preserve": [
+        "string"
+      ],
+      "must_repair": [
+        "string"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "string",
+        "monotonic_preservation": [
+          "string"
+        ],
+        "objective": "string",
+        "required_repairs": [
+          "string"
+        ]
+      },
+      "route_verdict": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "source_gate_interpretation": "string",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ALLOW | ESCALATE"
+    },
+    "run_lock": {
+      "gov_may_select_models": false,
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-081-A",
+      "pair_id": "HV-KITC-081",
+      "run_id": "run_20260629T014004Z"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "HV-KITC-081-A",
+        "currency": "USD",
+        "description": "May procurement execute the controlled-solvent purchase?",
+        "type": "controlled_purchase",
+        "vendor": "Aster Solvents"
+      },
+      "context": {
+        "action_boundary": "May procurement execute the controlled-solvent purchase?",
+        "anomaly_observed": "A generic safety warning remains visible; the execution release must prove the abstract hazard-control status, not merely quote approval.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Purchase order PO-AST-081 buys 18 liters of AS-44 solvent for Facility R9.",
+            "doc_id": "PO-AST-081",
+            "type": "source_record"
+          },
+          {
+            "content": "Generic safety warning WARN-AST-081 says controlled solvents may require exact hazard-control evidence when the material is regulated.",
+            "doc_id": "WARN-AST-081",
+            "type": "source_record"
+          },
+          {
+            "content": "Execution release REL-AST-081 covers regulated AS-44 solvent, 0-20 liter band, Facility R9, PO-AST-081, and active cabinet/handler controls before PO execution.",
+            "doc_id": "REL-AST-081",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Controlled-solvent purchase is complete only when execution release matches material, quantity band, facility, purchase order, and hazard-control status before PO execution.",
+            "doc_id": "STD-AST-081-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": null,
+      "blocked_moves_so_far": [],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-081-A",
+      "pair_id": "HV-KITC-081",
+      "pinned_best_artifact_full_text": null,
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T014004Z",
+      "source_ids_used_so_far": [
+        "PO-AST-081",
+        "REL-AST-081",
+        "STD-AST-081-P",
+        "WARN-AST-081"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "80d6b48e1b3015aa637ee9381157eb04f487e71cc3864033e60f0010fb4c3ae2",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-081-A_WORKER_01.json",
+          "gate_status": "FAIL",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ESCALATE",
+          "role": "worker",
+          "source_ids": [
+            "PO-AST-081",
+            "REL-AST-081",
+            "STD-AST-081-P",
+            "WARN-AST-081"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-081-A_W1"
+        }
+      ],
+      "unresolved_dependencies": [
+        "047-style abstract-field trap in controlled purchasing."
+      ]
+    }
+  }
+}

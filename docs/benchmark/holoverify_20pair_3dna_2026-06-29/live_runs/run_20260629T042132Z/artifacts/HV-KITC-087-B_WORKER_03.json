@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations activate the production device group?",
+    "allow_rule_assessment": "No. CP-77 calibration pack pending; calibration-status class not verified.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-GAC-087-P mandates calibration-status class match before activation; CP-77 calibration pack pending per CAL-GAC-087.",
+    "escalate_rule_assessment": "STD-GAC-087-P requires calibration-status class closure; CAL-GAC-087 shows CP-77 pending\u2014status-class trap unresolved.",
+    "timing_scope_authority_dependency_check": "Timing, scope, authority match per CAL-GAC-087 for GD-4/Site P2/RC-12/2026-06-28, but dependency (calibration-status class) unmet."
+  },
+  "cited_evidence": [
+    "ACT-GAC-087",
+    "CAL-GAC-087",
+    "STD-GAC-087-P",
+    "WARN-GAC-087"
+  ],
+  "critical_features_preserved": [
+    "source doc binding",
+    "action boundary exactness",
+    "calibration-status class dependency",
+    "source-record-only basis",
+    "timing/scope/authority match"
+  ],
+  "final_answer": "Action may not proceed. CAL-GAC-087 shows CP-77 calibration pack pending, and STD-GAC-087-P requires a verified calibration-status class before activation. WARN-GAC-087 reinforces that calibration status must be separately verified. The source boundary remains open due to this unresolved status-class trap, requiring escalation for resolution prior to any production device group activation.",
+  "open_blockers": [
+    "082-style status-class trap in device activation",
+    "CP-77 calibration pack pending",
+    "calibration-status class not verified"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

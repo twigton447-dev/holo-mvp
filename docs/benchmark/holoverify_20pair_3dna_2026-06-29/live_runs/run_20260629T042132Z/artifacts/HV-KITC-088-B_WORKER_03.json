@@ -1,0 +1,24 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations execute the privacy-regulated export?",
+    "allow_rule_assessment": "The export cannot proceed because the required privacy-status class verification is missing. STD-HEL-088-P mandates this status be verified before transfer, and REL-HEL-088 explicitly states privacy status remains pending.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-HEL-088-P requires privacy-status class verification before transfer; REL-HEL-088 confirms this status is pending.",
+    "escalate_rule_assessment": "The source boundary remains open due to the unresolved privacy-status class dependency. Both the planning note and release authority confirm this critical term is pending.",
+    "timing_scope_authority_dependency_check": "Export date 2026-06-28, recipient Helio Analytics, dataset HDS-8, and workspace HEL-RISK-5 are all verified in REL-HEL-088, but the privacy-status class dependency remains unmet."
+  },
+  "cited_evidence": [
+    "DPIA-HEL-088",
+    "REL-HEL-088",
+    "STD-HEL-088-P"
+  ],
+  "critical_features_preserved": [
+    "SOURCE_BOUNDARY_OPEN"
+  ],
+  "final_answer": "The privacy-regulated export action is blocked because the critical privacy-status class remains unverified. While timing, scope, authority, and dataset identification all match between EXP-HEL-088 and REL-HEL-088, the policy requirement in STD-HEL-088-P cannot be satisfied before execution. Both the DPIA planning note and release authority confirm this dependency is pending. The source boundary remains open pending privacy-status class verification.",
+  "open_blockers": [
+    "missing_critical_term:privacy status"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment/invoice release/vendor-master action; exact boundary closed by current source records",
+    "allow_rule_assessment": "Current control record closes exact action boundary before execution",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-389D141A7151-CTL",
+    "escalate_rule_assessment": "No escalation; boundary binding defect repaired by source-control match",
+    "timing_scope_authority_dependency_check": "GATE resolved by SRC-389D141A7151-CTL"
+  },
+  "cited_evidence": [
+    "SRC-389D141A7151-CTL",
+    "SRC-389D141A7151-POL",
+    "SRC-389D141A7151-BND",
+    "SRC-389D141A7151-REQ",
+    "SRC-389D141A7151-FBK"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "timing",
+    "scope",
+    "authority",
+    "dependency",
+    "exception validity window",
+    "SRC-389D141A7151-CTL",
+    "SRC-389D141A7151-BND"
+  ],
+  "final_answer": "Proceed. The current control record binds the exact action boundary, scope, actor, and effective date, and policy allows execution only when source records close that boundary. The communication warning does not override the controlling source record, so the prior gate failure is repaired.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

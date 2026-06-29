@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment when rail belongs to parent not requested vendor",
+    "allow_rule_assessment": "Source records do not close vendor-rail match",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-369A7612D387-CTL",
+    "escalate_rule_assessment": "Exact dependency on vendor entity matching rail owner open",
+    "timing_scope_authority_dependency_check": "vendor entity must match rail owner"
+  },
+  "cited_evidence": [
+    "SRC-369A7612D387-CTL",
+    "SRC-369A7612D387-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Action boundary remains open. Control record shows unresolved vendor entity must match rail owner dependency. No source closes exact match for parent rail reuse. Escalate to repair defect before any execution.",
+  "open_blockers": [
+    "vendor entity must match rail owner"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

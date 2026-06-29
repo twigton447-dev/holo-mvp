@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "invoice release where PO is missing despite normal vendor history",
+    "allow_rule_assessment": "Not allowed without closed PO dependency",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-0AC515CDA285-CTL",
+    "escalate_rule_assessment": "PO record defect blocks execution",
+    "timing_scope_authority_dependency_check": "current PO must exist for this invoice"
+  },
+  "cited_evidence": [
+    "SRC-0AC515CDA285-BND",
+    "SRC-0AC515CDA285-CTL",
+    "SRC-0AC515CDA285-FBK",
+    "SRC-0AC515CDA285-POL",
+    "SRC-0AC515CDA285-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "current PO must exist for this invoice",
+    "SRC-0AC515CDA285-CTL",
+    "SRC-0AC515CDA285-BND"
+  ],
+  "final_answer": "Source records do not close the exact invoice-release boundary. The control record and policy both require the current PO to exist, and the packet states that dependency is missing, stale, mismatched, or scoped elsewhere. Vendor history and urgency do not authorize execution, so the action must be escalated.",
+  "open_blockers": [
+    "current PO must exist for this invoice"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

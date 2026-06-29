@@ -1,0 +1,31 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "invoice release only; no payment or vendor-master action",
+    "allow_rule_assessment": "Current source records close authority for invoice release.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-D114F7F3C309-CTL",
+    "escalate_rule_assessment": "Gate failure persists: missing boundary binding for escalation rule assessment.",
+    "timing_scope_authority_dependency_check": "GATE remains unresolved; no final execution selection yet."
+  },
+  "cited_evidence": [
+    "SRC-D114F7F3C309-CTL",
+    "SRC-D114F7F3C309-POL",
+    "SRC-D114F7F3C309-BND",
+    "SRC-D114F7F3C309-REQ"
+  ],
+  "critical_features_preserved": [
+    "CLOSED",
+    "source IDs",
+    "action boundary",
+    "timing/scope/authority/dependency checks",
+    "critical terms"
+  ],
+  "final_answer": "Source records support a closed boundary for invoice release, but the deterministic gate still fails because escalation-rule binding is missing. Preserve CLOSED and the exact source IDs, but do not finalize execution. Escalate for gate repair before any action selection.",
+  "open_blockers": [
+    "missing_boundary_binding:escalate_rule_assessment",
+    "GATE"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

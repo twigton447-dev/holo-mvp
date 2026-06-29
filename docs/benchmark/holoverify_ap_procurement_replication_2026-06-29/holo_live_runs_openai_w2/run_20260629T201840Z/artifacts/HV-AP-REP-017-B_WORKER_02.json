@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment, invoice release, or vendor-master action for unapproved contact",
+    "allow_rule_assessment": "Exact source boundary remains open",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-7444086D50EB-CTL",
+    "escalate_rule_assessment": "Authorized contact registry is missing or mismatched",
+    "timing_scope_authority_dependency_check": "Open dependency blocks execution"
+  },
+  "cited_evidence": [
+    "SRC-7444086D50EB-CTL",
+    "SRC-7444086D50EB-BND",
+    "SRC-7444086D50EB-FBK",
+    "SRC-7444086D50EB-POL",
+    "SRC-7444086D50EB-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "authorized contact registry",
+    "SRC-7444086D50EB-CTL",
+    "SRC-7444086D50EB-BND"
+  ],
+  "final_answer": "ESCALATE: the packet does not close the exact boundary for executing AP action from an unapproved contact. The controlling control record says the authorized contact registry is missing, stale, mismatched, or scoped differently. Under the source records, AP should not proceed until that dependency is resolved.",
+  "open_blockers": [
+    "authorized contact registry"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

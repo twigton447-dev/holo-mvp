@@ -30,7 +30,13 @@ def test_public_pages_parse_as_html():
 def test_whitepaper_version_labels_stay_in_sync():
     html = _read(WHITEPAPER)
     versions = set(re.findall(r"Version ([0-9]+(?:\.[0-9]+)*)", html))
-    assert versions == {"7.4"}
+    assert versions == {"7.5"}
+
+
+def test_benchmark_version_labels_stay_in_sync():
+    html = _read(BENCHMARK)
+    versions = set(re.findall(r"Version ([0-9]+(?:\.[0-9]+)*)", html))
+    assert versions == {"6.9"}
 
 
 def test_whitepaper_problem_section_keeps_boundary_analogy():
@@ -93,6 +99,7 @@ def test_benchmark_and_whitepaper_contact_stay_aligned():
 def main() -> None:
     test_public_pages_parse_as_html()
     test_whitepaper_version_labels_stay_in_sync()
+    test_benchmark_version_labels_stay_in_sync()
     test_whitepaper_problem_section_keeps_boundary_analogy()
     test_whitepaper_header_uses_public_links_and_email_contact()
     test_whitepaper_holobuild_lane_copy_is_locked()

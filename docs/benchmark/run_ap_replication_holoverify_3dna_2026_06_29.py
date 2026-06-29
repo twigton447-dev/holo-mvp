@@ -48,6 +48,7 @@ OPENAI_W2_MODEL_KEYS = ("xai", OPENAI_W2_MODEL_KEY, "minimax")
 OPENAI_W2_REGISTRATION = AP_ROOT / "AP_OPENAI_W2_ROSTER_VARIANT_REGISTRATION_2026_06_29.json"
 OPENAI_W2_AVAILABILITY = AP_ROOT / "AP_OPENAI_W2_MODEL_AVAILABILITY_CHECK_2026_06_29.json"
 OPENAI_RESPONSES_TIMEOUT_SECONDS = 240
+AP_OPENAI_W2_GOV_MAX_TOKENS = 1024
 
 ANSWER_KEY_LEAK_PATTERNS = (
     "packet_truth",
@@ -140,6 +141,7 @@ def configure_openai_w2_runner() -> None:
         {"worker_index": 3, "role_name": "FINAL_COMPILER", "model_key": "minimax"},
     ]
     RUNNER.GOV_MODEL_KEY = "minimax"
+    RUNNER.GOV_MAX_TOKENS = AP_OPENAI_W2_GOV_MAX_TOKENS
     RUNNER._call_model = call_model_with_openai_responses
 
 
@@ -533,6 +535,10 @@ def build_openai_w2_live_holo_preflight() -> dict[str, Any]:
         "monotonic_preservation_configured": architecture_controls["monotonic_preservation_configured"],
         "final_selector_configured": architecture_controls["final_selector_configured"],
         "trace_accounting_configured": architecture_controls["trace_accounting_configured"],
+        "gov_contract_format": RUNNER._gov_contract().get("format") == "gov_micro_baton_v2",
+        "worker_contract_format": RUNNER._worker_contract().get("format") == "compact_key_value_v1",
+        "gov_output_budget_sufficient": getattr(RUNNER, "GOV_MAX_TOKENS", None) >= AP_OPENAI_W2_GOV_MAX_TOKENS,
+        "gov_max_tokens": getattr(RUNNER, "GOV_MAX_TOKENS", None) == AP_OPENAI_W2_GOV_MAX_TOKENS,
         "expected_holo_calls": 40 * 5 == 200,
         "expected_packets": len(records) == 40,
         "expected_pairs": len(pairs) == 20,
@@ -574,6 +580,14 @@ def build_openai_w2_live_holo_preflight() -> dict[str, Any]:
             "actual_w2_kind": RUNNER.MODEL_CONFIGS[w2["model_key"]]["kind"],
         },
         "architecture_controls": architecture_controls,
+        "runtime_contracts": {
+            "worker_contract_format": RUNNER._worker_contract().get("format"),
+            "gov_contract_format": RUNNER._gov_contract().get("format"),
+            "gov_max_tokens": getattr(RUNNER, "GOV_MAX_TOKENS", None),
+            "gov_call_builder": "RUNNER._build_gov_messages",
+            "gov_parser": "RUNNER._gov_from_response",
+            "packet_runner": "RUNNER._run_packet",
+        },
         "expected_counts": {
             "holo_calls": 200,
             "worker_calls": 120,

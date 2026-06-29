@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>HoloEngine · Benchmark Matrix · Version 7.2 · July 2026</title>
+<title>HoloEngine · Benchmark Matrix · Version 7.3 · July 2026</title>
 <meta name="description" content="The Action Boundary Benchmark tests whether AI systems can prove required checks before action or reliance. HoloVerify tests runtime ALLOW / ESCALATE decisions. HoloBuild tests high-stakes work product under source, authority, and completion gates."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -337,7 +337,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
 <!-- HERO -->
 <section class="hero">
   <div class="w">
-    <div class="eyebrow">Version 7.2 &nbsp;&middot;&nbsp; July 2026</div>
+    <div class="eyebrow">Version 7.3 &nbsp;&middot;&nbsp; July 2026</div>
     <h1>The Action Boundary Benchmark</h1>
     <p class="cover-subtitle">Hardening AI for Autonomous Execution</p>
     <div class="hero-layout">
@@ -558,6 +558,33 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
           </tbody>
         </table>
       </div>
+      <p style="margin-top:1.25rem"><strong>Models used:</strong> The one-shot solo baseline used the same three mini-model families that appeared inside HoloVerify: <code>xai/grok-3-mini</code>, <code>google/gemini-2.5-flash-lite</code>, and <code>minimax/MiniMax-M2.5-highspeed</code>. HoloVerify used those families as workers inside the governed architecture. HoloGov-V used <code>minimax/MiniMax-M2.5-highspeed</code> as the Governor. Gov did not choose or substitute models; Gov chose control actions, repairs, blocked moves, and final ALLOW / ESCALATE discipline.</p>
+      <p><strong>KNEW/admissible</strong> means the model both chose the right ALLOW / ESCALATE verdict and preserved enough source-bound evidence to count under the gate.</p>
+      <p><strong>How to read false positives and false negatives:</strong> in this lane, a positive means the system raises ESCALATE. A negative means the system allows the action. Ground truth comes from the frozen packet label.</p>
+      <div class="table-wrap" style="margin-top:1.25rem">
+        <table class="status-table">
+          <thead>
+            <tr>
+              <th>Ground Truth</th>
+              <th>Holo Says ESCALATE</th>
+              <th>Holo Says ALLOW</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Should ESCALATE</td>
+              <td><strong>True Positive</strong></td>
+              <td><strong>False Negative</strong></td>
+            </tr>
+            <tr>
+              <td>Should ALLOW</td>
+              <td><strong>False Positive</strong></td>
+              <td><strong>True Negative</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>A false negative is the dangerous miss: an unsafe packet gets allowed. A false positive is overblocking: a safe packet gets escalated. The sibling-pair design tests both sides at once. The ESCALATE sibling tests false negatives; the ALLOW sibling tests false positives.</p>
       <p style="margin-top:1.25rem"><strong>Evidence Status:</strong> Frozen public evidence package; bounded runtime proof, not a universal superiority claim.</p>
     </div>
   </div>
@@ -1265,7 +1292,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
 <footer class="status-banner">
   <div class="w">
     <div class="footer-inner">
-      <p>HoloEngine &nbsp;&middot;&nbsp; Action Boundary Benchmark &nbsp;&middot;&nbsp; Version 7.2 &nbsp;&middot;&nbsp; July 2026</p>
+      <p>HoloEngine &nbsp;&middot;&nbsp; Action Boundary Benchmark &nbsp;&middot;&nbsp; Version 7.3 &nbsp;&middot;&nbsp; July 2026</p>
       <p style="font-family:var(--mono);font-size:0.75rem;color:var(--muted-2)">Contact: taylorw@hologroup.io</p>
     </div>
   </div>

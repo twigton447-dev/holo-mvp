@@ -298,6 +298,107 @@ def _json_from_text(text: str, *, allow_markdown_fence: bool = False) -> dict[st
     return json.loads(stripped)
 
 
+WORKER_COMPACT_KEYS = (
+    "worker_role",
+    "verification_verdict",
+    "binding_class",
+    "action_boundary",
+    "allow_rule_assessment",
+    "escalate_rule_assessment",
+    "dependency_check",
+    "controlling_source_fact",
+    "cited_evidence",
+    "open_blockers",
+    "critical_features_preserved",
+    "final_answer",
+)
+
+
+def _split_compact_list(value: str) -> list[str]:
+    cleaned = value.strip()
+    if not cleaned or cleaned.lower() in {"none", "n/a", "na", "[]"}:
+        return []
+    return [item.strip() for item in cleaned.split("|") if item.strip()]
+
+
+def _worker_compact_from_text(text: str) -> dict[str, Any]:
+    stripped = _strip_thinking_blocks(text or "").strip()
+    if not stripped:
+        raise ValueError("worker_empty_text")
+    if stripped.startswith("```") or "```" in stripped:
+        raise ValueError("worker_markdown_fence_present")
+    parsed: dict[str, str] = {}
+    for raw_line in stripped.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        if "=" not in line:
+            raise ValueError(f"worker_compact_malformed_line:{line[:40]}")
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if key not in WORKER_COMPACT_KEYS:
+            raise ValueError(f"worker_compact_unexpected_key:{key}")
+        if key in parsed:
+            raise ValueError(f"worker_compact_duplicate_key:{key}")
+        parsed[key] = value.strip()
+    missing = [key for key in WORKER_COMPACT_KEYS if key not in parsed]
+    if missing:
+        raise ValueError(f"worker_compact_missing_keys:{','.join(missing)}")
+    verdict = parsed["verification_verdict"]
+    if verdict not in {"ALLOW", "ESCALATE"}:
+        raise ValueError("worker_compact_invalid_verdict")
+    binding_class = parsed["binding_class"]
+    if binding_class not in {"SOURCE_BOUNDARY_CLOSED", "SOURCE_BOUNDARY_OPEN"}:
+        raise ValueError("worker_compact_invalid_binding_class")
+    return {
+        "worker_role": parsed["worker_role"],
+        "verification_verdict": verdict,
+        "boundary_binding": {
+            "action_boundary": parsed["action_boundary"],
+            "allow_rule_assessment": parsed["allow_rule_assessment"],
+            "escalate_rule_assessment": parsed["escalate_rule_assessment"],
+            "timing_scope_authority_dependency_check": parsed["dependency_check"],
+            "binding_class": binding_class,
+            "controlling_source_fact": parsed["controlling_source_fact"],
+        },
+        "cited_evidence": _split_compact_list(parsed["cited_evidence"])[:8],
+        "open_blockers": _split_compact_list(parsed["open_blockers"])[:4],
+        "critical_features_preserved": _split_compact_list(parsed["critical_features_preserved"])[:6],
+        "final_answer": parsed["final_answer"],
+        "_worker_output_format": "compact_key_value_v1",
+    }
+
+
+def _worker_from_text(text: str) -> dict[str, Any]:
+    stripped = _strip_thinking_blocks(text or "").strip()
+    if not stripped:
+        raise ValueError("worker_empty_text")
+    if stripped.startswith("```"):
+        raise ValueError("worker_markdown_fence_present")
+    if stripped.startswith("{") or stripped.startswith("["):
+        parsed = json.loads(stripped)
+        if not isinstance(parsed, dict):
+            raise ValueError("worker_json_not_object")
+        parsed.setdefault("_worker_output_format", "json_object")
+        return parsed
+    return _worker_compact_from_text(stripped)
+
+
+def _worker_from_response(response: dict[str, Any]) -> dict[str, Any]:
+    text = response.get("text") or ""
+    finish_reason = response.get("finish_reason")
+    if not str(text).strip():
+        if finish_reason == "length":
+            raise ValueError("worker_finish_reason_length_empty_text")
+        raise ValueError("worker_empty_text")
+    try:
+        return _worker_from_text(str(text))
+    except Exception as exc:
+        if finish_reason == "length":
+            raise ValueError(f"worker_finish_reason_length_incomplete_output:{exc}") from exc
+        raise
+
+
 def _gov_micro_from_text(text: str) -> dict[str, Any]:
     stripped = _strip_thinking_blocks(text or "")
     if not stripped.strip():
@@ -569,20 +670,27 @@ def _call_model(config: dict[str, Any], messages: list[dict[str, str]], max_toke
 
 def _worker_contract() -> dict[str, Any]:
     return {
-        "worker_role": "string",
-        "verification_verdict": "ALLOW | ESCALATE",
-        "boundary_binding": {
-            "action_boundary": "string",
-            "allow_rule_assessment": "string",
-            "escalate_rule_assessment": "string",
-            "timing_scope_authority_dependency_check": "string",
+        "format": "compact_key_value_v1",
+        "rules": [
+            "Return exactly one key=value line for each required key.",
+            "No JSON, no braces, no quotes, no markdown, no prose outside the lines.",
+            "Use | to separate list items. Use an empty value when no blockers exist.",
+        ],
+        "required_keys_in_order": list(WORKER_COMPACT_KEYS),
+        "allowed_values": {
+            "verification_verdict": "ALLOW | ESCALATE",
             "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
-            "controlling_source_fact": "string",
         },
-        "cited_evidence": ["exact source doc_id"],
-        "open_blockers": ["string, max 3 items"],
-        "critical_features_preserved": ["string, max 5 items"],
-        "final_answer": "string, 25-120 words",
+        "field_bounds": {
+            "allow_rule_assessment": "max 14 words",
+            "escalate_rule_assessment": "max 14 words",
+            "dependency_check": "max 14 words",
+            "controlling_source_fact": "one exact source doc_id or short source-bound fact",
+            "cited_evidence": "pipe-separated exact source doc_id values, max 8",
+            "open_blockers": "pipe-separated, max 4; empty if none",
+            "critical_features_preserved": "pipe-separated, max 6",
+            "final_answer": "25-80 words",
+        },
     }
 
 
@@ -958,7 +1066,7 @@ def _build_worker_messages(
             "SETTLED_DECISIONS": [
                 "Gov chooses control actions, not models.",
                 "Source context is ground truth.",
-                "Workers return compact JSON only.",
+                "Workers return compact key=value lines only.",
             ],
             "unresolved_tensions": state_brief.get("unresolved_dependencies") or [],
             "system_role": "HoloVerify worker. Preserve state. Obey Gov.",
@@ -976,7 +1084,7 @@ def _build_worker_messages(
             "task_and_answer_contract": {
                 "task": "Decide whether the action may proceed using only source records in this packet.",
                 "answer_contract": _worker_contract(),
-                "word_band": "final_answer 25-120 words",
+                "word_band": "final_answer 25-80 words",
                 "source_rules": [
                     "cite exact doc_id values only",
                     "do not invent source IDs",
@@ -1007,9 +1115,10 @@ def _build_worker_messages(
             "You are a HoloVerify worker. Preserve state. Obey Gov.",
             "Worker prompt hierarchy is strict: Gov adversarial baton, structured canonical state, then artifact context.",
             "Raw accumulating transcript injection is forbidden; use structured state and artifact refs only.",
-            "Return the exact required worker schema only; do not add keys.",
-            "Keep boundary_binding values concise. Keep final_answer 25-120 words. Keep arrays short.",
-            "Return only valid JSON. No markdown fences.",
+            "Return compact_key_value_v1 only: exactly one key=value line for each required key, in order.",
+            "No JSON, no braces, no quotes, no markdown fences, no prose outside the key=value lines.",
+            "Use | for cited_evidence, open_blockers, and critical_features_preserved list values.",
+            "Keep values short. Keep final_answer 25-80 words.",
         ]
     )
     _assert_prompt_clean(user_obj)
@@ -1112,7 +1221,7 @@ def _validate_worker(parsed: dict[str, Any], spec: dict[str, Any], suffix: str, 
     if parsed.get("verification_verdict") == "ESCALATE" and binding.get("binding_class") != "SOURCE_BOUNDARY_OPEN":
         failures.append("escalate_requires_source_boundary_open")
     final_answer_words = len(str(parsed.get("final_answer") or "").split())
-    if final_answer_words < 25 or final_answer_words > 120:
+    if final_answer_words < 25 or final_answer_words > 80:
         failures.append(f"word_band_final_answer:{final_answer_words}")
     for key in ("cited_evidence", "open_blockers", "critical_features_preserved"):
         if key not in parsed or not isinstance(parsed.get(key), list):
@@ -1245,7 +1354,7 @@ def _normalize_worker_artifact_after_gate(
             feature_text += "\n" + missing_term
 
     final_answer_words = len(str(normalized.get("final_answer") or "").split())
-    if final_answer_words < 25 or final_answer_words > 120:
+    if final_answer_words < 25 or final_answer_words > 80:
         normalized["final_answer"] = _normalize_final_answer(normalized, spec, suffix, valid_ids)
 
     normalized_gate = _validate_worker(normalized, spec, suffix, valid_ids)
@@ -1644,7 +1753,7 @@ def _run_packet(run_id: str, pair: dict[str, Any], suffix: str, manifest: dict[s
         response: dict[str, Any] = {}
         try:
             response = _call_model(config, messages, max_tokens=WORKER_MAX_TOKENS)
-            parsed = _json_from_text(response["text"])
+            parsed = _worker_from_response(response)
             raw_parsed = json.loads(json.dumps(parsed))
             raw_gate = _validate_worker(parsed, spec, suffix, valid_ids)
             parsed, gate, worker_normalization = _normalize_worker_artifact_after_gate(

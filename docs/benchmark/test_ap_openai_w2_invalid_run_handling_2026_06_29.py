@@ -222,6 +222,88 @@ def test_transport_retry_exhaustion_fails_closed() -> None:
         RUNNER._transport_sleep = original_sleep
 
 
+def compact_worker_fixture(*, verdict: str = "ALLOW", source_id: str = "SRC-TEST-CTL") -> str:
+    return "\n".join(
+        [
+            "worker_role=ADVERSARIAL_SCOPE_CHALLENGER",
+            f"verification_verdict={verdict}",
+            "binding_class=SOURCE_BOUNDARY_CLOSED",
+            "action_boundary=invoice release with complete PO/invoice/receipt match",
+            "allow_rule_assessment=exact current source closes the boundary",
+            "escalate_rule_assessment=escalate only if source defect remains open",
+            "dependency_check=current exact match and approver limit are present",
+            f"controlling_source_fact={source_id}",
+            f"cited_evidence={source_id}|SRC-TEST-POL",
+            "open_blockers=",
+            "critical_features_preserved=exact match|approver limit|source boundary closed",
+            (
+                "final_answer=ALLOW: the source boundary is closed for the invoice release. "
+                "The cited control record and policy show exact current source support, approver limit, "
+                "and matching source evidence before execution, so no blocker remains open."
+            ),
+        ]
+    )
+
+
+def worker_spec_fixture() -> dict[str, object]:
+    return {
+        "boundary": "invoice release with complete PO/invoice/receipt match",
+        "knew_terms": {"A": ["exact match", "approver limit"], "B": []},
+    }
+
+
+def test_worker_malformed_unterminated_json_invalid() -> None:
+    malformed = (
+        '{"worker_role":"ADVERSARIAL_SCOPE_CHALLENGER","verification_verdict":"ALLOW",'
+        '"final_answer":"The source boundary is closed.","}'
+    )
+    assert_raises_contains(
+        lambda: RUNNER._worker_from_response({"text": malformed, "finish_reason": "completed"}),
+        "Unterminated string",
+    )
+
+
+def test_worker_markdown_wrapped_json_invalid() -> None:
+    wrapped = '```json\n{"verification_verdict":"ALLOW"}\n```'
+    assert_raises_contains(
+        lambda: RUNNER._worker_from_response({"text": wrapped, "finish_reason": "completed"}),
+        "worker_markdown_fence_present",
+    )
+
+
+def test_valid_compact_worker_output_parses_and_gates() -> None:
+    parsed = RUNNER._worker_from_response(
+        {"text": compact_worker_fixture(), "finish_reason": "completed"}
+    )
+    if parsed["_worker_output_format"] != "compact_key_value_v1":
+        raise AssertionError(parsed)
+    gate = RUNNER._validate_worker(parsed, worker_spec_fixture(), "A", {"SRC-TEST-CTL", "SRC-TEST-POL"})
+    if gate["passed"] is not True:
+        raise AssertionError(gate)
+
+
+def test_worker_output_missing_verdict_invalid() -> None:
+    missing_verdict = "\n".join(
+        line for line in compact_worker_fixture().splitlines() if not line.startswith("verification_verdict=")
+    )
+    assert_raises_contains(
+        lambda: RUNNER._worker_from_response({"text": missing_verdict, "finish_reason": "completed"}),
+        "worker_compact_missing_keys:verification_verdict",
+    )
+
+
+def test_worker_output_with_invented_source_id_invalid() -> None:
+    parsed = RUNNER._worker_from_response(
+        {"text": compact_worker_fixture(source_id="SRC-INVENTED"), "finish_reason": "completed"}
+    )
+    gate = RUNNER._validate_worker(parsed, worker_spec_fixture(), "A", {"SRC-TEST-CTL", "SRC-TEST-POL"})
+    failures = gate["failures"]
+    if "invented_source_id:SRC-INVENTED" not in failures:
+        raise AssertionError(failures)
+    if gate["passed"] is not False:
+        raise AssertionError(gate)
+
+
 def test_no_packet_or_prompt_hash_mutation() -> None:
     before = freeze_fingerprint()
     test_gov_empty_text_invalid()
@@ -230,6 +312,11 @@ def test_no_packet_or_prompt_hash_mutation() -> None:
     test_retry_classifies_transport_only()
     test_transport_retry_success_marks_recovered()
     test_transport_retry_exhaustion_fails_closed()
+    test_worker_malformed_unterminated_json_invalid()
+    test_worker_markdown_wrapped_json_invalid()
+    test_valid_compact_worker_output_parses_and_gates()
+    test_worker_output_missing_verdict_invalid()
+    test_worker_output_with_invented_source_id_invalid()
     after = freeze_fingerprint()
     if before != after:
         raise AssertionError("AP packet or prompt hashes changed during no-provider fixtures")
@@ -244,6 +331,11 @@ def main() -> None:
         test_retry_classifies_transport_only,
         test_transport_retry_success_marks_recovered,
         test_transport_retry_exhaustion_fails_closed,
+        test_worker_malformed_unterminated_json_invalid,
+        test_worker_markdown_wrapped_json_invalid,
+        test_valid_compact_worker_output_parses_and_gates,
+        test_worker_output_missing_verdict_invalid,
+        test_worker_output_with_invented_source_id_invalid,
         test_no_packet_or_prompt_hash_mutation,
     ]
     for test in tests:

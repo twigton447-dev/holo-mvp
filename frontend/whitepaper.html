@@ -69,6 +69,8 @@
     border: 1px solid var(--line);
     border-radius: 4px;
     padding: 0.08rem 0.32rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .topbar {
@@ -143,22 +145,26 @@
     margin-bottom: 2rem;
   }
   .meta-row {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     max-width: 980px;
+    align-items: stretch;
   }
   .meta-chip {
+    flex: 1 1 155px;
     border: 1px solid var(--line-strong);
     background: rgba(255, 255, 255, 0.86);
     border-radius: 8px;
-    padding: 0.7rem 0.85rem;
+    padding: 0.72rem 0.82rem;
     min-width: 0;
     box-shadow: inset 0 0 20px rgba(154,106,32,0.025);
   }
+  .meta-chip:nth-child(3),
+  .meta-chip:nth-child(4) { flex-basis: 215px; }
   .meta-chip span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
-  .meta-chip strong { display: block; margin-top: 0.2rem; font-size: 0.92rem; }
-  .meta-chip a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
+  .meta-chip strong { display: block; margin-top: 0.24rem; font-size: 0.92rem; line-height: 1.22; overflow-wrap: anywhere; }
+  .meta-chip a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: 0.16em; overflow-wrap: anywhere; }
 
   .article-shell {
     width: min(1180px, calc(100% - 40px));
@@ -367,7 +373,7 @@
     .hero-grid, .article-shell, .result-panel { grid-template-columns: 1fr; }
     .toc { position: relative; top: auto; }
     .process-map { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .meta-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .meta-chip { flex-basis: calc(50% - 0.5rem); }
   }
   @media (max-width: 680px) {
     p { font-size: 0.88rem; }
@@ -378,8 +384,10 @@
     .hero h2 { font-size: clamp(1.18rem, 6vw, 1.72rem); }
     .hero-subtitle { font-size: 0.98rem; margin-bottom: 1rem; }
     .eyebrow { margin-bottom: 0.85rem; }
-    .meta-row { display: grid; grid-template-columns: 1fr; gap: 0.5rem; }
-    .meta-chip { padding: 0.52rem 0.65rem; min-width: 0; }
+    .meta-row { gap: 0.5rem; }
+    .meta-chip,
+    .meta-chip:nth-child(3),
+    .meta-chip:nth-child(4) { flex-basis: 100%; padding: 0.52rem 0.65rem; min-width: 0; }
     .meta-chip span, .meta-chip strong { display: inline; }
     .meta-chip span { margin-right: 0.45rem; }
     footer { flex-direction: column; }

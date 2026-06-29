@@ -1,0 +1,139 @@
+{
+  "classification": "HOLOVERIFY_REPLICATION_3FAMILY_SOLO_TRIAGE_HANDOFF",
+  "status": "READY_FOR_AUTHORIZED_LOCAL_SHELL_EXECUTION",
+  "date": "2026-06-29",
+  "purpose": "Run one-shot solo triage over all frozen replication packets before spending any full Holo calls.",
+  "runtime_commit": "266ffbbb36b4ddf86254fa9fe592b651d782a3fd",
+  "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "freeze_root_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_2026-06-29",
+  "scope": {
+    "families": 3,
+    "pairs": 60,
+    "packets": 120,
+    "allow_truths": 60,
+    "escalate_truths": 60,
+    "hard_allow_target_pairs": 30,
+    "hard_escalate_target_pairs": 30,
+    "expected_provider_calls": 360,
+    "gov_calls": 0,
+    "holo_calls": 0,
+    "judge_calls": 0
+  },
+  "families": {
+    "HV-AP-REP-2026-06-29": "AP / procurement / vendor-master controls",
+    "HV-ACOM-REP-2026-06-29": "Agentic commerce / order execution controls",
+    "HV-ITAC-REP-2026-06-29": "IT access / permission change controls"
+  },
+  "solo_triage_roster": [
+    {
+      "slot": "Solo A",
+      "provider": "xai",
+      "model": "grok-3-mini"
+    },
+    {
+      "slot": "Solo B",
+      "provider": "openai",
+      "model": "gpt-5.4-mini"
+    },
+    {
+      "slot": "Solo C",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed"
+    }
+  ],
+  "forbidden": {
+    "gov": true,
+    "holo_state": true,
+    "gov_baton": true,
+    "artifact_registry": true,
+    "final_selector": true,
+    "judges": true,
+    "holo_runs": true,
+    "packet_edits": true,
+    "prompt_edits": true,
+    "fallback_or_substitution": true
+  },
+  "required_env_vars": [
+    "XAI_API_KEY",
+    "OPENAI_API_KEY",
+    "MINIMAX_API_KEY"
+  ],
+  "optional_env_vars": [
+    "MINIMAX_CHAT_COMPLETIONS_URL",
+    "MINIMAX_BASE_URL"
+  ],
+  "exact_preflight_command_lines": [
+    "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+    "git merge-base --is-ancestor 266ffbbb36b4ddf86254fa9fe592b651d782a3fd \"$(git rev-parse HEAD)\"",
+    "python3 -B docs/benchmark/run_replication_3family_solo_triage_2026_06_29.py --preflight"
+  ],
+  "preflight_must_report": {
+    "status": "PASS",
+    "packet_count": 120,
+    "pair_count": 60,
+    "expected_provider_calls": 360,
+    "expected_gov_calls": 0,
+    "expected_holo_calls": 0,
+    "expected_judge_calls": 0,
+    "provider_calls_made_by_preflight": 0,
+    "judge_calls_made_by_preflight": 0,
+    "prompt_leakage_rows": [],
+    "no_gemini_in_triage_roster": true
+  },
+  "exact_live_triage_command_lines": [
+    "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+    "git merge-base --is-ancestor 266ffbbb36b4ddf86254fa9fe592b651d782a3fd \"$(git rev-parse HEAD)\"",
+    "set -a; source .env; set +a",
+    "python3 -B docs/benchmark/run_replication_3family_solo_triage_2026_06_29.py --run-live"
+  ],
+  "exact_post_run_audit_command_lines": [
+    "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+    "RUN_DIR=\"$(ls -td docs/benchmark/holoverify_replication_packet_freeze_3families_2026-06-29/solo_triage_3mini/run_* | head -1)\"",
+    "python3 - \"$RUN_DIR\" <<'PY'",
+    "import json",
+    "import sys",
+    "from pathlib import Path",
+    "run = Path(sys.argv[1])",
+    "summary = json.loads((run / \"solo_triage_results.json\").read_text())",
+    "lock = json.loads((run / \"SOLO_TRIAGE_LOCK_VALIDATION.json\").read_text())",
+    "report = {",
+    "    \"run_dir\": str(run),",
+    "    \"classification\": summary.get(\"classification\"),",
+    "    \"provider_calls\": summary.get(\"provider_calls\"),",
+    "    \"expected_provider_calls\": summary.get(\"expected_provider_calls\"),",
+    "    \"gov_calls\": summary.get(\"gov_calls\"),",
+    "    \"holo_calls\": summary.get(\"holo_calls\"),",
+    "    \"judge_calls\": summary.get(\"judge_calls\"),",
+    "    \"provider_failures\": len(summary.get(\"provider_failures\") or []),",
+    "    \"freeze_root\": summary.get(\"freeze_root\"),",
+    "    \"lock_validation\": lock.get(\"validation_status\"),",
+    "    \"top_holo_targets\": len(summary.get(\"top_holo_targets\") or []),",
+    "    \"by_family\": summary.get(\"by_family\"),",
+    "    \"by_model\": summary.get(\"by_model\"),",
+    "}",
+    "print(json.dumps(report, indent=2, sort_keys=True))",
+    "PY"
+  ],
+  "expected_outputs": [
+    "SOLO_TRIAGE_PREFLIGHT.json",
+    "SOLO_TRIAGE_TRACE.jsonl",
+    "solo_triage_results.json",
+    "solo_triage_summary.md",
+    "SOLO_TRIAGE_LOCK_MANIFEST.json",
+    "SOLO_TRIAGE_LOCK_VALIDATION.json",
+    "prompts/"
+  ],
+  "triage_classes": [
+    "ALL_SIX_SOLO_COLLAPSE",
+    "STRONG_SOLO_COLLAPSE",
+    "MIXED_SEAM",
+    "NO_SOLO_SEAM",
+    "INVALID_PAIR_TRACE"
+  ],
+  "next_decision_rule": "After triage, consider Holo only for ALL_SIX_SOLO_COLLAPSE and STRONG_SOLO_COLLAPSE pairs.",
+  "codex_provider_calls": 0,
+  "codex_holo_calls": 0,
+  "codex_solo_live_calls": 0,
+  "codex_judge_calls": 0,
+  "stop_rule": "After solo triage completes, stop and inspect pair rankings. Do not start Holo until target pairs are selected."
+}

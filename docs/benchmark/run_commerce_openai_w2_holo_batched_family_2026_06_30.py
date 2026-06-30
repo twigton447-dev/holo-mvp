@@ -27,11 +27,35 @@ BATCH_PREFLIGHT_ROOT = COMMERCE_ROOT / "batched_full_holo_preflights"
 BATCH_HEALTH_GATED_PREFLIGHT_ROOT = COMMERCE_ROOT / "batched_full_holo_preflights_health_gated"
 ROLLUP_ROOT = COMMERCE_ROOT / "batched_full_holo_rollups"
 MINIMAX_HEALTH_ROOT = COMMERCE_ROOT / "minimax_health_checks"
+MINIMAX_WORKER_SMOKE_ROOT = COMMERCE_ROOT / "minimax_worker_contract_smokes"
 EXPECTED_FREEZE_ROOT_HASH = "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7"
 MINIMAX_HEALTH_PROMPT = "Return exactly MINIMAX_READY"
 MINIMAX_HEALTH_EXPECTED_RESPONSE = "MINIMAX_READY"
 MINIMAX_HEALTH_MAX_TOKENS = 128
 MINIMAX_HEALTH_MAX_AGE_SECONDS = 30 * 60
+MINIMAX_WORKER_SMOKE_MAX_TOKENS = 1200
+MINIMAX_WORKER_SMOKE_MAX_AGE_SECONDS = 30 * 60
+MINIMAX_WORKER_SMOKE_PROMPT = "\n".join(
+    [
+        "Return compact_key_value_v1 only.",
+        "The first output characters must be worker_role=FINAL_COMPILER.",
+        "Do not emit hidden thinking, analysis, Markdown, JSON, or prose.",
+        "Use only these fixture source IDs: SRC-FIXTURE-CTL and SRC-FIXTURE-BND.",
+        "Return exactly these lines, with no extra text:",
+        "worker_role=FINAL_COMPILER",
+        "verification_verdict=ALLOW",
+        "binding_class=SOURCE_BOUNDARY_CLOSED",
+        "action_boundary=fixture non-benchmark action boundary",
+        "allow_rule_assessment=fixture control closes exact boundary",
+        "escalate_rule_assessment=no open escalation defect remains",
+        "dependency_check=fixture timing scope authority and dependency closed",
+        "controlling_source_fact=SRC-FIXTURE-CTL",
+        "cited_evidence=SRC-FIXTURE-CTL|SRC-FIXTURE-BND",
+        "open_blockers=",
+        "critical_features_preserved=fixture boundary|SRC-FIXTURE-CTL|SRC-FIXTURE-BND",
+        "final_answer=Action may proceed because the fixture control closes the exact boundary.",
+    ]
+)
 
 BATCHES: dict[str, dict[str, Any]] = {
     "batch_1": {
@@ -157,6 +181,51 @@ def latest_minimax_health_report(now: datetime | None = None) -> dict[str, Any]:
     }
 
 
+def latest_minimax_worker_smoke_report(now: datetime | None = None) -> dict[str, Any]:
+    now = now or datetime.now(timezone.utc)
+    candidates = sorted(MINIMAX_WORKER_SMOKE_ROOT.glob("smoke_*/COMMERCE_MINIMAX_WORKER_CONTRACT_SMOKE_2026_06_30.json"))
+    if not candidates:
+        return {
+            "status": "MISSING",
+            "recent_pass": False,
+            "reason": "no_minimax_worker_contract_smoke_report_found",
+            "max_age_seconds": MINIMAX_WORKER_SMOKE_MAX_AGE_SECONDS,
+        }
+    path = candidates[-1]
+    try:
+        report = read_json(path)
+    except Exception as exc:
+        return {
+            "status": "MALFORMED",
+            "recent_pass": False,
+            "reason": f"latest_worker_smoke_malformed:{type(exc).__name__}",
+            "path": str(path),
+            "max_age_seconds": MINIMAX_WORKER_SMOKE_MAX_AGE_SECONDS,
+        }
+    created_at = parse_timestamp(report.get("created_at"))
+    age_seconds = None
+    if created_at is not None:
+        age_seconds = int((now - created_at).total_seconds())
+    recent = isinstance(age_seconds, int) and 0 <= age_seconds <= MINIMAX_WORKER_SMOKE_MAX_AGE_SECONDS
+    passed = report.get("status") == "PASS" and report.get("worker_contract_clean") is True
+    return {
+        "status": "PASS" if passed and recent else "FAIL",
+        "recent_pass": bool(passed and recent),
+        "reason": None if passed and recent else "latest_worker_smoke_missing_stale_failed_or_degraded",
+        "path": str(path),
+        "created_at": report.get("created_at"),
+        "age_seconds": age_seconds,
+        "max_age_seconds": MINIMAX_WORKER_SMOKE_MAX_AGE_SECONDS,
+        "worker_contract_clean": report.get("worker_contract_clean"),
+        "raw_starts_with_worker_role": report.get("raw_starts_with_worker_role"),
+        "parse_ok": report.get("parse_ok"),
+        "gate_passed": report.get("gate_passed"),
+        "finish_reason": report.get("finish_reason"),
+        "transport_attempt_count": report.get("transport_attempt_count"),
+        "transport_recovered": report.get("transport_recovered"),
+    }
+
+
 def run_minimax_health_check() -> int:
     """Run a harmless MiniMax readiness check with no benchmark content."""
     configure()
@@ -230,6 +299,132 @@ def run_minimax_health_check() -> int:
     write_text(out_dir / "COMMERCE_MINIMAX_HEALTH_CHECK_2026_06_30.md", render_minimax_health_md(report))
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if provider_clean else 1
+
+
+def run_minimax_worker_contract_smoke() -> int:
+    """Run a harmless MiniMax worker-format smoke with no benchmark content."""
+    configure()
+    config = RUNNER.MODEL_CONFIGS["minimax"]
+    env_name = config["api_key_env"]
+    if not os.getenv(env_name, "").strip():
+        raise RuntimeError(f"{env_name} missing")
+    now = datetime.now(timezone.utc)
+    run_id = now.strftime("smoke_%Y%m%dT%H%M%SZ")
+    out_dir = MINIMAX_WORKER_SMOKE_ROOT / run_id
+    out_dir.mkdir(parents=True, exist_ok=False)
+    prompt_hash = AP.sha256_text(MINIMAX_WORKER_SMOKE_PROMPT)
+    response: dict[str, Any] = {}
+    provider_call_ok = False
+    parse_ok = False
+    gate_passed = False
+    parse_error = None
+    gate_result: dict[str, Any] | None = None
+    error = None
+    try:
+        response = RUNNER._call_model(
+            config,
+            [{"role": "user", "content": MINIMAX_WORKER_SMOKE_PROMPT}],
+            max_tokens=MINIMAX_WORKER_SMOKE_MAX_TOKENS,
+        )
+        provider_call_ok = True
+        parsed = RUNNER._worker_from_response(response)
+        parse_ok = True
+        fixture_spec = {
+            "boundary": "fixture non-benchmark action boundary",
+            "knew_terms": {"A": ["fixture boundary", "SRC-FIXTURE-CTL", "SRC-FIXTURE-BND"]},
+        }
+        gate_result = RUNNER._validate_worker(parsed, fixture_spec, "A", {"SRC-FIXTURE-CTL", "SRC-FIXTURE-BND"})
+        gate_passed = bool(gate_result.get("passed"))
+    except RUNNER.TransportFailureAfterRetries as exc:
+        response = dict(getattr(exc, "metadata", {}) or {})
+        error = f"{type(exc).__name__}: {exc}"
+    except Exception as exc:
+        parse_error = f"{type(exc).__name__}: {exc}"
+    raw_text = str(response.get("raw_text") or response.get("text") or "")
+    text = str(response.get("text") or "")
+    raw_starts_with_worker_role = raw_text.lstrip().startswith("worker_role=FINAL_COMPILER")
+    text_starts_with_worker_role = text.lstrip().startswith("worker_role=FINAL_COMPILER")
+    worker_contract_clean = (
+        provider_call_ok
+        and parse_ok
+        and gate_passed
+        and raw_starts_with_worker_role
+        and text_starts_with_worker_role
+        and response.get("finish_reason") != "length"
+        and response.get("transport_attempt_count") == 1
+        and response.get("transport_recovered") is False
+        and not response.get("transport_final_failure_class")
+    )
+    report = {
+        "classification": "COMMERCE_MINIMAX_WORKER_CONTRACT_SMOKE_NON_BENCHMARK",
+        "status": "PASS" if worker_contract_clean else "FAIL",
+        "created_at": now.isoformat(),
+        "provider": config["provider"],
+        "model": config["model"],
+        "dna": config["dna"],
+        "prompt_hash": prompt_hash,
+        "prompt_policy": "harmless_non_benchmark_worker_contract_smoke_only",
+        "benchmark_content_included": False,
+        "packet_content_included": False,
+        "source_ids_included": False,
+        "traps_included": False,
+        "answer_keys_included": False,
+        "fixture_source_ids_only": ["SRC-FIXTURE-CTL", "SRC-FIXTURE-BND"],
+        "max_tokens": MINIMAX_WORKER_SMOKE_MAX_TOKENS,
+        "provider_call_ok": provider_call_ok,
+        "worker_contract_clean": worker_contract_clean,
+        "parse_ok": parse_ok,
+        "parse_error": parse_error,
+        "gate_passed": gate_passed,
+        "gate_result": gate_result,
+        "raw_starts_with_worker_role": raw_starts_with_worker_role,
+        "text_starts_with_worker_role": text_starts_with_worker_role,
+        "text_stripped_by_thinking_filter": response.get("text_stripped_by_thinking_filter"),
+        "response_text_preview": text[:500],
+        "raw_text_preview": raw_text[:500],
+        "finish_reason": response.get("finish_reason"),
+        "input_tokens": response.get("input_tokens"),
+        "output_tokens": response.get("output_tokens"),
+        "total_tokens": response.get("total_tokens"),
+        "elapsed_ms": response.get("elapsed_ms"),
+        "transport_attempt_count": response.get("transport_attempt_count"),
+        "transport_recovered": response.get("transport_recovered"),
+        "transport_retry_failures": response.get("transport_retry_failures") or [],
+        "transport_final_failure_class": response.get("transport_final_failure_class"),
+        "error": error,
+    }
+    write_json(out_dir / "COMMERCE_MINIMAX_WORKER_CONTRACT_SMOKE_2026_06_30.json", report)
+    write_text(out_dir / "COMMERCE_MINIMAX_WORKER_CONTRACT_SMOKE_2026_06_30.md", render_minimax_worker_smoke_md(report))
+    print(json.dumps(report, indent=2, sort_keys=True))
+    return 0 if worker_contract_clean else 1
+
+
+def render_minimax_worker_smoke_md(report: dict[str, Any]) -> str:
+    return "\n".join(
+        [
+            "# Commerce MiniMax Worker Contract Smoke",
+            "",
+            f"Classification: `{report['classification']}`",
+            f"Status: `{report['status']}`",
+            f"Provider/model: `{report['provider']}/{report['model']}`",
+            f"Prompt policy: `{report['prompt_policy']}`",
+            "",
+            "## Result",
+            "",
+            f"- Provider call OK: `{report['provider_call_ok']}`",
+            f"- Worker contract clean: `{report['worker_contract_clean']}`",
+            f"- Parse OK: `{report['parse_ok']}`",
+            f"- Gate passed: `{report['gate_passed']}`",
+            f"- Raw starts with worker role: `{report['raw_starts_with_worker_role']}`",
+            f"- Finish reason: `{report['finish_reason']}`",
+            f"- Transport attempts: `{report['transport_attempt_count']}`",
+            f"- Transport recovered: `{report['transport_recovered']}`",
+            f"- Error: `{report['error']}`",
+            "",
+            "No frozen Commerce packet text, prompt text, source IDs, traps, or answer keys are included in this worker smoke.",
+            "",
+        ]
+    )
 
 
 def render_minimax_health_md(report: dict[str, Any]) -> str:
@@ -317,6 +512,8 @@ def render_preflight_md(preflight: dict[str, Any]) -> str:
         f"- Judge calls: `{preflight['expected_counts']['judge_calls']}`",
         f"- MiniMax health required: `{preflight['minimax_health_gate']['required']}`",
         f"- MiniMax recent clean health: `{preflight['minimax_health_gate']['recent_pass']}`",
+        f"- MiniMax worker smoke required: `{preflight['minimax_worker_smoke_gate']['required']}`",
+        f"- MiniMax recent worker smoke: `{preflight['minimax_worker_smoke_gate']['recent_pass']}`",
         "",
         "## Checks",
         "",
@@ -329,7 +526,11 @@ def render_preflight_md(preflight: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def build_preflight(batch_id: str, require_minimax_health: bool = False) -> dict[str, Any]:
+def build_preflight(
+    batch_id: str,
+    require_minimax_health: bool = False,
+    require_minimax_worker_smoke: bool = False,
+) -> dict[str, Any]:
     pairs = selected_pairs(batch_id)
     counts = expected_counts(batch_id)
     declared_roster = roster()
@@ -338,6 +539,8 @@ def build_preflight(batch_id: str, require_minimax_health: bool = False) -> dict
     pair_ids = tuple(pair["pair_id"] for pair in pairs)
     health_gate = latest_minimax_health_report()
     health_gate["required"] = require_minimax_health
+    worker_smoke_gate = latest_minimax_worker_smoke_report()
+    worker_smoke_gate["required"] = require_minimax_worker_smoke
     checks = {
         "freeze_root_matches": True,
         "batch_declared": batch_id in BATCHES,
@@ -367,6 +570,8 @@ def build_preflight(batch_id: str, require_minimax_health: bool = False) -> dict
     }
     if require_minimax_health:
         checks["minimax_health_check_recent_clean_pass"] = health_gate["recent_pass"] is True
+    if require_minimax_worker_smoke:
+        checks["minimax_worker_contract_smoke_recent_clean_pass"] = worker_smoke_gate["recent_pass"] is True
     status = "PASS" if all(checks.values()) else "FAIL"
     architecture_lock = {
         "classification": "COMMERCE_OPENAI_W2_BATCHED_FULL_HOLO_ARCHITECTURE_LOCK",
@@ -399,6 +604,7 @@ def build_preflight(batch_id: str, require_minimax_health: bool = False) -> dict
         "expected_counts": counts,
         "architecture_lock": architecture_lock,
         "minimax_health_gate": health_gate,
+        "minimax_worker_smoke_gate": worker_smoke_gate,
         "checks": checks,
         "blocked_reason": None if status == "PASS" else [key for key, value in checks.items() if not value],
         "providers_called": 0,
@@ -407,7 +613,11 @@ def build_preflight(batch_id: str, require_minimax_health: bool = False) -> dict
         "judges_started": False,
     }
     preflight["root_signature"] = AP.sha256_text(AP.canonical_json({k: v for k, v in preflight.items() if k != "created_at"}))
-    out_dir = (BATCH_HEALTH_GATED_PREFLIGHT_ROOT if require_minimax_health else BATCH_PREFLIGHT_ROOT) / batch_id
+    out_dir = (
+        BATCH_HEALTH_GATED_PREFLIGHT_ROOT
+        if require_minimax_health or require_minimax_worker_smoke
+        else BATCH_PREFLIGHT_ROOT
+    ) / batch_id
     write_json(out_dir / "COMMERCE_OPENAI_W2_BATCH_PREFLIGHT.json", preflight)
     write_text(out_dir / "COMMERCE_OPENAI_W2_BATCH_PREFLIGHT.md", render_preflight_md(preflight))
     return preflight
@@ -608,8 +818,16 @@ def write_batch_summary_md(run_dir: Path, summary: dict[str, Any]) -> None:
     write_text(run_dir / "batch_summary.md", "\n".join(lines) + "\n")
 
 
-def run_batch(batch_id: str, require_minimax_health: bool = False) -> int:
-    manifest = build_preflight(batch_id, require_minimax_health=require_minimax_health)
+def run_batch(
+    batch_id: str,
+    require_minimax_health: bool = False,
+    require_minimax_worker_smoke: bool = False,
+) -> int:
+    manifest = build_preflight(
+        batch_id,
+        require_minimax_health=require_minimax_health,
+        require_minimax_worker_smoke=require_minimax_worker_smoke,
+    )
     if manifest["status"] != "PASS":
         raise RuntimeError(f"preflight_failed:{manifest.get('blocked_reason')}")
     for key in ("xai", AP.OPENAI_W2_MODEL_KEY, "minimax"):
@@ -745,7 +963,9 @@ def write_rollup_md(out_dir: Path, rollup: dict[str, Any]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--minimax-health-check", action="store_true")
+    parser.add_argument("--minimax-worker-contract-smoke", action="store_true")
     parser.add_argument("--require-minimax-health", action="store_true")
+    parser.add_argument("--require-minimax-worker-smoke", action="store_true")
     parser.add_argument("--preflight-batch", action="store_true")
     parser.add_argument("--preflight-all-batches", action="store_true")
     parser.add_argument("--run-batch", action="store_true")
@@ -754,25 +974,42 @@ def main() -> int:
     args = parser.parse_args()
     if args.minimax_health_check:
         return run_minimax_health_check()
+    if args.minimax_worker_contract_smoke:
+        return run_minimax_worker_contract_smoke()
     if args.preflight_batch:
         if not args.batch:
             raise SystemExit("--batch is required")
-        report = build_preflight(args.batch, require_minimax_health=args.require_minimax_health)
+        report = build_preflight(
+            args.batch,
+            require_minimax_health=args.require_minimax_health,
+            require_minimax_worker_smoke=args.require_minimax_worker_smoke,
+        )
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0 if report["status"] == "PASS" else 1
     if args.preflight_all_batches:
-        reports = [build_preflight(batch_id, require_minimax_health=args.require_minimax_health) for batch_id in BATCHES]
+        reports = [
+            build_preflight(
+                batch_id,
+                require_minimax_health=args.require_minimax_health,
+                require_minimax_worker_smoke=args.require_minimax_worker_smoke,
+            )
+            for batch_id in BATCHES
+        ]
         print(json.dumps(reports, indent=2, sort_keys=True))
         return 0 if all(report["status"] == "PASS" for report in reports) else 1
     if args.run_batch:
         if not args.batch:
             raise SystemExit("--batch is required")
-        return run_batch(args.batch, require_minimax_health=args.require_minimax_health)
+        return run_batch(
+            args.batch,
+            require_minimax_health=args.require_minimax_health,
+            require_minimax_worker_smoke=args.require_minimax_worker_smoke,
+        )
     if args.rollup_latest:
         rollup = rollup_latest()
         print(json.dumps(rollup, indent=2, sort_keys=True))
         return 0 if rollup["readiness_passed"] else 1
-    parser.error("Use --minimax-health-check, --preflight-batch, --preflight-all-batches, --run-batch, or --rollup-latest")
+    parser.error("Use --minimax-health-check, --minimax-worker-contract-smoke, --preflight-batch, --preflight-all-batches, --run-batch, or --rollup-latest")
     return 2
 
 

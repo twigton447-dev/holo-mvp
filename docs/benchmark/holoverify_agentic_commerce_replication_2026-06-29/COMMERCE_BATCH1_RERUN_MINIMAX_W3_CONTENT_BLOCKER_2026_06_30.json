@@ -1,0 +1,58 @@
+{
+  "classification": "COMMERCE_BATCH1_RERUN_MINIMAX_W3_CONTENT_BLOCKER",
+  "status": "BLOCKED_MODEL_OUTPUT_CONTRACT",
+  "created_at": "2026-06-30T00:00:00+00:00",
+  "run_dir": "docs/benchmark/holoverify_agentic_commerce_replication_2026-06-29/holo_live_runs_openai_w2_batched/batch_1/run_20260630T230945Z",
+  "run_classification": "COMMERCE_OPENAI_W2_BATCHED_HOLO_BATCH_INVALID_OR_INCOMPLETE",
+  "readiness_passed": false,
+  "provider_calls": 25,
+  "expected_provider_calls": 70,
+  "worker_calls": 15,
+  "gov_calls": 10,
+  "packet_count": 5,
+  "packet_correct": 4,
+  "valid_pairs": 2,
+  "invalidation_reason": "WORKER_CONTRACT_OR_TRUNCATION_FAILURE",
+  "root_failure": {
+    "turn_id": "HV-ACOM-REP-003-A_W3",
+    "packet_id": "HV-ACOM-REP-003-A",
+    "pair_id": "HV-ACOM-REP-003",
+    "call_kind": "worker",
+    "worker_index": 3,
+    "role_name": "FINAL_COMPILER",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "provider_call_ok": true,
+    "parse_ok": false,
+    "error": "ValueError: worker_finish_reason_length_empty_text",
+    "finish_reason": "length",
+    "input_tokens": 3109,
+    "output_tokens": 6000,
+    "total_tokens": 9109,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_final_failure_class": null,
+    "raw_text_starts_with": "<think>",
+    "raw_text_ends_with": "</think>",
+    "visible_text_after_thinking_filter": ""
+  },
+  "evidence_classification": {
+    "provider_transport_blocker": false,
+    "holo_verdict_failure": false,
+    "deterministic_gate_failure": false,
+    "worker_output_contract_failure": true,
+    "benchmark_quality_signal": false
+  },
+  "patch": {
+    "add_minimax_worker_contract_smoke": true,
+    "benchmark_content_in_smoke": false,
+    "pass_requires_raw_starts_with_worker_role": true,
+    "pass_requires_parse_ok": true,
+    "pass_requires_gate_passed": true,
+    "pass_forbids_finish_reason_length": true,
+    "pass_forbids_transport_recovery": true
+  },
+  "provider_calls_during_patch": 0,
+  "judge_calls_during_patch": 0
+}
+

@@ -61,6 +61,44 @@ def write_health_report(
     return path
 
 
+def write_worker_smoke_report(
+    root: Path,
+    name: str,
+    *,
+    created_at: datetime,
+    status: str = "PASS",
+    worker_contract_clean: bool = True,
+    raw_starts: bool = True,
+    parse_ok: bool = True,
+    gate_passed: bool = True,
+    finish_reason: str = "stop",
+    attempts: int = 1,
+    recovered: bool = False,
+) -> Path:
+    path = root / name / "COMMERCE_MINIMAX_WORKER_CONTRACT_SMOKE_2026_06_30.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "classification": "COMMERCE_MINIMAX_WORKER_CONTRACT_SMOKE_NON_BENCHMARK",
+                "status": status,
+                "created_at": created_at.isoformat(),
+                "worker_contract_clean": worker_contract_clean,
+                "raw_starts_with_worker_role": raw_starts,
+                "parse_ok": parse_ok,
+                "gate_passed": gate_passed,
+                "finish_reason": finish_reason,
+                "transport_attempt_count": attempts,
+                "transport_recovered": recovered,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
+    return path
+
+
 def test_health_gate_missing_report_blocks_when_required(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(BATCH, "MINIMAX_HEALTH_ROOT", tmp_path)
 
@@ -130,3 +168,59 @@ def test_health_check_prompt_contains_no_benchmark_content() -> None:
     assert "ALLOW" not in prompt
     assert "ESCALATE" not in prompt
     assert "SRC-" not in prompt
+
+
+def test_worker_smoke_missing_report_blocks_when_required(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(BATCH, "MINIMAX_WORKER_SMOKE_ROOT", tmp_path)
+
+    status = BATCH.latest_minimax_worker_smoke_report(now=datetime(2026, 6, 30, tzinfo=timezone.utc))
+
+    assert status["status"] == "MISSING"
+    assert status["recent_pass"] is False
+    assert status["reason"] == "no_minimax_worker_contract_smoke_report_found"
+
+
+def test_recent_clean_worker_smoke_report_passes(tmp_path, monkeypatch) -> None:
+    now = datetime(2026, 6, 30, 22, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(BATCH, "MINIMAX_WORKER_SMOKE_ROOT", tmp_path)
+    write_worker_smoke_report(tmp_path, "smoke_20260630T215900Z", created_at=now - timedelta(seconds=60))
+
+    status = BATCH.latest_minimax_worker_smoke_report(now=now)
+
+    assert status["status"] == "PASS"
+    assert status["recent_pass"] is True
+    assert status["worker_contract_clean"] is True
+    assert status["raw_starts_with_worker_role"] is True
+
+
+def test_worker_smoke_blocks_hidden_thinking_or_length_output(tmp_path, monkeypatch) -> None:
+    now = datetime(2026, 6, 30, 22, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(BATCH, "MINIMAX_WORKER_SMOKE_ROOT", tmp_path)
+    write_worker_smoke_report(
+        tmp_path,
+        "smoke_20260630T215900Z",
+        created_at=now - timedelta(seconds=60),
+        status="FAIL",
+        worker_contract_clean=False,
+        raw_starts=False,
+        parse_ok=False,
+        gate_passed=False,
+        finish_reason="length",
+    )
+
+    status = BATCH.latest_minimax_worker_smoke_report(now=now)
+
+    assert status["status"] == "FAIL"
+    assert status["recent_pass"] is False
+    assert status["raw_starts_with_worker_role"] is False
+    assert status["finish_reason"] == "length"
+
+
+def test_worker_smoke_prompt_contains_fixture_only() -> None:
+    prompt = BATCH.MINIMAX_WORKER_SMOKE_PROMPT
+
+    assert "SRC-FIXTURE-CTL" in prompt
+    assert "SRC-FIXTURE-BND" in prompt
+    assert "HV-" not in prompt
+    assert "SRC-D9519C1947BF" not in prompt
+    assert "hard_allow" not in prompt

@@ -15,7 +15,9 @@ Freeze root: `5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7`
 - Solo calls: `0`
 - Judge calls: `0`
 - MiniMax health required: `True`
-- MiniMax recent clean health: `False`
+- MiniMax recent clean health: `True`
+- MiniMax worker smoke required: `True`
+- MiniMax recent worker smoke: `False`
 
 ## Checks
 
@@ -46,6 +48,7 @@ Freeze root: `5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7`
 | `solo_calls_configured` | `True` |
 | `judge_calls_configured` | `True` |
 | `no_providers_called_during_preflight` | `True` |
-| `minimax_health_check_recent_clean_pass` | `False` |
+| `minimax_health_check_recent_clean_pass` | `True` |
+| `minimax_worker_contract_smoke_recent_clean_pass` | `False` |
 
 Stop here unless live batch execution is explicitly approved.

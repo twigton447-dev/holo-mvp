@@ -1,7 +1,7 @@
 # The Action Boundary Benchmark
 ### Hardening AI for Autonomous Execution
 
-**Version 6.9 · June 2026**
+**Version 7.5 · July 2026**
 
 ---
 

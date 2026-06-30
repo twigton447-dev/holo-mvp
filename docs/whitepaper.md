@@ -4,7 +4,7 @@
 
 ### Why smart models still need a checkpoint before real-world action
 
-Version 7.6 · June 2026
+Version 7.8 · July 2026
 
 Taylor Wigton
 Founder, HoloEngine
@@ -681,6 +681,6 @@ HoloEngine is built for the space between those two facts.
 ---
 
 HoloEngine
-Version 7.5 · June 2026
+Version 7.8 · July 2026
 holoengine.ai/whitepaper
 holoengine.ai/benchmark

@@ -1,0 +1,72 @@
+{
+  "classification": "PRE_REGISTERED_ROSTER_VARIANT_NO_LIVE_RUN",
+  "created_at": "2026-06-29T23:53:01.661801+00:00",
+  "created_for": "Agentic commerce order-execution replication family",
+  "frozen_packet_bank": {
+    "allow_truths": 20,
+    "escalate_truths": 20,
+    "family_id": "HV-ACOM-REP-2026-06-29",
+    "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "packet_hashes_match_freeze": "PASS_BY_PREFLIGHT",
+    "packets": 40,
+    "pairs": 20,
+    "prompt_hashes_match_freeze": "PASS_BY_PREFLIGHT",
+    "source_commit": "de22377be8175d04078ba6c70f1fd35222e9f572"
+  },
+  "new_holo_roster": {
+    "gov_may_choose_models": false,
+    "gov_sequence": [
+      {
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "slot": "G1"
+      },
+      {
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "slot": "G2"
+      }
+    ],
+    "worker_sequence": [
+      {
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "role": "SOURCE_BOUNDARY_MAPPER",
+        "slot": "W1"
+      },
+      {
+        "model": "gpt-5.4-mini",
+        "provider": "openai",
+        "role": "ADVERSARIAL_SCOPE_CHALLENGER",
+        "slot": "W2"
+      },
+      {
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "role": "FINAL_COMPILER",
+        "slot": "W3"
+      }
+    ]
+  },
+  "reason_for_variant": "Use the hardened OpenAI-W2 runtime path that passed AP full-family Holo execution; original preregistered Gemini W2 lane remains provider-risky.",
+  "registration_validation": {
+    "holo_runs_started": 0,
+    "judges_called": 0,
+    "providers_called": 0,
+    "solo_runs_started": 0
+  },
+  "solo_baseline_rule": {
+    "baton": false,
+    "gov": false,
+    "holo_state": false,
+    "judges": false,
+    "must_use_same_three_models_as_variant": [
+      "xai/grok-3-mini",
+      "openai/gpt-5.4-mini",
+      "minimax/MiniMax-M2.5-highspeed"
+    ],
+    "requires_valid_variant_holo_freeze_first": true,
+    "selector": false
+  },
+  "variant_name": "COMMERCE_OPENAI_W2_ROSTER_VARIANT_2026_06_29"
+}

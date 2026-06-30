@@ -171,9 +171,13 @@ def _call_openai_responses_once(config: dict[str, Any], messages: list[dict[str,
         for part in content if isinstance(content, list) else []:
             if isinstance(part, dict) and part.get("type") in {"output_text", "text"}:
                 text_parts.append(str(part.get("text") or ""))
+    raw_text = "".join(text_parts)
+    stripped_text = RUNNER._strip_thinking_blocks(raw_text)
     usage = data.get("usage") if isinstance(data.get("usage"), dict) else {}
     return {
-        "text": RUNNER._strip_thinking_blocks("".join(text_parts)),
+        "text": stripped_text,
+        "raw_text": raw_text,
+        "text_stripped_by_thinking_filter": raw_text != stripped_text,
         "finish_reason": data.get("status"),
         "response_id": data.get("id"),
         "input_tokens": usage.get("input_tokens"),
@@ -540,6 +544,9 @@ def build_openai_w2_live_holo_preflight() -> dict[str, Any]:
         "worker_contract_format": RUNNER._worker_contract().get("format") == "compact_key_value_v1",
         "gov_output_budget_sufficient": getattr(RUNNER, "GOV_MAX_TOKENS", None) >= AP_OPENAI_W2_GOV_MAX_TOKENS,
         "gov_max_tokens": getattr(RUNNER, "GOV_MAX_TOKENS", None) == AP_OPENAI_W2_GOV_MAX_TOKENS,
+        "generic_worker_max_tokens": getattr(RUNNER, "WORKER_MAX_TOKENS", None) == 3600,
+        "minimax_final_compiler_worker_max_tokens": getattr(RUNNER, "MINIMAX_FINAL_COMPILER_WORKER_MAX_TOKENS", None) == 6000,
+        "minimax_final_compiler_budget_active": RUNNER._worker_max_tokens(worker_sequence[2], RUNNER.MODEL_CONFIGS["minimax"]) == 6000,
         "empty_worker_output_retry_policy_v1_active": getattr(RUNNER, "EMPTY_WORKER_OUTPUT_RETRY_POLICY_VERSION", "") == "HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29",
         "empty_worker_output_max_retries": getattr(RUNNER, "EMPTY_WORKER_OUTPUT_MAX_RETRIES", None) == 2,
         "expected_holo_calls": 40 * 5 == 200,
@@ -586,6 +593,8 @@ def build_openai_w2_live_holo_preflight() -> dict[str, Any]:
         "runtime_contracts": {
             "worker_contract_format": RUNNER._worker_contract().get("format"),
             "gov_contract_format": RUNNER._gov_contract().get("format"),
+            "generic_worker_max_tokens": getattr(RUNNER, "WORKER_MAX_TOKENS", None),
+            "minimax_final_compiler_worker_max_tokens": getattr(RUNNER, "MINIMAX_FINAL_COMPILER_WORKER_MAX_TOKENS", None),
             "gov_max_tokens": getattr(RUNNER, "GOV_MAX_TOKENS", None),
             "gov_call_builder": "RUNNER._build_gov_messages",
             "gov_parser": "RUNNER._gov_from_response",

@@ -100,6 +100,7 @@ WORKER_SEQUENCE = [
 ]
 GOV_MODEL_KEY = "minimax"
 WORKER_MAX_TOKENS = 3600
+MINIMAX_FINAL_COMPILER_WORKER_MAX_TOKENS = 6000
 GOV_MAX_TOKENS = 384
 DYNAMIC_EARLY_EXIT_ENABLED = False
 
@@ -656,9 +657,13 @@ def _call_openai_compatible(config: dict[str, Any], messages: list[dict[str, str
     )
     choice = (data.get("choices") or [{}])[0]
     message = choice.get("message") if isinstance(choice, dict) else {}
+    raw_text = (message or {}).get("content") or ""
+    stripped_text = _strip_thinking_blocks(raw_text)
     usage = data.get("usage") if isinstance(data.get("usage"), dict) else {}
     return {
-        "text": _strip_thinking_blocks((message or {}).get("content") or ""),
+        "text": stripped_text,
+        "raw_text": raw_text,
+        "text_stripped_by_thinking_filter": raw_text != stripped_text,
         "finish_reason": choice.get("finish_reason") if isinstance(choice, dict) else None,
         "response_id": data.get("id"),
         "input_tokens": usage.get("prompt_tokens"),
@@ -688,11 +693,14 @@ def _call_gemini(config: dict[str, Any], messages: list[dict[str, str]], max_tok
     if candidates:
         parts = candidates[0].get("content", {}).get("parts", [])
         output = "".join(part.get("text", "") for part in parts if isinstance(part, dict))
+    stripped_output = _strip_thinking_blocks(output)
     usage = data.get("usageMetadata") if isinstance(data.get("usageMetadata"), dict) else {}
     in_tok = usage.get("promptTokenCount")
     out_tok = usage.get("candidatesTokenCount")
     return {
-        "text": _strip_thinking_blocks(output),
+        "text": stripped_output,
+        "raw_text": output,
+        "text_stripped_by_thinking_filter": output != stripped_output,
         "finish_reason": candidates[0].get("finishReason") if candidates else None,
         "response_id": data.get("responseId"),
         "input_tokens": in_tok,
@@ -780,12 +788,20 @@ def _call_worker_model_with_empty_output_retry(
         _empty_worker_output_sleep(EMPTY_WORKER_OUTPUT_BACKOFF_SECONDS[min(attempt - 1, len(EMPTY_WORKER_OUTPUT_BACKOFF_SECONDS) - 1)])
 
 
+def _worker_max_tokens(worker: dict[str, Any], config: dict[str, Any]) -> int:
+    if config.get("provider") == "minimax" and worker.get("role_name") == "FINAL_COMPILER":
+        return MINIMAX_FINAL_COMPILER_WORKER_MAX_TOKENS
+    return WORKER_MAX_TOKENS
+
+
 def _worker_contract() -> dict[str, Any]:
     return {
         "format": "compact_key_value_v1",
         "rules": [
             "Return exactly one key=value line for each required key.",
             "No JSON, no braces, no quotes, no markdown, no prose outside the lines.",
+            "Do not emit hidden reasoning, analysis, <think> blocks, or explanation before the contract.",
+            "The first output characters must be worker_role=.",
             "Use | to separate list items. Use an empty value when no blockers exist.",
         ],
         "required_keys_in_order": list(WORKER_COMPACT_KEYS),
@@ -1269,6 +1285,8 @@ def _build_worker_messages(
             "Raw accumulating transcript injection is forbidden; use structured state and artifact refs only.",
             "Return compact_key_value_v1 only: exactly one key=value line for each required key, in order.",
             "No JSON, no braces, no quotes, no markdown fences, no prose outside the key=value lines.",
+            "Do not emit hidden reasoning, analysis, <think> blocks, or explanation before the contract.",
+            "Start immediately with worker_role= as the first output characters.",
             "Use | for cited_evidence, open_blockers, and critical_features_preserved list values.",
             "Keep values short. Keep final_answer 25-80 words.",
         ]
@@ -1850,8 +1868,10 @@ def _build_preflight(limit: int = 0, bucket: str = "all") -> dict[str, Any]:
         },
         "token_budget_policy": {
             "worker_max_tokens": WORKER_MAX_TOKENS,
+            "minimax_final_compiler_worker_max_tokens": MINIMAX_FINAL_COMPILER_WORKER_MAX_TOKENS,
             "gov_max_tokens": GOV_MAX_TOKENS,
             "worker_budget_reason": "avoid structured JSON truncation under Gemini worker slot",
+            "minimax_final_compiler_worker_budget_reason": "Commerce W3 autopsy showed MiniMax final compiler can burn the generic worker budget before emitting visible compact output; final compiler gets extra output room while malformed or length-incomplete content still fails closed",
             "gov_budget_reason": "micro-control baton with room for MiniMax hidden completion overhead; Gov receives compact gate result and worker verdict only",
         },
     }
@@ -1941,7 +1961,7 @@ def _run_packet(run_id: str, pair: dict[str, Any], suffix: str, manifest: dict[s
             response = _call_worker_model_with_empty_output_retry(
                 config,
                 messages,
-                max_tokens=WORKER_MAX_TOKENS,
+                max_tokens=_worker_max_tokens(worker, config),
                 turn_id=turn_id,
             )
             parsed = _worker_from_response(response)

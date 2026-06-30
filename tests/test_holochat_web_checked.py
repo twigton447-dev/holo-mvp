@@ -279,6 +279,22 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     assert "renderRuntimeRail(data)" not in html
     assert "runtimeRailHtml" not in html
     assert "runtime-pill" not in html
+
+
+def test_runtime_dashboard_fetches_safe_status_only():
+    html = Path("frontend/runtime.html").read_text()
+
+    assert "HoloChat Runtime" in html
+    assert 'fetch("/runtime-status", {cache: "no-store"})' in html
+    assert "App version" in html
+    assert "Visible Analyst Rotation" in html
+    assert "Governed Shadow Call Order" in html
+    assert "Raw prompts exposed" in html
+    assert "API keys exposed" in html
+    assert "bearer " not in html.lower()
+    assert "secret-value" not in html.lower()
+
+    html = Path("frontend/chat.html").read_text()
     for label in (
         "Runtime",
         "This turn",

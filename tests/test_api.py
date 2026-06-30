@@ -77,6 +77,29 @@ class TestHealth:
         assert data["architecture_version"] == ARCHITECTURE_VERSION
         assert data["build_label"].startswith(APP_VERSION)
 
+    def test_runtime_status_reports_safe_live_roster(self, allow_client):
+        data = allow_client.get("/runtime-status").json()
+        assert data["release"]["app_version"] == APP_VERSION
+        assert data["truth_contract"]["raw_prompts_exposed"] is False
+        assert data["truth_contract"]["api_keys_exposed"] is False
+        holochat = data["holochat"]
+        assert holochat["visible_chat_lane"]["gov_can_choose_models"] is False
+        assert holochat["visible_chat_lane"]["model_selection"] == "fixed_manifest_order"
+        assert holochat["governed_shadow_lane"]["gov_can_choose_models"] is False
+        assert holochat["governed_shadow_lane"]["visible_answer_replaced"] is False
+        assert holochat["visible_chat_lane"]["analyst_rotation_order"]
+
+    def test_runtime_page_available(self, allow_client):
+        resp = allow_client.get("/runtime")
+        assert resp.status_code == 200
+        html = resp.text
+        assert "HoloChat Runtime" in html
+        assert "/runtime-status" in html
+        assert "Raw prompts exposed" in html
+        assert "API keys exposed" in html
+        assert "bearer " not in html.lower()
+        assert "secret-value" not in html.lower()
+
     def test_health_engine_live(self, allow_client):
         data = allow_client.get("/health").json()
         assert data["engine"] == "LIVE"

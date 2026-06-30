@@ -273,6 +273,46 @@ def version():
     return release_info()
 
 
+def _runtime_status_payload() -> dict[str, Any]:
+    chat_status = (
+        _chat_engine.runtime_status()
+        if _chat_engine is not None and hasattr(_chat_engine, "runtime_status")
+        else {
+            "status": "not_initialized",
+            "release": release_info(),
+        }
+    )
+    return {
+        "status": "ok",
+        "release": release_info(),
+        "context_governor": {
+            "initialized": _governor is not None,
+            "role": "action_boundary_evaluator",
+            "visible_chat_answer_producer": False,
+        },
+        "holochat": chat_status,
+        "truth_contract": {
+            "source": "live_process_runtime_state",
+            "raw_prompts_exposed": False,
+            "raw_memory_exposed": False,
+            "api_keys_exposed": False,
+            "provider_error_bodies_exposed": False,
+        },
+    }
+
+
+@app.get("/runtime-status")
+def runtime_status():
+    """Safe runtime dashboard payload: model roster, Gov status, and release."""
+    return _runtime_status_payload()
+
+
+@app.get("/v1/runtime/status")
+def runtime_status_v1():
+    """Versioned alias for the safe runtime dashboard payload."""
+    return _runtime_status_payload()
+
+
 @app.get("/config")
 def get_config():
     """Return public client-side configuration."""
@@ -853,6 +893,15 @@ def serve_chat_ui():
     if index.exists():
         return FileResponse(str(index))
     return {"status": "ok", "message": "Holo API running. Chat UI not found."}
+
+
+@app.get("/runtime")
+def serve_runtime_dashboard():
+    """Serve the safe Holo runtime dashboard."""
+    index = _frontend_dir / "runtime.html"
+    if index.exists():
+        return FileResponse(str(index))
+    return _runtime_status_payload()
 
 
 @app.post("/v1/chat")

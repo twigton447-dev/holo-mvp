@@ -29,7 +29,13 @@ from holo_context import (
     build_runtime_identity_block,
     estimate_context_tokens,
 )
-from holo_governed_shadow import run_governed_shadow
+from holo_governed_shadow import (
+    GOVERNED_SHADOW_ENV,
+    GOVERNED_SHADOW_VERSION,
+    ROSTER as GOVERNED_SHADOW_ROSTER,
+    governed_shadow_enabled,
+    run_governed_shadow,
+)
 from holo_router import HoloRouter, PreviousRoute, RouteDecision
 from holo_state import GovArcState, HoloState, RequiredTools
 from holo_trace import HoloTraceRecord, log_trace
@@ -1853,6 +1859,68 @@ class HoloChatEngine:
             + (" | Bench: " + ", ".join(a.provider for a in self._bench) if self._bench else "")
             + " | GovernorAdapter ready"
         )
+
+    def runtime_status(self) -> dict[str, Any]:
+        """Return safe, user-visible runtime identity and model-roster state."""
+        profile = getattr(self, "_resolved_architecture_profile", None)
+        runtime_info = dict(getattr(self, "_runtime_info", {}) or {})
+        active_pool = _adapter_pool_metadata(getattr(self, "_adapters", []) or [])
+        bench_pool = _adapter_pool_metadata(getattr(self, "_bench", []) or [])
+        governor = getattr(self, "_governor", None)
+        governor_meta = _governor_turn_metadata(governor, checked_this_turn=False)
+        return {
+            "status": "initialized",
+            "release": release_info(),
+            "visible_chat_lane": {
+                "runtime_profile": getattr(profile, "profile_id", runtime_info.get("runtime_profile")),
+                "runtime_class": getattr(profile, "runtime_class", runtime_info.get("runtime_class")),
+                "architecture_profile_status": getattr(profile, "status", runtime_info.get("architecture_profile_status")),
+                "architecture_manifest_version": getattr(profile, "manifest_version", runtime_info.get("architecture_manifest_version")),
+                "architecture_manifest_path": getattr(profile, "manifest_path", runtime_info.get("architecture_manifest_path")),
+                "runtime_behavior": getattr(profile, "runtime_behavior", runtime_info.get("runtime_behavior")),
+                "pool_strategy": getattr(profile, "pool_strategy", runtime_info.get("pool_strategy")),
+                "model_selection": "fixed_manifest_order",
+                "gov_can_choose_models": False,
+                "analyst_rotation_order": active_pool,
+                "bench_pool": bench_pool,
+                "selection_mode": "round_robin",
+                "visible_answer_mode": "one_selected_analyst_per_turn",
+            },
+            "governor": {
+                "role": "controller_check_layer",
+                "configured_provider": getattr(profile, "governor_provider", None),
+                "loaded_provider": governor_meta.get("governor_provider"),
+                "loaded_model": governor_meta.get("governor_model"),
+                "status": "configured" if governor_meta.get("governor_present") else "off",
+                "visible_answer_producer": False,
+            },
+            "governed_shadow_lane": {
+                "version": GOVERNED_SHADOW_VERSION,
+                "enabled": governed_shadow_enabled(),
+                "env_var": GOVERNED_SHADOW_ENV,
+                "trigger_policy": "hard_chat_or_thread_health_only",
+                "visible_answer_replaced": False,
+                "expected_call_sequence": [dict(item) for item in GOVERNED_SHADOW_ROSTER],
+                "model_selection": "fixed_roster_order",
+                "gov_can_choose_models": False,
+            },
+            "state_and_memory": {
+                "context_delivery_mode": runtime_info.get("context_delivery_mode", "capped_ranked_prompt_slice"),
+                "memory_delivery_mode": runtime_info.get("memory_delivery_mode", "rolling_summary_selected_context"),
+                "structured_state_object_mode": runtime_info.get("structured_state_object_mode", "active_prompt"),
+                "baton_pass_mode": runtime_info.get("baton_pass_mode", "active_prompt"),
+                "rolling_summary_mode": runtime_info.get("rolling_summary_mode", "active_prompt_sliding_window"),
+                "continuity_ledger_mode": runtime_info.get("continuity_ledger_mode", "active_prompt_structured_private"),
+                "analyst_receives_full_memory": runtime_info.get("analyst_receives_full_memory", False),
+                "durable_memory_store": runtime_info.get("durable_memory_store", "HoloBrain/capsule"),
+            },
+            "safety": {
+                "raw_prompts_exposed": False,
+                "raw_memory_exposed": False,
+                "provider_error_bodies_exposed": False,
+                "api_keys_exposed": False,
+            },
+        }
 
     def get_or_create_session(self, session_id: Optional[str] = None) -> ChatSession:
         if session_id and session_id in _sessions:

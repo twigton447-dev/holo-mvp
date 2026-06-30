@@ -493,6 +493,53 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
         assert forbidden not in runtime_text.lower()
 
 
+def test_holochat_runtime_status_reports_model_roster():
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._resolved_architecture_profile = ResolvedArchitectureProfile(
+        profile_id=DEFAULT_LOCKED_ARCHITECTURE_PROFILE,
+        profile_version="v1",
+        status="locked",
+        runtime_class="frontier_holo_optimized",
+        builder_alignment="patent_aligned_v4",
+        registry_mode="full_registry",
+        governor_lane="HoloGov-B",
+        runtime_behavior="manifest_controls_runtime_selection",
+        pool_strategy="frontier_ordered_full_registry",
+        active_provider_order=("xai", "openai", "minimax"),
+        governor_provider="openai",
+        manifest_path="holo_profiles/locked_architecture_profiles.json",
+        manifest_version="2026-06-25.1",
+    )
+    engine._adapters = [
+        FakeAdapter("xai", "grok-4.3"),
+        FakeAdapter("openai", "gpt-5.4"),
+        FakeAdapter("minimax", "MiniMax-Text-01"),
+    ]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._governor.provider = "openai"
+    engine._governor.model_id = "gpt-5.4"
+    engine._runtime_info = _runtime_metadata(
+        engine._resolved_architecture_profile,
+        engine._adapters,
+        engine._bench,
+    )
+
+    status = engine.runtime_status()
+
+    assert status["visible_chat_lane"]["model_selection"] == "fixed_manifest_order"
+    assert status["visible_chat_lane"]["gov_can_choose_models"] is False
+    assert status["visible_chat_lane"]["analyst_rotation_order"] == [
+        {"provider": "xai", "model": "grok-4.3"},
+        {"provider": "openai", "model": "gpt-5.4"},
+        {"provider": "minimax", "model": "MiniMax-Text-01"},
+    ]
+    assert status["governor"]["configured_provider"] == "openai"
+    assert status["governor"]["visible_answer_producer"] is False
+    assert status["governed_shadow_lane"]["expected_call_sequence"][0]["model"] == "grok-3-mini"
+    assert status["safety"]["api_keys_exposed"] is False
+
+
 def test_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     adapter = CapturingAdapter("openai", "gpt-4o-mini")

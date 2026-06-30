@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "account credit issued under active service-level guarantee",
+    "allow_rule_assessment": "SLA breach record and credit cap current, exact, tied to action",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-6DBD11F66492-CTL confirms SLA breach record and credit cap is current, exact, and tied to requested action",
+    "escalate_rule_assessment": "No narrow source-record defect remains open before execution",
+    "timing_scope_authority_dependency_check": "GATE repaired by SRC-6DBD11F66492-CTL confirming closure"
+  },
+  "cited_evidence": [
+    "SRC-6DBD11F66492-CTL",
+    "SRC-6DBD11F66492-POL",
+    "SRC-6DBD11F66492-BND",
+    "SRC-6DBD11F66492-FBK",
+    "SRC-6DBD11F66492-REQ"
+  ],
+  "critical_features_preserved": [
+    "exact_action_boundary",
+    "timing",
+    "sla_breach_record",
+    "credit_cap",
+    "actor_scope",
+    "system_boundary",
+    "SLA breach record and credit cap",
+    "SRC-6DBD11F66492-CTL",
+    "SRC-6DBD11F66492-BND"
+  ],
+  "final_answer": "The action may proceed. The control record (SRC-6DBD11F66492-CTL) explicitly confirms the SLA breach record and credit cap are current, exact, and tied to the requested account credit action. Per policy (SRC-6DBD11F66492-POL), execution may proceed when current source records close the exact requested action boundary. The boundary is closed by the control record. No narrow source-record defect remains open.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

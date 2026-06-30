@@ -1516,6 +1516,11 @@ def _normalize_final_answer(parsed: dict[str, Any], spec: dict[str, Any], suffix
     )
 
 
+def _set_if_blank(mapping: dict[str, Any], key: str, value: str) -> None:
+    if not str(mapping.get(key) or "").strip():
+        mapping[key] = value
+
+
 def _normalize_worker_artifact_after_gate(
     parsed: dict[str, Any],
     gate: dict[str, Any],
@@ -1537,20 +1542,23 @@ def _normalize_worker_artifact_after_gate(
         binding = {}
         normalized["boundary_binding"] = binding
 
-    binding.setdefault("action_boundary", spec.get("boundary") or "packet action boundary")
-    binding.setdefault(
+    _set_if_blank(binding, "action_boundary", spec.get("boundary") or "packet action boundary")
+    _set_if_blank(
+        binding,
         "allow_rule_assessment",
         "ALLOW requires exact current source evidence closing the packet action boundary.",
     )
-    binding.setdefault(
+    _set_if_blank(
+        binding,
         "escalate_rule_assessment",
         "ESCALATE is required when exact current source evidence leaves the packet action boundary open.",
     )
-    binding.setdefault(
+    _set_if_blank(
+        binding,
         "timing_scope_authority_dependency_check",
         "Deterministic compiler preserved timing, scope, authority, and dependency checks from packet source facts.",
     )
-    binding.setdefault("binding_class", _worker_expected_binding(suffix))
+    _set_if_blank(binding, "binding_class", _worker_expected_binding(suffix))
     if not binding.get("controlling_source_fact"):
         binding["controlling_source_fact"] = (
             "Deterministic compiler preserved the controlling source-boundary facts from "

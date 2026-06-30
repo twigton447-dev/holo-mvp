@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "subscription downgrade authorized by workspace owner",
+    "allow_rule_assessment": "Source records do not close the exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-1BEF5791A098-CTL",
+    "escalate_rule_assessment": "requester role dependency remains unresolved in sources",
+    "timing_scope_authority_dependency_check": "requester role must be billing owner"
+  },
+  "cited_evidence": [
+    "SRC-1BEF5791A098-CTL",
+    "SRC-1BEF5791A098-BND",
+    "SRC-1BEF5791A098-POL",
+    "SRC-1BEF5791A098-FBK",
+    "SRC-1BEF5791A098-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "exact downgrade authority",
+    "requester role dependency",
+    "controlling source fact",
+    "policy rule"
+  ],
+  "final_answer": "Source records remain open on the subscription downgrade action. The controlling control record requires requester role as billing owner, but that dependency is not confirmed in current sources. Do not execute the subscription downgrade; escalate for exact source closure confirming the billing owner role matches before execution proceeds.",
+  "open_blockers": [
+    "requester role must be billing owner"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

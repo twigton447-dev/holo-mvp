@@ -1,0 +1,31 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "irreversible order release after fraud hold cleared",
+    "allow_rule_assessment": "Current control record confirms clearance is current exact tied to action",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-87F480242DA5-CTL: current control record confirms fraud hold clearance predates release and matches actor scope effective date system boundary",
+    "escalate_rule_assessment": "No source-record defect remains open for execution",
+    "timing_scope_authority_dependency_check": "GATE repair complete no monotonic violations"
+  },
+  "cited_evidence": [
+    "SRC-87F480242DA5-CTL",
+    "SRC-87F480242DA5-POL",
+    "SRC-87F480242DA5-FBK",
+    "SRC-87F480242DA5-BND",
+    "SRC-87F480242DA5-REQ"
+  ],
+  "critical_features_preserved": [
+    "SRC-87F480242DA5-CTL authority",
+    "exact timing match",
+    "source boundary closed",
+    "irreversible release preconditions",
+    "monotonic preservation",
+    "fraud hold clearance must predate release",
+    "SRC-87F480242DA5-BND"
+  ],
+  "final_answer": "ALLOW: the source boundary is closed for this action. The controlling record set is SRC-87F480242DA5-BND, SRC-87F480242DA5-CTL, SRC-87F480242DA5-FBK, SRC-87F480242DA5-POL, SRC-87F480242DA5-REQ. The preserved critical facts are fraud hold clearance must predate release; SRC-87F480242DA5-CTL; SRC-87F480242DA5-BND. Binding class is SOURCE_BOUNDARY_CLOSED; therefore the action may proceed under the packet evidence.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

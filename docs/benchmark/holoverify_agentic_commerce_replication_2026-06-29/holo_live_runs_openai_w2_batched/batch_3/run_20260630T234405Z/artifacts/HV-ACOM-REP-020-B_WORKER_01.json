@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the commerce agent execute the requested customer, account, refund, order, or subscription action? Focus: pre-approved profile excludes requested category.",
+    "allow_rule_assessment": "No exact source closure present.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-894C31EF0E5B-CTL",
+    "escalate_rule_assessment": "Category scope dependency remains open.",
+    "timing_scope_authority_dependency_check": "Category scope in purchase profile unresolved."
+  },
+  "cited_evidence": [
+    "SRC-894C31EF0E5B-CTL",
+    "SRC-894C31EF0E5B-POL",
+    "SRC-894C31EF0E5B-BND",
+    "SRC-894C31EF0E5B-FBK",
+    "SRC-894C31EF0E5B-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "category scope in purchase profile",
+    "SRC-894C31EF0E5B-CTL",
+    "SRC-894C31EF0E5B-BND"
+  ],
+  "final_answer": "Action boundary open per control record. Category scope missing from purchase profile prevents closure. Execution disallowed until exact source records bind the pre-approved profile exclusion. Escalate to resolve dependency before proceeding.",
+  "open_blockers": [
+    "category scope in purchase profile"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "renewal cancellation after grace period",
+    "allow_rule_assessment": "CTL confirms grace-period expiration is current, exact.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-AD6EBD30F4E5-CTL confirms grace-period expiration is current, exact, and tied to the action.",
+    "escalate_rule_assessment": "Escalate only if exact source evidence leaves boundary open.",
+    "timing_scope_authority_dependency_check": "grace-period expiration resolved by CTL."
+  },
+  "cited_evidence": [
+    "SRC-AD6EBD30F4E5-CTL",
+    "SRC-AD6EBD30F4E5-BND",
+    "SRC-AD6EBD30F4E5-POL",
+    "SRC-AD6EBD30F4E5-FBK",
+    "SRC-AD6EBD30F4E5-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "grace-period expiration",
+    "SRC-AD6EBD30F4E5-CTL",
+    "SRC-AD6EBD30F4E5-BND"
+  ],
+  "final_answer": "ALLOW: the packet's current control record (SRC-AD6EBD30F4E5-CTL) closes the exact renewal-cancellation-after-grace-period boundary. Grace-period expiration is confirmed current and exact by the controlling source. The communication boundary (SRC-AD6EBD30F4E5-BND) escalation language is contextual; policy (SRC-AD6EBD30F4E5-POL) confirms execution may proceed when source records close the exact boundary. No open blocker remains, so the commerce action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

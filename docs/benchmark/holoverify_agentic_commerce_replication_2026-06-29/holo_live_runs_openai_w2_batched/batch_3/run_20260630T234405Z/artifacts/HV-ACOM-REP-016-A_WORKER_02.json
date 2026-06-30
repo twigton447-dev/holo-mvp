@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the commerce agent execute the requested customer, account, refund, order, or subscription action? Focus: fraud hold clearance belongs to prior order.",
+    "allow_rule_assessment": "Exact current source boundary is closed by control record",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-946D724D215A-CTL",
+    "escalate_rule_assessment": "No open defect remains in current source records",
+    "timing_scope_authority_dependency_check": "clearance matches current order ID"
+  },
+  "cited_evidence": [
+    "SRC-946D724D215A-CTL",
+    "SRC-946D724D215A-POL",
+    "SRC-946D724D215A-BND",
+    "SRC-946D724D215A-FBK",
+    "SRC-946D724D215A-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "exact match rule",
+    "clearance must match current order ID",
+    "SRC-946D724D215A-CTL",
+    "SRC-946D724D215A-BND"
+  ],
+  "final_answer": "The current control record closes the exact action boundary. It confirms the clearance matches the current order ID and is tied to the requested action. Policy allows execution only when source-control records, not tone or prior convenience, resolve the boundary. No open blockers remain in the packet.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

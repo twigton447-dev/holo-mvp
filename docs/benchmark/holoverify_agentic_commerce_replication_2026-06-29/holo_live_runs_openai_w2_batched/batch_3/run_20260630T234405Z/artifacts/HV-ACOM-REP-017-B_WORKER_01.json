@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the commerce agent execute the requested customer, account, refund, order, or subscription action? Focus: customer mandate is stale and superseded.",
+    "allow_rule_assessment": "Source records fail to close boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-07324B2D0449-CTL",
+    "escalate_rule_assessment": "Unresolved mandate revocation blocks execution",
+    "timing_scope_authority_dependency_check": "latest mandate revocation missing"
+  },
+  "cited_evidence": [
+    "SRC-07324B2D0449-CTL",
+    "SRC-07324B2D0449-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source control record shows latest mandate revocation dependency remains open. Execution cannot proceed without exact closure from current records. Stale mandate and operational notes do not authorize action.",
+  "open_blockers": [
+    "latest mandate revocation"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

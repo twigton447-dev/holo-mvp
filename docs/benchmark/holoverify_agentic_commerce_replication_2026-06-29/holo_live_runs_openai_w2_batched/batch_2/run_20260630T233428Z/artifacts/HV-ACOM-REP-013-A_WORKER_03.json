@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "commerce agent executing purchase approval where cost center must match cart owner",
+    "allow_rule_assessment": "current control record closes exact boundary for purchase approval action",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-D80024613026-CTL confirms cost center matches cart owner for this action",
+    "escalate_rule_assessment": "no open source-defect remains in current evidence",
+    "timing_scope_authority_dependency_check": "GATE satisfied by current control record SRC-D80024613026-CTL"
+  },
+  "cited_evidence": [
+    "SRC-D80024613026-CTL",
+    "SRC-D80024613026-POL",
+    "SRC-D80024613026-BND",
+    "SRC-D80024613026-REQ",
+    "SRC-D80024613026-FBK"
+  ],
+  "critical_features_preserved": [
+    "source-boundary focus",
+    "current records only",
+    "no tone-based blocking",
+    "no adjacent-record substitution",
+    "no authority shortcut",
+    "cost center matches cart owner"
+  ],
+  "final_answer": "ALLOW. The current control record confirms cost center must match cart owner for this exact action, and all five source documents close the purchase-approval boundary. The policy permits execution when current source records close the exact boundary, and no source-defect remains open. The communication boundary reinforces that tone, urgency, or emotion cannot override source-control authority. Execution may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

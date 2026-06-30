@@ -2701,6 +2701,16 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       : (usage.cost_source === "unknown_pricing" ? "unknown pricing" : (usage.cost_source || "unknown"));
 
     const rows = [];
+    const release = runtime.release || data.release || {};
+    if (Object.keys(release).length) {
+      rows.push(["Live version", release.app_version || "unknown"]);
+      rows.push(["Architecture version", release.architecture_version || "unknown"]);
+      if (release.build_label) rows.push(["Build label", release.build_label]);
+      if (release.git_commit_short) rows.push(["Build commit", release.git_commit_short]);
+      if (release.git_branch) rows.push(["Build branch", release.git_branch]);
+      if (release.deploy_service) rows.push(["Deploy service", release.deploy_service]);
+      if (release.deploy_environment) rows.push(["Deploy environment", release.deploy_environment]);
+    }
     rows.push(["Runtime", runtimeProfile || "unknown"]);
     if (provider || model) rows.push(["This turn", `${provider}${model ? ":" + model : ""}`]);
     rows.push(["Mode", modeLabel]);

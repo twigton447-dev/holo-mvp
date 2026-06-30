@@ -72,6 +72,7 @@ from chat_engine import HoloChatEngine, _safe_handoff_transition
 from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
 from db import Database
 from billing import create_checkout_session, create_customer_portal_session, construct_webhook_event, PLANS
+from holo_release import release_info
 
 _rate_limiter = RateLimiter()
 _db: Database | None = None
@@ -168,7 +169,7 @@ app = FastAPI(
         "Adversarial multi-model action evaluation. "
         "Shared-context, compounding postmortems by structurally independent models."
     ),
-    version  = "0.1.0",
+    version  = release_info()["app_version"],
     lifespan = lifespan,
 )
 
@@ -257,11 +258,19 @@ def _verify_key(request: Request) -> str:
 @app.get("/health")
 def health():
     """Liveness check."""
+    release = release_info()
     return {
         "status":  "ok",
-        "version": "0.1.0",
+        "version": release["app_version"],
+        "release": release,
         "engine":  "LIVE" if _governor else "NOT_INITIALIZED",
     }
+
+
+@app.get("/version")
+def version():
+    """Public release identity for live-build verification."""
+    return release_info()
 
 
 @app.get("/config")
@@ -274,6 +283,7 @@ def get_config():
     return {
         "google_client_id": os.getenv("GOOGLE_CLIENT_ID", ""),
         "google_auth_enabled": google_auth_enabled and bool(os.getenv("GOOGLE_CLIENT_ID", "").strip()),
+        "release": release_info(),
     }
 
 

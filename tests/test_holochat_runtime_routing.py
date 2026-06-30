@@ -7,6 +7,7 @@ import pytest
 
 import chat_engine
 import llm_adapters
+from holo_release import APP_VERSION, ARCHITECTURE_VERSION
 from chat_engine import (
     ChatSession,
     HoloChatEngine,
@@ -382,6 +383,8 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
         "Decide which Gov actions must stay deterministic",
     ]
     assert result["runtime"]["runtime_profile"] == "mini_only"
+    assert result["runtime"]["release"]["app_version"] == APP_VERSION
+    assert result["runtime"]["release"]["architecture_version"] == ARCHITECTURE_VERSION
     assert result["runtime"]["serial_call"] is True
     assert result["runtime"]["parallel_fanout"] is False
     assert result["runtime"]["frontier_enabled"] is False

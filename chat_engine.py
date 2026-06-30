@@ -38,6 +38,7 @@ from llm_adapters import (
     GovernorAdapter,
     load_adapters,
 )
+from holo_release import release_info
 from project_brain import ProjectBrain
 import web_search
 
@@ -1694,6 +1695,7 @@ def _runtime_metadata(
     balanced = runtime_class == BALANCED_RUNTIME_PROFILE
     frontier_assist_enabled = balanced and bool(bench_pool)
     metadata = {
+        "release": release_info(),
         "runtime_profile": runtime_profile_id,
         "active_pool": _adapter_pool_metadata(active_pool),
         "bench_pool": _adapter_pool_metadata(bench_pool),

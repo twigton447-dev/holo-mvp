@@ -15,6 +15,7 @@ from tests.conftest import (
     make_escalate_result,
 )
 from llm_adapters import BEC_CATEGORIES
+from holo_release import APP_VERSION, ARCHITECTURE_VERSION
 
 
 # ---------------------------------------------------------------------------
@@ -66,7 +67,15 @@ class TestHealth:
 
     def test_health_version(self, allow_client):
         data = allow_client.get("/health").json()
-        assert data["version"] == "0.1.0"
+        assert data["version"] == APP_VERSION
+        assert data["release"]["app_version"] == APP_VERSION
+        assert data["release"]["architecture_version"] == ARCHITECTURE_VERSION
+
+    def test_version_endpoint_reports_release_identity(self, allow_client):
+        data = allow_client.get("/version").json()
+        assert data["app_version"] == APP_VERSION
+        assert data["architecture_version"] == ARCHITECTURE_VERSION
+        assert data["build_label"].startswith(APP_VERSION)
 
     def test_health_engine_live(self, allow_client):
         data = allow_client.get("/health").json()

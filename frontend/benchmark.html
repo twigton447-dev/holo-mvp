@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>HoloEngine · Benchmark Matrix · Version 7.5 · July 2026</title>
+<title>HoloEngine · Benchmark Matrix · Version 7.51 · July 2026</title>
 <meta name="description" content="The Action Boundary Benchmark tests whether AI systems can prove required checks before action or reliance. HoloVerify tests runtime ALLOW / ESCALATE decisions. HoloBuild tests high-stakes work product under source, authority, and completion gates."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -361,7 +361,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
 <!-- HERO -->
 <section class="hero">
   <div class="w">
-    <div class="eyebrow">Version 7.5 &nbsp;&middot;&nbsp; July 2026</div>
+    <div class="eyebrow">Version 7.51 &nbsp;&middot;&nbsp; July 2026</div>
     <h1>The Action Boundary Benchmark</h1>
     <p class="cover-subtitle">Hardening AI for Autonomous Execution</p>
     <div class="hero-layout">
@@ -396,6 +396,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
       <ul class="takeaway-list">
         <li>Kit A showed that solo frontier models will approve a payment even when the purchase order that proves authority is missing.</li>
         <li>Kit B showed that solo frontier models will treat vague or stale policy language as if it were current approval.</li>
+        <li>The AP replication family showed Holo solving 40/40 frozen vendor-master payment packets while one-shot solo baselines remained unstable under strict KNEW/admissibility rules.</li>
         <li>The newer HoloBuild lane showed something else: even a very strong solo frontier model can understand the task and still fail to finish high-stakes work cleanly under real production limits.</li>
       </ul>
       <p class="takeaway-close"><strong>Holo's job is simple: before action or reliance, prove the required checks are complete.</strong></p>
@@ -823,6 +824,59 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
 
 <hr/>
 
+<!-- AP REPLICATION -->
+<section class="section" style="background:var(--bg-card)">
+  <div class="w">
+    <div class="section-eyebrow">Replication Family &middot; Vendor-Master Payment Controls</div>
+    <h2>When Solo Sometimes Works, But Still Cannot Be Trusted Alone</h2>
+    <p>The AP replication family is a larger 20-pair, 40-packet frozen benchmark family. Each sibling pair contains one ALLOW packet and one ESCALATE packet, testing whether the system can distinguish valid payment authority from unresolved vendor-master, approval, callback, duplicate-payment, or emergency-exception risk.</p>
+    <p>HoloVerify solved 40/40 packets and 20/20 sibling pairs. Matching one-shot solo baselines using the same three mini-model families completed 120/120 calls and produced 53/120 KNEW/admissible outputs.</p>
+
+    <div class="chart-container">
+      <div class="chart-title">AP Replication &mdash; HoloVerify vs Same-Family One-Shot Solos</div>
+      <div class="chart-spotlight compact">
+        <div class="spotlight-cell pass">
+          <strong>40/40</strong>
+          <span>Holo packets correct.</span>
+        </div>
+        <div class="spotlight-cell pass">
+          <strong>20/20</strong>
+          <span>Holo sibling pairs valid.</span>
+        </div>
+        <div class="spotlight-cell gold">
+          <strong>53/120</strong>
+          <span>solo KNEW/admissible outputs.</span>
+        </div>
+        <div class="spotlight-cell fail">
+          <strong>67/120</strong>
+          <span>strict solo failures.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mbox-list">
+      <div class="mbox" style="border-left:3px solid var(--green)">
+        <div class="mbox-label" style="color:var(--green)">Holo Result</div>
+        <p>Holo solved every AP packet and every AP sibling pair. The packet identity audit and no-leakage audit passed, and the Holo run had zero provider failures.</p>
+      </div>
+      <div class="mbox" style="border-left:3px solid var(--gold)">
+        <div class="mbox-label" style="color:var(--gold)">Solo Baseline Shape</div>
+        <p>This was not total solo collapse. It was mixed instability: every AP pair had at least two strict solo failures across six same-family one-shot attempts, while one pair showed complete six-of-six solo collapse.</p>
+      </div>
+      <div class="mbox" style="border-left:3px solid var(--blue)">
+        <div class="mbox-label" style="color:var(--blue)">Cost</div>
+        <p>The governed Holo run used 414,016 tokens versus 146,061 for the solo one-shot baseline, or about 2.84x the solo budget. That extra work is part of the checkpoint.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p><strong>Cumulative HoloVerify signal:</strong> across two committed internal HoloVerify families, Holo solved 80/80 frozen action-boundary packets and 40/40 sibling pairs. This is evidence for governed architecture at the action boundary, not a universal model-superiority claim.</p>
+    </div>
+  </div>
+</section>
+
+<hr/>
+
 <!-- WHAT WE TESTED -->
 <section class="section">
   <div class="w-wide">
@@ -1018,6 +1072,13 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
             <td><span class="status-pill green">Frozen public evidence</span></td>
             <td>Runtime ALLOW / ESCALATE evidence across 20 sibling pairs (40 packets) proving exact source-binding discipline.</td>
             <td>Does not measure long-form document quality or general reasoning.</td>
+          </tr>
+          <tr>
+            <td class="strong">HoloVerify / HoloGov-V</td>
+            <td class="mono strong">AP Replication</td>
+            <td><span class="status-pill green">Committed evidence</span></td>
+            <td>40/40 packets and 20/20 sibling pairs solved in vendor-master payment controls; one-shot solos produced 53/120 KNEW/admissible outputs.</td>
+            <td>Not a total solo-collapse claim and not externally reviewed.</td>
           </tr>
           <tr>
             <td class="strong">HoloBuild / HoloGov-B</td>
@@ -1315,6 +1376,14 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
         <div class="mbox-label" style="color:var(--green)">Kit B &middot; Agentic Commerce</div>
         <p style="font-size:0.95rem;color:var(--ink);font-weight:600;margin-bottom:0">Status: Benchmark Locked / v1 Complete</p>
       </div>
+      <div class="mbox" style="border-left:3px solid var(--gold);background:#fff">
+        <div class="mbox-label" style="color:var(--gold)">Vendor-Master Payment Controls &middot; AP Replication</div>
+        <p style="font-size:0.95rem;color:var(--ink);font-weight:600;margin-bottom:0">Status: Committed Evidence Package / Public Review Pending</p>
+      </div>
+      <div class="mbox" style="border-left:3px solid var(--gold);background:#fff">
+        <div class="mbox-label" style="color:var(--gold)">Clinical Activation Boundary Controls</div>
+        <p style="font-size:0.95rem;color:var(--ink);font-weight:600;margin-bottom:0">Status: Committed Public Package</p>
+      </div>
       <div class="mbox" style="border-left:3px solid var(--muted-2);background:#fff">
         <div class="mbox-label" style="color:var(--muted-2)">Kit D &middot; Regulated Procurement &amp; DFARS</div>
         <p style="font-size:0.95rem;color:var(--ink);font-weight:600;margin-bottom:0">Status: Scoping Phase</p>
@@ -1322,7 +1391,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
     </div>
 
     <div class="callout" style="margin-top:2rem">
-      <p><strong>Final Takeaway:</strong> Kit A showed solo frontier models will approve a payment without the purchase order that proves authority. Kit B showed solo frontier models will treat vague or stale policy language as if it were current approval. Holo&rsquo;s job is simple: before action or reliance, prove the required checks are complete.</p>
+      <p><strong>Final Takeaway:</strong> Kit A showed solo frontier models will approve a payment without the purchase order that proves authority. Kit B showed solo frontier models will treat vague or stale policy language as if it were current approval. The AP replication family showed mixed solo instability across a larger vendor-master payment family while Holo solved every sibling pair. Holo&rsquo;s job is simple: before action or reliance, prove the required checks are complete.</p>
     </div>
   </div>
 </section>
@@ -1345,7 +1414,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
 <footer class="status-banner">
   <div class="w">
     <div class="footer-inner">
-      <p>HoloEngine &nbsp;&middot;&nbsp; Action Boundary Benchmark &nbsp;&middot;&nbsp; Version 7.5 &nbsp;&middot;&nbsp; July 2026</p>
+      <p>HoloEngine &nbsp;&middot;&nbsp; Action Boundary Benchmark &nbsp;&middot;&nbsp; Version 7.51 &nbsp;&middot;&nbsp; July 2026</p>
       <p style="font-family:var(--mono);font-size:0.75rem;color:var(--muted-2)">Contact: taylorw@hologroup.io</p>
     </div>
   </div>

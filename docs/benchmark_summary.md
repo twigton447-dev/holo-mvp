@@ -1,7 +1,7 @@
 # The Action Boundary Benchmark
 ### Hardening AI for Autonomous Execution
 
-**Version 6.5 · June 2026**
+**Version 7.51 · July 2026**
 
 ---
 
@@ -112,6 +112,21 @@ A packet with a fake approval document that explicitly told the AI to "ignore po
 Holo: **8/8 KNEW.**
 
 The differentiating result is VAL-003: the only packet where Holo outperformed every other architecture on an ALLOW-vs-ESCALATE decision. That result is frozen, trace-adjudicated, and cryptographically sealed.
+
+---
+
+## Replication Families
+
+The public registry now separates the original packet registry from larger internal replication families. That separation matters. A small locked registry can show the failure class clearly; a larger replication family tests whether the same governed architecture keeps working across more sibling pairs.
+
+| Family | Domain | Packets | Pairs | Holo | Solo baseline | Clean collapse pairs | Token ratio | Status |
+|---|---|---:|---:|---|---|---:|---:|---|
+| Clinical Activation Boundary Controls | Clinical-regulated activation controls | 40 | 20 | 40/40 | 6/120 KNEW/admissible | 14 | 2.06x | Committed public package |
+| Vendor-Master Payment Controls | AP / procurement / vendor-master controls | 40 | 20 | 40/40 | 53/120 KNEW/admissible | 1 | 2.84x | Committed evidence package |
+
+The AP family should not be framed as total solo collapse. It is a different and useful result: every AP pair had at least two strict one-shot solo failures across six same-family solo attempts, while Holo solved both siblings in all 20 pairs.
+
+Across the two committed internal HoloVerify families, Holo solved 80/80 frozen action-boundary packets and 40/40 sibling pairs. That is not a universal superiority claim. It is evidence that governed architecture can hold the line across multiple action-boundary packet families, at higher token cost.
 
 ---
 

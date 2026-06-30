@@ -30,6 +30,7 @@ MINIMAX_HEALTH_ROOT = COMMERCE_ROOT / "minimax_health_checks"
 EXPECTED_FREEZE_ROOT_HASH = "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7"
 MINIMAX_HEALTH_PROMPT = "Return exactly MINIMAX_READY"
 MINIMAX_HEALTH_EXPECTED_RESPONSE = "MINIMAX_READY"
+MINIMAX_HEALTH_MAX_TOKENS = 128
 MINIMAX_HEALTH_MAX_AGE_SECONDS = 30 * 60
 
 BATCHES: dict[str, dict[str, Any]] = {
@@ -152,6 +153,7 @@ def latest_minimax_health_report(now: datetime | None = None) -> dict[str, Any]:
         "transport_attempt_count": report.get("transport_attempt_count"),
         "transport_recovered": report.get("transport_recovered"),
         "response_exact": report.get("response_exact"),
+        "max_tokens": report.get("max_tokens"),
     }
 
 
@@ -174,7 +176,7 @@ def run_minimax_health_check() -> int:
         response = RUNNER._call_model(
             config,
             [{"role": "user", "content": MINIMAX_HEALTH_PROMPT}],
-            max_tokens=16,
+            max_tokens=MINIMAX_HEALTH_MAX_TOKENS,
         )
         provider_call_ok = True
     except RUNNER.TransportFailureAfterRetries as exc:
@@ -208,6 +210,7 @@ def run_minimax_health_check() -> int:
         "traps_included": False,
         "answer_keys_included": False,
         "expected_response": MINIMAX_HEALTH_EXPECTED_RESPONSE,
+        "max_tokens": MINIMAX_HEALTH_MAX_TOKENS,
         "response_text": text,
         "response_exact": response_exact,
         "provider_call_ok": provider_call_ok,

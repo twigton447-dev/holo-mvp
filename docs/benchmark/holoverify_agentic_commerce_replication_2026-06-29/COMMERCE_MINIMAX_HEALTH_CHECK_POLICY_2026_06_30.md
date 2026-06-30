@@ -18,6 +18,7 @@ Allowed:
 
 - one harmless MiniMax call
 - prompt: `Return exactly MINIMAX_READY`
+- max output tokens: `128`
 - no packet content
 - no benchmark prompt content
 - no source IDs
@@ -47,4 +48,3 @@ Fail or block if:
 Before a batch run, the runner must find a recent passing MiniMax health check. The maximum age is `1800` seconds. If no recent clean health check exists, the health-gated batch preflight fails and the batch must not start.
 
 Existing invalid runs remain invalid. This policy does not retroactively recover or repair previous runs.
-

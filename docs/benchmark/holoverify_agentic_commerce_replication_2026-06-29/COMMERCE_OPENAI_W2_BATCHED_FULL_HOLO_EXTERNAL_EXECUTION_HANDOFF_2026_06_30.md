@@ -66,6 +66,7 @@ python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.
 Pass condition:
 
 - response is exactly `MINIMAX_READY`
+- max output tokens = `128`
 - transport attempts = `1`
 - transport recovered = `False`
 - no DNS, timeout, HTTP 5xx, or retry recovery

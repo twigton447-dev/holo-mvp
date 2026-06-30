@@ -125,8 +125,8 @@ def test_health_check_prompt_contains_no_benchmark_content() -> None:
     prompt = BATCH.MINIMAX_HEALTH_PROMPT
 
     assert prompt == "Return exactly MINIMAX_READY"
+    assert BATCH.MINIMAX_HEALTH_MAX_TOKENS == 128
     assert "HV-" not in prompt
     assert "ALLOW" not in prompt
     assert "ESCALATE" not in prompt
     assert "SRC-" not in prompt
-

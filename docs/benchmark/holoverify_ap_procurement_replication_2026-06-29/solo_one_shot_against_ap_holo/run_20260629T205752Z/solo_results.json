@@ -1,0 +1,1593 @@
+{
+  "by_model": {
+    "minimax/MiniMax-M2.5-highspeed": {
+      "calls": 40,
+      "correct_verdict": 23,
+      "knew_admissible": 16,
+      "parse_fail": 17,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 7,
+      "tokens": {
+        "input_tokens": 21148,
+        "output_tokens": 48816,
+        "total_tokens": 69964
+      },
+      "wrong_verdict": 0
+    },
+    "openai/gpt-5.4-mini": {
+      "calls": 40,
+      "correct_verdict": 36,
+      "knew_admissible": 30,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 6,
+      "tokens": {
+        "input_tokens": 19807,
+        "output_tokens": 5221,
+        "total_tokens": 25028
+      },
+      "wrong_verdict": 4
+    },
+    "xai/grok-3-mini": {
+      "calls": 40,
+      "correct_verdict": 35,
+      "knew_admissible": 7,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 28,
+      "tokens": {
+        "input_tokens": 24392,
+        "output_tokens": 5130,
+        "total_tokens": 51069
+      },
+      "wrong_verdict": 5
+    }
+  },
+  "classification": "AP_SOLO_ONE_SHOT_3MINI_COMPLETE",
+  "expected_provider_calls": 120,
+  "freeze_root_hash": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "gov_calls": 0,
+  "holo_run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_live_runs_openai_w2/run_20260629T201840Z",
+  "holo_state_calls": 0,
+  "holo_trace_hash": "a09b13791e636ebf172778331ed4ba4b434a025b7fbf4f4e0586d745d7aad255",
+  "judge_calls": 0,
+  "packet_results": [
+    {
+      "packet_id": "HV-AP-REP-001-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-001",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-D114F7F3C309-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-001-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-001",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-D0B364456A0A-BND,SRC-D0B364456A0A-POL"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-D0B364456A0A-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-002-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-002",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-F05CA8402464-BND"
+          ],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-F05CA8402464-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-002-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-002",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "action_boundary_mismatch",
+            "missing_required_source_ids:SRC-BF347128E475-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-003-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-003",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-D5751BFA0D4D-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-003-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-003",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-1027E2FDE3B4-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-004-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-004",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-92653D31DA6D-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-004-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-004",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-005-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-005",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-DEE4D784AF5E-BND"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-DEE4D784AF5E-BND"
+          ],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-DEE4D784AF5E-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-005-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-005",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-C7BDEE54413D-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-006-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-006",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-006-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-006",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-66C5F7F73D1D-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-007-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-007",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-4F8A27165A64-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-007-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-007",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-CD4055F2E56D-BND,SRC-CD4055F2E56D-POL"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-008-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-008",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-008-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-008",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-65B725086F96-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-009-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-009",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-D81F74B62164-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-009-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-009",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-0E3173BB8FF6-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-010-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-010",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-D6EA566D0381-BND"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-D6EA566D0381-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-010-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-010",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-644D91D5C220-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-011-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-011",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "verdict_mismatch"
+          ],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "WRONG_VERDICT",
+          "verdict": "ESCALATE",
+          "verdict_correct": false
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "verdict_mismatch",
+            "missing_required_source_ids:SRC-1D955A0F73B0-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "WRONG_VERDICT",
+          "verdict": "ESCALATE",
+          "verdict_correct": false
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-011-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-011",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-0AC515CDA285-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-012-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-012",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "verdict_mismatch"
+          ],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "WRONG_VERDICT",
+          "verdict": "ESCALATE",
+          "verdict_correct": false
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "verdict_mismatch",
+            "missing_required_source_ids:SRC-8764B4D3BAEE-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "WRONG_VERDICT",
+          "verdict": "ESCALATE",
+          "verdict_correct": false
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-012-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-012",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "action_boundary_mismatch",
+            "missing_required_source_ids:SRC-40B537448E4C-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-013-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-013",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "verdict_mismatch",
+            "missing_required_source_ids:SRC-7893AD449CF2-POL"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "WRONG_VERDICT",
+          "verdict": "ESCALATE",
+          "verdict_correct": false
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-013-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-013",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "action_boundary_mismatch"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-014-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-014",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-B49D745B049B-BND"
+          ],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-B49D745B049B-BND,SRC-B49D745B049B-POL"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-014-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-014",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-063FCC8CCDC8-BND"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-063FCC8CCDC8-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-015-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-015",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-389D141A7151-BND"
+          ],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "verdict_mismatch",
+            "missing_required_source_ids:SRC-389D141A7151-POL"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "WRONG_VERDICT",
+          "verdict": "ESCALATE",
+          "verdict_correct": false
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-015-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-015",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-2AFF34707CC9-POL"
+          ],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-016-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-016",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "verdict_mismatch"
+          ],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "WRONG_VERDICT",
+          "verdict": "ESCALATE",
+          "verdict_correct": false
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "verdict_mismatch",
+            "action_boundary_mismatch"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "WRONG_VERDICT",
+          "verdict": "ESCALATE",
+          "verdict_correct": false
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-016-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-016",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-017-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-017",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-938B8EACD0E4-POL"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-017-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-017",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-018-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-018",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-BDF64C04906C-BND,SRC-BDF64C04906C-POL"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-018-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-018",
+      "solo_by_model": [
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "action_boundary_mismatch"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-019-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-019",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-AD6F9A954B25-BND"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "verdict_mismatch"
+          ],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "WRONG_VERDICT",
+          "verdict": "ESCALATE",
+          "verdict_correct": false
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-AD6F9A954B25-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-019-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-019",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "parse_failed"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "PARSE_FAIL",
+          "verdict": null,
+          "verdict_correct": false
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-978A8E8D27B0-BND"
+          ],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-978A8E8D27B0-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-020-A",
+      "packet_truth": "ALLOW",
+      "pair_id": "HV-AP-REP-020",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-952AB2A8C247-BND"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        },
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-952AB2A8C247-BND"
+          ],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ALLOW",
+          "verdict_correct": true
+        }
+      ]
+    },
+    {
+      "packet_id": "HV-AP-REP-020-B",
+      "packet_truth": "ESCALATE",
+      "pair_id": "HV-AP-REP-020",
+      "solo_by_model": [
+        {
+          "admissible": false,
+          "gate_failures": [
+            "missing_required_source_ids:SRC-B72C34839286-BND"
+          ],
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "solo_label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "gpt-5.4-mini",
+          "provider": "openai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        },
+        {
+          "admissible": true,
+          "gate_failures": [],
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "solo_label": "KNEW",
+          "verdict": "ESCALATE",
+          "verdict_correct": true
+        }
+      ]
+    }
+  ],
+  "prompt_hash_mismatches": [],
+  "provider_calls": 120,
+  "provider_failures": [],
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/solo_one_shot_against_ap_holo/run_20260629T205752Z",
+  "solo_knew_admissible_total": 53,
+  "solo_model_keys": [
+    "xai",
+    "openai_w2",
+    "minimax"
+  ],
+  "solo_model_roster": [
+    {
+      "dna": "xai",
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "provider": "xai"
+    },
+    {
+      "dna": "openai",
+      "model": "gpt-5.4-mini",
+      "model_key": "openai_w2",
+      "provider": "openai"
+    },
+    {
+      "dna": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "provider": "minimax"
+    }
+  ],
+  "totals": {
+    "input_tokens": 65347,
+    "output_tokens": 59167,
+    "total_tokens": 146061
+  },
+  "trace_hash": "bc43dec7073451712d0c28b3ed296922185f5180423e6898817f0ae0343d9a7c"
+}

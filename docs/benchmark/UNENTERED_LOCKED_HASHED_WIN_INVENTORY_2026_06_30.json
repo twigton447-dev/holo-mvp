@@ -1,0 +1,141 @@
+{
+  "date": "2026-06-30",
+  "public_surfaces_checked": [
+    "docs/whitepaper.md",
+    "docs/benchmark_summary.md",
+    "frontend/whitepaper.html",
+    "frontend/benchmark.html"
+  ],
+  "already_entered_publicly": [
+    "Kit A Accounts Payable / BEC",
+    "Kit B Agentic Commerce v1",
+    "Clinical Activation Boundary Controls / HV-20",
+    "Vendor-Master Payment Controls / AP Replication",
+    "HoloBuild D11/D13/D14/D14B discussion"
+  ],
+  "best_missing_candidates": [
+    {
+      "id": "D10_INFRASTRUCTURE_CONFIGURATION_CHANGE",
+      "surface": "HoloBuild",
+      "candidate_status": "GOOD_MISSING_WIN_NEEDS_HASH_PACKAGE_BEFORE_PUBLIC_PROMOTION",
+      "result": {
+        "holo_score": 95,
+        "solo_score": 71,
+        "winner": "HOLO",
+        "judge_type": "full_gated_100_point"
+      },
+      "evidence_paths": [
+        "docs/benchmark/D11_LOCK_SCORE_AND_PROOF_LEDGER_2026-06-27.md",
+        "docs/benchmark/D11_LOCK_5_PACKET_SUITE_LOCK_2026-06-27.md",
+        "docs/benchmark/D11_LOCK_5_PACKET_SUITE_LOCK_2026-06-27.json"
+      ],
+      "caveats": [
+        "patched canary",
+        "not part of one uninterrupted 45-call suite",
+        "no repo LOCK_MANIFEST/root-signature package found for D11-lock suite"
+      ]
+    },
+    {
+      "id": "D11_CYBER_INCIDENT_CONTRACT_NOTICE_EMERGENCY_CLOUD_ACCESS",
+      "surface": "HoloBuild",
+      "candidate_status": "GOOD_MISSING_WIN_NEEDS_HASH_PACKAGE_BEFORE_PUBLIC_PROMOTION",
+      "result": {
+        "holo_score": 96,
+        "solo_score": 94,
+        "winner": "HOLO",
+        "judge_type": "full_gated_100_point"
+      },
+      "evidence_paths": [
+        "docs/benchmark/D11_LOCK_SCORE_AND_PROOF_LEDGER_2026-06-27.md",
+        "docs/benchmark/D11_LOCK_5_PACKET_SUITE_LOCK_2026-06-27.md",
+        "docs/benchmark/D11_LOCK_5_PACKET_SUITE_LOCK_2026-06-27.json"
+      ],
+      "caveats": [
+        "narrow win",
+        "both artifacts admissible",
+        "no repo LOCK_MANIFEST/root-signature package found for D11-lock suite"
+      ]
+    },
+    {
+      "id": "COMMERCE_OPENAI_W2_ALL_SIX_COLLAPSE_HOLO_CANARY",
+      "surface": "HoloVerify",
+      "candidate_status": "TRUE_LOCKED_HASHED_MISSING_CANARY_WIN",
+      "result": {
+        "classification": "COMMERCE_OPENAI_W2_ALL_SIX_COLLAPSE_HOLO_CANARY_COMPLETE",
+        "readiness_passed": true,
+        "packet_count": 6,
+        "valid_pairs": 3,
+        "packet_correct": 6,
+        "provider_calls": 30,
+        "worker_calls": 18,
+        "gov_calls": 12,
+        "solo_calls": 0,
+        "judge_calls": 0,
+        "input_tokens": 48445,
+        "output_tokens": 11138,
+        "total_tokens": 63485,
+        "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+        "lock_root_signature": "a19bd1e5e47411597ccf5fd941f1a24ba4269215a2fb72a4c2aabe68dc001948"
+      },
+      "pairs": [
+        "HV-ACOM-REP-006",
+        "HV-ACOM-REP-019",
+        "HV-ACOM-REP-020"
+      ],
+      "evidence_paths": [
+        "docs/benchmark/holoverify_agentic_commerce_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260630T031643Z/canary_summary.md",
+        "docs/benchmark/holoverify_agentic_commerce_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260630T031643Z/canary_results.json",
+        "docs/benchmark/holoverify_agentic_commerce_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260630T031643Z/LOCK_MANIFEST.json",
+        "docs/benchmark/holoverify_agentic_commerce_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260630T031643Z/LOCK_VALIDATION.json",
+        "docs/benchmark/holoverify_agentic_commerce_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260630T031643Z/COMMERCE_OPENAI_W2_ALL_SIX_COLLAPSE_HOLO_READINESS_ASSERTIONS.json"
+      ],
+      "caveats": [
+        "canary-sized",
+        "not a completed 20-pair Commerce family",
+        "no solo calls inside the Holo canary; solo collapse evidence references prior solo triage"
+      ]
+    }
+  ],
+  "do_not_promote_as_new_standalone_wins_yet": [
+    {
+      "id": "HARD_ALLOW_FP_5PAIR_FULL_ARCH_FREEZE",
+      "reason": "hash-locked precursor, pending judge, partly subsumed by Clinical/HV-20",
+      "root_signature": "47434052ed594ed65734e1e964434ae984a17777607fc72ad1c6424dd4de83f6",
+      "holo_local_knew_passes": "10/10",
+      "solo_local_knew_passes": "7/10"
+    },
+    {
+      "id": "AGENTIC_COMMERCE_FULL_FAMILY_RUNS",
+      "reason": "full-family Commerce runs are invalid/incomplete; only the 3-pair canary is clean"
+    },
+    {
+      "id": "AP_OPENAI_W2_CANARIES",
+      "reason": "one-pair AP canary is subsumed by public AP full-family result; all-six-collapse AP canaries are invalid/incomplete or fail target-pair validity",
+      "evidence_paths": [
+        "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2/run_20260629T164305Z/canary_summary.md",
+        "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260629T191023Z/canary_summary.md",
+        "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260629T193200Z/canary_summary.md"
+      ]
+    },
+    {
+      "id": "HOLOVERIFY_V_RESCUE_DIAGNOSTICS",
+      "reason": "complete diagnostic/rescue traces exist, but no LOCK_VALIDATION/LOCK_MANIFEST/LOCK_SUMMARY package was found under holoverify_v_* diagnostic folders",
+      "evidence_paths": [
+        "docs/benchmark/holoverify_v_activation_dependency_022_2026-06-28/",
+        "docs/benchmark/holoverify_v_subtle_closeout_021_2026-06-28/",
+        "docs/benchmark/holoverify_v_dependency_closure_025_2026-06-28/",
+        "docs/benchmark/holoverify_v_callback_provenance_two_packet_2026-06-28/",
+        "docs/benchmark/holoverify_v_kitc_042_hard_allow_fp_2026-06-28/",
+        "docs/benchmark/holoverify_v_kitc_047_hard_allow_fp_2026-06-28/",
+        "docs/benchmark/holoverify_v_kitc_082_hard_allow_fp_2026-06-28/"
+      ]
+    }
+  ],
+  "bottom_line": {
+    "best_immediate_missing_item": "COMMERCE_OPENAI_W2_ALL_SIX_COLLAPSE_HOLO_CANARY",
+    "best_holobuild_items_to_hash_package_next": [
+      "D10_INFRASTRUCTURE_CONFIGURATION_CHANGE",
+      "D11_CYBER_INCIDENT_CONTRACT_NOTICE_EMERGENCY_CLOUD_ACCESS"
+    ]
+  }
+}

@@ -434,6 +434,16 @@ The cost was higher than the first 20-pair HoloVerify family. Holo used 414,016 
 
 Across the two committed internal HoloVerify families, Holo solved 80/80 frozen action-boundary packets and 40/40 sibling pairs. The two families had different solo-baseline behavior: the clinical activation family produced broad clean solo collapse, while AP produced mixed solo behavior with strict failures present in every pair.
 
+### Replication Canary: Agentic Commerce All-Six Collapse
+
+The next Commerce result is smaller, but still useful.
+
+In a later Agentic Commerce canary, we selected three frozen sibling pairs where all six same-family solo one-shots had failed in triage. HoloVerify then ran those six packets through the governed architecture.
+
+Holo solved all 6 packets and all 3 sibling pairs. The run completed 30/30 provider calls, including 18 worker calls and 12 Gov calls, with no solo calls and no judges. The canary is lock-root validated with root signature `a19bd1e5e47411597ccf5fd941f1a24ba4269215a2fb72a4c2aabe68dc001948`.
+
+This is not a completed 20-pair Commerce family. It should be read as locked canary evidence: the failure pattern reappeared in Commerce, and the governed architecture held on the selected all-six-collapse pairs.
+
 ### HoloBuild and stronger baselines
 
 The HoloBuild lane tests a different question than HoloVerify.
@@ -455,6 +465,12 @@ The first was a scored win.
 In D11, both systems produced work that could be judged. HoloBuild produced an output that cleared all benchmark gates and outperformed Claude Opus 4.8 under blind scoring. Holo gained about 18.4 strict-score points and 24 action-boundary points while using about 1.9x total tokens.
 
 That is the clean scored proof point.
+
+There is also D11-lock ledger evidence that is useful but should be labeled separately.
+
+D10 was an infrastructure configuration-change case. HoloBuild won the full-gated 100-point judgment 95 to 71. D11_CYBER was a cyber incident / contract notice / emergency cloud-access case. HoloBuild won 96 to 94, with both artifacts admissible.
+
+Those are real HoloBuild wins in the repo ledger. They are not yet packaged like the AP and clinical HoloVerify families, with a public root-signature evidence package. So they should not be described as the same class of evidence. The right label is: D11-lock ledger evidence, split-run disclosed, root package not yet promoted.
 
 The second kind of win was different.
 

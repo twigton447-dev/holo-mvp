@@ -125,10 +125,16 @@ The solo baseline here is deliberately simple: each model gets one chance at the
 |---|---|---:|---:|---|---|---:|---:|---|
 | Clinical Activation Boundary Controls | Clinical-regulated activation controls | 40 | 20 | 40/40 | 6/120 KNEW/admissible | 14 | 2.06x | Committed public package |
 | Vendor-Master Payment Controls | AP / procurement / vendor-master controls | 40 | 20 | 40/40 | 53/120 KNEW/admissible | 1 | 2.84x | Committed evidence package |
+| Agentic Commerce All-Six Collapse Canary | Agentic commerce / order execution controls | 6 | 3 | 6/6 | all-six solo collapse in triage | 3 | n/a | Lock-rooted canary, not full-family proof |
+| D11-Lock HoloBuild Mini-Suite | Governed work-product quality | 2 cases | n/a | D10 95-71; D11_CYBER 96-94 | Claude Opus 4.8 baseline | n/a | n/a | Ledger evidence, split-run disclosed, root package not yet promoted |
 
 The AP family should not be framed as total solo collapse. It is a different and useful result: solo models sometimes got the answer right, but every AP pair still had at least two strict one-shot solo failures across six same-family attempts. Holo solved both siblings in all 20 pairs.
 
 Across the two committed internal HoloVerify families, Holo solved 80/80 frozen action-boundary packets and 40/40 sibling pairs. That is not a universal superiority claim. It is evidence that governed architecture can hold the line across multiple action-boundary packet families, at higher token cost.
+
+The Commerce canary is smaller but cleaner on collapse shape: three selected Commerce sibling pairs had all six same-family solo one-shots fail in triage, and Holo solved all six packets under the governed architecture. It is lock-rooted canary evidence, not a completed Commerce family.
+
+The D11-lock mini-suite is a different evidence class. D10 and D11_CYBER are real HoloBuild ledger wins, but they should stay labeled as ledger evidence until they are packaged with the same public root-signature evidence standard used for the larger HoloVerify families.
 
 ---
 

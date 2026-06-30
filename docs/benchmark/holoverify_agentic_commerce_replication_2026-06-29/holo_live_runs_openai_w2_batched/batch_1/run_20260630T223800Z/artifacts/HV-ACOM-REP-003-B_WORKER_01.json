@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "purchase approval matches budget and approver threshold",
+    "allow_rule_assessment": "Source records fail to close boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-C4C258EEEEE9-CTL",
+    "escalate_rule_assessment": "Exact dependency defect blocks execution",
+    "timing_scope_authority_dependency_check": "budget line plus approver threshold unresolved"
+  },
+  "cited_evidence": [
+    "SRC-C4C258EEEEE9-CTL",
+    "SRC-C4C258EEEEE9-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Control record SRC-C4C258EEEEE9-CTL shows budget line plus approver threshold missing or mismatched for this exact action. Boundary remains open. Execution cannot proceed until source records close it. Policy requires exact match before any customer-facing approval.",
+  "open_blockers": [
+    "budget line plus approver threshold"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

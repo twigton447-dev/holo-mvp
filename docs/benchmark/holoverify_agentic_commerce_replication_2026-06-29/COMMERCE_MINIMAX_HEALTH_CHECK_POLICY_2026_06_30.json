@@ -1,0 +1,42 @@
+{
+  "classification": "COMMERCE_MINIMAX_HEALTH_CHECK_POLICY",
+  "status": "REGISTERED_NO_PROVIDER_CALLS",
+  "created_at": "2026-06-30T00:00:00+00:00",
+  "applies_to": "Commerce OpenAI-W2 batched Holo runs only",
+  "health_check": {
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "prompt": "Return exactly MINIMAX_READY",
+    "expected_response": "MINIMAX_READY",
+    "max_age_seconds": 1800,
+    "benchmark_content_allowed": false,
+    "packet_content_allowed": false,
+    "source_ids_allowed": false,
+    "traps_allowed": false,
+    "answer_keys_allowed": false
+  },
+  "pass_requires": {
+    "provider_call_ok": true,
+    "response_exact": true,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_final_failure_class": null
+  },
+  "block_on": [
+    "DNS_RESOLUTION_ERROR",
+    "READ_TIMEOUT",
+    "HTTP_429",
+    "HTTP_500",
+    "HTTP_502",
+    "HTTP_503",
+    "HTTP_504",
+    "connection_reset",
+    "wrong_response_text",
+    "transport_recovered_true",
+    "missing_recent_health_check"
+  ],
+  "retroactive_effect": "NONE",
+  "provider_calls_during_registration": 0,
+  "judge_calls_during_registration": 0
+}
+

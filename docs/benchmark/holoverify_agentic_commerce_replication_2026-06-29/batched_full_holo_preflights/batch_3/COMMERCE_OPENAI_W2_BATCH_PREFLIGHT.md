@@ -14,6 +14,8 @@ Freeze root: `5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7`
 - Expected provider calls: `60`
 - Solo calls: `0`
 - Judge calls: `0`
+- MiniMax health required: `False`
+- MiniMax recent clean health: `False`
 
 ## Checks
 
@@ -43,6 +45,6 @@ Freeze root: `5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7`
 | `expected_gov_calls` | `True` |
 | `solo_calls_configured` | `True` |
 | `judge_calls_configured` | `True` |
-| `providers_called_during_preflight` | `True` |
+| `no_providers_called_during_preflight` | `True` |
 
 Stop here unless live batch execution is explicitly approved.

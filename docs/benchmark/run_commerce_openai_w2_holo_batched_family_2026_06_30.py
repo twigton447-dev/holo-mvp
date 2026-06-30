@@ -24,8 +24,13 @@ COMMERCE_MODULE_PATH = BENCHMARK_ROOT / "run_commerce_replication_holoverify_3dn
 COMMERCE_ROOT = BENCHMARK_ROOT / "holoverify_agentic_commerce_replication_2026-06-29"
 BATCH_RUN_ROOT = COMMERCE_ROOT / "holo_live_runs_openai_w2_batched"
 BATCH_PREFLIGHT_ROOT = COMMERCE_ROOT / "batched_full_holo_preflights"
+BATCH_HEALTH_GATED_PREFLIGHT_ROOT = COMMERCE_ROOT / "batched_full_holo_preflights_health_gated"
 ROLLUP_ROOT = COMMERCE_ROOT / "batched_full_holo_rollups"
+MINIMAX_HEALTH_ROOT = COMMERCE_ROOT / "minimax_health_checks"
 EXPECTED_FREEZE_ROOT_HASH = "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7"
+MINIMAX_HEALTH_PROMPT = "Return exactly MINIMAX_READY"
+MINIMAX_HEALTH_EXPECTED_RESPONSE = "MINIMAX_READY"
+MINIMAX_HEALTH_MAX_AGE_SECONDS = 30 * 60
 
 BATCHES: dict[str, dict[str, Any]] = {
     "batch_1": {
@@ -70,6 +75,18 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text())
 
 
+def parse_timestamp(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
 def trace_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -94,6 +111,148 @@ def expected_counts(batch_id: str) -> dict[str, int]:
         "solo_calls": 0,
         "judge_calls": 0,
     }
+
+
+def latest_minimax_health_report(now: datetime | None = None) -> dict[str, Any]:
+    now = now or datetime.now(timezone.utc)
+    candidates = sorted(MINIMAX_HEALTH_ROOT.glob("health_*/COMMERCE_MINIMAX_HEALTH_CHECK_2026_06_30.json"))
+    if not candidates:
+        return {
+            "status": "MISSING",
+            "recent_pass": False,
+            "reason": "no_minimax_health_check_report_found",
+            "max_age_seconds": MINIMAX_HEALTH_MAX_AGE_SECONDS,
+        }
+    path = candidates[-1]
+    try:
+        report = read_json(path)
+    except Exception as exc:
+        return {
+            "status": "MALFORMED",
+            "recent_pass": False,
+            "reason": f"latest_health_check_malformed:{type(exc).__name__}",
+            "path": str(path),
+            "max_age_seconds": MINIMAX_HEALTH_MAX_AGE_SECONDS,
+        }
+    created_at = parse_timestamp(report.get("created_at"))
+    age_seconds = None
+    if created_at is not None:
+        age_seconds = int((now - created_at).total_seconds())
+    recent = isinstance(age_seconds, int) and 0 <= age_seconds <= MINIMAX_HEALTH_MAX_AGE_SECONDS
+    passed = report.get("status") == "PASS" and report.get("provider_clean") is True
+    return {
+        "status": "PASS" if passed and recent else "FAIL",
+        "recent_pass": bool(passed and recent),
+        "reason": None if passed and recent else "latest_health_check_missing_stale_failed_or_degraded",
+        "path": str(path),
+        "created_at": report.get("created_at"),
+        "age_seconds": age_seconds,
+        "max_age_seconds": MINIMAX_HEALTH_MAX_AGE_SECONDS,
+        "provider_clean": report.get("provider_clean"),
+        "transport_attempt_count": report.get("transport_attempt_count"),
+        "transport_recovered": report.get("transport_recovered"),
+        "response_exact": report.get("response_exact"),
+    }
+
+
+def run_minimax_health_check() -> int:
+    """Run a harmless MiniMax readiness check with no benchmark content."""
+    configure()
+    config = RUNNER.MODEL_CONFIGS["minimax"]
+    env_name = config["api_key_env"]
+    if not os.getenv(env_name, "").strip():
+        raise RuntimeError(f"{env_name} missing")
+    now = datetime.now(timezone.utc)
+    run_id = now.strftime("health_%Y%m%dT%H%M%SZ")
+    out_dir = MINIMAX_HEALTH_ROOT / run_id
+    out_dir.mkdir(parents=True, exist_ok=False)
+    prompt_hash = AP.sha256_text(MINIMAX_HEALTH_PROMPT)
+    response: dict[str, Any] = {}
+    provider_call_ok = False
+    error = None
+    try:
+        response = RUNNER._call_model(
+            config,
+            [{"role": "user", "content": MINIMAX_HEALTH_PROMPT}],
+            max_tokens=16,
+        )
+        provider_call_ok = True
+    except RUNNER.TransportFailureAfterRetries as exc:
+        response = dict(getattr(exc, "metadata", {}) or {})
+        error = f"{type(exc).__name__}: {exc}"
+    except Exception as exc:
+        error = f"{type(exc).__name__}: {exc}"
+    text = str(response.get("text") or "").strip()
+    transport_attempt_count = response.get("transport_attempt_count")
+    transport_recovered = response.get("transport_recovered")
+    response_exact = text == MINIMAX_HEALTH_EXPECTED_RESPONSE
+    provider_clean = (
+        provider_call_ok
+        and response_exact
+        and transport_attempt_count == 1
+        and transport_recovered is False
+        and not response.get("transport_final_failure_class")
+    )
+    report = {
+        "classification": "COMMERCE_MINIMAX_HEALTH_CHECK_NON_BENCHMARK",
+        "status": "PASS" if provider_clean else "FAIL",
+        "created_at": now.isoformat(),
+        "provider": config["provider"],
+        "model": config["model"],
+        "dna": config["dna"],
+        "prompt_hash": prompt_hash,
+        "prompt_policy": "harmless_non_benchmark_readiness_prompt_only",
+        "benchmark_content_included": False,
+        "packet_content_included": False,
+        "source_ids_included": False,
+        "traps_included": False,
+        "answer_keys_included": False,
+        "expected_response": MINIMAX_HEALTH_EXPECTED_RESPONSE,
+        "response_text": text,
+        "response_exact": response_exact,
+        "provider_call_ok": provider_call_ok,
+        "provider_clean": provider_clean,
+        "transport_attempt_count": transport_attempt_count,
+        "transport_recovered": transport_recovered,
+        "transport_retry_failures": response.get("transport_retry_failures") or [],
+        "transport_final_failure_class": response.get("transport_final_failure_class"),
+        "finish_reason": response.get("finish_reason"),
+        "input_tokens": response.get("input_tokens"),
+        "output_tokens": response.get("output_tokens"),
+        "total_tokens": response.get("total_tokens"),
+        "elapsed_ms": response.get("elapsed_ms"),
+        "error": error,
+    }
+    write_json(out_dir / "COMMERCE_MINIMAX_HEALTH_CHECK_2026_06_30.json", report)
+    write_text(out_dir / "COMMERCE_MINIMAX_HEALTH_CHECK_2026_06_30.md", render_minimax_health_md(report))
+    print(json.dumps(report, indent=2, sort_keys=True))
+    return 0 if provider_clean else 1
+
+
+def render_minimax_health_md(report: dict[str, Any]) -> str:
+    return "\n".join(
+        [
+            "# Commerce MiniMax Health Check",
+            "",
+            f"Classification: `{report['classification']}`",
+            f"Status: `{report['status']}`",
+            f"Provider/model: `{report['provider']}/{report['model']}`",
+            f"Prompt policy: `{report['prompt_policy']}`",
+            "",
+            "## Result",
+            "",
+            f"- Provider call OK: `{report['provider_call_ok']}`",
+            f"- Provider clean: `{report['provider_clean']}`",
+            f"- Response exact: `{report['response_exact']}`",
+            f"- Transport attempts: `{report['transport_attempt_count']}`",
+            f"- Transport recovered: `{report['transport_recovered']}`",
+            f"- Final transport failure class: `{report['transport_final_failure_class']}`",
+            f"- Error: `{report['error']}`",
+            "",
+            "No frozen Commerce packet text, prompt text, source IDs, traps, or answer keys are included in this health check.",
+            "",
+        ]
+    )
 
 
 def selected_pairs(batch_id: str) -> list[dict[str, Any]]:
@@ -153,6 +312,8 @@ def render_preflight_md(preflight: dict[str, Any]) -> str:
         f"- Expected provider calls: `{preflight['expected_counts']['total_provider_calls']}`",
         f"- Solo calls: `{preflight['expected_counts']['solo_calls']}`",
         f"- Judge calls: `{preflight['expected_counts']['judge_calls']}`",
+        f"- MiniMax health required: `{preflight['minimax_health_gate']['required']}`",
+        f"- MiniMax recent clean health: `{preflight['minimax_health_gate']['recent_pass']}`",
         "",
         "## Checks",
         "",
@@ -165,13 +326,15 @@ def render_preflight_md(preflight: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def build_preflight(batch_id: str) -> dict[str, Any]:
+def build_preflight(batch_id: str, require_minimax_health: bool = False) -> dict[str, Any]:
     pairs = selected_pairs(batch_id)
     counts = expected_counts(batch_id)
     declared_roster = roster()
     w2 = declared_roster["worker_sequence"][1]
     freeze_diff_names = AP.git_diff_names(AP.FREEZE_ROOT)
     pair_ids = tuple(pair["pair_id"] for pair in pairs)
+    health_gate = latest_minimax_health_report()
+    health_gate["required"] = require_minimax_health
     checks = {
         "freeze_root_matches": True,
         "batch_declared": batch_id in BATCHES,
@@ -197,8 +360,10 @@ def build_preflight(batch_id: str) -> dict[str, Any]:
         "expected_gov_calls": counts["gov_calls"] in {28, 24},
         "solo_calls_configured": counts["solo_calls"] == 0,
         "judge_calls_configured": counts["judge_calls"] == 0,
-        "providers_called_during_preflight": True,
+        "no_providers_called_during_preflight": True,
     }
+    if require_minimax_health:
+        checks["minimax_health_check_recent_clean_pass"] = health_gate["recent_pass"] is True
     status = "PASS" if all(checks.values()) else "FAIL"
     architecture_lock = {
         "classification": "COMMERCE_OPENAI_W2_BATCHED_FULL_HOLO_ARCHITECTURE_LOCK",
@@ -230,6 +395,7 @@ def build_preflight(batch_id: str) -> dict[str, Any]:
         "pair_ids": list(pair_ids),
         "expected_counts": counts,
         "architecture_lock": architecture_lock,
+        "minimax_health_gate": health_gate,
         "checks": checks,
         "blocked_reason": None if status == "PASS" else [key for key, value in checks.items() if not value],
         "providers_called": 0,
@@ -238,7 +404,7 @@ def build_preflight(batch_id: str) -> dict[str, Any]:
         "judges_started": False,
     }
     preflight["root_signature"] = AP.sha256_text(AP.canonical_json({k: v for k, v in preflight.items() if k != "created_at"}))
-    out_dir = BATCH_PREFLIGHT_ROOT / batch_id
+    out_dir = (BATCH_HEALTH_GATED_PREFLIGHT_ROOT if require_minimax_health else BATCH_PREFLIGHT_ROOT) / batch_id
     write_json(out_dir / "COMMERCE_OPENAI_W2_BATCH_PREFLIGHT.json", preflight)
     write_text(out_dir / "COMMERCE_OPENAI_W2_BATCH_PREFLIGHT.md", render_preflight_md(preflight))
     return preflight
@@ -439,8 +605,8 @@ def write_batch_summary_md(run_dir: Path, summary: dict[str, Any]) -> None:
     write_text(run_dir / "batch_summary.md", "\n".join(lines) + "\n")
 
 
-def run_batch(batch_id: str) -> int:
-    manifest = build_preflight(batch_id)
+def run_batch(batch_id: str, require_minimax_health: bool = False) -> int:
+    manifest = build_preflight(batch_id, require_minimax_health=require_minimax_health)
     if manifest["status"] != "PASS":
         raise RuntimeError(f"preflight_failed:{manifest.get('blocked_reason')}")
     for key in ("xai", AP.OPENAI_W2_MODEL_KEY, "minimax"):
@@ -575,31 +741,35 @@ def write_rollup_md(out_dir: Path, rollup: dict[str, Any]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--minimax-health-check", action="store_true")
+    parser.add_argument("--require-minimax-health", action="store_true")
     parser.add_argument("--preflight-batch", action="store_true")
     parser.add_argument("--preflight-all-batches", action="store_true")
     parser.add_argument("--run-batch", action="store_true")
     parser.add_argument("--rollup-latest", action="store_true")
     parser.add_argument("--batch", choices=sorted(BATCHES))
     args = parser.parse_args()
+    if args.minimax_health_check:
+        return run_minimax_health_check()
     if args.preflight_batch:
         if not args.batch:
             raise SystemExit("--batch is required")
-        report = build_preflight(args.batch)
+        report = build_preflight(args.batch, require_minimax_health=args.require_minimax_health)
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0 if report["status"] == "PASS" else 1
     if args.preflight_all_batches:
-        reports = [build_preflight(batch_id) for batch_id in BATCHES]
+        reports = [build_preflight(batch_id, require_minimax_health=args.require_minimax_health) for batch_id in BATCHES]
         print(json.dumps(reports, indent=2, sort_keys=True))
         return 0 if all(report["status"] == "PASS" for report in reports) else 1
     if args.run_batch:
         if not args.batch:
             raise SystemExit("--batch is required")
-        return run_batch(args.batch)
+        return run_batch(args.batch, require_minimax_health=args.require_minimax_health)
     if args.rollup_latest:
         rollup = rollup_latest()
         print(json.dumps(rollup, indent=2, sort_keys=True))
         return 0 if rollup["readiness_passed"] else 1
-    parser.error("Use --preflight-batch, --preflight-all-batches, --run-batch, or --rollup-latest")
+    parser.error("Use --minimax-health-check, --preflight-batch, --preflight-all-batches, --run-batch, or --rollup-latest")
     return 2
 
 

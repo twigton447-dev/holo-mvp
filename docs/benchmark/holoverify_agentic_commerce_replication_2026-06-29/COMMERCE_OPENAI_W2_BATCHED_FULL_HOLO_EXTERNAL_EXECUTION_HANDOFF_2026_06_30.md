@@ -4,7 +4,7 @@ Date: 2026-06-30
 
 Classification: `COMMERCE_OPENAI_W2_BATCHED_FULL_HOLO_EXTERNAL_EXECUTION_HANDOFF`
 
-Status: `READY_FOR_AUTHORIZED_LOCAL_BATCH_PREFLIGHT`
+Status: `READY_FOR_AUTHORIZED_LOCAL_BATCH_PREFLIGHT_AFTER_MINIMAX_HEALTH_CHECK`
 
 ## Purpose
 
@@ -26,6 +26,7 @@ This is a batched full-family protocol. It is not a one-shot uninterrupted `200`
 - No packet edits.
 - No prompt edits.
 - No fallback or substitution.
+- MiniMax health gate required before each live batch.
 
 ## Required Environment Variables
 
@@ -52,6 +53,31 @@ python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.
 
 Preflight must pass for all three batches before live execution.
 
+## MiniMax Health Gate
+
+Before each live batch attempt, run one harmless non-benchmark MiniMax health check. This check must not include packet text, prompt text, source IDs, traps, answer keys, or any benchmark content.
+
+```bash
+cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
+set -a; source .env; set +a
+python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.py --minimax-health-check
+```
+
+Pass condition:
+
+- response is exactly `MINIMAX_READY`
+- transport attempts = `1`
+- transport recovered = `False`
+- no DNS, timeout, HTTP 5xx, or retry recovery
+
+If the health check fails or requires transport recovery, stop. Do not run a Commerce batch.
+
+After a clean health check, run the health-gated preflight for the target batch:
+
+```bash
+python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.py --preflight-batch --batch batch_1 --require-minimax-health
+```
+
 ## Live Batch Commands
 
 Run one batch at a time. If a batch fails, stop and preserve the run folder. Do not automatically continue to the next batch.
@@ -61,7 +87,7 @@ Batch 1:
 ```bash
 cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
 set -a; source .env; set +a
-python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.py --run-batch --batch batch_1
+python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.py --run-batch --batch batch_1 --require-minimax-health
 ```
 
 Batch 2:
@@ -69,7 +95,7 @@ Batch 2:
 ```bash
 cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
 set -a; source .env; set +a
-python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.py --run-batch --batch batch_2
+python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.py --run-batch --batch batch_2 --require-minimax-health
 ```
 
 Batch 3:
@@ -77,7 +103,7 @@ Batch 3:
 ```bash
 cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001
 set -a; source .env; set +a
-python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.py --run-batch --batch batch_3
+python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.py --run-batch --batch batch_3 --require-minimax-health
 ```
 
 ## Roll-Up Command
@@ -134,6 +160,7 @@ Each batch passes only if:
 - all packet final verdicts are correct and admissible
 - no leakage
 - no solo or judges
+- a recent clean MiniMax health check existed before launch
 
 The Commerce family proof passes only if all three batches pass and the roll-up passes.
 

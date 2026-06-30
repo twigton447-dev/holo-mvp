@@ -1,0 +1,51 @@
+{
+  "classification": "COMMERCE_BATCH1_RERUN_MINIMAX_DNS_BLOCKER",
+  "status": "BLOCKED_PROVIDER_RELIABILITY",
+  "created_at": "2026-06-30T00:00:00+00:00",
+  "run_dir": "docs/benchmark/holoverify_agentic_commerce_replication_2026-06-29/holo_live_runs_openai_w2_batched/batch_1/run_20260630T223800Z",
+  "run_classification": "COMMERCE_OPENAI_W2_BATCHED_HOLO_BATCH_INVALID_OR_INCOMPLETE",
+  "readiness_passed": false,
+  "provider_calls": 27,
+  "expected_provider_calls": 70,
+  "worker_calls": 16,
+  "gov_calls": 11,
+  "packet_count": 6,
+  "packet_correct": 5,
+  "valid_pairs": 2,
+  "invalidation_reason": "PROVIDER_FAILURE",
+  "root_failure": {
+    "turn_id": "HV-ACOM-REP-003-B_G1",
+    "packet_id": "HV-ACOM-REP-003-B",
+    "pair_id": "HV-ACOM-REP-003",
+    "call_kind": "gov",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "provider_call_ok": false,
+    "parse_ok": false,
+    "error": "TransportFailureAfterRetries: DNS_RESOLUTION_ERROR",
+    "transport_attempt_count": 3,
+    "transport_final_failure_class": "DNS_RESOLUTION_ERROR",
+    "transport_recovered": false,
+    "transport_retry_policy_version": "HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29",
+    "retry_failure_message": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+  },
+  "evidence_classification": {
+    "holo_verdict_failure": false,
+    "deterministic_gate_failure": false,
+    "final_selector_failure": false,
+    "provider_transport_blocker": true,
+    "benchmark_quality_signal": false
+  },
+  "preservation": {
+    "raw_trace_preserved": true,
+    "raw_prompts_preserved": true,
+    "raw_artifacts_preserved": true,
+    "lock_validation_preserved": true,
+    "no_leakage_preserved": true,
+    "no_solo_started": true,
+    "no_judges_started": true,
+    "no_fallback_or_substitution": true
+  },
+  "next_valid_move": "Run non-benchmark MiniMax health check before any fresh Commerce batch attempt."
+}
+

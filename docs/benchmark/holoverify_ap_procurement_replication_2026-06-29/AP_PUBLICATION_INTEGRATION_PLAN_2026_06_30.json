@@ -1,0 +1,60 @@
+{
+  "classification": "AP_PUBLICATION_INTEGRATION_PLAN",
+  "created_date": "2026-06-30",
+  "source_evidence_commit": "78164d47",
+  "evidence_root": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/final_evidence_package",
+  "family": {
+    "recommended_public_name": "Vendor-Master Payment Controls",
+    "domain": "AP / procurement / vendor-master controls",
+    "packets": 40,
+    "pairs": 20
+  },
+  "metrics": {
+    "holo_packets_correct": "40/40",
+    "holo_valid_pairs": "20/20",
+    "solo_calls": "120/120",
+    "solo_knew_admissible": "53/120",
+    "strict_solo_failures": "67/120",
+    "all_six_solo_fail_pairs": 1,
+    "mixed_pairs": 19,
+    "holo_tokens": 414016,
+    "solo_tokens": 146061,
+    "token_ratio_holo_over_solo": 2.835,
+    "packet_identity": "PASS",
+    "no_leakage": "PASS",
+    "judges": 0,
+    "holo_provider_failures": 0
+  },
+  "recommended_claim_shape": "HoloVerify completed a second committed 20-pair / 40-packet AP replication family. Holo solved 40/40 packets and 20/20 sibling pairs. Same-family one-shot solo baselines completed 120/120 calls and produced 53/120 KNEW/admissible outputs. Every AP pair had at least two strict solo failures across six one-shot attempts, while Holo solved both siblings. One AP pair showed complete all-six solo collapse. Holo used about 2.84x the solo token budget and passed packet-identity and no-leakage audits.",
+  "whitepaper_target": {
+    "file": "docs/whitepaper.md",
+    "section": "09. What the benchmark has shown so far",
+    "placement": "after Kit A / Kit B HoloVerify discussion and before HoloBuild",
+    "subsection_title": "Replication Family: Vendor-Master Payment Controls"
+  },
+  "benchmark_target": {
+    "recommended_surface": "public benchmark / registry summary",
+    "add_family_row": true,
+    "keep_separate_from_kit_c": true
+  },
+  "cumulative_safe_claim": "Across two committed internal HoloVerify families, Holo solved 80/80 frozen action-boundary packets and 40/40 sibling pairs. The two families had different solo-baseline behavior: Kit C produced broad clean solo collapse, while AP produced mixed solo behavior with strict failures present in every pair.",
+  "forbidden_claims": [
+    "AP proves Holo always beats solo.",
+    "AP produced 14 clean solo-collapse pairs.",
+    "All AP solos failed.",
+    "Every solo failure was a wrong verdict.",
+    "Parse failures are the same as wrong business reasoning.",
+    "AP was externally judged.",
+    "Holo is generally superior."
+  ],
+  "next_publication_tasks": [
+    "Create AP public-safe benchmark update draft from 78164d47.",
+    "Create AP whitepaper insert draft from 78164d47.",
+    "Update cumulative benchmark table to include Kit C and AP separately.",
+    "Update economics section with Kit C 2.06x and AP 2.84x token ratios.",
+    "Keep AP internal/committed until final public registry review.",
+    "Do not merge AP with Commerce until Commerce has a valid full-family Holo freeze and matching solo baseline."
+  ],
+  "providers_called": 0,
+  "judges_called": 0
+}

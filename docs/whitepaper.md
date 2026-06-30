@@ -4,7 +4,7 @@
 
 ### Why smart models still need a checkpoint before real-world action
 
-Version 7.5 · June 2026
+Version 7.6 · June 2026
 
 Taylor Wigton
 Founder, HoloEngine
@@ -419,6 +419,18 @@ A serious trust layer must escalate the first two and allow the third.
 Holo did that.
 
 Several non-Holo configurations either let unsafe orders through or overblocked the valid one.
+
+### Replication Family: Vendor-Master Payment Controls
+
+We then ran a larger AP / procurement replication family using 20 sibling pairs and 40 frozen packets. Each pair contained an ALLOW sibling and an ESCALATE sibling, testing whether the system could distinguish valid payment authority from unresolved vendor-master, approval, callback, duplicate-payment, or emergency-exception risk.
+
+HoloVerify solved 40/40 packets and 20/20 sibling pairs. Matching one-shot solo baselines using the same three mini-model families completed 120/120 calls and produced 53/120 KNEW/admissible outputs.
+
+This result should not be described as total solo collapse. It is more useful than that. AP showed mixed solo behavior: in every pair, at least two of six solo attempts failed the strict KNEW/admissibility standard, while Holo solved both siblings. One pair showed complete six-of-six solo collapse.
+
+The cost was higher than the first 20-pair HoloVerify family. Holo used 414,016 tokens versus 146,061 for the solo one-shot baseline, or about 2.84x the solo budget. That cost delta is part of the finding: governed verification buys reliability by spending more work at the action boundary.
+
+Across the two committed internal HoloVerify families, Holo solved 80/80 frozen action-boundary packets and 40/40 sibling pairs. The two families had different solo-baseline behavior: the clinical activation family produced broad clean solo collapse, while AP produced mixed solo behavior with strict failures present in every pair.
 
 ### HoloBuild and stronger baselines
 

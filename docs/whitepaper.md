@@ -701,3 +701,10 @@ AI is too useful to keep trapped in chat.
 It is also too consequential to let it act without a better gate.
 
 HoloEngine is built for the space between those two facts.
+
+---
+
+HoloEngine
+Version 7.81 · July 2026
+holoengine.ai/whitepaper
+holoengine.ai/benchmark

@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "fulfillment exception allowed by current carrier exception code",
+    "allow_rule_assessment": "Control record confirms exact match for exception code order date",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-6F49E82DEE8B-CTL",
+    "escalate_rule_assessment": "ESCALATE is required when exact current source evidence leaves the packet action boundary open.",
+    "timing_scope_authority_dependency_check": "Exception code matches order and date"
+  },
+  "cited_evidence": [
+    "SRC-6F49E82DEE8B-CTL",
+    "SRC-6F49E82DEE8B-POL",
+    "SRC-6F49E82DEE8B-BND",
+    "SRC-6F49E82DEE8B-FBK",
+    "SRC-6F49E82DEE8B-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "exception code must match order and date",
+    "SRC-6F49E82DEE8B-CTL",
+    "SRC-6F49E82DEE8B-BND"
+  ],
+  "final_answer": "Action may proceed. SRC-6F49E82DEE8B-CTL confirms exception code matches order and date exactly and ties to requested action boundary. Policy requires only this closure; no defects remain open.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

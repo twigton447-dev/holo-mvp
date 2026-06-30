@@ -2,8 +2,8 @@
 
 Classification: `COMMERCE_OPENAI_W2_BATCHED_FULL_HOLO_PREFLIGHT`
 Batch: `batch_1`
-Status: `FAIL`
-Result: `COMMERCE_OPENAI_W2_BATCH_BLOCKED`
+Status: `PASS`
+Result: `COMMERCE_OPENAI_W2_BATCH_READY`
 Freeze root: `5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7`
 
 ## Scope
@@ -17,7 +17,7 @@ Freeze root: `5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7`
 - MiniMax health required: `True`
 - MiniMax recent clean health: `True`
 - MiniMax worker smoke required: `True`
-- MiniMax recent worker smoke: `False`
+- MiniMax recent worker smoke: `True`
 
 ## Checks
 
@@ -49,6 +49,6 @@ Freeze root: `5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7`
 | `judge_calls_configured` | `True` |
 | `no_providers_called_during_preflight` | `True` |
 | `minimax_health_check_recent_clean_pass` | `True` |
-| `minimax_worker_contract_smoke_recent_clean_pass` | `False` |
+| `minimax_worker_contract_smoke_recent_clean_pass` | `True` |
 
 Stop here unless live batch execution is explicitly approved.

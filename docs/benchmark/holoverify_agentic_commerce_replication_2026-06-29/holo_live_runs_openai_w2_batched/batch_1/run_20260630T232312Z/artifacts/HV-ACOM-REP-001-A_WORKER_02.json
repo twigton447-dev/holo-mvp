@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "refund inside policy window with verified customer authorization",
+    "allow_rule_assessment": "Current source records close exact requested action boundary",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-9D3A5FAE2021-CTL",
+    "escalate_rule_assessment": "No open source-record defect remains before execution",
+    "timing_scope_authority_dependency_check": "refund window and verified account owner resolved"
+  },
+  "cited_evidence": [
+    "SRC-9D3A5FAE2021-CTL",
+    "SRC-9D3A5FAE2021-POL",
+    "SRC-9D3A5FAE2021-BND",
+    "SRC-9D3A5FAE2021-FBK",
+    "SRC-9D3A5FAE2021-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "refund window plus verified account owner",
+    "SRC-9D3A5FAE2021-CTL",
+    "SRC-9D3A5FAE2021-BND"
+  ],
+  "final_answer": "Source control record SRC-9D3A5FAE2021-CTL closes the exact refund boundary: policy window plus verified account owner match the requested action. Policy requires source closure, not tone-based hesitation. Communication boundary and fallback notes do not override the controlling control record. The action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

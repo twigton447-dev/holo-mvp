@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Fulfillment exception only when exception code matches order and date exactly",
+    "allow_rule_assessment": "Action not allowed; dependency unresolved",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-A96BAC691E35-CTL does not close exception code dependency",
+    "escalate_rule_assessment": "Escalate; open dependency blocks execution",
+    "timing_scope_authority_dependency_check": "Exception code must match order and date"
+  },
+  "cited_evidence": [
+    "SRC-A96BAC691E35-BND",
+    "SRC-A96BAC691E35-CTL",
+    "SRC-A96BAC691E35-FBK",
+    "SRC-A96BAC691E35-POL",
+    "SRC-A96BAC691E35-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "exception code match requirement",
+    "SRC-A96BAC691E35-CTL",
+    "SRC-A96BAC691E35-BND"
+  ],
+  "final_answer": "Source records do not close the exact action boundary. The control record says the exception-code dependency is missing, stale, mismatched, or scoped to a different action. Because the code must match order and date exactly, execution should not proceed. Escalate to obtain matching source closure first.",
+  "open_blockers": [
+    "exception code must match order and date"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

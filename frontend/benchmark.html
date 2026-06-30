@@ -829,8 +829,9 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
   <div class="w">
     <div class="section-eyebrow">Replication Family &middot; Vendor-Master Payment Controls</div>
     <h2>When Solo Sometimes Works, But Still Cannot Be Trusted Alone</h2>
-    <p>The AP replication family is a larger 20-pair, 40-packet frozen benchmark family. Each sibling pair contains one ALLOW packet and one ESCALATE packet, testing whether the system can distinguish valid payment authority from unresolved vendor-master, approval, callback, duplicate-payment, or emergency-exception risk.</p>
-    <p>HoloVerify solved 40/40 packets and 20/20 sibling pairs. Matching one-shot solo baselines using the same three mini-model families completed 120/120 calls and produced 53/120 KNEW/admissible outputs.</p>
+    <p>The AP replication family asks a simple question: can the system tell when a payment is actually authorized, not just when the paperwork looks normal?</p>
+    <p>We used 20 sibling pairs, or 40 frozen packets. Each pair had one case where payment could proceed and one case where it had to stop. The difference was narrow: vendor-master authority, approval chain, callback provenance, duplicate-payment risk, or an emergency exception.</p>
+    <p>HoloVerify solved 40/40 packets and 20/20 sibling pairs. The matching solo baseline used the same three mini-model families. Each solo model got one chance at each packet, without Gov, shared state, artifact memory, or a final selector. Across those 120 solo calls, 53 produced an audit-grade answer: the right verdict with reasoning clean enough to rely on.</p>
 
     <div class="chart-container">
       <div class="chart-title">AP Replication &mdash; HoloVerify vs Same-Family One-Shot Solos</div>
@@ -845,7 +846,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
         </div>
         <div class="spotlight-cell gold">
           <strong>53/120</strong>
-          <span>solo KNEW/admissible outputs.</span>
+          <span>solo audit-grade outputs.</span>
         </div>
         <div class="spotlight-cell fail">
           <strong>67/120</strong>
@@ -861,7 +862,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
       </div>
       <div class="mbox" style="border-left:3px solid var(--gold)">
         <div class="mbox-label" style="color:var(--gold)">Solo Baseline Shape</div>
-        <p>This was not total solo collapse. It was mixed instability: every AP pair had at least two strict solo failures across six same-family one-shot attempts, while one pair showed complete six-of-six solo collapse.</p>
+        <p>This was not total solo collapse. It was mixed instability: solo models sometimes got the answer right, but every AP pair still had at least two strict solo failures across six same-family one-shot attempts. One pair showed complete six-of-six solo collapse.</p>
       </div>
       <div class="mbox" style="border-left:3px solid var(--blue)">
         <div class="mbox-label" style="color:var(--blue)">Cost</div>
@@ -1077,7 +1078,7 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto 3rem;border-top:1px sol
             <td class="strong">HoloVerify / HoloGov-V</td>
             <td class="mono strong">AP Replication</td>
             <td><span class="status-pill green">Committed evidence</span></td>
-            <td>40/40 packets and 20/20 sibling pairs solved in vendor-master payment controls; one-shot solos produced 53/120 KNEW/admissible outputs.</td>
+            <td>40/40 packets and 20/20 sibling pairs solved in vendor-master payment controls; one-shot solos produced 53/120 audit-grade outputs.</td>
             <td>Not a total solo-collapse claim and not externally reviewed.</td>
           </tr>
           <tr>

@@ -466,11 +466,13 @@ This is still a bounded claim. It does not prove Holo is generally superior, and
 
 ### Replication Family: Vendor-Master Payment Controls
 
-We then ran a larger AP / procurement replication family using 20 sibling pairs and 40 frozen packets. Each pair contained an ALLOW sibling and an ESCALATE sibling, testing whether the system could distinguish valid payment authority from unresolved vendor-master, approval, callback, duplicate-payment, or emergency-exception risk.
+Then we asked a harder question: does the pattern hold in a larger AP / procurement family where solo models sometimes do fine?
 
-HoloVerify solved 40/40 packets and 20/20 sibling pairs. Matching one-shot solo baselines using the same three mini-model families completed 120/120 calls and produced 53/120 KNEW/admissible outputs.
+We built 20 sibling pairs, or 40 frozen packets. Each pair had one case where payment could proceed and one case where it had to stop. The difference was narrow: vendor-master authority, approval chain, callback provenance, duplicate-payment risk, or an emergency exception.
 
-This result should not be described as total solo collapse. It is more useful than that. AP showed mixed solo behavior: in every pair, at least two of six solo attempts failed the strict KNEW/admissibility standard, while Holo solved both siblings. One pair showed complete six-of-six solo collapse.
+HoloVerify solved 40/40 packets and 20/20 sibling pairs. The matching solo baseline used the same three mini-model families. Each solo model got one chance at each packet, without Gov, shared state, artifact memory, or a final selector. Across those 120 solo calls, 53 produced an audit-grade answer: the right verdict with reasoning clean enough to rely on.
+
+That means AP was not a story of total solo collapse. It was a story of instability. In every AP pair, at least two of the six solo attempts failed the strict standard, while Holo solved both siblings. One pair showed complete six-of-six solo collapse.
 
 The cost was higher than the first 20-pair HoloVerify family. Holo used 414,016 tokens versus 146,061 for the solo one-shot baseline, or about 2.84x the solo budget. That cost delta is part of the finding: governed verification buys reliability by spending more work at the action boundary.
 

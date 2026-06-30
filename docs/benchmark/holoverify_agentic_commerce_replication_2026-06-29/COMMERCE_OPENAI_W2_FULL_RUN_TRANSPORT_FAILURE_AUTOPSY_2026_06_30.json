@@ -1,0 +1,48 @@
+{
+  "classification": "COMMERCE_OPENAI_W2_FULL_RUN_TRANSPORT_FAILURE_AUTOPSY_NO_PROVIDER",
+  "created_at": "2026-06-30T00:00:00Z",
+  "invalid_run_preserved": true,
+  "run_dir": "docs/benchmark/holoverify_agentic_commerce_replication_2026-06-29/holo_live_runs_openai_w2/run_20260630T032421Z",
+  "provider_calls_completed": 122,
+  "expected_provider_calls": 200,
+  "worker_calls_completed": 73,
+  "gov_calls_completed": 49,
+  "completed_pairs_before_failure": 12,
+  "root_failure": {
+    "turn_id": "HV-ACOM-REP-013-A_G1",
+    "packet_id": "HV-ACOM-REP-013-A",
+    "pair_id": "HV-ACOM-REP-013",
+    "call_kind": "gov",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "provider_call_ok": false,
+    "parse_ok": false,
+    "admissible": false,
+    "finish_reason": null,
+    "error": "URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>"
+  },
+  "autopsy_finding": {
+    "not_w3_truncation_recurrence": true,
+    "w3_patch_survived_until_failure": true,
+    "not_holo_verdict_failure": true,
+    "not_gov_contract_failure": true,
+    "actual_class": "provider_transport_dns_resolution_failure",
+    "reporting_bug": "The AP/Commerce summary logic checked Gov parse failure before provider_call_ok, so a Gov-row provider failure was mislabeled as GOV_CONTRACT_OR_TRUNCATION_FAILURE.",
+    "retry_policy_gap": "urllib.error.URLError DNS text such as '[Errno 8] nodename nor servname provided, or not known' was not classified as retryable transport, so bounded retry metadata was not attached."
+  },
+  "patch_scope": {
+    "providers_called": 0,
+    "judges_called": 0,
+    "holo_rerun_started": false,
+    "solo_started": false,
+    "raw_trace_edited": false,
+    "raw_outputs_edited": false,
+    "packet_edits": false,
+    "prompt_edits": false
+  },
+  "patch_plan": {
+    "transport_classifier": "Classify DNS-resolution URLError markers as DNS_RESOLUTION_ERROR and retryable under the pre-registered transport policy.",
+    "summary_precedence": "Provider-call failure takes precedence over Gov parse/contract failure in invalidation_reason.",
+    "family_reporting": "Future Commerce summaries use COMMERCE classification instead of stale AP classification."
+  }
+}

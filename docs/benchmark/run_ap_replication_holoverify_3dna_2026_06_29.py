@@ -722,6 +722,14 @@ def validate_lock(lock_path: Path) -> dict[str, Any]:
     }
 
 
+def _family_classification_slug() -> str:
+    if AP_FAMILY_ID == "HV-ACOM-REP-2026-06-29":
+        return "COMMERCE"
+    if AP_FAMILY_ID == "HV-ITAC-REP-2026-06-29":
+        return "IT_ACCESS"
+    return "AP"
+
+
 def holo_summary(run_dir: Path, manifest: dict[str, Any], packet_results: list[dict[str, Any]], trace_path: Path) -> dict[str, Any]:
     rows = trace_rows(trace_path)
     totals = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
@@ -783,10 +791,10 @@ def holo_summary(run_dir: Path, manifest: dict[str, Any], packet_results: list[d
     ]
     terminal_failures = RUNNER._terminal_call_failures(rows)
     root_failure = terminal_failures[0] if terminal_failures else None
-    if root_failure and root_failure.get("call_kind") == "gov" and root_failure.get("parse_ok") is not True:
-        invalidation_reason = "GOV_CONTRACT_OR_TRUNCATION_FAILURE"
-    elif root_failure and root_failure.get("provider_call_ok") is not True:
+    if root_failure and root_failure.get("provider_call_ok") is not True:
         invalidation_reason = "PROVIDER_FAILURE"
+    elif root_failure and root_failure.get("call_kind") == "gov" and root_failure.get("parse_ok") is not True:
+        invalidation_reason = "GOV_CONTRACT_OR_TRUNCATION_FAILURE"
     elif len(rows) != 200:
         invalidation_reason = "INCOMPLETE_TRACE"
     elif packet_correct != 40 or valid_pairs != 20:
@@ -816,7 +824,9 @@ def holo_summary(run_dir: Path, manifest: dict[str, Any], packet_results: list[d
         and law_validation.official_valid
     )
     summary = {
-        "classification": "HOLOVERIFY_AP_REPLICATION_HOLO_COMPLETE" if readiness else "HOLOVERIFY_AP_REPLICATION_HOLO_INVALID_OR_INCOMPLETE",
+        "classification": f"HOLOVERIFY_{_family_classification_slug()}_REPLICATION_HOLO_COMPLETE"
+        if readiness
+        else f"HOLOVERIFY_{_family_classification_slug()}_REPLICATION_HOLO_INVALID_OR_INCOMPLETE",
         "readiness_passed": readiness,
         "run_dir": str(run_dir),
         "family_id": AP_FAMILY_ID,

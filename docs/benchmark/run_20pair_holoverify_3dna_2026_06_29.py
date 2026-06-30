@@ -551,13 +551,34 @@ def _classify_transport_exception(exc: BaseException) -> dict[str, Any] | None:
     if isinstance(exc, urllib.error.URLError):
         reason = getattr(exc, "reason", exc)
         reason_text = str(reason).lower()
+        dns_markers = (
+            "nodename nor servname provided",
+            "name or service not known",
+            "temporary failure in name resolution",
+            "getaddrinfo failed",
+            "no address associated with hostname",
+            "errno 8",
+            "gaierror",
+        )
         retryable = any(
             marker in reason_text
-            for marker in ("timed out", "timeout", "temporarily unavailable", "connection reset", "network is unreachable")
+            for marker in (
+                "timed out",
+                "timeout",
+                "temporarily unavailable",
+                "connection reset",
+                "network is unreachable",
+                *dns_markers,
+            )
         )
+        failure_class = "TRANSIENT_NETWORK_ERROR"
+        if "timed out" in reason_text or "timeout" in reason_text:
+            failure_class = "READ_TIMEOUT"
+        elif any(marker in reason_text for marker in dns_markers):
+            failure_class = "DNS_RESOLUTION_ERROR"
         return {
             "retryable": retryable,
-            "class": "READ_TIMEOUT" if "timed out" in reason_text or "timeout" in reason_text else "TRANSIENT_NETWORK_ERROR",
+            "class": failure_class,
             "message": str(exc),
         }
     return None

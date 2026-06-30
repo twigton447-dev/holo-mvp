@@ -249,6 +249,58 @@ def test_invalid_summary_without_architecture_lock_passes() -> None:
             raise AssertionError("summary Markdown was not written")
 
 
+def test_gov_provider_failure_summary_precedes_gov_contract_failure() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        run_dir = Path(tmp)
+        trace_path = run_dir / "TRACE_CALLS.jsonl"
+        row = {
+            "turn_id": "HV-ACOM-REP-013-A_G1",
+            "packet_id": "HV-ACOM-REP-013-A",
+            "pair_id": "HV-ACOM-REP-013",
+            "call_kind": "gov",
+            "provider": "minimax",
+            "model": "MiniMax-M2.5-highspeed",
+            "dna": "minimax",
+            "gov_index": 1,
+            "provider_call_ok": False,
+            "parse_ok": False,
+            "admissible": False,
+            "finish_reason": None,
+            "error": "URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>",
+            "received_gate_result": True,
+        }
+        trace_path.write_text(json.dumps(row, sort_keys=True) + "\n")
+        manifest = {
+            "root_signature": "fixture-root",
+            "model_roster_declared": {
+                "worker_sequence": [
+                    {"worker_index": 1, "provider": "xai", "model": "grok-3-mini", "dna": "xai"},
+                    {"worker_index": 2, "provider": "openai", "model": "gpt-5.4-mini", "dna": "openai"},
+                    {"worker_index": 3, "provider": "minimax", "model": "MiniMax-M2.5-highspeed", "dna": "minimax"},
+                ],
+                "gov_sequence": [
+                    {"slot": "G1", "provider": "minimax", "model": "MiniMax-M2.5-highspeed", "dna": "minimax"},
+                    {"slot": "G2", "provider": "minimax", "model": "MiniMax-M2.5-highspeed", "dna": "minimax"},
+                ],
+            },
+            "expected_counts": {"holo_calls": 200, "packets": 40, "judge_calls": 0},
+        }
+        original_family = AP.AP_FAMILY_ID
+        try:
+            AP.AP_FAMILY_ID = "HV-ACOM-REP-2026-06-29"
+            summary = AP.holo_summary(run_dir, manifest, [], trace_path)
+        finally:
+            AP.AP_FAMILY_ID = original_family
+        if summary["readiness_passed"] is not False:
+            raise AssertionError("invalid fixture summary should not pass readiness")
+        if summary["invalidation_reason"] != "PROVIDER_FAILURE":
+            raise AssertionError(summary["invalidation_reason"])
+        if summary["classification"] != "HOLOVERIFY_COMMERCE_REPLICATION_HOLO_INVALID_OR_INCOMPLETE":
+            raise AssertionError(summary["classification"])
+        if summary["root_failure"]["turn_id"] != "HV-ACOM-REP-013-A_G1":
+            raise AssertionError(summary["root_failure"])
+
+
 def test_retry_classifies_transport_only() -> None:
     retryable_http = urllib.error.HTTPError(
         "https://example.invalid",
@@ -275,6 +327,12 @@ def test_retry_classifies_transport_only() -> None:
     timeout = RUNNER._classify_transport_exception(TimeoutError("The read operation timed out"))
     assert timeout and timeout["retryable"] is True
     assert timeout["class"] == "READ_TIMEOUT"
+
+    dns_failure = RUNNER._classify_transport_exception(
+        urllib.error.URLError(OSError(8, "nodename nor servname provided, or not known"))
+    )
+    assert dns_failure and dns_failure["retryable"] is True
+    assert dns_failure["class"] == "DNS_RESOLUTION_ERROR"
 
     content_failure = RUNNER._classify_transport_exception(ValueError("gov_empty_text"))
     if content_failure is not None:
@@ -305,6 +363,33 @@ def test_transport_retry_success_marks_recovered() -> None:
     if response["transport_recovered"] is not True:
         raise AssertionError(response)
     if response["transport_retry_failures"][0]["class"] != "READ_TIMEOUT":
+        raise AssertionError(response)
+
+
+def test_transport_retry_dns_success_marks_recovered() -> None:
+    calls = {"count": 0}
+    original_sleep = RUNNER._transport_sleep
+    RUNNER._transport_sleep = lambda _seconds: None
+    try:
+        def call_once() -> dict[str, object]:
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise urllib.error.URLError(OSError(8, "nodename nor servname provided, or not known"))
+            return {"text": "OK", "finish_reason": "stop"}
+
+        response = RUNNER._call_with_transport_retry(
+            call_once,
+            provider="minimax",
+            model="MiniMax-M2.5-highspeed",
+            timeout_seconds=150,
+        )
+    finally:
+        RUNNER._transport_sleep = original_sleep
+    if response["transport_attempt_count"] != 2:
+        raise AssertionError(response)
+    if response["transport_recovered"] is not True:
+        raise AssertionError(response)
+    if response["transport_retry_failures"][0]["class"] != "DNS_RESOLUTION_ERROR":
         raise AssertionError(response)
 
 
@@ -619,8 +704,10 @@ def test_no_packet_or_prompt_hash_mutation() -> None:
     test_gov_v2_finish_reason_length_invalid()
     test_gov_v2_json_or_quotes_invalid()
     test_gov_v2_markdown_invalid()
+    test_gov_provider_failure_summary_precedes_gov_contract_failure()
     test_retry_classifies_transport_only()
     test_transport_retry_success_marks_recovered()
+    test_transport_retry_dns_success_marks_recovered()
     test_transport_retry_exhaustion_fails_closed()
     test_empty_worker_response_classifier_is_narrow()
     test_empty_worker_output_retry_success_marks_recovered()
@@ -651,8 +738,10 @@ def main() -> None:
         test_gov_v2_json_or_quotes_invalid,
         test_gov_v2_markdown_invalid,
         test_invalid_summary_without_architecture_lock_passes,
+        test_gov_provider_failure_summary_precedes_gov_contract_failure,
         test_retry_classifies_transport_only,
         test_transport_retry_success_marks_recovered,
+        test_transport_retry_dns_success_marks_recovered,
         test_transport_retry_exhaustion_fails_closed,
         test_empty_worker_response_classifier_is_narrow,
         test_empty_worker_output_retry_success_marks_recovered,

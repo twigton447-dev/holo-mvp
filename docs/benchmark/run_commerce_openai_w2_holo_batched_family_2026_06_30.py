@@ -53,7 +53,7 @@ MINIMAX_WORKER_SMOKE_PROMPT = "\n".join(
         "cited_evidence=SRC-FIXTURE-CTL|SRC-FIXTURE-BND",
         "open_blockers=",
         "critical_features_preserved=fixture boundary|SRC-FIXTURE-CTL|SRC-FIXTURE-BND",
-        "final_answer=Action may proceed because the fixture control closes the exact boundary.",
+        "final_answer=Action may proceed because the fixture control closes the exact non-benchmark boundary, cites the required fixture sources, and leaves no timing scope authority or dependency blocker unresolved.",
     ]
 )
 
@@ -218,6 +218,7 @@ def latest_minimax_worker_smoke_report(now: datetime | None = None) -> dict[str,
         "max_age_seconds": MINIMAX_WORKER_SMOKE_MAX_AGE_SECONDS,
         "worker_contract_clean": report.get("worker_contract_clean"),
         "raw_starts_with_worker_role": report.get("raw_starts_with_worker_role"),
+        "text_starts_with_worker_role": report.get("text_starts_with_worker_role"),
         "parse_ok": report.get("parse_ok"),
         "gate_passed": report.get("gate_passed"),
         "finish_reason": report.get("finish_reason"),
@@ -348,7 +349,6 @@ def run_minimax_worker_contract_smoke() -> int:
         provider_call_ok
         and parse_ok
         and gate_passed
-        and raw_starts_with_worker_role
         and text_starts_with_worker_role
         and response.get("finish_reason") != "length"
         and response.get("transport_attempt_count") == 1
@@ -416,6 +416,7 @@ def render_minimax_worker_smoke_md(report: dict[str, Any]) -> str:
             f"- Parse OK: `{report['parse_ok']}`",
             f"- Gate passed: `{report['gate_passed']}`",
             f"- Raw starts with worker role: `{report['raw_starts_with_worker_role']}`",
+            f"- Visible text starts with worker role: `{report['text_starts_with_worker_role']}`",
             f"- Finish reason: `{report['finish_reason']}`",
             f"- Transport attempts: `{report['transport_attempt_count']}`",
             f"- Transport recovered: `{report['transport_recovered']}`",

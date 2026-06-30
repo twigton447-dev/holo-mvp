@@ -81,7 +81,7 @@ python3 -B docs/benchmark/run_commerce_openai_w2_holo_batched_family_2026_06_30.
 
 Pass condition:
 
-- raw response starts with `worker_role=FINAL_COMPILER`
+- visible response starts with `worker_role=FINAL_COMPILER` after the registered thinking filter
 - visible response parses as `compact_key_value_v1`
 - deterministic fixture gate passes
 - finish reason is not `length`

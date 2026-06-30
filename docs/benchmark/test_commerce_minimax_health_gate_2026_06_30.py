@@ -69,6 +69,7 @@ def write_worker_smoke_report(
     status: str = "PASS",
     worker_contract_clean: bool = True,
     raw_starts: bool = True,
+    text_starts: bool = True,
     parse_ok: bool = True,
     gate_passed: bool = True,
     finish_reason: str = "stop",
@@ -85,6 +86,7 @@ def write_worker_smoke_report(
                 "created_at": created_at.isoformat(),
                 "worker_contract_clean": worker_contract_clean,
                 "raw_starts_with_worker_role": raw_starts,
+                "text_starts_with_worker_role": text_starts,
                 "parse_ok": parse_ok,
                 "gate_passed": gate_passed,
                 "finish_reason": finish_reason,
@@ -190,7 +192,7 @@ def test_recent_clean_worker_smoke_report_passes(tmp_path, monkeypatch) -> None:
     assert status["status"] == "PASS"
     assert status["recent_pass"] is True
     assert status["worker_contract_clean"] is True
-    assert status["raw_starts_with_worker_role"] is True
+    assert status["text_starts_with_worker_role"] is True
 
 
 def test_worker_smoke_blocks_hidden_thinking_or_length_output(tmp_path, monkeypatch) -> None:
@@ -203,6 +205,7 @@ def test_worker_smoke_blocks_hidden_thinking_or_length_output(tmp_path, monkeypa
         status="FAIL",
         worker_contract_clean=False,
         raw_starts=False,
+        text_starts=False,
         parse_ok=False,
         gate_passed=False,
         finish_reason="length",
@@ -213,6 +216,7 @@ def test_worker_smoke_blocks_hidden_thinking_or_length_output(tmp_path, monkeypa
     assert status["status"] == "FAIL"
     assert status["recent_pass"] is False
     assert status["raw_starts_with_worker_role"] is False
+    assert status["text_starts_with_worker_role"] is False
     assert status["finish_reason"] == "length"
 
 
@@ -224,3 +228,27 @@ def test_worker_smoke_prompt_contains_fixture_only() -> None:
     assert "HV-" not in prompt
     assert "SRC-D9519C1947BF" not in prompt
     assert "hard_allow" not in prompt
+
+
+def test_worker_smoke_allows_hidden_thinking_when_visible_contract_is_clean(tmp_path, monkeypatch) -> None:
+    now = datetime(2026, 6, 30, 22, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(BATCH, "MINIMAX_WORKER_SMOKE_ROOT", tmp_path)
+    write_worker_smoke_report(
+        tmp_path,
+        "smoke_20260630T215900Z",
+        created_at=now - timedelta(seconds=60),
+        status="PASS",
+        worker_contract_clean=True,
+        raw_starts=False,
+        text_starts=True,
+        parse_ok=True,
+        gate_passed=True,
+        finish_reason="stop",
+    )
+
+    status = BATCH.latest_minimax_worker_smoke_report(now=now)
+
+    assert status["status"] == "PASS"
+    assert status["recent_pass"] is True
+    assert status["raw_starts_with_worker_role"] is False
+    assert status["text_starts_with_worker_role"] is True

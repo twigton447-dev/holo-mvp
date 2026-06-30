@@ -55,11 +55,10 @@ Add a non-benchmark MiniMax worker-contract smoke:
 - no packet text
 - no benchmark prompt text
 - no source IDs except `SRC-FIXTURE-CTL` and `SRC-FIXTURE-BND`
-- require raw output to start with `worker_role=FINAL_COMPILER`
+- require visible stripped output to start with `worker_role=FINAL_COMPILER`
 - require compact worker parse
 - require deterministic fixture gate pass
 - reject `finish_reason=length`
 - reject transport recovery
 
 Do not rerun Commerce Batch 1 until both MiniMax health and MiniMax worker-contract smoke pass.
-

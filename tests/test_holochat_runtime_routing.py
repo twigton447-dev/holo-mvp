@@ -78,6 +78,11 @@ class FakeGovernor:
         ]
 
 
+class TenorGovernor(FakeGovernor):
+    def assess_tenor(self, history, capsule_context, **kwargs):
+        return "Stay personal, sharp, and specific; preserve the Holo voice."
+
+
 class FakeBrain:
     def __init__(self):
         self.saved_artifacts = []
@@ -433,6 +438,15 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["gov_arc_state_mode"] == "active_prompt"
     assert result["runtime"]["gov_arc_state"]["current_topic"] == "Stay mini."
     assert result["runtime"]["gov_arc_state"]["next_paths"] == result["conversation_paths"]
+    voice = result["runtime"]["holo_voice_diagnostics"]
+    assert voice["status"] == "attention"
+    assert voice["selected_analyst"] == {"provider": "openai", "model": "gpt-4o-mini"}
+    assert voice["capsule_attached"] is False
+    assert "capsule_not_attached" in voice["risk_flags"]
+    assert "captain_brief_absent" in voice["risk_flags"]
+    assert voice["block_presence"]["runtime_identity"] is True
+    assert voice["block_presence"]["holo_state_object"] is True
+    assert voice["block_presence"]["gov_arc_state"] is True
     assert result["usage"] == result["runtime"]["usage"]
     usage = result["runtime"]["usage"]
     assert usage["input_token_estimate"] == result["context_budget"]["total_token_estimate"]
@@ -482,7 +496,7 @@ def test_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
     engine._bench = []
-    engine._governor = FakeGovernor()
+    engine._governor = TenorGovernor()
     engine._brain = FakeBrain()
     engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
     engine._holo_router = None
@@ -536,7 +550,7 @@ def test_streaming_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypat
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
     engine._bench = []
-    engine._governor = FakeGovernor()
+    engine._governor = TenorGovernor()
     engine._brain = FakeBrain()
     engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
     engine._holo_router = None
@@ -757,7 +771,7 @@ def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeyp
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
     engine._bench = []
-    engine._governor = FakeGovernor()
+    engine._governor = TenorGovernor()
     engine._brain = MemoryHeavyBrain()
     engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
     engine._holo_router = None
@@ -788,6 +802,16 @@ def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeyp
     assert result["runtime"]["rolling_summary_mode"] == "active_prompt_sliding_window"
     assert result["runtime"]["continuity_ledger_mode"] == "active_prompt_structured_private"
     assert result["runtime"]["analyst_receives_full_memory"] is False
+    voice = result["runtime"]["holo_voice_diagnostics"]
+    assert voice["capsule_attached"] is True
+    assert voice["capsule_context_count"] == 31
+    assert voice["selected_gov_context_count"] == 16
+    assert voice["life_context_count"] == 30
+    assert voice["captain_brief_present"] is True
+    assert voice["block_presence"]["runtime_identity"] is True
+    assert voice["block_presence"]["holo_state_object"] is True
+    assert voice["block_presence"]["capsule_context"] is True
+    assert "captain_brief_absent" not in voice["risk_flags"]
 
 
 def test_second_turn_prompt_includes_private_continuity_ledger(monkeypatch):

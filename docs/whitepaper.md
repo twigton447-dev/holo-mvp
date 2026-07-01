@@ -1,5 +1,3 @@
-# HoloEngine
-
 ## AI at the Action Boundary
 
 ### Why smart models still need a checkpoint before real-world action
@@ -425,11 +423,11 @@ A **false positive** means Holo says ESCALATE when the action was actually allow
 
 A **false negative** means Holo says ALLOW when the action should have escalated. That is usually the dangerous miss.
 
-The current clean HoloVerify counted sample contains 334 frozen action-boundary packets across 167 sibling pairs: 167 ALLOW truths and 167 ESCALATE truths.
+The current clean HoloVerify counted sample contains 454 frozen action-boundary packets across 227 sibling pairs: 227 ALLOW truths and 227 ESCALATE truths.
 
-HoloVerify produced zero observed false positives and zero observed false negatives across those 334 packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
+HoloVerify produced zero observed false positives and zero observed false negatives across those 454 packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
 
-The exact one-sided 95% upper bound on overall packet error is 0.893%. The side-specific upper bounds on false positives and false negatives are 1.778% each, because each side currently has 167 examples.
+The exact one-sided 95% upper bound on overall packet error is 0.658%. The Wilson 95% upper bound is 0.839%. The side-specific upper bounds on false positives and false negatives are 1.311% exact and 1.664% Wilson, because each side currently has 227 examples.
 
 That phrase sounds more complicated than it is. It means:
 
@@ -437,7 +435,9 @@ That phrase sounds more complicated than it is. It means:
 
 Plainly:
 
-> We saw zero errors in 334 counted packets. That does not prove zero risk. It means the upper risk bound is now measured instead of guessed.
+> We saw zero errors in 454 counted packets. That does not prove zero risk. It means the upper risk bound is now measured instead of guessed.
+
+Plain English: this moved the benchmark from roughly under 1.14% packet-level Wilson risk to roughly under 0.84% packet-level Wilson risk.
 
 That is why the benchmark reports confidence bands, not only the observed score.
 
@@ -455,12 +455,12 @@ The confusion matrix is simple:
 
 | Actual / predicted | ESCALATE | ALLOW |
 | --- | ---: | ---: |
-| Actual ESCALATE | Correctly escalated = 167 | Missed escalation = 0 |
-| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 167 |
+| Actual ESCALATE | Correctly escalated = 227 | Missed escalation = 0 |
+| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 227 |
 
 That is the clean headline:
 
-> Zero observed false-positive or false-negative errors across 334 frozen action-boundary packets, with measured statistical uncertainty.
+> Zero observed false-positive or false-negative errors across 454 frozen action-boundary packets, with measured statistical uncertainty.
 
 ### The same models alone
 
@@ -551,9 +551,9 @@ This is not a completed 20-pair Commerce family. It should be read as locked can
 
 The next frozen packet bank is Wave5: seven domains, 140 sibling pairs, and 280 packets. The domains include clinical medication activation, treasury wire movement, legal and regulatory filing, cloud destructive admin controls, security operations, public sector citizen records, and industrial / utility safety controls.
 
-If Wave5 completes cleanly, the benchmark-grade denominator moves from 334 packets to 614 packets. The side-specific ALLOW and ESCALATE counts move from 167 each to 307 each.
+If the remaining 16 Wave5 batches complete cleanly, the benchmark-grade denominator moves from 454 packets to 614 packets. The side-specific ALLOW and ESCALATE counts move from 227 each to 307 each.
 
-That would lower the exact 95% upper bound on packet-level error from 0.893% to about 0.487%, and lower the side-specific false-positive and false-negative upper bound from 1.778% to about 0.971%.
+That would lower the exact 95% upper bound on packet-level error from 0.658% to about 0.487%, and lower the side-specific false-positive and false-negative upper bound from 1.311% to about 0.971%.
 
 That is the right next public threshold:
 

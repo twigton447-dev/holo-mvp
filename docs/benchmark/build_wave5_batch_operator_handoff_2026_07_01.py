@@ -33,9 +33,29 @@ def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def refresh_batch_from_live_preflight(batch: dict[str, Any]) -> dict[str, Any]:
+    refreshed = dict(batch)
+    live_preflight_ref = refreshed.get("live_preflight_ref")
+    if not live_preflight_ref:
+        return refreshed
+    live_preflight_path = REPO_ROOT / live_preflight_ref
+    if not live_preflight_path.exists():
+        return refreshed
+    live_preflight = load_json(live_preflight_path)
+    approval_sha = live_preflight.get("provider_approval_packet_sha256")
+    run_command = live_preflight.get("run_command_after_explicit_approval")
+    if approval_sha:
+        refreshed["approval_packet_sha256"] = approval_sha
+    if run_command:
+        refreshed["run_command_after_explicit_approval"] = run_command
+    refreshed["live_preflight_root_signature"] = live_preflight.get("root_signature")
+    refreshed["live_preflight_current_head"] = live_preflight.get("architecture_lock", {}).get("current_head_at_preflight")
+    return refreshed
+
+
 def build() -> dict[str, Any]:
     preflight = load_json(PREFLIGHT_JSON)
-    batches = preflight["batches"]
+    batches = [refresh_batch_from_live_preflight(batch) for batch in preflight["batches"]]
     if preflight["status"] != "PASS":
         raise RuntimeError(f"wave5_preflight_not_pass:{preflight.get('status')}")
     if preflight["totals"]["providers_called_during_preflight"] != 0:

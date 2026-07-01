@@ -44,17 +44,41 @@ def result_path_for_run(run: dict[str, Any]) -> Path:
     return REPO_ROOT / run["run_dir"] / "live_results.json"
 
 
+def clean_runs_for_batch(batch: dict[str, Any]) -> list[dict[str, Any]]:
+    return [run for run in batch["runs"] if run.get("readiness_passed") is True]
+
+
 def completed_result_for_batch(batch: dict[str, Any]) -> dict[str, Any] | None:
     clean_runs = [run for run in batch["runs"] if run.get("readiness_passed") is True]
-    if len(clean_runs) != 1:
+    if not clean_runs:
         return None
-    path = result_path_for_run(clean_runs[0])
+    # If an operator accidentally runs the same batch twice and both runs are
+    # clean, preserve both traces but count only the latest clean run.
+    path = result_path_for_run(clean_runs[-1])
     if not path.exists():
-        raise RuntimeError(f"completed_run_missing_live_results:{clean_runs[0]['run_dir']}")
+        raise RuntimeError(f"completed_run_missing_live_results:{clean_runs[-1]['run_dir']}")
     result = load_json(path)
     if result.get("readiness_passed") is not True:
         raise RuntimeError(f"completed_run_not_ready:{path}")
     return result
+
+
+def duplicate_clean_run_refs(batches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    refs = []
+    for batch in batches:
+        clean_runs = clean_runs_for_batch(batch)
+        if len(clean_runs) <= 1:
+            continue
+        refs.append(
+            {
+                "batch_id": batch["batch_id"],
+                "family_id": batch["family_id"],
+                "canonical_counted_run": clean_runs[-1]["run_dir"],
+                "preserved_non_counted_runs": [run["run_dir"] for run in clean_runs[:-1]],
+                "clean_run_count": len(clean_runs),
+            }
+        )
+    return refs
 
 
 def verdict_bucket_counts(results: list[dict[str, Any]]) -> dict[str, int]:
@@ -132,6 +156,7 @@ def build() -> dict[str, Any]:
     completed_batches = [row for row in batches if row["status"] == "COMPLETE"]
     completed_results = [completed_result_for_batch(row) for row in completed_batches]
     completed_results = [row for row in completed_results if row is not None]
+    duplicate_clean_runs = duplicate_clean_run_refs(completed_batches)
 
     token_totals = aggregate_tokens(completed_results)
     verdict_counts = verdict_bucket_counts(completed_results)
@@ -150,6 +175,7 @@ def build() -> dict[str, Any]:
         "no_judge_calls": all(int(result.get("judge_calls") or 0) == 0 for result in completed_results),
         "all_completed_batches_ready": all(result.get("readiness_passed") is True for result in completed_results),
         "all_completed_packets_correct": completed_correct == completed_packets,
+        "duplicate_clean_runs_preserved_and_not_counted": True,
     }
     if not completed_results:
         checks["provider_calls_match_completed_expectation"] = expected_provider_calls == 0 and observed_provider_calls == 0
@@ -199,6 +225,10 @@ def build() -> dict[str, Any]:
             ),
             **token_totals,
             **verdict_counts,
+            "duplicate_clean_run_batches": len(duplicate_clean_runs),
+            "preserved_non_counted_clean_runs": sum(
+                len(row["preserved_non_counted_runs"]) for row in duplicate_clean_runs
+            ),
         },
         "next_allowed_batch": ledger.get("next_allowed_batch") if not invalid_batches else None,
         "invalid_batches": [
@@ -211,6 +241,7 @@ def build() -> dict[str, Any]:
             for row in invalid_batches
         ],
         "completed_run_refs": run_refs(completed_results),
+        "duplicate_clean_runs": duplicate_clean_runs,
     }
     return report
 
@@ -247,6 +278,21 @@ def render_md(report: dict[str, Any]) -> str:
             )
     else:
         lines.append("No Wave5 live batch has completed yet. This file is readiness scaffolding, not benchmark evidence.")
+    lines.extend(["", "## Duplicate Clean Runs Preserved", ""])
+    if report["duplicate_clean_runs"]:
+        lines.extend(
+            [
+                "| Batch | Counted run | Preserved non-counted runs |",
+                "| --- | --- | --- |",
+            ]
+        )
+        for row in report["duplicate_clean_runs"]:
+            lines.append(
+                f"| `{row['batch_id']}` | `{row['canonical_counted_run']}` | "
+                f"`{', '.join(row['preserved_non_counted_runs'])}` |"
+            )
+    else:
+        lines.append("No duplicate clean runs were found.")
     lines.extend(["", "## Next Allowed Batch", ""])
     next_batch = report.get("next_allowed_batch")
     if next_batch:

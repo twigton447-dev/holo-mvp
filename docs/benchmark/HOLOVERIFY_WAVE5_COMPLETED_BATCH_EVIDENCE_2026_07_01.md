@@ -4,7 +4,7 @@ Status: `PASS`
 Evidence state: `PARTIAL_CLEAN_EVIDENCE`
 Source ledger queue state: `READY_FOR_NEXT_BATCH`
 Source ledger builder SHA-256: `fbf47676e8de1d59fe685a7128e46523eac964eeea499187bb23f4c37d38ca03`
-Collector script SHA-256: `d2721c6d4e1fbdfe9f60862eea7566071008b9620d1a737c7d98843fc015a983`
+Collector script SHA-256: `f26a0aa65ebb1d1474311558963bcdf7ff9ad5e1266641ffbf4d3f633f84abd5`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 
 ## Claim Boundary
@@ -18,25 +18,27 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 ## Totals
 
 - `total_batches`: `28`
-- `completed_batches`: `10`
-- `not_started_batches`: `18`
+- `completed_batches`: `11`
+- `not_started_batches`: `17`
 - `invalid_batches`: `0`
-- `completed_pairs`: `50`
-- `completed_packets`: `100`
-- `completed_correct_packets`: `100`
-- `expected_provider_calls_for_completed_batches`: `500`
-- `observed_provider_calls_for_completed_batches`: `500`
+- `completed_pairs`: `55`
+- `completed_packets`: `110`
+- `completed_correct_packets`: `110`
+- `expected_provider_calls_for_completed_batches`: `550`
+- `observed_provider_calls_for_completed_batches`: `550`
 - `judge_calls`: `0`
 - `transport_recovered_call_count`: `0`
-- `input_tokens`: `871699`
-- `output_tokens`: `169874`
-- `total_tokens`: `1108745`
-- `allow_packets`: `50`
-- `escalate_packets`: `50`
-- `allow_correct`: `50`
-- `escalate_correct`: `50`
-- `target_packets`: `50`
-- `guardrail_packets`: `50`
+- `input_tokens`: `958185`
+- `output_tokens`: `187356`
+- `total_tokens`: `1219793`
+- `allow_packets`: `55`
+- `escalate_packets`: `55`
+- `allow_correct`: `55`
+- `escalate_correct`: `55`
+- `target_packets`: `55`
+- `guardrail_packets`: `55`
+- `duplicate_clean_run_batches`: `1`
+- `preserved_non_counted_clean_runs`: `1`
 
 ## Checks
 
@@ -50,6 +52,7 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 | `no_judge_calls` | `True` |
 | `all_completed_batches_ready` | `True` |
 | `all_completed_packets_correct` | `True` |
+| `duplicate_clean_runs_preserved_and_not_counted` | `True` |
 
 ## Completed Runs
 
@@ -65,13 +68,20 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 | `WAVE5_TRES_HOLO_BATCH_004` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_tres_holo_batch_004/live_runs/run_20260701T203759Z` | `50` | `10` | `10` | `5` |
 | `WAVE5_LREG_HOLO_BATCH_001` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_lreg_holo_batch_001/live_runs/run_20260701T204454Z` | `50` | `10` | `10` | `5` |
 | `WAVE5_LREG_HOLO_BATCH_002` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_lreg_holo_batch_002/live_runs/run_20260701T205533Z` | `50` | `10` | `10` | `5` |
+| `WAVE5_LREG_HOLO_BATCH_003` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_lreg_holo_batch_003/live_runs/run_20260701T210956Z` | `50` | `10` | `10` | `5` |
+
+## Duplicate Clean Runs Preserved
+
+| Batch | Counted run | Preserved non-counted runs |
+| --- | --- | --- |
+| `WAVE5_LREG_HOLO_BATCH_003` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_lreg_holo_batch_003/live_runs/run_20260701T210956Z` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_lreg_holo_batch_003/live_runs/run_20260701T210231Z` |
 
 ## Next Allowed Batch
 
-- Batch: `WAVE5_LREG_HOLO_BATCH_003`
+- Batch: `WAVE5_LREG_HOLO_BATCH_004`
 - Family: `HV-LREG-REP-2026-07-01`
-- Approval SHA: `a76861940b67ecadc6737b56d680890b9c83e9b07a9d7b09ad3c41ce0e8b1189`
+- Approval SHA: `a5f2bdd590ea7a0b4f4dfaf6baec8c344e28558de2419fff30f4a41f28412620`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-LREG-REP-2026-07-01 --batch-number 3 --run-live --approval-packet-sha256 a76861940b67ecadc6737b56d680890b9c83e9b07a9d7b09ad3c41ce0e8b1189 --approval-statement "I explicitly approve provider calls for WAVE5_LREG_HOLO_BATCH_003 only, exactly as scoped in WAVE5_LREG_HOLO_BATCH_003_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-LREG-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 a5f2bdd590ea7a0b4f4dfaf6baec8c344e28558de2419fff30f4a41f28412620 --approval-statement "I explicitly approve provider calls for WAVE5_LREG_HOLO_BATCH_004 only, exactly as scoped in WAVE5_LREG_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```

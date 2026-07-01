@@ -4,7 +4,7 @@ Status: `PASS`
 Post-batch state: `READY_FOR_NEXT_BATCH`
 Provider calls by this audit: `0`
 Judge calls by this audit: `0`
-Wave5 live run folders: `10`
+Wave5 live run folders: `12`
 
 ## Recommended Action
 
@@ -16,47 +16,49 @@ Run exactly the next allowed batch if provider calls are explicitly approved.
 
 - `batches`: `28`
 - `complete_with_prior_invalid_batches`: `0`
-- `completed_batches`: `10`
-- `completed_packets`: `100`
-- `completed_pairs`: `50`
-- `expected_provider_calls_for_completed_batches`: `500`
+- `completed_batches`: `11`
+- `completed_packets`: `110`
+- `completed_pairs`: `55`
+- `expected_provider_calls_for_completed_batches`: `550`
 - `invalid_stop_batches`: `0`
 - `judges_called_by_ledger`: `0`
-- `not_started_batches`: `18`
-- `provider_calls_observed`: `500`
+- `not_started_batches`: `17`
+- `provider_calls_observed`: `600`
 - `providers_called_by_ledger`: `0`
 
 ### Completed Evidence
 
-- `allow_correct`: `50`
-- `allow_packets`: `50`
-- `completed_batches`: `10`
-- `completed_correct_packets`: `100`
-- `completed_packets`: `100`
-- `completed_pairs`: `50`
-- `escalate_correct`: `50`
-- `escalate_packets`: `50`
-- `expected_provider_calls_for_completed_batches`: `500`
-- `guardrail_packets`: `50`
-- `input_tokens`: `871699`
+- `allow_correct`: `55`
+- `allow_packets`: `55`
+- `completed_batches`: `11`
+- `completed_correct_packets`: `110`
+- `completed_packets`: `110`
+- `completed_pairs`: `55`
+- `duplicate_clean_run_batches`: `1`
+- `escalate_correct`: `55`
+- `escalate_packets`: `55`
+- `expected_provider_calls_for_completed_batches`: `550`
+- `guardrail_packets`: `55`
+- `input_tokens`: `958185`
 - `invalid_batches`: `0`
 - `judge_calls`: `0`
-- `not_started_batches`: `18`
-- `observed_provider_calls_for_completed_batches`: `500`
-- `output_tokens`: `169874`
-- `target_packets`: `50`
+- `not_started_batches`: `17`
+- `observed_provider_calls_for_completed_batches`: `550`
+- `output_tokens`: `187356`
+- `preserved_non_counted_clean_runs`: `1`
+- `target_packets`: `55`
 - `total_batches`: `28`
-- `total_tokens`: `1108745`
+- `total_tokens`: `1219793`
 - `transport_recovered_call_count`: `0`
 
 ## Next Batch
 
-- Batch: `WAVE5_LREG_HOLO_BATCH_003`
+- Batch: `WAVE5_LREG_HOLO_BATCH_004`
 - Family: `HV-LREG-REP-2026-07-01`
-- Approval SHA: `a76861940b67ecadc6737b56d680890b9c83e9b07a9d7b09ad3c41ce0e8b1189`
+- Approval SHA: `a5f2bdd590ea7a0b4f4dfaf6baec8c344e28558de2419fff30f4a41f28412620`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-LREG-REP-2026-07-01 --batch-number 3 --run-live --approval-packet-sha256 a76861940b67ecadc6737b56d680890b9c83e9b07a9d7b09ad3c41ce0e8b1189 --approval-statement "I explicitly approve provider calls for WAVE5_LREG_HOLO_BATCH_003 only, exactly as scoped in WAVE5_LREG_HOLO_BATCH_003_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-LREG-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 a5f2bdd590ea7a0b4f4dfaf6baec8c344e28558de2419fff30f4a41f28412620 --approval-statement "I explicitly approve provider calls for WAVE5_LREG_HOLO_BATCH_004 only, exactly as scoped in WAVE5_LREG_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Checks

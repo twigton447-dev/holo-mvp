@@ -758,7 +758,48 @@ def render_summary_md(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def completed_live_runs_for_batch(family_id: str, batch_number: int) -> list[dict[str, Any]]:
+    live_root = batch_root(family_id, batch_number) / "live_runs"
+    completed = []
+    if not live_root.exists():
+        return completed
+    for run_dir in sorted(live_root.glob("run_*")):
+        result_path = run_dir / "live_results.json"
+        if not result_path.exists():
+            continue
+        result = load_json(result_path)
+        if result.get("readiness_passed") is True:
+            completed.append(
+                {
+                    "run_id": run_dir.name,
+                    "run_dir": str(run_dir.relative_to(REPO_ROOT)),
+                    "classification": result.get("classification"),
+                    "provider_calls": result.get("provider_calls"),
+                    "packet_count": result.get("packet_count"),
+                    "packet_correct": result.get("packet_correct"),
+                    "valid_pairs": result.get("valid_pairs"),
+                }
+            )
+    return completed
+
+
 def run_live(family_id: str, batch_number: int, approval_statement: str | None, approval_packet_sha256: str | None) -> int:
+    completed_runs = completed_live_runs_for_batch(family_id, batch_number)
+    if completed_runs:
+        report = {
+            "classification": "WAVE5_LIVE_RUN_IDEMPOTENCY_GATE_LOCKED",
+            "status": "BLOCKED",
+            "batch_id": batch_id(family_id, batch_number),
+            "family_id": family_id,
+            "batch_number": batch_number,
+            "provider_calls_by_this_gate": 0,
+            "judge_calls_by_this_gate": 0,
+            "blocked_reason": "batch_already_has_clean_completed_live_run",
+            "completed_live_runs": completed_runs,
+            "next_valid_action": "Do not rerun this batch. Audit and commit the existing clean run, or register a new explicit variant.",
+        }
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 1
     runner = load_wave2_runner()
     configure_runner(runner, family_id, batch_number)
     return runner.run_live(approval_statement, approval_packet_sha256)

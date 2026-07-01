@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the care operator activate the medication or treatment workflow now? Focus: stat CT order execution.",
+    "allow_rule_assessment": "Exact control record closes the boundary",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-EADC47316935-CTL",
+    "escalate_rule_assessment": "No open defect remains in current source records",
+    "timing_scope_authority_dependency_check": "Current physician order and contrast risk clearance match"
+  },
+  "cited_evidence": [
+    "SRC-EADC47316935-CTL",
+    "SRC-EADC47316935-BND",
+    "SRC-EADC47316935-FBK",
+    "SRC-EADC47316935-POL",
+    "SRC-EADC47316935-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "current physician order and contrast risk clearance match",
+    "SRC-EADC47316935-CTL",
+    "SRC-EADC47316935-BND"
+  ],
+  "final_answer": "The action may proceed. The controlling control record (SRC-EADC47316935-CTL) confirms the current physician order and contrast risk clearance match exactly for stat CT order execution. The boundary is closed by current source records, not tone or urgency. No blocker remains in the packet. Execution is allowed under the frozen source-bound policy.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -8,22 +8,22 @@ Judge calls by this status check: `0`
 ## Totals
 
 - `selected_batches`: `28`
-- `run_folders`: `2`
-- `completed_batches`: `2`
-- `not_started_batches`: `26`
+- `run_folders`: `3`
+- `completed_batches`: `3`
+- `not_started_batches`: `25`
 - `invalid_stop_batches`: `0`
 - `in_progress_or_incomplete_batches`: `0`
-- `provider_calls_observed_from_artifacts`: `100`
+- `provider_calls_observed_from_artifacts`: `150`
 
 ## Next Or Blocking Batch
 
-- Batch: `WAVE5_MEDX_HOLO_BATCH_003`
+- Batch: `WAVE5_MEDX_HOLO_BATCH_004`
 - Family: `HV-MEDX-REP-2026-07-01`
 - Status: `NOT_STARTED`
-- Approval SHA: `164cbbce07c402e214b36110865ea49217f5d4f30af3defbd0c8ca0d29b9f07b`
+- Approval SHA: `7fb34b48ae48831fb18451b6211a3ef5f420822a24908659139abe5f63e6ac2d`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 3 --run-live --approval-packet-sha256 164cbbce07c402e214b36110865ea49217f5d4f30af3defbd0c8ca0d29b9f07b --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_003 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_003_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 7fb34b48ae48831fb18451b6211a3ef5f420822a24908659139abe5f63e6ac2d --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_004 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Batch Rows
@@ -32,7 +32,7 @@ python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-
 | --- | --- | --- | --- | --- | --- | --- |
 | `WAVE5_MEDX_HOLO_BATCH_001` | `HV-MEDX-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260701T190553Z` | `50` | `N/A` |
 | `WAVE5_MEDX_HOLO_BATCH_002` | `HV-MEDX-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260701T192304Z` | `50` | `N/A` |
-| `WAVE5_MEDX_HOLO_BATCH_003` | `HV-MEDX-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |
+| `WAVE5_MEDX_HOLO_BATCH_003` | `HV-MEDX-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260701T193310Z` | `50` | `N/A` |
 | `WAVE5_MEDX_HOLO_BATCH_004` | `HV-MEDX-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |
 | `WAVE5_TRES_HOLO_BATCH_001` | `HV-TRES-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |
 | `WAVE5_TRES_HOLO_BATCH_002` | `HV-TRES-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |

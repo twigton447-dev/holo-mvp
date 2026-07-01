@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: bonus release within approved pool and employee eligibility list.",
+    "allow_rule_assessment": "Exact control record closes bonus release boundary.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-AA591441B111-CTL",
+    "escalate_rule_assessment": "Escalate only if exact source evidence is missing.",
+    "timing_scope_authority_dependency_check": "bonus pool|employee eligibility|approver limit match confirmed"
+  },
+  "cited_evidence": [
+    "SRC-AA591441B111-CTL",
+    "SRC-AA591441B111-BND",
+    "SRC-AA591441B111-FBK",
+    "SRC-AA591441B111-POL",
+    "SRC-AA591441B111-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "bonus pool eligibility approver limit match",
+    "SRC-AA591441B111-CTL",
+    "SRC-AA591441B111-BND"
+  ],
+  "final_answer": "Current source records close the exact action boundary. The controlling control record confirms bonus pool, employee eligibility, and approver limit match for this bonus release. Communication tone or sensitive wording does not override the source-control record. HR or payroll may proceed with execution under the frozen Wave 2 policy.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

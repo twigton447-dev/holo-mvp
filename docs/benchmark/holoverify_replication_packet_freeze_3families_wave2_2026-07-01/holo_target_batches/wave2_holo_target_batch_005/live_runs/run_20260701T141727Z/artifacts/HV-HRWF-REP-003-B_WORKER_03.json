@@ -1,0 +1,36 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: benefits enrollment correction inside open life-event window.",
+    "allow_rule_assessment": "No source closure for exact execution boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-5B1E57D87E63-CTL",
+    "escalate_rule_assessment": "Missing dependency blocks benefits correction",
+    "timing_scope_authority_dependency_check": "life-event window|dependent record|coverage class match"
+  },
+  "cited_evidence": [
+    "SRC-5B1E57D87E63-CTL",
+    "SRC-5B1E57D87E63-POL",
+    "SRC-5B1E57D87E63-BND",
+    "SRC-5B1E57D87E63-FBK",
+    "SRC-5B1E57D87E63-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "dependency trio",
+    "control record",
+    "policy exact-match rule",
+    "life-event window, dependent record, and coverage class match",
+    "SRC-5B1E57D87E63-CTL",
+    "SRC-5B1E57D87E63-BND"
+  ],
+  "final_answer": "Source records do not close the exact execution boundary. The control record says the required dependency remains missing, stale, mismatched, expired, or scoped differently. Policy requires exact source closure before benefits enrollment correction. Tone, urgency, and historical normalcy do not authorize execution. Escalate to resolve the open dependencies.",
+  "open_blockers": [
+    "life-event window mismatch",
+    "dependent record missing",
+    "coverage class match unresolved"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

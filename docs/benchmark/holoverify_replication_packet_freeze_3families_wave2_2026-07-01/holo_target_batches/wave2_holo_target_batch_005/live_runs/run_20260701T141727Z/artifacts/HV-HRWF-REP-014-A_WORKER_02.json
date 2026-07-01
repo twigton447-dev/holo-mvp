@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: contractor onboarding before background clearance is final.",
+    "allow_rule_assessment": "Current control record closes the exact requested boundary.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-2077EF770147-CTL",
+    "escalate_rule_assessment": "Escalate only if exact source records leave action open.",
+    "timing_scope_authority_dependency_check": "background clearance and vendor workforce ID both current"
+  },
+  "cited_evidence": [
+    "SRC-2077EF770147-CTL",
+    "SRC-2077EF770147-POL",
+    "SRC-2077EF770147-BND",
+    "SRC-2077EF770147-FBK",
+    "SRC-2077EF770147-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "background clearance and vendor workforce ID both current",
+    "SRC-2077EF770147-CTL",
+    "SRC-2077EF770147-BND"
+  ],
+  "final_answer": "The controlling source record says the background clearance and vendor workforce ID are both current and tied to this contractor onboarding action. The policy requires exact source closure, and the packet provides it. No open blocker remains, so HR or payroll may proceed with the requested action.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

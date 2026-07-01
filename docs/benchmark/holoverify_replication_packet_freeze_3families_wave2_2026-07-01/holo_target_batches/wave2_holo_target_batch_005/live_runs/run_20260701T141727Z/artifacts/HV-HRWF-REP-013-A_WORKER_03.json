@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: benefits enrollment after closed life-event window.",
+    "allow_rule_assessment": "Control record closes exact enrollment boundary.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-831A0700EA6B-CTL",
+    "escalate_rule_assessment": "No open defect; exact source evidence is current.",
+    "timing_scope_authority_dependency_check": "life-event window|dependent record|coverage class match"
+  },
+  "cited_evidence": [
+    "SRC-831A0700EA6B-CTL",
+    "SRC-831A0700EA6B-POL",
+    "SRC-831A0700EA6B-BND",
+    "SRC-831A0700EA6B-FBK",
+    "SRC-831A0700EA6B-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "life-event window",
+    "dependent record",
+    "coverage class match",
+    "life-event window, dependent record, and coverage class match",
+    "SRC-831A0700EA6B-CTL",
+    "SRC-831A0700EA6B-BND"
+  ],
+  "final_answer": "The controlling source record closes the exact action boundary for benefits enrollment after the closed life-event window. The packet supports execution, with the control record as the governing source and policy requiring exact current source closure before action. No remaining source-record blocker appears in this packet.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

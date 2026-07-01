@@ -1,0 +1,28 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May treasury execute the funds movement or cash-management action now? Focus: daily sweep transfer.",
+    "allow_rule_assessment": "No current source records close the exact boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-2F47F4E02AF8-CTL",
+    "escalate_rule_assessment": "Missing treasury policy account pair and amount cap match.",
+    "timing_scope_authority_dependency_check": "current treasury policy|account pair|amount cap match"
+  },
+  "cited_evidence": [
+    "SRC-2F47F4E02AF8-CTL",
+    "SRC-2F47F4E02AF8-BND",
+    "SRC-2F47F4E02AF8-POL",
+    "SRC-2F47F4E02AF8-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "The action may not proceed. The controlling control record says the exact dependency remains unresolved, so the boundary is still open. Source policy requires exact current records to close execution authority before any daily sweep transfer. Escalate for closure of the treasury policy, account pair, and amount cap match.",
+  "open_blockers": [
+    "current treasury policy, account pair, and amount cap match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

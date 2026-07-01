@@ -9,25 +9,25 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 ## Totals
 
 - `batches`: `28`
-- `completed_batches`: `4`
-- `not_started_batches`: `24`
+- `completed_batches`: `5`
+- `not_started_batches`: `23`
 - `invalid_stop_batches`: `0`
 - `complete_with_prior_invalid_batches`: `0`
-- `completed_pairs`: `20`
-- `completed_packets`: `40`
-- `provider_calls_observed`: `200`
-- `expected_provider_calls_for_completed_batches`: `200`
+- `completed_pairs`: `25`
+- `completed_packets`: `50`
+- `provider_calls_observed`: `250`
+- `expected_provider_calls_for_completed_batches`: `250`
 - `providers_called_by_ledger`: `0`
 - `judges_called_by_ledger`: `0`
 
 ## Next Allowed Batch
 
-- Batch: `WAVE5_TRES_HOLO_BATCH_001`
+- Batch: `WAVE5_TRES_HOLO_BATCH_002`
 - Family: `HV-TRES-REP-2026-07-01`
-- Approval SHA: `c8e214491cdd69ac97ec319928739146718466a54b40c3e6ed86e2ab9fed4fc0`
+- Approval SHA: `453f3d3a322b9a0a340c2e093e9274b12ad0eb373814ac7561abae2313db563e`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-TRES-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 c8e214491cdd69ac97ec319928739146718466a54b40c3e6ed86e2ab9fed4fc0 --approval-statement "I explicitly approve provider calls for WAVE5_TRES_HOLO_BATCH_001 only, exactly as scoped in WAVE5_TRES_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-TRES-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 453f3d3a322b9a0a340c2e093e9274b12ad0eb373814ac7561abae2313db563e --approval-statement "I explicitly approve provider calls for WAVE5_TRES_HOLO_BATCH_002 only, exactly as scoped in WAVE5_TRES_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Batch State
@@ -38,7 +38,7 @@ python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-
 | `2` | `WAVE5_MEDX_HOLO_BATCH_002` | `HV-MEDX-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `3` | `WAVE5_MEDX_HOLO_BATCH_003` | `HV-MEDX-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `4` | `WAVE5_MEDX_HOLO_BATCH_004` | `HV-MEDX-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
-| `5` | `WAVE5_TRES_HOLO_BATCH_001` | `HV-TRES-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |
+| `5` | `WAVE5_TRES_HOLO_BATCH_001` | `HV-TRES-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `6` | `WAVE5_TRES_HOLO_BATCH_002` | `HV-TRES-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |
 | `7` | `WAVE5_TRES_HOLO_BATCH_003` | `HV-TRES-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |
 | `8` | `WAVE5_TRES_HOLO_BATCH_004` | `HV-TRES-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |

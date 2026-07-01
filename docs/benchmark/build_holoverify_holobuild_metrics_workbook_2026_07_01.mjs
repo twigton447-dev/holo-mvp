@@ -74,6 +74,7 @@ function dashboardRows(data) {
     "Kit B / Agentic Commerce v1 Registry",
     "Clinical Activation Boundary Controls / Kit C",
     "Vendor-Master Payment Controls / AP Replication",
+    "Wave 2 / HR-Data Privacy-Finance Targeted Holo Runs",
     "Agentic Commerce / Order Execution Replication",
     "Agentic Commerce / All-Six Collapse Canary",
     "IT Access / Permission Change Replication",
@@ -108,6 +109,8 @@ function caveatFor(row) {
   const tier = row.evidence_tier;
   if (tier === "public_registry_summary") return "Public registry summary row; packet-level traces not expanded here.";
   if (tier === "frozen_complete_run" || tier === "committed_evidence_package") return "Strongest HoloVerify package evidence.";
+  if (tier === "wave2_selected_target_batches_complete") return "Selected-target Wave2 Holo evidence across HR, data privacy, and finance; not full-family statistical proof.";
+  if (tier === "wave2_selected_target_solo_triage_exact_roster") return "Selected packets from Wave2 solo triage; same three model families as the Wave2 Holo roster.";
   if (tier === "batched_full_family_complete") return "Complete via locked batches; consolidated public package now exists.";
   if (tier === "replacement_family_rollup_needs_consolidated_lock") return "IT includes replacement pair 015R1; replacement rollup package now exists.";
   if (tier === "roster_matched_solo_baseline") return "Solo used the exact same three models used inside the matching Holo run.";
@@ -131,6 +134,7 @@ function definitionsRows() {
     { term: "Same-packet-bank solo triage", definition: "A solo triage run over the same frozen packets where one or more model slots may differ; use for seam discovery, not exact roster-matched claims." },
     { term: "AP roster", definition: "AP Holo and AP solo roster-matched baseline used xai/grok-3-mini, openai/gpt-5.4-mini, and minimax/MiniMax-M2.5-highspeed." },
     { term: "Commerce/IT triage roster", definition: "Commerce and IT solo triage used xai/grok-3-mini, openai/gpt-4o-mini, and minimax/MiniMax-M2.5-highspeed; the Holo OpenAI-W2 slot used openai/gpt-5.4-mini." },
+    { term: "Wave2 selected-target evidence", definition: "Wave2 target batches count selected pairs from the HR, data privacy, and finance packet bank; they are not full-family or per-domain statistical proof." },
     { term: "FPR", definition: "FP / (FP + TN). False escalation rate on ALLOW truth." },
     { term: "FNR", definition: "FN / (FN + TP). False allow rate on ESCALATE truth." },
     { term: "TPR", definition: "TP / (TP + FN). Escalation recall." },

@@ -38,6 +38,15 @@ COMMERCE_IT_TRIAGE_ROSTER_NOTE = (
     "Solo triage used xai/grok-3-mini, openai/gpt-4o-mini, and minimax/MiniMax-M2.5-highspeed; "
     "this is same-packet-bank seam triage, not an exact same-three-model comparison to the OpenAI-W2 Holo roster."
 )
+WAVE2_TARGET_FAMILY = "Wave 2 / HR-Data Privacy-Finance Targeted Holo Runs"
+WAVE2_TARGET_DOMAIN = "HR, data privacy, and finance close controls"
+WAVE2_TARGET_TIER = "wave2_selected_target_batches_complete"
+WAVE2_SELECTED_SOLO_TIER = "wave2_selected_target_solo_triage_exact_roster"
+WAVE2_ROSTER_NOTE = (
+    "Wave 2 Holo roster: W1 xai/grok-3-mini, G1 minimax/MiniMax-M2.5-highspeed, "
+    "W2 openai/gpt-5.4-mini, G2 minimax/MiniMax-M2.5-highspeed, W3 minimax/MiniMax-M2.5-highspeed. "
+    "Solo triage used the same three model families: xai/grok-3-mini, openai/gpt-5.4-mini, and minimax/MiniMax-M2.5-highspeed."
+)
 
 
 def rel(path: Path | str) -> str:
@@ -497,6 +506,134 @@ def add_solo_triage(
             )
 
 
+def add_wave2_target_batches() -> None:
+    base = Path("docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01")
+    batches_root = base / "holo_target_batches"
+    combined = batches_root / "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+    if (ROOT / combined).exists():
+        add_source(
+            "WAVE2_TARGET_BATCH_001_002_003_COMBINED_MEMO",
+            "HoloVerify",
+            str(combined),
+            "PASS",
+            True,
+            WAVE2_TARGET_TIER,
+            "No-provider combined memo for completed Wave 2 target batches 001-003; selected-target evidence, not full-family statistical proof.",
+        )
+
+    solo_package = base / "solo_triage_3mini/WAVE2_3FAMILY_SOLO_TRIAGE_EVIDENCE_PACKAGE_2026_07_01.json"
+    if (ROOT / solo_package).exists():
+        add_source(
+            "WAVE2_3FAMILY_SOLO_TRIAGE_PACKAGE",
+            "HoloVerify",
+            str(solo_package),
+            "PASS",
+            True,
+            WAVE2_SELECTED_SOLO_TIER,
+            f"Canonical Wave 2 solo triage package. Selected-target rows are counted through batch comparison artifacts. {WAVE2_ROSTER_NOTE}",
+            load_json(solo_package).get("freeze_root", ""),
+        )
+
+    seen_solo_runs: set[str] = set()
+    for batch_number in (1, 2, 3):
+        bid = f"WAVE2_HOLO_TARGET_BATCH_{batch_number:03d}"
+        comparison_path = batches_root / f"wave2_holo_target_batch_{batch_number:03d}" / f"{bid}_SOLO_VS_HOLO_COMPARISON_2026_07_01.json"
+        if not (ROOT / comparison_path).exists():
+            continue
+        comparison = load_json(comparison_path)
+        notes = f"Wave 2 selected-target batch {batch_number:03d}; not a full-family 60-pair statistical proof. {WAVE2_ROSTER_NOTE}"
+        add_source(
+            f"WAVE2_TARGET_BATCH_{batch_number:03d}_COMPARISON",
+            "HoloVerify",
+            str(comparison_path),
+            "PASS",
+            True,
+            WAVE2_TARGET_TIER,
+            notes,
+        )
+
+        holo_summary = comparison["holo_run_summary"]
+        if holo_summary.get("run_dir"):
+            live_path = Path(holo_summary["run_dir"]) / "live_results.json"
+        else:
+            live_path = batches_root / f"wave2_holo_target_batch_{batch_number:03d}" / comparison["scope"]["holo_run"] / "live_results.json"
+        lock_status = holo_summary.get("lock_validation_status") or (holo_summary.get("lock_validation") or {}).get("validation_status", "PASS")
+        add_source(
+            f"WAVE2_TARGET_BATCH_{batch_number:03d}_HOLO_LIVE",
+            "HoloVerify",
+            str(live_path),
+            lock_status,
+            True,
+            WAVE2_TARGET_TIER,
+            notes,
+        )
+        add_holo_result(
+            family=WAVE2_TARGET_FAMILY,
+            domain=WAVE2_TARGET_DOMAIN,
+            evidence_tier=WAVE2_TARGET_TIER,
+            path=str(live_path),
+            notes=notes,
+        )
+
+        solo_tokens = comparison["solo_tokens_on_selected_packets"]
+        summary = comparison["summary_metrics"]
+        add_run_summary(
+            evidence_family=WAVE2_TARGET_FAMILY,
+            domain=WAVE2_TARGET_DOMAIN,
+            evidence_tier=WAVE2_SELECTED_SOLO_TIER,
+            system="Selected solo one-shot triage",
+            source_path=str(comparison_path),
+            classification=comparison["classification"],
+            status="PASS",
+            packets=summary["holo_final_packet_count"],
+            provider_calls=solo_tokens["attempts"],
+            solo_calls=solo_tokens["attempts"],
+            judge_calls=0,
+            input_tokens=solo_tokens["input_tokens"],
+            output_tokens=solo_tokens["output_tokens"],
+            total_tokens=solo_tokens["total_tokens"],
+            root_signature=comparison.get("source_target_selection_sha256", ""),
+            notes=notes,
+        )
+
+        for run_dir in comparison["scope"].get("solo_runs", []):
+            if run_dir in seen_solo_runs:
+                continue
+            seen_solo_runs.add(run_dir)
+            result_path = Path(run_dir) / "solo_triage_results.json"
+            if not (ROOT / result_path).exists():
+                result_path = Path(run_dir) / "SOLO_TRIAGE_TRACE.jsonl"
+            add_source(
+                f"WAVE2_SOLO_RUN_{Path(run_dir).parent.name}_{Path(run_dir).name}",
+                "HoloVerify",
+                str(result_path),
+                "PASS",
+                True,
+                WAVE2_SELECTED_SOLO_TIER,
+                f"Canonical Wave 2 solo triage run referenced by selected-target comparisons. {WAVE2_ROSTER_NOTE}",
+            )
+
+        for pair in comparison["pair_rows"]:
+            for outcome in pair["six_solo_outcomes"]:
+                add_packet_row(
+                    evidence_family=WAVE2_TARGET_FAMILY,
+                    domain=pair["domain"],
+                    evidence_tier=WAVE2_SELECTED_SOLO_TIER,
+                    system="Selected solo one-shot triage",
+                    model=f"{outcome.get('provider')}/{outcome.get('model')}",
+                    packet_id=outcome.get("packet_id", ""),
+                    pair_id=pair["pair_id"],
+                    truth=outcome.get("packet_truth"),
+                    verdict=outcome.get("solo_verdict"),
+                    admissible=bool(outcome.get("knew_admissible")),
+                    source_path=outcome.get("trace_path") or str(comparison_path),
+                    source_root=comparison.get("source_target_selection_sha256", ""),
+                    failure_class=outcome.get("failure_class", ""),
+                    notes=f"Selected-target comparison batch {batch_number:03d}; solo label {outcome.get('solo_label', '')}.",
+                    token_total=outcome.get("total_tokens"),
+                )
+
+
 def add_public_registry_rows() -> None:
     source = "frontend/benchmark.html"
     add_source(
@@ -883,7 +1020,7 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         return
     fields = list(rows[0].keys())
     with open(path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+        writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -1100,6 +1237,7 @@ def main() -> None:
         evidence_tier="solo_triage_same_packet_bank_openai_4o_mini",
         notes=f"Solo triage was run before retiring ambiguous HV-ITAC-REP-015. {COMMERCE_IT_TRIAGE_ROSTER_NOTE}",
     )
+    add_wave2_target_batches()
 
     add_hard_allow_precursor()
     add_holobuild_rows()
@@ -1118,7 +1256,7 @@ def main() -> None:
             "HoloVerify packet bank",
             "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/FREEZE_MANIFEST.json",
             "PACKET_FREEZE_ONLY",
-            "Wave 2 packet bank, built/frozen but no live Holo/solo results in this workbook.",
+            "Wave 2 packet bank. Selected target Holo and solo rows are tracked separately when comparison artifacts are present.",
         ),
         (
             "IT_REPLACEMENT_015R1_FREEZE",
@@ -1218,6 +1356,7 @@ def main() -> None:
             "Parse/content/provider failures are tracked as OTHER/non-admissible unless a binary verdict is present.",
             "Kit A/B public registry rows are summary-level public evidence, not packet-level raw trace compilation.",
             "Commerce batched full family and IT replacement rollup are included as current file-backed evidence, with promotion caveats in source audit.",
+            "Wave 2 target batches are selected-target evidence over three domains, not a full-family or per-domain statistical proof.",
             "HoloBuild rows are full-gated ledger evidence but still need a public root-signature package before being placed beside AP/Clinical as public hash-package proof.",
         ],
         "packet_rows": packet_rows,

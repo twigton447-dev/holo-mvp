@@ -21,6 +21,7 @@ This package compiles current repo-backed HoloVerify and HoloBuild evidence into
 | Kit B / Agentic Commerce v1 Registry | Public registry summary | 3/3 KNEW | Public row includes FS55-A/B false negatives and FS55-C false positives | Registry summary with short public hashes |
 | Clinical Activation Boundary Controls / Kit C | Frozen complete run | 40/40 packets, 20/20 pairs | Solo one-shots: 6/120 KNEW/admissible | Strongest HoloVerify package evidence |
 | Vendor-Master Payment Controls / AP Replication | Committed evidence package | 40/40 packets, 20/20 pairs | Solo one-shots: 53/120 KNEW/admissible | Strong package evidence; AP was instability, not total solo collapse |
+| Wave 2 / HR-Data Privacy-Finance Targeted Holo Runs | Selected target batches complete | 54/54 packets, 27/27 pairs | Selected solo one-shots: 43/162 KNEW/admissible | Selected-target evidence across three Wave 2 domains; not full-family or per-domain statistical proof |
 | Agentic Commerce / Order Execution Replication | Current locked batches | 40/40 packets, 20/20 pairs | Solo triage: 26/120 KNEW/admissible | Needs consolidated family package before public headline use |
 | Agentic Commerce / All-Six Collapse Canary | Lock-rooted canary | 6/6 packets, 3/3 pairs | Selected from all-six solo-collapse triage pairs | Canary-sized, not full-family proof |
 | IT Access / Permission Change Replication | Batch plus replacement rollup | 40/40 included packets, 20/20 effective pairs | Solo triage: 24/120 KNEW/admissible | Needs consolidated rollup package because pair 015 was retired and replaced by 015R1 |
@@ -59,10 +60,13 @@ With zero observed errors, the rule-of-three gives an approximate 95% upper erro
 
 A 20-pair family has only 20 ALLOW and 20 ESCALATE packets, so a perfect 40/40 family is strong engineering evidence but not yet tight statistical proof of low FPR/FNR. To make a per-class FPR/FNR claim below 5% with zero observed errors, each domain needs about 60 matched sibling pairs, or a defensible pooled analysis across comparable families.
 
+The Wave 2 selected-target lane currently has 27 ALLOW-class and 27 ESCALATE-class Holo packets with zero observed Holo errors, so it is encouraging selected-target evidence, not yet a tight per-class FPR/FNR claim.
+
 ## Public Claim Boundaries
 
 - Do not claim universal model superiority.
 - Do not treat Kit A/B summary rows as the same evidence class as packet-level frozen packages.
+- Do not describe Wave 2 selected-target batches as full-family or per-domain statistical proof.
 - Do not promote Commerce or IT full-family results publicly until each has a consolidated family package and source audit.
 - Do not promote HoloBuild D10/D11/D13/D14 beside AP/Clinical until a public root-signature package exists.
 - Do not collapse parse/content/provider failures into FP/FN without explicitly stating the metric view.

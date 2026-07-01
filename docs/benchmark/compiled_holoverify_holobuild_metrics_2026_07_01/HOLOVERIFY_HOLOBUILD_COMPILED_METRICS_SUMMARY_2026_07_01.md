@@ -27,6 +27,7 @@ ESCALATE is treated as the positive class.
 | Kit B / Agentic Commerce v1 Registry | public registry summary | 3/3 | 0% | 0% | Public registry summary; Kit B hash snippets are in `frontend/benchmark.html`. |
 | Clinical Activation Boundary Controls / Kit C | frozen complete run | 40/40 | 0% | 0% | Strongest public-package HoloVerify evidence. |
 | Vendor-Master Payment Controls / AP Replication | committed evidence package | 40/40 | 0% | 0% | Full AP family. |
+| Wave 2 / HR-Data Privacy-Finance Targeted Holo Runs | selected target batches complete | 54/54 | 0% | 0% | Selected-target evidence across three Wave 2 domains; not full-family or per-domain statistical proof. |
 | Agentic Commerce / Order Execution Replication | consolidated public package created | 40/40 | 0% | 0% | Complete via locked batches; consolidated package root `74a5729fdd01834b9c0e2212d10a37e24a9b81e17bf7169affea60a02b917b21`. |
 | Agentic Commerce / All-Six Collapse Canary | lock-rooted canary | 6/6 | 0% | 0% | Canary-sized, not full-family proof. |
 | IT Access / Permission Change Replication | replacement rollup package created | 40/40 | 0% | 0% | Retired ambiguous `HV-ITAC-REP-015`; replacement `HV-ITAC-REP-015R1` is included. Rollup root `b09d4edc97eda5f9f90c73996e1675dc41d902a3b92c8f24ce7fe65fa6ddb6d3`. |
@@ -38,6 +39,7 @@ ESCALATE is treated as the positive class.
 |---|---|---:|---|
 | Clinical Activation Boundary Controls / Kit C | final evidence package | 6/120 | Roster-matched one-shot baseline: solo used the same three model families used inside Holo, `xai/grok-3-mini`, `google/gemini-2.5-flash-lite`, and `minimax/MiniMax-M2.5-highspeed`. |
 | Vendor-Master Payment Controls / AP Replication | roster-matched solo baseline | 53/120 | Exact same three models as AP Holo: `xai/grok-3-mini`, `openai/gpt-5.4-mini`, and `minimax/MiniMax-M2.5-highspeed`. |
+| Wave 2 / HR-Data Privacy-Finance Targeted Holo Runs | selected target solo triage | 43/162 | Same selected packets and same three model families as Wave 2 Holo; 119/162 selected solo attempts were not KNEW/admissible. |
 | Agentic Commerce / Order Execution Replication | solo triage | 26/120 | Same packet bank seam triage, not exact roster-matched proof: xAI and MiniMax match Holo, but solo used `openai/gpt-4o-mini` while Holo W2 used `openai/gpt-5.4-mini`. |
 | IT Access / Permission Change Replication | solo triage | 24/120 | Same packet bank seam triage run before retiring ambiguous `HV-ITAC-REP-015`; not exact roster-matched proof because solo used `openai/gpt-4o-mini` while Holo W2 used `openai/gpt-5.4-mini`. |
 | Hard ALLOW FP 5-Pair Precursor | local KNEW benchmark | 7/10 | Pending judge / not benchmark-locked. |
@@ -47,6 +49,7 @@ ESCALATE is treated as the positive class.
 - Exact roster-matched means the solo one-shot baseline used the same three models that appeared inside the corresponding Holo run.
 - Clinical / Kit C exact roster: `xai/grok-3-mini`, `google/gemini-2.5-flash-lite`, `minimax/MiniMax-M2.5-highspeed`.
 - AP exact roster: `xai/grok-3-mini`, `openai/gpt-5.4-mini`, `minimax/MiniMax-M2.5-highspeed`.
+- Wave 2 exact family roster: `xai/grok-3-mini`, `openai/gpt-5.4-mini`, `minimax/MiniMax-M2.5-highspeed`; Holo uses governed W/G/W/G/W turns while solo is one-shot.
 - Commerce and IT Holo roster: W1 `xai/grok-3-mini`, G1 `minimax/MiniMax-M2.5-highspeed`, W2 `openai/gpt-5.4-mini`, G2 `minimax/MiniMax-M2.5-highspeed`, W3 `minimax/MiniMax-M2.5-highspeed`.
 - Commerce and IT solo triage roster: `xai/grok-3-mini`, `openai/gpt-4o-mini`, `minimax/MiniMax-M2.5-highspeed`. Those triage rows are useful seam evidence, but should not be described as exact same-three-model comparisons.
 
@@ -80,6 +83,7 @@ Rule-of-three quick read:
 - This compile does not claim universal model superiority.
 - This compile does not treat parse/content/provider failures as false positives or false negatives unless a binary verdict exists.
 - Kit A/B public registry rows are summary-level rows, not expanded packet-level traces.
+- Wave 2 target batches are selected-target evidence over three domains, not full-family or per-domain statistical proof.
 - Commerce full-family evidence is current file-backed batched evidence with a consolidated public package now created.
 - IT is a row-level rollup with replacement pair `HV-ITAC-REP-015R1` and a replacement rollup package now created.
 - HoloBuild is ledger evidence and should be root-packaged before public promotion.

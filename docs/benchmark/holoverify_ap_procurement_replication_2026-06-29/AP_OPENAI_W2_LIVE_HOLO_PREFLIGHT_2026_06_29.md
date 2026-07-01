@@ -50,6 +50,12 @@ Freeze root: `5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7`
 | `monotonic_preservation_configured` | `True` |
 | `final_selector_configured` | `True` |
 | `trace_accounting_configured` | `True` |
+| `gov_contract_format` | `True` |
+| `worker_contract_format` | `True` |
+| `gov_output_budget_sufficient` | `True` |
+| `gov_max_tokens` | `True` |
+| `empty_worker_output_retry_policy_v1_active` | `True` |
+| `empty_worker_output_max_retries` | `True` |
 | `expected_holo_calls` | `True` |
 | `expected_packets` | `True` |
 | `expected_pairs` | `True` |

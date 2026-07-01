@@ -26,11 +26,16 @@
     "availability_passed": true,
     "best_artifact_registry_configured": true,
     "deterministic_gates_configured": true,
+    "empty_worker_output_max_retries": true,
+    "empty_worker_output_retry_policy_v1_active": true,
     "expected_holo_calls": true,
     "expected_packets": true,
     "expected_pairs": true,
     "final_selector_configured": true,
     "freeze_root_matches": true,
+    "gov_contract_format": true,
+    "gov_max_tokens": true,
+    "gov_output_budget_sufficient": true,
     "gov_sees_gate_results": true,
     "judges_not_configured_to_run": true,
     "model_roster_declared": true,
@@ -42,11 +47,12 @@
     "providers_called_during_preflight": true,
     "registration_file_present": true,
     "solo_not_configured_to_run": true,
-    "trace_accounting_configured": true
+    "trace_accounting_configured": true,
+    "worker_contract_format": true
   },
   "classification": "AP_OPENAI_W2_LIVE_HOLO_PREFLIGHT",
-  "created_at": "2026-06-29T11:45:51.864617+00:00",
-  "current_head_at_preflight": "50647772a80437096a943850d522bf18ca0d58e2",
+  "created_at": "2026-06-29T20:18:40.204326+00:00",
+  "current_head_at_preflight": "7becf74f466a1348cbc63cfcd544e39ff8bc3c39",
   "expected_counts": {
     "gov_calls": 80,
     "holo_calls": 200,
@@ -552,7 +558,7 @@
   "providers_called": 0,
   "registration_file": "holoverify_ap_procurement_replication_2026-06-29/AP_OPENAI_W2_ROSTER_VARIANT_REGISTRATION_2026_06_29.json",
   "result": "AP_OPENAI_W2_READY_FOR_FULL_HOLO_RUN",
-  "root_signature": "021e356356e1172f1d80896acc559b579a16e5f707da5205c3d3fe2e002d3caa",
+  "root_signature": "c359fae8e6d55f7353777a31b1c98ac2270f4181301cf6bb26e628cb908b21de",
   "runner_binding": {
     "actual_gov_key_from_runtime": "minimax",
     "actual_w2_kind": "openai_responses",
@@ -585,6 +591,14 @@
       }
     ],
     "runner_script": "run_ap_replication_holoverify_3dna_2026_06_29.py"
+  },
+  "runtime_contracts": {
+    "gov_call_builder": "RUNNER._build_gov_messages",
+    "gov_contract_format": "gov_micro_baton_v2",
+    "gov_max_tokens": 1024,
+    "gov_parser": "RUNNER._gov_from_response",
+    "packet_runner": "RUNNER._run_packet",
+    "worker_contract_format": "compact_key_value_v1"
   },
   "solo_started": false,
   "source_commit_required": "de22377be8175d04078ba6c70f1fd35222e9f572",

@@ -11,7 +11,7 @@ This is deliberately narrower than the progress ledger:
 from __future__ import annotations
 
 import json
-import subprocess
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -36,8 +36,8 @@ def write_text(path: Path, value: str) -> None:
     path.write_text(value)
 
 
-def current_head() -> str:
-    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True).strip()
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def result_path_for_run(run: dict[str, Any]) -> Path:
@@ -169,7 +169,9 @@ def build() -> dict[str, Any]:
         "status": "PASS" if all(checks.values()) else "FAIL",
         "evidence_state": evidence_state,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
-        "generated_from_head": current_head(),
+        "source_ledger_generated_from_head": ledger.get("generated_from_head"),
+        "collector_script_sha256": sha256_file(Path(__file__).resolve()),
+        "metadata_note": "This output records input provenance and script hash rather than current Git head, because committing the generated output necessarily changes HEAD.",
         "ledger_ref": str(LEDGER_JSON.relative_to(REPO_ROOT)),
         "freeze_root_hash": ledger["freeze_root_hash"],
         "claim_boundary": {
@@ -218,7 +220,8 @@ def render_md(report: dict[str, Any]) -> str:
         "",
         f"Status: `{report['status']}`",
         f"Evidence state: `{report['evidence_state']}`",
-        f"Generated from head: `{report['generated_from_head']}`",
+        f"Source ledger generated from head: `{report['source_ledger_generated_from_head']}`",
+        f"Collector script SHA-256: `{report['collector_script_sha256']}`",
         f"Freeze root: `{report['freeze_root_hash']}`",
         "",
         "## Claim Boundary",

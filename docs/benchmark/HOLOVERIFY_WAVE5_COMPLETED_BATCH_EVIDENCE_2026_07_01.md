@@ -2,7 +2,8 @@
 
 Status: `PASS`
 Evidence state: `NO_COMPLETED_BATCHES_YET`
-Generated from head: `1a7b440235197c55c578204ea693a4841b58ee3b`
+Source ledger generated from head: `ea3bd1ffaa9e006d773ba42ef3b536ff5557ac63`
+Collector script SHA-256: `514cbeea92a3995350eef818927bd6c938643604662e1de7da4af17d6dbc64e5`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 
 ## Claim Boundary

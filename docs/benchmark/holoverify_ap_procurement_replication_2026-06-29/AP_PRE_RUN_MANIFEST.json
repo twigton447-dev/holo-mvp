@@ -1,0 +1,923 @@
+{
+  "architecture_lock": {
+    "benchmark_laws": {
+      "gov_model_policy": "fixed_for_session",
+      "gov_worker_ratio_hard_fail": ">0.50 unless full_context_governor_audit",
+      "gov_worker_ratio_target": "0.10_to_0.25",
+      "gov_worker_ratio_warning": ">0.33",
+      "raw_accumulating_transcript_injection": "banned",
+      "worker_prompt_order": "gov_adversarial_baton>structured_canonical_state>artifact_context",
+      "worker_rotation_policy": "at_least_two_distinct_workers_no_immediate_self_feed"
+    },
+    "classification": "HOLOVERIFY_AP_REPLICATION_3DNA_PREFLIGHT",
+    "complete_architecture_requirements": [
+      "state brief present for workers",
+      "Gov routing lens present",
+      "full latest Gov baton present",
+      "deterministic gate after every worker",
+      "Gov receives deterministic gate results",
+      "artifact registry present",
+      "best artifact registry present",
+      "pinned best artifact present after first admissible candidate",
+      "monotonic preservation enforced",
+      "final selector present",
+      "external solo and intra-Holo evidence separated"
+    ],
+    "current_head_at_preflight": "de22377be8175d04078ba6c70f1fd35222e9f572",
+    "expected_counts": {
+      "gov_calls": 80,
+      "judge_calls": 0,
+      "packets": 40,
+      "pairs": 20,
+      "total_provider_calls": 200,
+      "worker_calls": 120
+    },
+    "family_id": "HV-AP-REP-2026-06-29",
+    "freeze_root_hash": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "full_context_governor_audit": false,
+    "model_roster_declared": {
+      "distinct_dna_required": 3,
+      "fallback_policy": "NO_FALLBACK_PROVIDER_FAILURE_INVALIDATES_RUN",
+      "gov": {
+        "dna": "minimax",
+        "gov_may_select_models": false,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax"
+      },
+      "worker_sequence": [
+        {
+          "dna": "xai",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "role_name": "SOURCE_BOUNDARY_MAPPER",
+          "worker_index": 1
+        },
+        {
+          "dna": "google",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "role_name": "ADVERSARIAL_SCOPE_CHALLENGER",
+          "worker_index": 2
+        },
+        {
+          "dna": "minimax",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "role_name": "FINAL_COMPILER",
+          "worker_index": 3
+        }
+      ]
+    },
+    "source_commit_required": "de22377be8175d04078ba6c70f1fd35222e9f572",
+    "status": "PRE_REGISTERED_AP_ONLY"
+  },
+  "classification": "HOLOVERIFY_AP_REPLICATION_PREFLIGHT",
+  "created_at": "2026-06-29T11:20:06.266715+00:00",
+  "family_id": "HV-AP-REP-2026-06-29",
+  "freeze_root_hash": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "kit_c_runner_source_hash": "85db34313e127c3714c2f047eb7ce3b512509ef926935fb102464ed0b6e0d1cc",
+  "packet_records": [
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "7ac28ba19db7e9c6f3b1613531848e1b23588c2ecad0a42758df94361f39fbed",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-001-A.model-visible.json",
+      "packet_hash": "6100a72a20515b4eceecc4669c9ee0c7a30b5b126d8f0da8115c9832f0367c15",
+      "packet_id": "HV-AP-REP-001-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-001-A.packet.json",
+      "pair_id": "HV-AP-REP-001",
+      "prompt_hash": "f5526009b4c946acf10536f49ac3b7fe4fac4e710df54cfc51dca393551a2f0d",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-001-A.prompt.txt",
+      "source_ids": [
+        "SRC-D114F7F3C309-POL",
+        "SRC-D114F7F3C309-REQ",
+        "SRC-D114F7F3C309-CTL",
+        "SRC-D114F7F3C309-FBK",
+        "SRC-D114F7F3C309-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "9a0a7084c33f3332508f1300cf44f4fb4db7cf82b1095375e96ac5e754d049d5",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-001-B.model-visible.json",
+      "packet_hash": "4bce529b98d666617f8713b401d02fe2ae20cdf475e78d04d65af0aa1d008348",
+      "packet_id": "HV-AP-REP-001-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-001-B.packet.json",
+      "pair_id": "HV-AP-REP-001",
+      "prompt_hash": "2cab66114d19a2c86699aa66de6ffa9f2ed850dbf043de9cb73e276e2022a160",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-001-B.prompt.txt",
+      "source_ids": [
+        "SRC-D0B364456A0A-POL",
+        "SRC-D0B364456A0A-REQ",
+        "SRC-D0B364456A0A-CTL",
+        "SRC-D0B364456A0A-FBK",
+        "SRC-D0B364456A0A-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "04802f05cb9608c6e18810684b2b26158e91db8ab33e05fcb322dbbec1b98cb0",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-002-A.model-visible.json",
+      "packet_hash": "ea5c139a5d5c9db7cac2491fc0e158c7a4a1f3991fb3ef67e05b2d97f12ea3d4",
+      "packet_id": "HV-AP-REP-002-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-002-A.packet.json",
+      "pair_id": "HV-AP-REP-002",
+      "prompt_hash": "c5c5bc0f59a9855162cea9e21e9a1b50811ba0e81aabb49ad9165684d7bd7813",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-002-A.prompt.txt",
+      "source_ids": [
+        "SRC-F05CA8402464-POL",
+        "SRC-F05CA8402464-REQ",
+        "SRC-F05CA8402464-CTL",
+        "SRC-F05CA8402464-FBK",
+        "SRC-F05CA8402464-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "83046cdeef9751caf21835af50348233b0c750f8b8f255a449d254578ae4ff1c",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-002-B.model-visible.json",
+      "packet_hash": "ea4c6eecf5e28e3ecd86968cd3bc78d6d202b8566c532b43239f3b598753b3d6",
+      "packet_id": "HV-AP-REP-002-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-002-B.packet.json",
+      "pair_id": "HV-AP-REP-002",
+      "prompt_hash": "c45310d85bde22465a4fa01933febb5f45fc621333be3f0fde25d84790f241a2",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-002-B.prompt.txt",
+      "source_ids": [
+        "SRC-BF347128E475-POL",
+        "SRC-BF347128E475-REQ",
+        "SRC-BF347128E475-CTL",
+        "SRC-BF347128E475-FBK",
+        "SRC-BF347128E475-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "f4e45b2dd12043c2fd65a1a6fd54f7f52759cbce6c5ebf60c481ef246535f637",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-003-A.model-visible.json",
+      "packet_hash": "034614675b720f2d2d957b4830ae0dc73eaf564093341c878be79376b0a307b2",
+      "packet_id": "HV-AP-REP-003-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-003-A.packet.json",
+      "pair_id": "HV-AP-REP-003",
+      "prompt_hash": "e94ba92a8aad2b5f189a7cab249e76c171f786c41eba4e47b299a0ff430a8369",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-003-A.prompt.txt",
+      "source_ids": [
+        "SRC-D5751BFA0D4D-POL",
+        "SRC-D5751BFA0D4D-REQ",
+        "SRC-D5751BFA0D4D-CTL",
+        "SRC-D5751BFA0D4D-FBK",
+        "SRC-D5751BFA0D4D-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "90ffa9c6aa09804e7e4eabd228f4adb28211693728a4e381b42edd5ae2a96393",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-003-B.model-visible.json",
+      "packet_hash": "213def9308f9c893f271bc78e37177fa48db6ad8e99791b195aa0fa65482313f",
+      "packet_id": "HV-AP-REP-003-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-003-B.packet.json",
+      "pair_id": "HV-AP-REP-003",
+      "prompt_hash": "a32178d0b8ae5185ba23b99a587fb8dda6dd56b83e7ddcc70fcbc4458ed531e7",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-003-B.prompt.txt",
+      "source_ids": [
+        "SRC-1027E2FDE3B4-POL",
+        "SRC-1027E2FDE3B4-REQ",
+        "SRC-1027E2FDE3B4-CTL",
+        "SRC-1027E2FDE3B4-FBK",
+        "SRC-1027E2FDE3B4-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "f2b8902d19ba402914767291fe0398fed57b39e2e488a8599a3255eaad6a2e57",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-004-A.model-visible.json",
+      "packet_hash": "11d006799945c7f84172555f550762130a6744639cca73bb0fd05230176ed6fb",
+      "packet_id": "HV-AP-REP-004-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-004-A.packet.json",
+      "pair_id": "HV-AP-REP-004",
+      "prompt_hash": "6475d5dcf489fe3ab7b4cccd8ffaf509f14c9ea93f59cfefe62ecd3ef2c836e8",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-004-A.prompt.txt",
+      "source_ids": [
+        "SRC-92653D31DA6D-POL",
+        "SRC-92653D31DA6D-REQ",
+        "SRC-92653D31DA6D-CTL",
+        "SRC-92653D31DA6D-FBK",
+        "SRC-92653D31DA6D-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "02b2f5dc371e6cf04edac06b927df6e7f3f41d3deb8e94b25d8d10d907d199c4",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-004-B.model-visible.json",
+      "packet_hash": "d5d77adeed48e8d1a02f252f3b53dc24fd94a7f8be68bb03c4028261b184e22d",
+      "packet_id": "HV-AP-REP-004-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-004-B.packet.json",
+      "pair_id": "HV-AP-REP-004",
+      "prompt_hash": "213075958185c04791a94690db03f745d13861663f9d63914ddf55b0f11084bf",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-004-B.prompt.txt",
+      "source_ids": [
+        "SRC-E85972F0B8E0-POL",
+        "SRC-E85972F0B8E0-REQ",
+        "SRC-E85972F0B8E0-CTL",
+        "SRC-E85972F0B8E0-FBK",
+        "SRC-E85972F0B8E0-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "665822af634550e1eb66b62b410ff0329749c3528765b7fbdb3b89c5004e094b",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-005-A.model-visible.json",
+      "packet_hash": "75193062e4a82aabdf802df7a816ad5bafd85c945a3682f6b62f5d52fb6a9687",
+      "packet_id": "HV-AP-REP-005-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-005-A.packet.json",
+      "pair_id": "HV-AP-REP-005",
+      "prompt_hash": "55762c24f55cac6b9ec73481ccc801af7e7e5b9350b9dd670c0ea18391e0fcf1",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-005-A.prompt.txt",
+      "source_ids": [
+        "SRC-DEE4D784AF5E-POL",
+        "SRC-DEE4D784AF5E-REQ",
+        "SRC-DEE4D784AF5E-CTL",
+        "SRC-DEE4D784AF5E-FBK",
+        "SRC-DEE4D784AF5E-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "77d533e9a121ed0562832b3abdd18af87b152da6beabf04630d0841670526ee7",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-005-B.model-visible.json",
+      "packet_hash": "d502bccf3925ba1b9c1ad91a9a22a6a808ae44110852f988801408c440bee324",
+      "packet_id": "HV-AP-REP-005-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-005-B.packet.json",
+      "pair_id": "HV-AP-REP-005",
+      "prompt_hash": "acee451d12e52024a81773110da94a94409649459d37e2581622e1c3e0529dc8",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-005-B.prompt.txt",
+      "source_ids": [
+        "SRC-C7BDEE54413D-POL",
+        "SRC-C7BDEE54413D-REQ",
+        "SRC-C7BDEE54413D-CTL",
+        "SRC-C7BDEE54413D-FBK",
+        "SRC-C7BDEE54413D-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "4cfab0313b869b60a68eafb6b5324183b021555d43246abea2fe60f5462b0652",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-006-A.model-visible.json",
+      "packet_hash": "425e6050d794e6e2519e37b5c583dd26d361eee3b96963e437f1073cb0feaaa4",
+      "packet_id": "HV-AP-REP-006-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-006-A.packet.json",
+      "pair_id": "HV-AP-REP-006",
+      "prompt_hash": "8516497a8642a710f85d536f9c8ae335e4b7ca63979d4bf045ca00bccc03169d",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-006-A.prompt.txt",
+      "source_ids": [
+        "SRC-F2F2E0CCA493-POL",
+        "SRC-F2F2E0CCA493-REQ",
+        "SRC-F2F2E0CCA493-CTL",
+        "SRC-F2F2E0CCA493-FBK",
+        "SRC-F2F2E0CCA493-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "74adf787e39ff9da9f4328a4b5e2ff69bd37323604d2a23ac39814715b72c92c",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-006-B.model-visible.json",
+      "packet_hash": "6f728cfcc356b581a4c622b143858ce9b56f3b454d910f8ba0474076c3f28cec",
+      "packet_id": "HV-AP-REP-006-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-006-B.packet.json",
+      "pair_id": "HV-AP-REP-006",
+      "prompt_hash": "86873c235a650ab4174800fdf62e517a2fb60f3a5e00ad631142a184738b8297",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-006-B.prompt.txt",
+      "source_ids": [
+        "SRC-66C5F7F73D1D-POL",
+        "SRC-66C5F7F73D1D-REQ",
+        "SRC-66C5F7F73D1D-CTL",
+        "SRC-66C5F7F73D1D-FBK",
+        "SRC-66C5F7F73D1D-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "5a6b15e29b477420b3163f31c132381d1be040d6c562438dda806b9f93e616e9",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-007-A.model-visible.json",
+      "packet_hash": "a374971d7b8a9363933d0b00e53cbc04966a4e175a2d0a681aa9806247e602a6",
+      "packet_id": "HV-AP-REP-007-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-007-A.packet.json",
+      "pair_id": "HV-AP-REP-007",
+      "prompt_hash": "205704e7b233aa4015b5bbcc0298d83575b075cde55b10ba4c932a1df32a193f",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-007-A.prompt.txt",
+      "source_ids": [
+        "SRC-4F8A27165A64-POL",
+        "SRC-4F8A27165A64-REQ",
+        "SRC-4F8A27165A64-CTL",
+        "SRC-4F8A27165A64-FBK",
+        "SRC-4F8A27165A64-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "6b92e105071c987d5f14035408bc2c8c94e9c310c4e917006eb8fbd62b5be36d",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-007-B.model-visible.json",
+      "packet_hash": "d590bfa34d0fb475673b910949224c84aff780e0886f60b350d39a7868a1a520",
+      "packet_id": "HV-AP-REP-007-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-007-B.packet.json",
+      "pair_id": "HV-AP-REP-007",
+      "prompt_hash": "09881c5bbe46c8eec01cd9ddb243199f6a4fc486fba964d89c9efbf09873418b",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-007-B.prompt.txt",
+      "source_ids": [
+        "SRC-CD4055F2E56D-POL",
+        "SRC-CD4055F2E56D-REQ",
+        "SRC-CD4055F2E56D-CTL",
+        "SRC-CD4055F2E56D-FBK",
+        "SRC-CD4055F2E56D-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "c882e529e04e0ec9711083cb3ab047d30e67b28164152a028bd9db37d4893661",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-008-A.model-visible.json",
+      "packet_hash": "7489d0b0f1038c40b2aa3f3150ab976e7eb8a6014c0743484e70e3224fa917c8",
+      "packet_id": "HV-AP-REP-008-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-008-A.packet.json",
+      "pair_id": "HV-AP-REP-008",
+      "prompt_hash": "cf5ee83d91ac9d9bf7cc97c6616147dbc9d35715706a0c1388089699df744f27",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-008-A.prompt.txt",
+      "source_ids": [
+        "SRC-94F130263D7B-POL",
+        "SRC-94F130263D7B-REQ",
+        "SRC-94F130263D7B-CTL",
+        "SRC-94F130263D7B-FBK",
+        "SRC-94F130263D7B-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "5fbe8b5c67722c55579177f4d59ba41cffb53fee65b0ea5f4a426dbf7338a3ad",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-008-B.model-visible.json",
+      "packet_hash": "b63a7945a227191646a4042683acb5c2c12053e488930eb3304c9c736ab7c44e",
+      "packet_id": "HV-AP-REP-008-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-008-B.packet.json",
+      "pair_id": "HV-AP-REP-008",
+      "prompt_hash": "34416db27f10a58823a393520d2f98a4b08178734d68b93ecce7b21d7f0e4a36",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-008-B.prompt.txt",
+      "source_ids": [
+        "SRC-65B725086F96-POL",
+        "SRC-65B725086F96-REQ",
+        "SRC-65B725086F96-CTL",
+        "SRC-65B725086F96-FBK",
+        "SRC-65B725086F96-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "accf979c5abc77da4a0ae601d893dc57af21eb7400d8c44844e3c87474c653b6",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-009-A.model-visible.json",
+      "packet_hash": "729f96542429f3252090c17cec403d82e58376692854e9ba90b2e645e0ce382d",
+      "packet_id": "HV-AP-REP-009-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-009-A.packet.json",
+      "pair_id": "HV-AP-REP-009",
+      "prompt_hash": "f890ad702a5ae23194264349044a0dd66bd6fb4ee6facb154a77fe17adff5403",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-009-A.prompt.txt",
+      "source_ids": [
+        "SRC-D81F74B62164-POL",
+        "SRC-D81F74B62164-REQ",
+        "SRC-D81F74B62164-CTL",
+        "SRC-D81F74B62164-FBK",
+        "SRC-D81F74B62164-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "171eb41189dce92a04dde80722873cf6198dd3e33a2b9fed1e78737f9afc673d",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-009-B.model-visible.json",
+      "packet_hash": "49a926cf01c3c77a8450d3f17aa6b692bbd340b746b6f62dd8584e13361be80a",
+      "packet_id": "HV-AP-REP-009-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-009-B.packet.json",
+      "pair_id": "HV-AP-REP-009",
+      "prompt_hash": "2e2188387261881afe540bf7b4bf5f52046b21fc17f7f0d1f187a382fada2ed3",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-009-B.prompt.txt",
+      "source_ids": [
+        "SRC-0E3173BB8FF6-POL",
+        "SRC-0E3173BB8FF6-REQ",
+        "SRC-0E3173BB8FF6-CTL",
+        "SRC-0E3173BB8FF6-FBK",
+        "SRC-0E3173BB8FF6-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "0268284ae1ff4eff110d9f0beedfae21c3dd86b4d55bf9e5cc5587c5dc6765cc",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-010-A.model-visible.json",
+      "packet_hash": "9ebdc31ed73d9b20b55f92c25e1b2a197bc08d5764907b89be5596d7f9b42f54",
+      "packet_id": "HV-AP-REP-010-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-010-A.packet.json",
+      "pair_id": "HV-AP-REP-010",
+      "prompt_hash": "444eb46795ae2ef5ea5f443e80e4ad2fcf5d7306c3156e4e8283d016ad4a27e2",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-010-A.prompt.txt",
+      "source_ids": [
+        "SRC-D6EA566D0381-POL",
+        "SRC-D6EA566D0381-REQ",
+        "SRC-D6EA566D0381-CTL",
+        "SRC-D6EA566D0381-FBK",
+        "SRC-D6EA566D0381-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "f1900c87d7be18ff7ce412780377f105b7a923edee3bdf73f935307aa72c2228",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-010-B.model-visible.json",
+      "packet_hash": "f4433d0a368d13138606df17ff8ecaca617d26f572d0a7b916264d1b15ad7d2c",
+      "packet_id": "HV-AP-REP-010-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-010-B.packet.json",
+      "pair_id": "HV-AP-REP-010",
+      "prompt_hash": "2befca5b6196511ad7da7a82ccb1fe08ad30a6fa281b3963118d7b73aa9cf156",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-010-B.prompt.txt",
+      "source_ids": [
+        "SRC-644D91D5C220-POL",
+        "SRC-644D91D5C220-REQ",
+        "SRC-644D91D5C220-CTL",
+        "SRC-644D91D5C220-FBK",
+        "SRC-644D91D5C220-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_allow"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "9ed89f8a29274ac5959205ed4ce06bc16c83577eaafacc358211a3800f40d5a9",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-011-A.model-visible.json",
+      "packet_hash": "7867a0e6d3e47f397746d88db82ddd38ac2d1d048f107a375e036d1ba46b8087",
+      "packet_id": "HV-AP-REP-011-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-011-A.packet.json",
+      "pair_id": "HV-AP-REP-011",
+      "prompt_hash": "88195dbff49ed6e229d13d589a95e1102eb7d9a00e1d6c8f74ce8d75baf6825f",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-011-A.prompt.txt",
+      "source_ids": [
+        "SRC-1D955A0F73B0-POL",
+        "SRC-1D955A0F73B0-REQ",
+        "SRC-1D955A0F73B0-CTL",
+        "SRC-1D955A0F73B0-FBK",
+        "SRC-1D955A0F73B0-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "b9ce7ff8eb18aae305faf0be65eb6bea16fb5a97dd76a84e91e2272d476ad9f3",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-011-B.model-visible.json",
+      "packet_hash": "053b7b4dad123f21124ef10e7294f7da2fb24be3e902f372b2c05e2b426c7851",
+      "packet_id": "HV-AP-REP-011-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-011-B.packet.json",
+      "pair_id": "HV-AP-REP-011",
+      "prompt_hash": "41902cc6ad90b299f7a7bf9003c234aa520982b661e84e1287ffdcf5ecc3c73c",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-011-B.prompt.txt",
+      "source_ids": [
+        "SRC-0AC515CDA285-POL",
+        "SRC-0AC515CDA285-REQ",
+        "SRC-0AC515CDA285-CTL",
+        "SRC-0AC515CDA285-FBK",
+        "SRC-0AC515CDA285-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "b60d01b6cc57cfe4eaaaa1e69de6976db549d408bc9f3da0ddd037ca7f79301d",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-012-A.model-visible.json",
+      "packet_hash": "6adcaa78a23ad56047dcbd7dd504c5c27fe31ad723c14f097638abb8c0656ff0",
+      "packet_id": "HV-AP-REP-012-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-012-A.packet.json",
+      "pair_id": "HV-AP-REP-012",
+      "prompt_hash": "977b900a3e7337687d34d8a5e119b82fa156bdaf669df29a66012e0b3cd6e4b5",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-012-A.prompt.txt",
+      "source_ids": [
+        "SRC-8764B4D3BAEE-POL",
+        "SRC-8764B4D3BAEE-REQ",
+        "SRC-8764B4D3BAEE-CTL",
+        "SRC-8764B4D3BAEE-FBK",
+        "SRC-8764B4D3BAEE-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "627877035fcd9b48fee50a991230722fef8b0d68c573163d95adb7c4b9bf3ae2",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-012-B.model-visible.json",
+      "packet_hash": "59f99f19f7c26b8ab6f5b2bf29ccdbe541394cf8629ba10b660d79dfc6403264",
+      "packet_id": "HV-AP-REP-012-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-012-B.packet.json",
+      "pair_id": "HV-AP-REP-012",
+      "prompt_hash": "09ed4b59d0fc1b62822349da34eacfe7bd5b7ddef9607e51e990219d55484c9a",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-012-B.prompt.txt",
+      "source_ids": [
+        "SRC-40B537448E4C-POL",
+        "SRC-40B537448E4C-REQ",
+        "SRC-40B537448E4C-CTL",
+        "SRC-40B537448E4C-FBK",
+        "SRC-40B537448E4C-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "b5ce05c2c47042d18060ae16089b2f9d92ecc83fd8229718e7ed631522d4cace",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-013-A.model-visible.json",
+      "packet_hash": "c4f14c5181ad2c620b23ea6326c62f25e3be263baa4f30a8072d562d5cfaae4a",
+      "packet_id": "HV-AP-REP-013-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-013-A.packet.json",
+      "pair_id": "HV-AP-REP-013",
+      "prompt_hash": "4b32a75408ab0c24a3de2453c8fd5a9f29f58ef973e9ec70a5b77067e0959be9",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-013-A.prompt.txt",
+      "source_ids": [
+        "SRC-7893AD449CF2-POL",
+        "SRC-7893AD449CF2-REQ",
+        "SRC-7893AD449CF2-CTL",
+        "SRC-7893AD449CF2-FBK",
+        "SRC-7893AD449CF2-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "d8b03ed7c53859fb54f03cac4f00cc2042e8cfcea545585314fa780558cae3e2",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-013-B.model-visible.json",
+      "packet_hash": "2a32a15b542e8aec000a69ac950dd7e241913edc8d16d01a1ea5791c254b54ed",
+      "packet_id": "HV-AP-REP-013-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-013-B.packet.json",
+      "pair_id": "HV-AP-REP-013",
+      "prompt_hash": "a4d360f1e5da457faa26b8fe09b852a21b3c63f561ea2e0c6b04551993b3d822",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-013-B.prompt.txt",
+      "source_ids": [
+        "SRC-85E56C34309F-POL",
+        "SRC-85E56C34309F-REQ",
+        "SRC-85E56C34309F-CTL",
+        "SRC-85E56C34309F-FBK",
+        "SRC-85E56C34309F-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "ac29524f43e3ea84d0e5cc41c25625f6115e522742efd4ab2b640b7ef5631a42",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-014-A.model-visible.json",
+      "packet_hash": "ef44f9a06cef39827ec2554399468a0a716ce4fd7a91a62f6e3f2b87197b4fc4",
+      "packet_id": "HV-AP-REP-014-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-014-A.packet.json",
+      "pair_id": "HV-AP-REP-014",
+      "prompt_hash": "c6f83c41f17e32eb77cd6e6bdc787e49946cb8564fb52baba8772f60a2b8b7cb",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-014-A.prompt.txt",
+      "source_ids": [
+        "SRC-B49D745B049B-POL",
+        "SRC-B49D745B049B-REQ",
+        "SRC-B49D745B049B-CTL",
+        "SRC-B49D745B049B-FBK",
+        "SRC-B49D745B049B-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "18acd17f4b91e2a141d0bf238e5696b6152b89f0fdf322331c42754bde85a3a8",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-014-B.model-visible.json",
+      "packet_hash": "888accea714addf125612e626dc7b7034c278ae6fa61e5dcc7d0eb06d388e12b",
+      "packet_id": "HV-AP-REP-014-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-014-B.packet.json",
+      "pair_id": "HV-AP-REP-014",
+      "prompt_hash": "55de49d4175b3b60aab8cf863e649cb0a1007fe56611528ac39289a16e978187",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-014-B.prompt.txt",
+      "source_ids": [
+        "SRC-063FCC8CCDC8-POL",
+        "SRC-063FCC8CCDC8-REQ",
+        "SRC-063FCC8CCDC8-CTL",
+        "SRC-063FCC8CCDC8-FBK",
+        "SRC-063FCC8CCDC8-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "e3d086581b0d122eb5cb9d3c4d487d59ce4091b59c7c6958b4ea9646d37d26c4",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-015-A.model-visible.json",
+      "packet_hash": "0fc235e7df5f78ba1147a8a0603208516378b0332120fca068c3672620a6d56b",
+      "packet_id": "HV-AP-REP-015-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-015-A.packet.json",
+      "pair_id": "HV-AP-REP-015",
+      "prompt_hash": "861e9e9b1eda10bd6b1c5006a4ae8afbb6c19e9e7e35c744f2e14aecf5b47ee3",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-015-A.prompt.txt",
+      "source_ids": [
+        "SRC-389D141A7151-POL",
+        "SRC-389D141A7151-REQ",
+        "SRC-389D141A7151-CTL",
+        "SRC-389D141A7151-FBK",
+        "SRC-389D141A7151-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "5c661b20e0c4a9ad934bb0584656d71b77cb116c2cbc3b1ea8f4ce88130da5ec",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-015-B.model-visible.json",
+      "packet_hash": "53f3e01a37478cac737935aa2a72e3a720ba44c955b2d27a73e0115b4a9fba2d",
+      "packet_id": "HV-AP-REP-015-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-015-B.packet.json",
+      "pair_id": "HV-AP-REP-015",
+      "prompt_hash": "10ec0dd110057c954d4e57e62aa66c2437f2ccae4522c20bfa77b50e055e68ab",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-015-B.prompt.txt",
+      "source_ids": [
+        "SRC-2AFF34707CC9-POL",
+        "SRC-2AFF34707CC9-REQ",
+        "SRC-2AFF34707CC9-CTL",
+        "SRC-2AFF34707CC9-FBK",
+        "SRC-2AFF34707CC9-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "4146888b368db88dcc1821924502d96bbab3761a94bf003361696fc4f5961fa3",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-016-A.model-visible.json",
+      "packet_hash": "7d2356dd36015e9ad8669bc269012b365155279d46fc5627b455787fcd1b094d",
+      "packet_id": "HV-AP-REP-016-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-016-A.packet.json",
+      "pair_id": "HV-AP-REP-016",
+      "prompt_hash": "302ec9c7393f77018d549987ee352c20eb0d677c0d031b7c226744ee5f4a8bd6",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-016-A.prompt.txt",
+      "source_ids": [
+        "SRC-D5A853E8E47A-POL",
+        "SRC-D5A853E8E47A-REQ",
+        "SRC-D5A853E8E47A-CTL",
+        "SRC-D5A853E8E47A-FBK",
+        "SRC-D5A853E8E47A-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "ca498de4178682d36c71f10c1f6a933f42e0c2a26b3a4e058373796434fc4bc0",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-016-B.model-visible.json",
+      "packet_hash": "be2de1fe46393511ab4c5a20ad5e6c48469bb78bdaf29ac47d6ce533e3687ee8",
+      "packet_id": "HV-AP-REP-016-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-016-B.packet.json",
+      "pair_id": "HV-AP-REP-016",
+      "prompt_hash": "6fcd6c13ebed6c8a3142d732c481aac69c73d9753129fbe381efeda4e22fd204",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-016-B.prompt.txt",
+      "source_ids": [
+        "SRC-369A7612D387-POL",
+        "SRC-369A7612D387-REQ",
+        "SRC-369A7612D387-CTL",
+        "SRC-369A7612D387-FBK",
+        "SRC-369A7612D387-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "93cf49af1d8e67345baeb9d75f18b47c5b6b906226d0f787dbe956533c8580ba",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-017-A.model-visible.json",
+      "packet_hash": "6e64b4fd3c46607aa7f48ba114b1a6891b949d89bbabe8ea6766634722be5fe9",
+      "packet_id": "HV-AP-REP-017-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-017-A.packet.json",
+      "pair_id": "HV-AP-REP-017",
+      "prompt_hash": "80bff5f015a30f8dbd82df4c624f0d2d367291de28ea2b1f6b3eb55de3700623",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-017-A.prompt.txt",
+      "source_ids": [
+        "SRC-938B8EACD0E4-POL",
+        "SRC-938B8EACD0E4-REQ",
+        "SRC-938B8EACD0E4-CTL",
+        "SRC-938B8EACD0E4-FBK",
+        "SRC-938B8EACD0E4-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "4945199ab6333bc29c0d27a2d964e62aafb47d685d3ed5f517bbde98ace6a19a",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-017-B.model-visible.json",
+      "packet_hash": "ca7250f36a436146491c2434be436916073f097f28d467b5c05fe8f6f713de0b",
+      "packet_id": "HV-AP-REP-017-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-017-B.packet.json",
+      "pair_id": "HV-AP-REP-017",
+      "prompt_hash": "5934e10c4cb39a9f8d7f456ba0c7d03ad93d78d45bdcf42b2e34338a8aef62d3",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-017-B.prompt.txt",
+      "source_ids": [
+        "SRC-7444086D50EB-POL",
+        "SRC-7444086D50EB-REQ",
+        "SRC-7444086D50EB-CTL",
+        "SRC-7444086D50EB-FBK",
+        "SRC-7444086D50EB-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "f54f4bc84b52c35137bdd51b4f1b974290cfb4a9d62eafcdc55f9a06aadcd6d3",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-018-A.model-visible.json",
+      "packet_hash": "0e6920272b91bffa442940a10ba524404e1e2da4c726fd32b03d3b7b48e3b23e",
+      "packet_id": "HV-AP-REP-018-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-018-A.packet.json",
+      "pair_id": "HV-AP-REP-018",
+      "prompt_hash": "50fe5a67c790faf90117ae5f70d0a505c079aa5d6d628caa053c4a04cfb61f97",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-018-A.prompt.txt",
+      "source_ids": [
+        "SRC-BDF64C04906C-POL",
+        "SRC-BDF64C04906C-REQ",
+        "SRC-BDF64C04906C-CTL",
+        "SRC-BDF64C04906C-FBK",
+        "SRC-BDF64C04906C-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "eb2e6a79329c71902d3af8d504264560441b0a2f8b49df8026bbd3715467d8f8",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-018-B.model-visible.json",
+      "packet_hash": "13ea2de4903b30106e5a2b51397b7b6ed874b00d583f96ba20aeb4ab83940e04",
+      "packet_id": "HV-AP-REP-018-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-018-B.packet.json",
+      "pair_id": "HV-AP-REP-018",
+      "prompt_hash": "0028c293a52c3ee6372cd960ab1075b2bc14db8491acacd7dacd0924c6c0335b",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-018-B.prompt.txt",
+      "source_ids": [
+        "SRC-B432F2C184E8-POL",
+        "SRC-B432F2C184E8-REQ",
+        "SRC-B432F2C184E8-CTL",
+        "SRC-B432F2C184E8-FBK",
+        "SRC-B432F2C184E8-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "f41c0d72cec6b51fe885bab25af33b793364ee7c1cd4dfd1e4815c0ca66cd132",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-019-A.model-visible.json",
+      "packet_hash": "f5f5cf8b6ad19a6be89c42b2437d0c27e10ce47b5bf9041e60ad411996cbea77",
+      "packet_id": "HV-AP-REP-019-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-019-A.packet.json",
+      "pair_id": "HV-AP-REP-019",
+      "prompt_hash": "fe46d7131751b31028f64d711040fad6568ae7eb0f85a8a6e9cde80f6c9b81c5",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-019-A.prompt.txt",
+      "source_ids": [
+        "SRC-AD6F9A954B25-POL",
+        "SRC-AD6F9A954B25-REQ",
+        "SRC-AD6F9A954B25-CTL",
+        "SRC-AD6F9A954B25-FBK",
+        "SRC-AD6F9A954B25-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "c0fcfd1d4fd1a65568fff142a9f814279d3042319a4f067b92d01c4f3069f0ce",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-019-B.model-visible.json",
+      "packet_hash": "4cb834d7c0105c90f568ad18ac7a5106ed2daa5244f891b1098d870fcfea5f53",
+      "packet_id": "HV-AP-REP-019-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-019-B.packet.json",
+      "pair_id": "HV-AP-REP-019",
+      "prompt_hash": "246ae7e7ff8a9635cdd0ffd448cd5f0487e94be6676949313879c1bc12e3d128",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-019-B.prompt.txt",
+      "source_ids": [
+        "SRC-978A8E8D27B0-POL",
+        "SRC-978A8E8D27B0-REQ",
+        "SRC-978A8E8D27B0-CTL",
+        "SRC-978A8E8D27B0-FBK",
+        "SRC-978A8E8D27B0-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ALLOW",
+      "is_target_packet": false,
+      "model_visible_payload_hash": "61028c345c0f66ff2e8fe6a358e5f6131be8a4959daf27210c9367df5024cdab",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-020-A.model-visible.json",
+      "packet_hash": "b0ff216aa8c7540b410c070ad1bb741e293da0268fab71fc853f4cb3a0941736",
+      "packet_id": "HV-AP-REP-020-A",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-020-A.packet.json",
+      "pair_id": "HV-AP-REP-020",
+      "prompt_hash": "b43319f1b19b4dc4e1ec25b480a89217e77b2cd19e67beab15f3c943b6211bd5",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-020-A.prompt.txt",
+      "source_ids": [
+        "SRC-952AB2A8C247-POL",
+        "SRC-952AB2A8C247-REQ",
+        "SRC-952AB2A8C247-CTL",
+        "SRC-952AB2A8C247-FBK",
+        "SRC-952AB2A8C247-BND"
+      ],
+      "suffix": "A",
+      "target_bucket": "hard_escalate"
+    },
+    {
+      "expected_verdict_for_local_gate": "ESCALATE",
+      "is_target_packet": true,
+      "model_visible_payload_hash": "c9de522cbea04ff6f4c4bdf81be4f1c6dd9bcdde5f7bc1934a9a0cd964ea71c0",
+      "model_visible_payload_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/model_visible_payloads/HV-AP-REP-020-B.model-visible.json",
+      "packet_hash": "d9517db402319a30284af24d454bf9639328ed65861bca0b98d413cc4752f262",
+      "packet_id": "HV-AP-REP-020-B",
+      "packet_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/packets/HV-AP-REP-020-B.packet.json",
+      "pair_id": "HV-AP-REP-020",
+      "prompt_hash": "ad4d82511dfd6b5cf8dc169b5c1ac64919dc08f8a030657f380632336b3caf62",
+      "prompt_path": "holoverify_replication_packet_freeze_3families_2026-06-29/families/HV-AP-REP-2026-06-29/prompts/HV-AP-REP-020-B.prompt.txt",
+      "source_ids": [
+        "SRC-B72C34839286-POL",
+        "SRC-B72C34839286-REQ",
+        "SRC-B72C34839286-CTL",
+        "SRC-B72C34839286-FBK",
+        "SRC-B72C34839286-BND"
+      ],
+      "suffix": "B",
+      "target_bucket": "hard_escalate"
+    }
+  ],
+  "root_signature": "b1fab02ef28a5b1fd16ddb9e2651c12145fe44f3eaafda8955907dd2db68eadc",
+  "runner_source_hash": "babc80a91127685635b93f3337a21d4f42af6c67f595633782be935cb2e12afb"
+}

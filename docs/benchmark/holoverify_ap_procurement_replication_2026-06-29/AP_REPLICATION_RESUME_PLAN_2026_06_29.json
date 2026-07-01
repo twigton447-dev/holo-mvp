@@ -1,0 +1,113 @@
+{
+  "classification": "AP_REPLICATION_RESUME_PLAN_NO_RERUNS_YET",
+  "status": "BLOCKED_ON_REQUIRED_GEMINI_WORKER_503",
+  "family_id": "HV-AP-REP-2026-06-29",
+  "freeze_commit": "de22377be8175d04078ba6c70f1fd35222e9f572",
+  "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "ap_preflight": "PASS",
+  "holo_result": "NOT_COMPLETE",
+  "solo_baseline": "NOT_RUN",
+  "judges": "NOT_RUN",
+  "commerce_it": "NOT_RUN",
+  "blocked_until": "google/gemini-2.5-flash-lite is stable enough to complete required Worker 2 slot",
+  "current_blocker": {
+    "provider": "google",
+    "model": "gemini-2.5-flash-lite",
+    "http_status": 503,
+    "failure_type": "provider_service_unavailable",
+    "affected_slot": "W2_ADVERSARIAL_SCOPE_CHALLENGER"
+  },
+  "preserved_invalid_attempts": [
+    {
+      "run": "run_20260629T105111Z",
+      "calls": 133,
+      "worker_calls": 80,
+      "gov_calls": 53,
+      "failure_provider": "google",
+      "failure_model": "gemini-2.5-flash-lite",
+      "failure_packet": "HV-AP-REP-014-A",
+      "failure_turn": "HV-AP-REP-014-A_W2",
+      "failure_error": "HTTPError: HTTP Error 503: Service Unavailable",
+      "lock_status": "PASS",
+      "lock_root": "6a39255165a0e71a112094377e5a56dc66d1111ecc1c48adf267069919821cc2"
+    },
+    {
+      "run": "run_20260629T110920Z",
+      "calls": 43,
+      "worker_calls": 26,
+      "gov_calls": 17,
+      "failure_provider": "google",
+      "failure_model": "gemini-2.5-flash-lite",
+      "failure_packet": "HV-AP-REP-005-A",
+      "failure_turn": "HV-AP-REP-005-A_W2",
+      "failure_error": "HTTPError: HTTP Error 503: Service Unavailable",
+      "lock_status": "PASS",
+      "lock_root": "e0d4f7fe2e4d7a0376603b13cdd89b99bc5303e462a382af271a858db433d989"
+    },
+    {
+      "run": "run_20260629T111600Z",
+      "calls": 28,
+      "worker_calls": 17,
+      "gov_calls": 11,
+      "failure_provider": "google",
+      "failure_model": "gemini-2.5-flash-lite",
+      "failure_packet": "HV-AP-REP-003-B",
+      "failure_turn": "HV-AP-REP-003-B_W2",
+      "failure_error": "HTTPError: HTTP Error 503: Service Unavailable",
+      "lock_status": "PASS",
+      "lock_root": "3a2ef6c9e7b0e682493d1390e69416c6a99750392e107f3f54268dabbdb4af50"
+    }
+  ],
+  "protocol_boundaries": {
+    "answer_key_leakage_allowed": false,
+    "fallback_model_allowed_for_proof_credit": false,
+    "judges_allowed_before_holo_freeze": false,
+    "packet_edits_allowed": false,
+    "prompt_edits_allowed": false,
+    "roster_substitution_allowed": false,
+    "solo_allowed_before_valid_holo_freeze": false
+  },
+  "pre_resume_health_check": {
+    "classification": "TINY_NON_BENCHMARK_PROVIDER_HEALTH_CHECK",
+    "provider": "google",
+    "model": "gemini-2.5-flash-lite",
+    "prompt": "Return exactly OK.",
+    "packet_content_allowed": false,
+    "benchmark_prompt_allowed": false,
+    "holo_run_allowed": false,
+    "solo_run_allowed": false,
+    "judge_run_allowed": false,
+    "if_fails": "KEEP_AP_BLOCKED",
+    "if_passes": "RUN_ONE_FRESH_FULL_AP_HOLO_ATTEMPT_FROM_FROZEN_PACKET_BANK"
+  },
+  "next_valid_holo_attempt": {
+    "requires_health_check_pass": true,
+    "fresh_full_run_required": true,
+    "partial_retry_allowed": false,
+    "family_scope": "AP_ONLY",
+    "worker_sequence": [
+      "xai/grok-3-mini",
+      "google/gemini-2.5-flash-lite",
+      "minimax/MiniMax-M2.5-highspeed"
+    ],
+    "gov_model": "minimax/MiniMax-M2.5-highspeed",
+    "expected_provider_calls": 200,
+    "judges": 0
+  },
+  "solo_resume_rule": {
+    "requires_valid_ap_holo_freeze": true,
+    "expected_provider_calls": 120,
+    "models": [
+      "xai/grok-3-mini",
+      "google/gemini-2.5-flash-lite",
+      "minimax/MiniMax-M2.5-highspeed"
+    ],
+    "gov": false,
+    "holo_state": false,
+    "baton": false,
+    "selector": false,
+    "judges": false
+  },
+  "commerce_it_rule": "DO_NOT_RUN_UNTIL_AP_COMPLETED_AND_AUDITED_OR_EXPLICITLY_DEFERRED_BY_USER",
+  "recommended_next_action": "Wait for Gemini stability, then run the tiny non-benchmark provider health check only."
+}

@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Banking / KYC / AML controls action now? Action: foreign transfer with stale country-risk review. Boundary: transfer note cannot replace current country-risk review.",
+    "allow_rule_assessment": "Current control record closes the exact requested boundary.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-568D9D4F01AE-CTL",
+    "escalate_rule_assessment": "No escalation; source record is current and controlling.",
+    "timing_scope_authority_dependency_check": "country-risk review|destination|purpose match current"
+  },
+  "cited_evidence": [
+    "SRC-568D9D4F01AE-CTL",
+    "SRC-568D9D4F01AE-POL",
+    "SRC-568D9D4F01AE-BND",
+    "SRC-568D9D4F01AE-FBK",
+    "SRC-568D9D4F01AE-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "country-risk review",
+    "destination",
+    "purpose match",
+    "country-risk review, destination, and purpose match",
+    "SRC-568D9D4F01AE-CTL",
+    "SRC-568D9D4F01AE-BND"
+  ],
+  "final_answer": "The packet\u2019s controlling control record says the current review, destination, and purpose match are exact and tied to the requested foreign transfer. Policy allows execution only when the exact boundary is closed by source records, and the communication boundary cannot override that. Based on the source records here, the action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

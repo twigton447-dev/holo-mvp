@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Defense administration / logistics controls action now? Action: inventory adjustment without dual custody reconciliation. Boundary: warehouse note cannot adjust inventory alone.",
+    "allow_rule_assessment": "No exact source closure for dual custody",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-71AE993A7465-CTL",
+    "escalate_rule_assessment": "Unresolved dependency blocks execution",
+    "timing_scope_authority_dependency_check": "dual custody count and memo match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-71AE993A7465-CTL",
+    "SRC-71AE993A7465-BND",
+    "SRC-71AE993A7465-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records do not close the exact boundary for inventory adjustment without dual custody reconciliation. The control record confirms the dependency is missing, stale, mismatched, expired, unsigned, unapproved, or scoped differently. Warehouse note alone cannot authorize execution. The action must escalate until source-control dependency is matched.",
+  "open_blockers": [
+    "dual custody count and adjustment memo match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

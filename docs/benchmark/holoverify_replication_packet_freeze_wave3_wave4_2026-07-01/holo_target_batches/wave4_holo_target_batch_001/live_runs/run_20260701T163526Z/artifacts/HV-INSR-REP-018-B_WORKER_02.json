@@ -1,0 +1,28 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Insurance claims / coverage controls action now? Action: total-loss settlement missing title document. Boundary: valuation memo cannot settle without title closure.",
+    "allow_rule_assessment": "Source records do not close the boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-83439DDAF666-CTL",
+    "escalate_rule_assessment": "Title closure remains missing in current control record",
+    "timing_scope_authority_dependency_check": "title documents|valuation|lienholder status remain unmatched"
+  },
+  "cited_evidence": [
+    "SRC-83439DDAF666-CTL",
+    "SRC-83439DDAF666-BND",
+    "SRC-83439DDAF666-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Escalate. The current source-control record does not close the exact boundary for total-loss settlement with missing title document. Valuation memo cannot authorize settlement before title closure, and the source records still show unresolved title documents, valuation, and lienholder status match.",
+  "open_blockers": [
+    "title documents missing",
+    "lienholder mismatch"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

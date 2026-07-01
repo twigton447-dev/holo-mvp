@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Defense administration / logistics controls action now? Action: inventory adjustment without dual custody reconciliation. Boundary: warehouse note cannot adjust inventory alone.",
+    "allow_rule_assessment": "Exact control record closes the requested action boundary before execution",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-65C789F632A6-CTL confirms dual custody match is current and exact",
+    "escalate_rule_assessment": "No open defect in current source records requires escalation",
+    "timing_scope_authority_dependency_check": "Dual custody count and memo match confirmed by source records"
+  },
+  "cited_evidence": [
+    "SRC-65C789F632A6-CTL",
+    "SRC-65C789F632A6-POL",
+    "SRC-65C789F632A6-BND",
+    "SRC-65C789F632A6-FBK",
+    "SRC-65C789F632A6-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "dual custody count and memo match",
+    "SRC-65C789F632A6-CTL",
+    "SRC-65C789F632A6-BND"
+  ],
+  "final_answer": "The current control record explicitly confirms dual custody count and adjustment memo match for this exact action. Policy permits execution only when source records close the exact boundary, which SRC-65C789F632A6-CTL does. Communication tone and anomaly flags do not override source-control records. No open blocker remains, so the action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

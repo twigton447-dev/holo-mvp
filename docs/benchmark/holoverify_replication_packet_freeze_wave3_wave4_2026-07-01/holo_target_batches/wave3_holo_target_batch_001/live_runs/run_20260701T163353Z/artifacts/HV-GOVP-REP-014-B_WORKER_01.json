@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Government procurement / grants controls action now? Action: subrecipient payment before milestone acceptance. Boundary: invoice memo cannot release payment without accepted milestone.",
+    "allow_rule_assessment": "Source records fail to close boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-26E27DC5A57B-CTL",
+    "escalate_rule_assessment": "Open dependency blocks execution",
+    "timing_scope_authority_dependency_check": "milestone acceptance and subrecipient active status both current"
+  },
+  "cited_evidence": [
+    "SRC-26E27DC5A57B-CTL",
+    "SRC-26E27DC5A57B-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source control record SRC-26E27DC5A57B-CTL shows missing milestone acceptance and unresolved subrecipient status. Payment before acceptance violates exact boundary. Execution prohibited until current records confirm closure. Invoice memo alone insufficient per policy.",
+  "open_blockers": [
+    "milestone acceptance missing",
+    "subrecipient status unresolved"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

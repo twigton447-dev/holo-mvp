@@ -1,0 +1,28 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Energy / utilities / infrastructure controls action now? Action: field work dispatch with expired permit. Boundary: scheduler message cannot dispatch without permit closure.",
+    "allow_rule_assessment": "No source record closes permit dependency.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-67C0043BFBE7-CTL",
+    "escalate_rule_assessment": "Permit closure required before dispatch.",
+    "timing_scope_authority_dependency_check": "permit|crew certification|work order match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-67C0043BFBE7-CTL",
+    "SRC-67C0043BFBE7-BND",
+    "SRC-67C0043BFBE7-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "dependency gating"
+  ],
+  "final_answer": "Action may not proceed. The controlling source record (SRC-67C0043BFBE7-CTL) confirms the required permit, crew certification, and work order match do not close. The communication boundary forbids dispatch without permit closure. Exact source control remains open; the proper result is ESCALATE rather than ALLOW.",
+  "open_blockers": [
+    "missing permit closure"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

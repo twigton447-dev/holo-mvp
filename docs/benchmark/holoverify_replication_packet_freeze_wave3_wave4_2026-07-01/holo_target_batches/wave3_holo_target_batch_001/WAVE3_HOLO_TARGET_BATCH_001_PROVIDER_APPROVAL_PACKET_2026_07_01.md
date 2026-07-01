@@ -1,9 +1,9 @@
-# Wave 3 Holo Target Batch 001 Provider Approval Packet
+# Wave 3 Holo Target Batch Provider Approval Packet
 
-Status: `PENDING_RUNTIME_LIVE_PREFLIGHT_REFRESH`
+Status: `READY_FOR_EXPLICIT_PROVIDER_APPROVAL`
 Approval granted by this packet: `False`
-Approval packet SHA-256: `1b9888d431324dc8e22d6b1dc4feab33a34fffaaae88eaebd565a5b1a43a1ca8`
-Live preflight root signature: `PENDING_RUNTIME_PREFLIGHT`
+Approval packet SHA-256: `4cb9571846cad4b6f6e57dbc406d044320ff9283c5b73c2f2bf5dfbb81d3a066`
+Live preflight root signature: `4fa40081fa4d54c56c6fbf463a70a98d90fa62d8d27b12b67e59bc23ef271ba6`
 
 ## Required Statement
 
@@ -11,29 +11,24 @@ Live preflight root signature: `PENDING_RUNTIME_PREFLIGHT`
 
 ## Expected Calls If Approved
 
-- `gov_calls`: `48`
-- `judge_calls`: `0`
-- `packets`: `24`
 - `pairs`: `12`
-- `solo_calls`: `0`
-- `total_provider_calls`: `120`
+- `packets`: `24`
 - `worker_calls`: `72`
+- `gov_calls`: `48`
+- `total_provider_calls`: `120`
+- `judge_calls`: `0`
+- `solo_calls`: `0`
 
-## Runtime Refresh Required
-
-Run the no-provider live preflight first. It will refresh this approval packet with the current live-preflight root and a new SHA-256.
-
-## Template Command After Runtime Refresh
+## Command After Explicit Approval
 
 ```bash
-python3 -B docs/benchmark/run_wave3_wave4_holo_target_batch_2026_07_01.py --wave wave3 --batch-number 1 --run-live --approval-packet-sha256 1b9888d431324dc8e22d6b1dc4feab33a34fffaaae88eaebd565a5b1a43a1ca8 --approval-statement "I explicitly approve provider calls for WAVE3_HOLO_TARGET_BATCH_001 only, exactly as scoped in WAVE3_HOLO_TARGET_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave3_wave4_holo_target_batch_2026_07_01.py --wave wave3 --batch-number 1 --run-live --approval-packet-sha256 4cb9571846cad4b6f6e57dbc406d044320ff9283c5b73c2f2bf5dfbb81d3a066 --approval-statement "I explicitly approve provider calls for WAVE3_HOLO_TARGET_BATCH_001 only, exactly as scoped in WAVE3_HOLO_TARGET_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Stop Rules
 
 - Do not run providers without explicit approval.
-- Do not use this template packet directly for live execution.
-- Run the no-provider live preflight immediately before live execution to bind the approval packet to the current preflight root.
-- Do not run solo or judges.
+- Use this approval packet only for the current checkout state and current live-preflight root.
+- Do not rerun solo or judges.
 - Do not edit frozen packets or prompts.
 - No fallback or model substitution.

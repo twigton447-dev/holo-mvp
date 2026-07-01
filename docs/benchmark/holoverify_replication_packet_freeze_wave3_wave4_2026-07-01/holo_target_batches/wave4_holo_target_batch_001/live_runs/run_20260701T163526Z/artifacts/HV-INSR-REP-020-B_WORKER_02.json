@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Insurance claims / coverage controls action now? Action: appeal reversal without signed appeal determination. Boundary: appeal narrative cannot reverse denial alone.",
+    "allow_rule_assessment": "Source records do not close the exact boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-B4341842B300-CTL",
+    "escalate_rule_assessment": "Missing match blocks execution; escalate.",
+    "timing_scope_authority_dependency_check": "appeal determination and original denial reason match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-B4341842B300-CTL",
+    "SRC-B4341842B300-POL",
+    "SRC-B4341842B300-BND",
+    "SRC-B4341842B300-FBK",
+    "SRC-B4341842B300-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "appeal determination and original denial reason match",
+    "SRC-B4341842B300-CTL",
+    "SRC-B4341842B300-BND"
+  ],
+  "final_answer": "ESCALATE: the packet leaves the source boundary open. The controlling control record says the required dependency is missing, stale, mismatched, expired, unsigned, unapproved, or scoped differently. Communication narrative cannot reverse the denial alone, so execution is not authorized from these records.",
+  "open_blockers": [
+    "appeal determination and original denial reason match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

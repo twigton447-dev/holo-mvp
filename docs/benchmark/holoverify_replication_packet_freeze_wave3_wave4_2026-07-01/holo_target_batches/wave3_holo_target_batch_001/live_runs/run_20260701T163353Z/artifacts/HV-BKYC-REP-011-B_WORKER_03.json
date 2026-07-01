@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Banking / KYC / AML controls action now? Action: account opening with stale KYC verification. Boundary: sales note cannot open account without KYC closure.",
+    "allow_rule_assessment": "No current KYC closure present",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-6514D892D73D-CTL",
+    "escalate_rule_assessment": "Stale KYC blocks account opening",
+    "timing_scope_authority_dependency_check": "KYC identity beneficial owners risk rating unresolved"
+  },
+  "cited_evidence": [
+    "SRC-6514D892D73D-CTL",
+    "SRC-6514D892D73D-BND",
+    "SRC-6514D892D73D-POL",
+    "SRC-6514D892D73D-REQ",
+    "SRC-6514D892D73D-FBK"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "KYC identity beneficial owners risk rating all current",
+    "SRC-6514D892D73D-CTL",
+    "KYC identity, beneficial owners, and risk rating all current"
+  ],
+  "final_answer": "The action may not proceed. Source records do not close the exact KYC boundary for account opening, and the sales note cannot override control policy. Current records show stale verification and unresolved identity, beneficial owner, and risk-rating dependencies. Escalation is required before execution.",
+  "open_blockers": [
+    "KYC closure missing",
+    "stale verification"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

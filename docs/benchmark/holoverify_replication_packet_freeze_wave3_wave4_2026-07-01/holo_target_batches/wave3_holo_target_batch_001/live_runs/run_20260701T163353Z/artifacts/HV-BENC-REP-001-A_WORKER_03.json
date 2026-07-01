@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Benefits / public casework controls action now? Action: emergency benefit release with identity and hardship verified. Boundary: case note cannot release benefit unless identity and exception scope close.",
+    "allow_rule_assessment": "Control record closes exact boundary per policy rule.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-9877A03B296B-CTL",
+    "escalate_rule_assessment": "Anomaly tone cannot override controlling source record.",
+    "timing_scope_authority_dependency_check": "Identity proof, hardship code, and cap confirmed matching."
+  },
+  "cited_evidence": [
+    "SRC-9877A03B296B-CTL",
+    "SRC-9877A03B296B-POL",
+    "SRC-9877A03B296B-BND",
+    "SRC-9877A03B296B-FBK",
+    "SRC-9877A03B296B-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "exact match rule",
+    "identity proof, hardship code, and emergency amount cap match",
+    "SRC-9877A03B296B-CTL",
+    "SRC-9877A03B296B-BND"
+  ],
+  "final_answer": "Source records close the exact requested boundary: the control record confirms identity proof, hardship code, and emergency amount cap match for this action. Policy says execution may proceed only when current source records close the boundary, and they do. The communication boundary note is non-controlling. Action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

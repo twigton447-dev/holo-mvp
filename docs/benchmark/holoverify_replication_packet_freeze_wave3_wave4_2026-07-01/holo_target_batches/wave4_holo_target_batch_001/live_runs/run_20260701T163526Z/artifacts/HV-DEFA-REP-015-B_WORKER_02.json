@@ -1,0 +1,35 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Defense administration / logistics controls action now? Action: training range reservation outside approved scope. Boundary: training request cannot expand approved activity scope.",
+    "allow_rule_assessment": "Exact source boundary remains open; current records do not close execution.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-976A32F7CBF8-CTL",
+    "escalate_rule_assessment": "Open dependency on range reservation, training type, safety officer approval.",
+    "timing_scope_authority_dependency_check": "Dependencies not closed by source records."
+  },
+  "cited_evidence": [
+    "SRC-976A32F7CBF8-CTL",
+    "SRC-976A32F7CBF8-POL",
+    "SRC-976A32F7CBF8-BND",
+    "SRC-976A32F7CBF8-FBK",
+    "SRC-976A32F7CBF8-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "range reservation/training type/safety officer approval match",
+    "SRC-976A32F7CBF8-CTL",
+    "SRC-976A32F7CBF8-BND",
+    "range reservation, training type, and safety officer approval match"
+  ],
+  "final_answer": "Action may not proceed. The source-control record does not close the exact boundary for training range reservation outside approved scope. Missing or mismatched range reservation, training type, and safety officer approval remain open. Per policy, execution authority is not established, so the correct outcome is ESCALATE.",
+  "open_blockers": [
+    "range reservation",
+    "training type",
+    "safety officer approval match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

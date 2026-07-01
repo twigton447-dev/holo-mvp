@@ -55,10 +55,10 @@ Run exactly the next allowed batch if provider calls are explicitly approved.
 
 - Batch: `WAVE5_SECO_HOLO_BATCH_001`
 - Family: `HV-SECO-REP-2026-07-01`
-- Approval SHA: `7b544fc5442eec7dafaa5cd9e4238bccc84b48ad4ccaa658220af567b73b12ab`
+- Approval SHA: `578a0f03efb8c741e24ea89b6621a6e27f409dc3b0d5ce344141555032a9632a`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-SECO-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 7b544fc5442eec7dafaa5cd9e4238bccc84b48ad4ccaa658220af567b73b12ab --approval-statement "I explicitly approve provider calls for WAVE5_SECO_HOLO_BATCH_001 only, exactly as scoped in WAVE5_SECO_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-SECO-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 578a0f03efb8c741e24ea89b6621a6e27f409dc3b0d5ce344141555032a9632a --approval-statement "I explicitly approve provider calls for WAVE5_SECO_HOLO_BATCH_001 only, exactly as scoped in WAVE5_SECO_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Checks

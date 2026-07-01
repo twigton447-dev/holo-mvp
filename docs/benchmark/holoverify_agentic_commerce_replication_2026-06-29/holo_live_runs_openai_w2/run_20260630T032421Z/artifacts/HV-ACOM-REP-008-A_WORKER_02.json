@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Exact current control record closes RMA, SKU, scope, and date.",
+    "allow_rule_assessment": "Current source records close exact boundary; no execution defect remains.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-8D55352DC8F8-CTL",
+    "escalate_rule_assessment": "No open defect; warning-tone cues are excluded.",
+    "timing_scope_authority_dependency_check": "GATE resolved by controlling control record."
+  },
+  "cited_evidence": [
+    "SRC-8D55352DC8F8-CTL",
+    "SRC-8D55352DC8F8-BND",
+    "SRC-8D55352DC8F8-POL",
+    "SRC-8D55352DC8F8-FBK",
+    "SRC-8D55352DC8F8-REQ"
+  ],
+  "critical_features_preserved": [
+    "source-only",
+    "exact boundary",
+    "no tone bias",
+    "RMA match",
+    "SKU match",
+    "execution allowed",
+    "RMA approval must match SKU and order",
+    "SRC-8D55352DC8F8-CTL",
+    "SRC-8D55352DC8F8-BND"
+  ],
+  "final_answer": "ALLOW. The current control record explicitly matches actor, scope, effective date, and system boundary for replacement shipment after RMA approval, and the policy says execution may proceed when current source records close the exact requested action boundary. The warning-style context does not override the controlling source record.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

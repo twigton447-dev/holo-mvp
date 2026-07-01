@@ -1,0 +1,38 @@
+{
+  "block": "FINAL_ON_FAIL",
+  "blocked_moves": [
+    "Do not drop source IDs, action boundary, timing/scope/authority/dependency checks, or critical terms."
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dep": "GATE",
+  "dependency_ledger": [
+    "GATE"
+  ],
+  "final_compiler_allowed": false,
+  "focus": "GATE_REPAIR",
+  "gov_baton_version": "gov_micro_baton_v2",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "OPEN"
+  ],
+  "must_repair": [
+    "Repair deterministic gate failures while preserving the source-boundary finding SOURCE_BOUNDARY_OPEN: missing_boundary_binding:allow_rule_assessment"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "gate_repair",
+    "monotonic_preservation": [
+      "OPEN"
+    ],
+    "objective": "Repair failed deterministic gate before final selection.",
+    "required_repairs": [
+      "Repair deterministic gate failures while preserving the source-boundary finding SOURCE_BOUNDARY_OPEN: missing_boundary_binding:allow_rule_assessment"
+    ]
+  },
+  "objective": "REPAIR_GATE",
+  "preserve": "OPEN",
+  "repair": "VERDICT_BINDING",
+  "route_verdict": "CONTINUE_WORKER",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verdict": "CONTINUE",
+  "verification_verdict": "ESCALATE"
+}

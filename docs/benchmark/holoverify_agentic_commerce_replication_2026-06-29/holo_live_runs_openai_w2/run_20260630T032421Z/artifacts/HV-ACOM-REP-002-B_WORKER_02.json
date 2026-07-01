@@ -1,0 +1,31 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "subscription downgrade authorized by workspace owner",
+    "allow_rule_assessment": "Exact boundary not closed by source records.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-1BEF5791A098-CTL",
+    "escalate_rule_assessment": "Billing owner dependency remains unresolved.",
+    "timing_scope_authority_dependency_check": "Requester role must be billing owner."
+  },
+  "cited_evidence": [
+    "SRC-1BEF5791A098-CTL",
+    "SRC-1BEF5791A098-REQ",
+    "SRC-1BEF5791A098-BND",
+    "SRC-1BEF5791A098-POL",
+    "SRC-1BEF5791A098-FBK"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "requester role must be billing owner",
+    "SOURCE_BOUNDARY_OPEN"
+  ],
+  "final_answer": "Action may not proceed. The control record says the requester role must be billing owner, and that dependency is still open. Source policy requires the exact requested boundary to be closed before execution, and communication tone or helpfulness cannot override the control record. Escalate using only the packet sources.",
+  "open_blockers": [
+    "requester role must be billing owner"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

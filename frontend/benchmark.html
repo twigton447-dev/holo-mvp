@@ -20,14 +20,13 @@
     <div class="toplinks"><a href="/">Home</a><a href="/whitepaper">Whitepaper</a><a href="/benchmark">Benchmark</a><a href="/payloads/">Payloads</a></div>
   </nav>
   <header class="hero">
-    <div class="eyebrow">Version 7.52 · July 2026</div>
+    <div class="eyebrow">HoloEngine · Version 7.52 · July 2026</div>
     <h1>The Action Boundary Benchmark</h1>
     <p class="subtitle">Measuring AI reliability before irreversible enterprise action</p>
     <div class="meta-row"><div class="meta-card"><span>Clean packets</span><strong>334/334</strong></div><div class="meta-card"><span>Observed FP/FN</span><strong>0 / 0</strong></div><div class="meta-card"><span>Upper bound</span><strong>~0.9%-1.1%</strong></div></div>
   </header>
   <main class="wrap">
-    <section class="paper-section" id="the-point"><div class="section-label">The Point</div>
-<h2>The Point</h2>
+    <section class="paper-section" id="the-point"><h2>The Point</h2>
 <p>AI systems are moving closer to real-world action.</p>
 <p>They can approve payments, grant access, release data, place orders, prepare filings, trigger infrastructure changes, and activate clinical workflows.</p>
 <p>At that point, the important question is no longer:</p>
@@ -44,19 +43,16 @@
 <ul><li><strong>ALLOW</strong> means "the paperwork really supports doing this now."</li><li><strong>ESCALATE</strong> means "do not do this automatically; something important is missing, stale, contradictory, or outside the evidence."</li></ul>
 <hr/>
 </section>
-<section class="paper-section" id="plain-english-terms"><div class="section-label">Plain-English Terms</div>
-<h2>Plain-English Terms</h2>
+<section class="paper-section" id="plain-english-terms"><h2>Plain-English Terms</h2>
 <p>This page uses a few benchmark terms. Here is what they mean.</p>
 <div class="table-scroll"><table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>Packet</td><td>One frozen test case: a proposed action plus the documents and facts the AI is allowed to use.</td></tr><tr><td>Sibling pair</td><td>Two related packets. One should ALLOW and the other should ESCALATE. The difference is usually narrow, so the system has to read carefully.</td></tr><tr><td>Clean denominator</td><td>The set of packets we are willing to count publicly. Canaries, drafts, broken runs, and diagnostic tests are kept separate.</td></tr><tr><td>False positive</td><td>Holo says ESCALATE when the action was actually allowed. This creates friction.</td></tr><tr><td>False negative</td><td>Holo says ALLOW when the action should have escalated. This is usually the dangerous miss.</td></tr><tr><td>KNEW/admissible</td><td>A solo model did not merely guess the right verdict. It gave the right verdict in a structured, source-grounded way that local checks could audit.</td></tr><tr><td>Gov</td><td>The controller between worker models. Gov reads the last output and gate results, then tells the next worker what to preserve, repair, or block.</td></tr><tr><td>Deterministic gate</td><td>Local code, not an AI opinion. It checks required sections, source IDs, missing evidence, and action-boundary rules.</td></tr><tr><td>Final selector</td><td>A local rule that can keep the best valid answer instead of blindly trusting the last answer.</td></tr></tbody></table></div>
 <hr/>
 </section>
-<section class="paper-section" id="current-benchmark-ledger"><div class="section-label">Current Benchmark Ledger</div>
-<h2>Current Benchmark Ledger</h2>
+<section class="paper-section" id="current-benchmark-ledger"><h2>Current Benchmark Ledger</h2>
 <p>The current clean benchmark-grade HoloVerify counted sample is:</p>
 <div class="table-scroll"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody><tr><td>Frozen action-boundary packets</td><td>334</td></tr><tr><td>Sibling pairs</td><td>167</td></tr><tr><td>ALLOW truths</td><td>167</td></tr><tr><td>ESCALATE truths</td><td>167</td></tr><tr><td>Correct HoloVerify packets</td><td>334</td></tr><tr><td>Observed false positives</td><td>0</td></tr><tr><td>Observed false negatives</td><td>0</td></tr></tbody></table></div>
 <p>Observed result:</p>
-<blockquote><p>HoloVerify solved 334/334 clean benchmark-grade action-boundary packets with<br>zero observed false positives and zero observed false negatives.</p></blockquote>
-<p>That does not mean zero risk.</p>
+<blockquote><p>HoloVerify produced zero observed false positives and zero observed false negatives across 334 clean benchmark-grade action-boundary packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.</p></blockquote>
 <p>The honest statistical statement is:</p>
 <div class="table-scroll"><table><thead><tr><th>Metric</th><th>Errors</th><th>n</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Overall packet error</td><td>0</td><td>334</td><td>0.893%</td><td>1.137%</td></tr><tr><td>False positive rate</td><td>0</td><td>167</td><td>1.778%</td><td>2.249%</td></tr><tr><td>False negative rate</td><td>0</td><td>167</td><td>1.778%</td><td>2.249%</td></tr></tbody></table></div>
 <p>Exact and Wilson are two standard ways to put a confidence band around an error rate. They answer the same basic question:</p>
@@ -66,8 +62,7 @@
 <blockquote><p>We saw zero errors in 334 counted packets. Statistics still requires humility:<br>the real error rate could be above zero, so we report the upper bound.</p></blockquote>
 <hr/>
 </section>
-<section class="paper-section" id="how-to-read-the-statistics"><div class="section-label">How To Read The Statistics</div>
-<h2>How To Read The Statistics</h2>
+<section class="paper-section" id="how-to-read-the-statistics"><h2>How To Read The Statistics</h2>
 <p>The observed score is what happened in the test.</p>
 <p>The upper bound is what the test lets us responsibly say about the unknown real error rate.</p>
 <p>That distinction matters.</p>
@@ -86,8 +81,7 @@
 <blockquote><p>Observed accuracy tells you what happened. The upper bound tells you how much<br>uncertainty remains.</p></blockquote>
 <hr/>
 </section>
-<section class="paper-section" id="confusion-matrix"><div class="section-label">Confusion Matrix</div>
-<h2>Confusion Matrix</h2>
+<section class="paper-section" id="confusion-matrix"><h2>Confusion Matrix</h2>
 <p>Positive class: <strong>ESCALATE</strong>.</p>
 <p>That means we treat "the system correctly stopped or escalated the action" as the positive event.</p>
 <div class="table-scroll"><table><thead><tr><th>Actual / Predicted</th><th>ESCALATE</th><th>ALLOW</th></tr></thead><tbody><tr><td>Actual ESCALATE</td><td>Correctly escalated = 167</td><td>Missed escalation = 0</td></tr><tr><td>Actual ALLOW</td><td>Wrongly escalated = 0</td><td>Correctly allowed = 167</td></tr></tbody></table></div>
@@ -96,8 +90,7 @@
 <p>Observed rates describe what happened in the sample. The confidence bands above are the risk language.</p>
 <hr/>
 </section>
-<section class="paper-section" id="holo-versus-the-same-models-alone"><div class="section-label">Holo Versus The Same Models Alone</div>
-<h2>Holo Versus The Same Models Alone</h2>
+<section class="paper-section" id="holo-versus-the-same-models-alone"><h2>Holo Versus The Same Models Alone</h2>
 <p>The central comparison is not "Holo used stronger models."</p>
 <p>It did not.</p>
 <p>The matched solo baselines used the same mini-model families that were used inside the governed HoloVerify architecture.</p>
@@ -116,8 +109,7 @@
 <p>That is the benchmark's main architecture finding.</p>
 <hr/>
 </section>
-<section class="paper-section" id="what-counts"><div class="section-label">What Counts</div>
-<h2>What Counts</h2>
+<section class="paper-section" id="what-counts"><h2>What Counts</h2>
 <p>Only clean benchmark-grade evidence is counted in the 334-packet denominator.</p>
 <p>Included:</p>
 <ul><li>Frozen packets.</li><li>Locked traces.</li><li>Hash-checked prompts and payloads.</li><li>Full HoloVerify governed architecture runs.</li><li>Balanced ALLOW/ESCALATE sibling pairs.</li><li>No prompt leakage.</li><li>No judges in the clean statistical denominator.</li></ul>
@@ -126,15 +118,13 @@
 <p>This matters because benchmark credibility depends as much on what is excluded as on what is counted.</p>
 <hr/>
 </section>
-<section class="paper-section" id="evidence-families"><div class="section-label">Evidence Families</div>
-<h2>Evidence Families</h2>
+<section class="paper-section" id="evidence-families"><h2>Evidence Families</h2>
 <div class="table-scroll"><table><thead><tr><th>Family</th><th>Domain</th><th>Packets</th><th>Pairs</th><th>HoloVerify</th></tr></thead><tbody><tr><td>Clinical Activation Boundary Controls</td><td>Clinical-regulated activation controls</td><td>40</td><td>20</td><td>40/40</td></tr><tr><td>Vendor-Master Payment Controls</td><td>AP / procurement / vendor-master controls</td><td>40</td><td>20</td><td>40/40</td></tr><tr><td>Agentic Commerce Order Execution</td><td>Order execution controls</td><td>40</td><td>20</td><td>40/40</td></tr><tr><td>IT Access Permission Change</td><td>Access / privilege controls</td><td>40</td><td>20</td><td>40/40</td></tr><tr><td>Wave2-4 Expansion</td><td>HR, privacy, finance, government, benefits, banking, defense admin, insurance, utilities</td><td>174</td><td>87</td><td>174/174</td></tr></tbody></table></div>
 <p>Other locked evidence exists, but is not counted in the clean denominator:</p>
 <div class="table-scroll"><table><thead><tr><th>Evidence</th><th>Why separate</th></tr></thead><tbody><tr><td>Agentic Commerce all-six collapse canary</td><td>Lock-rooted canary, not full-family denominator</td></tr><tr><td>Hard ALLOW false-positive precursor</td><td>Frozen precursor, not clean denominator</td></tr><tr><td>D11 HoloBuild mini-suite</td><td>HoloBuild quality evidence, not HoloVerify action-boundary denominator</td></tr></tbody></table></div>
 <hr/>
 </section>
-<section class="paper-section" id="how-holoverify-works"><div class="section-label">How HoloVerify Works</div>
-<h2>How HoloVerify Works</h2>
+<section class="paper-section" id="how-holoverify-works"><h2>How HoloVerify Works</h2>
 <p>HoloVerify is not a single model.</p>
 <p>It is a governed verification architecture.</p>
 <p>Each packet is processed through:</p>
@@ -148,8 +138,7 @@
 <p>The goal is action-boundary closure.</p>
 <hr/>
 </section>
-<section class="paper-section" id="relation-to-factuality-benchmarks"><div class="section-label">Relation To Factuality Benchmarks</div>
-<h2>Relation To Factuality Benchmarks</h2>
+<section class="paper-section" id="relation-to-factuality-benchmarks"><h2>Relation To Factuality Benchmarks</h2>
 <p>Benchmarks like AA-Omniscience measure factual recall and hallucination. They reward correct answers, punish bad guesses, and treat abstention as better than hallucination when the model does not know.</p>
 <p>HoloVerify applies a related discipline at the action boundary.</p>
 <p>When the source evidence does not authorize an action, the correct behavior is not a confident paragraph.</p>
@@ -161,8 +150,7 @@
 <ul><li>https://artificialanalysis.ai/evaluations/omniscience</li></ul>
 <hr/>
 </section>
-<section class="paper-section" id="cost"><div class="section-label">Cost</div>
-<h2>Cost</h2>
+<section class="paper-section" id="cost"><h2>Cost</h2>
 <p>HoloVerify is not cheaper than a one-shot model.</p>
 <p>It is a safety premium.</p>
 <p>The system spends more tokens because it uses multiple worker turns, Gov adjudication, deterministic gates, state preservation, artifact tracking, and final selection.</p>
@@ -173,16 +161,14 @@
 <p>For money movement, clinical activation, privileged access, legal filing, data release, or infrastructure changes, often yes.</p>
 <hr/>
 </section>
-<section class="paper-section" id="what-this-does-not-claim"><div class="section-label">What This Does Not Claim</div>
-<h2>What This Does Not Claim</h2>
+<section class="paper-section" id="what-this-does-not-claim"><h2>What This Does Not Claim</h2>
 <p>This benchmark does not claim:</p>
 <ul><li>HoloVerify has zero real-world risk.</li><li>HoloVerify is universally superior to every model.</li><li>HoloVerify replaces qualified human review in clinical, legal, financial, or defense contexts.</li><li>The tested packets cover every possible enterprise failure mode.</li><li>One-shot solo baselines represent every possible solo prompting method.</li></ul>
 <p>This benchmark does claim:</p>
 <blockquote><p>On the current clean locked denominator, HoloVerify has produced zero observed<br>false-positive or false-negative errors across 334 action-boundary packets,<br>with a measured statistical upper risk band.</p></blockquote>
 <hr/>
 </section>
-<section class="paper-section" id="next-statistical-milestone"><div class="section-label">Next Statistical Milestone</div>
-<h2>Next Statistical Milestone</h2>
+<section class="paper-section" id="next-statistical-milestone"><h2>Next Statistical Milestone</h2>
 <p>The next frozen packet bank is Wave5:</p>
 <div class="table-scroll"><table><thead><tr><th>Wave5 scope</th><th>Value</th></tr></thead><tbody><tr><td>Domains</td><td>7</td></tr><tr><td>Sibling pairs</td><td>140</td></tr><tr><td>Packets</td><td>280</td></tr><tr><td>ALLOW truths</td><td>140</td></tr><tr><td>ESCALATE truths</td><td>140</td></tr></tbody></table></div>
 <p>Wave5 domains:</p>
@@ -193,8 +179,7 @@
 <blockquote><p>Below 0.5% packet-level upper risk and below 1.0% false-positive /<br>false-negative upper risk, if Wave5 completes cleanly.</p></blockquote>
 <hr/>
 </section>
-<section class="paper-section" id="reliability-threshold-roadmap"><div class="section-label">Reliability Threshold Roadmap</div>
-<h2>Reliability Threshold Roadmap</h2>
+<section class="paper-section" id="reliability-threshold-roadmap"><h2>Reliability Threshold Roadmap</h2>
 <p>The business question is not "did this sample pass?"</p>
 <p>The business question is:</p>
 <blockquote><p>How low does the upper risk bound need to be before this class of action can<br>be trusted with this level of autonomy?</p></blockquote>
@@ -207,8 +192,7 @@
 <p>The &lt; 0.1% tier should be treated as a production-scale validation program, not as the next public benchmark milestone.</p>
 <hr/>
 </section>
-<section class="paper-section" id="next-packet-families"><div class="section-label">Next Packet Families</div>
-<h2>Next Packet Families</h2>
+<section class="paper-section" id="next-packet-families"><h2>Next Packet Families</h2>
 <p>After Wave5, the next packet expansion should prioritize more irreversible action boundaries, not generic reasoning tasks.</p>
 <p>Recommended next families:</p>
 <div class="table-scroll"><table><thead><tr><th>Domain</th><th>Action boundary being tested</th></tr></thead><tbody><tr><td>Defense logistics / command authorization</td><td>Whether source authority permits movement, procurement, or operational release</td></tr><tr><td>Banking / AML / account freeze controls</td><td>Whether account restriction or release is justified by current evidence</td></tr><tr><td>Insurance claims / payout authorization</td><td>Whether payout, denial, or escalation is permitted</td></tr><tr><td>Pharma quality / batch release</td><td>Whether manufacturing or quality evidence permits product release</td></tr><tr><td>Privacy / data disclosure / consent controls</td><td>Whether records may be disclosed to a requester</td></tr><tr><td>Education / student record release</td><td>Whether student records can be released under current authority</td></tr><tr><td>Export control / customs / restricted shipment release</td><td>Whether shipment can proceed under current screening evidence</td></tr><tr><td>Real estate / mortgage / escrow release</td><td>Whether funds, documents, or approvals may be released</td></tr><tr><td>Manufacturing quality hold / supplier substitution</td><td>Whether an exception can override a quality hold</td></tr><tr><td>Tax / regulatory payment controls</td><td>Whether a filing, remittance, or exception is currently authorized</td></tr><tr><td>Customer account security / MFA reset</td><td>Whether identity proof closes the account-change boundary</td></tr><tr><td>Energy trading / credit-limit controls</td><td>Whether a trade, override, or exposure increase is permitted</td></tr><tr><td>Legal discovery / privilege / litigation hold release</td><td>Whether documents can be released or must be escalated</td></tr><tr><td>Healthcare claims / prior authorization</td><td>Whether coverage or authorization evidence closes the payment/action boundary</td></tr></tbody></table></div>
@@ -216,15 +200,13 @@
 <ul><li>20 sibling pairs.</li><li>40 packets.</li><li>10 hard-ALLOW target pairs.</li><li>10 hard-ESCALATE target pairs.</li><li>ALLOW and ESCALATE sibling for every pair.</li><li>Same frozen packet discipline.</li><li>Same no-leakage and packet-identity checks.</li><li>Same matched solo baseline after Holo freeze.</li></ul>
 <hr/>
 </section>
-<section class="paper-section" id="audit-sources"><div class="section-label">Audit Sources</div>
-<h2>Audit Sources</h2>
+<section class="paper-section" id="audit-sources"><h2>Audit Sources</h2>
 <p>Primary current sources:</p>
 <ul><li><code>docs/benchmark/HOLOVERIFY_STATISTICAL_APPENDIX_2026_07_01.md</code></li><li><code>docs/benchmark/HOLOVERIFY_WAVE2_WAVE3_WAVE4_COMBINED_EVIDENCE_MEMO_2026_07_01.md</code></li><li><code>docs/benchmark/HOLOVERIFY_WAVE3_WAVE4_FINAL_EVIDENCE_MEMO_2026_07_01.md</code></li><li><code>docs/benchmark/HOLOVERIFY_REPLICATION_PACKET_FREEZE_WAVE5_7DOMAIN_2026_07_01.md</code></li></ul>
 <p>The benchmark should feel like an audit ledger: clear about what was counted, clear about what was excluded, and clear about how much uncertainty remains.</p>
 <hr/>
 </section>
-<section class="paper-section" id="the-ask"><div class="section-label">The Ask</div>
-<h2>The Ask</h2>
+<section class="paper-section" id="the-ask"><h2>The Ask</h2>
 <p>We are looking for one or two enterprise design partners in financial services, procurement, compliance operations, healthcare operations, infrastructure, or regulated data workflows who want to pressure-test Holo against real action-boundary decisions before we scale.</p>
 <p>If your team is preparing to let AI recommend, approve, release, or execute high-stakes actions, the question is not whether the model sounds careful.</p>
 <p>The question is whether the evidence actually closes the boundary.</p>

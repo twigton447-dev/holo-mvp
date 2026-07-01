@@ -427,9 +427,7 @@ A **false negative** means Holo says ALLOW when the action should have escalated
 
 The current clean HoloVerify counted sample contains 334 frozen action-boundary packets across 167 sibling pairs: 167 ALLOW truths and 167 ESCALATE truths.
 
-HoloVerify solved 334/334 of those packets with zero observed false positives and zero observed false negatives.
-
-That does not mean zero risk.
+HoloVerify produced zero observed false positives and zero observed false negatives across those 334 packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
 
 The exact one-sided 95% upper bound on overall packet error is 0.893%. The side-specific upper bounds on false positives and false negatives are 1.778% each, because each side currently has 167 examples.
 

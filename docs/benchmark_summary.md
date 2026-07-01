@@ -75,10 +75,7 @@ The current clean benchmark-grade HoloVerify counted sample is:
 
 Observed result:
 
-> HoloVerify solved 334/334 clean benchmark-grade action-boundary packets with
-> zero observed false positives and zero observed false negatives.
-
-That does not mean zero risk.
+> HoloVerify produced zero observed false positives and zero observed false negatives across 334 clean benchmark-grade action-boundary packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
 
 The honest statistical statement is:
 

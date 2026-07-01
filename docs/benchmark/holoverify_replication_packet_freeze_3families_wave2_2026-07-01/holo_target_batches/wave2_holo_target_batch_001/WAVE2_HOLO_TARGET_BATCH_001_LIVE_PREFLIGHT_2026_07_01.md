@@ -3,7 +3,7 @@
 Status: `PASS`
 Batch: `WAVE2_HOLO_TARGET_BATCH_001`
 Freeze root: `80d8106d7efe72bee44d2c05648b71814204c08e1f96934afefd3d75d242845f`
-Root signature: `b8823cd49b7eae4127ea540ac00e969299d5a7973804989ad610289bf9eeddc5`
+Root signature: `72a87464fc720550a5e37b1d19ad7f86f41ce7e8a31e21341319d7a6af62367c`
 
 ## Expected Calls
 

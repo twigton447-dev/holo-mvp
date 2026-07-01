@@ -1,0 +1,64 @@
+{
+  "approval_granted_by_this_packet": false,
+  "approval_required": true,
+  "approval_statement_required": "I explicitly approve provider calls for WAVE4_HOLO_TARGET_BATCH_001 only, exactly as scoped in WAVE4_HOLO_TARGET_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01.",
+  "batch_id": "WAVE4_HOLO_TARGET_BATCH_001",
+  "classification": "WAVE4_HOLO_TARGET_BATCH_001_PROVIDER_APPROVAL_PACKET_NO_PROVIDER",
+  "created_at_utc": "2026-07-01T16:09:40.001640+00:00",
+  "expected_calls_if_approved": {
+    "gov_calls": 60,
+    "judge_calls": 0,
+    "packets": 30,
+    "pairs": 15,
+    "solo_calls": 0,
+    "total_provider_calls": 150,
+    "worker_calls": 90
+  },
+  "generated_without_provider_calls": true,
+  "model_roster": [
+    "W1:xai/grok-3-mini:SOURCE_BOUNDARY_MAPPER",
+    "G1:minimax/MiniMax-M2.5-highspeed:CONTROL_ROUTER",
+    "W2:openai/gpt-5.4-mini:ADVERSARIAL_SCOPE_CHALLENGER",
+    "G2:minimax/MiniMax-M2.5-highspeed:CONTROL_ROUTER",
+    "W3:minimax/MiniMax-M2.5-highspeed:FINAL_COMPILER"
+  ],
+  "package_sha256": "9bee4a37c394c91a2407ddfdf02743df9d685f614a246a599226a767e95003ed",
+  "packet_scope": {
+    "packet_count": 30,
+    "pair_count": 15,
+    "selected_pair_ids": [
+      "HV-DEFA-REP-010",
+      "HV-DEFA-REP-015",
+      "HV-UTIL-REP-012",
+      "HV-DEFA-REP-005",
+      "HV-DEFA-REP-014",
+      "HV-DEFA-REP-019",
+      "HV-DEFA-REP-020",
+      "HV-INSR-REP-002",
+      "HV-INSR-REP-008",
+      "HV-INSR-REP-009",
+      "HV-INSR-REP-010",
+      "HV-INSR-REP-011",
+      "HV-INSR-REP-018",
+      "HV-INSR-REP-020",
+      "HV-UTIL-REP-013"
+    ],
+    "wave": "wave4"
+  },
+  "provider_boundary": {
+    "live_runner_status": "PENDING_OR_SEPARATE",
+    "run_command_after_approval": "python3 -B docs/benchmark/run_wave3_wave4_holo_target_batch_2026_07_01.py --wave wave4 --batch-number 1 --run-live --approval-packet-sha256 APPROVAL_PACKET_SHA256_FROM_PROVIDER_APPROVAL_PACKET --approval-statement \"I explicitly approve provider calls for WAVE4_HOLO_TARGET_BATCH_001 only, exactly as scoped in WAVE4_HOLO_TARGET_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01.\""
+  },
+  "source_paths": {
+    "preflight": "docs/benchmark/holoverify_replication_packet_freeze_wave3_wave4_2026-07-01/holo_target_batches/wave4_holo_target_batch_001/WAVE4_HOLO_TARGET_BATCH_001_PREFLIGHT_2026_07_01.json",
+    "registration": "docs/benchmark/holoverify_replication_packet_freeze_wave3_wave4_2026-07-01/holo_target_batches/wave4_holo_target_batch_001/WAVE4_HOLO_TARGET_BATCH_001_REGISTRATION_2026_07_01.json",
+    "solo_triage_results": "docs/benchmark/holoverify_replication_packet_freeze_wave3_wave4_2026-07-01/solo_triage_3mini/wave4_solo_triage/run_20260701T151059Z/solo_triage_results.json"
+  },
+  "status": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+  "stop_rules": [
+    "Do not run providers without explicit approval.",
+    "Do not run solo or judges.",
+    "Do not edit frozen packets or prompts.",
+    "No fallback or model substitution."
+  ]
+}

@@ -1,10 +1,3 @@
-# The Action Boundary Benchmark
-### Measuring AI reliability before irreversible enterprise action
-
-**Version 7.52 · July 2026**
-
----
-
 ## The Point
 
 AI systems are moving closer to real-world action.
@@ -65,25 +58,25 @@ The current clean benchmark-grade HoloVerify counted sample is:
 
 | Metric | Value |
 | --- | ---: |
-| Frozen action-boundary packets | 334 |
-| Sibling pairs | 167 |
-| ALLOW truths | 167 |
-| ESCALATE truths | 167 |
-| Correct HoloVerify packets | 334 |
+| Frozen action-boundary packets | 454 |
+| Sibling pairs | 227 |
+| ALLOW truths | 227 |
+| ESCALATE truths | 227 |
+| Correct HoloVerify packets | 454 |
 | Observed false positives | 0 |
 | Observed false negatives | 0 |
 
 Observed result:
 
-> HoloVerify produced zero observed false positives and zero observed false negatives across 334 clean benchmark-grade action-boundary packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
+> HoloVerify produced zero observed false positives and zero observed false negatives across 454 clean benchmark-grade action-boundary packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
 
 The honest statistical statement is:
 
 | Metric | Errors | n | Exact 95% upper bound | Wilson 95% upper bound |
 | --- | ---: | ---: | ---: | ---: |
-| Overall packet error | 0 | 334 | 0.893% | 1.137% |
-| False positive rate | 0 | 167 | 1.778% | 2.249% |
-| False negative rate | 0 | 167 | 1.778% | 2.249% |
+| Overall packet error | 0 | 454 | 0.658% | 0.839% |
+| False positive rate | 0 | 227 | 1.311% | 1.664% |
+| False negative rate | 0 | 227 | 1.311% | 1.664% |
 
 Exact and Wilson are two standard ways to put a confidence band around an error
 rate. They answer the same basic question:
@@ -97,8 +90,14 @@ bounded by the confidence interval.
 
 In simpler terms:
 
-> We saw zero errors in 334 counted packets. Statistics still requires humility:
+> We saw zero errors in 454 counted packets. Statistics still requires humility:
 > the real error rate could be above zero, so we report the upper bound.
+
+Plain English: this moved the benchmark from roughly under 1.14% packet-level
+Wilson risk to roughly under 0.84% packet-level Wilson risk.
+
+The stricter false-positive and false-negative side-specific number is higher
+because each side has half the examples: 227 ALLOW and 227 ESCALATE.
 
 ---
 
@@ -111,7 +110,7 @@ error rate.
 
 That distinction matters.
 
-If HoloVerify gets 334 out of 334 packets right, the observed error rate is 0%.
+If HoloVerify gets 454 out of 454 packets right, the observed error rate is 0%.
 But the real world is larger than the sample. A perfect sample does not prove a
 perfect system.
 
@@ -158,8 +157,8 @@ the positive event.
 
 | Actual / Predicted | ESCALATE | ALLOW |
 | --- | ---: | ---: |
-| Actual ESCALATE | Correctly escalated = 167 | Missed escalation = 0 |
-| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 167 |
+| Actual ESCALATE | Correctly escalated = 227 | Missed escalation = 0 |
+| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 227 |
 
 Observed rates:
 
@@ -230,7 +229,7 @@ That is the benchmark's main architecture finding.
 
 ## What Counts
 
-Only clean benchmark-grade evidence is counted in the 334-packet denominator.
+Only clean benchmark-grade evidence is counted in the 454-packet denominator.
 
 Included:
 
@@ -265,6 +264,7 @@ as on what is counted.
 | Agentic Commerce Order Execution | Order execution controls | 40 | 20 | 40/40 |
 | IT Access Permission Change | Access / privilege controls | 40 | 20 | 40/40 |
 | Wave2-4 Expansion | HR, privacy, finance, government, benefits, banking, defense admin, insurance, utilities | 174 | 87 | 174/174 |
+| Wave5 Clean Batches Entered | Medical, treasury, legal, infrastructure, security, public sector, industrial controls | 120 | 60 | 120/120 |
 
 Other locked evidence exists, but is not counted in the clean denominator:
 
@@ -374,7 +374,7 @@ This benchmark does not claim:
 This benchmark does claim:
 
 > On the current clean locked denominator, HoloVerify has produced zero observed
-> false-positive or false-negative errors across 334 action-boundary packets,
+> false-positive or false-negative errors across 454 action-boundary packets,
 > with a measured statistical upper risk band.
 
 ---
@@ -401,14 +401,15 @@ Wave5 domains:
 - Public sector / citizen records controls.
 - Industrial / utility / OT safety controls.
 
-If Wave5 completes cleanly, the benchmark-grade denominator becomes:
+If the remaining 16 Wave5 batches complete cleanly, the benchmark-grade
+denominator becomes:
 
-| Metric | Current | After clean Wave5 |
+| Metric | Current | After remaining clean Wave5 |
 | --- | ---: | ---: |
-| Packets | 334 | 614 |
-| Sibling pairs | 167 | 307 |
-| Packet-level exact 95% upper bound | 0.893% | about 0.487% |
-| False-positive / false-negative exact 95% upper bound | 1.778% | about 0.971% |
+| Packets | 454 | 614 |
+| Sibling pairs | 227 | 307 |
+| Packet-level exact 95% upper bound | 0.658% | about 0.487% |
+| False-positive / false-negative exact 95% upper bound | 1.311% | about 0.971% |
 
 That is the next milestone:
 
@@ -429,12 +430,12 @@ The business question is:
 Side-specific false-positive and false-negative risk is the primary safety bar
 because ALLOW and ESCALATE fail in different ways.
 
-| Target side-specific upper bound | Required ALLOW examples | Required ESCALATE examples | Required total packets | Additional packets from current 334 | Additional packets after clean Wave5 |
+| Target side-specific upper bound | Required ALLOW examples | Required ESCALATE examples | Required total packets | Additional packets from current 454 | Additional packets after clean Wave5 |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| < 1.0% | 299 | 299 | 598 | 264 | 0 |
-| < 0.5% | 598 | 598 | 1,196 | 862 | 582 |
-| < 0.25% | 1,197 | 1,197 | 2,394 | 2,060 | 1,780 |
-| < 0.1% | 2,995 | 2,995 | 5,990 | 5,656 | 5,376 |
+| < 1.0% | 299 | 299 | 598 | 144 | 0 |
+| < 0.5% | 598 | 598 | 1,196 | 742 | 582 |
+| < 0.25% | 1,197 | 1,197 | 2,394 | 1,940 | 1,780 |
+| < 0.1% | 2,995 | 2,995 | 5,990 | 5,536 | 5,376 |
 
 Recommended threshold policy:
 
@@ -447,7 +448,7 @@ Recommended threshold policy:
 
 The next practical target is:
 
-> Run Wave5 clean, then expand by roughly 582 additional balanced packets to
+> Finish Wave5 clean, then expand by roughly 582 additional balanced packets to
 > push side-specific false-positive and false-negative upper bounds below 0.5%.
 
 The < 0.1% tier should be treated as a production-scale validation program, not

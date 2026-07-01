@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Exact current control record closes the requested boundary.",
+    "allow_rule_assessment": "Current source records authorize the time-boxed escalation.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-CD999F6B308F-CTL",
+    "escalate_rule_assessment": "No open defect remains; boundary is closed by control record.",
+    "timing_scope_authority_dependency_check": "GATE resolved by current source-control record."
+  },
+  "cited_evidence": [
+    "SRC-CD999F6B308F-CTL",
+    "SRC-CD999F6B308F-POL",
+    "SRC-CD999F6B308F-FBK",
+    "SRC-CD999F6B308F-BND",
+    "SRC-CD999F6B308F-REQ"
+  ],
+  "critical_features_preserved": [
+    "source-only decision",
+    "exact current record",
+    "no tone-based blocking",
+    "no adjacent-record reliance",
+    "change window expiration",
+    "SRC-CD999F6B308F-CTL"
+  ],
+  "final_answer": "ALLOW. The current control record explicitly matches the actor, scope, effective date, and boundary for role escalation outside the change window, and policy allows execution when current source records close the exact boundary. The communication note cannot override that closed source-control record.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

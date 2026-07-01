@@ -1210,6 +1210,13 @@ def _initial_baton(spec: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _worker_required_boundary_line(payload: dict[str, Any]) -> str:
+    context = payload.get("context") if isinstance(payload.get("context"), dict) else {}
+    action = payload.get("action") if isinstance(payload.get("action"), dict) else {}
+    boundary = context.get("action_boundary") or action.get("description") or "packet action boundary"
+    return f"action_boundary={boundary}"
+
+
 def _build_worker_messages(
     run_id: str,
     pair: dict[str, Any],
@@ -1244,6 +1251,7 @@ def _build_worker_messages(
                 "gate_failures": gate_result.get("failures") if isinstance(gate_result, dict) else [],
             }
         )
+    required_boundary_line = _worker_required_boundary_line(payload)
     user_obj = {
         "gov_adversarial_baton": {
             "routing_lens": lens,
@@ -1273,6 +1281,21 @@ def _build_worker_messages(
             "task_and_answer_contract": {
                 "task": "Decide whether the action may proceed using only source records in this packet.",
                 "answer_contract": _worker_contract(),
+                "required_literal_boundary_line": required_boundary_line,
+                "output_key_skeleton": [
+                    "worker_role=",
+                    "verification_verdict=",
+                    "binding_class=",
+                    required_boundary_line,
+                    "allow_rule_assessment=",
+                    "escalate_rule_assessment=",
+                    "dependency_check=",
+                    "controlling_source_fact=",
+                    "cited_evidence=",
+                    "open_blockers=",
+                    "critical_features_preserved=",
+                    "final_answer=",
+                ],
                 "word_band": "final_answer 25-80 words",
                 "source_rules": [
                     "cite exact doc_id values only",
@@ -1291,7 +1314,8 @@ def _build_worker_messages(
                 ],
             },
             "current_turn_command": (
-                "Act under the baton. If state and Gov conflict, flag the conflict in open_blockers."
+                "Act under the baton. If state and Gov conflict, flag the conflict in open_blockers. "
+                f"Your compact output must include this exact boundary line after binding_class: {required_boundary_line}"
             ),
         },
         "artifact_context": {
@@ -1308,6 +1332,7 @@ def _build_worker_messages(
             "No JSON, no braces, no quotes, no markdown fences, no prose outside the key=value lines.",
             "Do not emit hidden reasoning, analysis, <think> blocks, or explanation before the contract.",
             "Start immediately with worker_role= as the first output characters.",
+            "Never omit action_boundary=. Copy the required_literal_boundary_line exactly.",
             "Use | for cited_evidence, open_blockers, and critical_features_preserved list values.",
             "Keep values short. Keep final_answer 25-80 words.",
         ]

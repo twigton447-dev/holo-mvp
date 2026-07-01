@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May treasury execute the funds movement or cash-management action now? Focus: bank portal admin approval.",
+    "allow_rule_assessment": "Source records do not close boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-588B3B706AED-CTL",
+    "escalate_rule_assessment": "Unresolved signer matrix dependency blocks execution",
+    "timing_scope_authority_dependency_check": "Current treasury admin and signer matrix match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-588B3B706AED-CTL",
+    "SRC-588B3B706AED-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "The action boundary remains open due to unresolved dependency in SRC-588B3B706AED-CTL. Execution cannot proceed until the treasury admin and signer matrix match is confirmed closed by source records. Policy requires exact boundary closure before any funds movement.",
+  "open_blockers": [
+    "current treasury admin and signer matrix match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

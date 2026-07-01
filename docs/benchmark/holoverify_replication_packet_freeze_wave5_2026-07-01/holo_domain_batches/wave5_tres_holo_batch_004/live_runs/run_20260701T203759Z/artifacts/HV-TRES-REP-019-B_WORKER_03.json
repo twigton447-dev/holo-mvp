@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May treasury execute the funds movement or cash-management action now? Focus: payment rail fallback.",
+    "allow_rule_assessment": "No source record closes the exact boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-BE731108654D-CTL",
+    "escalate_rule_assessment": "Open dependency blocks execution.",
+    "timing_scope_authority_dependency_check": "Fallback rail authorization and recipient match unresolved."
+  },
+  "cited_evidence": [
+    "SRC-BE731108654D-CTL",
+    "SRC-BE731108654D-BND",
+    "SRC-BE731108654D-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match"
+  ],
+  "final_answer": "The action may not proceed. Source records do not close the exact execution boundary, and the controlling control record still leaves fallback rail authorization and recipient match unresolved. Under the frozen Wave5 policy, that open dependency blocks treasury execution, so the correct disposition is escalation rather than allow.",
+  "open_blockers": [
+    "current fallback rail authorization and recipient match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

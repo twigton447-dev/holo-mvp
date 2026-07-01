@@ -409,18 +409,60 @@
     {
       "approval_packet_sha256": "8e1e796543a36a4334b45a2dd9787ab2087a669901c1a92263bf3157cf52f594",
       "batch_id": "WAVE5_TRES_HOLO_BATCH_004",
-      "complete_run_count": 0,
+      "complete_run_count": 1,
       "expected_provider_calls": 50,
       "family_id": "HV-TRES-REP-2026-07-01",
       "invalid_or_incomplete_run_count": 0,
-      "latest_run": null,
+      "latest_run": {
+        "classification": "WAVE5_TRES_HOLO_BATCH_004_COMPLETE",
+        "expected_provider_calls": 50,
+        "gov_calls": 20,
+        "invalidation_reason": null,
+        "judge_calls": 0,
+        "lock_validation_exists": true,
+        "packet_correct": 10,
+        "packet_count": 10,
+        "provider_calls": 50,
+        "readiness_passed": true,
+        "root_failure": null,
+        "run_dir": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_tres_holo_batch_004/live_runs/run_20260701T203759Z",
+        "run_id": "run_20260701T203759Z",
+        "status": "COMPLETE",
+        "summary_exists": true,
+        "trace_exists": true,
+        "transport_recovered_call_count": 0,
+        "valid_pairs": 5,
+        "worker_calls": 30
+      },
       "packets": 10,
       "pairs": 5,
       "run_command_after_explicit_approval": "python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-TRES-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 8e1e796543a36a4334b45a2dd9787ab2087a669901c1a92263bf3157cf52f594 --approval-statement \"I explicitly approve provider calls for WAVE5_TRES_HOLO_BATCH_004 only, exactly as scoped in WAVE5_TRES_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
-      "run_count": 0,
+      "run_count": 1,
       "run_root": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_tres_holo_batch_004/live_runs",
-      "runs": [],
-      "status": "NOT_STARTED"
+      "runs": [
+        {
+          "classification": "WAVE5_TRES_HOLO_BATCH_004_COMPLETE",
+          "expected_provider_calls": 50,
+          "gov_calls": 20,
+          "invalidation_reason": null,
+          "judge_calls": 0,
+          "lock_validation_exists": true,
+          "packet_correct": 10,
+          "packet_count": 10,
+          "provider_calls": 50,
+          "readiness_passed": true,
+          "root_failure": null,
+          "run_dir": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_tres_holo_batch_004/live_runs/run_20260701T203759Z",
+          "run_id": "run_20260701T203759Z",
+          "status": "COMPLETE",
+          "summary_exists": true,
+          "trace_exists": true,
+          "transport_recovered_call_count": 0,
+          "valid_pairs": 5,
+          "worker_calls": 30
+        }
+      ],
+      "status": "COMPLETE"
     },
     {
       "approval_packet_sha256": "1e9186de923375b99c1b7c10db36270e0adde0a7bd903d35c1af4a8736af4e90",
@@ -755,11 +797,11 @@
   "freeze_root_hash": "3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf",
   "handoff_ref": "docs/benchmark/HOLOVERIFY_WAVE5_BATCH_OPERATOR_HANDOFF_2026_07_01.json",
   "next_allowed_batch": {
-    "approval_packet_sha256": "8e1e796543a36a4334b45a2dd9787ab2087a669901c1a92263bf3157cf52f594",
-    "batch_id": "WAVE5_TRES_HOLO_BATCH_004",
-    "family_id": "HV-TRES-REP-2026-07-01",
+    "approval_packet_sha256": "1e9186de923375b99c1b7c10db36270e0adde0a7bd903d35c1af4a8736af4e90",
+    "batch_id": "WAVE5_LREG_HOLO_BATCH_001",
+    "family_id": "HV-LREG-REP-2026-07-01",
     "reason": "first_not_started_after_clean_prefix",
-    "run_command_after_explicit_approval": "python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-TRES-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 8e1e796543a36a4334b45a2dd9787ab2087a669901c1a92263bf3157cf52f594 --approval-statement \"I explicitly approve provider calls for WAVE5_TRES_HOLO_BATCH_004 only, exactly as scoped in WAVE5_TRES_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\""
+    "run_command_after_explicit_approval": "python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-LREG-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 1e9186de923375b99c1b7c10db36270e0adde0a7bd903d35c1af4a8736af4e90 --approval-statement \"I explicitly approve provider calls for WAVE5_LREG_HOLO_BATCH_001 only, exactly as scoped in WAVE5_LREG_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01.\""
   },
   "progress_builder_sha256": "fbf47676e8de1d59fe685a7128e46523eac964eeea499187bb23f4c37d38ca03",
   "queue_state": "READY_FOR_NEXT_BATCH",
@@ -769,14 +811,14 @@
   "totals": {
     "batches": 28,
     "complete_with_prior_invalid_batches": 0,
-    "completed_batches": 7,
-    "completed_packets": 70,
-    "completed_pairs": 35,
-    "expected_provider_calls_for_completed_batches": 350,
+    "completed_batches": 8,
+    "completed_packets": 80,
+    "completed_pairs": 40,
+    "expected_provider_calls_for_completed_batches": 400,
     "invalid_stop_batches": 0,
     "judges_called_by_ledger": 0,
-    "not_started_batches": 21,
-    "provider_calls_observed": 350,
+    "not_started_batches": 20,
+    "provider_calls_observed": 400,
     "providers_called_by_ledger": 0
   }
 }

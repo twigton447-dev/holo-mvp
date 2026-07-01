@@ -72,6 +72,13 @@ from chat_engine import HoloChatEngine, _safe_handoff_transition
 from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
 from db import Database
 from billing import create_checkout_session, create_customer_portal_session, construct_webhook_event, PLANS
+from hologov_v_signer import (
+    HoloGovVReceiptVerificationError,
+    HoloGovVSignerClient,
+    HoloGovVSignerError,
+    HoloGovVSignerUnavailableError,
+    HoloGovVSignerVetoError,
+)
 
 _rate_limiter = RateLimiter()
 _db: Database | None = None
@@ -81,6 +88,35 @@ DEFAULT_MAX_RPM = 60
 # This means adapters are initialized once (SDK clients, auth, etc.).
 _governor: ContextGovernor | None = None
 _chat_engine: Optional[HoloChatEngine] = None
+_hologov_v_signer_client: HoloGovVSignerClient | None = None
+
+
+class HoloGovVEnforcementRequiredError(RuntimeError):
+    """Raised when HoloGov-V cannot produce an accepted enforcement receipt."""
+
+
+def _canonical_action_context_packet(body: dict[str, Any]) -> dict[str, Any]:
+    """Return the exact evidence packet HoloVerify is allowed to bind."""
+    return {
+        "action": body.get("action", {}),
+        "context": body.get("context", {}),
+    }
+
+
+def _canonical_json(data: Any) -> str:
+    return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def _evidence_packet_hash(body: dict[str, Any]) -> str:
+    packet = _canonical_action_context_packet(body)
+    return hashlib.sha256(_canonical_json(packet).encode("utf-8")).hexdigest()
+
+
+def _get_hologov_v_signer_client() -> HoloGovVSignerClient:
+    global _hologov_v_signer_client
+    if _hologov_v_signer_client is None:
+        _hologov_v_signer_client = HoloGovVSignerClient.from_env(dict(os.environ))
+    return _hologov_v_signer_client
 
 
 def _max_rpm_from_value(raw: Any, *, default: int = DEFAULT_MAX_RPM) -> int:
@@ -363,6 +399,103 @@ async def evaluate_action(
             detail="Evaluation engine error. See server logs for details.",
         )
 
+    partner_boundary_route_marker = object()
+
+    def _enforce_hologov_v_receipt(result: dict[str, Any], body: dict[str, Any]) -> dict[str, Any]:
+        """
+        Require the isolated HoloGov-V signer to issue the receipt required for
+        partner-valid output.
+        """
+        if result.get("governor_veto") is True:
+            raise HoloGovVEnforcementRequiredError("HoloGov-V vetoed partner-valid output.")
+
+        decision = result.get("decision")
+        if decision not in {"ALLOW", "ESCALATE"}:
+            raise HoloGovVEnforcementRequiredError("HoloGov-V requires a binary decision.")
+
+        evidence_hash = _evidence_packet_hash(body)
+        provenance_id = f"hvp_{uuid.uuid4().hex[:12]}"
+        signer = _get_hologov_v_signer_client()
+        try:
+            receipt = signer.issue_receipt(
+                decision=decision,
+                evaluation_id=result.get("evaluation_id"),
+                evidence_hash=evidence_hash,
+            )
+        except HoloGovVSignerVetoError as e:
+            raise HoloGovVEnforcementRequiredError("HoloGov-V signer vetoed partner-valid output.") from e
+        except (
+            HoloGovVSignerUnavailableError,
+            HoloGovVReceiptVerificationError,
+            HoloGovVSignerError,
+        ) as e:
+            raise HoloGovVEnforcementRequiredError("HoloGov-V signer did not issue a verifiable receipt.") from e
+        receipt["provenance"] = {
+            "provenance_id": provenance_id,
+            "source": "holo_internal",
+            "minted_by": "HoloVerify action-boundary",
+            "evaluation_id": result.get("evaluation_id"),
+            "evidence_hash": evidence_hash,
+            "receipt_id": receipt["receipt_id"],
+            "receipt_signature": receipt["receipt_signature"],
+            "signer_id": receipt.get("signer_id"),
+            "key_id": receipt.get("key_id"),
+        }
+        return receipt
+
+    def _attach_partner_boundary_audit(
+        result: dict[str, Any],
+        body: dict[str, Any],
+        receipt: dict[str, Any],
+    ) -> dict[str, Any]:
+        pinned_artifacts = result.get("artifacts", {})
+        result["hologov_v_enforcement_receipt"] = receipt
+        result["provenance"] = receipt["provenance"]
+        result["partner_audit"] = {
+            "audit_id": result.get("evaluation_id"),
+            "evidence_hash": receipt["evidence_hash"],
+            "canonical_packet": _canonical_action_context_packet(body),
+            "decision_basis": result.get("decision_reason"),
+            "turn_history": result.get("turn_history", []),
+            "artifacts": {
+                "action_v1": pinned_artifacts.get("action_v1"),
+                "context_v1": pinned_artifacts.get("context_v1"),
+            },
+            "coverage_matrix": result.get("coverage_matrix", {}),
+            "governor_briefs": result.get("governor_briefs", []),
+        }
+        result["_partner_boundary_route_marker"] = partner_boundary_route_marker
+        return result
+
+    def _build_partner_response(result: dict[str, Any]) -> dict[str, Any]:
+        if result.get("_partner_boundary_route_marker") is not partner_boundary_route_marker:
+            raise HoloGovVEnforcementRequiredError("HoloGov-V route marker missing.")
+        response = _build_response(result)
+        response.update({
+            "hologov_v_enforcement_receipt": result["hologov_v_enforcement_receipt"],
+            "provenance": result["provenance"],
+            "audit": result["partner_audit"],
+        })
+        return response
+
+    try:
+        receipt = _enforce_hologov_v_receipt(result, body)
+        result = _attach_partner_boundary_audit(result, body, receipt)
+    except HoloGovVEnforcementRequiredError as e:
+        logger.error(f"HoloGov-V enforcement veto: {e}", exc_info=True)
+        _track_usage(_key, "/v1/evaluate_action", 503)
+        raise HTTPException(
+            status_code=503,
+            detail="HoloGov-V enforcement did not accept partner-valid output.",
+        )
+    except Exception as e:
+        logger.error(f"HoloGov-V enforcement error: {type(e).__name__}: {e}", exc_info=True)
+        _track_usage(_key, "/v1/evaluate_action", 500)
+        raise HTTPException(
+            status_code=500,
+            detail="HoloGov-V enforcement error. Partner-valid output unavailable.",
+        )
+
     elapsed = int((time.time() - t0) * 1000)
     tokens  = result.get("total_tokens", {})
     _track_usage(
@@ -381,7 +514,7 @@ async def evaluate_action(
             logger.warning(f"Quota increment unavailable; response already computed: {e}")
 
     # Build API response
-    response = _build_response(result)
+    response = _build_partner_response(result)
     return JSONResponse(content=response)
 
 

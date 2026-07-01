@@ -4,6 +4,7 @@ ContextGovernor mocked so no real LLM calls are made.
 """
 import os
 import pytest
+import uuid
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
@@ -26,14 +27,35 @@ def _make_mock_adapters(results):
     return [adapter, adapter, adapter]
 
 
+class _OfflineAcceptedSigner:
+    def issue_receipt(self, *, decision, evaluation_id, evidence_hash):
+        return {
+            "receipt_id": f"hgovv_test_{uuid.uuid4().hex[:8]}",
+            "schema": "hologov_v_receipt_v1",
+            "receipt_version": "1",
+            "lane": "HoloGov-V",
+            "status": "accepted",
+            "enforcement_point": "/v1/evaluate_action",
+            "decision": decision,
+            "evaluation_id": evaluation_id,
+            "evidence_hash": evidence_hash,
+            "signer_id": "offline-test-signer",
+            "key_id": "offline-test-key",
+            "issued_at": "2026-06-26T00:00:00Z",
+            "nonce": uuid.uuid4().hex,
+            "receipt_signature": "offline-test-signature",
+        }
+
+
 @pytest.fixture
 def allow_client():
     """Client wired to return 3x ALLOW / all-LOW turns."""
     results = [make_turn_result(verdict="ALLOW", turn_number=i) for i in range(1, 4)]
     with patch("context_governor.load_adapters", return_value=(_make_mock_adapters(results), [])):
-        from main import app
-        with TestClient(app, raise_server_exceptions=False) as client:
-            yield client
+        import main
+        with patch.object(main, "_hologov_v_signer_client", _OfflineAcceptedSigner()):
+            with TestClient(main.app, raise_server_exceptions=False) as client:
+                yield client
 
 
 @pytest.fixture
@@ -45,9 +67,10 @@ def escalate_client():
         make_turn_result(verdict="ESCALATE", turn_number=3),
     ]
     with patch("context_governor.load_adapters", return_value=(_make_mock_adapters(results), [])):
-        from main import app
-        with TestClient(app, raise_server_exceptions=False) as client:
-            yield client
+        import main
+        with patch.object(main, "_hologov_v_signer_client", _OfflineAcceptedSigner()):
+            with TestClient(main.app, raise_server_exceptions=False) as client:
+                yield client
 
 
 # ---------------------------------------------------------------------------

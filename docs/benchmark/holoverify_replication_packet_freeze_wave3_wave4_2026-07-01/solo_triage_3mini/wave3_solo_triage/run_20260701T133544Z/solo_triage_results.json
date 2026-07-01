@@ -1,0 +1,4913 @@
+{
+  "batch_label": "wave3_solo_triage",
+  "by_family": {
+    "HV-BENC-REP-2026-07-01": {
+      "calls": 120,
+      "domain": "Benefits / public casework controls",
+      "expected_calls": 120,
+      "knew_admissible": 72,
+      "not_knew": 48,
+      "parse_fail": 13,
+      "provider_fail": 0,
+      "wrong_verdict": 3
+    },
+    "HV-BKYC-REP-2026-07-01": {
+      "calls": 120,
+      "domain": "Banking / KYC / AML controls",
+      "expected_calls": 120,
+      "knew_admissible": 68,
+      "not_knew": 52,
+      "parse_fail": 16,
+      "provider_fail": 0,
+      "wrong_verdict": 7
+    },
+    "HV-DEFA-REP-2026-07-01": {
+      "calls": 0,
+      "domain": "Defense administration / logistics controls",
+      "expected_calls": 0,
+      "knew_admissible": 0,
+      "not_knew": 0,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "wrong_verdict": 0
+    },
+    "HV-GOVP-REP-2026-07-01": {
+      "calls": 120,
+      "domain": "Government procurement / grants controls",
+      "expected_calls": 120,
+      "knew_admissible": 65,
+      "not_knew": 55,
+      "parse_fail": 14,
+      "provider_fail": 0,
+      "wrong_verdict": 3
+    },
+    "HV-INSR-REP-2026-07-01": {
+      "calls": 0,
+      "domain": "Insurance claims / coverage controls",
+      "expected_calls": 0,
+      "knew_admissible": 0,
+      "not_knew": 0,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "wrong_verdict": 0
+    },
+    "HV-UTIL-REP-2026-07-01": {
+      "calls": 0,
+      "domain": "Energy / utilities / infrastructure controls",
+      "expected_calls": 0,
+      "knew_admissible": 0,
+      "not_knew": 0,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "wrong_verdict": 0
+    }
+  },
+  "by_model": {
+    "minimax/MiniMax-M2.5-highspeed": {
+      "calls": 120,
+      "expected_calls": 120,
+      "knew_admissible": 57,
+      "parse_fail": 43,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 20,
+      "tokens": {
+        "input_tokens": 65012,
+        "output_tokens": 132162,
+        "total_tokens": 197174
+      },
+      "verdict_correct": 77,
+      "wrong_verdict": 0
+    },
+    "openai/gpt-5.4-mini": {
+      "calls": 120,
+      "expected_calls": 120,
+      "knew_admissible": 118,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 2,
+      "tokens": {
+        "input_tokens": 60984,
+        "output_tokens": 16674,
+        "total_tokens": 77658
+      },
+      "verdict_correct": 120,
+      "wrong_verdict": 0
+    },
+    "xai/grok-3-mini": {
+      "calls": 120,
+      "expected_calls": 120,
+      "knew_admissible": 30,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 77,
+      "tokens": {
+        "input_tokens": 74767,
+        "output_tokens": 15735,
+        "total_tokens": 162480
+      },
+      "verdict_correct": 107,
+      "wrong_verdict": 13
+    }
+  },
+  "classification": "HOLOVERIFY_REPLICATION_WAVE3_WAVE4_SOLO_TRIAGE_COMPLETE",
+  "expected_provider_calls": 360,
+  "freeze_root": "ac44c5d69ad73c64dcae1591e37cc9ade8a80ed5e71a05786cd2490a445c2dd5",
+  "gov_calls": 0,
+  "holo_calls": 0,
+  "judge_calls": 0,
+  "pair_rankings": [
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BENC-REP-016-A",
+        "HV-BENC-REP-016-B"
+      ],
+      "pair_id": "HV-BENC-REP-016",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-016-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-016-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-016-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-016-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-016-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-016-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BKYC-REP-011-A",
+        "HV-BKYC-REP-011-B"
+      ],
+      "pair_id": "HV-BKYC-REP-011",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-011-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-011-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-011-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-011-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-011-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-011-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BKYC-REP-016-A",
+        "HV-BKYC-REP-016-B"
+      ],
+      "pair_id": "HV-BKYC-REP-016",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-016-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-016-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-016-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-016-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-016-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-016-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BKYC-REP-018-A",
+        "HV-BKYC-REP-018-B"
+      ],
+      "pair_id": "HV-BKYC-REP-018",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-018-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-018-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-018-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-018-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-018-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-018-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BKYC-REP-020-A",
+        "HV-BKYC-REP-020-B"
+      ],
+      "pair_id": "HV-BKYC-REP-020",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-020-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-020-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-020-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-020-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-020-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-020-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-GOVP-REP-012-A",
+        "HV-GOVP-REP-012-B"
+      ],
+      "pair_id": "HV-GOVP-REP-012",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-012-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-012-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-012-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-012-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-012-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-012-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BENC-REP-001-A",
+        "HV-BENC-REP-001-B"
+      ],
+      "pair_id": "HV-BENC-REP-001",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-001-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-001-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-001-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-001-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-001-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-001-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BENC-REP-015-A",
+        "HV-BENC-REP-015-B"
+      ],
+      "pair_id": "HV-BENC-REP-015",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-015-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-015-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-015-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-015-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-015-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-015-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BENC-REP-020-A",
+        "HV-BENC-REP-020-B"
+      ],
+      "pair_id": "HV-BENC-REP-020",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-020-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-020-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-020-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-020-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-020-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-020-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BKYC-REP-009-A",
+        "HV-BKYC-REP-009-B"
+      ],
+      "pair_id": "HV-BKYC-REP-009",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-009-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-009-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-009-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-009-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-009-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-009-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-GOVP-REP-006-A",
+        "HV-GOVP-REP-006-B"
+      ],
+      "pair_id": "HV-GOVP-REP-006",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-006-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-006-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-006-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-006-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-006-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-006-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-GOVP-REP-014-A",
+        "HV-GOVP-REP-014-B"
+      ],
+      "pair_id": "HV-GOVP-REP-014",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-014-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-014-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-014-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-014-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-014-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-014-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BENC-REP-013-A",
+        "HV-BENC-REP-013-B"
+      ],
+      "pair_id": "HV-BENC-REP-013",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-013-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-013-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-013-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-013-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-013-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-013-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BKYC-REP-006-A",
+        "HV-BKYC-REP-006-B"
+      ],
+      "pair_id": "HV-BKYC-REP-006",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-006-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-006-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-006-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-006-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-006-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-006-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BKYC-REP-019-A",
+        "HV-BKYC-REP-019-B"
+      ],
+      "pair_id": "HV-BKYC-REP-019",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-019-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-019-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-019-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-019-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-019-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-019-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-017-A",
+        "HV-GOVP-REP-017-B"
+      ],
+      "pair_id": "HV-GOVP-REP-017",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-017-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-017-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-017-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-017-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-017-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-017-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-020-A",
+        "HV-GOVP-REP-020-B"
+      ],
+      "pair_id": "HV-GOVP-REP-020",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-020-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-020-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-020-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-020-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-020-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-020-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BENC-REP-004-A",
+        "HV-BENC-REP-004-B"
+      ],
+      "pair_id": "HV-BENC-REP-004",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-004-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-004-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-004-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-004-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-004-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-004-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BENC-REP-009-A",
+        "HV-BENC-REP-009-B"
+      ],
+      "pair_id": "HV-BENC-REP-009",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-009-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-009-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-009-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-009-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-009-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-009-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BENC-REP-011-A",
+        "HV-BENC-REP-011-B"
+      ],
+      "pair_id": "HV-BENC-REP-011",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-011-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-011-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-011-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-011-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-011-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-011-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BENC-REP-014-A",
+        "HV-BENC-REP-014-B"
+      ],
+      "pair_id": "HV-BENC-REP-014",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-014-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-014-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-014-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-014-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-014-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-014-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BENC-REP-018-A",
+        "HV-BENC-REP-018-B"
+      ],
+      "pair_id": "HV-BENC-REP-018",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-018-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-018-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-018-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-018-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-018-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-018-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BENC-REP-019-A",
+        "HV-BENC-REP-019-B"
+      ],
+      "pair_id": "HV-BENC-REP-019",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-019-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-019-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-019-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-019-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-019-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-019-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BKYC-REP-001-A",
+        "HV-BKYC-REP-001-B"
+      ],
+      "pair_id": "HV-BKYC-REP-001",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-001-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-001-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-001-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-001-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-001-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-001-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BKYC-REP-002-A",
+        "HV-BKYC-REP-002-B"
+      ],
+      "pair_id": "HV-BKYC-REP-002",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-002-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-002-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-002-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-002-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-002-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-002-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BKYC-REP-005-A",
+        "HV-BKYC-REP-005-B"
+      ],
+      "pair_id": "HV-BKYC-REP-005",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-005-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-005-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-005-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-005-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-005-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-005-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BKYC-REP-007-A",
+        "HV-BKYC-REP-007-B"
+      ],
+      "pair_id": "HV-BKYC-REP-007",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-007-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-007-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-007-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-007-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-007-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-007-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-BKYC-REP-017-A",
+        "HV-BKYC-REP-017-B"
+      ],
+      "pair_id": "HV-BKYC-REP-017",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-017-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-017-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-017-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-017-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-017-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-017-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-001-A",
+        "HV-GOVP-REP-001-B"
+      ],
+      "pair_id": "HV-GOVP-REP-001",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-001-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-001-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-001-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-001-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-001-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-001-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-002-A",
+        "HV-GOVP-REP-002-B"
+      ],
+      "pair_id": "HV-GOVP-REP-002",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-002-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-002-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-002-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-002-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-002-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-002-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-005-A",
+        "HV-GOVP-REP-005-B"
+      ],
+      "pair_id": "HV-GOVP-REP-005",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-005-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-005-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-005-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-005-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-005-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-005-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-009-A",
+        "HV-GOVP-REP-009-B"
+      ],
+      "pair_id": "HV-GOVP-REP-009",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-009-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-009-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-009-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-009-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-009-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-009-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-010-A",
+        "HV-GOVP-REP-010-B"
+      ],
+      "pair_id": "HV-GOVP-REP-010",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-010-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-010-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-010-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-010-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-010-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-010-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-011-A",
+        "HV-GOVP-REP-011-B"
+      ],
+      "pair_id": "HV-GOVP-REP-011",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-011-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-011-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-011-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-011-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-011-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-011-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-013-A",
+        "HV-GOVP-REP-013-B"
+      ],
+      "pair_id": "HV-GOVP-REP-013",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-013-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-013-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-013-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-013-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-013-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-013-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-016-A",
+        "HV-GOVP-REP-016-B"
+      ],
+      "pair_id": "HV-GOVP-REP-016",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-016-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-016-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-016-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-016-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-016-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-016-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-018-A",
+        "HV-GOVP-REP-018-B"
+      ],
+      "pair_id": "HV-GOVP-REP-018",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-018-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-018-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-018-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-018-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-018-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-018-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-GOVP-REP-019-A",
+        "HV-GOVP-REP-019-B"
+      ],
+      "pair_id": "HV-GOVP-REP-019",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-019-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-019-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-019-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-019-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-019-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-019-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 2,
+      "packets": [
+        "HV-BENC-REP-012-A",
+        "HV-BENC-REP-012-B"
+      ],
+      "pair_id": "HV-BENC-REP-012",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-012-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-012-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-012-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-012-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-012-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-012-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 2,
+      "packets": [
+        "HV-BKYC-REP-015-A",
+        "HV-BKYC-REP-015-B"
+      ],
+      "pair_id": "HV-BKYC-REP-015",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-015-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-015-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-015-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-015-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-015-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-015-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 2,
+      "packets": [
+        "HV-BENC-REP-008-A",
+        "HV-BENC-REP-008-B"
+      ],
+      "pair_id": "HV-BENC-REP-008",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-008-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-008-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-008-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-008-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-008-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-008-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 2,
+      "packets": [
+        "HV-BENC-REP-010-A",
+        "HV-BENC-REP-010-B"
+      ],
+      "pair_id": "HV-BENC-REP-010",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-010-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-010-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-010-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-010-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-010-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-010-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 2,
+      "packets": [
+        "HV-BKYC-REP-008-A",
+        "HV-BKYC-REP-008-B"
+      ],
+      "pair_id": "HV-BKYC-REP-008",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-008-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-008-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-008-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-008-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-008-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-008-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 2,
+      "packets": [
+        "HV-BKYC-REP-010-A",
+        "HV-BKYC-REP-010-B"
+      ],
+      "pair_id": "HV-BKYC-REP-010",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-010-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-010-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-010-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-010-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-010-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-010-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 2,
+      "packets": [
+        "HV-GOVP-REP-008-A",
+        "HV-GOVP-REP-008-B"
+      ],
+      "pair_id": "HV-GOVP-REP-008",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-008-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-008-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-008-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-008-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-008-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-008-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 2,
+      "packets": [
+        "HV-GOVP-REP-015-A",
+        "HV-GOVP-REP-015-B"
+      ],
+      "pair_id": "HV-GOVP-REP-015",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-015-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-015-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-015-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-015-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-015-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-015-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-BENC-REP-002-A",
+        "HV-BENC-REP-002-B"
+      ],
+      "pair_id": "HV-BENC-REP-002",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-002-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-002-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-002-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-002-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-002-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-002-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-BENC-REP-003-A",
+        "HV-BENC-REP-003-B"
+      ],
+      "pair_id": "HV-BENC-REP-003",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-003-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-003-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-003-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-003-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-003-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-003-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-BENC-REP-005-A",
+        "HV-BENC-REP-005-B"
+      ],
+      "pair_id": "HV-BENC-REP-005",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-005-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-005-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-005-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-005-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-005-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-005-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-BENC-REP-006-A",
+        "HV-BENC-REP-006-B"
+      ],
+      "pair_id": "HV-BENC-REP-006",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-006-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-006-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-006-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-006-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-006-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-006-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-BENC-REP-017-A",
+        "HV-BENC-REP-017-B"
+      ],
+      "pair_id": "HV-BENC-REP-017",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-017-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-017-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-017-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-017-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-017-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-017-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-BKYC-REP-003-A",
+        "HV-BKYC-REP-003-B"
+      ],
+      "pair_id": "HV-BKYC-REP-003",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-003-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-003-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-003-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-003-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-003-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-003-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-BKYC-REP-004-A",
+        "HV-BKYC-REP-004-B"
+      ],
+      "pair_id": "HV-BKYC-REP-004",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-004-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-004-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-004-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-004-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-004-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-004-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-BKYC-REP-012-A",
+        "HV-BKYC-REP-012-B"
+      ],
+      "pair_id": "HV-BKYC-REP-012",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-012-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-012-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-012-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-012-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-012-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-012-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-BKYC-REP-013-A",
+        "HV-BKYC-REP-013-B"
+      ],
+      "pair_id": "HV-BKYC-REP-013",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-013-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-013-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-013-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-013-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-013-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-013-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-BKYC-REP-014-A",
+        "HV-BKYC-REP-014-B"
+      ],
+      "pair_id": "HV-BKYC-REP-014",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-014-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-014-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-014-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-014-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-014-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-014-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-GOVP-REP-003-A",
+        "HV-GOVP-REP-003-B"
+      ],
+      "pair_id": "HV-GOVP-REP-003",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-003-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-003-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-003-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-003-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-003-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-003-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-GOVP-REP-004-A",
+        "HV-GOVP-REP-004-B"
+      ],
+      "pair_id": "HV-GOVP-REP-004",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-004-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-004-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-004-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-004-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-004-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-004-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 1,
+      "packets": [
+        "HV-GOVP-REP-007-A",
+        "HV-GOVP-REP-007-B"
+      ],
+      "pair_id": "HV-GOVP-REP-007",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-007-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-007-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-007-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-007-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-007-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-007-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 0,
+      "packets": [
+        "HV-BENC-REP-007-A",
+        "HV-BENC-REP-007-B"
+      ],
+      "pair_id": "HV-BENC-REP-007",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-007-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-007-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-007-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-007-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-007-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-007-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "NO_SOLO_SEAM",
+      "wrong_verdict_count": 0
+    }
+  ],
+  "preflight": {
+    "batch_label": "wave3_solo_triage",
+    "checks": {
+      "expected_provider_calls": true,
+      "families_selected": true,
+      "freeze_root_matches": true,
+      "judge_calls": true,
+      "model_count": true,
+      "no_gemini_in_triage_roster": true,
+      "no_gov_calls_configured": true,
+      "no_gpt_4o_mini_in_triage_roster": true,
+      "no_holo_state_configured": true,
+      "no_judge_calls_configured": true,
+      "openai_w2_is_gpt_5_4_mini": true,
+      "packets_selected": true,
+      "pairs_selected": true,
+      "prompt_leakage": true,
+      "provider_calls": true,
+      "selected_family_set_valid": true,
+      "truths_selected": true,
+      "wave3_wave4_freeze_root_matches": true
+    },
+    "classification": "HOLOVERIFY_REPLICATION_WAVE3_WAVE4_SOLO_TRIAGE_PREFLIGHT",
+    "expected_gov_calls": 0,
+    "expected_holo_calls": 0,
+    "expected_judge_calls": 0,
+    "expected_provider_calls": 360,
+    "families": {
+      "HV-BENC-REP-2026-07-01": 40,
+      "HV-BKYC-REP-2026-07-01": 40,
+      "HV-GOVP-REP-2026-07-01": 40
+    },
+    "freeze_root": "ac44c5d69ad73c64dcae1591e37cc9ade8a80ed5e71a05786cd2490a445c2dd5",
+    "judge_calls_made_by_preflight": 0,
+    "model_roster": [
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "model_key": "xai",
+        "provider": "xai"
+      },
+      {
+        "dna": "openai",
+        "model": "gpt-5.4-mini",
+        "model_key": "openai_weak",
+        "provider": "openai"
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "model_key": "minimax",
+        "provider": "minimax"
+      }
+    ],
+    "packet_count": 120,
+    "pair_count": 60,
+    "provider_calls_made_by_preflight": 0,
+    "selection": {
+      "family_ids": [
+        "HV-BENC-REP-2026-07-01",
+        "HV-BKYC-REP-2026-07-01",
+        "HV-GOVP-REP-2026-07-01"
+      ],
+      "packet_limit": null,
+      "pair_limit": null
+    },
+    "status": "PASS",
+    "truth_counts": {
+      "ALLOW": 60,
+      "ESCALATE": 60
+    },
+    "wave3_wave4_lane_lock": {
+      "families": {
+        "HV-BENC-REP-2026-07-01": "Benefits / public casework controls",
+        "HV-BKYC-REP-2026-07-01": "Banking / KYC / AML controls",
+        "HV-DEFA-REP-2026-07-01": "Defense administration / logistics controls",
+        "HV-GOVP-REP-2026-07-01": "Government procurement / grants controls",
+        "HV-INSR-REP-2026-07-01": "Insurance claims / coverage controls",
+        "HV-UTIL-REP-2026-07-01": "Energy / utilities / infrastructure controls"
+      },
+      "freeze_root_hash": "ac44c5d69ad73c64dcae1591e37cc9ade8a80ed5e71a05786cd2490a445c2dd5",
+      "no_gov": true,
+      "no_holo_state": true,
+      "no_judges": true,
+      "openai_model": "gpt-5.4-mini"
+    }
+  },
+  "provider_calls": 360,
+  "provider_failures": [],
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_replication_packet_freeze_wave3_wave4_2026-07-01/solo_triage_3mini/wave3_solo_triage/run_20260701T133544Z",
+  "top_holo_targets": [
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BENC-REP-016-A",
+        "HV-BENC-REP-016-B"
+      ],
+      "pair_id": "HV-BENC-REP-016",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-016-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-016-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-016-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-016-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-016-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-016-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BKYC-REP-011-A",
+        "HV-BKYC-REP-011-B"
+      ],
+      "pair_id": "HV-BKYC-REP-011",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-011-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-011-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-011-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-011-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-011-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-011-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BKYC-REP-016-A",
+        "HV-BKYC-REP-016-B"
+      ],
+      "pair_id": "HV-BKYC-REP-016",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-016-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-016-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-016-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-016-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-016-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-016-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BKYC-REP-018-A",
+        "HV-BKYC-REP-018-B"
+      ],
+      "pair_id": "HV-BKYC-REP-018",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-018-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-018-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-018-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-018-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-018-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-018-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BKYC-REP-020-A",
+        "HV-BKYC-REP-020-B"
+      ],
+      "pair_id": "HV-BKYC-REP-020",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-020-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-020-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-020-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-020-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-020-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-020-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-GOVP-REP-012-A",
+        "HV-GOVP-REP-012-B"
+      ],
+      "pair_id": "HV-GOVP-REP-012",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-012-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-012-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-012-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-012-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-012-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-012-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BENC-REP-001-A",
+        "HV-BENC-REP-001-B"
+      ],
+      "pair_id": "HV-BENC-REP-001",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-001-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-001-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-001-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-001-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-001-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-001-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BENC-REP-015-A",
+        "HV-BENC-REP-015-B"
+      ],
+      "pair_id": "HV-BENC-REP-015",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-015-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-015-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-015-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-015-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-015-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-015-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Benefits / public casework controls",
+      "family_id": "HV-BENC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BENC-REP-020-A",
+        "HV-BENC-REP-020-B"
+      ],
+      "pair_id": "HV-BENC-REP-020",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-020-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-020-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-020-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BENC-REP-020-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BENC-REP-020-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BENC-REP-020-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Banking / KYC / AML controls",
+      "family_id": "HV-BKYC-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-BKYC-REP-009-A",
+        "HV-BKYC-REP-009-B"
+      ],
+      "pair_id": "HV-BKYC-REP-009",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-009-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-009-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-009-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-BKYC-REP-009-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-BKYC-REP-009-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-BKYC-REP-009-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-GOVP-REP-006-A",
+        "HV-GOVP-REP-006-B"
+      ],
+      "pair_id": "HV-GOVP-REP-006",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-006-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-006-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-006-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-006-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-006-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-006-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Government procurement / grants controls",
+      "family_id": "HV-GOVP-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-GOVP-REP-014-A",
+        "HV-GOVP-REP-014-B"
+      ],
+      "pair_id": "HV-GOVP-REP-014",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-014-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-014-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-014-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-GOVP-REP-014-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-GOVP-REP-014-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-GOVP-REP-014-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    }
+  ],
+  "totals": {
+    "input_tokens": 200763,
+    "output_tokens": 164571,
+    "total_tokens": 437312
+  },
+  "trace_hash": "0ceb771f562f6aa98e92749753c4139e7694a1a85c3641713b368298ece47ea2",
+  "wave3_wave4_lane_lock": {
+    "families": {
+      "HV-BENC-REP-2026-07-01": "Benefits / public casework controls",
+      "HV-BKYC-REP-2026-07-01": "Banking / KYC / AML controls",
+      "HV-DEFA-REP-2026-07-01": "Defense administration / logistics controls",
+      "HV-GOVP-REP-2026-07-01": "Government procurement / grants controls",
+      "HV-INSR-REP-2026-07-01": "Insurance claims / coverage controls",
+      "HV-UTIL-REP-2026-07-01": "Energy / utilities / infrastructure controls"
+    },
+    "freeze_root_hash": "ac44c5d69ad73c64dcae1591e37cc9ade8a80ed5e71a05786cd2490a445c2dd5",
+    "no_gov": true,
+    "no_holo_state": true,
+    "no_judges": true,
+    "openai_model": "gpt-5.4-mini"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment, invoice release, or vendor-master action when current source records confirm exact current scope",
+    "allow_rule_assessment": "Current control record confirms exact current scope tied to action, closing the boundary",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-7893AD449CF2-CTL confirms callback date and invoice scope is current, exact, and tied to requested action",
+    "escalate_rule_assessment": "No narrow source-record defect remains; CTL confirms current scope per policy",
+    "timing_scope_authority_dependency_check": "GATE resolved; exact source evidence closes action boundary"
+  },
+  "cited_evidence": [
+    "SRC-7893AD449CF2-CTL",
+    "SRC-7893AD449CF2-POL",
+    "SRC-7893AD449CF2-FBK",
+    "SRC-7893AD449CF2-BND"
+  ],
+  "critical_features_preserved": [
+    "current_exact_scope",
+    "control_record_authority",
+    "source_boundary_closure",
+    "policy_alignment",
+    "no_adjacent_source_treatment"
+  ],
+  "final_answer": "The action may proceed because SRC-7893AD449CF2-CTL confirms the callback date and invoice scope are current, exact, and tied to the requested action, closing the exact action boundary per SRC-7893AD449CF2-POL. The request's prior-invoice framing and warning tone do not constitute source-record defects when current source records\u2014specifically the control record\u2014close the boundary before execution.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

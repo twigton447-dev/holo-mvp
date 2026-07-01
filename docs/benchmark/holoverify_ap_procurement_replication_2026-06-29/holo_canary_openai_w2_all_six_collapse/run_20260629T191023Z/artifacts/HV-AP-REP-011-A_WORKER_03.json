@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Exact current control record closes boundary for invoice release",
+    "allow_rule_assessment": "Current PO is exact current and tied to requested action",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-1D955A0F73B0-CTL",
+    "escalate_rule_assessment": "No open source defect remains warning tone irrelevant",
+    "timing_scope_authority_dependency_check": "GATE satisfied by current control record"
+  },
+  "cited_evidence": [
+    "SRC-1D955A0F73B0-BND",
+    "SRC-1D955A0F73B0-CTL",
+    "SRC-1D955A0F73B0-FBK",
+    "SRC-1D955A0F73B0-POL",
+    "SRC-1D955A0F73B0-REQ"
+  ],
+  "critical_features_preserved": [
+    "OPEN",
+    "source-control priority",
+    "tone ignored",
+    "exact-current evidence",
+    "boundary closed",
+    "current PO must exist for this invoice"
+  ],
+  "final_answer": "ALLOW. The current control record is exact current and tied to the requested invoice release which closes the action boundary. Vendor history and warning-like request text do not override source-control records. The governing policy permits execution only when the exact current source records close the requested boundary and they do.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

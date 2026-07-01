@@ -18,25 +18,25 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 ## Totals
 
 - `total_batches`: `28`
-- `completed_batches`: `8`
-- `not_started_batches`: `20`
+- `completed_batches`: `9`
+- `not_started_batches`: `19`
 - `invalid_batches`: `0`
-- `completed_pairs`: `40`
-- `completed_packets`: `80`
-- `completed_correct_packets`: `80`
-- `expected_provider_calls_for_completed_batches`: `400`
-- `observed_provider_calls_for_completed_batches`: `400`
+- `completed_pairs`: `45`
+- `completed_packets`: `90`
+- `completed_correct_packets`: `90`
+- `expected_provider_calls_for_completed_batches`: `450`
+- `observed_provider_calls_for_completed_batches`: `450`
 - `judge_calls`: `0`
 - `transport_recovered_call_count`: `0`
-- `input_tokens`: `697186`
-- `output_tokens`: `136961`
-- `total_tokens`: `888140`
-- `allow_packets`: `40`
-- `escalate_packets`: `40`
-- `allow_correct`: `40`
-- `escalate_correct`: `40`
-- `target_packets`: `40`
-- `guardrail_packets`: `40`
+- `input_tokens`: `784082`
+- `output_tokens`: `152935`
+- `total_tokens`: `997673`
+- `allow_packets`: `45`
+- `escalate_packets`: `45`
+- `allow_correct`: `45`
+- `escalate_correct`: `45`
+- `target_packets`: `45`
+- `guardrail_packets`: `45`
 
 ## Checks
 
@@ -63,13 +63,14 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 | `WAVE5_TRES_HOLO_BATCH_002` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_tres_holo_batch_002/live_runs/run_20260701T200540Z` | `50` | `10` | `10` | `5` |
 | `WAVE5_TRES_HOLO_BATCH_003` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_tres_holo_batch_003/live_runs/run_20260701T201925Z` | `50` | `10` | `10` | `5` |
 | `WAVE5_TRES_HOLO_BATCH_004` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_tres_holo_batch_004/live_runs/run_20260701T203759Z` | `50` | `10` | `10` | `5` |
+| `WAVE5_LREG_HOLO_BATCH_001` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_lreg_holo_batch_001/live_runs/run_20260701T204454Z` | `50` | `10` | `10` | `5` |
 
 ## Next Allowed Batch
 
-- Batch: `WAVE5_LREG_HOLO_BATCH_001`
+- Batch: `WAVE5_LREG_HOLO_BATCH_002`
 - Family: `HV-LREG-REP-2026-07-01`
-- Approval SHA: `1e9186de923375b99c1b7c10db36270e0adde0a7bd903d35c1af4a8736af4e90`
+- Approval SHA: `53f3c3f4d6d195ac54f57eb17e7f20564a6e1355ec1d05a87ba952615bc2979c`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-LREG-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 1e9186de923375b99c1b7c10db36270e0adde0a7bd903d35c1af4a8736af4e90 --approval-statement "I explicitly approve provider calls for WAVE5_LREG_HOLO_BATCH_001 only, exactly as scoped in WAVE5_LREG_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-LREG-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 53f3c3f4d6d195ac54f57eb17e7f20564a6e1355ec1d05a87ba952615bc2979c --approval-statement "I explicitly approve provider calls for WAVE5_LREG_HOLO_BATCH_002 only, exactly as scoped in WAVE5_LREG_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```

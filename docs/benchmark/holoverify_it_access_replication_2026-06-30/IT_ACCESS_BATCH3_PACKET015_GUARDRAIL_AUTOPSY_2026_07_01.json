@@ -1,0 +1,62 @@
+{
+  "classification": "IT_ACCESS_BATCH3_INVALID_PACKET_SEMANTIC_AMBIGUITY",
+  "created_at": "2026-07-01",
+  "run_dir": "docs/benchmark/holoverify_it_access_replication_2026-06-30/holo_live_runs_openai_w2_batched/batch_3/run_20260701T010300Z",
+  "batch_id": "batch_3",
+  "packet_id": "HV-ITAC-REP-015-A",
+  "pair_id": "HV-ITAC-REP-015",
+  "expected_truth": "ALLOW",
+  "observed_final_verdict": null,
+  "final_selector_reason": "NO_ADMISSIBLE_ARTIFACT",
+  "provider_calls": 60,
+  "expected_provider_calls": 60,
+  "worker_calls": 36,
+  "gov_calls": 24,
+  "solo_calls": 0,
+  "judge_calls": 0,
+  "provider_failures": 0,
+  "parse_failures": 0,
+  "no_leakage": "PASS",
+  "packet_identity": "PASS",
+  "three_dna_roster": "PASS",
+  "batch_readiness": "FAIL",
+  "failing_worker_verdicts": [
+    {
+      "turn_id": "HV-ITAC-REP-015-A_W1",
+      "provider": "xai",
+      "model": "grok-3-mini",
+      "verification_verdict": "ESCALATE",
+      "gate_passed": false
+    },
+    {
+      "turn_id": "HV-ITAC-REP-015-A_W2",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "verification_verdict": "ESCALATE",
+      "gate_passed": false
+    },
+    {
+      "turn_id": "HV-ITAC-REP-015-A_W3",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "verification_verdict": "ESCALATE",
+      "gate_passed": false
+    }
+  ],
+  "gov_behavior": {
+    "gov_calls_for_packet": 2,
+    "both_gov_calls_parsed": true,
+    "gov_flagged_overblock": true,
+    "gov_control_action": "CONTINUE_REPAIR",
+    "gov_focus": "GATE_REPAIR"
+  },
+  "root_cause": "The packet answer key expects ALLOW because the current control record closes the HR termination dependency, but the model-visible action boundary and communication boundary repeatedly state that an offboarding conflict or active offboarding block is still active. All three workers reasonably treated that boundary text as an active blocker.",
+  "source_of_ambiguity": [
+    "action_boundary: Focus: offboarding conflict still active.",
+    "communication_boundary: active offboarding block overrides access request",
+    "source boundary text: Communication boundary: active offboarding block overrides access request."
+  ],
+  "recommended_action": "Preserve the invalid run, quarantine or retire HV-ITAC-REP-015 from proof-credit, and freeze a clearer replacement IT Access sibling pair before seeking a 20/20 family result.",
+  "proof_credit_allowed": false,
+  "rerun_same_packet_recommended": false
+}

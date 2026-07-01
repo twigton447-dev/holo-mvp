@@ -1,0 +1,38 @@
+{
+  "block": "FINAL_ON_FAIL",
+  "blocked_moves": [
+    "Do not escalate from warning tone, stale/adjacent records, missing phrasing, or plausible risk when exact current source evidence closes the boundary."
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dep": "GATE",
+  "dependency_ledger": [
+    "GATE"
+  ],
+  "final_compiler_allowed": false,
+  "focus": "GATE_REPAIR",
+  "gov_baton_version": "gov_micro_baton_v2",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "OPEN"
+  ],
+  "must_repair": [
+    "Potential overblock: re-check whether exact current source evidence closes the action boundary; if closed, return ALLOW with SOURCE_BOUNDARY_CLOSED."
+  ],
+  "next_worker_baton": {
+    "attack_focus": "overblock",
+    "monotonic_preservation": [
+      "OPEN"
+    ],
+    "objective": "Repair failed deterministic gate before final selection.",
+    "required_repairs": [
+      "Potential overblock: re-check whether exact current source evidence closes the action boundary; if closed, return ALLOW with SOURCE_BOUNDARY_CLOSED."
+    ]
+  },
+  "objective": "REPAIR_GATE",
+  "preserve": "OPEN",
+  "repair": "VERDICT_BINDING",
+  "route_verdict": "CONTINUE_WORKER",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verdict": "CONTINUE",
+  "verification_verdict": "ESCALATE"
+}

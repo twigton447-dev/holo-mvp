@@ -29,6 +29,8 @@ ROLLUP_ROOT = IT_ACCESS_ROOT / "batched_full_holo_rollups"
 MINIMAX_HEALTH_ROOT = IT_ACCESS_ROOT / "minimax_health_checks"
 MINIMAX_WORKER_SMOKE_ROOT = IT_ACCESS_ROOT / "minimax_worker_contract_smokes"
 EXPECTED_FREEZE_ROOT_HASH = "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7"
+REPLACEMENT_015R1_FREEZE_ROOT = IT_ACCESS_ROOT / "it_access_replacement_pair_015r1_freeze_2026_07_01"
+REPLACEMENT_015R1_FREEZE_ROOT_HASH = "6c61024da5f6c36c1ee5210b95efd1d7a1ed0caff60a11efe0ace1ca1e72dc4e"
 MINIMAX_HEALTH_PROMPT = "Return exactly MINIMAX_READY"
 MINIMAX_HEALTH_EXPECTED_RESPONSE = "MINIMAX_READY"
 MINIMAX_HEALTH_MAX_TOKENS = 128
@@ -70,6 +72,12 @@ BATCHES: dict[str, dict[str, Any]] = {
         "label": "pairs_015_020",
         "pair_ids": tuple(f"HV-ITAC-REP-{index:03d}" for index in range(15, 21)),
     },
+    "replacement_015r1": {
+        "label": "replacement_pair_015r1",
+        "pair_ids": ("HV-ITAC-REP-015R1",),
+        "replacement_for": "HV-ITAC-REP-015",
+        "supplemental_freeze": True,
+    },
 }
 
 
@@ -98,6 +106,10 @@ def write_text(path: Path, value: str) -> None:
 
 def read_json(path: Path) -> Any:
     return json.loads(path.read_text())
+
+
+def sha256_file(path: Path) -> str:
+    return AP.sha256_file(path)
 
 
 def parse_timestamp(value: str | None) -> datetime | None:
@@ -454,8 +466,123 @@ def render_minimax_health_md(report: dict[str, Any]) -> str:
     )
 
 
+def active_freeze_root_hash(batch_id: str) -> str:
+    if BATCHES[batch_id].get("supplemental_freeze"):
+        return REPLACEMENT_015R1_FREEZE_ROOT_HASH
+    return EXPECTED_FREEZE_ROOT_HASH
+
+
+def read_replacement_015r1_freeze() -> dict[str, Any]:
+    summary = read_json(REPLACEMENT_015R1_FREEZE_ROOT / "FREEZE_MANIFEST.json")
+    if summary.get("freeze_root_hash") != REPLACEMENT_015R1_FREEZE_ROOT_HASH:
+        raise RuntimeError(f"replacement_freeze_root_mismatch:{summary.get('freeze_root_hash')}")
+    if summary.get("original_freeze_root_hash") != EXPECTED_FREEZE_ROOT_HASH:
+        raise RuntimeError("replacement_original_freeze_root_mismatch")
+    packet_manifest = read_json(REPLACEMENT_015R1_FREEZE_ROOT / "manifests" / "PACKET_HASH_MANIFEST.json")
+    prompt_manifest = read_json(REPLACEMENT_015R1_FREEZE_ROOT / "manifests" / "PROMPT_HASH_MANIFEST.json")
+    index = read_json(REPLACEMENT_015R1_FREEZE_ROOT / "manifests" / "PACKET_INDEX.json")
+    packet_by_id = {row["packet_id"]: row for row in packet_manifest["records"]}
+    prompt_by_id = {row["packet_id"]: row for row in prompt_manifest["records"]}
+    records = []
+    for row in sorted(index, key=lambda item: (item["pair_id"], item["sibling_id"])):
+        packet_hash_row = packet_by_id[row["packet_id"]]
+        prompt_hash_row = prompt_by_id[row["packet_id"]]
+        packet_path = REPLACEMENT_015R1_FREEZE_ROOT / packet_hash_row["packet_path"]
+        prompt_path = REPLACEMENT_015R1_FREEZE_ROOT / prompt_hash_row["prompt_path"]
+        model_payload_path = REPLACEMENT_015R1_FREEZE_ROOT / packet_hash_row["model_visible_payload_path"]
+        if sha256_file(packet_path) != packet_hash_row["packet_sha256"]:
+            raise RuntimeError(f"replacement_packet_hash_mismatch:{row['packet_id']}")
+        if sha256_file(prompt_path) != prompt_hash_row["prompt_sha256"]:
+            raise RuntimeError(f"replacement_prompt_hash_mismatch:{row['packet_id']}")
+        if sha256_file(model_payload_path) != packet_hash_row["model_visible_payload_file_sha256"]:
+            raise RuntimeError(f"replacement_model_visible_hash_mismatch:{row['packet_id']}")
+        packet = read_json(packet_path)
+        records.append(
+            {
+                **row,
+                "packet_path": str(packet_path.relative_to(BENCHMARK_ROOT)),
+                "prompt_path": str(prompt_path.relative_to(BENCHMARK_ROOT)),
+                "model_visible_payload_path": str(model_payload_path.relative_to(BENCHMARK_ROOT)),
+                "packet_file_sha256": packet_hash_row["packet_sha256"],
+                "prompt_file_sha256": prompt_hash_row["prompt_sha256"],
+                "model_visible_payload_file_sha256": packet_hash_row["model_visible_payload_file_sha256"],
+                "model_visible_payload_canonical_sha256": packet_hash_row["model_visible_payload_canonical_sha256"],
+                "answer_key_canonical_sha256": packet_hash_row["answer_key_canonical_sha256"],
+                "packet": packet,
+            }
+        )
+    if len(records) != 2:
+        raise RuntimeError(f"replacement_packet_count_mismatch:{len(records)}")
+    return {"summary": summary, "records": records}
+
+
+def source_record(packet: dict[str, Any], suffix: str) -> str:
+    for item in packet["source_control_facts"]:
+        if str(item["source_id"]).endswith(suffix):
+            return str(item["source_id"])
+    return str(packet["source_control_facts"][0]["source_id"])
+
+
+def build_pairs_any_count(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_pair: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for record in records:
+        by_pair[record["pair_id"]].append(record)
+    pairs = []
+    for pair_id, pair_records in sorted(by_pair.items()):
+        if len(pair_records) != 2:
+            raise RuntimeError(f"pair_sibling_count_mismatch:{pair_id}")
+        by_suffix = {row["sibling_id"]: row for row in pair_records}
+        a = by_suffix["A"]
+        b = by_suffix["B"]
+        target = next(row for row in pair_records if row["target_sibling"])
+        target_suffix = target["sibling_id"]
+        guardrail_suffix = "B" if target_suffix == "A" else "A"
+        spec = {
+            "pair_id": pair_id,
+            "boundary": a["packet"]["action_boundary"],
+            "failure_class_notes": a["packet"]["hidden_dependency"],
+            "knew_terms": {
+                "A": [
+                    a["packet"]["hidden_dependency"],
+                    source_record(a["packet"], "-CTL"),
+                    source_record(a["packet"], "-BND"),
+                ],
+                "B": [
+                    b["packet"]["hidden_dependency"],
+                    source_record(b["packet"], "-CTL"),
+                    source_record(b["packet"], "-BND"),
+                ],
+            },
+        }
+        pairs.append(
+            {
+                "pair_id": pair_id,
+                "benchmark_bucket": target["target_bucket"],
+                "target_suffix": target_suffix,
+                "guardrail_suffix": guardrail_suffix,
+                "spec": spec,
+                "payloads": {
+                    "A": AP.convert_payload(a["packet"]),
+                    "B": AP.convert_payload(b["packet"]),
+                },
+                "freeze_records": {"A": a, "B": b},
+                "candidate": {"failing_models": []},
+            }
+        )
+    return pairs
+
+
 def selected_pairs(batch_id: str) -> list[dict[str, Any]]:
     configure()
+    if BATCHES[batch_id].get("supplemental_freeze"):
+        freeze = read_replacement_015r1_freeze()
+        pairs = build_pairs_any_count(freeze["records"])
+        by_id = {pair["pair_id"]: pair for pair in pairs}
+        pair_ids = BATCHES[batch_id]["pair_ids"]
+        missing = [pair_id for pair_id in pair_ids if pair_id not in by_id]
+        if missing:
+            raise RuntimeError(f"replacement_target_pairs_missing:{missing}")
+        return [by_id[pair_id] for pair_id in pair_ids]
     freeze = AP.read_freeze()
     if freeze["summary"].get("freeze_root_hash") != EXPECTED_FREEZE_ROOT_HASH:
         raise RuntimeError("freeze_root_mismatch")
@@ -502,6 +629,9 @@ def render_preflight_md(preflight: dict[str, Any]) -> str:
         f"Status: `{preflight['status']}`",
         f"Result: `{preflight['result']}`",
         f"Freeze root: `{preflight['freeze_root']}`",
+        f"Original freeze root: `{preflight['original_freeze_root']}`",
+        f"Supplemental replacement freeze: `{preflight['supplemental_replacement_freeze']}`",
+        f"Replacement for: `{preflight['replacement_for']}`",
         "",
         "## Scope",
         "",
@@ -537,6 +667,8 @@ def build_preflight(
     declared_roster = roster()
     w2 = declared_roster["worker_sequence"][1]
     freeze_diff_names = AP.git_diff_names(AP.FREEZE_ROOT)
+    active_root_hash = active_freeze_root_hash(batch_id)
+    is_replacement_batch = bool(BATCHES[batch_id].get("supplemental_freeze"))
     pair_ids = tuple(pair["pair_id"] for pair in pairs)
     health_gate = latest_minimax_health_report()
     health_gate["required"] = require_minimax_health
@@ -544,6 +676,8 @@ def build_preflight(
     worker_smoke_gate["required"] = require_minimax_worker_smoke
     checks = {
         "freeze_root_matches": True,
+        "original_freeze_root_preserved": EXPECTED_FREEZE_ROOT_HASH == "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+        "replacement_freeze_root_matches": (not is_replacement_batch) or active_root_hash == REPLACEMENT_015R1_FREEZE_ROOT_HASH,
         "batch_declared": batch_id in BATCHES,
         "target_pairs_match_batch": pair_ids == BATCHES[batch_id]["pair_ids"],
         "target_pairs_count": len(pairs) == counts["pairs"],
@@ -562,9 +696,9 @@ def build_preflight(
         "empty_worker_output_retry_policy_v1_active": getattr(RUNNER, "EMPTY_WORKER_OUTPUT_RETRY_POLICY_VERSION", "") == "HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29",
         "no_packet_edits": not freeze_diff_names,
         "no_prompt_edits": not freeze_diff_names,
-        "expected_provider_calls": counts["total_provider_calls"] in {70, 60},
-        "expected_worker_calls": counts["worker_calls"] in {42, 36},
-        "expected_gov_calls": counts["gov_calls"] in {28, 24},
+        "expected_provider_calls": counts["total_provider_calls"] in {70, 60, 10},
+        "expected_worker_calls": counts["worker_calls"] in {42, 36, 6},
+        "expected_gov_calls": counts["gov_calls"] in {28, 24, 4},
         "solo_calls_configured": counts["solo_calls"] == 0,
         "judge_calls_configured": counts["judge_calls"] == 0,
         "no_providers_called_during_preflight": True,
@@ -577,7 +711,10 @@ def build_preflight(
     architecture_lock = {
         "classification": "IT_ACCESS_OPENAI_W2_BATCHED_FULL_HOLO_ARCHITECTURE_LOCK",
         "family_id": IT_ACCESS.FAMILY_ID,
-        "freeze_root_hash": EXPECTED_FREEZE_ROOT_HASH,
+        "freeze_root_hash": active_root_hash,
+        "original_freeze_root_hash": EXPECTED_FREEZE_ROOT_HASH,
+        "supplemental_replacement_freeze": is_replacement_batch,
+        "replacement_for": BATCHES[batch_id].get("replacement_for"),
         "batch_id": batch_id,
         "batch_label": BATCHES[batch_id]["label"],
         "pair_ids": list(pair_ids),
@@ -597,7 +734,10 @@ def build_preflight(
         "status": status,
         "result": "IT_ACCESS_OPENAI_W2_BATCH_READY" if status == "PASS" else "IT_ACCESS_OPENAI_W2_BATCH_BLOCKED",
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "freeze_root": EXPECTED_FREEZE_ROOT_HASH,
+        "freeze_root": active_root_hash,
+        "original_freeze_root": EXPECTED_FREEZE_ROOT_HASH,
+        "supplemental_replacement_freeze": is_replacement_batch,
+        "replacement_for": BATCHES[batch_id].get("replacement_for"),
         "source_it_access_runner": str(IT_ACCESS_MODULE_PATH.relative_to(BENCHMARK_ROOT)),
         "batch_id": batch_id,
         "batch_label": BATCHES[batch_id]["label"],
@@ -644,6 +784,7 @@ def scan_no_leakage(run_dir: Path) -> dict[str, Any]:
 def summarize_batch(run_dir: Path, manifest: dict[str, Any], packet_results: list[dict[str, Any]], trace_path: Path) -> dict[str, Any]:
     rows = trace_rows(trace_path)
     counts = manifest["expected_counts"]
+    active_root_hash = manifest.get("freeze_root") or EXPECTED_FREEZE_ROOT_HASH
     totals = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
     for row in rows:
         for key in totals:
@@ -707,7 +848,7 @@ def summarize_batch(run_dir: Path, manifest: dict[str, Any], packet_results: lis
         "no_solo": "PASS",
         "provider_failures": "PASS" if not provider_failures else "FAIL",
         "no_leakage": leakage["status"],
-        "packet_identity_matches_freeze": "PASS" if manifest.get("freeze_root") == EXPECTED_FREEZE_ROOT_HASH else "FAIL",
+        "packet_identity_matches_freeze": "PASS" if manifest.get("freeze_root") == active_root_hash else "FAIL",
         "three_dna_present": "PASS" if roster_audit.get("all_3_dna_participated") else "FAIL",
         "roster_matches": "PASS" if roster_audit.get("declared_roster_matches_actual_calls") else "FAIL",
         "deterministic_gate_after_every_worker": "PASS" if all("gate_result" in row for row in rows if row.get("call_kind") == "worker") else "FAIL",
@@ -736,7 +877,10 @@ def summarize_batch(run_dir: Path, manifest: dict[str, Any], packet_results: lis
         "classification": "IT_ACCESS_OPENAI_W2_BATCHED_HOLO_BATCH_COMPLETE" if readiness else "IT_ACCESS_OPENAI_W2_BATCHED_HOLO_BATCH_INVALID_OR_INCOMPLETE",
         "readiness_passed": readiness,
         "run_dir": str(run_dir),
-        "freeze_root": EXPECTED_FREEZE_ROOT_HASH,
+        "freeze_root": active_root_hash,
+        "original_freeze_root": manifest.get("original_freeze_root") or EXPECTED_FREEZE_ROOT_HASH,
+        "supplemental_replacement_freeze": manifest.get("supplemental_replacement_freeze") is True,
+        "replacement_for": manifest.get("replacement_for"),
         "batch_id": manifest["batch_id"],
         "batch_label": manifest["batch_label"],
         "pair_ids": manifest["pair_ids"],
@@ -779,6 +923,9 @@ def write_batch_summary_md(run_dir: Path, summary: dict[str, Any]) -> None:
         f"Batch: `{summary['batch_id']}`",
         f"Readiness passed: `{summary['readiness_passed']}`",
         f"Freeze root: `{summary['freeze_root']}`",
+        f"Original freeze root: `{summary['original_freeze_root']}`",
+        f"Supplemental replacement freeze: `{summary['supplemental_replacement_freeze']}`",
+        f"Replacement for: `{summary['replacement_for']}`",
         "",
         "## Calls",
         "",

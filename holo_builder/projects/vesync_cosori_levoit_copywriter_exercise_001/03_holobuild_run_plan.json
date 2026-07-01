@@ -1,0 +1,255 @@
+{
+  "run_id": "vesync_cosori_levoit_copywriter_exercise_001_holobuild_creative_loop_plan",
+  "status": "STAGED_NOT_RUN",
+  "created_at": "2026-06-26T14:20:00-07:00",
+  "provider_calls_used_in_staging": 0,
+  "architecture_contract_file": "../../ARCHITECTURE.md",
+  "requested_chosen_product": "Cosori TurboBlaze Air Fryer",
+  "objective": "Use the research packet, live web research, and supplied copy options to produce one schema-compliant VeSync assignment artifact for Cosori TurboBlaze Air Fryer. The artifact must connect features and functionality to a better, more wellness-forward lifestyle.",
+  "strict_creative_note": "Please craft campaign copy that focuses on the product's features and functionalities while highlighting how these innovations contribute to a better, more wellness-forward lifestyle. Each section of copy should creatively position the brand's benefits in a way that resonates with new audiences.",
+  "input_files": [
+    "00_input_brief.json",
+    "01_research_packet_seed.json",
+    "02_initial_draft.md",
+    "02_initial_draft.json",
+    "05_output_schema.json",
+    "06_product_lane_strategy.json"
+  ],
+  "product_lanes": [
+    {
+      "product": "Cosori TurboBlaze Air Fryer",
+      "required_strategy": "Show that the air fryer contributes to a healthier lifestyle by making less-oil home cooking faster, easier, and more repeatable. Use 'supports' or 'contributes to' lifestyle language, not guaranteed health outcomes."
+    }
+  ],
+  "live_research": {
+    "allowed": true,
+    "required_before_final_generation": true,
+    "minimum_sources_per_product": 3,
+    "required_source_classes": [
+      "first_party_product_page",
+      "first_party_brand_or_collection_page",
+      "platform_ad_library_or_platform_docs",
+      "selected_third_party_or_retail_review_if_used"
+    ],
+    "research_budget": {
+      "max_web_research_seconds_per_turn": 20,
+      "max_elapsed_seconds_per_lane": 120,
+      "max_search_queries_per_lane": 8,
+      "max_pages_opened_per_lane": 12,
+      "max_meta_ads_library_attempt_seconds_per_turn": 20,
+      "stop_when": [
+        "minimum source classes are satisfied and no new material claim appears in two consecutive searches",
+        "Meta Ads Library access fails or yields no usable Cosori examples within the per-turn web-research budget",
+        "the turn or lane reaches any elapsed-time, query, or page-open cap"
+      ],
+      "fallback_if_budget_exhausted": "Proceed with the staged packet and mark missing live evidence in adversarial_notes.missing_evidence."
+    },
+    "storage_rule": "Every live finding used in copy must be saved with url, title, source_type, brand, accessed_at, evidence_snippet, confidence, reliability_score, reliability_tier, evidence_level, and used_for.",
+    "meta_rule": "If actual Meta Ads Library examples are unavailable, mark Meta observations as platform constraints or hypotheses, not observed Cosori ad conventions."
+  },
+  "canonical_thread_policy": {
+    "holo_build_is_lossless": true,
+    "rule": "Each subsequent HoloBuild LLM turn must receive the entire canonical thread before it, not only a summary.",
+    "must_include_for_each_turn_after_turn_1": [
+      "initial visible packet files",
+      "all prior turn system prompts",
+      "all prior turn user prompts",
+      "all prior turn model outputs",
+      "all prior attacker findings",
+      "all prior governor briefs",
+      "all accepted and rejected copy variants",
+      "all live source records captured so far",
+      "all missing-evidence notes and claim-boundary warnings",
+      "the current candidate artifact"
+    ],
+    "compression_rule": "Do not replace prior turns with a compressed summary. A navigation index or section labels may be added, but the canonical prior content must remain available verbatim.",
+    "overflow_rule": "If the full canonical thread cannot fit in the target model context, stop the run and mark it blocked rather than silently summarizing or dropping prior turns.",
+    "trace_artifacts_required": [
+      "canonical_thread.jsonl",
+      "live_source_records.jsonl",
+      "turn_inputs.jsonl",
+      "turn_outputs.jsonl"
+    ]
+  },
+  "model_policy": {
+    "status": "ACTIVE_FOR_LIVE_RUN",
+    "active_model_pool": [
+      {
+        "provider": "anthropic",
+        "model_label": "Claude Opus 4.8",
+        "model_id": "claude-opus-4-8"
+      },
+      {
+        "provider": "xai",
+        "model_label": "Grok 4.3",
+        "model_id": "grok-4.3"
+      }
+    ],
+    "hologov": {
+      "provider": "xai",
+      "model_label": "Grok 4.3",
+      "model_id": "grok-4.3",
+      "constant_across_sessions": true,
+      "overrides_different_provider_governor_rule": true
+    },
+    "rotation_rule": "Randomized constrained active-model rotation across Claude Opus 4.8 and Grok 4.3 with no consecutive active-model repeats. HoloGov remains Grok 4.3 on every turn and every session.",
+    "fallback_rule": "Do not silently fall back to a different model family. If Claude Opus 4.8 or Grok 4.3 is unavailable at execution time, block the run and record the failure."
+  },
+  "output_contract": {
+    "format": "strict_json_only",
+    "schema_file": "05_output_schema.json",
+    "must_match_top_level_keys": [
+      "assignment_id",
+      "product",
+      "section_1_meta_ads",
+      "section_2_website_banners",
+      "section_3_email",
+      "adversarial_notes"
+    ],
+    "paid_ad_copy_fields": [
+      "on_image_text",
+      "primary_text",
+      "headline",
+      "description",
+      "cta"
+    ],
+    "website_banner_fields": [
+      "header",
+      "subhead",
+      "cta"
+    ],
+    "email_fields": [
+      "subject_line_1",
+      "subject_line_2",
+      "body",
+      "ps"
+    ],
+    "adversarial_note_fields": [
+      "wellness_linkage_issues",
+      "rule_violations",
+      "tone_drift",
+      "missing_evidence"
+    ],
+    "word_count_rules": {
+      "section_3_email.body": {
+        "min_words": 100,
+        "max_words": 150,
+        "count_excludes": [
+          "subject_line_1",
+          "subject_line_2",
+          "ps"
+        ]
+      }
+    },
+    "must_not_include": [
+      "source appendix",
+      "research essay",
+      "markdown wrapper",
+      "medical claims",
+      "diet or weight-loss claims",
+      "unsupported product features"
+    ]
+  },
+  "holo_build_lane": {
+    "condition_id": "holo_build_creative_dynamic_convergence_v1",
+    "turn_budget": 10,
+    "convergence_enabled": true,
+    "convergence_window": null,
+    "minimum_turns_before_convergence_check": 2,
+    "interpretation": "Each turn treats the prior output as improvable. The run may stop early only if both the active model and constant Grok 4.3 HoloGov judge that no further meaningful improvement is possible. Otherwise continue until the hard cap of 10 turns.",
+    "no_live_research": false,
+    "live_research_allowed": true,
+    "same_visible_packet_as_solo_lanes": true,
+    "run_shape": "Run the dynamic HoloBuild loop for Cosori TurboBlaze only. Emit one strict JSON artifact matching 05_output_schema.json on every turn.",
+    "turn_sequence": [
+      {
+        "turn": 1,
+        "role": "live_research_and_creative_strategy_builder",
+        "task": "Refresh current online evidence for the active product lane, store source records, diagnose the draft or product opportunity, and define the feature-to-wellness lifestyle strategy."
+      },
+      {
+        "turn": 2,
+        "role": "evidence_claim_boundary_attacker",
+        "task": "Attack the plan and draft for unsupported claims, missing 'up to' qualifiers, wellness overreach, weak lifestyle linkage, word-count risk, and Meta evidence laundering."
+      },
+      {
+        "turn": 3,
+        "role": "meta_ad_builder",
+        "task": "Improve the two Meta ads using channel-native structure, short hooks, one concrete product proof per unit, and explicit feature-to-wellness lifestyle payoff."
+      },
+      {
+        "turn": 4,
+        "role": "website_email_builder",
+        "task": "Improve the three banners as a sequence and improve the short email body plus P.S. within the exact schema. Do not add preview text or email CTA."
+      },
+      {
+        "turn": 5,
+        "role": "brand_voice_channel_qa_attacker",
+        "task": "Pressure-test the full draft for brand voice, channel fit, assignment completeness, repetition, blandness, claim safety, explicit lifestyle contribution, and email body word count."
+      },
+      {
+        "turn": 6,
+        "role": "final_synthesis_author",
+        "task": "Produce a convergence-ready assignment copy as valid JSON matching 05_output_schema.json, incorporating accepted repairs, exact word-count compliance, and preserved evidence boundaries."
+      },
+      {
+        "turn": 7,
+        "role": "incremental_improvement_builder",
+        "task": "If convergence has not been jointly certified, improve the current candidate artifact without adding unsupported claims. Focus on sharper lifestyle linkage, channel fit, and copy energy."
+      },
+      {
+        "turn": 8,
+        "role": "regression_and_claim_attacker",
+        "task": "Attack the current candidate for regressions, stale feature-dump phrasing, claim overreach, weak new-audience resonance, missing P.S., and email word-count drift."
+      },
+      {
+        "turn": 9,
+        "role": "final_repair_builder",
+        "task": "Apply only necessary repairs from the canonical thread while preserving the strongest accepted copy and all evidence boundaries."
+      },
+      {
+        "turn": 10,
+        "role": "hard_cap_final_synthesis_author",
+        "task": "At the hard cap, produce the best final strict JSON artifact matching 05_output_schema.json. Do not continue researching or revising beyond this turn."
+      }
+    ],
+    "critical_stop_rules": [
+      "Do not add new product claims beyond the packet.",
+      "Do not imply health outcomes.",
+      "Do not leave a section as functionality-only; every section needs a lifestyle or routine payoff.",
+      "Do not call Meta patterns observed brand ads unless actual Ads Library examples are supplied.",
+      "Do not omit the P.S.",
+      "Do not submit an email body outside 100-150 words.",
+      "Do not output a research brief instead of the final assignment copy.",
+      "Do not exceed the live-research budget; if evidence is missing, mark it rather than continuing to browse.",
+      "Do not use a model outside Claude Opus 4.8 and Grok 4.3 without explicit user approval.",
+      "Do not change HoloGov away from Grok 4.3.",
+      "Do not terminate early unless both the active model and Grok 4.3 HoloGov certify that no further meaningful improvement is possible."
+    ]
+  },
+  "solo_control_lanes": [
+    {
+      "condition_id": "solo_claude_opus_4_8_single_shot_v0",
+      "model_requested": "Claude Opus 4.8",
+      "model_availability_verified": false,
+      "turn_budget": 1,
+      "prompting": "Single prompt with the same visible input packet, same live-research permission, same TurboBlaze-only focus, and same output contract. No iterative critique."
+    },
+    {
+      "condition_id": "solo_claude_opus_4_8_multi_shot_v0",
+      "model_requested": "Claude Opus 4.8",
+      "model_availability_verified": false,
+      "turn_budget": 10,
+      "prompting": "Same model receives the same visible input packet, same live-research permission, same TurboBlaze-only focus, and the same dynamic improvement objective up to the 10-turn cap, but without HoloBuild role separation, constant Grok 4.3 HoloGov state, or independent attacker roles."
+    }
+  ],
+  "fairness_controls": [
+    "All lanes receive the same brief, research packet seed, and initial draft.",
+    "Every lane may browse during generation under the same live-research rules.",
+    "All lanes must produce the same deliverable fields.",
+    "Record provider, model, timestamp, token totals, and error states.",
+    "Blind-label artifacts before human or model judging.",
+    "Separate generation results from judging results."
+  ],
+  "current_repo_runtime_note": "The existing local holo_builder loop is AP/BEC benchmark specific and imports a packet assertion surface not present in this checkout. This project is staged for a creative HoloBuild adapter or external run harness, not for direct execution through holo_builder/builder.py as-is."
+}

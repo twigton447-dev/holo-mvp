@@ -1,0 +1,79 @@
+{
+  "batch_id": "WAVE2_HOLO_TARGET_BATCH_001",
+  "checks": {
+    "all_pairs_have_two_siblings": true,
+    "expected_judge_calls_0": true,
+    "expected_provider_calls_90": true,
+    "expected_solo_calls_0": true,
+    "freeze_root_clean_in_git": true,
+    "freeze_root_matches_expected": true,
+    "gov_cannot_choose_models": true,
+    "model_visible_hashes_match": true,
+    "no_prompt_leakage_hits": true,
+    "packet_count_18": true,
+    "packet_hashes_match": true,
+    "pair_count_9": true,
+    "prompt_hashes_match": true,
+    "target_selection_sha_matches_expected": true
+  },
+  "classification": "WAVE2_HOLO_TARGET_BATCH_001_PREFLIGHT_NO_PROVIDER",
+  "created_at_utc": "2026-07-01T03:51:38.616106+00:00",
+  "expected_counts": {
+    "gov_calls": 36,
+    "judge_calls": 0,
+    "packets": 18,
+    "pairs": 9,
+    "solo_calls": 0,
+    "total_provider_calls": 90,
+    "worker_calls": 54
+  },
+  "model_roster": [
+    {
+      "model": "grok-3-mini",
+      "provider": "xai",
+      "role_name": "SOURCE_BOUNDARY_MAPPER",
+      "turn": "W1"
+    },
+    {
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "role_name": "CONTROL_ROUTER",
+      "turn": "G1"
+    },
+    {
+      "model": "gpt-5.4-mini",
+      "provider": "openai",
+      "role_name": "ADVERSARIAL_SCOPE_CHALLENGER",
+      "turn": "W2"
+    },
+    {
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "role_name": "CONTROL_ROUTER",
+      "turn": "G2"
+    },
+    {
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "role_name": "FINAL_COMPILER",
+      "turn": "W3"
+    }
+  ],
+  "next_valid_step": "Create or run a live Holo runner using this exact batch. Do not run solo or judges first.",
+  "prompt_leakage_hits": [],
+  "ready_for_live_holo": true,
+  "required_holo_controls": [
+    "state brief present for workers",
+    "Gov routing lens present",
+    "full latest Gov baton present",
+    "deterministic gate after every worker",
+    "Gov receives deterministic gate results",
+    "artifact registry present",
+    "best artifact registry present",
+    "pinned best artifact present after first admissible candidate",
+    "monotonic preservation enforced",
+    "final selector present",
+    "external solo and intra-Holo evidence separated"
+  ],
+  "status": "PASS"
+}

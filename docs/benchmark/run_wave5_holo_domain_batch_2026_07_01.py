@@ -449,6 +449,7 @@ def configure_runner(module: Any, family_id: str, batch_number: int) -> None:
     module.LIVE_RUN_ROOT = root / "live_runs"
     original_load_json = module.load_json
     original_render_live_summary_md = module.render_live_summary_md
+    original_validate_preflight = module.validate_preflight
 
     def runtime_fingerprint() -> str:
         return (
@@ -557,9 +558,32 @@ def configure_runner(module: Any, family_id: str, batch_number: int) -> None:
     def render_live_summary_md(summary: dict[str, Any]) -> str:
         return original_render_live_summary_md(summary).replace("Wave 2 Holo Target Batch", "Wave5 Holo Domain Batch")
 
+    def wave5_preflight_root(manifest: dict[str, Any]) -> str:
+        """Hash material batch/protocol state, not mutable operator runtime metadata."""
+        body = json.loads(json.dumps(manifest))
+        body.pop("created_at", None)
+        body.pop("root_signature", None)
+        body.pop("provider_approval_packet_ref", None)
+        body.pop("provider_approval_packet_sha256", None)
+        body.pop("run_command_after_explicit_approval", None)
+        architecture_lock = body.get("architecture_lock")
+        if isinstance(architecture_lock, dict):
+            architecture_lock.pop("current_head_at_preflight", None)
+        body["root_signature_mode"] = "wave5_material_preflight_v1"
+        return sha256_text(canonical_json(body))
+
+    def validate_preflight_with_stable_root() -> dict[str, Any]:
+        manifest = original_validate_preflight()
+        manifest["root_signature_mode"] = "wave5_material_preflight_v1"
+        manifest["root_signature"] = wave5_preflight_root(manifest)
+        write_json(module.LIVE_PREFLIGHT_JSON, manifest)
+        write_text(module.LIVE_PREFLIGHT_MD, render_preflight_md(manifest))
+        return manifest
+
     module.convert_payload = convert_payload
     module.current_head = runtime_fingerprint
     module.load_json = load_json_with_wave5_architecture
+    module.validate_preflight = validate_preflight_with_stable_root
     module.render_preflight_md = render_preflight_md
     module.render_live_summary_md = render_live_summary_md
 

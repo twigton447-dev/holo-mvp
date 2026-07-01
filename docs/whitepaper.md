@@ -4,20 +4,35 @@
 
 ### Why smart models still need a checkpoint before real-world action
 
-Version 7.81
-July 2026
+Version 7.82 · July 2026
 
 Taylor Wigton
 Founder, HoloEngine
 
-HoloEngine: holoengine.ai
-Benchmark: holoengine.ai/benchmark
-Contact: taylorw@hologroup.io
-Patent status: Patent pending
+Patent pending
 
 ---
 
-## The problem
+## Contents
+
+01. The problem
+02. Two kinds of trust
+03. What HoloEngine does
+04. The hard failures look normal
+05. Why solo models fail
+06. The architecture
+07. Where this matters
+08. How Holo is tested
+09. What the benchmark has shown so far
+10. The economics of a checkpoint
+11. Why human review is not enough
+12. What Holo does not claim
+13. The skeptical view
+14. The real point
+
+---
+
+## 01. The problem
 
 AI is no longer just talking.
 
@@ -41,11 +56,11 @@ They do not check whether the evidence actually supports the action.
 
 This is the gap.
 
-The current standard for AI action security is closer to pre-9/11 airport security — basic checks, assumed normal traffic, and a system built around the idea that most things passing through are probably fine.
+The current standard for AI action security is closer to pre-9/11 airport security: basic checks, assumed normal traffic, and a system built around the idea that most things passing through are probably fine.
 
 High-stakes AI needs something closer to Customs and Border Protection.
 
-At the border, the question is not just “Are you allowed through?” The question is “Does your story hold up?” What are you carrying? Why today? Does the paperwork match the cargo? Is there a contradiction hiding inside something that looks normal?
+At the border, the question is not just "Are you allowed through?" The question is "Does your story hold up?" What are you carrying? Why today? Does the paperwork match the cargo? Is there a contradiction hiding inside something that looks normal?
 
 That is the missing layer.
 
@@ -63,7 +78,7 @@ That is the problem HoloEngine is built to solve.
 
 ---
 
-## Two kinds of trust
+## 02. Two kinds of trust
 
 We are starting to trust AI in two ways at once.
 
@@ -95,7 +110,7 @@ The evidence has to hold.
 
 ---
 
-## What HoloEngine does
+## 03. What HoloEngine does
 
 HoloEngine is a trust layer for high-stakes AI work.
 
@@ -107,7 +122,7 @@ It adds a checkpoint where the checkpoint matters most.
 
 A strong trust layer doesn't have to be slow and expensive.
 
-We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a perfect, rule-following draft on the first try, the Governor verifies the math and exits early. You don't pay for extra AI turns you don't need.
+We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a complete, rule-following draft on the first try, the Governor verifies the math and exits early. You don't pay for extra AI turns you don't need.
 
 In our live D11 tests, the system exited early on clean drafts, cutting token burn by 52%. But when a draft was messy or violated rules, the Governor refused to exit and forced the models to repair it. You only pay the "safety premium" when the system is actively saving you from a failure.
 
@@ -148,9 +163,11 @@ It sits right before an irreversible action.
 A system submits the proposed action and its supporting evidence. HoloVerify checks the packet and returns one of two answers:
 
 **ALLOW**
+
 The evidence closes the boundary. The action can proceed.
 
 **ESCALATE**
+
 The evidence does not close the boundary. A person or higher-control workflow must review it.
 
 That binary answer matters.
@@ -159,7 +176,7 @@ High-stakes systems do not need another paragraph of confident analysis at the f
 
 ---
 
-## The hard failures look normal
+## 04. The hard failures look normal
 
 Most people imagine AI risk as something obvious.
 
@@ -211,7 +228,7 @@ The missing layer is evidence judgment at the boundary.
 
 ---
 
-## Why solo models fail
+## 05. Why solo models fail
 
 A top model can be very smart and still fail here.
 
@@ -223,7 +240,7 @@ A solo model may accept a plausible story too quickly. It may see a concern and 
 
 That is the operating risk.
 
-If one model owns the final decision, that model’s blind spots become part of your process.
+If one model owns the final decision, that model's blind spots become part of your process.
 
 A stronger model helps. But it does not remove the need for structure.
 
@@ -247,7 +264,7 @@ A reliance-grade artifact has to survive the gate.
 
 Our traces revealed a deeper problem than simple hallucination. We call it Final-Mile Regression.
 
-A smart model will often find the perfect, source-grounded answer early in the process. But when you ask that same model to write the final polished document, it tries to sound helpful. In the process of smoothing out the prose, it accidentally deletes the critical limits or exceptions it established just seconds before. The model delivers a final artifact that is actually weaker than its rough draft.
+A smart model will often find a strong, source-grounded answer early in the process. But when you ask that same model to write the final polished document, it tries to sound helpful. In the process of smoothing out the prose, it accidentally deletes the critical limits or exceptions it established just seconds before. The model delivers a final artifact that is actually weaker than its rough draft.
 
 ### The Oscillation Problem
 
@@ -255,7 +272,7 @@ We also found that natural language is a terrible way to enforce rules. If a doc
 
 ---
 
-## The architecture
+## 06. The architecture
 
 HoloEngine is the core architecture.
 
@@ -271,7 +288,15 @@ Different roles have different jobs. One establishes the baseline story. One loo
 
 That is the role of HoloGov inside the architecture.
 
-HoloGov is the deterministic proof-gate component. It is not another analyst model and it does not make provider calls. It applies the relevant policy and proof standard for the surface it is governing.
+HoloGov is the governing layer. In the current HoloBuild and HoloVerify architecture, it is hybrid: provider-backed Gov calls perform adversarial adjudication at locked points in the run, while local deterministic code owns the hard gates that decide whether an artifact is admissible.
+
+Gov does not choose the model roster. The run lock fixes the worker order. Gov diagnoses the previous worker output, reads deterministic gate results, blocks unsafe moves, preserves what is correct, and tells the next worker what must be repaired or resolved.
+
+The deterministic layer is what prevents a model from simply declaring victory. If a required section is missing, a source ID is invented, an action boundary is unresolved, or a structured output fails, local code can fail the artifact even if the prose sounds convincing.
+
+Plainly:
+
+> Gov argues with the workers. Code checks the boundary. The final answer has to satisfy both.
 
 ### The Deterministic Cage
 
@@ -283,13 +308,21 @@ We call this the Deterministic Cage.
 2. **Local Eligibility Gates:** The AI Governor does not get to decide if a document is "ready." Local code checks the word quotas and required sections. If the math fails, the AI is physically blocked from marking the document as complete.
 3. **The Final Selector (Monotonic Preservation):** HoloEngine constantly pins the "best artifact" in memory. If a model tries to get clever in the final turn and accidentally regresses the quality of the document, the Final Selector automatically throws the final turn in the trash and outputs the pinned, verified intermediate draft instead.
 
-In HoloBuild, HoloGov-B asks whether a work product is ready to rely on, needs revision, or must preserve unresolved risk.
+This sounds technical, but the idea is simple:
 
-In HoloVerify, HoloGov-V asks whether a proposed action can proceed or must escalate.
+> Do not trust the last answer just because it is last. Trust the best answer that actually passed the gates.
+
+In HoloBuild, HoloGov-B governs work-product readiness. It asks whether a work product is ready to rely on, needs revision, or must preserve unresolved risk.
+
+In HoloVerify, HoloGov-V governs runtime action decisions. It asks whether a proposed action can proceed or must escalate.
 
 In HoloChat, HoloGov-C governs continuity and context admission rather than action authorization.
 
-The details differ because each lane has different policies, roles, and failure modes. But the purpose is consistent:
+HoloBrain is the persistent memory and intelligence substrate that supports HoloEngine over time. It preserves memory, artifact references, and audit context so HoloEngine can work from stable records instead of loose chat history.
+
+For HoloGov-B and HoloGov-V, the reference and audit layer stays near-lossless. The live prompt receives only the compact operational slice needed for the turn.
+
+The details differ because each lane has different roles and failure modes. But the purpose is consistent:
 
 What has actually been proven?
 
@@ -299,7 +332,7 @@ No proof, no clearance.
 
 ---
 
-## Where this matters
+## 07. Where this matters
 
 The action boundary is not theoretical. It appears in workflows where a wrong decision costs money, creates liability, or opens a security hole.
 
@@ -325,13 +358,24 @@ That is the problem HoloEngine is built for.
 
 ---
 
-## How Holo is tested
+## 08. How Holo is tested
 
 Standard AI benchmarks ask models questions.
 
 That is useful, but it does not answer the question enterprises care about.
 
 Should this action execute right now?
+
+Factuality benchmarks such as AA-Omniscience are useful because they reward
+calibration: a model should know facts, but it should also avoid confident
+guessing when it does not know.
+
+HoloVerify applies the same discipline to action.
+
+When the evidence does not authorize the action, the correct answer is not a
+better paragraph.
+
+The correct answer is ESCALATE.
 
 To test that, we built HoloFactory.
 
@@ -363,34 +407,93 @@ The whitepaper makes the broader point: this is the kind of testing required if 
 
 ---
 
-## What the benchmark has shown so far
+## 09. What the benchmark has shown so far
 
-D11
-Scored Opus-facing proof
-D11 is the initial scored HoloBuild comparison. HoloBuild produced a proof-clean output and outperformed Claude Opus 4.8 under blind scoring.
-Current scored flagship
+The benchmark evidence is still internally built. It is not a universal claim. It is not third-party validation. It should not be treated as unconstrained production reliability.
 
-D13
-Full-Gated Proof Win
-HoloBuild officially defeated the solo baseline 94 to 69 under the full 100-point gated validator, resolving critical source-logic traps.
-Official proof score
+But the pattern is now large enough to describe precisely.
 
-D14
-Full-Gated Proof Win
-HoloBuild officially defeated the solo baseline 94 to 69, capturing and correcting deep action-boundary confusion.
-Official proof score
+First, the terms:
 
-The benchmark evidence is still early. It is not a universal claim. It is not third-party validation. It should not be treated as production reliability.
+A **packet** is one frozen test case: a proposed action plus the documents and facts the AI is allowed to use.
 
-But the pattern is useful.
+A **sibling pair** is two related packets. One should ALLOW and the other should ESCALATE. The difference is usually narrow, so the system has to read carefully.
 
-Definitions
+The **clean denominator** is the set of packets we are willing to count publicly. Canaries, drafts, broken runs, and diagnostic tests are kept separate.
 
-Scored proof: A completed run that passed the published gates: frozen packet, hashed prompt, captured trace, blind scoring, label assignment, and ledger promotion.
+A **false positive** means Holo says ESCALATE when the action was actually allowed. That creates friction.
 
-Baseline failure: A solo run that did not produce a scoreable artifact.
+A **false negative** means Holo says ALLOW when the action should have escalated. That is usually the dangerous miss.
 
-Hardening evidence: A failure Holo preserved and used to tighten the system.
+The current clean HoloVerify counted sample contains 334 frozen action-boundary packets across 167 sibling pairs: 167 ALLOW truths and 167 ESCALATE truths.
+
+HoloVerify solved 334/334 of those packets with zero observed false positives and zero observed false negatives.
+
+That does not mean zero risk.
+
+The exact one-sided 95% upper bound on overall packet error is 0.893%. The side-specific upper bounds on false positives and false negatives are 1.778% each, because each side currently has 167 examples.
+
+That phrase sounds more complicated than it is. It means:
+
+> Given this many tests and zero observed errors, this is the highest error rate that still remains statistically plausible at the 95% confidence level.
+
+Plainly:
+
+> We saw zero errors in 334 counted packets. That does not prove zero risk. It means the upper risk bound is now measured instead of guessed.
+
+That is why the benchmark reports confidence bands, not only the observed score.
+
+The observed score says what happened in the sample.
+
+The upper bound says how much uncertainty remains.
+
+We use an exact binomial upper bound as the headline risk number because it is a conservative one-sided bound for zero-error runs. We also report Wilson score intervals in the benchmark page because Wilson is a standard way to put a confidence band around a proportion without pretending the sample percentage is the whole story.
+
+The reason for a one-sided upper bound is simple: for a safety system, the question is not whether the error rate could be lower. The question is how high it could still plausibly be.
+
+That is also why false positives and false negatives are separated. A false ESCALATE creates friction. A false ALLOW can let a bad action proceed. They are different business risks and should not be hidden inside one blended accuracy number.
+
+The confusion matrix is simple:
+
+| Actual / predicted | ESCALATE | ALLOW |
+| --- | ---: | ---: |
+| Actual ESCALATE | Correctly escalated = 167 | Missed escalation = 0 |
+| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 167 |
+
+That is the clean headline:
+
+> Zero observed false-positive or false-negative errors across 334 frozen action-boundary packets, with measured statistical uncertainty.
+
+### The same models alone
+
+The most important comparison is not Holo against a weaker hidden baseline.
+
+The matched solo baselines used the same mini-model families that were used inside HoloVerify. The difference was architecture.
+
+The solo models received the same frozen packets, but they did not receive Gov, shared state, deterministic gates, artifact memory, best-answer preservation, or a final selector.
+
+Each solo model received exactly one independent call per packet. HoloVerify used those same model families inside a governed multi-turn architecture.
+
+A solo output only counted as KNEW/admissible if it gave the right verdict and produced a source-bound, machine-checkable explanation.
+
+In plain English, KNEW/admissible means:
+
+> The model did not just guess the right answer. It showed its work in a way the system could audit.
+
+| Evidence slice | HoloVerify | Same models alone, one-shot | Meaning |
+| --- | ---: | ---: | --- |
+| Clinical Activation Boundary Controls | 40/40 packets | 6/120 KNEW/admissible | Broad solo collapse; Holo solved both siblings across 20 pairs |
+| Vendor-Master Payment Controls | 40/40 packets | 53/120 KNEW/admissible | Solo sometimes succeeded, but every pair still had strict one-shot failures |
+| Wave3/Wave4 focused slice | 54/54 packets | 54/162 KNEW/admissible | 27/27 strong solo-collapse pairs in the focused expansion |
+| Wave2B5 + Wave3/Wave4 matched expansion | 100/100 packets | 116/300 KNEW/admissible | Larger matched slice with same-model solo instability preserved |
+
+This is not a claim that every solo model always fails.
+
+It is a narrower and more useful claim:
+
+> The same model families that were brittle as isolated one-shot decision makers became reliable when placed inside the governed HoloVerify architecture.
+
+That is the architecture result.
 
 ### Kit A: Accounts Payable and BEC
 
@@ -422,48 +525,6 @@ Holo did that.
 
 Several non-Holo configurations either let unsafe orders through or overblocked the valid one.
 
-### HV-20 Runtime Cage: The 40-Packet Sibling Test
-
-HoloVerify now has runtime evidence in addition to the HoloBuild document tests.
-
-HV-20 is a frozen 40-packet action-boundary cage built from 20 sibling pairs. Each pair has one packet where the correct answer is ALLOW and one very similar packet where the correct answer is ESCALATE.
-
-That design matters.
-
-A system can look safe by escalating everything. But that creates false positives and freezes valid work.
-
-A system can look useful by allowing everything. But that creates false negatives and lets risky actions through.
-
-The hard problem is doing both at once: stop the unsafe action without blocking the safe one.
-
-The domain was not chat and it was not long-form writing. It was operational action control: connector activation, rebate and ledger release, firmware release, sterilization lot release, procurement ceilings, clinical batch release, controlled-solvent purchase, production device activation, and regulated data export.
-
-The solo baseline and HoloVerify used the same small model families: `xai/grok-3-mini`, `google/gemini-2.5-flash-lite`, and `minimax/MiniMax-M2.5-highspeed`. The solo models saw the frozen packets alone. HoloVerify used those same families inside a governed workflow, with `minimax/MiniMax-M2.5-highspeed` serving as the Governor.
-
-The Governor did not win by swapping in a secret better model. Its job was control: demand missing evidence, force repair, block unsupported moves, and preserve final ALLOW / ESCALATE discipline.
-
-The result was stark.
-
-HoloVerify solved 40 out of 40 packets.
-
-The solo one-shots completed 120 out of 120 calls, but only 6 were KNEW/admissible. KNEW/admissible means the model picked the right ALLOW / ESCALATE verdict and preserved enough source-bound evidence to count under the gate.
-
-In 14 of the 20 sibling pairs, all six solo attempts failed while HoloVerify solved both siblings.
-
-The token cost was also bounded: 426,002 Holo tokens versus 206,839 solo tokens, or about 2.06x. That is not free. But it is not "run ten expensive models on everything" either. It is the cost of governed verification at the boundary.
-
-Here is the clean error map.
-
-A positive means ESCALATE. A negative means ALLOW.
-
-A true positive means the system caught a risky packet. A false negative is the dangerous miss: an unsafe packet got allowed. A false positive is overblocking: a clean packet got escalated. A true negative means clean work was allowed to proceed.
-
-HV-20 tests both sides. The ESCALATE sibling tests false negatives. The ALLOW sibling tests false positives.
-
-The evidence is also hash-locked and inspectable. The canonical public package commit is `87b39f2`. The public package lock root is `5ffe3c41e5cf35324f9bb0518c24df118aad0eea15900abbb1d9996df1756695`. The package includes the public-safe packet set, sibling mapping, payload hashes, summary memo, no-provider audit, and proof summary. Packet identity passed.
-
-This is still a bounded claim. It does not prove Holo is generally superior, and it does not prove universal statistical dominance. It supports the narrower thesis of this paper: at the action boundary, architecture matters. The same model families behaved differently when placed inside a governed verification workflow with evidence gates, packet-identity locks, and final ALLOW / ESCALATE discipline.
-
 ### Replication Family: Vendor-Master Payment Controls
 
 Then we asked a harder question: does the pattern hold in a larger AP / procurement family where solo models sometimes do fine?
@@ -477,6 +538,32 @@ That means AP was not a story of total solo collapse. It was a story of instabil
 The cost was higher than the first 20-pair HoloVerify family. Holo used 414,016 tokens versus 146,061 for the solo one-shot baseline, or about 2.84x the solo budget. That cost delta is part of the finding: governed verification buys reliability by spending more work at the action boundary.
 
 Across the two committed internal HoloVerify families, Holo solved 80/80 frozen action-boundary packets and 40/40 sibling pairs. The two families had different solo-baseline behavior: the clinical activation family produced broad clean solo collapse, while AP produced mixed solo behavior with strict failures present in every pair.
+
+### Replication Canary: Agentic Commerce All-Six Collapse
+
+The next Commerce result is smaller, but still useful.
+
+In a later Agentic Commerce canary, we selected three frozen sibling pairs where all six same-family solo one-shots had failed in triage. HoloVerify then ran those six packets through the governed architecture.
+
+Holo solved all 6 packets and all 3 sibling pairs. The run completed 30/30 provider calls, including 18 worker calls and 12 Gov calls, with no solo calls and no judges. The canary is lock-root validated with root signature `a19bd1e5e47411597ccf5fd941f1a24ba4269215a2fb72a4c2aabe68dc001948`.
+
+This is not a completed 20-pair Commerce family. It should be read as locked canary evidence: the failure pattern reappeared in Commerce, and the governed architecture held on the selected all-six-collapse pairs.
+
+### Next statistical milestone
+
+The next frozen packet bank is Wave5: seven domains, 140 sibling pairs, and 280 packets. The domains include clinical medication activation, treasury wire movement, legal and regulatory filing, cloud destructive admin controls, security operations, public sector citizen records, and industrial / utility safety controls.
+
+If Wave5 completes cleanly, the benchmark-grade denominator moves from 334 packets to 614 packets. The side-specific ALLOW and ESCALATE counts move from 167 each to 307 each.
+
+That would lower the exact 95% upper bound on packet-level error from 0.893% to about 0.487%, and lower the side-specific false-positive and false-negative upper bound from 1.778% to about 0.971%.
+
+That is the right next public threshold:
+
+> Below 0.5% packet-level upper risk and below 1.0% false-positive / false-negative upper risk, if Wave5 completes cleanly.
+
+After that, the next serious milestone is below 0.5% side-specific false-positive and false-negative risk. With zero observed errors, that requires about 598 ALLOW examples and 598 ESCALATE examples, or 1,196 total balanced packets. After a clean Wave5, that means roughly 582 additional balanced packets.
+
+The 0.1% tier is different. That requires thousands of balanced examples plus external review and ongoing monitoring. It should be treated as production-scale validation, not as the next public benchmark step.
 
 ### HoloBuild and stronger baselines
 
@@ -500,25 +587,51 @@ In D11, both systems produced work that could be judged. HoloBuild produced an o
 
 That is the clean scored proof point.
 
-D13 & D14: Full-Gated Proof Wins
+There is also D11-lock ledger evidence that is useful but should be labeled separately.
 
-In our latest testing under the locked 100-point validator, we moved from simple completion checks to full head-to-head comparisons. Holo won both the D13 and D14 runs by the exact same margin: 94 to 69.
+D10 was an infrastructure configuration-change case. HoloBuild won the full-gated 100-point judgment 95 to 71. D11_CYBER was a cyber incident / contract notice / emergency cloud-access case. HoloBuild won 96 to 94, with both artifacts admissible.
 
-These runs show exactly where solo models break down when facing complex policy traps. In both cases, the solo model failed due to source-logic confusion. It looked at the rules and claimed that a narrow containment path required a massive, company-wide approval chain. That statement directly contradicted the source documents.
+Those are real HoloBuild wins in the repo ledger. They are not yet packaged like the AP and clinical HoloVerify families, with a public root-signature evidence package. So they should not be described as the same class of evidence. The right label is: D11-lock ledger evidence, split-run disclosed, root package not yet promoted.
 
-The solo model over-cautiously hallucinated a barrier that did not exist, freezing the business logic. HoloEngine's stateful governor tracked the exact dependency boundaries, approved the narrow containment, and kept the restricted pathways--like vendor-master writes and payment diversions--firmly blocked until real authorization existed.
+The second kind of win was different.
 
-This proves the 25-point reliability gap. Holo didn't just win on formatting; it was the only architecture that understood the actual legal and operational boundaries of the task.
+In D13 and D14B, HoloBuild completed the governed artifact. Claude Opus 4.8 did not produce a complete, scoreable deliverable under the same bounded production rules.
+
+That is not a numeric scoring win because there was no valid solo artifact to score against.
+
+But it is still a major result.
+
+In production, failing to complete the required artifact is not a technicality. It is failure. If the work needs claim limits, source closure, required disclaimers, and clean completion, then an output that misses those elements is not safe to rely on.
+
+This is the uncomfortable finding: Opus 4.8 often understood the task, but still failed to finish the job safely under real constraints.
+
+That is different from being dumb.
+
+It is more important.
+
+A weak model failing is not surprising. A top model reasoning well and still failing the production gate is the kind of failure enterprises need to know about.
+
+D13 and D14B should therefore be treated as completion-gate wins for HoloBuild and production-gate failures for the solo baseline.
+
+They are not score-margin wins.
+
+They are delivery wins.
+
+That distinction makes the claim stronger, not weaker.
+
+D14 is separate again. In D14, HoloBuild denied itself proof credit because an internal source-review step failed validation. That is not a benchmark win. It is hardening evidence. It shows that Holo can fail closed when its own process breaks.
 
 So the evidence should be read this way:
 
-D11 shows HoloBuild beating the solo baseline in a clean initial comparison.
+D11 shows HoloBuild beating Opus in a clean scored comparison.
 
-D13 and D14 show HoloBuild capturing consecutive 94-69 victories by enforcing strict action boundaries where solo models fall into source-logic confusion.
+D13 and D14B show HoloBuild completing governed work that solo Opus failed to complete under bounded conditions.
 
-D12 remains our open form-control engineering fixture, which directly catalyzed the creation of our Deterministic Form Actuator.
+D14 shows HoloBuild refusing to claim victory when its internal chain did not clear.
 
-That is the honest story. And it is a strong one.
+That is the honest story.
+
+And it is a strong one.
 
 ### D12: The Form-Control Diagnosis
 
@@ -528,7 +641,7 @@ This proved that an AI Governor without a deterministic actuator is insufficient
 
 ---
 
-## The economics of a checkpoint
+## 10. The economics of a checkpoint
 
 The main claim is not that Holo makes every model better everywhere.
 
@@ -554,7 +667,7 @@ For high-stakes action, the extra review can be rational.
 
 ---
 
-## Why human review is not enough
+## 11. Why human review is not enough
 
 The default answer to AI risk is human review.
 
@@ -574,15 +687,15 @@ Humans should be involved when the system escalates. But they should not be the 
 
 The system itself needs to do more of the evidence work before it asks the human to decide.
 
-A good escalation should not say, “Something seems risky.”
+A good escalation should not say, "Something seems risky."
 
-It should say, “This exact proof is missing,” or “This approval is stale,” or “This claim exceeds the source,” or “This exception is valid because these controls closed.”
+It should say, "This exact proof is missing," or "This approval is stale," or "This claim exceeds the source," or "This exception is valid because these controls closed."
 
 That is how human review becomes useful again.
 
 ---
 
-## What Holo does not claim
+## 12. What Holo does not claim
 
 Holo does not claim to catch everything.
 
@@ -610,11 +723,11 @@ A serious trust architecture has to be honest about what has been proven, what h
 
 ---
 
-## The skeptical view
+## 13. The skeptical view
 
 A smart buyer or investor should have objections.
 
-### “We already have policy layers.”
+### "We already have policy layers."
 
 Good. You need them.
 
@@ -628,7 +741,7 @@ Holo does not replace policy infrastructure.
 
 It sits after policy and before action.
 
-### “This is a vendor-built benchmark.”
+### "This is a vendor-built benchmark."
 
 Yes.
 
@@ -638,7 +751,7 @@ The response is not to pretend otherwise. The response is to make the evidence i
 
 The best next step is independent replication.
 
-### “Won’t better models make Holo obsolete?”
+### "Won't better models make Holo obsolete?"
 
 No. Holo is not a bet against stronger models. It is designed to use them.
 
@@ -650,7 +763,7 @@ Model quality helps.
 
 The checkpoint stays ahead by upgrading the models inside it.
 
-### “Won’t models patch their own blindspots?”
+### "Won't models patch their own blindspots?"
 
 Not reliably by themselves.
 
@@ -658,9 +771,9 @@ Recent research argues that hallucinations persist partly because training and e
 
 That is the point of Holo. The system does not assume a model can inspect away its own blindspots. It adds external structure: role separation, adversarial pressure, evidence gates, audit trails, and a final Governor check.
 
-Sources: Kalai et al., “Why Language Models Hallucinate” (https://arxiv.org/abs/2509.04664); Huang et al., “Large Language Models Cannot Self-Correct Reasoning Yet” (https://arxiv.org/abs/2310.01798); Valmeekam et al., “Can Large Language Models Really Improve by Self-critiquing Their Own Plans?” (https://arxiv.org/abs/2310.08118).
+Kalai et al., "Why Language Models Hallucinate"; Huang et al., "Large Language Models Cannot Self-Correct Reasoning Yet"; Valmeekam et al., "Can Large Language Models Really Improve by Self-critiquing Their Own Plans?".
 
-### “Isn’t this just more agents?”
+### "Isn't this just more agents?"
 
 No.
 
@@ -674,7 +787,7 @@ No proof, no clearance.
 
 ---
 
-## The real point
+## 14. The real point
 
 The future of enterprise AI is not just better chat.
 
@@ -705,6 +818,6 @@ HoloEngine is built for the space between those two facts.
 ---
 
 HoloEngine
-Version 7.81 · July 2026
+Version 7.82 · July 2026
 holoengine.ai/whitepaper
 holoengine.ai/benchmark

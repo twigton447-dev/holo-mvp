@@ -1,476 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-WMMFBGFND8"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-WMMFBGFND8');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoloEngine · AI at the Action Boundary · Version 7.81</title>
+<title>HoloEngine · AI at the Action Boundary · Version 7.82 · July 2026</title>
+<meta name="description" content="Why smart models still need a checkpoint before real-world action.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script data-goatcounter="https://holoengine.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap');
-
-  :root {
-    --ink: #141414;
-    --muted: #4c4a45;
-    --soft: #85817a;
-    --paper: #ffffff;
-    --wash: #f6f4ee;
-    --panel: #fffefa;
-    --panel-strong: #f5efe1;
-    --line: rgba(154, 106, 32, 0.24);
-    --line-strong: rgba(154, 106, 32, 0.52);
-    --blue: #344854;
-    --green: #2f7555;
-    --rust: #96533a;
-    --gold: #98671d;
-    --gold-soft: #c8a465;
-    --violet: #575164;
-    --shadow: 0 24px 70px rgba(28, 26, 21, 0.09);
-    --glow: 0 0 20px rgba(152, 103, 29, 0.1);
-  }
-
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    background:
-      linear-gradient(90deg, rgba(154,106,32,0.035) 0 1px, transparent 1px 100%),
-      linear-gradient(180deg, rgba(154,106,32,0.028) 0 1px, transparent 1px 100%),
-      linear-gradient(180deg, #ffffff 0%, #faf9f5 48%, #f1eee7 100%);
-    background-size: 48px 48px, 48px 48px, auto;
-    color: var(--ink);
-    font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
-    line-height: 1.68;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  a { color: var(--gold); text-decoration-thickness: 1px; text-underline-offset: 4px; }
-  p { margin: 0 0 1rem; max-width: 720px; font-size: 1rem; color: var(--muted); }
-  strong { color: var(--ink); font-weight: 700; }
-  .paper-section ol {
-    max-width: 720px;
-    margin: 0 0 1rem 1.35rem;
-    padding: 0;
-    color: var(--muted);
-  }
-  .paper-section li { margin: 0 0 0.7rem; padding-left: 0.2rem; }
-  .paper-section li::marker { color: var(--gold); font-weight: 700; }
-  code {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 0.82em;
-    color: var(--gold);
-    background: rgba(154,106,32,0.055);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 0.08rem 0.32rem;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  .topbar {
-    width: min(1180px, calc(100% - 40px));
-    margin: 0 auto;
-    padding: 1rem 0;
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    align-items: center;
-    border-bottom: 1px solid var(--line);
-  }
-  .brand-link {
-    font-family: "Cormorant Garamond", Georgia, serif;
-    font-size: 1.1rem;
-    letter-spacing: 0.02em;
-    color: var(--gold);
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .toplinks { display: flex; gap: 1.1rem; align-items: center; flex-wrap: wrap; }
-  .toplinks a {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--muted);
-  }
-
-  .hero {
-    width: min(980px, calc(100% - 40px));
-    margin: 0 auto;
-    padding: 3.4rem 0 2.5rem;
-  }
-  .hero-grid {
-    max-width: 980px;
-    margin: 0 auto;
-  }
-  .eyebrow {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--gold);
-    font-weight: 600;
-    margin-bottom: 1.3rem;
-  }
-  .hero h1 {
-    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-    font-size: clamp(4rem, 8vw, 6.8rem);
-    line-height: 0.9;
-    letter-spacing: -0.055em;
-    margin: 0 0 1.2rem;
-    color: var(--ink);
-    text-shadow: 0 1px 0 #fff;
-    overflow-wrap: anywhere;
-  }
-  .hero h2 {
-    font-family: "Source Serif 4", Georgia, serif;
-    font-size: clamp(1.45rem, 2.9vw, 2.55rem);
-    line-height: 1.12;
-    margin: 0 0 1rem;
-    max-width: 780px;
-    letter-spacing: -0.02em;
-    color: var(--gold);
-  }
-  .hero-subtitle {
-    font-size: 1.12rem;
-    max-width: 620px;
-    color: var(--muted);
-    margin-bottom: 2rem;
-  }
-  .meta-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    max-width: 980px;
-    align-items: stretch;
-  }
-  .meta-chip {
-    flex: 1 1 155px;
-    border: 1px solid var(--line-strong);
-    background: rgba(255, 255, 255, 0.86);
-    border-radius: 8px;
-    padding: 0.72rem 0.82rem;
-    min-width: 0;
-    box-shadow: inset 0 0 20px rgba(154,106,32,0.025);
-  }
-  .meta-chip:nth-child(3),
-  .meta-chip:nth-child(4) { flex-basis: 215px; }
-  .meta-chip span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
-  .meta-chip strong { display: block; margin-top: 0.24rem; font-size: 0.92rem; line-height: 1.22; overflow-wrap: anywhere; }
-  .meta-chip a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: 0.16em; overflow-wrap: anywhere; }
-
-  .article-shell {
-    width: min(1180px, calc(100% - 40px));
-    margin: 0 auto 5rem;
-    display: grid;
-    grid-template-columns: 250px minmax(0, 1fr);
-    gap: clamp(2rem, 4vw, 4rem);
-    align-items: start;
-  }
-  .toc {
-    position: sticky;
-    top: 1.2rem;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(14px);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 12px 48px rgba(54, 39, 14, 0.12);
-  }
-  .toc-title { font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.8rem; }
-  .toc a {
-    display: grid;
-    grid-template-columns: 2.2rem 1fr;
-    gap: 0.4rem;
-    padding: 0.52rem 0;
-    border-top: 1px solid var(--line);
-    text-decoration: none;
-    color: var(--muted);
-    font-size: 0.86rem;
-    line-height: 1.25;
-  }
-  .toc a span { font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; color: var(--gold); }
-
-  main { min-width: 0; }
-  .paper-section {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(249, 248, 245, 0.97));
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: clamp(1.35rem, 3vw, 2.7rem);
-    margin-bottom: 1.35rem;
-    box-shadow: var(--shadow), inset 0 0 34px rgba(154,106,32,0.02);
-  }
-  .section-label {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    margin-bottom: 0.9rem;
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--soft);
-  }
-  .section-label span { color: var(--gold); font-weight: 600; }
-  .paper-section h2 {
-    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-    font-size: clamp(2.25rem, 4.8vw, 4rem);
-    line-height: 1.08;
-    margin: 0 0 1.5rem;
-    letter-spacing: -0.045em;
-    color: var(--ink);
-  }
-  .paper-section h3 {
-    font-family: "Source Serif 4", Georgia, serif;
-    font-size: 1.18rem;
-    line-height: 1.25;
-    margin: 1.7rem 0 0.75rem;
-    color: var(--ink);
-    letter-spacing: -0.01em;
-  }
-
-  .line-callout {
-    max-width: 760px;
-    margin: 1.15rem 0;
-    padding: 0.95rem 1.1rem;
-    border: 1px solid var(--line-strong);
-    border-left: 4px solid var(--gold);
-    background: rgba(154,106,32,0.045);
-    color: var(--ink);
-    font-weight: 700;
-    border-radius: 8px;
-  }
-  .decision-word {
-    width: max-content;
-    min-width: 130px;
-    margin: 0.7rem 0 0.5rem;
-    border-radius: 8px;
-    padding: 0.6rem 0.85rem;
-    font-family: "IBM Plex Mono", monospace;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-align: center;
-  }
-  .decision-word.allow { color: var(--green); background: rgba(142,228,156,0.09); border: 1px solid rgba(142,228,156,0.45); }
-  .decision-word.escalate { color: var(--rust); background: rgba(240,161,95,0.09); border: 1px solid rgba(240,161,95,0.45); }
-
-  .trust-grid, .lane-grid, .proof-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.95rem; margin: 1.2rem 0 1.6rem; }
-  .proof-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .trust-card, .lane-card, .proof-grid div {
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.78);
-  }
-  .trust-card h3, .lane-card h3 { margin: 0.25rem 0 0.45rem; }
-  .trust-card p, .lane-card p { margin: 0; font-size: 0.92rem; }
-  .card-kicker, .lane-card span { font-family: "IBM Plex Mono", monospace; font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
-  .lane-card.build { border-top: 5px solid var(--blue); }
-  .lane-card.verify { border-top: 5px solid var(--green); }
-
-  .process-map {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(120px, 1fr));
-    gap: 0.7rem;
-    margin: 1.2rem 0 1.7rem;
-  }
-  .process-map div {
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    padding: 0.95rem;
-    background: rgba(255, 255, 255, 0.78);
-  }
-  .process-map span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.66rem; color: var(--gold); margin-bottom: 0.35rem; }
-  .process-map strong { display: block; font-size: 0.9rem; color: var(--ink); }
-  .process-map em { display: block; color: var(--soft); font-size: 0.78rem; font-style: normal; margin-top: 0.2rem; }
-
-  .domain-cloud { display: flex; flex-wrap: wrap; gap: 0.55rem; margin: 1rem 0 1.55rem; }
-  .domain-cloud span { border: 1px solid var(--line); border-radius: 999px; padding: 0.42rem 0.65rem; background: rgba(255,255,255,0.72); color: var(--ink); font-size: 0.86rem; }
-
-  .result-panel {
-    display: grid;
-    grid-template-columns: minmax(0, 0.88fr) minmax(320px, 1fr);
-    gap: 1rem;
-    margin: 1.2rem 0;
-    padding: 1rem;
-    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(249,248,245,0.86));
-    border-radius: 8px;
-    color: var(--ink);
-    border: 1px solid var(--line-strong);
-  }
-  .result-copy { padding: 0.5rem; }
-  .result-copy h3 { color: var(--gold); margin-top: 0.35rem; }
-  .result-copy p { color: var(--muted); }
-  .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
-  .metric-grid div { background: rgba(255,255,255,0.76); border: 1px solid var(--line); border-radius: 8px; padding: 1rem; }
-  .metric-grid strong { color: var(--ink); display: block; font-size: 1.8rem; line-height: 1; margin-bottom: 0.4rem; }
-  .metric-grid span { color: var(--muted); font-size: 0.82rem; }
-  .proof-grid div strong { display: block; margin-bottom: 0.35rem; }
-  .proof-grid div span { color: var(--muted); font-size: 0.88rem; }
-
-  .economics-strip {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-    margin: 1.2rem 0 1.6rem;
-  }
-  .economics-strip div { border-radius: 8px; border: 1px solid var(--line); padding: 1rem; background: rgba(255,255,255,0.72); }
-  .economics-strip span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 0.66rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.45rem; }
-  .economics-strip strong { display: block; line-height: 1.25; }
-
-  .boundary-note {
-    border-radius: 8px;
-    border: 1px solid var(--line-strong);
-    background: rgba(154,106,32,0.045);
-    padding: 1rem;
-    margin: 1rem 0 1.5rem;
-    color: var(--ink);
-  }
-  .limit-item {
-    padding: 0.78rem 0.95rem;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: rgba(255,255,255,0.72);
-    margin-bottom: 0.55rem;
-  }
-  .objection-stack { display: grid; gap: 0.8rem; }
-  .objection-card { border: 1px solid var(--line); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.72); }
-  .objection-card h3 { margin-top: 0; }
-  .objection-card p:last-child { margin-bottom: 0; }
-  .closing-panel {
-    border-radius: 8px;
-    padding: clamp(1.4rem, 3vw, 2rem);
-    background:
-      radial-gradient(circle at 50% 30%, rgba(200,164,101,0.1), transparent 22rem),
-      linear-gradient(135deg, #ffffff, #f7f4ec 55%, #eee7d8);
-    border: 1px solid var(--line-strong);
-  }
-  .closing-panel p, .closing-panel h3, .closing-panel strong { color: var(--ink); }
-  .closing-panel p { max-width: 760px; color: var(--muted); }
-
-  footer {
-    width: min(1180px, calc(100% - 40px));
-    margin: 0 auto 3rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--line-strong);
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    color: var(--soft);
-    font-size: 0.86rem;
-  }
-  footer strong { display: block; font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.55rem; letter-spacing: 0.01em; color: var(--gold); }
-  footer .links { text-align: right; }
-
-  @media (max-width: 980px) {
-    .hero-grid, .article-shell, .result-panel { grid-template-columns: 1fr; }
-    .toc { position: relative; top: auto; }
-    .process-map { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .meta-chip { flex-basis: calc(50% - 0.5rem); }
-  }
-  @media (max-width: 680px) {
-    p { font-size: 0.88rem; }
-    .topbar { align-items: flex-start; flex-direction: column; }
-    .toplinks { gap: 0.75rem; }
-    .hero { padding: 1.65rem 0 1.8rem; }
-    .hero h1 { font-size: clamp(3.15rem, 16vw, 4.8rem); letter-spacing: -0.055em; margin-bottom: 0.8rem; }
-    .hero h2 { font-size: clamp(1.18rem, 6vw, 1.72rem); }
-    .hero-subtitle { font-size: 0.98rem; margin-bottom: 1rem; }
-    .eyebrow { margin-bottom: 0.85rem; }
-    .meta-row { gap: 0.5rem; }
-    .meta-chip,
-    .meta-chip:nth-child(3),
-    .meta-chip:nth-child(4) { flex-basis: 100%; padding: 0.52rem 0.65rem; min-width: 0; }
-    .meta-chip span, .meta-chip strong { display: inline; }
-    .meta-chip span { margin-right: 0.45rem; }
-    footer { flex-direction: column; }
-    .trust-grid, .lane-grid, .proof-grid, .metric-grid, .economics-strip, .process-map { grid-template-columns: 1fr; }
-    .paper-section { padding: 1.15rem; }
-    footer .links { text-align: left; }
-  }
-
-  @media print {
-    body { background: #fff; }
-    .topbar, .toc { display: none; }
-    .hero, .article-shell, footer { width: auto; margin-left: 0; margin-right: 0; }
-    .article-shell { display: block; }
-    .paper-section { box-shadow: none; page-break-inside: avoid; }
-  }
+:root{--ink:#111315;--muted:#4f5661;--soft:#6f7781;--paper:#ffffff;--line:#d9ded6;--gold:#9b7f3e;--blue:#255878;--green:#25715f;--rust:#9a4d38;--shadow:0 24px 70px rgba(17,19,21,0.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(90deg,rgba(37,88,120,.055) 0 1px,transparent 1px 100%),linear-gradient(180deg,#fbfbf8 0%,#eef2ee 100%);background-size:44px 44px,auto;color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.68;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration-thickness:1px;text-underline-offset:4px}p{margin:0 0 1rem;color:var(--muted);font-size:1.02rem;max-width:820px}strong{color:var(--ink);font-weight:720}code{font-family:"IBM Plex Mono",monospace;font-size:.84em;background:#eef2ed;border:1px solid var(--line);border-radius:4px;padding:.08rem .3rem;color:#243042}.topbar{width:min(1120px,calc(100% - 40px));margin:0 auto;padding:1rem 0;display:flex;justify-content:space-between;gap:1rem;align-items:center;border-bottom:1px solid var(--line)}.brand-link{font-family:"IBM Plex Mono",monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--ink);text-decoration:none;font-weight:650}.toplinks{display:flex;gap:1.1rem;align-items:center;flex-wrap:wrap}.toplinks a{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--soft)}.hero{width:min(980px,calc(100% - 40px));margin:0 auto;padding:4.5rem 0 2.8rem}.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:650;margin-bottom:1.2rem}h1{font-family:"EB Garamond",Georgia,serif;font-size:clamp(3.8rem,8vw,6.8rem);line-height:.9;letter-spacing:0;margin:0 0 1rem;color:var(--ink);font-weight:600}.subtitle{font-size:clamp(1.35rem,2.5vw,2.1rem);line-height:1.12;color:var(--muted);max-width:780px;margin:0 0 1.5rem;font-weight:500}.meta-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:2rem}.meta-card{background:rgba(255,255,255,.78);border:1px solid var(--line);border-radius:8px;padding:1rem;box-shadow:0 10px 34px rgba(17,19,21,.045)}.meta-card span{display:block;font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);margin-bottom:.45rem}.meta-card strong{display:block;font-size:1.5rem;line-height:1.1;color:var(--ink)}.wrap{width:min(980px,calc(100% - 40px));margin:0 auto 4rem}.paper-section{background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:clamp(1.35rem,3vw,2.7rem);margin:0 0 1.35rem}.section-label{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:650;margin-bottom:1rem}h2{font-family:"EB Garamond",Georgia,serif;font-size:clamp(2.2rem,4.6vw,3.8rem);line-height:1.02;font-weight:600;letter-spacing:0;margin:0 0 1.25rem;color:var(--ink)}h3{font-family:"EB Garamond",Georgia,serif;font-size:clamp(1.55rem,3vw,2.15rem);line-height:1.12;margin:1.8rem 0 .75rem;color:var(--ink);font-weight:600}hr{border:0;border-top:1px solid var(--line);margin:2rem 0}ul,ol{max-width:820px;margin:0 0 1rem 1.3rem;padding:0;color:var(--muted)}li{margin:.45rem 0;padding-left:.15rem}blockquote{max-width:840px;margin:1.25rem 0;padding:1rem 1.2rem;border-left:4px solid var(--gold);background:#f7f2e8;border-radius:0 8px 8px 0;color:var(--ink)}blockquote p{font-family:"EB Garamond",Georgia,serif;color:var(--ink);font-size:1.25rem;line-height:1.42;margin:0}.table-scroll{width:100%;overflow-x:auto;margin:1.25rem 0 1.6rem;border-radius:8px}table{width:100%;border-collapse:separate;border-spacing:0;font-size:.94rem;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}th,td{text-align:left;vertical-align:top;padding:.78rem .85rem;border-bottom:1px solid var(--line);color:var(--muted)}th{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:#f0f3ed;font-weight:650}tr:last-child td{border-bottom:0}footer{width:min(980px,calc(100% - 40px));margin:0 auto;padding:2rem 0 3rem;color:var(--soft);font-size:.9rem;display:flex;justify-content:space-between;gap:1rem;border-top:1px solid var(--line)}footer a{color:var(--soft)}@media(max-width:760px){.meta-row{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}table{font-size:.84rem}th,td{padding:.62rem}.paper-section{padding:1.1rem}footer{flex-direction:column}}
 </style>
 </head>
 <body>
-  <nav class="topbar" aria-label="Primary">
-    <a class="brand-link" href="https://holoengine.ai">HoloEngine</a>
-    <div class="toplinks">
-      <a href="https://holoengine.ai/benchmark">Benchmark</a>
-      <a href="https://holoengine.ai/payloads">Payloads</a>
-      <a href="https://github.com/twigton447-dev/holo-benchmark" target="_blank" rel="noopener">GitHub</a>
-    </div>
+  <nav class="topbar">
+    <a class="brand-link" href="/">HoloEngine</a>
+    <div class="toplinks"><a href="/">Home</a><a href="/whitepaper">Whitepaper</a><a href="/benchmark">Benchmark</a><a href="/payloads/">Payloads</a></div>
   </nav>
-
   <header class="hero">
-    <div class="hero-grid">
-      <div>
-        <div class="eyebrow">Version 7.81 · July 2026</div>
-        <h1>HoloEngine</h1>
-        <h2>AI at the Action Boundary</h2>
-        <p class="hero-subtitle">Why smart models still need a checkpoint before real-world action</p>
-        <div class="meta-row">
-          <div class="meta-chip"><span>Author</span><strong>Taylor Wigton</strong></div>
-          <div class="meta-chip"><span>HoloEngine</span><strong><a href="https://holoengine.ai">holoengine.ai</a></strong></div>
-          <div class="meta-chip"><span>Benchmark</span><strong><a href="https://holoengine.ai/benchmark">holoengine.ai/benchmark</a></strong></div>
-          <div class="meta-chip"><span>Contact</span><strong><a href="mailto:taylorw@hologroup.io">taylorw@hologroup.io</a></strong></div>
-          <div class="meta-chip"><span>Patent status</span><strong>Patent pending</strong></div>
-        </div>
-      </div>
-    </div>
+    <div class="eyebrow">Version 7.82 · July 2026</div>
+    <h1>HoloEngine</h1>
+    <p class="subtitle">AI at the Action Boundary</p>
+    <div class="meta-row"><div class="meta-card"><span>Author</span><strong>Taylor Wigton</strong></div><div class="meta-card"><span>Boundary</span><strong>Action</strong></div><div class="meta-card"><span>Evidence</span><strong>Frozen</strong></div></div>
   </header>
-
-  <div class="article-shell">
-    <aside class="toc" aria-label="Table of contents">
-      <div class="toc-title">Contents</div>
-      <a href="#the-problem"><span>01</span>The problem</a>
-<a href="#two-kinds-of-trust"><span>02</span>Two kinds of trust</a>
-<a href="#what-holoengine-does"><span>03</span>What HoloEngine does</a>
-<a href="#the-hard-failures-look-normal"><span>04</span>The hard failures look normal</a>
-<a href="#why-solo-models-fail"><span>05</span>Why solo models fail</a>
-<a href="#the-architecture"><span>06</span>The architecture</a>
-<a href="#where-this-matters"><span>07</span>Where this matters</a>
-<a href="#how-holo-is-tested"><span>08</span>How Holo is tested</a>
-<a href="#what-the-benchmark-has-shown-so-far"><span>09</span>What the benchmark has shown so far</a>
-<a href="#the-economics-of-a-checkpoint"><span>10</span>The economics of a checkpoint</a>
-<a href="#why-human-review-is-not-enough"><span>11</span>Why human review is not enough</a>
-<a href="#what-holo-does-not-claim"><span>12</span>What Holo does not claim</a>
-<a href="#the-skeptical-view"><span>13</span>The skeptical view</a>
-<a href="#the-real-point"><span>14</span>The real point</a>
-    </aside>
-    <main>
-
-      <section class="paper-section" id="the-problem">
-        <div class="section-label"><span>01</span><b>The problem</b></div>
-        <h2>The problem</h2>
-
-        <p>AI is no longer just talking.</p>
+  <main class="wrap">
+    <section class="paper-section" id="overview"><div class="section-label">Overview</div>
+<h2>Overview</h2>
+<h2>HoloEngine</h2>
+</section>
+<section class="paper-section" id="ai-at-the-action-boundary"><div class="section-label">AI at the Action Boundary</div>
+<h2>AI at the Action Boundary</h2>
+<h3>Why smart models still need a checkpoint before real-world action</h3>
+<p>Version 7.82 · July 2026</p>
+<p>Taylor Wigton Founder, HoloEngine</p>
+<p>Patent pending</p>
+<hr/>
+</section>
+<section class="paper-section" id="01-the-problem"><div class="section-label">01. The problem</div>
+<h2>01. The problem</h2>
+<p>AI is no longer just talking.</p>
 <p>It is starting to do real work.</p>
 <p>It can check invoices, draft contracts, prepare approval packets, recommend payments, grant access, and place orders. In many companies, the document AI produces is what actually authorizes the action. If that document is wrong, the action can be wrong too.</p>
 <p>That is the opportunity.</p>
 <p>But it is also the risk.</p>
 <p>There is always a final moment before something real happens. Before money moves. Before access is granted. Before a contract is signed. Before a purchase is placed. Before a report is treated as safe to rely on.</p>
 <p>We call that moment the action boundary.</p>
-<p class="line-callout">High-stakes AI needs Customs and Border Protection, not pre-9/11 airport security.</p>
+<p>High-stakes AI needs Customs and Border Protection, not pre-9/11 airport security.</p>
 <p>Right now, most AI safety tools are built for the wrong layer. They check whether the user has permission. They check whether the prompt follows policy. They check whether the model sounds careful.</p>
 <p>They do not check whether the evidence actually supports the action.</p>
 <p>This is the gap.</p>
-<p>The current standard for AI action security is closer to pre-9/11 airport security — basic checks, assumed normal traffic, and a system built around the idea that most things passing through are probably fine.</p>
+<p>The current standard for AI action security is closer to pre-9/11 airport security: basic checks, assumed normal traffic, and a system built around the idea that most things passing through are probably fine.</p>
 <p>High-stakes AI needs something closer to Customs and Border Protection.</p>
-<p>At the border, the question is not just “Are you allowed through?” The question is “Does your story hold up?” What are you carrying? Why today? Does the paperwork match the cargo? Is there a contradiction hiding inside something that looks normal?</p>
+<p>At the border, the question is not just "Are you allowed through?" The question is "Does your story hold up?" What are you carrying? Why today? Does the paperwork match the cargo? Is there a contradiction hiding inside something that looks normal?</p>
 <p>That is the missing layer.</p>
 <p>We are now trusting AI in two ways at once.</p>
 <p>First, we trust the work it produces. A model can write a compliance memo, a payment justification, or a procurement brief that looks complete but still misses the one approval, source, or limit that actually matters.</p>
@@ -478,26 +61,11 @@
 <p>Both failures come from the same root:</p>
 <p>The system was never forced to prove that the evidence actually closes the gate.</p>
 <p>That is the problem HoloEngine is built to solve.</p>
-
-      </section>
-
-      <section class="paper-section" id="two-kinds-of-trust">
-        <div class="section-label"><span>02</span><b>Two kinds of trust</b></div>
-        <h2>Two kinds of trust</h2>
-
-        <div class="trust-grid" aria-label="Two kinds of trust">
-          <div class="trust-card">
-            <div class="card-kicker">Work Product</div>
-            <h3>Can we rely on this?</h3>
-            <p>The draft can sound careful and still miss the source, limit, or approval that matters.</p>
-          </div>
-          <div class="trust-card">
-            <div class="card-kicker">Real Action</div>
-            <h3>Can this happen now?</h3>
-            <p>The workflow can look normal and still lack the authority to move money, grant access, or commit the company.</p>
-          </div>
-        </div>
-        <p>We are starting to trust AI in two ways at once.</p>
+<hr/>
+</section>
+<section class="paper-section" id="02-two-kinds-of-trust"><div class="section-label">02. Two kinds of trust</div>
+<h2>02. Two kinds of trust</h2>
+<p>We are starting to trust AI in two ways at once.</p>
 <p>First, we trust the work it produces.</p>
 <p>A model can write a legal summary, compliance memo, procurement brief, diligence report, or payment-release packet. The output can look polished. It can sound careful. It can cite documents. It can feel complete.</p>
 <p>But looking complete is not the same as being complete.</p>
@@ -508,34 +76,19 @@
 <p>And still, the action should not happen.</p>
 <p>That is the second trust problem.</p>
 <p>HoloEngine exists because both problems are versions of the same problem.</p>
-<p class="line-callout">Before reliance, prove the work.</p>
-<p class="line-callout">Before action, prove the authority.</p>
-<p class="line-callout">The evidence has to hold.</p>
-
-      </section>
-
-      <section class="paper-section" id="what-holoengine-does">
-        <div class="section-label"><span>03</span><b>What HoloEngine does</b></div>
-        <h2>What HoloEngine does</h2>
-
-        <div class="lane-grid" aria-label="HoloEngine lanes">
-          <div class="lane-card build">
-            <span>Early Lane</span>
-            <h3>HoloBuild</h3>
-            <p>Creates high-stakes work that people can rely on.</p>
-          </div>
-          <div class="lane-card verify">
-            <span>Late Lane</span>
-            <h3>HoloVerify</h3>
-            <p>Checks proposed actions before they become hard to undo.</p>
-          </div>
-        </div>
-        <p>HoloEngine is a trust layer for high-stakes AI work.</p>
+<p>Before reliance, prove the work.</p>
+<p>Before action, prove the authority.</p>
+<p>The evidence has to hold.</p>
+<hr/>
+</section>
+<section class="paper-section" id="03-what-holoengine-does"><div class="section-label">03. What HoloEngine does</div>
+<h2>03. What HoloEngine does</h2>
+<p>HoloEngine is a trust layer for high-stakes AI work.</p>
 <p>It does not try to replace the model. It does not claim one model is always better than another. It does not pretend AI can be made perfect.</p>
 <p>It adds a checkpoint where the checkpoint matters most.</p>
 <h3>The Economics of the Checkpoint</h3>
 <p>A strong trust layer doesn't have to be slow and expensive.</p>
-<p>We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a perfect, rule-following draft on the first try, the Governor verifies the math and exits early. You don't pay for extra AI turns you don't need.</p>
+<p>We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a complete, rule-following draft on the first try, the Governor verifies the math and exits early. You don't pay for extra AI turns you don't need.</p>
 <p>In our live D11 tests, the system exited early on clean drafts, cutting token burn by 52%. But when a draft was messy or violated rules, the Governor refused to exit and forced the models to repair it. You only pay the "safety premium" when the system is actively saving you from a failure.</p>
 <p>HoloEngine has two main lanes.</p>
 <h3>HoloBuild</h3>
@@ -561,14 +114,11 @@
 <p>The evidence does not close the boundary. A person or higher-control workflow must review it.</p>
 <p>That binary answer matters.</p>
 <p>High-stakes systems do not need another paragraph of confident analysis at the final step. They need a clear stop-or-go decision grounded in evidence.</p>
-
-      </section>
-
-      <section class="paper-section" id="the-hard-failures-look-normal">
-        <div class="section-label"><span>04</span><b>The hard failures look normal</b></div>
-        <h2>The hard failures look normal</h2>
-
-        <p>Most people imagine AI risk as something obvious.</p>
+<hr/>
+</section>
+<section class="paper-section" id="04-the-hard-failures-look-normal"><div class="section-label">04. The hard failures look normal</div>
+<h2>04. The hard failures look normal</h2>
+<p>Most people imagine AI risk as something obvious.</p>
 <p>A fake vendor. A strange email. A broken approval chain. A suspicious attachment. A prompt injection. A missing field.</p>
 <p>Those matter. But they are not the hardest failures.</p>
 <p>The hardest failures are quiet.</p>
@@ -592,19 +142,16 @@
 <p>They are judgment failures.</p>
 <p>That is why better prompts are not enough. Permission checks are not enough. Human review queues are not enough.</p>
 <p>The missing layer is evidence judgment at the boundary.</p>
-
-      </section>
-
-      <section class="paper-section" id="why-solo-models-fail">
-        <div class="section-label"><span>05</span><b>Why solo models fail</b></div>
-        <h2>Why solo models fail</h2>
-
-        <p>A top model can be very smart and still fail here.</p>
+<hr/>
+</section>
+<section class="paper-section" id="05-why-solo-models-fail"><div class="section-label">05. Why solo models fail</div>
+<h2>05. Why solo models fail</h2>
+<p>A top model can be very smart and still fail here.</p>
 <p>Not because it cannot reason.</p>
 <p>Because it is alone.</p>
 <p>A solo model may accept a plausible story too quickly. It may see a concern and then talk itself out of it. It may mistake a clean workflow for real authority. It may block something valid because it is unusual. It may use a self-review pass to defend its first answer.</p>
 <p>That is the operating risk.</p>
-<p>If one model owns the final decision, that model’s blind spots become part of your process.</p>
+<p>If one model owns the final decision, that model's blind spots become part of your process.</p>
 <p>A stronger model helps. But it does not remove the need for structure.</p>
 <p>In our HoloBuild tests against top frontier baselines, including Claude Opus 4.8, the most revealing failures were not dumb failures. The model often understood the task. It knew the domain. It produced strong reasoning.</p>
 <p>Then it failed to finish the job safely.</p>
@@ -612,61 +159,49 @@
 <p>We call this bounded completion failure.</p>
 <p>Plainly: the model understood the assignment, but it did not close the work cleanly under real limits.</p>
 <p>That matters because production has limits. Real systems do not get infinite time, infinite budget, and infinite cleanup passes. The work has to close.</p>
-<p class="line-callout">A smart draft is not enough.</p>
-<p class="line-callout">A reliance-grade artifact has to survive the gate.</p>
+<p>A smart draft is not enough.</p>
+<p>A reliance-grade artifact has to survive the gate.</p>
 <h3>The Final-Mile Regression</h3>
 <p>Our traces revealed a deeper problem than simple hallucination. We call it Final-Mile Regression.</p>
-<p>A smart model will often find the perfect, source-grounded answer early in the process. But when you ask that same model to write the final polished document, it tries to sound helpful. In the process of smoothing out the prose, it accidentally deletes the critical limits or exceptions it established just seconds before. The model delivers a final artifact that is actually weaker than its rough draft.</p>
+<p>A smart model will often find a strong, source-grounded answer early in the process. But when you ask that same model to write the final polished document, it tries to sound helpful. In the process of smoothing out the prose, it accidentally deletes the critical limits or exceptions it established just seconds before. The model delivers a final artifact that is actually weaker than its rough draft.</p>
 <h3>The Oscillation Problem</h3>
 <p>We also found that natural language is a terrible way to enforce rules. If a document is 200 words too long, and an AI Governor says "make it shorter," the worker model will wildly overshoot and cut 500 words. When told to expand, it overwrites. The model oscillates endlessly because language is vague.</p>
-
-      </section>
-
-      <section class="paper-section" id="the-architecture">
-        <div class="section-label"><span>06</span><b>The architecture</b></div>
-        <h2>The architecture</h2>
-
-        <div class="process-map" aria-label="HoloEngine process">
-          <div><span>01</span><strong>Case packet</strong><em>same evidence record</em></div>
-          <div><span>02</span><strong>Role separation</strong><em>different jobs, not a vote</em></div>
-          <div><span>03</span><strong>Evidence pressure</strong><em>source over confidence</em></div>
-          <div><span>04</span><strong>HoloGov</strong><em>lane-specific proof gate</em></div>
-          <div><span>05</span><strong>Boundary result</strong><em>ready, revise, allow, or escalate</em></div>
-        </div>
-        <p>HoloEngine is the core architecture.</p>
+<hr/>
+</section>
+<section class="paper-section" id="06-the-architecture"><div class="section-label">06. The architecture</div>
+<h2>06. The architecture</h2>
+<p>HoloEngine is the core architecture.</p>
 <p>It is used inside HoloBuild, HoloVerify, and other Holo surfaces. The surface changes. The boundary rule stays the same.</p>
 <p>HoloEngine is not just more models.</p>
 <p>A group of models voting on the same problem can still fail. They can share the same assumption. They can converge on the wrong story. They can create more words without creating more proof.</p>
 <p>HoloEngine is closer to a surgical team.</p>
 <p>Different roles have different jobs. One establishes the baseline story. One looks for weak points. One tests claims against sources. One preserves unresolved contradictions. The attending physician does not average opinions. The attending signs off only if the chart closes.</p>
 <p>That is the role of HoloGov inside the architecture.</p>
-<p>HoloGov is the deterministic proof-gate component. It is not another analyst model and it does not make provider calls. It applies the relevant policy and proof standard for the surface it is governing.</p>
+<p>HoloGov is the governing layer. In the current HoloBuild and HoloVerify architecture, it is hybrid: provider-backed Gov calls perform adversarial adjudication at locked points in the run, while local deterministic code owns the hard gates that decide whether an artifact is admissible.</p>
+<p>Gov does not choose the model roster. The run lock fixes the worker order. Gov diagnoses the previous worker output, reads deterministic gate results, blocks unsafe moves, preserves what is correct, and tells the next worker what must be repaired or resolved.</p>
+<p>The deterministic layer is what prevents a model from simply declaring victory. If a required section is missing, a source ID is invented, an action boundary is unresolved, or a structured output fails, local code can fail the artifact even if the prose sounds convincing.</p>
+<p>Plainly:</p>
+<blockquote><p>Gov argues with the workers. Code checks the boundary. The final answer has to satisfy both.</p></blockquote>
 <h3>The Deterministic Cage</h3>
 <p>To fix the oscillation and the final-mile regression, we stopped treating AI as a single thing. We split the architecture into two layers: a probabilistic Data Plane (the models that read and write) and a deterministic Control Plane (the hard-coded rules that govern them).</p>
 <p>We call this the Deterministic Cage.</p>
-<ol>
-  <li><strong>The Form Actuator:</strong> Instead of the Governor telling a worker to "make it shorter," local Python code calculates the exact mechanical defect (e.g., "Cut exactly 251 words from Section 2"). The model is handed a strict mathematical constraint, not a suggestion.</li>
-  <li><strong>Local Eligibility Gates:</strong> The AI Governor does not get to decide if a document is "ready." Local code checks the word quotas and required sections. If the math fails, the AI is physically blocked from marking the document as complete.</li>
-  <li><strong>The Final Selector (Monotonic Preservation):</strong> HoloEngine constantly pins the "best artifact" in memory. If a model tries to get clever in the final turn and accidentally regresses the quality of the document, the Final Selector automatically throws the final turn in the trash and outputs the pinned, verified intermediate draft instead.</li>
-</ol>
-<p>In HoloBuild, HoloGov-B asks whether a work product is ready to rely on, needs revision, or must preserve unresolved risk.</p>
-<p>In HoloVerify, HoloGov-V asks whether a proposed action can proceed or must escalate.</p>
+<ol><li><strong>The Form Actuator:</strong> Instead of the Governor telling a worker to "make it shorter," local Python code calculates the exact mechanical defect (e.g., "Cut exactly 251 words from Section 2"). The model is handed a strict mathematical constraint, not a suggestion.</li><li><strong>Local Eligibility Gates:</strong> The AI Governor does not get to decide if a document is "ready." Local code checks the word quotas and required sections. If the math fails, the AI is physically blocked from marking the document as complete.</li><li><strong>The Final Selector (Monotonic Preservation):</strong> HoloEngine constantly pins the "best artifact" in memory. If a model tries to get clever in the final turn and accidentally regresses the quality of the document, the Final Selector automatically throws the final turn in the trash and outputs the pinned, verified intermediate draft instead.</li></ol>
+<p>This sounds technical, but the idea is simple:</p>
+<blockquote><p>Do not trust the last answer just because it is last. Trust the best answer that actually passed the gates.</p></blockquote>
+<p>In HoloBuild, HoloGov-B governs work-product readiness. It asks whether a work product is ready to rely on, needs revision, or must preserve unresolved risk.</p>
+<p>In HoloVerify, HoloGov-V governs runtime action decisions. It asks whether a proposed action can proceed or must escalate.</p>
 <p>In HoloChat, HoloGov-C governs continuity and context admission rather than action authorization.</p>
-<p>The details differ because each lane has different policies, roles, and failure modes. But the purpose is consistent:</p>
+<p>HoloBrain is the persistent memory and intelligence substrate that supports HoloEngine over time. It preserves memory, artifact references, and audit context so HoloEngine can work from stable records instead of loose chat history.</p>
+<p>For HoloGov-B and HoloGov-V, the reference and audit layer stays near-lossless. The live prompt receives only the compact operational slice needed for the turn.</p>
+<p>The details differ because each lane has different roles and failure modes. But the purpose is consistent:</p>
 <p>What has actually been proven?</p>
 <p>The point is disciplined disagreement followed by a final evidence gate.</p>
-<p class="line-callout">No proof, no clearance.</p>
-
-      </section>
-
-      <section class="paper-section" id="where-this-matters">
-        <div class="section-label"><span>07</span><b>Where this matters</b></div>
-        <h2>Where this matters</h2>
-
-        <div class="domain-cloud" aria-label="Workflow examples">
-          <span>AP vendor bank changes</span><span>Trade finance</span><span>Fund redemptions</span><span>Cloud access</span><span>Procurement</span><span>Insurance claims</span><span>Export controls</span><span>Healthcare overrides</span><span>Loan waivers</span><span>Legal settlements</span>
-        </div>
-        <p>The action boundary is not theoretical. It appears in workflows where a wrong decision costs money, creates liability, or opens a security hole.</p>
+<p>No proof, no clearance.</p>
+<hr/>
+</section>
+<section class="paper-section" id="07-where-this-matters"><div class="section-label">07. Where this matters</div>
+<h2>07. Where this matters</h2>
+<p>The action boundary is not theoretical. It appears in workflows where a wrong decision costs money, creates liability, or opens a security hole.</p>
 <p>Examples include AP vendor bank changes, trade finance payment releases, fund redemption cash releases, cloud access break-glass requests, procurement emergency approvals, insurance claim payouts, export-control shipment holds, healthcare prior-auth overrides, loan covenant waivers, and legal settlement payments.</p>
 <p>The list will grow because the pattern is broad.</p>
 <p>But the rule is the same in every domain.</p>
@@ -676,17 +211,18 @@
 <p>A trust layer that escalates everything is not safe. It is just expensive. Teams will route around it.</p>
 <p>A useful trust layer has to catch hidden risk and clear messy but valid business reality.</p>
 <p>That is harder.</p>
-<p class="line-callout">That is the problem HoloEngine is built for.</p>
-
-      </section>
-
-      <section class="paper-section" id="how-holo-is-tested">
-        <div class="section-label"><span>08</span><b>How Holo is tested</b></div>
-        <h2>How Holo is tested</h2>
-
-        <p>Standard AI benchmarks ask models questions.</p>
+<p>That is the problem HoloEngine is built for.</p>
+<hr/>
+</section>
+<section class="paper-section" id="08-how-holo-is-tested"><div class="section-label">08. How Holo is tested</div>
+<h2>08. How Holo is tested</h2>
+<p>Standard AI benchmarks ask models questions.</p>
 <p>That is useful, but it does not answer the question enterprises care about.</p>
 <p>Should this action execute right now?</p>
+<p>Factuality benchmarks such as AA-Omniscience are useful because they reward calibration: a model should know facts, but it should also avoid confident guessing when it does not know.</p>
+<p>HoloVerify applies the same discipline to action.</p>
+<p>When the evidence does not authorize the action, the correct answer is not a better paragraph.</p>
+<p>The correct answer is ESCALATE.</p>
 <p>To test that, we built HoloFactory.</p>
 <p>HoloFactory creates realistic, multi-document business environments. For an accounts payable scenario, it can generate invoices, email chains, purchase order records, approval artifacts, vendor history, and payment instructions.</p>
 <p>The packet is then hash-locked.</p>
@@ -701,26 +237,49 @@
 <p>A benchmark result only counts if it survives the publication process: packet freezing, prompt hashing, trace capture, blind adjudication, label assignment, and ledger promotion.</p>
 <p>The benchmark page carries the full registry.</p>
 <p>The whitepaper makes the broader point: this is the kind of testing required if AI is going to act in the real world.</p>
-
-      </section>
-
-      <section class="paper-section" id="what-the-benchmark-has-shown-so-far">
-        <div class="section-label"><span>09</span><b>What the benchmark has shown so far</b></div>
-        <h2>What the benchmark has shown so far</h2>
-
-        <div class="proof-grid" aria-label="Benchmark proof results">
-          <div><strong>D11<br>Scored Opus-facing proof</strong><span>D11 is the initial scored HoloBuild comparison. HoloBuild produced a proof-clean output and outperformed Claude Opus 4.8 under blind scoring.<br><br>Current scored flagship</span></div>
-          <div><strong>D13<br>Full-Gated Proof Win</strong><span>HoloBuild officially defeated the solo baseline 94 to 69 under the full 100-point gated validator, resolving critical source-logic traps.<br><br>Official proof score</span></div>
-          <div><strong>D14<br>Full-Gated Proof Win</strong><span>HoloBuild officially defeated the solo baseline 94 to 69, capturing and correcting deep action-boundary confusion.<br><br>Official proof score</span></div>
-        </div>
-        <div class="card-kicker">Definitions</div>
-        <div class="proof-grid" aria-label="Evidence category definitions">
-          <div><strong>Scored proof</strong><span>A completed run that passed the published gates: frozen packet, hashed prompt, captured trace, blind scoring, label assignment, and ledger promotion.</span></div>
-          <div><strong>Baseline failure</strong><span>A solo run that did not produce a scoreable artifact.</span></div>
-          <div><strong>Hardening evidence</strong><span>A failure Holo preserved and used to tighten the system.</span></div>
-        </div>
-        <p>The benchmark evidence is still early. It is not a universal claim. It is not third-party validation. It should not be treated as production reliability.</p>
-<p>But the pattern is useful.</p>
+<hr/>
+</section>
+<section class="paper-section" id="09-what-the-benchmark-has-shown-so-far"><div class="section-label">09. What the benchmark has shown so far</div>
+<h2>09. What the benchmark has shown so far</h2>
+<p>The benchmark evidence is still internally built. It is not a universal claim. It is not third-party validation. It should not be treated as unconstrained production reliability.</p>
+<p>But the pattern is now large enough to describe precisely.</p>
+<p>First, the terms:</p>
+<p>A <strong>packet</strong> is one frozen test case: a proposed action plus the documents and facts the AI is allowed to use.</p>
+<p>A <strong>sibling pair</strong> is two related packets. One should ALLOW and the other should ESCALATE. The difference is usually narrow, so the system has to read carefully.</p>
+<p>The <strong>clean denominator</strong> is the set of packets we are willing to count publicly. Canaries, drafts, broken runs, and diagnostic tests are kept separate.</p>
+<p>A <strong>false positive</strong> means Holo says ESCALATE when the action was actually allowed. That creates friction.</p>
+<p>A <strong>false negative</strong> means Holo says ALLOW when the action should have escalated. That is usually the dangerous miss.</p>
+<p>The current clean HoloVerify counted sample contains 334 frozen action-boundary packets across 167 sibling pairs: 167 ALLOW truths and 167 ESCALATE truths.</p>
+<p>HoloVerify solved 334/334 of those packets with zero observed false positives and zero observed false negatives.</p>
+<p>That does not mean zero risk.</p>
+<p>The exact one-sided 95% upper bound on overall packet error is 0.893%. The side-specific upper bounds on false positives and false negatives are 1.778% each, because each side currently has 167 examples.</p>
+<p>That phrase sounds more complicated than it is. It means:</p>
+<blockquote><p>Given this many tests and zero observed errors, this is the highest error rate that still remains statistically plausible at the 95% confidence level.</p></blockquote>
+<p>Plainly:</p>
+<blockquote><p>We saw zero errors in 334 counted packets. That does not prove zero risk. It means the upper risk bound is now measured instead of guessed.</p></blockquote>
+<p>That is why the benchmark reports confidence bands, not only the observed score.</p>
+<p>The observed score says what happened in the sample.</p>
+<p>The upper bound says how much uncertainty remains.</p>
+<p>We use an exact binomial upper bound as the headline risk number because it is a conservative one-sided bound for zero-error runs. We also report Wilson score intervals in the benchmark page because Wilson is a standard way to put a confidence band around a proportion without pretending the sample percentage is the whole story.</p>
+<p>The reason for a one-sided upper bound is simple: for a safety system, the question is not whether the error rate could be lower. The question is how high it could still plausibly be.</p>
+<p>That is also why false positives and false negatives are separated. A false ESCALATE creates friction. A false ALLOW can let a bad action proceed. They are different business risks and should not be hidden inside one blended accuracy number.</p>
+<p>The confusion matrix is simple:</p>
+<div class="table-scroll"><table><thead><tr><th>Actual / predicted</th><th>ESCALATE</th><th>ALLOW</th></tr></thead><tbody><tr><td>Actual ESCALATE</td><td>Correctly escalated = 167</td><td>Missed escalation = 0</td></tr><tr><td>Actual ALLOW</td><td>Wrongly escalated = 0</td><td>Correctly allowed = 167</td></tr></tbody></table></div>
+<p>That is the clean headline:</p>
+<blockquote><p>Zero observed false-positive or false-negative errors across 334 frozen action-boundary packets, with measured statistical uncertainty.</p></blockquote>
+<h3>The same models alone</h3>
+<p>The most important comparison is not Holo against a weaker hidden baseline.</p>
+<p>The matched solo baselines used the same mini-model families that were used inside HoloVerify. The difference was architecture.</p>
+<p>The solo models received the same frozen packets, but they did not receive Gov, shared state, deterministic gates, artifact memory, best-answer preservation, or a final selector.</p>
+<p>Each solo model received exactly one independent call per packet. HoloVerify used those same model families inside a governed multi-turn architecture.</p>
+<p>A solo output only counted as KNEW/admissible if it gave the right verdict and produced a source-bound, machine-checkable explanation.</p>
+<p>In plain English, KNEW/admissible means:</p>
+<blockquote><p>The model did not just guess the right answer. It showed its work in a way the system could audit.</p></blockquote>
+<div class="table-scroll"><table><thead><tr><th>Evidence slice</th><th>HoloVerify</th><th>Same models alone, one-shot</th><th>Meaning</th></tr></thead><tbody><tr><td>Clinical Activation Boundary Controls</td><td>40/40 packets</td><td>6/120 KNEW/admissible</td><td>Broad solo collapse; Holo solved both siblings across 20 pairs</td></tr><tr><td>Vendor-Master Payment Controls</td><td>40/40 packets</td><td>53/120 KNEW/admissible</td><td>Solo sometimes succeeded, but every pair still had strict one-shot failures</td></tr><tr><td>Wave3/Wave4 focused slice</td><td>54/54 packets</td><td>54/162 KNEW/admissible</td><td>27/27 strong solo-collapse pairs in the focused expansion</td></tr><tr><td>Wave2B5 + Wave3/Wave4 matched expansion</td><td>100/100 packets</td><td>116/300 KNEW/admissible</td><td>Larger matched slice with same-model solo instability preserved</td></tr></tbody></table></div>
+<p>This is not a claim that every solo model always fails.</p>
+<p>It is a narrower and more useful claim:</p>
+<blockquote><p>The same model families that were brittle as isolated one-shot decision makers became reliable when placed inside the governed HoloVerify architecture.</p></blockquote>
+<p>That is the architecture result.</p>
 <h3>Kit A: Accounts Payable and BEC</h3>
 <p>In one AP case, a payment looked ready to release. The vendor was real. The payment controls looked clean. The workflow referenced a purchase order.</p>
 <p>But the purchase order was missing.</p>
@@ -736,27 +295,6 @@
 <p>A serious trust layer must escalate the first two and allow the third.</p>
 <p>Holo did that.</p>
 <p>Several non-Holo configurations either let unsafe orders through or overblocked the valid one.</p>
-<h3>HV-20 Runtime Cage: The 40-Packet Sibling Test</h3>
-<p>HoloVerify now has runtime evidence in addition to the HoloBuild document tests.</p>
-<p>HV-20 is a frozen 40-packet action-boundary cage built from 20 sibling pairs. Each pair has one packet where the correct answer is ALLOW and one very similar packet where the correct answer is ESCALATE.</p>
-<p>That design matters.</p>
-<p>A system can look safe by escalating everything. But that creates false positives and freezes valid work.</p>
-<p>A system can look useful by allowing everything. But that creates false negatives and lets risky actions through.</p>
-<p>The hard problem is doing both at once: stop the unsafe action without blocking the safe one.</p>
-<p>The domain was not chat and it was not long-form writing. It was operational action control: connector activation, rebate and ledger release, firmware release, sterilization lot release, procurement ceilings, clinical batch release, controlled-solvent purchase, production device activation, and regulated data export.</p>
-<p>The solo baseline and HoloVerify used the same small model families: <code>xai/grok-3-mini</code>, <code>google/gemini-2.5-flash-lite</code>, and <code>minimax/MiniMax-M2.5-highspeed</code>. The solo models saw the frozen packets alone. HoloVerify used those same families inside a governed workflow, with <code>minimax/MiniMax-M2.5-highspeed</code> serving as the Governor.</p>
-<p>The Governor did not win by swapping in a secret better model. Its job was control: demand missing evidence, force repair, block unsupported moves, and preserve final ALLOW / ESCALATE discipline.</p>
-<p>The result was stark.</p>
-<p>HoloVerify solved 40 out of 40 packets.</p>
-<p>The solo one-shots completed 120 out of 120 calls, but only 6 were KNEW/admissible. KNEW/admissible means the model picked the right ALLOW / ESCALATE verdict and preserved enough source-bound evidence to count under the gate.</p>
-<p>In 14 of the 20 sibling pairs, all six solo attempts failed while HoloVerify solved both siblings.</p>
-<p>The token cost was also bounded: 426,002 Holo tokens versus 206,839 solo tokens, or about 2.06x. That is not free. But it is not "run ten expensive models on everything" either. It is the cost of governed verification at the boundary.</p>
-<p>Here is the clean error map.</p>
-<p>A positive means ESCALATE. A negative means ALLOW.</p>
-<p>A true positive means the system caught a risky packet. A false negative is the dangerous miss: an unsafe packet got allowed. A false positive is overblocking: a clean packet got escalated. A true negative means clean work was allowed to proceed.</p>
-<p>HV-20 tests both sides. The ESCALATE sibling tests false negatives. The ALLOW sibling tests false positives.</p>
-<p>The evidence is also hash-locked and inspectable. The canonical public package commit is <code>87b39f2</code>. The public package lock root is <code>5ffe3c41e5cf35324f9bb0518c24df118aad0eea15900abbb1d9996df1756695</code>. The package includes the public-safe packet set, sibling mapping, payload hashes, summary memo, no-provider audit, and proof summary. Packet identity passed.</p>
-<p>This is still a bounded claim. It does not prove Holo is generally superior, and it does not prove universal statistical dominance. It supports the narrower thesis of this paper: at the action boundary, architecture matters. The same model families behaved differently when placed inside a governed verification workflow with evidence gates, packet-identity locks, and final ALLOW / ESCALATE discipline.</p>
 <h3>Replication Family: Vendor-Master Payment Controls</h3>
 <p>Then we asked a harder question: does the pattern hold in a larger AP / procurement family where solo models sometimes do fine?</p>
 <p>We built 20 sibling pairs, or 40 frozen packets. Each pair had one case where payment could proceed and one case where it had to stop. The difference was narrow: vendor-master authority, approval chain, callback provenance, duplicate-payment risk, or an emergency exception.</p>
@@ -764,6 +302,19 @@
 <p>That means AP was not a story of total solo collapse. It was a story of instability. In every AP pair, at least two of the six solo attempts failed the strict standard, while Holo solved both siblings. One pair showed complete six-of-six solo collapse.</p>
 <p>The cost was higher than the first 20-pair HoloVerify family. Holo used 414,016 tokens versus 146,061 for the solo one-shot baseline, or about 2.84x the solo budget. That cost delta is part of the finding: governed verification buys reliability by spending more work at the action boundary.</p>
 <p>Across the two committed internal HoloVerify families, Holo solved 80/80 frozen action-boundary packets and 40/40 sibling pairs. The two families had different solo-baseline behavior: the clinical activation family produced broad clean solo collapse, while AP produced mixed solo behavior with strict failures present in every pair.</p>
+<h3>Replication Canary: Agentic Commerce All-Six Collapse</h3>
+<p>The next Commerce result is smaller, but still useful.</p>
+<p>In a later Agentic Commerce canary, we selected three frozen sibling pairs where all six same-family solo one-shots had failed in triage. HoloVerify then ran those six packets through the governed architecture.</p>
+<p>Holo solved all 6 packets and all 3 sibling pairs. The run completed 30/30 provider calls, including 18 worker calls and 12 Gov calls, with no solo calls and no judges. The canary is lock-root validated with root signature <code>a19bd1e5e47411597ccf5fd941f1a24ba4269215a2fb72a4c2aabe68dc001948</code>.</p>
+<p>This is not a completed 20-pair Commerce family. It should be read as locked canary evidence: the failure pattern reappeared in Commerce, and the governed architecture held on the selected all-six-collapse pairs.</p>
+<h3>Next statistical milestone</h3>
+<p>The next frozen packet bank is Wave5: seven domains, 140 sibling pairs, and 280 packets. The domains include clinical medication activation, treasury wire movement, legal and regulatory filing, cloud destructive admin controls, security operations, public sector citizen records, and industrial / utility safety controls.</p>
+<p>If Wave5 completes cleanly, the benchmark-grade denominator moves from 334 packets to 614 packets. The side-specific ALLOW and ESCALATE counts move from 167 each to 307 each.</p>
+<p>That would lower the exact 95% upper bound on packet-level error from 0.893% to about 0.487%, and lower the side-specific false-positive and false-negative upper bound from 1.778% to about 0.971%.</p>
+<p>That is the right next public threshold:</p>
+<blockquote><p>Below 0.5% packet-level upper risk and below 1.0% false-positive / false-negative upper risk, if Wave5 completes cleanly.</p></blockquote>
+<p>After that, the next serious milestone is below 0.5% side-specific false-positive and false-negative risk. With zero observed errors, that requires about 598 ALLOW examples and 598 ESCALATE examples, or 1,196 total balanced packets. After a clean Wave5, that means roughly 582 additional balanced packets.</p>
+<p>The 0.1% tier is different. That requires thousands of balanced examples plus external review and ongoing monitoring. It should be treated as production-scale validation, not as the next public benchmark step.</p>
 <h3>HoloBuild and stronger baselines</h3>
 <p>The HoloBuild lane tests a different question than HoloVerify.</p>
 <p>HoloVerify asks whether an action should execute.</p>
@@ -775,32 +326,37 @@
 <p>The first was a scored win.</p>
 <p>In D11, both systems produced work that could be judged. HoloBuild produced an output that cleared all benchmark gates and outperformed Claude Opus 4.8 under blind scoring. Holo gained about 18.4 strict-score points and 24 action-boundary points while using about 1.9x total tokens.</p>
 <p>That is the clean scored proof point.</p>
-<h3>D13 &amp; D14: Full-Gated Proof Wins</h3>
-<p>In our latest testing under the locked 100-point validator, we moved from simple completion checks to full head-to-head comparisons. Holo won both the D13 and D14 runs by the exact same margin: 94 to 69.</p>
-<p>These runs show exactly where solo models break down when facing complex policy traps. In both cases, the solo model failed due to source-logic confusion. It looked at the rules and claimed that a narrow containment path required a massive, company-wide approval chain. That statement directly contradicted the source documents.</p>
-<p>The solo model over-cautiously hallucinated a barrier that did not exist, freezing the business logic. HoloEngine's stateful governor tracked the exact dependency boundaries, approved the narrow containment, and kept the restricted pathways&mdash;like vendor-master writes and payment diversions&mdash;firmly blocked until real authorization existed.</p>
-<p>This proves the 25-point reliability gap. Holo didn't just win on formatting; it was the only architecture that understood the actual legal and operational boundaries of the task.</p>
+<p>There is also D11-lock ledger evidence that is useful but should be labeled separately.</p>
+<p>D10 was an infrastructure configuration-change case. HoloBuild won the full-gated 100-point judgment 95 to 71. D11_CYBER was a cyber incident / contract notice / emergency cloud-access case. HoloBuild won 96 to 94, with both artifacts admissible.</p>
+<p>Those are real HoloBuild wins in the repo ledger. They are not yet packaged like the AP and clinical HoloVerify families, with a public root-signature evidence package. So they should not be described as the same class of evidence. The right label is: D11-lock ledger evidence, split-run disclosed, root package not yet promoted.</p>
+<p>The second kind of win was different.</p>
+<p>In D13 and D14B, HoloBuild completed the governed artifact. Claude Opus 4.8 did not produce a complete, scoreable deliverable under the same bounded production rules.</p>
+<p>That is not a numeric scoring win because there was no valid solo artifact to score against.</p>
+<p>But it is still a major result.</p>
+<p>In production, failing to complete the required artifact is not a technicality. It is failure. If the work needs claim limits, source closure, required disclaimers, and clean completion, then an output that misses those elements is not safe to rely on.</p>
+<p>This is the uncomfortable finding: Opus 4.8 often understood the task, but still failed to finish the job safely under real constraints.</p>
+<p>That is different from being dumb.</p>
+<p>It is more important.</p>
+<p>A weak model failing is not surprising. A top model reasoning well and still failing the production gate is the kind of failure enterprises need to know about.</p>
+<p>D13 and D14B should therefore be treated as completion-gate wins for HoloBuild and production-gate failures for the solo baseline.</p>
+<p>They are not score-margin wins.</p>
+<p>They are delivery wins.</p>
+<p>That distinction makes the claim stronger, not weaker.</p>
+<p>D14 is separate again. In D14, HoloBuild denied itself proof credit because an internal source-review step failed validation. That is not a benchmark win. It is hardening evidence. It shows that Holo can fail closed when its own process breaks.</p>
 <p>So the evidence should be read this way:</p>
-<p>D11 shows HoloBuild beating the solo baseline in a clean initial comparison.</p>
-<p>D13 and D14 show HoloBuild capturing consecutive 94-69 victories by enforcing strict action boundaries where solo models fall into source-logic confusion.</p>
-<p>D12 remains our open form-control engineering fixture, which directly catalyzed the creation of our Deterministic Form Actuator.</p>
-<p>That is the honest story. And it is a strong one.</p>
+<p>D11 shows HoloBuild beating Opus in a clean scored comparison.</p>
+<p>D13 and D14B show HoloBuild completing governed work that solo Opus failed to complete under bounded conditions.</p>
+<p>D14 shows HoloBuild refusing to claim victory when its internal chain did not clear.</p>
+<p>That is the honest story.</p>
+<p>And it is a strong one.</p>
 <h3>D12: The Form-Control Diagnosis</h3>
 <p>In early D12 runs, we found that models failed mechanically, not epistemically. The models understood the business logic, but repeatedly failed strict word-band limits. The AI Governor diagnosed the failure correctly, but the worker models could not execute the repair.</p>
 <p>This proved that an AI Governor without a deterministic actuator is insufficient for hard admissibility gates. We froze this failure, built the Form Actuator to pass exact mathematical constraints to the models, and locked it into the architecture. We don't hide our losses; we use them to build the infrastructure.</p>
-
-      </section>
-
-      <section class="paper-section" id="the-economics-of-a-checkpoint">
-        <div class="section-label"><span>10</span><b>The economics of a checkpoint</b></div>
-        <h2>The economics of a checkpoint</h2>
-
-        <div class="economics-strip" aria-label="Checkpoint economics">
-          <div><span>Low stakes</span><strong>Skip the extra gate.</strong></div>
-          <div><span>High stakes</span><strong>Pay for the check before the action.</strong></div>
-          <div><span>Irreversible</span><strong>The cost of missing matters more than the cost of checking.</strong></div>
-        </div>
-        <p>The main claim is not that Holo makes every model better everywhere.</p>
+<hr/>
+</section>
+<section class="paper-section" id="10-the-economics-of-a-checkpoint"><div class="section-label">10. The economics of a checkpoint</div>
+<h2>10. The economics of a checkpoint</h2>
+<p>The main claim is not that Holo makes every model better everywhere.</p>
 <p>That would be hype.</p>
 <p>The stronger claim is narrower:</p>
 <p>For high-stakes action-boundary tasks, a governed architecture appears to improve reliability without requiring an order-of-magnitude increase in model work.</p>
@@ -811,14 +367,11 @@
 <p>That is how AI action-boundary economics should be evaluated.</p>
 <p>For low-stakes work, Holo may be unnecessary.</p>
 <p>For high-stakes action, the extra review can be rational.</p>
-
-      </section>
-
-      <section class="paper-section" id="why-human-review-is-not-enough">
-        <div class="section-label"><span>11</span><b>Why human review is not enough</b></div>
-        <h2>Why human review is not enough</h2>
-
-        <p>The default answer to AI risk is human review.</p>
+<hr/>
+</section>
+<section class="paper-section" id="11-why-human-review-is-not-enough"><div class="section-label">11. Why human review is not enough</div>
+<h2>11. Why human review is not enough</h2>
+<p>The default answer to AI risk is human review.</p>
 <p>That sounds safe.</p>
 <p>But in practice, human review often becomes a liability layer.</p>
 <p>The human sees a clean-looking approval card. A short summary. A few fields. Maybe a confidence score. The real evidence is scattered across documents, systems, timestamps, policies, and prior history.</p>
@@ -827,86 +380,64 @@
 <p>That is a rubber stamp with stress attached.</p>
 <p>Humans should be involved when the system escalates. But they should not be the only checkpoint between an autonomous agent and an irreversible action.</p>
 <p>The system itself needs to do more of the evidence work before it asks the human to decide.</p>
-<p>A good escalation should not say, “Something seems risky.”</p>
-<p>It should say, “This exact proof is missing,” or “This approval is stale,” or “This claim exceeds the source,” or “This exception is valid because these controls closed.”</p>
+<p>A good escalation should not say, "Something seems risky."</p>
+<p>It should say, "This exact proof is missing," or "This approval is stale," or "This claim exceeds the source," or "This exception is valid because these controls closed."</p>
 <p>That is how human review becomes useful again.</p>
-
-      </section>
-
-      <section class="paper-section" id="what-holo-does-not-claim">
-        <div class="section-label"><span>12</span><b>What Holo does not claim</b></div>
-        <h2>What Holo does not claim</h2>
-
-        <div class="boundary-note">
-          <strong>Claim boundary:</strong> the paper separates proof, diagnosis, and hardening evidence because blending them would weaken the case.
-        </div>
-        <p>Holo does not claim to catch everything.</p>
-<p class="limit-item">It does not replace identity systems, access controls, fraud tools, logging, audit trails, or human escalation.</p>
-<p class="limit-item">It does not claim independent third-party validation.</p>
-<p class="limit-item">It does not claim production reliability metrics.</p>
-<p class="limit-item">It does not claim that every diagnostic run is benchmark proof.</p>
-<p class="limit-item">It does not claim regression tests are new benchmark wins.</p>
-<p class="limit-item">It does not claim that a result from one lane automatically proves another lane.</p>
+<hr/>
+</section>
+<section class="paper-section" id="12-what-holo-does-not-claim"><div class="section-label">12. What Holo does not claim</div>
+<h2>12. What Holo does not claim</h2>
+<p>Holo does not claim to catch everything.</p>
+<p>It does not replace identity systems, access controls, fraud tools, logging, audit trails, or human escalation.</p>
+<p>It does not claim independent third-party validation.</p>
+<p>It does not claim production reliability metrics.</p>
+<p>It does not claim that every diagnostic run is benchmark proof.</p>
+<p>It does not claim regression tests are new benchmark wins.</p>
+<p>It does not claim that a result from one lane automatically proves another lane.</p>
 <p>The HoloVerify lane tests runtime ALLOW or ESCALATE decisions.</p>
 <p>The HoloBuild lane tests whether high-stakes work products are complete, source-grounded, and safe to rely on.</p>
 <p>They are related, but they are not the same claim.</p>
 <p>That separation matters.</p>
 <p>A serious trust architecture has to be honest about what has been proven, what has only been diagnosed, and what still needs to be tested.</p>
-
-      </section>
-
-      <section class="paper-section" id="the-skeptical-view">
-        <div class="section-label"><span>13</span><b>The skeptical view</b></div>
-        <h2>The skeptical view</h2>
-        <div class="objection-stack">
-        <p>A smart buyer or investor should have objections.</p>
-<div class="objection-card">
-<h3>“We already have policy layers.”</h3>
+<hr/>
+</section>
+<section class="paper-section" id="13-the-skeptical-view"><div class="section-label">13. The skeptical view</div>
+<h2>13. The skeptical view</h2>
+<p>A smart buyer or investor should have objections.</p>
+<h3>"We already have policy layers."</h3>
 <p>Good. You need them.</p>
 <p>Policy layers check identity, permissions, routing, and known rules. They are the passport check.</p>
 <p>But they usually do not ask whether the business story holds up.</p>
 <p>They may know the user is allowed to approve payments. They may not know whether this payment has the required authority.</p>
 <p>Holo does not replace policy infrastructure.</p>
 <p>It sits after policy and before action.</p>
-</div>
-<div class="objection-card">
-<h3>“This is a vendor-built benchmark.”</h3>
+<h3>"This is a vendor-built benchmark."</h3>
 <p>Yes.</p>
 <p>That should make people cautious.</p>
 <p>The response is not to pretend otherwise. The response is to make the evidence inspectable: frozen packets, locked prompts, trace records, blind adjudication, public payloads, and clear separation between benchmark proof and diagnostic evidence.</p>
 <p>The best next step is independent replication.</p>
-</div>
-<div class="objection-card">
-<h3>“Won’t better models make Holo obsolete?”</h3>
+<h3>"Won't better models make Holo obsolete?"</h3>
 <p>No. Holo is not a bet against stronger models. It is designed to use them.</p>
 <p>The architecture is model-agnostic and hot-swappable: when stronger models arrive, they can be moved into the roles, pressure tests, and Governor checks. The checkpoint gets stronger without abandoning the evidence discipline that made the checkpoint useful.</p>
 <p>Better models may fix specific failures. That is why the benchmark has to keep getting harder. But model progress does not remove the need for a boundary layer that asks whether the evidence actually supports the action.</p>
-<p class="line-callout">Model quality helps.</p>
-<p class="line-callout">The checkpoint stays ahead by upgrading the models inside it.</p>
-</div>
-<div class="objection-card">
-<h3>“Won’t models patch their own blindspots?”</h3>
+<p>Model quality helps.</p>
+<p>The checkpoint stays ahead by upgrading the models inside it.</p>
+<h3>"Won't models patch their own blindspots?"</h3>
 <p>Not reliably by themselves.</p>
 <p>Recent research argues that hallucinations persist partly because training and evaluation systems can reward guessing over acknowledging uncertainty. Other work finds that intrinsic self-correction and self-critique can fail or even degrade performance without external feedback or sound verification.</p>
 <p>That is the point of Holo. The system does not assume a model can inspect away its own blindspots. It adds external structure: role separation, adversarial pressure, evidence gates, audit trails, and a final Governor check.</p>
-<p><a href="https://arxiv.org/abs/2509.04664" target="_blank" rel="noopener">Kalai et al., “Why Language Models Hallucinate”</a>; <a href="https://arxiv.org/abs/2310.01798" target="_blank" rel="noopener">Huang et al., “Large Language Models Cannot Self-Correct Reasoning Yet”</a>; <a href="https://arxiv.org/abs/2310.08118" target="_blank" rel="noopener">Valmeekam et al., “Can Large Language Models Really Improve by Self-critiquing Their Own Plans?”</a>.</p>
-</div>
-<div class="objection-card">
-<h3>“Isn’t this just more agents?”</h3>
+<p>Kalai et al., "Why Language Models Hallucinate"; Huang et al., "Large Language Models Cannot Self-Correct Reasoning Yet"; Valmeekam et al., "Can Large Language Models Really Improve by Self-critiquing Their Own Plans?".</p>
+<h3>"Isn't this just more agents?"</h3>
 <p>No.</p>
 <p>More agents can make the problem worse if they share assumptions or vote without proof.</p>
 <p>The important part is not the number of models.</p>
 <p>The important part is structured disagreement plus a final evidence check.</p>
-<p class="line-callout">No proof, no clearance.</p>
-</div>
-        </div>
-      </section>
-
-      <section class="paper-section" id="the-real-point">
-        <div class="section-label"><span>14</span><b>The real point</b></div>
-        <h2>The real point</h2>
-        <div class="closing-panel">
-        <p>The future of enterprise AI is not just better chat.</p>
+<p>No proof, no clearance.</p>
+<hr/>
+</section>
+<section class="paper-section" id="14-the-real-point"><div class="section-label">14. The real point</div>
+<h2>14. The real point</h2>
+<p>The future of enterprise AI is not just better chat.</p>
 <p>It is delegation.</p>
 <p>Companies want AI to do real work. Not just draft. Not just summarize. Not just recommend. They want it to execute.</p>
 <p>That future requires a new kind of checkpoint.</p>
@@ -919,18 +450,13 @@
 <p>AI is too useful to keep trapped in chat.</p>
 <p>It is also too consequential to let it act without a better gate.</p>
 <p>HoloEngine is built for the space between those two facts.</p>
-        </div>
-      </section>
-
-    </main>
-  </div>
-
+<hr/>
+<p>HoloEngine Version 7.82 · July 2026 holoengine.ai/whitepaper holoengine.ai/benchmark</p>
+</section>
+  </main>
   <footer>
-    <div><strong>HoloEngine</strong><br>Version 7.81 · July 2026</div>
-    <div class="links">
-      <a href="https://holoengine.ai/whitepaper">holoengine.ai/whitepaper</a><br>
-      <a href="https://holoengine.ai/benchmark">holoengine.ai/benchmark</a>
-    </div>
+    <div><strong>HoloEngine</strong><br>Version 7.82 · July 2026</div>
+    <div><a href="/whitepaper">holoengine.ai/whitepaper</a><br><a href="/benchmark">holoengine.ai/benchmark</a></div>
   </footer>
 </body>
 </html>

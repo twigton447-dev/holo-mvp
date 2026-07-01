@@ -9,6 +9,7 @@ freeze root, batch IDs, and payload wording to the Wave3/Wave4 packet bank.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -47,6 +48,27 @@ def load_wave2_runner() -> Any:
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text())
+
+
+def write_json(path: Path, value: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True) + "\n")
+
+
+def write_text(path: Path, value: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(value)
+
+
+def sha256_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def package_sha256(data: dict[str, Any]) -> str:
+    body = dict(data)
+    body.pop("created_at_utc", None)
+    body.pop("package_sha256", None)
+    return sha256_text(json.dumps(body, indent=2, sort_keys=True, ensure_ascii=True) + "\n")
 
 
 def configure_runner(module: Any, wave: str, batch_number: int) -> None:
@@ -170,6 +192,72 @@ def configure_runner(module: Any, wave: str, batch_number: int) -> None:
     module.render_live_summary_md = render_live_summary_md
 
 
+def refresh_provider_approval_packet(runner: Any, wave: str, batch_number: int, manifest: dict[str, Any]) -> dict[str, Any]:
+    cfg = WAVE_CONFIG[wave]
+    suffix = f"{batch_number:03d}"
+    batch_id = f"{cfg['batch_prefix']}_{suffix}"
+    staging_root = FREEZE_ROOT / "holo_target_batches" / f"{cfg['output_prefix']}_{suffix}"
+    approval_path = staging_root / f"{batch_id}_PROVIDER_APPROVAL_PACKET_2026_07_01.json"
+    approval = load_json(approval_path)
+    approval["classification"] = f"{batch_id}_PROVIDER_APPROVAL_PACKET_NO_PROVIDER_RUNTIME_REFRESHED"
+    approval["expected_calls_if_approved"] = manifest["architecture_lock"]["expected_counts"]
+    approval["live_preflight_root_signature"] = manifest["root_signature"]
+    approval["model_roster"] = manifest["architecture_lock"]["model_roster_declared"]
+    approval["next_locked_gate"] = "EXPLICIT_PROVIDER_APPROVAL_WITH_EXACT_STATEMENT_AND_PACKET_SHA"
+    approval["pre_run_verifiers"] = {
+        "live_preflight_status": manifest["status"],
+        "providers_called_during_preflight": manifest["providers_called"],
+        "solo_started_during_preflight": manifest["solo_started"],
+        "judges_started_during_preflight": manifest["judges_started"],
+        "live_holo_started_during_preflight": manifest["live_holo_started"],
+    }
+    approval["status"] = "READY_FOR_EXPLICIT_PROVIDER_APPROVAL" if manifest["status"] == "PASS" else "NOT_READY"
+    approval["stop_rules"] = [
+        "Do not run providers without explicit approval.",
+        "Use this approval packet only for the current checkout state and current live-preflight root.",
+        "Do not rerun solo or judges.",
+        "Do not edit frozen packets or prompts.",
+        "No fallback or model substitution.",
+    ]
+    approval["package_sha256"] = package_sha256(approval)
+    write_json(approval_path, approval)
+    write_text(staging_root / f"{batch_id}_PROVIDER_APPROVAL_PACKET_2026_07_01.md", render_approval_md(cfg["title"], approval))
+    manifest["provider_approval_packet_ref"] = str(approval_path.relative_to(REPO_ROOT))
+    manifest["provider_approval_packet_sha256"] = approval["package_sha256"]
+    manifest["run_command_after_explicit_approval"] = approval["provider_boundary"]["run_command_after_approval"].replace(
+        "APPROVAL_PACKET_SHA256_FROM_PROVIDER_APPROVAL_PACKET", approval["package_sha256"]
+    )
+    write_json(runner.LIVE_PREFLIGHT_JSON, manifest)
+    return approval
+
+
+def render_approval_md(title: str, approval: dict[str, Any]) -> str:
+    command = approval["provider_boundary"]["run_command_after_approval"].replace(
+        "APPROVAL_PACKET_SHA256_FROM_PROVIDER_APPROVAL_PACKET", approval["package_sha256"]
+    )
+    lines = [
+        f"# {title} Provider Approval Packet",
+        "",
+        f"Status: `{approval['status']}`",
+        f"Approval granted by this packet: `{approval['approval_granted_by_this_packet']}`",
+        f"Approval packet SHA-256: `{approval['package_sha256']}`",
+        f"Live preflight root signature: `{approval.get('live_preflight_root_signature')}`",
+        "",
+        "## Required Statement",
+        "",
+        f"`{approval['approval_statement_required']}`",
+        "",
+        "## Expected Calls If Approved",
+        "",
+    ]
+    for key, value in approval["expected_calls_if_approved"].items():
+        lines.append(f"- `{key}`: `{value}`")
+    lines.extend(["", "## Command After Explicit Approval", "", "```bash", command, "```", ""])
+    lines.extend(["## Stop Rules", ""])
+    lines.extend(f"- {rule}" for rule in approval["stop_rules"])
+    return "\n".join(lines) + "\n"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--wave", choices=tuple(WAVE_CONFIG), required=True)
@@ -183,6 +271,7 @@ def main() -> int:
     configure_runner(runner, args.wave, args.batch_number)
     if args.preflight:
         manifest = runner.validate_preflight()
+        refresh_provider_approval_packet(runner, args.wave, args.batch_number, manifest)
         print(json.dumps(manifest, indent=2, sort_keys=True))
         return 0
     if args.run_live:

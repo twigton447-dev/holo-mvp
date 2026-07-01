@@ -266,7 +266,9 @@ def build_package(wave: str, pair_limit: int | None) -> dict[str, Any]:
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "expected_calls_if_approved": expected_counts,
         "generated_without_provider_calls": True,
+        "live_preflight_root_signature": None,
         "model_roster": architecture["call_sequence"],
+        "next_locked_gate": "RUN_NO_PROVIDER_LIVE_PREFLIGHT_TO_REFRESH_APPROVAL_PACKET",
         "packet_scope": {
             "packet_count": expected_counts["packets"],
             "pair_count": expected_counts["pairs"],
@@ -287,9 +289,11 @@ def build_package(wave: str, pair_limit: int | None) -> dict[str, Any]:
             "preflight": str(preflight_path.relative_to(REPO_ROOT)),
             "solo_triage_results": str(solo_path.relative_to(REPO_ROOT)),
         },
-        "status": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL" if preflight["status"] == "PASS" else "NOT_READY",
+        "status": "PENDING_RUNTIME_LIVE_PREFLIGHT_REFRESH" if preflight["status"] == "PASS" else "NOT_READY",
         "stop_rules": [
             "Do not run providers without explicit approval.",
+            "Do not use this template packet directly for live execution.",
+            "Run the no-provider live preflight immediately before live execution to bind the approval packet to the current preflight root.",
             "Do not run solo or judges.",
             "Do not edit frozen packets or prompts.",
             "No fallback or model substitution.",
@@ -364,6 +368,7 @@ def render_approval_md(title: str, approval: dict[str, Any]) -> str:
         f"Status: `{approval['status']}`",
         f"Approval granted by this packet: `{approval['approval_granted_by_this_packet']}`",
         f"Approval packet SHA-256: `{approval['package_sha256']}`",
+        f"Live preflight root signature: `{approval.get('live_preflight_root_signature') or 'PENDING_RUNTIME_PREFLIGHT'}`",
         "",
         "## Required Statement",
         "",
@@ -374,7 +379,21 @@ def render_approval_md(title: str, approval: dict[str, Any]) -> str:
     ]
     for key, value in approval["expected_calls_if_approved"].items():
         lines.append(f"- `{key}`: `{value}`")
-    lines.extend(["", "## Command After Explicit Approval", "", "```bash", command, "```", ""])
+    lines.extend(
+        [
+            "",
+            "## Runtime Refresh Required",
+            "",
+            "Run the no-provider live preflight first. It will refresh this approval packet with the current live-preflight root and a new SHA-256.",
+            "",
+            "## Template Command After Runtime Refresh",
+            "",
+            "```bash",
+            command,
+            "```",
+            "",
+        ]
+    )
     lines.extend(["## Stop Rules", ""])
     lines.extend(f"- {rule}" for rule in approval["stop_rules"])
     return "\n".join(lines) + "\n"

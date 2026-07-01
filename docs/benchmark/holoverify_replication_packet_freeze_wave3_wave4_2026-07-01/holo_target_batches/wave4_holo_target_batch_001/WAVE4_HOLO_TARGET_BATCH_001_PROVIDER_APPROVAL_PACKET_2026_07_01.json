@@ -4,7 +4,7 @@
   "approval_statement_required": "I explicitly approve provider calls for WAVE4_HOLO_TARGET_BATCH_001 only, exactly as scoped in WAVE4_HOLO_TARGET_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01.",
   "batch_id": "WAVE4_HOLO_TARGET_BATCH_001",
   "classification": "WAVE4_HOLO_TARGET_BATCH_001_PROVIDER_APPROVAL_PACKET_NO_PROVIDER",
-  "created_at_utc": "2026-07-01T16:09:40.001640+00:00",
+  "created_at_utc": "2026-07-01T16:30:08.453753+00:00",
   "expected_calls_if_approved": {
     "gov_calls": 60,
     "judge_calls": 0,
@@ -15,6 +15,7 @@
     "worker_calls": 90
   },
   "generated_without_provider_calls": true,
+  "live_preflight_root_signature": null,
   "model_roster": [
     "W1:xai/grok-3-mini:SOURCE_BOUNDARY_MAPPER",
     "G1:minimax/MiniMax-M2.5-highspeed:CONTROL_ROUTER",
@@ -22,7 +23,8 @@
     "G2:minimax/MiniMax-M2.5-highspeed:CONTROL_ROUTER",
     "W3:minimax/MiniMax-M2.5-highspeed:FINAL_COMPILER"
   ],
-  "package_sha256": "9bee4a37c394c91a2407ddfdf02743df9d685f614a246a599226a767e95003ed",
+  "next_locked_gate": "RUN_NO_PROVIDER_LIVE_PREFLIGHT_TO_REFRESH_APPROVAL_PACKET",
+  "package_sha256": "1e5920dcbc427774b83002b7e7d0f518171fb25f7ea161de4e529cc76197aa5a",
   "packet_scope": {
     "packet_count": 30,
     "pair_count": 15,
@@ -54,9 +56,11 @@
     "registration": "docs/benchmark/holoverify_replication_packet_freeze_wave3_wave4_2026-07-01/holo_target_batches/wave4_holo_target_batch_001/WAVE4_HOLO_TARGET_BATCH_001_REGISTRATION_2026_07_01.json",
     "solo_triage_results": "docs/benchmark/holoverify_replication_packet_freeze_wave3_wave4_2026-07-01/solo_triage_3mini/wave4_solo_triage/run_20260701T151059Z/solo_triage_results.json"
   },
-  "status": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+  "status": "PENDING_RUNTIME_LIVE_PREFLIGHT_REFRESH",
   "stop_rules": [
     "Do not run providers without explicit approval.",
+    "Do not use this template packet directly for live execution.",
+    "Run the no-provider live preflight immediately before live execution to bind the approval packet to the current preflight root.",
     "Do not run solo or judges.",
     "Do not edit frozen packets or prompts.",
     "No fallback or model substitution."

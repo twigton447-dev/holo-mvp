@@ -1,8 +1,9 @@
 # Wave 4 Holo Target Batch 001 Provider Approval Packet
 
-Status: `READY_FOR_EXPLICIT_PROVIDER_APPROVAL`
+Status: `PENDING_RUNTIME_LIVE_PREFLIGHT_REFRESH`
 Approval granted by this packet: `False`
-Approval packet SHA-256: `9bee4a37c394c91a2407ddfdf02743df9d685f614a246a599226a767e95003ed`
+Approval packet SHA-256: `1e5920dcbc427774b83002b7e7d0f518171fb25f7ea161de4e529cc76197aa5a`
+Live preflight root signature: `PENDING_RUNTIME_PREFLIGHT`
 
 ## Required Statement
 
@@ -18,15 +19,21 @@ Approval packet SHA-256: `9bee4a37c394c91a2407ddfdf02743df9d685f614a246a599226a7
 - `total_provider_calls`: `150`
 - `worker_calls`: `90`
 
-## Command After Explicit Approval
+## Runtime Refresh Required
+
+Run the no-provider live preflight first. It will refresh this approval packet with the current live-preflight root and a new SHA-256.
+
+## Template Command After Runtime Refresh
 
 ```bash
-python3 -B docs/benchmark/run_wave3_wave4_holo_target_batch_2026_07_01.py --wave wave4 --batch-number 1 --run-live --approval-packet-sha256 9bee4a37c394c91a2407ddfdf02743df9d685f614a246a599226a767e95003ed --approval-statement "I explicitly approve provider calls for WAVE4_HOLO_TARGET_BATCH_001 only, exactly as scoped in WAVE4_HOLO_TARGET_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave3_wave4_holo_target_batch_2026_07_01.py --wave wave4 --batch-number 1 --run-live --approval-packet-sha256 1e5920dcbc427774b83002b7e7d0f518171fb25f7ea161de4e529cc76197aa5a --approval-statement "I explicitly approve provider calls for WAVE4_HOLO_TARGET_BATCH_001 only, exactly as scoped in WAVE4_HOLO_TARGET_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Stop Rules
 
 - Do not run providers without explicit approval.
+- Do not use this template packet directly for live execution.
+- Run the no-provider live preflight immediately before live execution to bind the approval packet to the current preflight root.
 - Do not run solo or judges.
 - Do not edit frozen packets or prompts.
 - No fallback or model substitution.

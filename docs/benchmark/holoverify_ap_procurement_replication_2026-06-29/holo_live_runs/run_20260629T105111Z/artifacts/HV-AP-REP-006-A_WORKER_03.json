@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: payment rail unchanged though remittance email text changed.",
+    "allow_rule_assessment": "CTL confirms exact payment rail fingerprint match to vendor master, closing the action boundary before execution",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-F2F2E0CCA493-CTL confirms exact payment rail fingerprint match to vendor master, resolving the dependency",
+    "escalate_rule_assessment": "No source-record defect remains open; timing and scope are tied to the current control record",
+    "timing_scope_authority_dependency_check": "Rail match confirmed current and tied to action scope; remittance email text change is out of scope per SRC-F2F2E0CCA493-BND"
+  },
+  "cited_evidence": [
+    "SRC-F2F2E0CCA493-CTL",
+    "SRC-F2F2E0CCA493-POL",
+    "SRC-F2F2E0CCA493-BND",
+    "SRC-F2F2E0CCA493-FBK",
+    "SRC-F2F2E0CCA493-REQ"
+  ],
+  "critical_features_preserved": [
+    "payment rail fingerprint match",
+    "rail fingerprint tied to action scope",
+    "remittance text out of scope per boundary",
+    "source-control records as execution authority",
+    "exact match to vendor master confirmed",
+    "payment rail fingerprint must match vendor master",
+    "SRC-F2F2E0CCA493-CTL",
+    "SRC-F2F2E0CCA493-BND"
+  ],
+  "final_answer": "The action may proceed. Source control record SRC-F2F2E0CCA493-CTL confirms the exact payment rail fingerprint matches the vendor master, closing the action boundary. Policy SRC-F2F2E0CCA493-POL permits execution when source records close the boundary. Communication boundary SRC-F2F2E0CCA493-BND dictates that remittance email text changes do not alter payment rail controls. The unresolved dependency is resolved; the unchanged payment rail is the controlling factor.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

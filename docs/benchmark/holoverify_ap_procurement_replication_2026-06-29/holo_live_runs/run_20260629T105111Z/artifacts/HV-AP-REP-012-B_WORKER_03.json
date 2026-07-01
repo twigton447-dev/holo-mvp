@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "vendor-bank change lacks out-of-band callback",
+    "allow_rule_assessment": "SRC-40B537448E4C-POL requires exact source records to close the action boundary before execution; current source records do not satisfy this requirement.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-40B537448E4C-CTL states required callback confirmation for new rail is absent for this action.",
+    "escalate_rule_assessment": "SRC-40B537448E4C-CTL confirms the required callback record is missing; execution authority cannot be granted until this dependency is resolved.",
+    "timing_scope_authority_dependency_check": "Dependency unresolved per SRC-40B537448E4C-CTL; no execution authority granted for vendor-bank change."
+  },
+  "cited_evidence": [
+    "SRC-40B537448E4C-CTL",
+    "SRC-40B537448E4C-POL",
+    "SRC-40B537448E4C-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "callback must confirm new rail",
+    "SRC-40B537448E4C-CTL"
+  ],
+  "final_answer": "Source records confirm the action cannot proceed. SRC-40B537448E4C-CTL explicitly states the required callback confirmation for the new rail is absent. Per SRC-40B537448E4C-POL, execution is permitted only when source records precisely close the action boundary. SRC-40B537448E4C-BND reinforces that communication text cannot authorize bank-detail changes. Prior vendor history (SRC-40B537448E4C-FBK) does not grant execution authority. ESCALATE to resolve the callback dependency before any payment or master-data modification.",
+  "open_blockers": [
+    "missing callback confirmation for vendor-bank change"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

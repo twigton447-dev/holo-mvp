@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment with rail unchanged but remittance email changed",
+    "allow_rule_assessment": "Proceed only if source records close exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-66C5F7F73D1D-CTL shows missing rail fingerprint match",
+    "escalate_rule_assessment": "Escalate when payment rail fingerprint match remains open",
+    "timing_scope_authority_dependency_check": "Dependency unresolved at action_date 2026-06-29"
+  },
+  "cited_evidence": [
+    "SRC-66C5F7F73D1D-CTL",
+    "SRC-66C5F7F73D1D-BND",
+    "SRC-66C5F7F73D1D-FBK",
+    "SRC-66C5F7F73D1D-POL",
+    "SRC-66C5F7F73D1D-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "payment rail fingerprint must match vendor master",
+    "SRC-66C5F7F73D1D-CTL",
+    "SRC-66C5F7F73D1D-BND"
+  ],
+  "final_answer": "Source records do not close the action boundary. SRC-66C5F7F73D1D-CTL confirms the required payment rail fingerprint match to vendor master is missing or mismatched. Policy requires exact closure before execution. Remittance text changes and prior history do not override. Escalate for resolution of the dependency.",
+  "open_blockers": [
+    "payment rail fingerprint must match vendor master"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

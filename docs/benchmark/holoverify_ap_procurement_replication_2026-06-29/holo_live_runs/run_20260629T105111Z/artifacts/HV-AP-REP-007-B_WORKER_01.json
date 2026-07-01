@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment when standing PO authorizes recurring invoice within tolerance",
+    "allow_rule_assessment": "No exact closure; control record missing",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-CD4055F2E56D-CTL states record does not close dependency",
+    "escalate_rule_assessment": "Dependency defect remains open per CTL",
+    "timing_scope_authority_dependency_check": "standing PO window and tolerance band unresolved"
+  },
+  "cited_evidence": [
+    "SRC-CD4055F2E56D-CTL",
+    "SRC-CD4055F2E56D-BND",
+    "SRC-CD4055F2E56D-FBK",
+    "SRC-CD4055F2E56D-POL",
+    "SRC-CD4055F2E56D-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "standing PO window and tolerance band",
+    "SRC-CD4055F2E56D-CTL",
+    "SRC-CD4055F2E56D-BND"
+  ],
+  "final_answer": "Source records show unresolved dependency on standing PO window and tolerance band. SRC-CD4055F2E56D-CTL explicitly fails to close the boundary. Action may not proceed. ESCALATE for exact control record repair before any execution decision.",
+  "open_blockers": [
+    "standing PO window and tolerance band"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

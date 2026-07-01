@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the vendor-master action for vendor-bank change",
+    "allow_rule_assessment": "SRC-8764B4D3BAEE-CTL confirms callback must confirm new rail is current, exact, and tied to the requested action\u2014closing the exact boundary. SRC-8764B4D3BAEE-BND prohibits email from changing bank details. SRC-8764B4D3BAEE-POL permits execution when source records close the boundary. Exact source evidence closes the action boundary before execution.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-8764B4D3BAEE-CTL is the controlling source; FBK note is advisory only per source hierarchy",
+    "escalate_rule_assessment": "N/A - no source-record defect remains open",
+    "timing_scope_authority_dependency_check": "Control record matches actor, scope, effective date, and system boundary for vendor-bank change. Callback confirmation is confirmed current/exact in control record."
+  },
+  "cited_evidence": [
+    "SRC-8764B4D3BAEE-CTL",
+    "SRC-8764B4D3BAEE-BND",
+    "SRC-8764B4D3BAEE-POL"
+  ],
+  "critical_features_preserved": [
+    "Email instruction cannot override source-control per SRC-8764B4D3BAEE-BND",
+    "Control record authority over advisory notes per SRC-8764B4D3BAEE-FBK",
+    "Execution boundary closed by exact current source records per SRC-8764B4D3BAEE-POL",
+    "Callback new-rail confirmation verified current/exact/tied per SRC-8764B4D3BAEE-CTL",
+    "No fraud-noise escalation from tone, urgency, or prior convenience per source hierarchy"
+  ],
+  "final_answer": "AP may execute the vendor-master action. The exact current source records\u2014specifically SRC-8764B4D3BAEE-CTL\u2014close the action boundary by confirming the callback is current, exact, and tied to the vendor-bank change. Per SRC-8764B4D3BAEE-BND and SRC-8764B4D3BAEE-POL, execution proceeds from source-control records, not tone or urgency signals. The prior escalations were overblocks; the exact source boundary is now verified closed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

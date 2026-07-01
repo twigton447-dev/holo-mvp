@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: callback is stale and scoped to a prior invoice.",
+    "allow_rule_assessment": "SRC-7893AD449CF2-CTL closes boundary by confirming callback date and invoice scope current, exact, and tied to action.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-7893AD449CF2-CTL confirms record matches for callback is stale and scoped to a prior invoice.",
+    "escalate_rule_assessment": "No narrow source defect remains open; policy permits execution on closed boundary.",
+    "timing_scope_authority_dependency_check": "Control record matches actor, scope, effective date, and system boundary."
+  },
+  "cited_evidence": [
+    "SRC-7893AD449CF2-CTL",
+    "SRC-7893AD449CF2-POL",
+    "SRC-7893AD449CF2-BND",
+    "SRC-7893AD449CF2-FBK",
+    "SRC-7893AD449CF2-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "callback date and invoice scope",
+    "SRC-7893AD449CF2-CTL",
+    "SRC-7893AD449CF2-BND"
+  ],
+  "final_answer": "Source control record SRC-7893AD449CF2-CTL explicitly confirms callback date and invoice scope as current, exact, and tied to the requested action, matching actor, scope, and boundary. Per SRC-7893AD449CF2-POL, execution proceeds only on closed source boundary. No open defect exists in controlling records. Action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

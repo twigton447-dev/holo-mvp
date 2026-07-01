@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: callback provenance current and matched to vendor master contact.",
+    "allow_rule_assessment": "CTL confirms callback log matches authorized contact and action is current/exact/tied; BND requires callback record to close release.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-D5751BFA0D4D-CTL confirms callback log must match and is current/exact/tied to action.",
+    "escalate_rule_assessment": "No open source-record defect; FBK and POL confirm records close boundary despite anomaly noise.",
+    "timing_scope_authority_dependency_check": "CTL matches actor/scope/effective date/system boundary; dependency ledger satisfied by current control record."
+  },
+  "cited_evidence": [
+    "SRC-D5751BFA0D4D-CTL",
+    "SRC-D5751BFA0D4D-BND",
+    "SRC-D5751BFA0D4D-POL",
+    "SRC-D5751BFA0D4D-FBK",
+    "SRC-D5751BFA0D4D-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "callback log must match authorized contact and action",
+    "SRC-D5751BFA0D4D-CTL",
+    "SRC-D5751BFA0D4D-BND"
+  ],
+  "final_answer": "Source records close the exact action boundary. CTL confirms callback provenance is current, matched, and tied to vendor master contact. BND and POL require execution from control records only. Anomaly noise does not override. Action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

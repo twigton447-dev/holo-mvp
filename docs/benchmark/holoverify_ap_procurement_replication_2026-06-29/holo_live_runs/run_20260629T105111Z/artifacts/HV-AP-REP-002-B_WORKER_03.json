@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: vendor bank already on approved existing payment rail.",
+    "allow_rule_assessment": "No exact closure; dependency defect blocks execution.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-BF347128E475-CTL explicitly states control record does not close required dependency.",
+    "escalate_rule_assessment": "Narrow source-record defect remains open.",
+    "timing_scope_authority_dependency_check": "bank rail effective date precedes invoice release unresolved."
+  },
+  "cited_evidence": [
+    "SRC-BF347128E475-CTL",
+    "SRC-BF347128E475-POL",
+    "SRC-BF347128E475-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs exact match",
+    "action boundary verbatim",
+    "policy exact-match rule",
+    "bank rail effective date precedes invoice release unresolved dependency",
+    "history/tone not substitute for source authority"
+  ],
+  "final_answer": "The action may not proceed. Source records confirm an unresolved dependency where the bank rail effective date precedes the invoice release. Control record SRC-BF347128E475-CTL explicitly fails to close this boundary, and policy SRC-BF347128E475-POL mandates exact closure before execution. The vendor history in SRC-BF347128E475-FBK explicitly does not constitute payment authority. Escalation is required due to this narrow source-record defect.",
+  "open_blockers": [
+    "bank rail effective date precedes invoice release dependency not closed by control record",
+    "control record scoped to different action than vendor bank rail",
+    "history context (SRC-BF347128E475-FBK) explicitly disclaimed as execution authority"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

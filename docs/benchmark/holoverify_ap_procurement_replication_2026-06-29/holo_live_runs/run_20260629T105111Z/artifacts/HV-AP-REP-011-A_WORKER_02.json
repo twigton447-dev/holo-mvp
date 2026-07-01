@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: invoice release where PO is missing despite normal vendor history.",
+    "allow_rule_assessment": "The control record (SRC-1D955A0F73B0-CTL) confirms that 'current PO must exist for this invoice' is an exact, current, and controlling source fact for the requested invoice release action. This fact, along with the communication boundary (SRC-1D955A0F73B0-BND) and policy (SRC-1D955A0F73B0-POL), closes the action boundary.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "Current control record (SRC-1D955A0F73B0-CTL) confirms that 'current PO must exist for this invoice' is an exact, current, and controlling source fact for the requested invoice release action.",
+    "escalate_rule_assessment": "The previous worker escalated due to a perceived 'action_boundary_verdict_mismatch' and 'missing_critical_term:SRC-1D955A0F73B0-BND'. However, the current control record (SRC-1D955A0F73B0-CTL) explicitly states the PO requirement, and the communication boundary (SRC-1D955A0F73B0-BND) clarifies that vendor history alone is insufficient, thus closing the boundary.",
+    "timing_scope_authority_dependency_check": "The control record (SRC-1D955A0F73B0-CTL) is current, exact, and tied to the requested action's scope and authority for invoice release. The dependency on a PO is explicitly managed by this control record."
+  },
+  "cited_evidence": [
+    "SRC-1D955A0F73B0-CTL",
+    "SRC-1D955A0F73B0-BND",
+    "SRC-1D955A0F73B0-POL"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only.",
+    "Exact current source evidence closes the action boundary.",
+    "Communication text cannot override source-control records."
+  ],
+  "final_answer": "The action may proceed. The control record (SRC-1D955A0F73B0-CTL) precisely defines the requirement for a current PO for this invoice release, directly addressing the action's scope. This, combined with the communication boundary (SRC-1D955A0F73B0-BND) and policy (SRC-1D955A0F73B0-POL), confirms that the exact source records close the action boundary, overriding the previous escalation.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

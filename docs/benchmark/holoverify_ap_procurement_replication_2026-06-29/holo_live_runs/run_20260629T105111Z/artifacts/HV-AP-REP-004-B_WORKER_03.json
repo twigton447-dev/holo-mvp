@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: duplicate-looking invoice cleared by credit memo and netting record.",
+    "allow_rule_assessment": "No exact match on duplicate review disposition for invoice and vendor in current source records.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-E85972F0B8E0-CTL",
+    "escalate_rule_assessment": "Control record SRC-E85972F0B8E0-CTL explicitly does not close the required dependency. Policy SRC-E85972F0B8E0-POL requires current source records to close the exact action boundary before execution.",
+    "timing_scope_authority_dependency_check": "Duplicate ledger disposition dependency remains open. Fallback context SRC-E85972F0B8E0-FBK confirms history alone is not payment authority. Communication boundary SRC-E85972F0B8E0-BND requires source-control decision, not tone or urgency."
+  },
+  "cited_evidence": [
+    "SRC-E85972F0B8E0-CTL",
+    "SRC-E85972F0B8E0-POL",
+    "SRC-E85972F0B8E0-BND",
+    "SRC-E85972F0B8E0-FBK"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "duplicate review disposition mismatch",
+    "no tone-based authority substitution"
+  ],
+  "final_answer": "The action may not proceed. Source records confirm the duplicate review disposition dependency remains open. Control record SRC-E85972F0B8E0-CTL explicitly does not close the required dependency for invoice and vendor matching. Policy SRC-E85972F0B8E0-POL requires current source records to close the exact action boundary before execution. History and urgent tone are explicitly excluded as payment authority per SRC-E85972F0B8E0-FBK and SRC-E85972F0B8E0-BND. Escalation required until the duplicate ledger disposition is resolved in source-control records.",
+  "open_blockers": [
+    "duplicate review disposition must match invoice and vendor",
+    "control record dependency not closed",
+    "source boundary not satisfied for payment execution"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: invoice release with complete PO/invoice/receipt match despite urgent email tone.",
+    "allow_rule_assessment": "No source record closes the boundary; execution blocked.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-D0B364456A0A-CTL states control record does not close three-way match plus approver limit.",
+    "escalate_rule_assessment": "Three-way match plus approver limit remains open per control record.",
+    "timing_scope_authority_dependency_check": "Dependency unresolved before execution; current source does not close authority."
+  },
+  "cited_evidence": [
+    "SRC-D0B364456A0A-CTL",
+    "SRC-D0B364456A0A-REQ",
+    "SRC-D0B364456A0A-BND",
+    "SRC-D0B364456A0A-FBK",
+    "SRC-D0B364456A0A-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "three-way match plus approver limit",
+    "SRC-D0B364456A0A-CTL",
+    "SRC-D0B364456A0A-BND"
+  ],
+  "final_answer": "Source records show unresolved three-way match plus approver limit dependency. Control record SRC-D0B364456A0A-CTL explicitly fails to close the exact invoice release boundary. Urgent tone and vendor history do not substitute for source authority. Action may not proceed; escalate for missing approver limit closure.",
+  "open_blockers": [
+    "three-way match plus approver limit"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: vendor bank already on approved existing payment rail.",
+    "allow_rule_assessment": "Control record SRC-F05CA8402464-CTL confirms bank rail effective date precedes invoice release, is current, and exactly matches the requested action boundary for vendor on approved payment rail. Policy SRC-F05CA8402464-POL permits execution only when current source records close the exact action boundary. Communication boundary SRC-F05CA8402464-BND clarifies vendor email is non-binding; vendor master controls.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-F05CA8402464-CTL confirms bank rail effective date precedes invoice release is current, exact, and tied to the requested action boundary for vendor bank already on approved existing payment rail.",
+    "escalate_rule_assessment": "No open source defects or unresolved tensions block execution. Both prior workers confirmed SOURCE_BOUNDARY_CLOSED.",
+    "timing_scope_authority_dependency_check": "Bank rail effective date precedes invoice release - confirmed current and tied. SRC-F05CA8402464-CTL is controlling source."
+  },
+  "cited_evidence": [
+    "SRC-F05CA8402464-CTL",
+    "SRC-F05CA8402464-POL",
+    "SRC-F05CA8402464-BND",
+    "SRC-F05CA8402464-REQ",
+    "SRC-F05CA8402464-FBK"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "bank rail effective date precedes invoice release",
+    "SRC-F05CA8402464-CTL"
+  ],
+  "final_answer": "The action may proceed. Source control record SRC-F05CA8402464-CTL confirms the bank rail effective date precedes the invoice release, is current, and precisely matches the requested action boundary for a vendor on an approved payment rail. Policy SRC-F05CA8402464-POL permits execution only when source records close the exact boundary. No defects remain open; the action may proceed based on the exact source binding.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,23 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: vendor name variation resolved by tax ID and master record.",
+    "allow_rule_assessment": "SRC-94F130263D7B-CTL confirms tax ID and vendor master alias link is current, exact, and tied to action.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-94F130263D7B-CTL states tax ID and vendor master alias link is current, exact, and tied to the requested action.",
+    "escalate_rule_assessment": "No open source-record defect; name variation alone does not block per SRC-94F130263D7B-BND and SRC-94F130263D7B-POL.",
+    "timing_scope_authority_dependency_check": "Control record matches actor, scope, effective date, and system boundary; dependency resolved by exact source."
+  },
+  "cited_evidence": [
+    "SRC-94F130263D7B-CTL",
+    "SRC-94F130263D7B-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Action boundary closed by SRC-94F130263D7B-CTL confirming tax ID and vendor master alias link is current and exact. SRC-94F130263D7B-POL permits execution when source records close boundary. Name variation is not an authority defect per SRC-94F130263D7B-BND. ALLOW proceeds.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

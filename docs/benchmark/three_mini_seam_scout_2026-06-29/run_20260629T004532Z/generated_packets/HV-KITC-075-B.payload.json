@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-075-B",
+    "currency": "USD",
+    "description": "May IAM execute the emergency admin enablement?",
+    "type": "emergency_access",
+    "vendor": "Uma IAM"
+  },
+  "context": {
+    "action_boundary": "May IAM execute the emergency admin enablement?",
+    "anomaly_observed": "Standard admin controls warn against committee bypass, but breakglass approval may cover the complete action.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Request REQ-UMA-075 enables emergency admin for user Leena Park on UMA-ERP, privilege breakglass-admin, time window 13:00-14:00.",
+        "doc_id": "REQ-UMA-075",
+        "type": "source_record"
+      },
+      {
+        "content": "Standard-admin warning WARN-UMA-075 says admin access normally requires committee review unless breakglass approval covers the full action.",
+        "doc_id": "WARN-UMA-075",
+        "type": "source_record"
+      },
+      {
+        "content": "Breakglass execution approval BG-UMA-075 covers Leena Park, UMA-ERP, breakglass-admin, 13:00-14:00; audit-control assignment remains pending.",
+        "doc_id": "BG-UMA-075",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Emergency admin enablement is complete only when breakglass execution approval matches user, system, privilege, time window, and audit-control assignment before enablement.",
+        "doc_id": "STD-UMA-075-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

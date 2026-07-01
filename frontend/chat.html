@@ -2701,6 +2701,24 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       : (usage.cost_source === "unknown_pricing" ? "unknown pricing" : (usage.cost_source || "unknown"));
 
     const rows = [];
+    const release = runtime.release || data.release || {};
+    if (Object.keys(release).length) {
+      rows.push(["Live version", release.app_version || "unknown"]);
+      rows.push(["Architecture version", release.architecture_version || "unknown"]);
+      if (release.build_label) rows.push(["Build label", release.build_label]);
+      if (release.git_commit_short) rows.push(["Build commit", release.git_commit_short]);
+      if (release.git_branch) rows.push(["Build branch", release.git_branch]);
+      if (release.deploy_service) rows.push(["Deploy service", release.deploy_service]);
+      if (release.deploy_environment) rows.push(["Deploy environment", release.deploy_environment]);
+    }
+    const allCylinders = runtime.holochat_all_cylinders || data.holochat_all_cylinders || {};
+    if (Object.keys(allCylinders).length) {
+      rows.push(["HC all cylinders", allCylinders.all_cylinders === true ? "yes" : (allCylinders.status || "unknown")]);
+      rows.push(["HC base runtime", allCylinders.base_runtime_ready === true ? "ready" : "attention"]);
+      rows.push(["Hard-chat shadow", allCylinders.hard_chat_shadow_ready === true ? "ready" : "off"]);
+      const attention = allCylinders.attention_items || [];
+      if (attention.length) rows.push(["HC attention", attention.join(", ")]);
+    }
     rows.push(["Runtime", runtimeProfile || "unknown"]);
     if (provider || model) rows.push(["This turn", `${provider}${model ? ":" + model : ""}`]);
     rows.push(["Mode", modeLabel]);
@@ -2734,6 +2752,36 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     rows.push(["Gov Arc State", govArcMode]);
     rows.push(["Baton Pass", batonMode]);
     rows.push(["Holo4DNA", holo4dnaMode]);
+    const governedShadow = runtime.governed_shadow || {};
+    if (Object.keys(governedShadow).length) {
+      rows.push(["Governed shadow", governedShadow.status || "unknown"]);
+      rows.push(["Governed shadow trigger", governedShadow.trigger_reason || "unknown"]);
+      rows.push(["Governed shadow calls", `${fmtTokens(governedShadow.call_count)} / ${fmtTokens(governedShadow.expected_call_count)}`]);
+      const selector = governedShadow.final_selector || {};
+      if (selector.selection_reason) rows.push(["Governed final selector", selector.selection_reason]);
+      const shadowTokens = governedShadow.token_totals || {};
+      if (shadowTokens.total !== undefined) {
+        rows.push(["Governed shadow tokens", fmtTokens(shadowTokens.total)]);
+        rows.push(["Governed Gov share", shadowTokens.gov_share === null || shadowTokens.gov_share === undefined ? "unknown" : `${(Number(shadowTokens.gov_share) * 100).toFixed(1)}%`]);
+      }
+      if (governedShadow.invalidation_reason) rows.push(["Governed shadow invalid", governedShadow.invalidation_reason]);
+    }
+    const voiceDiag = runtime.holo_voice_diagnostics || {};
+    if (Object.keys(voiceDiag).length) {
+      const flags = voiceDiag.risk_flags || [];
+      rows.push(["Holo voice check", voiceDiag.status || "unknown"]);
+      rows.push(["Holo voice flags", flags.length ? flags.join(", ") : "none"]);
+      rows.push(["Capsule attached", voiceDiag.capsule_attached === true ? "yes" : "no"]);
+      rows.push(["Capsule context", `${fmtTokens(voiceDiag.capsule_context_count)} items`]);
+      rows.push(["Selected Gov context", `${fmtTokens(voiceDiag.selected_gov_context_count)} items`]);
+      rows.push(["Life context", `${fmtTokens(voiceDiag.life_context_count)} items`]);
+      rows.push(["Rolling summary present", voiceDiag.rolling_summary_present === true ? "yes" : "no"]);
+      rows.push(["Gov brief present", voiceDiag.captain_brief_present === true ? "yes" : "no"]);
+      const blocks = voiceDiag.block_presence || {};
+      rows.push(["Holo state in prompt", blocks.holo_state_object === true ? "yes" : "no"]);
+      rows.push(["Runtime identity in prompt", blocks.runtime_identity === true ? "yes" : "no"]);
+      rows.push(["Voice selected model", `${(voiceDiag.selected_analyst || {}).provider || "unknown"}:${(voiceDiag.selected_analyst || {}).model || "unknown"}`]);
+    }
     rows.push(["AutoReseed", autoReseed]);
     if (runtime.auto_compact_enabled === true) {
       rows.push(["Auto compact count", fmtTokens(runtime.auto_compact_count)]);

@@ -72,6 +72,7 @@ from chat_engine import HoloChatEngine, _safe_handoff_transition
 from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
 from db import Database
 from billing import create_checkout_session, create_customer_portal_session, construct_webhook_event, PLANS
+from holo_release import release_info
 from hologov_v_signer import (
     HoloGovVReceiptVerificationError,
     HoloGovVSignerClient,
@@ -146,6 +147,54 @@ def _api_key_row_from_db(raw_key: str) -> Optional[dict]:
         return None
 
 
+def _runtime_check(name: str, passed: bool, detail: str = "") -> dict[str, Any]:
+    return {
+        "name": name,
+        "passed": bool(passed),
+        "detail": detail,
+    }
+
+
+def _holochat_all_cylinders_status(chat_status: dict[str, Any], *, context_governor_initialized: bool) -> dict[str, Any]:
+    visible = chat_status.get("visible_chat_lane", {}) if isinstance(chat_status, dict) else {}
+    governor = chat_status.get("governor", {}) if isinstance(chat_status, dict) else {}
+    shadow = chat_status.get("governed_shadow_lane", {}) if isinstance(chat_status, dict) else {}
+    state = chat_status.get("state_and_memory", {}) if isinstance(chat_status, dict) else {}
+    safety = chat_status.get("safety", {}) if isinstance(chat_status, dict) else {}
+    release = release_info()
+    analyst_rotation = visible.get("analyst_rotation_order") or []
+    shadow_sequence = shadow.get("expected_call_sequence") or []
+
+    checks = [
+        _runtime_check("release_identity_present", bool(release.get("app_version") and release.get("architecture_version")), release.get("build_label", "")),
+        _runtime_check("context_governor_initialized", context_governor_initialized),
+        _runtime_check("holochat_engine_initialized", chat_status.get("status") == "initialized", str(chat_status.get("status", "unknown"))),
+        _runtime_check("visible_lane_has_multiple_models", len(analyst_rotation) >= 2, f"{len(analyst_rotation)} analyst models"),
+        _runtime_check("visible_lane_fixed_manifest_order", visible.get("model_selection") == "fixed_manifest_order", str(visible.get("model_selection", "unknown"))),
+        _runtime_check("gov_cannot_choose_models", visible.get("gov_can_choose_models") is False and shadow.get("gov_can_choose_models") is False),
+        _runtime_check("governor_separate_from_visible_answer", governor.get("visible_answer_producer") is False, str(governor.get("role", "unknown"))),
+        _runtime_check("governed_shadow_installed", len(shadow_sequence) == 5, f"{len(shadow_sequence)} expected calls"),
+        _runtime_check("governed_shadow_fixed_roster", shadow.get("model_selection") == "fixed_roster_order", str(shadow.get("model_selection", "unknown"))),
+        _runtime_check("bounded_state_memory_active", state.get("analyst_receives_full_memory") is False, str(state.get("memory_delivery_mode", "unknown"))),
+        _runtime_check("holo_brain_attached", state.get("durable_memory_store") == "HoloBrain/capsule", str(state.get("durable_memory_store", "unknown"))),
+        _runtime_check("safe_runtime_metadata_only", all(
+            safety.get(key) is False
+            for key in ("raw_prompts_exposed", "raw_memory_exposed", "provider_error_bodies_exposed", "api_keys_exposed")
+        )),
+    ]
+    failed = [check for check in checks if not check["passed"]]
+    shadow_enabled = shadow.get("enabled") is True
+    return {
+        "version": "holochat_all_cylinders_v0.1",
+        "status": "ok" if not failed and shadow_enabled else ("base_ready_shadow_off" if not failed else "attention"),
+        "all_cylinders": not failed and shadow_enabled,
+        "base_runtime_ready": not failed,
+        "hard_chat_shadow_ready": shadow_enabled,
+        "attention_items": [check["name"] for check in failed] + ([] if shadow_enabled else ["governed_shadow_disabled"]),
+        "checks": checks,
+    }
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup: validate env and boot the Context Governor."""
@@ -204,7 +253,7 @@ app = FastAPI(
         "Adversarial multi-model action evaluation. "
         "Shared-context, compounding postmortems by structurally independent models."
     ),
-    version  = "0.1.0",
+    version  = release_info()["app_version"],
     lifespan = lifespan,
 )
 
@@ -293,11 +342,64 @@ def _verify_key(request: Request) -> str:
 @app.get("/health")
 def health():
     """Liveness check."""
+    release = release_info()
     return {
         "status":  "ok",
-        "version": "0.1.0",
+        "version": release["app_version"],
+        "release": release,
         "engine":  "LIVE" if _governor else "NOT_INITIALIZED",
     }
+
+
+@app.get("/version")
+def version():
+    """Public release identity for live-build verification."""
+    return release_info()
+
+
+def _runtime_status_payload() -> dict[str, Any]:
+    context_governor_initialized = _governor is not None
+    chat_status = (
+        _chat_engine.runtime_status()
+        if _chat_engine is not None and hasattr(_chat_engine, "runtime_status")
+        else {
+            "status": "not_initialized",
+            "release": release_info(),
+        }
+    )
+    return {
+        "status": "ok",
+        "release": release_info(),
+        "context_governor": {
+            "initialized": context_governor_initialized,
+            "role": "action_boundary_evaluator",
+            "visible_chat_answer_producer": False,
+        },
+        "holochat": chat_status,
+        "holochat_all_cylinders": _holochat_all_cylinders_status(
+            chat_status,
+            context_governor_initialized=context_governor_initialized,
+        ),
+        "truth_contract": {
+            "source": "live_process_runtime_state",
+            "raw_prompts_exposed": False,
+            "raw_memory_exposed": False,
+            "api_keys_exposed": False,
+            "provider_error_bodies_exposed": False,
+        },
+    }
+
+
+@app.get("/runtime-status")
+def runtime_status():
+    """Safe runtime dashboard payload: model roster, Gov status, and release."""
+    return _runtime_status_payload()
+
+
+@app.get("/v1/runtime/status")
+def runtime_status_v1():
+    """Versioned alias for the safe runtime dashboard payload."""
+    return _runtime_status_payload()
 
 
 @app.get("/config")
@@ -310,6 +412,7 @@ def get_config():
     return {
         "google_client_id": os.getenv("GOOGLE_CLIENT_ID", ""),
         "google_auth_enabled": google_auth_enabled and bool(os.getenv("GOOGLE_CLIENT_ID", "").strip()),
+        "release": release_info(),
     }
 
 
@@ -976,6 +1079,15 @@ def serve_chat_ui():
     if index.exists():
         return FileResponse(str(index))
     return {"status": "ok", "message": "Holo API running. Chat UI not found."}
+
+
+@app.get("/runtime")
+def serve_runtime_dashboard():
+    """Serve the safe Holo runtime dashboard, or JSON if the page is absent."""
+    index = _frontend_dir / "runtime.html"
+    if index.exists():
+        return FileResponse(str(index))
+    return _runtime_status_payload()
 
 
 @app.post("/v1/chat")

@@ -29,9 +29,17 @@ from holo_context import (
     build_runtime_identity_block,
     estimate_context_tokens,
 )
+from holo_governed_shadow import (
+    GOVERNED_SHADOW_ENV,
+    GOVERNED_SHADOW_VERSION,
+    ROSTER as GOVERNED_SHADOW_ROSTER,
+    governed_shadow_enabled,
+    run_governed_shadow,
+)
 from holo_router import HoloRouter, PreviousRoute, RouteDecision
 from holo_state import GovArcState, HoloState, RequiredTools
 from holo_trace import HoloTraceRecord, log_trace
+from holo_release import release_info
 from llm_adapters import (
     HOLO_CHAT_SYSTEM_PROMPT,
     GovernorAdapter,
@@ -1451,6 +1459,8 @@ def _turn_runtime_metadata(
     timing_breakdown: Optional[dict[str, Any]] = None,
     handoff_transition: Optional[dict[str, Any]] = None,
     session: Optional[ChatSession] = None,
+    governed_shadow: Optional[dict[str, Any]] = None,
+    holo_voice_diagnostics: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
@@ -1519,6 +1529,10 @@ def _turn_runtime_metadata(
         metadata["frontier_assist"] = frontier_assist
     if timing_breakdown is not None:
         metadata["timing_breakdown"] = timing_breakdown
+    if governed_shadow is not None:
+        metadata["governed_shadow"] = governed_shadow
+    if holo_voice_diagnostics is not None:
+        metadata["holo_voice_diagnostics"] = holo_voice_diagnostics
     metadata.update(
         _governor_turn_metadata(
             governor,
@@ -1526,6 +1540,145 @@ def _turn_runtime_metadata(
         )
     )
     return metadata
+
+
+def _holo_voice_diagnostics(
+    *,
+    session: ChatSession,
+    analyst_adapter: Any,
+    capsule_id: Optional[str],
+    incognito: bool,
+    capsule_context: dict[str, Any],
+    life_context: list[dict[str, Any]],
+    last_session: Optional[dict[str, Any]],
+    tenor: Optional[str],
+    patent_state: str,
+    runtime_identity: str,
+    system_prompt: str,
+    context_budget: Optional[dict[str, Any]],
+    provider_history: Optional[dict[str, Any]],
+    governed_shadow: Optional[dict[str, Any]],
+) -> dict[str, Any]:
+    capsule_attached = bool(capsule_id and not incognito)
+    ledger = _normalized_continuity_ledger(session.continuity_ledger)
+    safe_capsule_keys = [
+        str(key)
+        for key in (capsule_context or {}).keys()
+        if not str(key).startswith("_")
+    ]
+    selected_gov_context = _governor_capsule_context(capsule_context)
+    block_presence = {
+        "runtime_identity": "HOLOCHAT RUNTIME IDENTITY:" in (system_prompt or ""),
+        "holo_state_object": "HOLO STATE OBJECT" in (system_prompt or ""),
+        "gov_arc_state": "GOV ARC STATE" in (system_prompt or ""),
+        "captain_brief": bool(tenor) and "CAPTAIN BRIEF" in (system_prompt or ""),
+        "life_context": bool(life_context),
+        "last_session": bool(last_session),
+        "capsule_context": bool(capsule_context),
+        "patent_state_nonempty": bool((patent_state or "").strip()),
+    }
+    risk_flags: list[str] = []
+    if incognito:
+        risk_flags.append("incognito_memory_stripped")
+    elif not capsule_attached:
+        risk_flags.append("capsule_not_attached")
+    elif not capsule_context:
+        risk_flags.append("capsule_context_empty")
+    if not block_presence["runtime_identity"]:
+        risk_flags.append("runtime_identity_missing")
+    if not incognito and not block_presence["holo_state_object"]:
+        risk_flags.append("holo_state_object_missing")
+    if not incognito and not block_presence["gov_arc_state"]:
+        risk_flags.append("gov_arc_state_missing")
+    if not incognito and not block_presence["captain_brief"]:
+        risk_flags.append("captain_brief_absent")
+    if not session.rolling_summary and session.turn_count >= 2:
+        risk_flags.append("rolling_summary_absent_after_first_turn")
+    omitted = _safe_positive_int((provider_history or {}).get("adapter_history_omitted_messages"))
+    if omitted:
+        risk_flags.append("adapter_history_truncated")
+    if (governed_shadow or {}).get("status") in {None, "off", "skipped"}:
+        risk_flags.append("governed_shadow_not_active")
+
+    return {
+        "version": "holo_voice_diagnostics_v0.1",
+        "status": "attention" if risk_flags else "ok",
+        "risk_flags": risk_flags,
+        "selected_analyst": _adapter_identity_dict(analyst_adapter),
+        "capsule_attached": capsule_attached,
+        "incognito": bool(incognito),
+        "capsule_context_count": len(safe_capsule_keys),
+        "selected_gov_context_count": len(selected_gov_context),
+        "life_context_count": len(life_context or []),
+        "last_session_present": bool(last_session),
+        "rolling_summary_present": bool(session.rolling_summary),
+        "critical_constraints_count": len(session.critical_constraints or []),
+        "continuity_ledger_counts": {
+            key: len(ledger.get(key) or [])
+            for key in _CONTINUITY_LEDGER_KEYS
+        },
+        "block_presence": block_presence,
+        "captain_brief_present": block_presence["captain_brief"],
+        "context_token_estimate": _safe_positive_int((context_budget or {}).get("total_token_estimate")),
+        "adapter_history_messages": _safe_positive_int((provider_history or {}).get("adapter_history_messages")),
+        "adapter_history_omitted_messages": omitted,
+        "governed_shadow_status": (governed_shadow or {}).get("status", "unknown"),
+        "safe_metadata_only": True,
+    }
+
+
+def _run_governed_shadow_for_turn(
+    engine: "HoloChatEngine",
+    *,
+    session: ChatSession,
+    user_message: str,
+    response_text: str,
+    capsule_id: Optional[str],
+    capsule_context: dict[str, Any],
+    context_budget: Optional[dict[str, Any]],
+    search_query: Optional[str],
+    search_results: Optional[str],
+    incognito: bool,
+) -> dict[str, Any]:
+    try:
+        holo_state = HoloState.from_chat_turn(
+            session_id=session.session_id,
+            turn_number=session.turn_count,
+            user_message=user_message,
+            capsule_id=None if incognito else capsule_id,
+            user_goal=session.gov_arc_state.user_goal,
+            critical_constraints=session.critical_constraints,
+            rolling_summary=session.rolling_summary or _rolling_summary_from_history(session.history),
+            continuity_ledger=_normalized_continuity_ledger(session.continuity_ledger),
+            settled_decisions=session.gov_arc_state.settled_decisions,
+            thread_health_score=session.thread_health_score,
+            thread_status=session.thread_status,
+            required_tools=_required_tools_for_turn(search_query, search_results),
+            gov_arc_state=session.gov_arc_state,
+        )
+        return run_governed_shadow(
+            adapters=[*(getattr(engine, "_adapters", []) or []), *(getattr(engine, "_bench", []) or [])],
+            user_message=user_message,
+            holo_state=holo_state,
+            capsule_context={} if incognito else (capsule_context or {}),
+            visible_answer=response_text,
+            context_token_estimate=(context_budget or {}).get("total_token_estimate"),
+        )
+    except Exception as exc:
+        return {
+            "version": "holochat_governed_shadow_v0.1",
+            "mode": "shadow",
+            "enabled": True,
+            "status": "invalid",
+            "triggered": False,
+            "trigger_reason": "shadow_runtime_exception",
+            "call_count": 0,
+            "expected_call_count": 5,
+            "invalidation_reason": "SHADOW_RUNTIME_EXCEPTION",
+            "root_failure": {"type": type(exc).__name__},
+            "visible_answer_replaced": False,
+            "safe_metadata_only": True,
+        }
 
 
 def _runtime_metadata(
@@ -1548,6 +1701,7 @@ def _runtime_metadata(
     balanced = runtime_class == BALANCED_RUNTIME_PROFILE
     frontier_assist_enabled = balanced and bool(bench_pool)
     metadata = {
+        "release": release_info(),
         "runtime_profile": runtime_profile_id,
         "active_pool": _adapter_pool_metadata(active_pool),
         "bench_pool": _adapter_pool_metadata(bench_pool),
@@ -1705,6 +1859,68 @@ class HoloChatEngine:
             + (" | Bench: " + ", ".join(a.provider for a in self._bench) if self._bench else "")
             + " | GovernorAdapter ready"
         )
+
+    def runtime_status(self) -> dict[str, Any]:
+        """Return safe, user-visible runtime identity and model-roster state."""
+        profile = getattr(self, "_resolved_architecture_profile", None)
+        runtime_info = dict(getattr(self, "_runtime_info", {}) or {})
+        active_pool = _adapter_pool_metadata(getattr(self, "_adapters", []) or [])
+        bench_pool = _adapter_pool_metadata(getattr(self, "_bench", []) or [])
+        governor = getattr(self, "_governor", None)
+        governor_meta = _governor_turn_metadata(governor, checked_this_turn=False)
+        return {
+            "status": "initialized",
+            "release": release_info(),
+            "visible_chat_lane": {
+                "runtime_profile": getattr(profile, "profile_id", runtime_info.get("runtime_profile")),
+                "runtime_class": getattr(profile, "runtime_class", runtime_info.get("runtime_class")),
+                "architecture_profile_status": getattr(profile, "status", runtime_info.get("architecture_profile_status")),
+                "architecture_manifest_version": getattr(profile, "manifest_version", runtime_info.get("architecture_manifest_version")),
+                "architecture_manifest_path": getattr(profile, "manifest_path", runtime_info.get("architecture_manifest_path")),
+                "runtime_behavior": getattr(profile, "runtime_behavior", runtime_info.get("runtime_behavior")),
+                "pool_strategy": getattr(profile, "pool_strategy", runtime_info.get("pool_strategy")),
+                "model_selection": "fixed_manifest_order",
+                "gov_can_choose_models": False,
+                "analyst_rotation_order": active_pool,
+                "bench_pool": bench_pool,
+                "selection_mode": "round_robin",
+                "visible_answer_mode": "one_selected_analyst_per_turn",
+            },
+            "governor": {
+                "role": "controller_check_layer",
+                "configured_provider": getattr(profile, "governor_provider", None),
+                "loaded_provider": governor_meta.get("governor_provider"),
+                "loaded_model": governor_meta.get("governor_model"),
+                "status": "configured" if governor_meta.get("governor_present") else "off",
+                "visible_answer_producer": False,
+            },
+            "governed_shadow_lane": {
+                "version": GOVERNED_SHADOW_VERSION,
+                "enabled": governed_shadow_enabled(),
+                "env_var": GOVERNED_SHADOW_ENV,
+                "trigger_policy": "hard_chat_or_thread_health_only",
+                "visible_answer_replaced": False,
+                "expected_call_sequence": [dict(item) for item in GOVERNED_SHADOW_ROSTER],
+                "model_selection": "fixed_roster_order",
+                "gov_can_choose_models": False,
+            },
+            "state_and_memory": {
+                "context_delivery_mode": runtime_info.get("context_delivery_mode", "capped_ranked_prompt_slice"),
+                "memory_delivery_mode": runtime_info.get("memory_delivery_mode", "rolling_summary_selected_context"),
+                "structured_state_object_mode": runtime_info.get("structured_state_object_mode", "active_prompt"),
+                "baton_pass_mode": runtime_info.get("baton_pass_mode", "active_prompt"),
+                "rolling_summary_mode": runtime_info.get("rolling_summary_mode", "active_prompt_sliding_window"),
+                "continuity_ledger_mode": runtime_info.get("continuity_ledger_mode", "active_prompt_structured_private"),
+                "analyst_receives_full_memory": runtime_info.get("analyst_receives_full_memory", False),
+                "durable_memory_store": runtime_info.get("durable_memory_store", "HoloBrain/capsule"),
+            },
+            "safety": {
+                "raw_prompts_exposed": False,
+                "raw_memory_exposed": False,
+                "provider_error_bodies_exposed": False,
+                "api_keys_exposed": False,
+            },
+        }
 
     def get_or_create_session(self, session_id: Optional[str] = None) -> ChatSession:
         if session_id and session_id in _sessions:
@@ -2160,6 +2376,34 @@ class HoloChatEngine:
             provider_output_tokens=out_tok,
             latency_ms=elapsed_ms,
         )
+        governed_shadow = _run_governed_shadow_for_turn(
+            self,
+            session=session,
+            user_message=user_message,
+            response_text=response_text,
+            capsule_id=capsule_id,
+            capsule_context=capsule_context,
+            context_budget=context_budget,
+            search_query=search_query,
+            search_results=search_results,
+            incognito=incognito,
+        )
+        holo_voice_diagnostics = _holo_voice_diagnostics(
+            session=session,
+            analyst_adapter=adapter,
+            capsule_id=capsule_id,
+            incognito=incognito,
+            capsule_context=capsule_context,
+            life_context=life_context,
+            last_session=last_session,
+            tenor=tenor,
+            patent_state=patent_state,
+            runtime_identity=runtime_identity,
+            system_prompt=system_prompt,
+            context_budget=context_budget,
+            provider_history=provider_history_stats,
+            governed_shadow=governed_shadow,
+        )
         resolved_runtime_profile = getattr(self, "_resolved_architecture_profile", None) or _holochat_runtime_profile()
         runtime_info = getattr(self, "_runtime_info", None) or _runtime_metadata(
             resolved_runtime_profile,
@@ -2190,6 +2434,8 @@ class HoloChatEngine:
             ),
             handoff_transition=active_handoff_transition,
             session=session,
+            governed_shadow=governed_shadow,
+            holo_voice_diagnostics=holo_voice_diagnostics,
         )
 
         return {
@@ -2602,6 +2848,34 @@ class HoloChatEngine:
             provider_output_tokens=out_tok,
             latency_ms=elapsed_ms,
         )
+        governed_shadow = _run_governed_shadow_for_turn(
+            self,
+            session=session,
+            user_message=user_message,
+            response_text=response_text,
+            capsule_id=capsule_id,
+            capsule_context=capsule_context,
+            context_budget=context_budget,
+            search_query=search_query,
+            search_results=search_results,
+            incognito=incognito,
+        )
+        holo_voice_diagnostics = _holo_voice_diagnostics(
+            session=session,
+            analyst_adapter=adapter,
+            capsule_id=capsule_id,
+            incognito=incognito,
+            capsule_context=capsule_context,
+            life_context=life_context,
+            last_session=last_session,
+            tenor=tenor,
+            patent_state=patent_state,
+            runtime_identity=runtime_identity,
+            system_prompt=system_prompt,
+            context_budget=context_budget,
+            provider_history=provider_history_stats,
+            governed_shadow=governed_shadow,
+        )
         resolved_runtime_profile = getattr(self, "_resolved_architecture_profile", None) or _holochat_runtime_profile()
         runtime_info = getattr(self, "_runtime_info", None) or _runtime_metadata(
             resolved_runtime_profile,
@@ -2632,6 +2906,8 @@ class HoloChatEngine:
             ),
             handoff_transition=active_handoff_transition,
             session=session,
+            governed_shadow=governed_shadow,
+            holo_voice_diagnostics=holo_voice_diagnostics,
         )
 
         yield {

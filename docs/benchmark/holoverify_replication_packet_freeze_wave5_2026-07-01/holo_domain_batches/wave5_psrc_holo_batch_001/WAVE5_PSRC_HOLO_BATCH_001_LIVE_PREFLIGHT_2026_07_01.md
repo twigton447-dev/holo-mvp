@@ -5,7 +5,7 @@ Batch: `WAVE5_PSRC_HOLO_BATCH_001`
 Family: `HV-PSRC-REP-2026-07-01`
 Selection mode: `wave5-domain-5pair-batch`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
-Root signature: `38f38b2a5a54085e4d64837874e7ea19a380487be8f3209178a2e64e71f49478`
+Root signature: `374d4488f37b2d63b0e93697d94ce64ba8ef9ba760eb8cd96cc9965f3dec110c`
 
 ## Expected Calls
 

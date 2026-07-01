@@ -5,7 +5,7 @@ Batch: `WAVE5_SECO_HOLO_BATCH_003`
 Family: `HV-SECO-REP-2026-07-01`
 Selection mode: `wave5-domain-5pair-batch`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
-Root signature: `e00d41d2ad61c3c9f0f3163a95fdade4737f3772386bd6c2e2d1cb35a7fb0f18`
+Root signature: `d5fc4b743ab2d80ac29897c86ddc65926625678aaac55e0d4de98c3f5eb39b7a`
 
 ## Expected Calls
 

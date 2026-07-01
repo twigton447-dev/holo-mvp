@@ -5,7 +5,7 @@ Batch: `WAVE5_OTSF_HOLO_BATCH_002`
 Family: `HV-OTSF-REP-2026-07-01`
 Selection mode: `wave5-domain-5pair-batch`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
-Root signature: `e1dc6a6edfd3e52edd67ff2cd8857f06609171c12143d7cb522b4375d89228d9`
+Root signature: `d9d632c75c4c28389978c45c9c580f11f14bc1a0d84baf9bb8e731d77cf95324`
 
 ## Expected Calls
 

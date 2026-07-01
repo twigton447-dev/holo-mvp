@@ -9,32 +9,32 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 ## Totals
 
 - `batches`: `28`
-- `completed_batches`: `0`
-- `not_started_batches`: `28`
+- `completed_batches`: `1`
+- `not_started_batches`: `27`
 - `invalid_stop_batches`: `0`
 - `complete_with_prior_invalid_batches`: `0`
-- `completed_pairs`: `0`
-- `completed_packets`: `0`
-- `provider_calls_observed`: `0`
-- `expected_provider_calls_for_completed_batches`: `0`
+- `completed_pairs`: `5`
+- `completed_packets`: `10`
+- `provider_calls_observed`: `50`
+- `expected_provider_calls_for_completed_batches`: `50`
 - `providers_called_by_ledger`: `0`
 - `judges_called_by_ledger`: `0`
 
 ## Next Allowed Batch
 
-- Batch: `WAVE5_MEDX_HOLO_BATCH_001`
+- Batch: `WAVE5_MEDX_HOLO_BATCH_002`
 - Family: `HV-MEDX-REP-2026-07-01`
-- Approval SHA: `4aabf9937d7aa629ed4da512d924b99fdafc8b8a4e437df47e7fd80deff8bbc0`
+- Approval SHA: `83b68cbc2c3775ed28d78e4de0045768d17ef9ab3d8de8a6f92cdb295329e0b1`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 4aabf9937d7aa629ed4da512d924b99fdafc8b8a4e437df47e7fd80deff8bbc0 --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_001 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 83b68cbc2c3775ed28d78e4de0045768d17ef9ab3d8de8a6f92cdb295329e0b1 --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_002 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Batch State
 
 | # | Batch | Family | Status | Runs | Provider calls observed | Latest invalidation |
 | --- | --- | --- | --- | --- | --- | --- |
-| `1` | `WAVE5_MEDX_HOLO_BATCH_001` | `HV-MEDX-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |
+| `1` | `WAVE5_MEDX_HOLO_BATCH_001` | `HV-MEDX-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `2` | `WAVE5_MEDX_HOLO_BATCH_002` | `HV-MEDX-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |
 | `3` | `WAVE5_MEDX_HOLO_BATCH_003` | `HV-MEDX-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |
 | `4` | `WAVE5_MEDX_HOLO_BATCH_004` | `HV-MEDX-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |

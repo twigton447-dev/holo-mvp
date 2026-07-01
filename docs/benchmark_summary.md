@@ -1,3 +1,29 @@
+## Brief Takeaway
+
+HoloVerify moved from a cool benchmark result to a measured risk bound.
+
+Current clean benchmark:
+
+| Signal | Result |
+| --- | ---: |
+| Frozen action-boundary packets correct | 454/454 |
+| Observed false positives | 0 |
+| Observed false negatives | 0 |
+| Wilson 95% packet-level upper bound | 0.839% |
+| Exact 95% packet-level upper bound | 0.658% |
+
+The Wilson number is high on the page because it explains the benchmark honestly:
+zero observed errors does not mean zero real-world risk. It means the remaining
+uncertainty can now be bounded.
+
+Given 454 tests and 0 observed errors, Wilson asks: how high could the true
+packet error rate still plausibly be? The current answer is about 0.84% at the
+95% confidence level.
+
+The clean denominator is balanced: 227 ALLOW truths and 227 ESCALATE truths.
+
+---
+
 ## The Point
 
 AI systems are moving closer to real-world action.

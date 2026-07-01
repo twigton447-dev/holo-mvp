@@ -17,22 +17,26 @@ ALLOW-side false positives, and ESCALATE-side false negatives.
 
 ---
 
-## The Point
+## What Is HoloEngine?
 
-AI systems are moving closer to real-world action.
+HoloEngine is an AI control system for high-stakes actions. It is designed for
+cases where an AI system may approve, release, grant, execute, escalate, or
+prepare something that affects the real world.
 
-They can approve payments, grant access, release data, place orders, prepare
-filings, trigger infrastructure changes, and activate clinical workflows.
-
-At that point, the important question is no longer:
-
-> Can the model produce a plausible answer?
-
-The question is:
+The core question is simple:
 
 > Does the evidence actually authorize the action?
 
-HoloVerify is tested at that boundary.
+HoloEngine is designed for domains such as:
+
+- payments, AP, procurement, and vendor-master changes
+- agentic commerce and order execution
+- IT access, admin permissions, and offboarding
+- clinical and regulated workflow activation
+- treasury, legal, compliance, cloud, security, public-sector, and industrial
+  controls
+
+HoloVerify is the action-boundary verifier inside HoloEngine.
 
 It returns one of two decisions:
 

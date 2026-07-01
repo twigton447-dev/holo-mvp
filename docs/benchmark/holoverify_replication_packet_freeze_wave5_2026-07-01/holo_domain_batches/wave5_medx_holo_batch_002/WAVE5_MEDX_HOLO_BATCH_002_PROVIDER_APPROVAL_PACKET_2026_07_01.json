@@ -1,0 +1,97 @@
+{
+  "approval_granted_by_this_packet": false,
+  "approval_statement_required": "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_002 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01.",
+  "batch_id": "WAVE5_MEDX_HOLO_BATCH_002",
+  "batch_number": 2,
+  "classification": "WAVE5_MEDX_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_NO_PROVIDER_RUNTIME_REFRESHED",
+  "created_at_utc": "2026-07-01T18:24:22.801878+00:00",
+  "expected_calls_if_approved": {
+    "gov_calls": 20,
+    "judge_calls": 0,
+    "packets": 10,
+    "pairs": 5,
+    "solo_calls": 0,
+    "total_provider_calls": 50,
+    "worker_calls": 30
+  },
+  "family_id": "HV-MEDX-REP-2026-07-01",
+  "freeze_root_hash": "3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf",
+  "live_preflight_root_signature": "408aaa8e81af085c0f231e8ec8e87f578ae0f205ea5eea07dfe085ea15ff1d4e",
+  "model_roster": {
+    "fallback_policy": "NO_FALLBACK_PROVIDER_FAILURE_INVALIDATES_RUN",
+    "gov": {
+      "dna": "minimax",
+      "gov_may_select_models": false,
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax"
+    },
+    "gov_sequence": [
+      {
+        "dna": "minimax",
+        "gov_may_select_models": false,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "slot": "G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_may_select_models": false,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "slot": "G2"
+      }
+    ],
+    "worker_sequence": [
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "model_key": "xai",
+        "provider": "xai",
+        "role_name": "SOURCE_BOUNDARY_MAPPER",
+        "worker_index": 1
+      },
+      {
+        "dna": "openai",
+        "model": "gpt-5.4-mini",
+        "model_key": "openai_w2",
+        "provider": "openai",
+        "role_name": "ADVERSARIAL_SCOPE_CHALLENGER",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "model_key": "minimax",
+        "provider": "minimax",
+        "role_name": "FINAL_COMPILER",
+        "worker_index": 3
+      }
+    ]
+  },
+  "next_locked_gate": "EXPLICIT_PROVIDER_APPROVAL_WITH_EXACT_STATEMENT_AND_PACKET_SHA",
+  "package_sha256": "bdb43e3867f0664aeb89a769c432e21bb848e17e28ecd373e7370ac6dd43d1b1",
+  "pre_run_verifiers": {
+    "judges_started_during_preflight": false,
+    "live_holo_started_during_preflight": false,
+    "live_preflight_status": "PASS",
+    "providers_called_during_preflight": 0,
+    "solo_started_during_preflight": false
+  },
+  "provider_boundary": {
+    "no_fallback_or_substitution": true,
+    "no_judges": true,
+    "no_solo": true,
+    "one_batch_only": true,
+    "requires_explicit_approval": true,
+    "run_command_after_approval": "python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 APPROVAL_PACKET_SHA256_FROM_PROVIDER_APPROVAL_PACKET --approval-statement \"I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_002 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01.\""
+  },
+  "registration_ref": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_medx_holo_batch_002/WAVE5_MEDX_HOLO_BATCH_002_REGISTRATION_2026_07_01.json",
+  "status": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+  "stop_rules": [
+    "Do not run providers without exact approval statement and approval packet SHA.",
+    "Do not edit frozen packets or prompts.",
+    "Do not run solo or judges.",
+    "Do not fallback or substitute models.",
+    "If the batch fails, preserve the invalid run and stop."
+  ]
+}

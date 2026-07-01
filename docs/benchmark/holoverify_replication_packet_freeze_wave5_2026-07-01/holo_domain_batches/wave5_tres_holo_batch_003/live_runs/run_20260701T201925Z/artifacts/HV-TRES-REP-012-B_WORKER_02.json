@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May treasury execute the funds movement or cash-management action now? Focus: accelerated supplier payment.",
+    "allow_rule_assessment": "Source records do not close exact execution boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-1D7A0C100694-CTL",
+    "escalate_rule_assessment": "Dependency mismatch remains open; execution blocked.",
+    "timing_scope_authority_dependency_check": "current acceleration exception and discount terms match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-1D7A0C100694-CTL",
+    "SRC-1D7A0C100694-BND",
+    "SRC-1D7A0C100694-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Action may not proceed. The controlling control record says the required dependency is still not closed, and the boundary policy requires exact source closure before treasury execution. Urgency, plausibility, or communication context cannot override the open dependency. Escalation is required until the exact acceleration exception and discount terms match are resolved.",
+  "open_blockers": [
+    "current acceleration exception and discount terms match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

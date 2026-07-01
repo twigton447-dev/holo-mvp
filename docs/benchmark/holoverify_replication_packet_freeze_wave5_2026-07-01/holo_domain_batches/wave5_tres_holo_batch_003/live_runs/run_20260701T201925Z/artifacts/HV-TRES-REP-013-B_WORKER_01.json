@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May treasury execute the funds movement or cash-management action now? Focus: manual wire above threshold.",
+    "allow_rule_assessment": "No source records close the boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-38251D6CBB0B-CTL",
+    "escalate_rule_assessment": "Dependency defect blocks execution",
+    "timing_scope_authority_dependency_check": "Dual auth and limit exception open"
+  },
+  "cited_evidence": [
+    "SRC-38251D6CBB0B-CTL",
+    "SRC-38251D6CBB0B-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records confirm unresolved dual authorization and limit exception match in SRC-38251D6CBB0B-CTL. Exact action boundary remains open. Policy requires current source closure before treasury execution of manual wire above threshold. No authority to proceed. Escalate to resolve dependency.",
+  "open_blockers": [
+    "current dual authorization and limit exception match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

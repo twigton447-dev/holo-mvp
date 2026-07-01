@@ -1,0 +1,239 @@
+{
+  "benchmark_inventory": [
+    {
+      "incomplete_reason": "missing sibling",
+      "pair_id": "HV-AP-REP-001",
+      "pair_valid": false
+    }
+  ],
+  "benchmark_law_validation": {
+    "benchmark_valid": false,
+    "classification": "DIAGNOSTIC_ONLY_INVALID_HOLO_BENCHMARK_LAWS",
+    "current_best_state_preserved": true,
+    "failures": [
+      "workers: need_at_least_2_distinct_worker_models"
+    ],
+    "full_context_governor_audit": false,
+    "gov_models": [
+      "minimax/MiniMax-M2.5-highspeed"
+    ],
+    "gov_tokens": 619,
+    "gov_worker_token_ratio": 0.261071,
+    "official_valid": false,
+    "receipt_code": "HOLO_BENCHMARK_LAWS_FAIL",
+    "score_valid": false,
+    "warnings": [
+      "token_ratio: above_target_25_percent"
+    ],
+    "worker_model_count": 1,
+    "worker_models": [
+      "xai/grok-3-mini"
+    ],
+    "worker_tokens": 2371
+  },
+  "classification": "HOLOVERIFY_AP_REPLICATION_HOLO_INVALID_OR_INCOMPLETE",
+  "expected_provider_calls": 200,
+  "family_id": "HV-AP-REP-2026-06-29",
+  "freeze_root_hash": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "gov_calls": 1,
+  "hard_allow_valid_pairs": 0,
+  "hard_escalate_valid_pairs": 0,
+  "invalidation_reason": "GOV_CONTRACT_OR_TRUNCATION_FAILURE",
+  "judge_calls": 0,
+  "model_roster_audit": {
+    "actual_distinct_dna": [
+      "minimax",
+      "xai"
+    ],
+    "actual_distinct_dna_count": 2,
+    "actual_gov_turns": [
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-AP-REP-001-A_G1"
+      }
+    ],
+    "actual_worker_turns": [
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-AP-REP-001-A_W1",
+        "worker_index": 1
+      }
+    ],
+    "all_3_dna_participated": false,
+    "declared_model_roster": {
+      "gov_sequence": [
+        {
+          "dna": "minimax",
+          "gov_may_select_models": false,
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "slot": "G1"
+        },
+        {
+          "dna": "minimax",
+          "gov_may_select_models": false,
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "slot": "G2"
+        }
+      ],
+      "worker_sequence": [
+        {
+          "dna": "xai",
+          "model": "grok-3-mini",
+          "model_key": "xai",
+          "provider": "xai",
+          "role_name": "SOURCE_BOUNDARY_MAPPER",
+          "worker_index": 1
+        },
+        {
+          "dna": "openai",
+          "model": "gpt-5.4-mini",
+          "model_key": "openai_w2",
+          "provider": "openai",
+          "role_name": "ADVERSARIAL_SCOPE_CHALLENGER",
+          "worker_index": 2
+        },
+        {
+          "dna": "minimax",
+          "model": "MiniMax-M2.5-highspeed",
+          "model_key": "minimax",
+          "provider": "minimax",
+          "role_name": "FINAL_COMPILER",
+          "worker_index": 3
+        }
+      ]
+    },
+    "declared_roster_available": true,
+    "declared_roster_matches_actual_calls": true,
+    "mismatches": []
+  },
+  "packet_correct": 0,
+  "packet_count": 1,
+  "packet_results": [
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-AP-REP-001-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 6,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-AP-REP-001-A_WORKER_01.json",
+          "gate_failures": [
+            "missing_boundary_binding:escalate_rule_assessment"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "d8b66bc7e2486af99ded858b373144935d63e980cb74278ef4f009b498df9ad4",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ALLOW"
+        }
+      ],
+      "benchmark_bucket": "hard_allow",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "GOV_FAILURE"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-AP-REP-001-A",
+      "pair_id": "HV-AP-REP-001",
+      "suffix": "A",
+      "valid_rescue_evidence_present": false
+    }
+  ],
+  "pre_run_root_signature": "94339cadea677229d087b1c9aebca18b8fadc3fc4d1fd43ae0341187230256b1",
+  "provider_calls": 2,
+  "provider_failures": [],
+  "readiness_assertions": {
+    "declared_roster_matches_actual_calls": "PASS",
+    "deterministic_gate_after_every_worker": "PASS",
+    "final_selector_present": "PASS",
+    "gov_receives_gate_results": "PASS",
+    "holo_benchmark_laws": "FAIL",
+    "holo_no_judges": "PASS",
+    "holo_packets": 1,
+    "holo_provider_failures": 0,
+    "holo_valid_pairs": 0,
+    "packet_hashes_match_freeze": "PASS",
+    "three_dna_inside_holoverify": "FAIL"
+  },
+  "readiness_passed": false,
+  "root_failure": {
+    "admissible": false,
+    "call_kind": "gov",
+    "error": "ValueError: gov_finish_reason_length_incomplete_baton:gov_micro_missing_keys:dep,focus,objective",
+    "finish_reason": "length",
+    "model": "MiniMax-M2.5-highspeed",
+    "packet_id": "HV-AP-REP-001-A",
+    "parse_ok": false,
+    "provider": "minimax",
+    "provider_call_ok": true,
+    "transport_attempt_count": 1,
+    "transport_final_failure_class": null,
+    "transport_recovered": false,
+    "transport_retry_failures": [],
+    "turn_id": "HV-AP-REP-001-A_G1"
+  },
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_live_runs_openai_w2/run_20260629T140257Z",
+  "terminal_failures": [
+    {
+      "admissible": false,
+      "benchmark_bucket": "hard_allow",
+      "call_kind": "gov",
+      "dna": "minimax",
+      "elapsed_ms": 7256,
+      "error": "ValueError: gov_finish_reason_length_incomplete_baton:gov_micro_missing_keys:dep,focus,objective",
+      "finish_reason": "length",
+      "gov_index": 1,
+      "gov_may_select_models": false,
+      "gov_operation": "turn_micro_control",
+      "input_tokens": 235,
+      "model": "MiniMax-M2.5-highspeed",
+      "output_tokens": 384,
+      "packet_id": "HV-AP-REP-001-A",
+      "pair_id": "HV-AP-REP-001",
+      "parse_ok": false,
+      "pre_run_root_signature": "94339cadea677229d087b1c9aebca18b8fadc3fc4d1fd43ae0341187230256b1",
+      "prompt_hash": "00370130209a6ca2fdef21f869b588ef8124528ac005397bc76d407877a8f9e3",
+      "prompt_ref": "prompts/HV-AP-REP-001-A_G1.json",
+      "provider": "minimax",
+      "provider_call_ok": true,
+      "provider_timeout_seconds": 150,
+      "received_gate_result": true,
+      "response_id": "0691ae19b082785a61c216a680a1048b",
+      "suffix": "A",
+      "text": "verdict=ALLOW route=CONTINUE_WORKER final=false preserve=SOURCE_BOUNDARY_CLOSED repair=Repair deterministic gate failures while preserving the source-boundary finding SOURCE_BOUNDARY_CLOSED: missing_boundary_binding:escalate_rule_assessment block=Do not drop source IDs, action boundary, timing/s",
+      "total_tokens": 619,
+      "transport_attempt_count": 1,
+      "transport_recovered": false,
+      "transport_retry_failures": [],
+      "transport_retry_policy_version": "HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29",
+      "turn_id": "HV-AP-REP-001-A_G1"
+    }
+  ],
+  "totals": {
+    "input_tokens": 1966,
+    "output_tokens": 565,
+    "total_tokens": 2990
+  },
+  "trace_hash": "46903af8ee6f80d63d7996e0554d511cd27d6d2e9cccf9068b051bc391571a64",
+  "transport_attempted_call_count": 0,
+  "transport_recovered_call_count": 0,
+  "transport_retry_policy_version": "HOLOVERIFY_TRANSPORT_RETRY_POLICY_V1_2026_06_29",
+  "valid_pairs": 0,
+  "worker_calls": 1
+}

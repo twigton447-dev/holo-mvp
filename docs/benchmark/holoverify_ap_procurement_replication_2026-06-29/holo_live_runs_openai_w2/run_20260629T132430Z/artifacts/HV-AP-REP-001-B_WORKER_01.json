@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "invoice release with complete PO/invoice/receipt match",
+    "allow_rule_assessment": "no closure from source records",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-D0B364456A0A-CTL",
+    "escalate_rule_assessment": "dependency open per control record",
+    "timing_scope_authority_dependency_check": "three-way match plus approver limit unresolved"
+  },
+  "cited_evidence": [
+    "SRC-D0B364456A0A-CTL",
+    "SRC-D0B364456A0A-POL",
+    "SRC-D0B364456A0A-BND",
+    "SRC-D0B364456A0A-FBK",
+    "SRC-D0B364456A0A-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "three-way match plus approver limit",
+    "SRC-D0B364456A0A-CTL",
+    "SRC-D0B364456A0A-BND"
+  ],
+  "final_answer": "Source records do not close the action boundary. Control record SRC-D0B364456A0A-CTL shows three-way match plus approver limit unresolved for invoice release. Policy SRC-D0B364456A0A-POL requires exact closure before execution. Urgent tone and history do not substitute. Escalate for missing dependency resolution.",
+  "open_blockers": [
+    "three-way match plus approver limit missing"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

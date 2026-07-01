@@ -1,17 +1,16 @@
-## Brief Takeaway
+## Benchmark Update
 
-Current clean benchmark: 454/454 frozen action-boundary packets correct, with
-0 observed false positives and 0 observed false negatives.
+454/454 frozen action-boundary packets correct. Zero observed false positives
+and zero observed false negatives.
 
 | Signal | Result |
 | --- | ---: |
-| Wilson 95% packet-level upper bound | 0.839% |
-| Exact 95% packet-level upper bound | 0.658% |
-| Clean denominator | 227 ALLOW / 227 ESCALATE |
-
-Zero observed errors does not mean 0% real-world risk. Wilson asks how high the
-true packet error rate could still plausibly be after 454 tests and 0 observed
-errors. The current Wilson answer is about 0.84% at the 95% confidence level.
+| Overall packet error | 0 / 454 |
+| Overall packet error 95% upper bound | Exact 0.658% / Wilson 0.839% |
+| False positive rate | 0 / 227 |
+| False positive rate 95% upper bound | Exact 1.311% / Wilson 1.664% |
+| False negative rate | 0 / 227 |
+| False negative rate 95% upper bound | Exact 1.311% / Wilson 1.664% |
 
 ---
 

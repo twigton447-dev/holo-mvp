@@ -9,22 +9,26 @@ import json
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 
 ROOT = Path("docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01")
 TARGET_ROOT = ROOT / "holo_target_batches"
 SELECTION_PATH = ROOT / "solo_triage_3mini" / "WAVE2_HOLO_TARGET_SELECTION_FROM_SOLO_TRIAGE_2026_07_01.json"
+PACKET_INDEX_PATH = ROOT / "manifests" / "PACKET_INDEX.json"
 
 
-def read_json(path: Path) -> dict:
+def read_json(path: Path) -> Any:
     return json.loads(path.read_text())
 
 
 def write_json_with_hash(path: Path, data: dict) -> str:
     data = dict(data)
     data.pop("package_sha256", None)
+    data.pop("created_at_utc", None)
     rendered = json.dumps(data, indent=2, sort_keys=True) + "\n"
     package_sha256 = hashlib.sha256(rendered.encode("utf-8")).hexdigest()
+    data["created_at_utc"] = datetime.now(timezone.utc).isoformat()
     data["package_sha256"] = package_sha256
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
     return package_sha256
@@ -47,6 +51,10 @@ def ratio(num: int, den: int) -> float:
     return round(num / den, 6) if den else 0.0
 
 
+def display_value(value: Any) -> Any:
+    return "MISSING_REPO_EVIDENCE" if value is None else value
+
+
 def live_preflight_head(batch: int) -> str:
     batch_id = f"{batch:03d}"
     preflight_path = (
@@ -58,6 +66,87 @@ def live_preflight_head(batch: int) -> str:
         return "UNKNOWN"
     data = read_json(preflight_path)
     return data.get("current_head_at_preflight") or data.get("commit") or "UNKNOWN"
+
+
+def load_staged_batch(batch: int, expected_pair_ids: list[str] | None = None) -> dict | None:
+    batch_id = f"{batch:03d}"
+    batch_dir = TARGET_ROOT / f"wave2_holo_target_batch_{batch_id}"
+    registration_path = batch_dir / f"WAVE2_HOLO_TARGET_BATCH_{batch_id}_REGISTRATION_2026_07_01.json"
+    preflight_path = batch_dir / f"WAVE2_HOLO_TARGET_BATCH_{batch_id}_PREFLIGHT_2026_07_01.json"
+    live_preflight_path = batch_dir / f"WAVE2_HOLO_TARGET_BATCH_{batch_id}_LIVE_PREFLIGHT_2026_07_01.json"
+    if not registration_path.exists() or not preflight_path.exists():
+        return None
+
+    registration = read_json(registration_path)
+    preflight = read_json(preflight_path)
+    live_preflight = read_json(live_preflight_path) if live_preflight_path.exists() else {}
+    selected_pair_ids = registration.get("selected_pair_ids", [])
+    pair_records = {}
+    for row in registration.get("selected_records", []):
+        pair_records.setdefault(
+            row["pair_id"],
+            {
+                "domain": row.get("domain"),
+                "family_id": row.get("family_id"),
+                "pair_id": row.get("pair_id"),
+                "target_bucket": row.get("target_bucket"),
+                "triage_class": row.get("triage_class"),
+                "not_knew_count": row.get("not_knew_count"),
+                "wrong_verdict_count": row.get("wrong_verdict_count"),
+                "parse_or_provider_fail_count": row.get("parse_or_provider_fail_count"),
+                "priority_score": row.get("priority_score"),
+            },
+        )
+
+    return {
+        "batch": batch_id,
+        "batch_id": f"WAVE2_HOLO_TARGET_BATCH_{batch_id}",
+        "claim_boundary": registration.get(
+            "claim_boundary",
+            "Staged/preflight evidence only; not counted as Holo result, solo comparison, judge result, or statistical proof.",
+        ),
+        "expected_counts": registration.get("expected_counts", {}),
+        "live_execution_gate": live_preflight.get("live_execution_gate", {}),
+        "live_holo_started": live_preflight.get("live_holo_started", False),
+        "live_preflight_path": str(live_preflight_path) if live_preflight_path.exists() else None,
+        "live_preflight_root_signature": live_preflight.get("root_signature"),
+        "providers_called": live_preflight.get("providers_called", 0),
+        "ready_for_live_holo": preflight.get("ready_for_live_holo"),
+        "selected_pair_ids": selected_pair_ids,
+        "selected_pairs": [pair_records[pair_id] for pair_id in selected_pair_ids if pair_id in pair_records],
+        "selected_pairs_match_expected_pool": selected_pair_ids == expected_pair_ids if expected_pair_ids is not None else None,
+        "selection_mode": registration.get("selection_mode") or "target-selection",
+        "selection_mode_defaulted": registration.get("selection_mode") is None,
+        "solo_started": live_preflight.get("solo_started", False),
+        "judges_started": live_preflight.get("judges_started", False),
+        "status": preflight.get("status"),
+    }
+
+
+def remaining_full_family_pairs_after_target_pool() -> list[dict]:
+    selection = read_json(SELECTION_PATH)
+    target_pair_ids = {row.get("pair_id") for row in selection.get("all_top_targets", [])}
+    grouped: dict[str, dict] = {}
+    for row in read_json(PACKET_INDEX_PATH):
+        pair = grouped.setdefault(
+            row["pair_id"],
+            {
+                "domain": row["domain"],
+                "family_id": row["family_id"],
+                "packet_ids": [],
+                "pair_id": row["pair_id"],
+                "target_bucket": row["target_bucket"],
+            },
+        )
+        pair["packet_ids"].append(row["packet_id"])
+
+    remaining = []
+    for pair_id, row in sorted(grouped.items()):
+        if pair_id in target_pair_ids:
+            continue
+        row["packet_ids"] = sorted(row["packet_ids"])
+        remaining.append(row)
+    return remaining
 
 
 def compact_pair_row(batch: int, row: dict) -> dict:
@@ -171,6 +260,7 @@ def build_combined(batches: list[int]) -> dict:
         "solo_structural_or_evidence_fail": sum_key(solo_tokens, "structural_or_evidence_fail"),
         "solo_wrong_verdict": sum_key(solo_tokens, "wrong_verdict"),
         "strong_solo_collapse_pairs": sum_key(summaries, "strong_solo_collapse_pairs"),
+        "non_target_full_family_completion_pairs": sum_key(summaries, "non_target_full_family_completion_pairs"),
         "token_ratio_holo_vs_selected_solo": ratio(holo_total, selected_solo_total),
     }
 
@@ -200,6 +290,13 @@ def build_combined(batches: list[int]) -> dict:
     selection = read_json(SELECTION_PATH)
     run_pairs = {row["pair_id"] for row in pair_rows}
     remaining = [target for target in selection.get("all_top_targets", []) if target.get("pair_id") not in run_pairs]
+    remaining_full_family = remaining_full_family_pairs_after_target_pool()
+    staged_next = load_staged_batch(max(batches) + 1, [row.get("pair_id") for row in remaining])
+    if staged_next and staged_next.get("selection_mode") != "target-selection":
+        staged_next = None
+    staged_full_family = load_staged_batch(5, [row["pair_id"] for row in remaining_full_family])
+    if staged_full_family and staged_full_family.get("selection_mode") != "full-family-remainder":
+        staged_full_family = None
 
     batch_summaries = []
     for batch, data in comparisons:
@@ -223,13 +320,27 @@ def build_combined(batches: list[int]) -> dict:
             "token_ratio_holo_vs_selected_solo": metrics.get("token_ratio_holo_vs_selected_solo"),
         })
 
+    batch_label = ", ".join(f"{batch:03d}" for batch in batches)
+    if staged_next:
+        next_valid_step = f"Run explicitly approved live Holo execution for {staged_next['batch_id']}. Do not run solo or judges first."
+    elif remaining:
+        next_valid_step = "Stage the next selected-target batch from the remaining target pool. Do not run providers until explicitly approved."
+    elif staged_full_family:
+        next_valid_step = (
+            f"After selected-target promotion is complete, run explicitly approved live Holo execution for "
+            f"{staged_full_family['batch_id']}. Keep it under full-family statistical language."
+        )
+    else:
+        next_valid_step = "No selected-target staging gap is visible. Keep provider work closed until an explicit live gate is opened."
+
     return {
         "batch_summaries": batch_summaries,
         "claim_boundaries": [
-            "This memo covers only Wave 2 Holo target Batches 001, 002, and 003, not the entire Wave 2 frozen packet bank.",
+            f"This memo covers only Wave 2 Holo target Batches {batch_label}, not the entire Wave 2 frozen packet bank.",
             f"Holo solved all selected target packets run in these batches: {combined_metrics['holo_packets_correct_admissible']}/{combined_metrics['holo_packets']} packets and {combined_metrics['holo_valid_pairs']}/{combined_metrics['holo_pairs']} sibling pairs.",
             f"The matched solo one-shot results on the same selected packets were unreliable: {combined_metrics['solo_not_knew']}/{combined_metrics['selected_solo_attempts']} attempts were not KNEW/admissible.",
-            "Batch 002 carries the strongest wrong-verdict signal. Batch 003 carries additional strong solo-collapse evidence with no solo wrong-verdict count.",
+            "Selected-target evidence remains separate from full-family statistical proof until the non-target remainder has live Holo evidence.",
+            "Any staged selected-target or full-family remainder section is preflight-only and excluded from scored totals.",
             "Token ratio is operational bookkeeping only. It is not a proof claim because solo was one-shot while Holo used governed multi-turn architecture.",
             "No judges are included in this package. No new provider calls were made to create this combined memo.",
             "Internal Holo worker misses are separated from external solo failures. They show governance correction, not standalone solo failure.",
@@ -243,17 +354,20 @@ def build_combined(batches: list[int]) -> dict:
             for _, data in comparisons
             for miss in data.get("intra_holo_worker_misses_corrected", [])
         ],
-        "next_valid_step": "Continue only with an explicitly approved next target batch or a new frozen packet family. Do not run providers from this memo.",
+        "full_family_remainder_after_target_pool": remaining_full_family,
+        "next_valid_step": next_valid_step,
         "no_judge_calls_for_this_package": True,
         "no_provider_calls_for_this_package": True,
         "pair_rows": pair_rows,
         "remaining_target_pool": {
-            "pairs_already_run_in_batch_001_002_003": len(run_pairs),
+            "pairs_already_run_in_batch_set": len(run_pairs),
             "remaining_top_targets": len(remaining),
             "total_top_targets_from_solo_triage": len(selection.get("all_top_targets", [])),
-            "next_batch_preview_pair_count": min(9, len(remaining)),
-            "next_batch_preview_pairs": remaining[:9],
+            "next_batch_preview_pair_count": min(10, len(remaining)),
+            "next_batch_preview_pairs": remaining[:10],
         },
+        "staged_full_family_remainder_batch": staged_full_family,
+        "staged_next_target_batch": staged_next,
         "source_batch_comparison_paths": {
             f"batch_{batch:03d}": str(batch_comparison_path(batch))
             for batch in batches
@@ -265,15 +379,17 @@ def build_combined(batches: list[int]) -> dict:
 
 def combined_md(data: dict) -> str:
     metrics = data["combined_metrics"]
+    batch_label = "+".join(batch["batch"] for batch in data["batch_summaries"])
+    batch_words = ", ".join(f"Batch {batch['batch']}" for batch in data["batch_summaries"])
     lines = [
-        "# Wave 2 Holo Target Batch 001+002+003 Combined Evidence Memo",
+        f"# Wave 2 Holo Target Batch {batch_label} Combined Evidence Memo",
         "",
         f"Classification: `{data['classification']}`",
         f"Package SHA-256: `{data['package_sha256']}`",
         "",
         "## Scope",
         "",
-        "This is a no-provider combined memo over the Wave 2 Holo target Batch 001, Batch 002, and Batch 003 evidence. It does not add judge calls, provider calls, packet edits, prompt edits, or new scoring rules.",
+        f"This is a no-provider combined memo over the Wave 2 Holo target {batch_words} evidence. It does not add judge calls, provider calls, packet edits, prompt edits, or new scoring rules.",
         "",
         "## Combined Result",
         "",
@@ -294,6 +410,7 @@ def combined_md(data: dict) -> str:
         f"| Solo structural/evidence fails | `{metrics['solo_structural_or_evidence_fail']}` |",
         f"| All-six solo-collapse pairs | `{metrics['all_six_solo_collapse_pairs']}` |",
         f"| Strong solo-collapse pairs | `{metrics['strong_solo_collapse_pairs']}` |",
+        f"| Non-target full-family completion pairs | `{metrics['non_target_full_family_completion_pairs']}` |",
         f"| Intra-Holo worker misses corrected | `{metrics['holo_intra_worker_misses_corrected']}` |",
         f"| Solo not KNEW rate | `{metrics['solo_not_knew_rate']}` |",
         f"| Holo vs selected solo token ratio | `{metrics['token_ratio_holo_vs_selected_solo']}` |",
@@ -354,7 +471,100 @@ def combined_md(data: dict) -> str:
         "",
         "## Remaining Target Pool",
         "",
-        f"Solo triage produced `{remaining['total_top_targets_from_solo_triage']}` top targets. Batch 001+002+003 have run `{remaining['pairs_already_run_in_batch_001_002_003']}` pairs, leaving `{remaining['remaining_top_targets']}` target pairs.",
+        f"Solo triage produced `{remaining['total_top_targets_from_solo_triage']}` top targets. These batches have run `{remaining['pairs_already_run_in_batch_set']}` pairs, leaving `{remaining['remaining_top_targets']}` target pairs.",
+    ])
+
+    staged = data.get("staged_next_target_batch")
+    if staged:
+        counts = staged["expected_counts"]
+        lines.extend([
+            "",
+            "## Staged Final Target Batch",
+            "",
+            f"Batch: `{staged['batch_id']}`",
+            f"Selection mode: `{staged['selection_mode']}`",
+            f"Selection mode defaulted: `{staged['selection_mode_defaulted']}`",
+            f"Status: `{staged['status']}`",
+            f"Ready for live Holo: `{staged['ready_for_live_holo']}`",
+            f"Selected pairs match expected target pool: `{staged['selected_pairs_match_expected_pool']}`",
+            f"Providers called: `{staged['providers_called']}`",
+            f"Live Holo started: `{staged['live_holo_started']}`",
+            f"Live execution gate: `{staged['live_execution_gate'].get('status', 'MISSING_REPO_EVIDENCE')}`",
+            f"Solo started: `{staged['solo_started']}`",
+            f"Judges started: `{staged['judges_started']}`",
+            f"Expected live provider calls: `{counts.get('total_provider_calls')}` (`{counts.get('worker_calls')}` worker, `{counts.get('gov_calls')}` Gov)",
+            f"Expected solo calls: `{counts.get('solo_calls')}`",
+            f"Expected judge calls: `{counts.get('judge_calls')}`",
+            f"Live preflight root signature: `{staged['live_preflight_root_signature']}`",
+            "",
+            f"Claim boundary: {staged['claim_boundary']}",
+            "",
+            "| Priority | Family | Pair | Class | Bucket | Not KNEW | Wrong verdicts | Parse/provider fails |",
+            "| ---: | --- | --- | --- | --- | ---: | ---: | ---: |",
+        ])
+        for row in staged["selected_pairs"]:
+            lines.append(
+                f"| `{display_value(row['priority_score'])}` | `{row['family_id']}` | `{row['pair_id']}` | "
+                f"`{row['triage_class']}` | `{row['target_bucket']}` | `{display_value(row['not_knew_count'])}` | "
+                f"`{display_value(row['wrong_verdict_count'])}` | `{display_value(row['parse_or_provider_fail_count'])}` |"
+            )
+
+    full_family = data.get("full_family_remainder_after_target_pool", [])
+    lines.extend([
+        "",
+        "## Full-Family Remainder After Target Pool",
+        "",
+        "These pairs are outside the selected-target pool and are needed only for full 60-pair Wave 2 coverage.",
+        "",
+        f"Remaining non-target full-family pairs: `{len(full_family)}`.",
+    ])
+    if full_family:
+        lines.extend([
+            "",
+            "| Family | Pair | Bucket | Packets |",
+            "| --- | --- | --- | --- |",
+        ])
+        for row in full_family:
+            lines.append(
+                f"| `{row['family_id']}` | `{row['pair_id']}` | `{row['target_bucket']}` | `{', '.join(row['packet_ids'])}` |"
+            )
+
+    staged_full = data.get("staged_full_family_remainder_batch")
+    if staged_full:
+        counts = staged_full["expected_counts"]
+        lines.extend([
+            "",
+            "## Staged Full-Family Remainder Batch",
+            "",
+            f"Batch: `{staged_full['batch_id']}`",
+            f"Selection mode: `{staged_full['selection_mode']}`",
+            f"Selection mode defaulted: `{staged_full['selection_mode_defaulted']}`",
+            f"Status: `{staged_full['status']}`",
+            f"Ready for live Holo: `{staged_full['ready_for_live_holo']}`",
+            f"Selected pairs match remaining full-family backlog: `{staged_full['selected_pairs_match_expected_pool']}`",
+            f"Providers called: `{staged_full['providers_called']}`",
+            f"Live Holo started: `{staged_full['live_holo_started']}`",
+            f"Live execution gate: `{staged_full['live_execution_gate'].get('status', 'MISSING_REPO_EVIDENCE')}`",
+            f"Solo started: `{staged_full['solo_started']}`",
+            f"Judges started: `{staged_full['judges_started']}`",
+            f"Expected live provider calls: `{counts.get('total_provider_calls')}` (`{counts.get('worker_calls')}` worker, `{counts.get('gov_calls')}` Gov)",
+            f"Expected solo calls: `{counts.get('solo_calls')}`",
+            f"Expected judge calls: `{counts.get('judge_calls')}`",
+            f"Live preflight root signature: `{staged_full['live_preflight_root_signature']}`",
+            "",
+            f"Claim boundary: {staged_full['claim_boundary']}",
+            "",
+            "| Priority | Family | Pair | Class | Bucket | Not KNEW | Wrong verdicts | Parse/provider fails |",
+            "| ---: | --- | --- | --- | --- | ---: | ---: | ---: |",
+        ])
+        for row in staged_full["selected_pairs"]:
+            lines.append(
+                f"| `{display_value(row['priority_score'])}` | `{row['family_id']}` | `{row['pair_id']}` | "
+                f"`{row['triage_class']}` | `{row['target_bucket']}` | `{display_value(row['not_knew_count'])}` | "
+                f"`{display_value(row['wrong_verdict_count'])}` | `{display_value(row['parse_or_provider_fail_count'])}` |"
+            )
+
+    lines.extend([
         "",
         "## Next Valid Step",
         "",

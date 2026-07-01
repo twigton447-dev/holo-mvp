@@ -1,11 +1,11 @@
 # Wave 2 Holo Target Batch 001+002+003 Combined Evidence Memo
 
 Classification: `WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_NO_PROVIDER`
-Package SHA-256: `a6590bfcbdf93a2752a376268d643a119aa615273e728d7720d50fb0f591481a`
+Package SHA-256: `d74d76ce0e13fe1cf31cc8ca731eb315d744fbc1f2122923216c90c41bfdfda6`
 
 ## Scope
 
-This is a no-provider combined memo over the Wave 2 Holo target Batch 001, Batch 002, and Batch 003 evidence. It does not add judge calls, provider calls, packet edits, prompt edits, or new scoring rules.
+This is a no-provider combined memo over the Wave 2 Holo target Batch 001, Batch 002, Batch 003 evidence. It does not add judge calls, provider calls, packet edits, prompt edits, or new scoring rules.
 
 ## Combined Result
 
@@ -26,6 +26,7 @@ This is a no-provider combined memo over the Wave 2 Holo target Batch 001, Batch
 | Solo structural/evidence fails | `81` |
 | All-six solo-collapse pairs | `2` |
 | Strong solo-collapse pairs | `25` |
+| Non-target full-family completion pairs | `0` |
 | Intra-Holo worker misses corrected | `8` |
 | Solo not KNEW rate | `0.734568` |
 | Holo vs selected solo token ratio | `3.17477` |
@@ -41,10 +42,11 @@ This is a no-provider combined memo over the Wave 2 Holo target Batch 001, Batch
 
 ## Claim Boundaries
 
-- This memo covers only Wave 2 Holo target Batches 001, 002, and 003, not the entire Wave 2 frozen packet bank.
+- This memo covers only Wave 2 Holo target Batches 001, 002, 003, not the entire Wave 2 frozen packet bank.
 - Holo solved all selected target packets run in these batches: 54/54 packets and 27/27 sibling pairs.
 - The matched solo one-shot results on the same selected packets were unreliable: 119/162 attempts were not KNEW/admissible.
-- Batch 002 carries the strongest wrong-verdict signal. Batch 003 carries additional strong solo-collapse evidence with no solo wrong-verdict count.
+- Selected-target evidence remains separate from full-family statistical proof until the non-target remainder has live Holo evidence.
+- Any staged selected-target or full-family remainder section is preflight-only and excluded from scored totals.
 - Token ratio is operational bookkeeping only. It is not a proof claim because solo was one-shot while Holo used governed multi-turn architecture.
 - No judges are included in this package. No new provider calls were made to create this combined memo.
 - Internal Holo worker misses are separated from external solo failures. They show governance correction, not standalone solo failure.
@@ -91,8 +93,119 @@ This is a no-provider combined memo over the Wave 2 Holo target Batch 001, Batch
 
 ## Remaining Target Pool
 
-Solo triage produced `37` top targets. Batch 001+002+003 have run `27` pairs, leaving `10` target pairs.
+Solo triage produced `37` top targets. These batches have run `27` pairs, leaving `10` target pairs.
+
+## Staged Final Target Batch
+
+Batch: `WAVE2_HOLO_TARGET_BATCH_004`
+Selection mode: `target-selection`
+Selection mode defaulted: `True`
+Status: `PASS`
+Ready for live Holo: `True`
+Selected pairs match expected target pool: `True`
+Providers called: `0`
+Live Holo started: `False`
+Live execution gate: `PASS`
+Solo started: `False`
+Judges started: `False`
+Expected live provider calls: `100` (`60` worker, `40` Gov)
+Expected solo calls: `0`
+Expected judge calls: `0`
+Live preflight root signature: `bfa320f216b25ac3f5f9c321573ae56270a66292906f0038531ae12bce5c0a3b`
+
+Claim boundary: Staged/preflight evidence only; not counted as Holo result, solo comparison, judge result, or statistical proof.
+
+| Priority | Family | Pair | Class | Bucket | Not KNEW | Wrong verdicts | Parse/provider fails |
+| ---: | --- | --- | --- | --- | ---: | ---: | ---: |
+| `9` | `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-016` | `STRONG_SOLO_COLLAPSE` | `hard_escalate` | `4` | `0` | `1` |
+| `8` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-005` | `STRONG_SOLO_COLLAPSE` | `hard_allow` | `4` | `0` | `0` |
+| `8` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-007` | `STRONG_SOLO_COLLAPSE` | `hard_allow` | `4` | `0` | `0` |
+| `8` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-008` | `STRONG_SOLO_COLLAPSE` | `hard_allow` | `4` | `0` | `0` |
+| `8` | `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-002` | `STRONG_SOLO_COLLAPSE` | `hard_allow` | `4` | `0` | `0` |
+| `8` | `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-017` | `STRONG_SOLO_COLLAPSE` | `hard_escalate` | `4` | `0` | `0` |
+| `8` | `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-020` | `STRONG_SOLO_COLLAPSE` | `hard_escalate` | `4` | `0` | `0` |
+| `8` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-006` | `STRONG_SOLO_COLLAPSE` | `hard_allow` | `4` | `0` | `0` |
+| `8` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-007` | `STRONG_SOLO_COLLAPSE` | `hard_allow` | `4` | `0` | `0` |
+| `8` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-010` | `STRONG_SOLO_COLLAPSE` | `hard_allow` | `4` | `0` | `0` |
+
+## Full-Family Remainder After Target Pool
+
+These pairs are outside the selected-target pool and are needed only for full 60-pair Wave 2 coverage.
+
+Remaining non-target full-family pairs: `23`.
+
+| Family | Pair | Bucket | Packets |
+| --- | --- | --- | --- |
+| `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-002` | `hard_allow` | `HV-DPRV-REP-002-A, HV-DPRV-REP-002-B` |
+| `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-003` | `hard_allow` | `HV-DPRV-REP-003-A, HV-DPRV-REP-003-B` |
+| `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-004` | `hard_allow` | `HV-DPRV-REP-004-A, HV-DPRV-REP-004-B` |
+| `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-006` | `hard_allow` | `HV-DPRV-REP-006-A, HV-DPRV-REP-006-B` |
+| `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-010` | `hard_allow` | `HV-DPRV-REP-010-A, HV-DPRV-REP-010-B` |
+| `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-011` | `hard_escalate` | `HV-DPRV-REP-011-A, HV-DPRV-REP-011-B` |
+| `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-016` | `hard_escalate` | `HV-DPRV-REP-016-A, HV-DPRV-REP-016-B` |
+| `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-017` | `hard_escalate` | `HV-DPRV-REP-017-A, HV-DPRV-REP-017-B` |
+| `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-005` | `hard_allow` | `HV-FINC-REP-005-A, HV-FINC-REP-005-B` |
+| `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-008` | `hard_allow` | `HV-FINC-REP-008-A, HV-FINC-REP-008-B` |
+| `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-014` | `hard_escalate` | `HV-FINC-REP-014-A, HV-FINC-REP-014-B` |
+| `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-018` | `hard_escalate` | `HV-FINC-REP-018-A, HV-FINC-REP-018-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-002` | `hard_allow` | `HV-HRWF-REP-002-A, HV-HRWF-REP-002-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-003` | `hard_allow` | `HV-HRWF-REP-003-A, HV-HRWF-REP-003-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-004` | `hard_allow` | `HV-HRWF-REP-004-A, HV-HRWF-REP-004-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-005` | `hard_allow` | `HV-HRWF-REP-005-A, HV-HRWF-REP-005-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-008` | `hard_allow` | `HV-HRWF-REP-008-A, HV-HRWF-REP-008-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-009` | `hard_allow` | `HV-HRWF-REP-009-A, HV-HRWF-REP-009-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-011` | `hard_escalate` | `HV-HRWF-REP-011-A, HV-HRWF-REP-011-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-013` | `hard_escalate` | `HV-HRWF-REP-013-A, HV-HRWF-REP-013-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-014` | `hard_escalate` | `HV-HRWF-REP-014-A, HV-HRWF-REP-014-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-015` | `hard_escalate` | `HV-HRWF-REP-015-A, HV-HRWF-REP-015-B` |
+| `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-016` | `hard_escalate` | `HV-HRWF-REP-016-A, HV-HRWF-REP-016-B` |
+
+## Staged Full-Family Remainder Batch
+
+Batch: `WAVE2_HOLO_TARGET_BATCH_005`
+Selection mode: `full-family-remainder`
+Selection mode defaulted: `False`
+Status: `PASS`
+Ready for live Holo: `True`
+Selected pairs match remaining full-family backlog: `True`
+Providers called: `0`
+Live Holo started: `False`
+Live execution gate: `LOCKED`
+Solo started: `False`
+Judges started: `False`
+Expected live provider calls: `230` (`138` worker, `92` Gov)
+Expected solo calls: `0`
+Expected judge calls: `0`
+Live preflight root signature: `3cf24480f79bde31d58774d5e2a32290f97f2c1ab9d5088b9f1eaf676909b46b`
+
+Claim boundary: Full-family remainder staging only; not selected-target evidence and not scored until a live Holo run exists.
+
+| Priority | Family | Pair | Class | Bucket | Not KNEW | Wrong verdicts | Parse/provider fails |
+| ---: | --- | --- | --- | --- | ---: | ---: | ---: |
+| `MISSING_REPO_EVIDENCE` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-002` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-003` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-004` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-006` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-010` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-011` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_escalate` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-016` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_escalate` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-DPRV-REP-2026-07-01` | `HV-DPRV-REP-017` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_escalate` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-005` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-008` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-014` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_escalate` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-FINC-REP-2026-07-01` | `HV-FINC-REP-018` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_escalate` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-002` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-003` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-004` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-005` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-008` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-009` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_allow` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-011` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_escalate` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-013` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_escalate` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-014` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_escalate` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-015` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_escalate` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
+| `MISSING_REPO_EVIDENCE` | `HV-HRWF-REP-2026-07-01` | `HV-HRWF-REP-016` | `NON_TARGET_FULL_FAMILY_COMPLETION` | `hard_escalate` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` | `MISSING_REPO_EVIDENCE` |
 
 ## Next Valid Step
 
-Continue only with an explicitly approved next target batch or a new frozen packet family. Do not run providers from this memo.
+Run explicitly approved live Holo execution for WAVE2_HOLO_TARGET_BATCH_004. Do not run solo or judges first.

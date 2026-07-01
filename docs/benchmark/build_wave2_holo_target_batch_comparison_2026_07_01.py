@@ -145,6 +145,16 @@ def pair_metadata(registration: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return grouped
 
 
+def evidence_class_for_triage(triage_class: str) -> str:
+    if triage_class == "ALL_SIX_SOLO_COLLAPSE":
+        return "ALL_SIX_SOLO_COLLAPSE_HOLO_PAIR_SOLVED"
+    if triage_class == "STRONG_SOLO_COLLAPSE":
+        return "STRONG_SOLO_COLLAPSE_HOLO_PAIR_SOLVED"
+    if triage_class == "NON_TARGET_FULL_FAMILY_COMPLETION":
+        return "NON_TARGET_FULL_FAMILY_COMPLETION_HOLO_PAIR_SOLVED"
+    return f"{triage_class}_HOLO_PAIR_SOLVED"
+
+
 def build_comparison(batch_number: int, run_dir: Path | None = None) -> dict[str, Any]:
     bid = batch_id(batch_number)
     root = batch_root(batch_number)
@@ -193,11 +203,7 @@ def build_comparison(batch_number: int, run_dir: Path | None = None) -> dict[str
                 outcome["trace_path"] = str(Path(solo_package["domains"][rec["family_id"]]["run_dir"]) / "SOLO_TRIAGE_TRACE.jsonl")
                 six_solo.append(outcome)
 
-        evidence_class = (
-            "ALL_SIX_SOLO_COLLAPSE_HOLO_PAIR_SOLVED"
-            if meta["triage_class"] == "ALL_SIX_SOLO_COLLAPSE"
-            else "STRONG_SOLO_COLLAPSE_HOLO_PAIR_SOLVED"
-        )
+        evidence_class = evidence_class_for_triage(meta["triage_class"])
         pair_rows.append(
             {
                 "domain": meta["domain"],
@@ -268,6 +274,9 @@ def build_comparison(batch_number: int, run_dir: Path | None = None) -> dict[str
         "solo_wrong_verdict": solo_tokens["wrong_verdict"],
         "all_six_solo_collapse_pairs": sum(1 for row in pair_rows if row["triage_class"] == "ALL_SIX_SOLO_COLLAPSE"),
         "strong_solo_collapse_pairs": sum(1 for row in pair_rows if row["triage_class"] == "STRONG_SOLO_COLLAPSE"),
+        "non_target_full_family_completion_pairs": sum(
+            1 for row in pair_rows if row["triage_class"] == "NON_TARGET_FULL_FAMILY_COMPLETION"
+        ),
         "token_ratio_holo_vs_selected_solo": round(holo_tokens["total_tokens"] / solo_tokens["total_tokens"], 6),
     }
 
@@ -295,11 +304,13 @@ def build_comparison(batch_number: int, run_dir: Path | None = None) -> dict[str
         "pair_rows": pair_rows,
         "scope": {
             "batch_id": bid,
+            "claim_boundary": registration.get("claim_boundary"),
             "holo_run": str(run_dir.relative_to(root)),
             "no_judges": True,
             "no_new_provider_calls_for_comparison": True,
             "selected_packets": registration["packet_count"],
             "selected_pairs": registration["pair_count"],
+            "selection_mode": registration.get("selection_mode", "target-selection"),
             "selection_source": str(TARGET_SELECTION.name),
             "solo_runs": [domain["run_dir"] for domain in solo_package["domains"].values()],
         },
@@ -356,6 +367,7 @@ def comparison_md(comparison: dict[str, Any], batch_number: int) -> str:
         ("Solo structural/evidence fails", "solo_structural_or_evidence_fail"),
         ("All-six solo-collapse pairs", "all_six_solo_collapse_pairs"),
         ("Strong solo-collapse pairs", "strong_solo_collapse_pairs"),
+        ("Non-target full-family completion pairs", "non_target_full_family_completion_pairs"),
         ("Intra-Holo worker misses corrected", "holo_intra_worker_misses_corrected"),
         ("Holo/selected solo token ratio", "token_ratio_holo_vs_selected_solo"),
     ]:

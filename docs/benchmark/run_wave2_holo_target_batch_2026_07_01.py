@@ -4,7 +4,7 @@
 Scope:
 - Reads the frozen Wave 2 packet bank.
 - Uses a staged Wave 2 target batch from the no-provider staging package.
-- Runs the complete HoloVerify architecture over 9 pairs / 18 packets.
+- Runs the complete HoloVerify architecture over the staged pair/packet count.
 - Does not run solo or judges.
 """
 
@@ -113,6 +113,79 @@ def write_text(path: Path, value: str) -> None:
 
 def current_head() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True).strip()
+
+
+def batch_artifact_path(batch_number: int, artifact_suffix: str) -> Path:
+    suffix = f"{batch_number:03d}"
+    bid = f"WAVE2_HOLO_TARGET_BATCH_{suffix}"
+    return FREEZE_ROOT / "holo_target_batches" / f"wave2_holo_target_batch_{suffix}" / f"{bid}_{artifact_suffix}_2026_07_01.json"
+
+
+def combined_memo_path(batch_numbers: list[int]) -> Path:
+    suffix = "_".join(f"{batch_number:03d}" for batch_number in batch_numbers)
+    return FREEZE_ROOT / "holo_target_batches" / f"WAVE2_HOLO_TARGET_BATCH_{suffix}_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+
+
+def effective_selection_mode(registration: dict[str, Any]) -> str:
+    return registration.get("selection_mode") or "target-selection"
+
+
+def required_approval_statement() -> str:
+    return (
+        f"I explicitly approve provider calls for {BATCH_ID} only, exactly as scoped in "
+        f"{BATCH_ID}_PROVIDER_APPROVAL_PACKET_2026_07_01."
+    )
+
+
+def provider_approval_packet_path() -> Path:
+    return STAGING_ROOT / f"{BATCH_ID}_PROVIDER_APPROVAL_PACKET_2026_07_01.json"
+
+
+def package_sha256(data: dict[str, Any]) -> str:
+    body = dict(data)
+    body.pop("created_at_utc", None)
+    body.pop("package_sha256", None)
+    rendered = json.dumps(body, indent=2, sort_keys=True) + "\n"
+    return sha256_text(rendered)
+
+
+def provider_approval_gate(
+    approval_statement: str | None,
+    approval_packet_sha256: str | None,
+    manifest: dict[str, Any],
+) -> dict[str, Any]:
+    expected = required_approval_statement()
+    approval_path = provider_approval_packet_path()
+    approval_packet = load_json(approval_path) if approval_path.exists() else {}
+    expected_packet_sha256 = approval_packet.get("package_sha256")
+    actual_packet_sha256 = package_sha256(approval_packet) if approval_packet else None
+    approval_counts = approval_packet.get("expected_calls_if_approved", {})
+    expected_counts = manifest["architecture_lock"]["expected_counts"]
+    checks = {
+        "approval_packet_exists": approval_path.exists(),
+        "approval_packet_hash_valid": expected_packet_sha256 == actual_packet_sha256,
+        "approval_packet_status_ready": approval_packet.get("status") == "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+        "approval_packet_does_not_self_grant": approval_packet.get("approval_granted_by_this_packet") is False,
+        "approval_packet_batch_matches": approval_packet.get("batch_id") == BATCH_ID,
+        "approval_packet_root_signature_matches_preflight": approval_packet.get("live_preflight_root_signature")
+        == manifest.get("root_signature"),
+        "approval_packet_expected_calls_match_preflight": approval_counts == expected_counts,
+        "approval_statement_provided": bool(approval_statement),
+        "approval_statement_exact_match": approval_statement == expected,
+        "approval_packet_sha256_provided": bool(approval_packet_sha256),
+        "approval_packet_sha256_exact_match": approval_packet_sha256 == expected_packet_sha256,
+        "approval_batch_matches_configured_batch": BATCH_ID in expected,
+    }
+    blocked = [key for key, value in checks.items() if not value]
+    return {
+        "approval_packet_path": str(approval_path.relative_to(REPO_ROOT)),
+        "approval_packet_sha256": expected_packet_sha256,
+        "approval_statement_sha256": sha256_text(expected),
+        "blocked_reason": blocked or None,
+        "checks": checks,
+        "required_approval_statement": expected,
+        "status": "PASS" if not blocked else "LOCKED",
+    }
 
 
 def configure_batch(batch_number: int) -> None:
@@ -371,11 +444,63 @@ def selected_pair_ids() -> list[str]:
     return list(registration["selected_pair_ids"])
 
 
+def live_execution_gate(registration: dict[str, Any] | None = None) -> dict[str, Any]:
+    registration = registration or load_json(REGISTRATION_PATH)
+    selection_mode = effective_selection_mode(registration)
+    if selection_mode != "full-family-remainder":
+        return {
+            "blocked_reason": None,
+            "required_before_live": [],
+            "selection_mode": selection_mode,
+            "status": "PASS",
+        }
+
+    batch_004_comparison = batch_artifact_path(4, "SOLO_VS_HOLO_COMPARISON")
+    batch_004_combined_memo = combined_memo_path([1, 2, 3, 4])
+    checks: dict[str, bool] = {
+        "batch_004_comparison_exists": batch_004_comparison.exists(),
+        "batch_004_combined_memo_exists": batch_004_combined_memo.exists(),
+    }
+    selected_target_pairs = None
+    scored_pairs = None
+    scored_packets = None
+    if batch_004_combined_memo.exists():
+        combined = load_json(batch_004_combined_memo)
+        metrics = combined.get("combined_metrics") or combined.get("summary_metrics", {})
+        staged_next = combined.get("staged_next_target_batch") or combined.get("staged_next_batch")
+        selected_target_pairs = len(
+            load_json(FREEZE_ROOT / "solo_triage_3mini/WAVE2_HOLO_TARGET_SELECTION_FROM_SOLO_TRIAGE_2026_07_01.json").get(
+                "all_top_targets", []
+            )
+        )
+        scored_pairs = metrics.get("holo_pairs", metrics.get("holo_sibling_pairs"))
+        scored_packets = metrics.get("holo_packets")
+        checks["batch_004_combined_memo_scores_all_37_selected_targets"] = scored_pairs == selected_target_pairs == 37
+        checks["batch_004_combined_memo_has_74_scored_packets"] = scored_packets == 74
+        checks["batch_004_combined_memo_has_no_next_target_batch"] = not staged_next
+
+    blocked = [key for key, value in checks.items() if not value]
+    return {
+        "blocked_reason": blocked or None,
+        "checks": checks,
+        "required_before_live": [
+            str(batch_004_comparison.relative_to(REPO_ROOT)),
+            str(batch_004_combined_memo.relative_to(REPO_ROOT)),
+        ],
+        "scored_packets_in_promoted_selected_target_memo": scored_packets,
+        "scored_pairs_in_promoted_selected_target_memo": scored_pairs,
+        "selected_target_pair_pool": selected_target_pairs,
+        "selection_mode": selection_mode,
+        "status": "PASS" if not blocked else "LOCKED",
+    }
+
+
 def build_live_preflight() -> dict[str, Any]:
     configure_openai_w2_runner()
     freeze_manifest = load_json(FREEZE_ROOT / "FREEZE_MANIFEST.json")
     staging_preflight = load_json(PREFLIGHT_PATH)
     registration = load_json(REGISTRATION_PATH)
+    execution_gate = live_execution_gate(registration)
     records = read_freeze_records()
     pairs = build_pairs(records)
     worker_sequence = [
@@ -491,6 +616,9 @@ def build_live_preflight() -> dict[str, Any]:
         "status": architecture_lock["status"],
         "created_at": datetime.now(timezone.utc).isoformat(),
         "batch_id": BATCH_ID,
+        "selection_mode": effective_selection_mode(registration),
+        "selection_mode_defaulted": registration.get("selection_mode") is None,
+        "claim_boundary": registration.get("claim_boundary"),
         "freeze_root_hash": EXPECTED_FREEZE_ROOT_HASH,
         "registration_ref": str(REGISTRATION_PATH.relative_to(REPO_ROOT)),
         "staging_preflight_ref": str(PREFLIGHT_PATH.relative_to(REPO_ROOT)),
@@ -500,6 +628,10 @@ def build_live_preflight() -> dict[str, Any]:
         "architecture_lock": architecture_lock,
         "packet_records": packet_records,
         "checks": checks,
+        "live_execution_gate": execution_gate,
+        "provider_approval_required": True,
+        "required_approval_statement": required_approval_statement(),
+        "required_approval_statement_sha256": sha256_text(required_approval_statement()),
         "blocked_reason": None if all(checks.values()) else [key for key, value in checks.items() if not value],
         "providers_called": 0,
         "solo_started": False,
@@ -513,11 +645,18 @@ def build_live_preflight() -> dict[str, Any]:
 
 
 def render_preflight_md(preflight: dict[str, Any]) -> str:
+    title = (
+        f"Wave 2 Holo Full-Family Remainder Batch {BATCH_SUFFIX} Live Preflight"
+        if preflight.get("selection_mode") == "full-family-remainder"
+        else f"Wave 2 Holo Target Batch {BATCH_SUFFIX} Live Preflight"
+    )
     lines = [
-        f"# Wave 2 Holo Target Batch {BATCH_SUFFIX} Live Preflight",
+        f"# {title}",
         "",
         f"Status: `{preflight['status']}`",
         f"Batch: `{preflight['batch_id']}`",
+        f"Selection mode: `{preflight.get('selection_mode')}`",
+        f"Selection mode defaulted: `{preflight.get('selection_mode_defaulted')}`",
         f"Freeze root: `{preflight['freeze_root_hash']}`",
         f"Root signature: `{preflight['root_signature']}`",
         "",
@@ -535,11 +674,47 @@ def render_preflight_md(preflight: dict[str, Any]) -> str:
     lines.extend(["", "## Checks", "", "| Check | Value |", "| --- | --- |"])
     for key, value in preflight["checks"].items():
         lines.append(f"| `{key}` | `{value}` |")
+    gate = preflight.get("live_execution_gate", {})
+    lines.extend(["", "## Live Execution Gate", ""])
+    lines.append(f"Status: `{gate.get('status', 'UNKNOWN')}`")
+    if gate.get("blocked_reason"):
+        lines.append(f"Blocked reason: `{gate['blocked_reason']}`")
+    if gate.get("required_before_live"):
+        lines.extend(["", "Required before live:", ""])
+        for item in gate["required_before_live"]:
+            lines.append(f"- `{item}`")
+    approval_statement = preflight.get("required_approval_statement") or ""
+    approved_live_command = (
+        f"python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number {BATCH_NUMBER} "
+        "--run-live --approval-packet-sha256 APPROVAL_PACKET_SHA256_FROM_PROVIDER_APPROVAL_PACKET "
+        f"--approval-statement {json.dumps(approval_statement)}"
+    )
+    lines.extend(
+        [
+            "",
+            "## Provider Approval Gate",
+            "",
+            f"Approval required: `{preflight.get('provider_approval_required')}`",
+            f"Required statement SHA-256: `{preflight.get('required_approval_statement_sha256')}`",
+            "",
+            "Required approval statement:",
+            "",
+            f"`{preflight.get('required_approval_statement')}`",
+        ]
+    )
     lines.extend(["", "## Next Step", ""])
     if preflight["status"] == "PASS":
-        lines.append(
-            f"Run `python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number {BATCH_NUMBER} --run-live` only when provider calls are approved."
-        )
+        if preflight.get("selection_mode") == "full-family-remainder":
+            if gate.get("status") == "PASS":
+                lines.append(
+                    f"Run `{approved_live_command}` only when provider calls are explicitly approved."
+                )
+            else:
+                lines.append("Do not run live. Batch 005 remains locked behind Batch 004 comparison and promotion.")
+        else:
+            lines.append(
+                f"Run `{approved_live_command}` only when provider calls are approved."
+            )
     else:
         lines.append(f"Do not run live. Blocked checks: `{preflight['blocked_reason']}`")
     return "\n".join(lines) + "\n"
@@ -806,8 +981,14 @@ def render_live_summary_md(summary: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def run_live() -> int:
+def run_live(approval_statement: str | None, approval_packet_sha256: str | None) -> int:
     manifest = validate_preflight()
+    gate = manifest.get("live_execution_gate", {})
+    if gate.get("status") != "PASS":
+        raise RuntimeError(f"wave2_holo_live_execution_gate_locked:{gate.get('blocked_reason')}")
+    approval_gate = provider_approval_gate(approval_statement, approval_packet_sha256, manifest)
+    if approval_gate["status"] != "PASS":
+        raise RuntimeError(f"wave2_holo_provider_approval_gate_locked:{approval_gate['blocked_reason']}")
     for key in ("xai", OPENAI_W2_MODEL_KEY, "minimax"):
         env = RUNNER.MODEL_CONFIGS[key]["api_key_env"]
         if not os.getenv(env, "").strip():
@@ -839,6 +1020,8 @@ def main() -> int:
     parser.add_argument("--batch-number", type=int, default=1)
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--run-live", action="store_true")
+    parser.add_argument("--approval-statement")
+    parser.add_argument("--approval-packet-sha256")
     args = parser.parse_args()
     configure_batch(args.batch_number)
     if args.preflight:
@@ -846,7 +1029,7 @@ def main() -> int:
         print(json.dumps(manifest, indent=2, sort_keys=True))
         return 0
     if args.run_live:
-        return run_live()
+        return run_live(args.approval_statement, args.approval_packet_sha256)
     parser.error("choose --preflight or --run-live")
     return 2
 

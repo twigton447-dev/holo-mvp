@@ -42,11 +42,38 @@ WAVE2_TARGET_FAMILY = "Wave 2 / HR-Data Privacy-Finance Targeted Holo Runs"
 WAVE2_TARGET_DOMAIN = "HR, data privacy, and finance close controls"
 WAVE2_TARGET_TIER = "wave2_selected_target_batches_complete"
 WAVE2_SELECTED_SOLO_TIER = "wave2_selected_target_solo_triage_exact_roster"
+WAVE2_FULL_FAMILY_REMAINDER_TIER = "wave2_full_family_remainder_holo_batches"
+WAVE2_FULL_FAMILY_REMAINDER_SOLO_TIER = "wave2_full_family_remainder_solo_triage_exact_roster"
 WAVE2_ROSTER_NOTE = (
     "Wave 2 Holo roster: W1 xai/grok-3-mini, G1 minimax/MiniMax-M2.5-highspeed, "
     "W2 openai/gpt-5.4-mini, G2 minimax/MiniMax-M2.5-highspeed, W3 minimax/MiniMax-M2.5-highspeed. "
     "Solo triage used the same three model families: xai/grok-3-mini, openai/gpt-5.4-mini, and minimax/MiniMax-M2.5-highspeed."
 )
+
+
+def wave2_existing_batch_numbers(batches_root: Path) -> list[int]:
+    numbers: list[int] = []
+    for batch_dir in sorted((ROOT / batches_root).glob("wave2_holo_target_batch_*")):
+        match = re.search(r"wave2_holo_target_batch_(\d{3})$", batch_dir.name)
+        if not match:
+            continue
+        batch_number = int(match.group(1))
+        bid = f"WAVE2_HOLO_TARGET_BATCH_{batch_number:03d}"
+        comparison = batches_root / batch_dir.name / f"{bid}_SOLO_VS_HOLO_COMPARISON_2026_07_01.json"
+        if (ROOT / comparison).exists():
+            numbers.append(batch_number)
+    return numbers
+
+
+def wave2_selection_mode(comparison: dict[str, Any]) -> str:
+    mode = (comparison.get("scope") or {}).get("selection_mode")
+    if mode:
+        return mode
+    if comparison.get("summary_metrics", {}).get("non_target_full_family_completion_pairs"):
+        return "full-family-remainder"
+    if any(row.get("triage_class") == "NON_TARGET_FULL_FAMILY_COMPLETION" for row in comparison.get("pair_rows", [])):
+        return "full-family-remainder"
+    return "target-selection"
 
 
 def rel(path: Path | str) -> str:
@@ -509,16 +536,21 @@ def add_solo_triage(
 def add_wave2_target_batches() -> None:
     base = Path("docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01")
     batches_root = base / "holo_target_batches"
-    combined = batches_root / "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
-    if (ROOT / combined).exists():
+    batch_numbers = wave2_existing_batch_numbers(batches_root)
+    if batch_numbers:
+        suffix = "_".join(f"{batch_number:03d}" for batch_number in batch_numbers)
+        combined = batches_root / f"WAVE2_HOLO_TARGET_BATCH_{suffix}_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+    else:
+        combined = batches_root / "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+    if batch_numbers and (ROOT / combined).exists():
         add_source(
-            "WAVE2_TARGET_BATCH_001_002_003_COMBINED_MEMO",
+            f"WAVE2_TARGET_BATCH_{suffix}_COMBINED_MEMO",
             "HoloVerify",
             str(combined),
             "PASS",
             True,
             WAVE2_TARGET_TIER,
-            "No-provider combined memo for completed Wave 2 target batches 001-003; selected-target evidence, not full-family statistical proof.",
+            "No-provider combined memo for completed Wave 2 target batches; selected-target evidence remains separated from full-family remainder evidence.",
         )
 
     solo_package = base / "solo_triage_3mini/WAVE2_3FAMILY_SOLO_TRIAGE_EVIDENCE_PACKAGE_2026_07_01.json"
@@ -535,20 +567,39 @@ def add_wave2_target_batches() -> None:
         )
 
     seen_solo_runs: set[str] = set()
-    for batch_number in (1, 2, 3):
+    for batch_number in batch_numbers:
         bid = f"WAVE2_HOLO_TARGET_BATCH_{batch_number:03d}"
         comparison_path = batches_root / f"wave2_holo_target_batch_{batch_number:03d}" / f"{bid}_SOLO_VS_HOLO_COMPARISON_2026_07_01.json"
         if not (ROOT / comparison_path).exists():
             continue
         comparison = load_json(comparison_path)
-        notes = f"Wave 2 selected-target batch {batch_number:03d}; not a full-family 60-pair statistical proof. {WAVE2_ROSTER_NOTE}"
+        selection_mode = wave2_selection_mode(comparison)
+        if selection_mode == "full-family-remainder":
+            comparison_source_id = f"WAVE2_FULL_FAMILY_REMAINDER_BATCH_{batch_number:03d}_COMPARISON"
+            holo_source_id = f"WAVE2_FULL_FAMILY_REMAINDER_BATCH_{batch_number:03d}_HOLO_LIVE"
+            holo_tier = WAVE2_FULL_FAMILY_REMAINDER_TIER
+            solo_tier = WAVE2_FULL_FAMILY_REMAINDER_SOLO_TIER
+            solo_system = "Full-family remainder solo one-shot triage"
+            notes = (
+                f"Wave 2 full-family remainder batch {batch_number:03d}; not selected-target evidence. "
+                f"{WAVE2_ROSTER_NOTE}"
+            )
+            solo_notes = f"Full-family remainder comparison batch {batch_number:03d}"
+        else:
+            comparison_source_id = f"WAVE2_TARGET_BATCH_{batch_number:03d}_COMPARISON"
+            holo_source_id = f"WAVE2_TARGET_BATCH_{batch_number:03d}_HOLO_LIVE"
+            holo_tier = WAVE2_TARGET_TIER
+            solo_tier = WAVE2_SELECTED_SOLO_TIER
+            solo_system = "Selected solo one-shot triage"
+            notes = f"Wave 2 selected-target batch {batch_number:03d}; not a full-family 60-pair statistical proof. {WAVE2_ROSTER_NOTE}"
+            solo_notes = f"Selected-target comparison batch {batch_number:03d}"
         add_source(
-            f"WAVE2_TARGET_BATCH_{batch_number:03d}_COMPARISON",
+            comparison_source_id,
             "HoloVerify",
             str(comparison_path),
             "PASS",
             True,
-            WAVE2_TARGET_TIER,
+            holo_tier,
             notes,
         )
 
@@ -559,18 +610,18 @@ def add_wave2_target_batches() -> None:
             live_path = batches_root / f"wave2_holo_target_batch_{batch_number:03d}" / comparison["scope"]["holo_run"] / "live_results.json"
         lock_status = holo_summary.get("lock_validation_status") or (holo_summary.get("lock_validation") or {}).get("validation_status", "PASS")
         add_source(
-            f"WAVE2_TARGET_BATCH_{batch_number:03d}_HOLO_LIVE",
+            holo_source_id,
             "HoloVerify",
             str(live_path),
             lock_status,
             True,
-            WAVE2_TARGET_TIER,
+            holo_tier,
             notes,
         )
         add_holo_result(
             family=WAVE2_TARGET_FAMILY,
             domain=WAVE2_TARGET_DOMAIN,
-            evidence_tier=WAVE2_TARGET_TIER,
+            evidence_tier=holo_tier,
             path=str(live_path),
             notes=notes,
         )
@@ -580,8 +631,8 @@ def add_wave2_target_batches() -> None:
         add_run_summary(
             evidence_family=WAVE2_TARGET_FAMILY,
             domain=WAVE2_TARGET_DOMAIN,
-            evidence_tier=WAVE2_SELECTED_SOLO_TIER,
-            system="Selected solo one-shot triage",
+            evidence_tier=solo_tier,
+            system=solo_system,
             source_path=str(comparison_path),
             classification=comparison["classification"],
             status="PASS",
@@ -609,8 +660,8 @@ def add_wave2_target_batches() -> None:
                 str(result_path),
                 "PASS",
                 True,
-                WAVE2_SELECTED_SOLO_TIER,
-                f"Canonical Wave 2 solo triage run referenced by selected-target comparisons. {WAVE2_ROSTER_NOTE}",
+                solo_tier,
+                f"Canonical Wave 2 solo triage run referenced by Wave 2 comparisons. {WAVE2_ROSTER_NOTE}",
             )
 
         for pair in comparison["pair_rows"]:
@@ -618,8 +669,8 @@ def add_wave2_target_batches() -> None:
                 add_packet_row(
                     evidence_family=WAVE2_TARGET_FAMILY,
                     domain=pair["domain"],
-                    evidence_tier=WAVE2_SELECTED_SOLO_TIER,
-                    system="Selected solo one-shot triage",
+                    evidence_tier=solo_tier,
+                    system=solo_system,
                     model=f"{outcome.get('provider')}/{outcome.get('model')}",
                     packet_id=outcome.get("packet_id", ""),
                     pair_id=pair["pair_id"],
@@ -629,7 +680,7 @@ def add_wave2_target_batches() -> None:
                     source_path=outcome.get("trace_path") or str(comparison_path),
                     source_root=comparison.get("source_target_selection_sha256", ""),
                     failure_class=outcome.get("failure_class", ""),
-                    notes=f"Selected-target comparison batch {batch_number:03d}; solo label {outcome.get('solo_label', '')}.",
+                    notes=f"{solo_notes}; solo label {outcome.get('solo_label', '')}.",
                     token_total=outcome.get("total_tokens"),
                 )
 

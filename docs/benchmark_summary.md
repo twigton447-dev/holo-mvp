@@ -1,19 +1,17 @@
 ## Benchmark Update
 
-454/454 frozen action-boundary packets correct. That is the same as 0 total
-packet errors across the clean denominator.
+454/454 frozen action-boundary packets correct. Zero observed false positives
+and zero observed false negatives.
 
-The breakdown below shows the same result three ways: total packet errors,
-ALLOW-side false positives, and ESCALATE-side false negatives.
+Read the table left to right: **Errors** is what happened in the test, **n** is
+the denominator, and the two right columns are 95% upper bounds on the unknown
+real error rate.
 
-| Signal | Result |
-| --- | ---: |
-| Overall packet error, all packets | 0 / 454 |
-| Overall packet error 95% upper bound | Exact 0.658% / Wilson 0.839% |
-| False positive rate, ALLOW side | 0 / 227 |
-| False positive rate 95% upper bound | Exact 1.311% / Wilson 1.664% |
-| False negative rate, ESCALATE side | 0 / 227 |
-| False negative rate 95% upper bound | Exact 1.311% / Wilson 1.664% |
+| Metric | Errors | n | Exact 95% upper bound | Wilson 95% upper bound |
+| --- | ---: | ---: | ---: | ---: |
+| Overall packet error | 0 | 454 | 0.658% | 0.839% |
+| False positive rate | 0 | 227 | 1.311% | 1.664% |
+| False negative rate | 0 | 227 | 1.311% | 1.664% |
 
 ---
 

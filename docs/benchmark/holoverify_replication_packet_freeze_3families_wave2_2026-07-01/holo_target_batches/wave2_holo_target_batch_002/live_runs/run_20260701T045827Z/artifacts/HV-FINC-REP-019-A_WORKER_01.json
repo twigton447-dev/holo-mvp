@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May finance book, release, defer, capitalize, consolidate, or recognize the requested accounting action now? Focus: tax accrual adjustment with missing reviewer signoff.",
+    "allow_rule_assessment": "Exact signoff match required before execution",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-45791B48A49D-CTL",
+    "escalate_rule_assessment": "Unresolved reviewer signoff blocks boundary close",
+    "timing_scope_authority_dependency_check": "Tax memo jurisdiction reviewer signoff unresolved"
+  },
+  "cited_evidence": [
+    "SRC-45791B48A49D-REQ",
+    "SRC-45791B48A49D-CTL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records show unresolved reviewer signoff dependency for tax accrual adjustment. Boundary remains open per control ledger and request focus. Action may not proceed until exact match confirmed. Escalate to close dependency before execution.",
+  "open_blockers": [
+    "missing reviewer signoff"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

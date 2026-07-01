@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May finance book, release, defer, capitalize, consolidate, or recognize the requested accounting action now? Focus: intercompany elimination with unmatched counterparty ledger.",
+    "allow_rule_assessment": "Source records do not close exact action boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-77CE1B2F03CE-CTL",
+    "escalate_rule_assessment": "Missing counterparty ledger blocks booking.",
+    "timing_scope_authority_dependency_check": "Counterparty ledger match remains unresolved."
+  },
+  "cited_evidence": [
+    "SRC-77CE1B2F03CE-BND",
+    "SRC-77CE1B2F03CE-CTL",
+    "SRC-77CE1B2F03CE-FBK",
+    "SRC-77CE1B2F03CE-POL",
+    "SRC-77CE1B2F03CE-REQ"
+  ],
+  "critical_features_preserved": [
+    "exact source boundary",
+    "unmatched dependency",
+    "source-control authority",
+    "no tone-based decision",
+    "counterparty ledger and elimination amount match",
+    "SRC-77CE1B2F03CE-CTL",
+    "SRC-77CE1B2F03CE-BND"
+  ],
+  "final_answer": "Source records do not close the exact action boundary. The control record and boundary text both show the counterparty ledger mismatch remains open, so the requested intercompany elimination should not proceed. Escalate for reconciliation and matching of the counterparty ledger and elimination amount before any booking or consolidation.",
+  "open_blockers": [
+    "counterparty ledger mismatch"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

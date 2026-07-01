@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Run the staged Wave 2 Holo target batch.
+"""Run staged Wave 2 Holo target batches.
 
 Scope:
 - Reads the frozen Wave 2 packet bank.
-- Uses only WAVE2_HOLO_TARGET_BATCH_001 from the no-provider staging package.
+- Uses a staged Wave 2 target batch from the no-provider staging package.
 - Runs the complete HoloVerify architecture over 9 pairs / 18 packets.
 - Does not run solo or judges.
 """
@@ -33,6 +33,9 @@ if str(REPO_ROOT) not in sys.path:
 
 BASE_RUNNER_PATH = BENCHMARK_ROOT / "run_20pair_holoverify_3dna_2026_06_29.py"
 FREEZE_ROOT = BENCHMARK_ROOT / "holoverify_replication_packet_freeze_3families_wave2_2026-07-01"
+BATCH_NUMBER = 1
+BATCH_SUFFIX = "001"
+BATCH_ID = "WAVE2_HOLO_TARGET_BATCH_001"
 STAGING_ROOT = FREEZE_ROOT / "holo_target_batches" / "wave2_holo_target_batch_001"
 REGISTRATION_PATH = STAGING_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_REGISTRATION_2026_07_01.json"
 PREFLIGHT_PATH = STAGING_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_PREFLIGHT_2026_07_01.json"
@@ -110,6 +113,21 @@ def write_text(path: Path, value: str) -> None:
 
 def current_head() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True).strip()
+
+
+def configure_batch(batch_number: int) -> None:
+    global BATCH_NUMBER, BATCH_SUFFIX, BATCH_ID, STAGING_ROOT, REGISTRATION_PATH, PREFLIGHT_PATH, LIVE_PREFLIGHT_JSON, LIVE_PREFLIGHT_MD, LIVE_RUN_ROOT
+    if batch_number < 1:
+        raise ValueError("batch_number must be >= 1")
+    BATCH_NUMBER = batch_number
+    BATCH_SUFFIX = f"{batch_number:03d}"
+    BATCH_ID = f"WAVE2_HOLO_TARGET_BATCH_{BATCH_SUFFIX}"
+    STAGING_ROOT = FREEZE_ROOT / "holo_target_batches" / f"wave2_holo_target_batch_{BATCH_SUFFIX}"
+    REGISTRATION_PATH = STAGING_ROOT / f"{BATCH_ID}_REGISTRATION_2026_07_01.json"
+    PREFLIGHT_PATH = STAGING_ROOT / f"{BATCH_ID}_PREFLIGHT_2026_07_01.json"
+    LIVE_PREFLIGHT_JSON = STAGING_ROOT / f"{BATCH_ID}_LIVE_PREFLIGHT_2026_07_01.json"
+    LIVE_PREFLIGHT_MD = STAGING_ROOT / f"{BATCH_ID}_LIVE_PREFLIGHT_2026_07_01.md"
+    LIVE_RUN_ROOT = STAGING_ROOT / "live_runs"
 
 
 def git_diff_names(path: Path) -> list[str]:
@@ -396,15 +414,18 @@ def build_live_preflight() -> dict[str, Any]:
     ]
     families_diff = git_diff_names(FREEZE_ROOT / "families")
     manifests_diff = git_diff_names(FREEZE_ROOT / "manifests")
+    expected_pair_count = registration["expected_counts"]["pairs"]
+    expected_packet_count = registration["expected_counts"]["packets"]
+    expected_total_calls = registration["expected_counts"]["total_provider_calls"]
     checks = {
         "staging_preflight_passed": staging_preflight.get("status") == "PASS",
         "freeze_root_matches": freeze_manifest.get("freeze_root_hash") == EXPECTED_FREEZE_ROOT_HASH,
         "target_selection_sha_matches": registration.get("source_target_selection_sha256") == EXPECTED_TARGET_SELECTION_SHA,
-        "pair_count": len(pairs) == 9,
-        "packet_count": len(records) == 18,
+        "pair_count": len(pairs) == expected_pair_count,
+        "packet_count": len(records) == expected_packet_count,
         "selected_pair_ids_match_registration": [pair["pair_id"] for pair in pairs] == selected_pair_ids(),
-        "packet_hashes_match_freeze": len(records) == 18,
-        "prompt_hashes_match_freeze": len(records) == 18,
+        "packet_hashes_match_freeze": len(records) == expected_packet_count,
+        "prompt_hashes_match_freeze": len(records) == expected_packet_count,
         "no_packet_edits": not families_diff,
         "no_prompt_edits": not families_diff,
         "no_manifest_edits": not manifests_diff,
@@ -428,16 +449,16 @@ def build_live_preflight() -> dict[str, Any]:
         "best_artifact_registry_configured": callable(getattr(RUNNER, "_select_best", None)),
         "pinned_best_configured": callable(getattr(RUNNER, "_make_state_brief", None)),
         "final_selector_configured": callable(getattr(RUNNER, "_select_best", None)),
-        "expected_provider_calls_90": len(records) * 5 == 90,
+        f"expected_provider_calls_{expected_total_calls}": len(records) * 5 == expected_total_calls,
         "solo_calls_0": True,
         "judge_calls_0": True,
     }
     architecture_lock = {
-        "classification": "WAVE2_HOLO_TARGET_BATCH_001_LIVE_PREFLIGHT",
+        "classification": f"{BATCH_ID}_LIVE_PREFLIGHT",
         "status": "PASS" if all(checks.values()) else "FAIL",
         "current_head_at_preflight": current_head(),
         "freeze_root_hash": EXPECTED_FREEZE_ROOT_HASH,
-        "batch_id": "WAVE2_HOLO_TARGET_BATCH_001",
+        "batch_id": BATCH_ID,
         "model_roster_declared": {
             "worker_sequence": worker_sequence,
             "gov": gov,
@@ -466,14 +487,15 @@ def build_live_preflight() -> dict[str, Any]:
         },
     }
     preimage = {
-        "classification": "WAVE2_HOLO_TARGET_BATCH_001_LIVE_PREFLIGHT",
+        "classification": f"{BATCH_ID}_LIVE_PREFLIGHT",
         "status": architecture_lock["status"],
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "batch_id": "WAVE2_HOLO_TARGET_BATCH_001",
+        "batch_id": BATCH_ID,
         "freeze_root_hash": EXPECTED_FREEZE_ROOT_HASH,
         "registration_ref": str(REGISTRATION_PATH.relative_to(REPO_ROOT)),
         "staging_preflight_ref": str(PREFLIGHT_PATH.relative_to(REPO_ROOT)),
         "runner_script": str(Path(__file__).relative_to(BENCHMARK_ROOT)),
+        "runner_batch_arg": f"--batch-number {BATCH_NUMBER}",
         "base_runner_script": str(BASE_RUNNER_PATH.relative_to(BENCHMARK_ROOT)),
         "architecture_lock": architecture_lock,
         "packet_records": packet_records,
@@ -492,7 +514,7 @@ def build_live_preflight() -> dict[str, Any]:
 
 def render_preflight_md(preflight: dict[str, Any]) -> str:
     lines = [
-        "# Wave 2 Holo Target Batch 001 Live Preflight",
+        f"# Wave 2 Holo Target Batch {BATCH_SUFFIX} Live Preflight",
         "",
         f"Status: `{preflight['status']}`",
         f"Batch: `{preflight['batch_id']}`",
@@ -515,7 +537,9 @@ def render_preflight_md(preflight: dict[str, Any]) -> str:
         lines.append(f"| `{key}` | `{value}` |")
     lines.extend(["", "## Next Step", ""])
     if preflight["status"] == "PASS":
-        lines.append("Run `python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --run-live` only when provider calls are approved.")
+        lines.append(
+            f"Run `python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number {BATCH_NUMBER} --run-live` only when provider calls are approved."
+        )
     else:
         lines.append(f"Do not run live. Blocked checks: `{preflight['blocked_reason']}`")
     return "\n".join(lines) + "\n"
@@ -535,7 +559,7 @@ def lock_directory(run_dir: Path, filename_prefix: str = "LOCK") -> dict[str, An
             continue
         files.append({"relative_path": str(path.relative_to(run_dir)), "sha256": sha256_file(path), "bytes": path.stat().st_size})
     manifest_no_root = {
-        "classification": f"WAVE2_HOLO_TARGET_BATCH_001_{filename_prefix}_MANIFEST",
+        "classification": f"{BATCH_ID}_{filename_prefix}_MANIFEST",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "run_dir": str(run_dir),
         "freeze_root_hash": EXPECTED_FREEZE_ROOT_HASH,
@@ -585,7 +609,7 @@ def no_leakage_audit(run_dir: Path) -> dict[str, Any]:
             if pattern.lower() in lower:
                 hits.append({"path": str(path.relative_to(run_dir)), "pattern": pattern})
     return {
-        "classification": "WAVE2_HOLO_TARGET_BATCH_001_NO_LEAKAGE_AUDIT",
+        "classification": f"{BATCH_ID}_NO_LEAKAGE_AUDIT",
         "status": "PASS" if not hits else "FAIL",
         "run_dir": str(run_dir),
         "prompt_files_scanned": len(prompt_files),
@@ -689,10 +713,10 @@ def holo_summary(run_dir: Path, manifest: dict[str, Any], packet_results: list[d
         and law_validation.official_valid
     )
     summary = {
-        "classification": "WAVE2_HOLO_TARGET_BATCH_001_COMPLETE" if readiness else "WAVE2_HOLO_TARGET_BATCH_001_INVALID_OR_INCOMPLETE",
+        "classification": f"{BATCH_ID}_COMPLETE" if readiness else f"{BATCH_ID}_INVALID_OR_INCOMPLETE",
         "readiness_passed": readiness,
         "run_dir": str(run_dir),
-        "batch_id": "WAVE2_HOLO_TARGET_BATCH_001",
+        "batch_id": BATCH_ID,
         "freeze_root_hash": EXPECTED_FREEZE_ROOT_HASH,
         "pre_run_root_signature": manifest["root_signature"],
         "trace_hash": sha256_file(trace_path) if trace_path.exists() else None,
@@ -736,14 +760,14 @@ def holo_summary(run_dir: Path, manifest: dict[str, Any], packet_results: list[d
         "packet_results": [{k: v for k, v in result.items() if k != "calls"} for result in packet_results],
     }
     write_json(run_dir / "live_results.json", summary)
-    write_json(run_dir / "WAVE2_HOLO_TARGET_BATCH_001_NO_LEAKAGE_AUDIT.json", leakage)
+    write_json(run_dir / f"{BATCH_ID}_NO_LEAKAGE_AUDIT.json", leakage)
     write_text(run_dir / "live_summary.md", render_live_summary_md(summary))
     return summary
 
 
 def render_live_summary_md(summary: dict[str, Any]) -> str:
     lines = [
-        "# Wave 2 Holo Target Batch 001 Live Summary",
+        f"# Wave 2 Holo Target Batch {BATCH_SUFFIX} Live Summary",
         "",
         f"Classification: `{summary['classification']}`",
         f"Readiness passed: `{summary['readiness_passed']}`",
@@ -812,9 +836,11 @@ def run_live() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--batch-number", type=int, default=1)
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--run-live", action="store_true")
     args = parser.parse_args()
+    configure_batch(args.batch_number)
     if args.preflight:
         manifest = validate_preflight()
         print(json.dumps(manifest, indent=2, sort_keys=True))

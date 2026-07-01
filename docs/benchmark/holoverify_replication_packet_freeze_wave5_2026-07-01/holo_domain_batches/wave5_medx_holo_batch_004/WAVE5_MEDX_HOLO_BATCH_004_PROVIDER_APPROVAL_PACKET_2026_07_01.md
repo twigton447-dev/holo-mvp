@@ -4,8 +4,8 @@ Status: `READY_FOR_EXPLICIT_PROVIDER_APPROVAL`
 Batch: `WAVE5_MEDX_HOLO_BATCH_004`
 Family: `HV-MEDX-REP-2026-07-01`
 Approval granted by this packet: `False`
-Approval packet SHA-256: `6f713a7de3d08aa5c1d92e8c4918273e80534d368b0b8184086e61e23a344431`
-Live preflight root signature: `c4825e9ddaa15bfb1f2e76e479c54ff92f2d681e75222b366cdae34013b75935`
+Approval packet SHA-256: `7fb34b48ae48831fb18451b6211a3ef5f420822a24908659139abe5f63e6ac2d`
+Live preflight root signature: `9405c2e3d1385209c85342b235aa623268868e9dddc2ddd144addd3edf05f5e2`
 
 ## Required Statement
 
@@ -24,7 +24,7 @@ Live preflight root signature: `c4825e9ddaa15bfb1f2e76e479c54ff92f2d681e75222b36
 ## Command After Explicit Approval
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 6f713a7de3d08aa5c1d92e8c4918273e80534d368b0b8184086e61e23a344431 --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_004 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 7fb34b48ae48831fb18451b6211a3ef5f420822a24908659139abe5f63e6ac2d --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_004 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Stop Rules

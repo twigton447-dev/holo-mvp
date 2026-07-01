@@ -4,8 +4,8 @@ Status: `READY_FOR_EXPLICIT_PROVIDER_APPROVAL`
 Batch: `WAVE5_PSRC_HOLO_BATCH_002`
 Family: `HV-PSRC-REP-2026-07-01`
 Approval granted by this packet: `False`
-Approval packet SHA-256: `16af8f89d318abb1d05cc6f3bafc51329fe8de5ea9a83376fa6a3e4038d8626a`
-Live preflight root signature: `5aace5929f59126db33b665abc80598e64ef2e7836786dead6107c051867e5f3`
+Approval packet SHA-256: `2f4862937b1cd633d98f828667e44b3771c812a5ff786640a3c5f3e378c03a7e`
+Live preflight root signature: `7bf05982dd0ad6f1337ccc6ee46dab8c8636a5e883479ee706ecdf02f91f724a`
 
 ## Required Statement
 
@@ -24,7 +24,7 @@ Live preflight root signature: `5aace5929f59126db33b665abc80598e64ef2e7836786dea
 ## Command After Explicit Approval
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-PSRC-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 16af8f89d318abb1d05cc6f3bafc51329fe8de5ea9a83376fa6a3e4038d8626a --approval-statement "I explicitly approve provider calls for WAVE5_PSRC_HOLO_BATCH_002 only, exactly as scoped in WAVE5_PSRC_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-PSRC-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 2f4862937b1cd633d98f828667e44b3771c812a5ff786640a3c5f3e378c03a7e --approval-statement "I explicitly approve provider calls for WAVE5_PSRC_HOLO_BATCH_002 only, exactly as scoped in WAVE5_PSRC_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Stop Rules

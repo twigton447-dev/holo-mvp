@@ -4,8 +4,8 @@ Status: `READY_FOR_EXPLICIT_PROVIDER_APPROVAL`
 Batch: `WAVE5_TRES_HOLO_BATCH_001`
 Family: `HV-TRES-REP-2026-07-01`
 Approval granted by this packet: `False`
-Approval packet SHA-256: `a1e7f8e017b83e9281a9b8fc03aa68fcf3d08dde32a609f6ab899932f53940c5`
-Live preflight root signature: `d2ac5fe9c8ef408a906488a43c1a64a3dc80092f6908869cd0dc3317c3642051`
+Approval packet SHA-256: `c8e214491cdd69ac97ec319928739146718466a54b40c3e6ed86e2ab9fed4fc0`
+Live preflight root signature: `c4de57749df7f19626047a829d65b08ab096004e86dc9ce5b77742449470445e`
 
 ## Required Statement
 
@@ -24,7 +24,7 @@ Live preflight root signature: `d2ac5fe9c8ef408a906488a43c1a64a3dc80092f6908869c
 ## Command After Explicit Approval
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-TRES-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 a1e7f8e017b83e9281a9b8fc03aa68fcf3d08dde32a609f6ab899932f53940c5 --approval-statement "I explicitly approve provider calls for WAVE5_TRES_HOLO_BATCH_001 only, exactly as scoped in WAVE5_TRES_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-TRES-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 c8e214491cdd69ac97ec319928739146718466a54b40c3e6ed86e2ab9fed4fc0 --approval-statement "I explicitly approve provider calls for WAVE5_TRES_HOLO_BATCH_001 only, exactly as scoped in WAVE5_TRES_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Stop Rules

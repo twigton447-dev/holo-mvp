@@ -20,7 +20,6 @@ import argparse
 import hashlib
 import importlib.util
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +37,7 @@ PAIRS_PER_BATCH = 5
 PACKETS_PER_PAIR = 2
 CALLS_PER_PACKET = 5
 DATE_STAMP = "2026_07_01"
+STABLE_CREATED_AT_UTC = "2026-07-01T00:00:00+00:00"
 
 FAMILY_ORDER = [
     "HV-MEDX-REP-2026-07-01",
@@ -106,9 +106,7 @@ def package_sha256(data: dict[str, Any]) -> str:
 
 
 def current_head() -> str:
-    import subprocess
-
-    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True).strip()
+    return f"wave5_runner={sha256_file(Path(__file__).resolve())}:base_runner={sha256_file(WAVE2_RUNNER_PATH)}"
 
 
 def family_code(family_id: str) -> str:
@@ -314,7 +312,7 @@ def approval_shell(family_id: str, batch_number: int, registration: dict[str, An
     packet = {
         "classification": f"{bid}_PROVIDER_APPROVAL_PACKET_NO_PROVIDER_SHELL",
         "status": "NOT_READY",
-        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "created_at_utc": STABLE_CREATED_AT_UTC,
         "batch_id": bid,
         "family_id": family_id,
         "batch_number": batch_number,
@@ -370,7 +368,7 @@ def stage_batch(family_id: str, batch_number: int) -> dict[str, Any]:
     registration = {
         "classification": f"{bid}_REGISTRATION_NO_PROVIDER",
         "status": "PASS" if all(checks.values()) else "FAIL",
-        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "created_at_utc": STABLE_CREATED_AT_UTC,
         "repo_head": current_head(),
         "batch_id": bid,
         "family_id": family_id,
@@ -403,7 +401,7 @@ def stage_batch(family_id: str, batch_number: int) -> dict[str, Any]:
     preflight = {
         "classification": f"{bid}_PREFLIGHT_NO_PROVIDER",
         "status": registration["status"],
-        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "created_at_utc": STABLE_CREATED_AT_UTC,
         "batch_id": bid,
         "family_id": family_id,
         "batch_number": batch_number,
@@ -632,6 +630,7 @@ def build_preflight(family_id: str, batch_number: int) -> dict[str, Any]:
     runner = load_wave2_runner()
     configure_runner(runner, family_id, batch_number)
     manifest = runner.validate_preflight()
+    manifest["created_at"] = STABLE_CREATED_AT_UTC
     refresh_provider_approval_packet(runner, family_id, batch_number, manifest)
     return manifest
 
@@ -682,7 +681,7 @@ def preflight_all() -> dict[str, Any]:
     report = {
         "classification": "HOLOVERIFY_WAVE5_BATCH_EXECUTION_PREFLIGHT_NO_PROVIDER",
         "status": "PASS" if all(checks.values()) else "FAIL",
-        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "created_at_utc": STABLE_CREATED_AT_UTC,
         "repo_head": current_head(),
         "freeze_root_hash": EXPECTED_FREEZE_ROOT_HASH,
         "batching_policy": {

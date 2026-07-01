@@ -5,7 +5,7 @@ Batch: `WAVE5_LREG_HOLO_BATCH_002`
 Family: `HV-LREG-REP-2026-07-01`
 Selection mode: `wave5-domain-5pair-batch`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
-Root signature: `a66f2b95e99ec30acc7a9b6eb6d0669ea0393ab3e08be9cee82c6ab69b232bae`
+Root signature: `21d8fc1c07bfff0d7f59e605f78bd85054791acf3303a138f7f25ae53c99c336`
 
 ## Expected Calls
 

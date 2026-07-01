@@ -5,7 +5,7 @@ Batch: `WAVE5_TRES_HOLO_BATCH_001`
 Family: `HV-TRES-REP-2026-07-01`
 Selection mode: `wave5-domain-5pair-batch`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
-Root signature: `d2ac5fe9c8ef408a906488a43c1a64a3dc80092f6908869cd0dc3317c3642051`
+Root signature: `c4de57749df7f19626047a829d65b08ab096004e86dc9ce5b77742449470445e`
 
 ## Expected Calls
 

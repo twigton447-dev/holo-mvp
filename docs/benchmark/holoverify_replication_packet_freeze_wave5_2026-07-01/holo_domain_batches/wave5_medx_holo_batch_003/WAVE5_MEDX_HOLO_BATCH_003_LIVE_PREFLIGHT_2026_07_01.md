@@ -5,7 +5,7 @@ Batch: `WAVE5_MEDX_HOLO_BATCH_003`
 Family: `HV-MEDX-REP-2026-07-01`
 Selection mode: `wave5-domain-5pair-batch`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
-Root signature: `2d041b260d2add71f4250a2a24cc394f9ccd7e3fd696493cbac2fa616c78e26d`
+Root signature: `d94a1ee1974f1762f4bd3c81729d6d5fc686c8b15f68a77733bb49c0a8a4d231`
 
 ## Expected Calls
 

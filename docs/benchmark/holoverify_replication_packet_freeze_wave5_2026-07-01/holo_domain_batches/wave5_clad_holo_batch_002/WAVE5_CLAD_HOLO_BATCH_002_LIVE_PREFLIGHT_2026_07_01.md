@@ -5,7 +5,7 @@ Batch: `WAVE5_CLAD_HOLO_BATCH_002`
 Family: `HV-CLAD-REP-2026-07-01`
 Selection mode: `wave5-domain-5pair-batch`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
-Root signature: `2f0ee63ae4901d4ccd8f28a9bee8424eca6301a1e4a0ccc7fe7976f1fdf0d78e`
+Root signature: `dc4a047a6366142a8b44e2cb216668e7276a3ea9b3d4be07e17f9d2732a6da70`
 
 ## Expected Calls
 

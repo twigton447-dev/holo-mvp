@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import json
 import hashlib
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +21,7 @@ REPO_ROOT = BENCHMARK_ROOT.parents[1]
 LEDGER_JSON = BENCHMARK_ROOT / "HOLOVERIFY_WAVE5_BATCH_PROGRESS_LEDGER_2026_07_01.json"
 OUT_JSON = BENCHMARK_ROOT / "HOLOVERIFY_WAVE5_COMPLETED_BATCH_EVIDENCE_2026_07_01.json"
 OUT_MD = BENCHMARK_ROOT / "HOLOVERIFY_WAVE5_COMPLETED_BATCH_EVIDENCE_2026_07_01.md"
+STABLE_CREATED_AT_UTC = "2026-07-01T00:00:00+00:00"
 
 
 def load_json(path: Path) -> Any:
@@ -168,10 +168,11 @@ def build() -> dict[str, Any]:
         "classification": "HOLOVERIFY_WAVE5_COMPLETED_BATCH_EVIDENCE_NO_PROVIDER",
         "status": "PASS" if all(checks.values()) else "FAIL",
         "evidence_state": evidence_state,
-        "created_at_utc": datetime.now(timezone.utc).isoformat(),
-        "source_ledger_generated_from_head": ledger.get("generated_from_head"),
+        "created_at_utc": STABLE_CREATED_AT_UTC,
+        "source_ledger_progress_builder_sha256": ledger.get("progress_builder_sha256"),
+        "source_ledger_queue_state": ledger.get("queue_state"),
         "collector_script_sha256": sha256_file(Path(__file__).resolve()),
-        "metadata_note": "This output records input provenance and script hash rather than current Git head, because committing the generated output necessarily changes HEAD.",
+        "metadata_note": "This output records input provenance and script hash rather than current Git head, because committing generated output necessarily changes HEAD.",
         "ledger_ref": str(LEDGER_JSON.relative_to(REPO_ROOT)),
         "freeze_root_hash": ledger["freeze_root_hash"],
         "claim_boundary": {
@@ -220,7 +221,8 @@ def render_md(report: dict[str, Any]) -> str:
         "",
         f"Status: `{report['status']}`",
         f"Evidence state: `{report['evidence_state']}`",
-        f"Source ledger generated from head: `{report['source_ledger_generated_from_head']}`",
+        f"Source ledger queue state: `{report['source_ledger_queue_state']}`",
+        f"Source ledger builder SHA-256: `{report['source_ledger_progress_builder_sha256']}`",
         f"Collector script SHA-256: `{report['collector_script_sha256']}`",
         f"Freeze root: `{report['freeze_root_hash']}`",
         "",

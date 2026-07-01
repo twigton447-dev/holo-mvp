@@ -2,7 +2,8 @@
 
 Status: `PASS`
 Queue state: `READY_FOR_NEXT_BATCH`
-Generated from head: `ea3bd1ffaa9e006d773ba42ef3b536ff5557ac63`
+Source handoff builder SHA-256: `3132939673c00f37ca367efed30b6f59df8edc89699b5c4ff26b6e60963cfbb4`
+Progress builder SHA-256: `fbf47676e8de1d59fe685a7128e46523eac964eeea499187bb23f4c37d38ca03`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 
 ## Totals
@@ -23,10 +24,10 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 
 - Batch: `WAVE5_MEDX_HOLO_BATCH_001`
 - Family: `HV-MEDX-REP-2026-07-01`
-- Approval SHA: `57aa1ae0dc035b2c5769d29aa1f2eb14ca8a4e9ef1027fecc2ad234abab1cb24`
+- Approval SHA: `4aabf9937d7aa629ed4da512d924b99fdafc8b8a4e437df47e7fd80deff8bbc0`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 57aa1ae0dc035b2c5769d29aa1f2eb14ca8a4e9ef1027fecc2ad234abab1cb24 --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_001 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 4aabf9937d7aa629ed4da512d924b99fdafc8b8a4e437df47e7fd80deff8bbc0 --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_001 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Batch State

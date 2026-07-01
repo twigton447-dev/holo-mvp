@@ -2,8 +2,9 @@
 
 Status: `PASS`
 Evidence state: `NO_COMPLETED_BATCHES_YET`
-Source ledger generated from head: `ea3bd1ffaa9e006d773ba42ef3b536ff5557ac63`
-Collector script SHA-256: `514cbeea92a3995350eef818927bd6c938643604662e1de7da4af17d6dbc64e5`
+Source ledger queue state: `READY_FOR_NEXT_BATCH`
+Source ledger builder SHA-256: `fbf47676e8de1d59fe685a7128e46523eac964eeea499187bb23f4c37d38ca03`
+Collector script SHA-256: `d2721c6d4e1fbdfe9f60862eea7566071008b9620d1a737c7d98843fc015a983`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 
 ## Claim Boundary
@@ -58,8 +59,8 @@ No Wave5 live batch has completed yet. This file is readiness scaffolding, not b
 
 - Batch: `WAVE5_MEDX_HOLO_BATCH_001`
 - Family: `HV-MEDX-REP-2026-07-01`
-- Approval SHA: `57aa1ae0dc035b2c5769d29aa1f2eb14ca8a4e9ef1027fecc2ad234abab1cb24`
+- Approval SHA: `4aabf9937d7aa629ed4da512d924b99fdafc8b8a4e437df47e7fd80deff8bbc0`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 57aa1ae0dc035b2c5769d29aa1f2eb14ca8a4e9ef1027fecc2ad234abab1cb24 --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_001 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 4aabf9937d7aa629ed4da512d924b99fdafc8b8a4e437df47e7fd80deff8bbc0 --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_001 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```

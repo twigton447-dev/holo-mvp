@@ -4,8 +4,8 @@ Status: `READY_FOR_EXPLICIT_PROVIDER_APPROVAL`
 Batch: `WAVE5_OTSF_HOLO_BATCH_003`
 Family: `HV-OTSF-REP-2026-07-01`
 Approval granted by this packet: `False`
-Approval packet SHA-256: `c4fc1679b5236ca87ad1ff8c49235463dce760dc00725df51e3db1a404f7ce9d`
-Live preflight root signature: `ca7ea9a4794fe057dc4fb27f55e173c1f21c2e21ca02b71fd6daded3cc9e9a87`
+Approval packet SHA-256: `d271ce89608d8beada106c7596457c95174978c3c2e147e242ce40b3db363291`
+Live preflight root signature: `504022e9d66e9bc1bc6f934ebcbf08f7e75ca33b3113e1f483e72e9e356620a1`
 
 ## Required Statement
 
@@ -24,7 +24,7 @@ Live preflight root signature: `ca7ea9a4794fe057dc4fb27f55e173c1f21c2e21ca02b71f
 ## Command After Explicit Approval
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 3 --run-live --approval-packet-sha256 c4fc1679b5236ca87ad1ff8c49235463dce760dc00725df51e3db1a404f7ce9d --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_003 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_003_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 3 --run-live --approval-packet-sha256 d271ce89608d8beada106c7596457c95174978c3c2e147e242ce40b3db363291 --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_003 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_003_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Stop Rules

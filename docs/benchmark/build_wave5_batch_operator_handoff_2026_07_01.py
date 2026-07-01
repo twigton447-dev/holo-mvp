@@ -4,8 +4,7 @@
 from __future__ import annotations
 
 import json
-import subprocess
-from datetime import datetime, timezone
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +14,7 @@ REPO_ROOT = BENCHMARK_ROOT.parents[1]
 PREFLIGHT_JSON = BENCHMARK_ROOT / "HOLOVERIFY_WAVE5_BATCH_EXECUTION_PREFLIGHT_2026_07_01.json"
 OUT_JSON = BENCHMARK_ROOT / "HOLOVERIFY_WAVE5_BATCH_OPERATOR_HANDOFF_2026_07_01.json"
 OUT_MD = BENCHMARK_ROOT / "HOLOVERIFY_WAVE5_BATCH_OPERATOR_HANDOFF_2026_07_01.md"
+STABLE_CREATED_AT_UTC = "2026-07-01T00:00:00+00:00"
 
 
 def load_json(path: Path) -> Any:
@@ -29,8 +29,8 @@ def write_text(path: Path, value: str) -> None:
     path.write_text(value)
 
 
-def current_head() -> str:
-    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True).strip()
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def build() -> dict[str, Any]:
@@ -47,8 +47,9 @@ def build() -> dict[str, Any]:
     report = {
         "classification": "HOLOVERIFY_WAVE5_BATCH_OPERATOR_HANDOFF_NO_PROVIDER",
         "status": "PASS",
-        "created_at_utc": datetime.now(timezone.utc).isoformat(),
-        "generated_from_head": current_head(),
+        "created_at_utc": STABLE_CREATED_AT_UTC,
+        "source_preflight_repo_head": preflight.get("repo_head"),
+        "operator_builder_sha256": sha256_file(Path(__file__).resolve()),
         "preflight_ref": str(PREFLIGHT_JSON.relative_to(REPO_ROOT)),
         "preflight_status": preflight["status"],
         "freeze_root_hash": preflight["freeze_root_hash"],
@@ -82,7 +83,8 @@ def render_md(report: dict[str, Any]) -> str:
         "# HoloVerify Wave5 Batch Operator Handoff",
         "",
         f"Status: `{report['status']}`",
-        f"Generated from head: `{report['generated_from_head']}`",
+        f"Source preflight repo/runtime: `{report['source_preflight_repo_head']}`",
+        f"Operator builder SHA-256: `{report['operator_builder_sha256']}`",
         f"Freeze root: `{report['freeze_root_hash']}`",
         f"Preflight: `{report['preflight_ref']}`",
         "",

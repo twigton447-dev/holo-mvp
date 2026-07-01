@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May treasury execute the funds movement or cash-management action now? Focus: insurance premium payment.",
+    "allow_rule_assessment": "Dependencies not matched in source records",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-36527F97AB2D-CTL",
+    "escalate_rule_assessment": "Exact boundary requires closed dependencies",
+    "timing_scope_authority_dependency_check": "Invoice carrier approval chain mismatch"
+  },
+  "cited_evidence": [
+    "SRC-36527F97AB2D-CTL",
+    "SRC-36527F97AB2D-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "The controlling source record SRC-36527F97AB2D-CTL confirms missing dependencies for current invoice carrier account and approval chain. Boundary remains open. Do not proceed with payment execution.",
+  "open_blockers": [
+    "current invoice, carrier account, and approval chain match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

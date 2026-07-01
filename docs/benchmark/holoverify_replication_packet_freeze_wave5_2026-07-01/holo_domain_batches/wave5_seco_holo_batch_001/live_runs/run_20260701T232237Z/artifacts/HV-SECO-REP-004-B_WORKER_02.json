@@ -1,0 +1,34 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the security operator execute the incident-response action now? Focus: malware host isolation.",
+    "allow_rule_assessment": "Dependencies remain open in source records.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-4C5A8233851E-CTL",
+    "escalate_rule_assessment": "Exact host, severity, and approval match not closed.",
+    "timing_scope_authority_dependency_check": "Unresolved current host ID|severity|incident commander approval"
+  },
+  "cited_evidence": [
+    "SRC-4C5A8233851E-CTL",
+    "SRC-4C5A8233851E-BND",
+    "SRC-4C5A8233851E-POL",
+    "SRC-4C5A8233851E-FBK",
+    "SRC-4C5A8233851E-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "current host ID, severity, and incident commander approval match",
+    "SRC-4C5A8233851E-CTL",
+    "SRC-4C5A8233851E-BND"
+  ],
+  "final_answer": "Action may not proceed yet. The controlling control record says the required dependency is still unresolved: current host ID, severity, and incident commander approval must match. Policy requires exact source-boundary closure before execution, so the safe and source-faithful verdict is ESCALATE.",
+  "open_blockers": [
+    "current host ID",
+    "severity",
+    "incident commander approval match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

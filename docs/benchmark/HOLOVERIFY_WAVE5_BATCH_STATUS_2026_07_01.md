@@ -8,22 +8,22 @@ Judge calls by this status check: `0`
 ## Totals
 
 - `selected_batches`: `28`
-- `run_folders`: `17`
-- `completed_batches`: `16`
-- `not_started_batches`: `12`
+- `run_folders`: `18`
+- `completed_batches`: `17`
+- `not_started_batches`: `11`
 - `invalid_stop_batches`: `0`
 - `in_progress_or_incomplete_batches`: `0`
-- `provider_calls_observed_from_artifacts`: `850`
+- `provider_calls_observed_from_artifacts`: `900`
 
 ## Next Or Blocking Batch
 
-- Batch: `WAVE5_SECO_HOLO_BATCH_001`
+- Batch: `WAVE5_SECO_HOLO_BATCH_002`
 - Family: `HV-SECO-REP-2026-07-01`
 - Status: `NOT_STARTED`
-- Approval SHA: `578a0f03efb8c741e24ea89b6621a6e27f409dc3b0d5ce344141555032a9632a`
+- Approval SHA: `398bd98cc7b9892c8272fea8627886122c25ca573ac5eb1ab80cd330af0f1657`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-SECO-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 578a0f03efb8c741e24ea89b6621a6e27f409dc3b0d5ce344141555032a9632a --approval-statement "I explicitly approve provider calls for WAVE5_SECO_HOLO_BATCH_001 only, exactly as scoped in WAVE5_SECO_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-SECO-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 398bd98cc7b9892c8272fea8627886122c25ca573ac5eb1ab80cd330af0f1657 --approval-statement "I explicitly approve provider calls for WAVE5_SECO_HOLO_BATCH_002 only, exactly as scoped in WAVE5_SECO_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Batch Rows
@@ -46,7 +46,7 @@ python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-
 | `WAVE5_CLAD_HOLO_BATCH_002` | `HV-CLAD-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260701T215907Z` | `50` | `N/A` |
 | `WAVE5_CLAD_HOLO_BATCH_003` | `HV-CLAD-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260701T225854Z` | `50` | `N/A` |
 | `WAVE5_CLAD_HOLO_BATCH_004` | `HV-CLAD-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260701T231050Z` | `50` | `N/A` |
-| `WAVE5_SECO_HOLO_BATCH_001` | `HV-SECO-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |
+| `WAVE5_SECO_HOLO_BATCH_001` | `HV-SECO-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260701T232237Z` | `50` | `N/A` |
 | `WAVE5_SECO_HOLO_BATCH_002` | `HV-SECO-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |
 | `WAVE5_SECO_HOLO_BATCH_003` | `HV-SECO-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |
 | `WAVE5_SECO_HOLO_BATCH_004` | `HV-SECO-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |

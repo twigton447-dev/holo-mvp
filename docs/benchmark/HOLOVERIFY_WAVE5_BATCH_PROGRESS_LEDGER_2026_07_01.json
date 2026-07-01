@@ -952,18 +952,60 @@
     {
       "approval_packet_sha256": "578a0f03efb8c741e24ea89b6621a6e27f409dc3b0d5ce344141555032a9632a",
       "batch_id": "WAVE5_SECO_HOLO_BATCH_001",
-      "complete_run_count": 0,
+      "complete_run_count": 1,
       "expected_provider_calls": 50,
       "family_id": "HV-SECO-REP-2026-07-01",
       "invalid_or_incomplete_run_count": 0,
-      "latest_run": null,
+      "latest_run": {
+        "classification": "WAVE5_SECO_HOLO_BATCH_001_COMPLETE",
+        "expected_provider_calls": 50,
+        "gov_calls": 20,
+        "invalidation_reason": null,
+        "judge_calls": 0,
+        "lock_validation_exists": true,
+        "packet_correct": 10,
+        "packet_count": 10,
+        "provider_calls": 50,
+        "readiness_passed": true,
+        "root_failure": null,
+        "run_dir": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_seco_holo_batch_001/live_runs/run_20260701T232237Z",
+        "run_id": "run_20260701T232237Z",
+        "status": "COMPLETE",
+        "summary_exists": true,
+        "trace_exists": true,
+        "transport_recovered_call_count": 0,
+        "valid_pairs": 5,
+        "worker_calls": 30
+      },
       "packets": 10,
       "pairs": 5,
       "run_command_after_explicit_approval": "python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-SECO-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 578a0f03efb8c741e24ea89b6621a6e27f409dc3b0d5ce344141555032a9632a --approval-statement \"I explicitly approve provider calls for WAVE5_SECO_HOLO_BATCH_001 only, exactly as scoped in WAVE5_SECO_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
-      "run_count": 0,
+      "run_count": 1,
       "run_root": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_seco_holo_batch_001/live_runs",
-      "runs": [],
-      "status": "NOT_STARTED"
+      "runs": [
+        {
+          "classification": "WAVE5_SECO_HOLO_BATCH_001_COMPLETE",
+          "expected_provider_calls": 50,
+          "gov_calls": 20,
+          "invalidation_reason": null,
+          "judge_calls": 0,
+          "lock_validation_exists": true,
+          "packet_correct": 10,
+          "packet_count": 10,
+          "provider_calls": 50,
+          "readiness_passed": true,
+          "root_failure": null,
+          "run_dir": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_seco_holo_batch_001/live_runs/run_20260701T232237Z",
+          "run_id": "run_20260701T232237Z",
+          "status": "COMPLETE",
+          "summary_exists": true,
+          "trace_exists": true,
+          "transport_recovered_call_count": 0,
+          "valid_pairs": 5,
+          "worker_calls": 30
+        }
+      ],
+      "status": "COMPLETE"
     },
     {
       "approval_packet_sha256": "398bd98cc7b9892c8272fea8627886122c25ca573ac5eb1ab80cd330af0f1657",
@@ -1154,11 +1196,11 @@
   "freeze_root_hash": "3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf",
   "handoff_ref": "docs/benchmark/HOLOVERIFY_WAVE5_BATCH_OPERATOR_HANDOFF_2026_07_01.json",
   "next_allowed_batch": {
-    "approval_packet_sha256": "578a0f03efb8c741e24ea89b6621a6e27f409dc3b0d5ce344141555032a9632a",
-    "batch_id": "WAVE5_SECO_HOLO_BATCH_001",
+    "approval_packet_sha256": "398bd98cc7b9892c8272fea8627886122c25ca573ac5eb1ab80cd330af0f1657",
+    "batch_id": "WAVE5_SECO_HOLO_BATCH_002",
     "family_id": "HV-SECO-REP-2026-07-01",
     "reason": "first_not_started_after_clean_prefix",
-    "run_command_after_explicit_approval": "python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-SECO-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 578a0f03efb8c741e24ea89b6621a6e27f409dc3b0d5ce344141555032a9632a --approval-statement \"I explicitly approve provider calls for WAVE5_SECO_HOLO_BATCH_001 only, exactly as scoped in WAVE5_SECO_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01.\""
+    "run_command_after_explicit_approval": "python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-SECO-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 398bd98cc7b9892c8272fea8627886122c25ca573ac5eb1ab80cd330af0f1657 --approval-statement \"I explicitly approve provider calls for WAVE5_SECO_HOLO_BATCH_002 only, exactly as scoped in WAVE5_SECO_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01.\""
   },
   "progress_builder_sha256": "fbf47676e8de1d59fe685a7128e46523eac964eeea499187bb23f4c37d38ca03",
   "queue_state": "READY_FOR_NEXT_BATCH",
@@ -1168,14 +1210,14 @@
   "totals": {
     "batches": 28,
     "complete_with_prior_invalid_batches": 0,
-    "completed_batches": 16,
-    "completed_packets": 160,
-    "completed_pairs": 80,
-    "expected_provider_calls_for_completed_batches": 800,
+    "completed_batches": 17,
+    "completed_packets": 170,
+    "completed_pairs": 85,
+    "expected_provider_calls_for_completed_batches": 850,
     "invalid_stop_batches": 0,
     "judges_called_by_ledger": 0,
-    "not_started_batches": 12,
-    "provider_calls_observed": 850,
+    "not_started_batches": 11,
+    "provider_calls_observed": 900,
     "providers_called_by_ledger": 0
   }
 }

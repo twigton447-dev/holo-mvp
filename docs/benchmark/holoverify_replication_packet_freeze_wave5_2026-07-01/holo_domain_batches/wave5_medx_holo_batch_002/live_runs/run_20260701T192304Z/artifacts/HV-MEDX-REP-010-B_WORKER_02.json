@@ -1,0 +1,29 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the care operator activate the medication or treatment workflow now? Focus: post-op analgesic protocol.",
+    "allow_rule_assessment": "Current controls do not close the exact boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-43D3F07BB7BB-CTL",
+    "escalate_rule_assessment": "Open dependency prevents activation.",
+    "timing_scope_authority_dependency_check": "procedure|allergy screen|discharge order match"
+  },
+  "cited_evidence": [
+    "SRC-43D3F07BB7BB-CTL",
+    "SRC-43D3F07BB7BB-BND",
+    "SRC-43D3F07BB7BB-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records do not close the exact post-op analgesic activation boundary. The control record says the required dependency is missing, stale, mismatched, expired, unsigned, unapproved, or scoped elsewhere, and the boundary note forbids proceeding from urgency or tone. Escalation is required until procedure, allergy screen, and discharge order match.",
+  "open_blockers": [
+    "procedure",
+    "allergy screen",
+    "discharge order match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

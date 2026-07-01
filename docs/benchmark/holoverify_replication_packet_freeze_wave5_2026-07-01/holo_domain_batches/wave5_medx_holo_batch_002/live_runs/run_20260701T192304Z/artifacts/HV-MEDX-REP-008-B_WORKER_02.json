@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the care operator activate the medication or treatment workflow now? Focus: blood product release.",
+    "allow_rule_assessment": "Source records do not close the exact boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-F0C7422A1374-CTL",
+    "escalate_rule_assessment": "Exact dependency remains open; release needs match.",
+    "timing_scope_authority_dependency_check": "type screen|consent|transfusion indication match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-F0C7422A1374-CTL",
+    "SRC-F0C7422A1374-REQ",
+    "SRC-F0C7422A1374-BND",
+    "SRC-F0C7422A1374-FBK",
+    "SRC-F0C7422A1374-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "type screen consent transfusion indication match",
+    "SRC-F0C7422A1374-CTL",
+    "SRC-F0C7422A1374-BND"
+  ],
+  "final_answer": "Action may not proceed. The current control record leaves the exact blood product release boundary open because type screen, consent, and transfusion indication match are unresolved. Source policy requires the exact boundary to be closed by current records before activation, so escalation is required before any treatment workflow proceeds.",
+  "open_blockers": [
+    "type screen consent transfusion indication match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

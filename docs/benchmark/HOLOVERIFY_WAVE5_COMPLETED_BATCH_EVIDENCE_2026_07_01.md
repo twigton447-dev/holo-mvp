@@ -18,25 +18,25 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 ## Totals
 
 - `total_batches`: `28`
-- `completed_batches`: `1`
-- `not_started_batches`: `27`
+- `completed_batches`: `2`
+- `not_started_batches`: `26`
 - `invalid_batches`: `0`
-- `completed_pairs`: `5`
-- `completed_packets`: `10`
-- `completed_correct_packets`: `10`
-- `expected_provider_calls_for_completed_batches`: `50`
-- `observed_provider_calls_for_completed_batches`: `50`
+- `completed_pairs`: `10`
+- `completed_packets`: `20`
+- `completed_correct_packets`: `20`
+- `expected_provider_calls_for_completed_batches`: `100`
+- `observed_provider_calls_for_completed_batches`: `100`
 - `judge_calls`: `0`
 - `transport_recovered_call_count`: `0`
-- `input_tokens`: `88483`
-- `output_tokens`: `18038`
-- `total_tokens`: `113234`
-- `allow_packets`: `5`
-- `escalate_packets`: `5`
-- `allow_correct`: `5`
-- `escalate_correct`: `5`
-- `target_packets`: `5`
-- `guardrail_packets`: `5`
+- `input_tokens`: `176387`
+- `output_tokens`: `35162`
+- `total_tokens`: `225498`
+- `allow_packets`: `10`
+- `escalate_packets`: `10`
+- `allow_correct`: `10`
+- `escalate_correct`: `10`
+- `target_packets`: `10`
+- `guardrail_packets`: `10`
 
 ## Checks
 
@@ -56,13 +56,14 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 | Batch | Run | Provider calls | Packets | Correct | Valid pairs |
 | --- | --- | --- | --- | --- | --- |
 | `WAVE5_MEDX_HOLO_BATCH_001` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_medx_holo_batch_001/live_runs/run_20260701T190553Z` | `50` | `10` | `10` | `5` |
+| `WAVE5_MEDX_HOLO_BATCH_002` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_medx_holo_batch_002/live_runs/run_20260701T192304Z` | `50` | `10` | `10` | `5` |
 
 ## Next Allowed Batch
 
-- Batch: `WAVE5_MEDX_HOLO_BATCH_002`
+- Batch: `WAVE5_MEDX_HOLO_BATCH_003`
 - Family: `HV-MEDX-REP-2026-07-01`
-- Approval SHA: `83b68cbc2c3775ed28d78e4de0045768d17ef9ab3d8de8a6f92cdb295329e0b1`
+- Approval SHA: `164cbbce07c402e214b36110865ea49217f5d4f30af3defbd0c8ca0d29b9f07b`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 83b68cbc2c3775ed28d78e4de0045768d17ef9ab3d8de8a6f92cdb295329e0b1 --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_002 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-MEDX-REP-2026-07-01 --batch-number 3 --run-live --approval-packet-sha256 164cbbce07c402e214b36110865ea49217f5d4f30af3defbd0c8ca0d29b9f07b --approval-statement "I explicitly approve provider calls for WAVE5_MEDX_HOLO_BATCH_003 only, exactly as scoped in WAVE5_MEDX_HOLO_BATCH_003_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```

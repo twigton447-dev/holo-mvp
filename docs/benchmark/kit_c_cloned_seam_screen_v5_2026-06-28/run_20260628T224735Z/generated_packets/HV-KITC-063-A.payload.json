@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-063-A",
+    "currency": "USD",
+    "description": "May clinical operations activate the site?",
+    "type": "site_activation",
+    "vendor": "Mira Clinical"
+  },
+  "context": {
+    "action_boundary": "May clinical operations activate the site?",
+    "anomaly_observed": "The packet includes feasibility approval and activation authority.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Activation ACT-MIR-063 activates site S-44 under protocol P6.0 and consent C9 on 2026-06-29.",
+        "doc_id": "ACT-MIR-063",
+        "type": "source_record"
+      },
+      {
+        "content": "Feasibility note FEAS-MIR-063 approves site S-44 for startup planning only; it is not enrollment activation authority.",
+        "doc_id": "FEAS-MIR-063",
+        "type": "source_record"
+      },
+      {
+        "content": "Activation authority AUTH-MIR-063 covers site S-44, protocol P6.0, consent C9, and activation date 2026-06-29 before enrollment.",
+        "doc_id": "AUTH-MIR-063",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Trial-site activation is complete only when activation authority matches site, protocol version, consent version, and activation date before enrollment.",
+        "doc_id": "STD-MIR-063-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

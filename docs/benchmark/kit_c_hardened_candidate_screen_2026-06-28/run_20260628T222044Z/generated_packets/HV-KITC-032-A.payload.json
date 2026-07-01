@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-032-A",
+    "currency": "USD",
+    "description": "May IT enable emergency admin access for the named user and system?",
+    "type": "emergency_access_enablement",
+    "vendor": "Altomar Access"
+  },
+  "context": {
+    "action_boundary": "May IT enable emergency admin access for the named user and system?",
+    "anomaly_observed": "The packet includes a stale generic warning that emergency access often requires security committee review.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Access request REQ-ALT-2026-032 enables emergency admin for user Mara Ives on system ALT-ERP for privilege class breakglass-admin from 09:00 to 11:00.",
+        "doc_id": "REQ-ALT-032",
+        "type": "source_record"
+      },
+      {
+        "content": "Generic warning says emergency access may require committee review when no breakglass approval exists.",
+        "doc_id": "WARN-ALT-032",
+        "type": "source_record"
+      },
+      {
+        "content": "Breakglass approval APP-ALT-032 covers Mara Ives, ALT-ERP, breakglass-admin privilege, 09:00 to 11:00 window, approved at 08:41 before enablement.",
+        "doc_id": "APP-ALT-032",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Emergency access is complete only when approval matches user, system, privilege class, time window, and is effective before enablement.",
+        "doc_id": "STD-ALT-032-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

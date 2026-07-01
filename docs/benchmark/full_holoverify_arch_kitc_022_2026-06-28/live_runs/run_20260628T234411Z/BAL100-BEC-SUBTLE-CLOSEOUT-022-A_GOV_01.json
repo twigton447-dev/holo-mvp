@@ -1,0 +1,52 @@
+{
+  "blocked_moves": [
+    "Treating Site 18-L (lab) as equivalent to Site 18-P (production) for activation dependency",
+    "Inferring missing release condition RC-7 from partial source evidence rather than explicit record",
+    "Accepting CAL-ACR-022 as sufficient without verifying RC-ACR-022 release condition attachment",
+    "Allowing shared DG-41B prefix to override site-specific boundary requirements",
+    "Treating worker ALLOW verdict as final without addressing gate failures"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "ACT-ACR-022 specifies activation for DG-41B at Site 18-P",
+    "CAL-ACR-022 provides calibration evidence for DG-41B production units at Site 18-P for RC-7",
+    "RC-ACR-022 requires calibration attachment before activation",
+    "STD-ACR-022 establishes device group, site, release condition, and timing as boundary fields",
+    "NOTE-ACR-022 flags shared DG-41B prefix across lab (18-L) and production (18-P) units"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "EXACT_ACTIVATION_DEPENDENCY_CLOSED binding class",
+    "DG-41B device group exact match",
+    "Site 18-P as activation site (production units only)",
+    "Release condition RC-7 as specified in CAL-ACR-022",
+    "Timing verification that calibration completed before ACT-ACR-2026-8022",
+    "Distinction between Site 18-P (production) and Site 18-L (lab)"
+  ],
+  "must_repair": [
+    "Resolve packet_022a_invented_site_18l failure by ensuring no cross-contamination between Site 18-P and Site 18-L references in source binding",
+    "Address knew_term_missing:ACT-ACR-022 failure by ensuring ACT-ACR-022 record completeness for activation dependency verification",
+    "Verify that CAL-ACR-022 calibration explicitly covers production units (not lab units) at Site 18-P",
+    "Confirm RC-ACR-022 release condition attachment is present in activation packet"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Resolve source gate failures by ensuring Site 18-P (production) and Site 18-L (lab) are not conflated in the activation dependency binding; verify ACT-ACR-022 record completeness",
+    "monotonic_preservation": [
+      "Device group DG-41B exact match preserved",
+      "Site 18-P (production units) as activation site preserved",
+      "Release condition RC-7 from CAL-ACR-022 preserved",
+      "EXACT_ACTIVATION_DEPENDENCY_CLOSED binding class preserved"
+    ],
+    "objective": "Repair gate failures while maintaining correct source bindings; prepare worker output that passes WORKER_SOURCE_BOUND_GATE with all critical features intact",
+    "required_repairs": [
+      "Investigate source of Site 18-L reference and ensure it does not contaminate Site 18-P activation dependency verification",
+      "Verify ACT-ACR-022 activation record contains all required fields for dependency verification",
+      "Confirm CAL-ACR-022 calibration packet explicitly specifies production telemetry units (distinguishing from lab units at Site 18-L)",
+      "Validate that activation packet contains RC-ACR-022 release condition record as required attachment"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Worker 01 output binding EXACT_ACTIVATION_DEPENDENCY_CLOSED is correct; gate failures indicate source contamination between Site 18-P and Site 18-L that must be repaired while preserving the correct dependency structure",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

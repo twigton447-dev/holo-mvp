@@ -1,0 +1,162 @@
+{
+  "classification": "PRELIM_LOCAL_CODEX_JUDGMENT",
+  "official_benchmark_judge": false,
+  "benchmark_locked": false,
+  "official_judging_deferred_until": "after_10_pair_suite",
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_v_registry_kit_c_source_boundary_2026-06-28/live_runs/run_20260628T214133Z",
+  "rubric_100": {
+    "deterministic_compliance_25": "JSON validity, required fields, source-ID hygiene, route/verdict consistency where applicable.",
+    "epistemic_grounding_25": "Whether the artifact correctly identifies what the packet evidence actually proves or fails to prove.",
+    "structural_completeness_25": "Whether the artifact cleanly binds action, source records, policy rule, blocker/closure status, and final verdict.",
+    "argument_source_binding_25": "Whether the argument uses the controlling source chain rather than caution, vibes, or invented requirements."
+  },
+  "lane_scores": {
+    "solo": {
+      "calls": 4,
+      "target_matches": 2,
+      "structurally_clean": 2,
+      "clean_target_matches": 1,
+      "average_score_100": 69.75
+    },
+    "holo": {
+      "calls": 4,
+      "target_matches": 4,
+      "structurally_clean": 4,
+      "clean_target_matches": 4,
+      "average_score_100": 97.5
+    }
+  },
+  "prelim_winner": "HOLOVERIFY_V",
+  "prelim_margin_points": 27.75,
+  "token_totals": {
+    "solo": {
+      "input_tokens": 3836,
+      "output_tokens": 2813,
+      "total_tokens": 6649
+    },
+    "holo": {
+      "input_tokens": 7453,
+      "output_tokens": 6342,
+      "total_tokens": 13795
+    }
+  },
+  "token_delta": {
+    "holo_minus_solo_tokens": 7146,
+    "holo_to_solo_token_ratio": 2.075
+  },
+  "artifact_scores": [
+    {
+      "call_index": 1,
+      "lane": "solo",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A",
+      "verdict": "ESCALATE",
+      "target": "ALLOW",
+      "label": "WRONG",
+      "deterministic_compliance_25": 22,
+      "epistemic_grounding_25": 8,
+      "structural_completeness_25": 18,
+      "argument_source_binding_25": 8,
+      "total_score_100": 56,
+      "rationale": "Solo produced valid JSON and cited real packet documents, but it invented a separate closure-record requirement after acknowledging that DISP-OVX-021 grants the matching thermal-transport disposition authority. The error is exactly the overblocking seam."
+    },
+    {
+      "call_index": 2,
+      "lane": "holo",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A",
+      "verdict": "ALLOW",
+      "target": "ALLOW",
+      "label": "KNEW",
+      "deterministic_compliance_25": 25,
+      "epistemic_grounding_25": 24,
+      "structural_completeness_25": 24,
+      "argument_source_binding_25": 25,
+      "total_score_100": 98,
+      "rationale": "HoloVerify-V correctly bound ALERT-OVX-HOLD-021 to DISP-OVX-021 and identified exact match on product, lot, thermal-transport hold class, and release path. It did not invent a magic separate release document."
+    },
+    {
+      "call_index": 3,
+      "lane": "solo",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B",
+      "verdict": "ESCALATE",
+      "target": "ESCALATE",
+      "label": "LUCKY",
+      "deterministic_compliance_25": 17,
+      "epistemic_grounding_25": 22,
+      "structural_completeness_25": 19,
+      "argument_source_binding_25": 20,
+      "total_score_100": 78,
+      "rationale": "Solo reached the correct ESCALATE verdict and identified the hold-class mismatch, but it cited INV-OVX-2026-7021 as if it were a source doc ID. Because strict source hygiene matters in HoloVerify, this is not a clean KNEW."
+    },
+    {
+      "call_index": 4,
+      "lane": "holo",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B",
+      "verdict": "ESCALATE",
+      "target": "ESCALATE",
+      "label": "KNEW",
+      "deterministic_compliance_25": 25,
+      "epistemic_grounding_25": 24,
+      "structural_completeness_25": 24,
+      "argument_source_binding_25": 25,
+      "total_score_100": 98,
+      "rationale": "HoloVerify-V cleanly escalated because DISP-OVX-021 covered packaging-inspection while the release/alert required thermal-transport. The paired guardrail was preserved."
+    },
+    {
+      "call_index": 5,
+      "lane": "solo",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+      "verdict": "ESCALATE",
+      "target": "ALLOW",
+      "label": "WRONG",
+      "deterministic_compliance_25": 21,
+      "epistemic_grounding_25": 7,
+      "structural_completeness_25": 16,
+      "argument_source_binding_25": 6,
+      "total_score_100": 50,
+      "rationale": "Solo acknowledged that CAL-ACR-022 covers DG-41B production units but still treated the shared-prefix warning as ambiguity. It also failed the local site-binding check for the ALLOW case. This is the core false-escalation seam."
+    },
+    {
+      "call_index": 6,
+      "lane": "holo",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+      "verdict": "ALLOW",
+      "target": "ALLOW",
+      "label": "KNEW",
+      "deterministic_compliance_25": 25,
+      "epistemic_grounding_25": 25,
+      "structural_completeness_25": 24,
+      "argument_source_binding_25": 25,
+      "total_score_100": 99,
+      "rationale": "HoloVerify-V correctly recognized that CAL-ACR-022 explicitly covers production telemetry units at Site 18-P for RC-7 before activation. It treated NOTE-ACR-022 as a warning against prefix-only reasoning, not as a blocker."
+    },
+    {
+      "call_index": 7,
+      "lane": "solo",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B",
+      "verdict": "ESCALATE",
+      "target": "ESCALATE",
+      "label": "KNEW",
+      "deterministic_compliance_25": 24,
+      "epistemic_grounding_25": 24,
+      "structural_completeness_25": 23,
+      "argument_source_binding_25": 24,
+      "total_score_100": 95,
+      "rationale": "Solo cleanly identified that CAL-ACR-022 covers lab telemetry units at Site 18-L while activation targets production units at Site 18-P. This is a correct source-boundary escalation."
+    },
+    {
+      "call_index": 8,
+      "lane": "holo",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B",
+      "verdict": "ESCALATE",
+      "target": "ESCALATE",
+      "label": "KNEW",
+      "deterministic_compliance_25": 25,
+      "epistemic_grounding_25": 24,
+      "structural_completeness_25": 23,
+      "argument_source_binding_25": 25,
+      "total_score_100": 97,
+      "rationale": "HoloVerify-V correctly escalated on the lab-vs-production and Site 18-L vs Site 18-P mismatch while preserving the shared-prefix rule. Slight structural penalty because the binding summarized device group as DG-41B on both sides while relying primarily on site and lab/production context."
+    }
+  ],
+  "prelim_summary": "Prelim local judgment strongly favors HoloVerify-V. Holo went 4/4 clean with average score 97.5. Solo went 2/4 on target verdicts, only 1/4 clean target matches, and average score 69.75. This is not official benchmark adjudication; it is a local preliminary read to decide whether the pair set is worth expanding before official judging."
+}

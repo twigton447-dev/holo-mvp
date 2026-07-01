@@ -1,0 +1,35 @@
+{
+  "cited_evidence": [
+    "AUTH-BOR-082: activation authority covers site B-18, protocol P8.1, activation date 2026-06-28; current IRB-approved consent C12 remains pending",
+    "ACT-BOR-082: activation record confirms site B-18 under protocol P8.1 and consent C12 on 2026-06-28",
+    "STD-BOR-082-P: policy requires activation authority to match site, protocol version, consent version, activation date, and consent-status class before enrollment",
+    "FEAS-BOR-082: feasibility note approves startup planning only; consent status must be separately verified before enrollment"
+  ],
+  "clinical_activation_binding": {
+    "activation_authority_id": "AUTH-BOR-082",
+    "activation_date": "2026-06-28",
+    "activation_record_id": "ACT-BOR-082",
+    "binding_class": "CONSENT_STATUS_PENDING",
+    "consent_status_evidence": "AUTH-BOR-082 explicitly states consent C12 remains pending - this qualifier controls the consent-status class not merely the document existence",
+    "consent_version": "C12",
+    "controlling_source_fact": "AUTH-BOR-082 activation authority covers site B-18, protocol P8.1, activation date 2026-06-28; current IRB-approved consent C12 remains pending",
+    "feasibility_note_id": "FEAS-BOR-082",
+    "protocol_version": "P8.1",
+    "site": "B-18"
+  },
+  "critical_features_preserved": [
+    "AUTH-BOR-082 controls boundary not FEAS-BOR-082",
+    "consent C12 remains pending is AUTH-BOR-082 verbatim language controlling consent-status class",
+    "activation authority matches site B-18, protocol P8.1, activation date 2026-06-28",
+    "STD-BOR-082-P consent-status class requirement is unresolved by pending qualifier"
+  ],
+  "final_answer": "Clinical operations MUST ESCALATE activation of trial site B-18 under protocol P8.1 with consent C12 on 2026-06-28. Activation authority AUTH-BOR-082 explicitly states consent C12 remains pending - this qualifier is the controlling language for consent-status class and cannot be abstracted away as operational equivalent to CLOSED. The consent-status class is PENDING not CLOSED per AUTH-BOR-082 verbatim. STD-BOR-082-P requires consent-status class in activation authority before enrollment; AUTH-BOR-082 does not close this class because consent remains pending. Feasibility note FEAS-BOR-082 is planning-only and does not resolve the pending consent-status class. The prior artifact incorrectly treated 'current IRB-approved consent C12' as equivalent to consent-status-class CLOSED without addressing the explicit 'remains pending' qualifier in the same document - this is a substantive misinterpretation of controlling source language.",
+  "open_blockers": [
+    "Consent status class PENDING per AUTH-BOR-082 'consent C12 remains pending' verbatim language - consent-status class must resolve to CLOSED before enrollment",
+    "STD-BOR-082-P consent-status class gate not satisfied because AUTH-BOR-082 states consent remains pending not closed"
+  ],
+  "packet_id": "HV-KITC-082-B",
+  "verification_verdict": "ESCALATE",
+  "warning_or_prelim_artifact_handling": "FEAS-BOR-082 is planning-only preliminary artifact per policy atlas FP_EXCEPTION_PATH_FREEZE; AUTH-BOR-082 controls the boundary but explicitly states consent remains pending - this qualifier controls consent-status class not merely document status",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

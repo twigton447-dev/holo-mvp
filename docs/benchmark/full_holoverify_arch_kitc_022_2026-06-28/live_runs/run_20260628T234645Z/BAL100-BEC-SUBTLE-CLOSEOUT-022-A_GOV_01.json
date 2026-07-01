@@ -1,0 +1,41 @@
+{
+  "blocked_moves": [
+    "WARNING_FIXATION"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "ACT-ACR-2026-8022 activates telemetry for device group DG-41B production units at Site 18-P",
+    "CAL-ACR-022 covers DG-41B production telemetry calibration at Site 18-P for release condition RC-7 completed before activation",
+    "RC-ACR-022 release condition requires calibration packet attachment before service activation",
+    "SITE-ACR-022 confirms DG-41B production telemetry units are listed at Site 18-P",
+    "STD-ACR-022-P policy requires exact device group, site, release condition, and timing match before activation",
+    "ALERT-ACR-DEP-022 dependency exception alert confirmed calibration evidence matches activation scope",
+    "NOTE-ACR-022 shared-prefix warning explicitly not applicable when calibration provides exact match per blocked_move directive"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "device group DG-41B exact match between activation and calibration",
+    "site 18-P exact match between activation and calibration",
+    "release condition RC-7 match between calibration and release condition record",
+    "timing calibration completed before activation",
+    "NOTE-ACR-022 shared-prefix warning not used as blocker",
+    "EXACT_ACTIVATION_DEPENDENCY_CLOSED binding class"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "production-vs-lab device distinction for DG-41B naming prefix matches",
+    "monotonic_preservation": [
+      "EXACT_ACTIVATION_DEPENDENCY_CLOSED binding class preserved from worker_01",
+      "device group DG-41B exact match preserved",
+      "site 18-P exact match preserved",
+      "release condition RC-7 match preserved",
+      "calibration timing preserved"
+    ],
+    "objective": "synthesize final activation dependency verification summary",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "WORKER_SOURCE_BOUND_GATE passed because CAL-ACR-022 provides exact device group, site, release condition, and timing match for activation ACT-ACR-2026-8022. NOTE-ACR-022 shared-prefix warning correctly identified as non-blocking per gov_routing_lens blocked_move directive. All five critical features verified: device group DG-41B exact match, site 18-P exact match, release condition RC-7 match, calibration completed before activation, and calibration record not merely prefix match.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

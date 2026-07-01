@@ -1,0 +1,30 @@
+{
+  "blocked_moves": [
+    "Inventing additional gate requirements beyond STD-NOV-042-P",
+    "Treating SRC-NOV-042 as execution blocker",
+    "Adding warning-tone artifacts where source facts resolve boundary",
+    "Requiring re-verification of already-passed deterministic gates"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "STD-NOV-042-P policy requirement: EHS release matches chemical, quantity band, facility, PO before issuance - VERIFIED via EHS-NOV-042",
+    "PO-NOV-042 purchase order: 18L NS-55, Facility R2 - VERIFIED within band",
+    "EHS-NOV-042 execution release: covers NS-55, 0-25L, Facility R2, PO-NOV-042 - VERIFIED EXACT match",
+    "SRC-NOV-042 sourcing note: quote collection only, separate scope - VERIFIED not execution authority"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "EHS-NOV-042 as controlling execution release",
+    "PO-NOV-042 as covered purchase order",
+    "EXACT_EXECUTION_RELEASE_CLOSED binding class",
+    "0-25L quantity band conformance for 18L order",
+    "Facility R2 match",
+    "SRC-NOV-042 sourcing-note scope separate from execution authority"
+  ],
+  "must_repair": [],
+  "next_worker_baton": null,
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "WORKER_SOURCE_BOUND_GATE passed. EHS-NOV-042 exactly matches policy-required boundary: NS-55 solvent, 0-25L band, Facility R2, PO-NOV-042 before issuance. SRC-NOV-042 scope is sourcing-only, not execution authority. No gate failures exist. No repairs required.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

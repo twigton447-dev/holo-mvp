@@ -1,0 +1,41 @@
+{
+  "blocked_moves": [
+    "Close activation dependency with CAL-ACR-022 evidence without Site 18-P production unit calibration",
+    "Permit activation of production telemetry without exact calibration match per binding class SITE_AND_USE_CLASS_MISMATCH",
+    "Substitute Site 18-L lab calibration for Site 18-P production calibration based on DG-41B prefix alone",
+    "Treat NOTE-ACR-022 shared-prefix warning as sufficient evidence for activation despite site-use-class mismatch",
+    "Interpret shared device_group prefix as sufficient for activation dependency satisfaction",
+    "Move to CONFIRM_CLOSE without obtaining Site 18-P production unit calibration evidence"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "ACT-ACR-2026-8022 activation dependency ALERT-ACR-DEP-022 remains open: CAL-ACR-022 covers Site 18-L lab units, activation requires Site 18-P production units",
+    "STD-ACR-022-P binding interpretation is binding: device_group plus site plus release_condition plus timing all required for exact match",
+    "NOTE-ACR-022 warning correctly preserved: shared DG-41B prefix does not satisfy site/use_class mismatch"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "device_group DG-41B concretely matched across CAL-ACR-022 and ACT-ACR-2026-8022",
+    "site field concretely mismatched: CAL-ACR-022 Site 18-L vs ACT-ACR-2026-8022 Site 18-P",
+    "use_class field concretely mismatched: CAL-ACR-022 lab vs ACT-ACR-2026-8022 production",
+    "release_condition RC-7 present for both records but tied to mismatched calibration evidence",
+    "timing requirement per RC-7 requires calibration of same-site production units, which does not exist",
+    "NOTE-ACR-022 warning interpretation: shared prefix warning supports ESCALATE, does not contradict it"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Validate that no worker may close this dependency with current calibration evidence; confirm FINAL_COMPILER verdict compilation captures all binding failures",
+    "monotonic_preservation": [
+      "binding class SITE_AND_USE_CLASS_MISMATCH from deterministic gate",
+      "ESCALATE verdict from source gate interpretation",
+      "four critical features preserved: device_group prefix, site binding, use_class, release_condition timing",
+      "open_blockers: site mismatch, use_class mismatch, release_condition applied to mismatched evidence"
+    ],
+    "objective": "Confirm FINAL_COMPILER should produce ESCALATE binding record for BAL100-BEC-SUBTLE-CLOSEOUT-022-B packet; no further worker turns can close the activation dependency with current CAL-ACR-022 evidence",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "STD-ACR-022-P requires exact match of device_group, site, release_condition, and timing. CAL-ACR-022 satisfies device_group DG-41B but fails site (18-L vs 18-P), use_class (lab vs production), and timing (lab calibration does not precede production activation). Source gate verdict ESCALATE is binding and deterministically determined.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

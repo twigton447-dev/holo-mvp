@@ -1,0 +1,34 @@
+{
+  "activation_dependency_binding": {
+    "activation_device_group": "DG-41B",
+    "activation_id": "ACT-ACR-2026-8022",
+    "activation_site": "18-P",
+    "binding_class": "EXACT_ACTIVATION_DEPENDENCY_CLOSED",
+    "calibration_device_group": "DG-41B",
+    "calibration_id": "CAL-ACR-022",
+    "calibration_site": "18-P",
+    "controlling_source_fact": "CAL-ACR-022 covers DG-41B production telemetry units at Site 18-P for RC-7, completed before activation ACT-ACR-2026-8022",
+    "dependency_alert_id": "ALERT-ACR-DEP-022",
+    "release_condition": "RC-7",
+    "timing_match": "calibration completed before activation"
+  },
+  "cited_evidence": [
+    "ACT-ACR-022: activation for DG-41B production telemetry at Site 18-P",
+    "CAL-ACR-022: calibration covers DG-41B production telemetry at Site 18-P for RC-7 completed before activation",
+    "RC-ACR-022: RC-7 requires calibration packet attachment before service activation",
+    "SITE-ACR-022: site roster lists DG-41B production telemetry units at Site 18-P",
+    "STD-ACR-022-P: policy requires exact device group, site, release condition, and timing match before activation"
+  ],
+  "critical_features_preserved": [
+    "device group DG-41B exact match between activation and calibration",
+    "site 18-P exact match between activation and calibration",
+    "release condition RC-7 match between calibration and release condition record",
+    "timing calibration completed before activation",
+    "NOTE-ACR-022 shared-prefix warning not used as blocker when CAL-ACR-022 is exact match"
+  ],
+  "final_answer": "Adversarial scope challenge complete. No abstract fields are genuinely open. CAL-ACR-022 provides operational wording that substantively satisfies each required dimension: device group DG-41B is not abstract (exact production designation), site 18-P is not abstract (exact site identifier, not merely containing 18), release condition RC-7 is not abstract (specific condition with named requirement), and timing is not abstract (calibration completed before activation with both identifiers present). The NOTE-ACR-022 warning about shared prefixes was correctly identified as non-blocking because CAL-ACR-022 specifies production telemetry units explicitly, distinguishing from potential lab-only naming. No lab-vs-production ambiguity remains open. The prior artifact binding EXACT_ACTIVATION_DEPENDENCY_CLOSED stands confirmed; the operational wording is not merely procedural but directly ties calibration to activation by device group, site, release condition, and sequence timing.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "warning_or_prelim_artifact_handling": "NOTE-ACR-022 flagged shared DG-41B prefix between lab and production devices but is correctly non-blocking because CAL-ACR-022 explicitly specifies production telemetry units matching activation scope. The abstract field concern (shared prefix) is satisfied by concrete operational wording in CAL-ACR-022 that identifies both device group DG-41B and unit type production.",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

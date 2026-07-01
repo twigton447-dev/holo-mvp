@@ -1,0 +1,48 @@
+{
+  "blocked_moves": [
+    "Treating 'service depot' and 'internal repair center' as functionally equivalent roles",
+    "Closing exception boundary when consignee role strings differ literally",
+    "Issuing ALLOW verdict when source documents show literal consignee role mismatch",
+    "Treating GEN-SOR-047 as warning-only without flagging role discrepancy",
+    "Adjudicating role equivalence outside strict source literal matching"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Worker 1 must be superseded; its consignee role equivalence reasoning contradicts literal binding expected by gate",
+    "Gate expects literal string mismatch on consignee role; functional equivalence reasoning is an unauthorized repair",
+    "Verdict ESCALATE required per gate, not ALLOW; ALLOW was a gate failure",
+    "Consignee role mismatch is the controlling source condition; all other field matches are subordinate"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "Exact item match: controlled analyzer part C-17 (SHIP-SOR-047 \u2194 EXC-SOR-047)",
+    "Exact destination match: Canada",
+    "Exact shipment date match: 2026-06-23",
+    "Item control status: controlled"
+  ],
+  "must_repair": [
+    "Consignee role literal binding: 'service depot' (SHIP-SOR-047) \u2260 'internal repair center' (EXC-SOR-047) \u2192 binding must be CONSIGNEE_ROLE_MISMATCH, not EXACT_EXCEPTION_CLOSED",
+    "Verdict correction: literal role mismatch triggers ESCALATE verdict, not ALLOW",
+    "Functional equivalence reasoning on consignee role must be suppressed; source gates require literal string comparison for role fields"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Re-evaluate consignee role binding under strict literal string comparison; reject functional equivalence reasoning; bind to literal mismatch between 'service depot' and 'internal repair center'; produce ESCALATE verdict",
+    "monotonic_preservation": [
+      "Item C-17 exact match preserved",
+      "Destination Canada exact match preserved",
+      "Shipment date 2026-06-23 exact match preserved",
+      "Item control status controlled preserved"
+    ],
+    "objective": "Re-bind consignee role using literal string comparison; correct verdict from ALLOW to ESCALATE; identify role mismatch as the blocking condition for exception closure",
+    "required_repairs": [
+      "Replace EXACT_EXCEPTION_CLOSED binding with CONSIGNEE_ROLE_MISMATCH binding based on literal string difference",
+      "Replace ALLOW verdict with ESCALATE verdict based on literal role mismatch",
+      "Remove functional equivalence reasoning from consignee role analysis",
+      "Surface GEN-SOR-047 warning as supporting evidence of literal role mismatch concern, not as advisory-only"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate failed because Worker 1 applied functional equivalence reasoning to consignee role, closing the exception boundary. Gate expected literal string comparison: 'service depot' \u2260 'internal repair center' \u2192 CONSIGNEE_ROLE_MISMATCH binding \u2192 ESCALATE verdict. All other field matches (item, destination, date) are preserved but subordinate to role mismatch. Next worker must rebind role fields strictly and correct verdict to ESCALATE.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

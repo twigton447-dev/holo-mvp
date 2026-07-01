@@ -1,0 +1,35 @@
+{
+  "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A_WORKER_02",
+  "binding_class": "EXACT_HOLD_CLOSEOUT_CLOSED",
+  "cited_evidence": [
+    "STD-OVX-021-P states concrete matching requirement: product, lot, hold class, release path before inventory movement",
+    "DISP-OVX-021 row QD-74 explicitly names board MAT-R authority for OVX-9 lot L-882 under thermal-transport hold class, directly matching the alert field",
+    "INV-OVX-021 and MOVE-OVX-021 both explicitly name OVX-9 lot L-882 in concrete inventory movement records, not abstract references",
+    "ALERT-OVX-HOLD-021 names thermal-transport hold class explicitly; no abstract placeholder language found in any critical field"
+  ],
+  "critical_features_preserved": [
+    "product OVX-9 explicitly named in ALERT-OVX-HOLD-021, DISP-OVX-021, INV-OVX-021, and MOVE-OVX-021 without abstract reference",
+    "lot L-882 explicitly named across all four sources, matching the policy-required concrete identifier",
+    "thermal-transport hold class explicitly stated in both ALERT-OVX-HOLD-021 and DISP-OVX-021 with identical wording",
+    "release path from INV-OVX-021 inventory release to MOVE-OVX-021 staging confirmed as sequential and concrete"
+  ],
+  "final_answer": "Adversarial challenge: examined all abstract or potentially open fields. ALERT-OVX-HOLD-021 status is explicitly \"visible warning only\" per source handling, not an unresolved condition requiring further action. No field relies on operational softening of abstract policy language. Each of the four required fields (product, lot, hold class, release path) appears as concrete, named values in source records, not as generalized operational wording that merely gestures at compliance. The EXACT_HOLD_CLOSEOUT_CLOSED binding is substantively grounded, not merely claimed. No genuine open fields found. Verdict ALLOW stands.",
+  "gate_failures": [],
+  "gate_passed": true,
+  "open_blockers": [],
+  "quality_hold_closeout_binding": {
+    "alert_hold_class": "thermal-transport",
+    "binding_class": "EXACT_HOLD_CLOSEOUT_CLOSED",
+    "controlling_source_fact": "DISP-OVX-021 row QD-74 explicitly assigns board MAT-R authority for model OVX-9 refurb lot L-882 under thermal-transport hold class, matching ALERT-OVX-HOLD-021 field exactly",
+    "disposition_hold_class": "thermal-transport",
+    "disposition_id": "DISP-OVX-021",
+    "inventory_release_id": "INV-OVX-021",
+    "lot": "L-882",
+    "product": "OVX-9",
+    "quality_hold_alert_id": "ALERT-OVX-HOLD-021",
+    "release_path": "INV-OVX-021 to MOVE-OVX-021 sellable inventory bin"
+  },
+  "verification_verdict": "ALLOW",
+  "warning_or_prelim_artifact_handling": "ALERT-OVX-HOLD-021 is a closed warning status, not an unresolved hold. Its thermal-transport hold class field is matched exactly by DISP-OVX-021 row QD-74. No abstract field remains open; no operational wording substitutes for source-grounded evidence.",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

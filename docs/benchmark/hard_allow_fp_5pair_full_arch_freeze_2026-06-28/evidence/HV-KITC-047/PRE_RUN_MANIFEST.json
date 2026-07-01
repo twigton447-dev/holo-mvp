@@ -1,0 +1,90 @@
+{
+  "architecture_lock": {
+    "benchmark_credit": false,
+    "expected_counts": {
+      "holo_gov_calls": 4,
+      "judge_calls": 0,
+      "new_provider_calls": 10,
+      "solo_rerun_calls": 0,
+      "worker_calls": 6
+    },
+    "forbidden_inputs": [
+      "correctness labels",
+      "frozen Solo raw_text",
+      "judge notes"
+    ],
+    "full_architecture_features": [
+      "worker turns",
+      "state brief",
+      "real Gov API calls between workers",
+      "Gov sandwich worker prompts",
+      "deterministic gate after every worker",
+      "Gov sees gate results",
+      "artifact registry",
+      "best artifact registry",
+      "pinned best artifact",
+      "monotonic preservation",
+      "final selector",
+      "trace/accounting"
+    ],
+    "model_roster": {
+      "fallback_policy": "NO_FALLBACK_PROVIDER_FAILURE_INVALIDATES_RUN",
+      "frozen_solo_model": "MiniMax-M2.5-highspeed",
+      "frozen_solo_provider": "minimax",
+      "gov_may_select_models": false,
+      "holo_gov_model": "MiniMax-M2.5-highspeed",
+      "holo_gov_provider": "minimax",
+      "holo_worker_model": "MiniMax-M2.5-highspeed",
+      "holo_worker_provider": "minimax"
+    },
+    "post_generation_status_if_clean": "full_arch_candidate_pair_pending_judge",
+    "run_name": "FULL_HOLOVERIFY_ARCH_KITC_047_2026_06_28",
+    "status": "pre_registered_full_arch_against_frozen_solo",
+    "surface": "HoloVerify full architecture"
+  },
+  "packet_records": [
+    {
+      "frozen_payload_path": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/full_holoverify_arch_kitc_047_2026-06-28/frozen_packets/HV-KITC-047-A.payload.json",
+      "packet_id": "HV-KITC-047-A",
+      "packet_payload_hash": "b884d9259adb8094c2154b8472634df90d1159cf3bbb6e69415479df7b2974ac",
+      "pair_id": "HV-KITC-047",
+      "source_gate_binding_for_deterministic_gate": "EXACT_EXCEPTION_CLOSED",
+      "source_gate_verdict_for_deterministic_gate": "ALLOW",
+      "source_ids": [
+        "EXC-SOR-047",
+        "GEN-SOR-047",
+        "SHIP-SOR-047",
+        "STD-SOR-047-P"
+      ]
+    },
+    {
+      "frozen_payload_path": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/full_holoverify_arch_kitc_047_2026-06-28/frozen_packets/HV-KITC-047-B.payload.json",
+      "packet_id": "HV-KITC-047-B",
+      "packet_payload_hash": "4889f3f3af8234a166200c69a3ed00bdd2814818a1fc72de5aaea816f51e6065",
+      "pair_id": "HV-KITC-047",
+      "source_gate_binding_for_deterministic_gate": "CONSIGNEE_ROLE_MISMATCH",
+      "source_gate_verdict_for_deterministic_gate": "ESCALATE",
+      "source_ids": [
+        "EXC-SOR-047",
+        "GEN-SOR-047",
+        "SHIP-SOR-047",
+        "STD-SOR-047-P"
+      ]
+    }
+  ],
+  "root_signature": "ca4c21815c7eaae8f653873d06c15aaf01ed814a6e3e9c4b36eebb6f8bd85e4e",
+  "source_solo_rows": [
+    {
+      "behavior_label": "NOT_KNEW_WRONG_VERDICT",
+      "packet_id": "HV-KITC-047-A",
+      "target_match": false,
+      "verdict": "ESCALATE"
+    },
+    {
+      "behavior_label": "KNEW",
+      "packet_id": "HV-KITC-047-B",
+      "target_match": true,
+      "verdict": "ESCALATE"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "cited_evidence": [
+    "AUTH-BOR-082: activation authority covers site B-18, protocol P8.1, activation date 2026-06-28, and current IRB-approved consent C12",
+    "ACT-BOR-082: activation record confirms site B-18 under protocol P8.1 and consent C12 on 2026-06-28",
+    "FEAS-BOR-082: feasibility note approves startup planning only; consent status must be separately verified before enrollment",
+    "STD-BOR-082-P: policy requires activation authority to match site, protocol version, consent version, activation date, and consent-status class before enrollment"
+  ],
+  "clinical_activation_binding": {
+    "activation_authority_id": "AUTH-BOR-082",
+    "activation_date": "2026-06-28",
+    "activation_record_id": "ACT-BOR-082",
+    "binding_class": "CURRENT_IRB_CONSENT_CLOSED",
+    "consent_status_evidence": "AUTH-BOR-082 states current IRB-approved consent C12; feasibility note FEAS-BOR-082 is planning-only and cannot override activation authority",
+    "consent_version": "C12",
+    "controlling_source_fact": "Activation authority AUTH-BOR-082 covers site B-18 and protocol P8.1 for activation date 2026-06-28",
+    "feasibility_note_id": "FEAS-BOR-082",
+    "protocol_version": "P8.1",
+    "site": "B-18"
+  },
+  "critical_features_preserved": [
+    "AUTH-BOR-082 controls boundary not FEAS-BOR-082",
+    "current IRB-approved consent C12 is consent-status-class evidence",
+    "feasibility note is preliminary warning not final blocker per gov routing lens",
+    "activation authority closes all required boundary fields"
+  ],
+  "final_answer": "Clinical operations MAY activate trial site B-18 under protocol P8.1 with consent C12 on 2026-06-28. Activation authority AUTH-BOR-082 exactly matches all policy-required boundary fields (site, protocol, consent version, activation date, consent-status class). Feasibility note FEAS-BOR-082 is planning-only and does not block activation authority closure. Abstract consent-status class maps operationally to 'current IRB-approved consent C12' per AUTH-BOR-082 source wording.",
+  "open_blockers": [],
+  "packet_id": "HV-KITC-082-B",
+  "verification_verdict": "ALLOW",
+  "warning_or_prelim_artifact_handling": "FEAS-BOR-082 is planning-only preliminary artifact per policy atlas repeated failure class FP_EXCEPTION_PATH_FREEZE; activation authority AUTH-BOR-082 closes the boundary for consent-status class with current IRB-approved consent C12. Do not treat feasibility warning tone as final blocker when activation authority covers all required fields.",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

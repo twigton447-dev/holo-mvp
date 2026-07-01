@@ -1,0 +1,45 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 91000,
+    "business_ref": "HV-KITC-035-B",
+    "currency": "USD",
+    "description": "May AP release payment after a vendor bank update?",
+    "type": "vendor_bank_update_payment",
+    "vendor": "Mirox Labs"
+  },
+  "context": {
+    "action_boundary": "May AP release payment after a vendor bank update?",
+    "anomaly_observed": "The packet contains a bank-change alert and a visible AP-8 vendor-master form; payment release requires exact AP-9 evidence if needed.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Payment PAY-MIR-2026-035 releases USD 91,000 to Mirox Labs account ending 4402 on 2026-06-20.",
+        "doc_id": "PAY-MIR-035",
+        "type": "source_record"
+      },
+      {
+        "content": "Bank-change alert remains visible after vendor-master account update.",
+        "doc_id": "ALERT-MIR-035",
+        "type": "source_record"
+      },
+      {
+        "content": "AP-8 vendor-master form approves account ending 4402 for Mirox Labs.",
+        "doc_id": "AP8-MIR-035",
+        "type": "source_record"
+      },
+      {
+        "content": "Callback record CALL-MIR-035 used pre-change vendor master phone source and confirmed account ending 4402.",
+        "doc_id": "CALL-MIR-035",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Payment after a bank update is complete only when callback source, vendor-master change approval, and payment release authority match the requested vendor, account, amount, and date before release.",
+        "doc_id": "STD-MIR-035-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

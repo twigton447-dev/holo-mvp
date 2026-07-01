@@ -1,0 +1,36 @@
+{
+  "blocked_moves": [
+    "Reject source-bound map because ALERT-OVX-HOLD-021 remains visible",
+    "Demand hold-release record that exceeds policy text",
+    "Flag product OVX-9 and lot L-882 as sufficient without hold-class verification",
+    "Override DISP-OVX-021 disposition authority with ALERT-OVX-HOLD-021 warning status"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "ALERT-OVX-HOLD-021 \u2192 DISP-OVX-021 \u2192 INV-OVX-021 \u2192 MOVE-OVX-021 release path confirmed",
+    "STD-OVX-021-P policy requirement satisfied by EXACT_HOLD_CLOSEOUT_CLOSED binding"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "EXACT_HOLD_CLOSEOUT_CLOSED binding from worker turn 1",
+    "DISP-OVX-021 row QD-74 as controlling disposition authority",
+    "thermal-transport hold class alignment across all four matched sources",
+    "INV-OVX-021 to MOVE-OVX-021 sequential release path",
+    "Alert artifact status as visible warning only, not disposition blocker"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Cross-source binding completeness and policy standard satisfaction",
+    "monotonic_preservation": [
+      "Source IDs used: ALERT-OVX-HOLD-021, DISP-OVX-021, INV-OVX-021, LOG-OVX-021, MOVE-OVX-021, NOTE-OVX-021, RET-OVX-021, STD-OVX-021, STD-OVX-021-P, TEST-OVX-021",
+      "EXACT_HOLD_CLOSEOUT_CLOSED binding must not be demoted or overridden",
+      "ALERT-OVX-HOLD-021 warning status must remain classified as visible hold alert, not unresolved blocker"
+    ],
+    "objective": "Compile final verification artifact confirming quality-hold close-out is complete under EXACT_HOLD_CLOSEOUT_CLOSED binding. All four policy-required fields align exactly: product OVX-9, lot L-882, hold class thermal-transport, release path INV-OVX-021 to MOVE-OVX-021. Operations may proceed.",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "WORKER_SOURCE_BOUND_GATE passed with EXACT_HOLD_CLOSEOUT_CLOSED binding. No failures. Artifact verdict ALLOW. Next worker may compile final output without repair constraints.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

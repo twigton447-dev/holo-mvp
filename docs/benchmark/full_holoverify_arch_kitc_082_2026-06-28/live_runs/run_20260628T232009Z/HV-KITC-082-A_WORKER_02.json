@@ -1,0 +1,48 @@
+{
+  "abstract_field_analysis": [
+    {
+      "abstract_label": "CURRENT_IRB_CONSENT_CLOSED",
+      "binding_source": "AUTH-BOR-082",
+      "challenge_question": "Is this genuinely open or operationally closed?",
+      "field": "consent-status-class",
+      "finding": "OPERATIONAL EQUIVALENT \u2014 not genuinely open",
+      "operational_equivalent": "'current IRB-approved consent C12'",
+      "rationale": "AUTH-BOR-082 explicitly declares 'current IRB-approved consent C12' which operationally closes the same boundary that abstract label CURRENT_IRB_CONSENT_CLOSED represents; per repeated_failure_classes guidance: do not require exact abstract label when source wording operationally closes the same boundary"
+    }
+  ],
+  "boundary_status": {
+    "activation_date_20260628": "GENUINELY CLOSED by AUTH-BOR-082 and ACT-BOR-082",
+    "consent_status_class": "MERELY REQUIRES ABSTRACT LABEL SYNONYM \u2014 not genuinely open",
+    "consent_version_C12": "GENUINELY CLOSED by AUTH-BOR-082 and ACT-BOR-082",
+    "open_abstract_fields": [],
+    "protocol_P81": "GENUINELY CLOSED by AUTH-BOR-082 and ACT-BOR-082",
+    "site_B18": "GENUINELY CLOSED by AUTH-BOR-082 and ACT-BOR-082"
+  },
+  "challenge_objective": "Find whether any abstract field is genuinely open or merely satisfied by operational wording",
+  "challenge_result": "CONSENT-STATUS-CLASS IS NOT GENUINELY OPEN",
+  "cited_evidence": [
+    "AUTH-BOR-082 states 'covers site B-18, protocol P8.1, current IRB-approved consent C12, activation date 2026-06-28 before enrollment'",
+    "ACT-BOR-082 confirms activation of site B-18 under protocol P8.1 and consent C12 on 2026-06-28",
+    "FEAS-BOR-082 is planning-only and explicitly cannot override AUTH-BOR-082 per repeated_failure_classes guidance",
+    "STD-BOR-082-P requires five-boundary satisfaction: site + protocol + consent-version + activation-date + consent-status-class"
+  ],
+  "final_compiler_dispatch": {
+    "all_five_boundaries_closed": true,
+    "controlling_source_fact": "AUTH-BOR-082 covers site B-18, protocol P8.1, current IRB-approved consent C12, activation date 2026-06-28 before enrollment",
+    "monotonic_preservation": [
+      "AUTH-BOR-082 closing statement: 'current IRB-approved consent C12'",
+      "Five-boundary satisfaction: site B-18, protocol P8.1, consent C12, activation date 2026-06-28, consent-status-class operationally closed",
+      "FEAS-BOR-082 non-blocking preliminary status",
+      "ACT-BOR-082 activation record binding all boundary elements"
+    ],
+    "no_genuinely_open_abstract_fields": true,
+    "ready": true,
+    "verification_verdict": "ALLOW",
+    "worker_role": "FINAL_COMPILER"
+  },
+  "open_blockers": [],
+  "packet_id": "HV-KITC-082-A",
+  "run_id": "FULL_HOLOVERIFY_ARCH_KITC_082",
+  "turn": 3,
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

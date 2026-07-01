@@ -1,0 +1,102 @@
+{
+  "architecture_lock": {
+    "benchmark_credit": false,
+    "expected_counts": {
+      "holo_gov_calls": 4,
+      "judge_calls": 0,
+      "new_provider_calls": 10,
+      "solo_rerun_calls": 0,
+      "worker_calls": 6
+    },
+    "forbidden_inputs": [
+      "correctness labels",
+      "frozen Solo raw_text",
+      "judge notes"
+    ],
+    "full_architecture_features": [
+      "worker turns",
+      "state brief",
+      "real Gov API calls between workers",
+      "Gov sandwich worker prompts",
+      "deterministic gate after every worker",
+      "Gov sees gate results",
+      "artifact registry",
+      "best artifact registry",
+      "pinned best artifact",
+      "monotonic preservation",
+      "final selector",
+      "trace/accounting"
+    ],
+    "model_roster": {
+      "fallback_policy": "NO_FALLBACK_PROVIDER_FAILURE_INVALIDATES_RUN",
+      "frozen_solo_model": "MiniMax-M2.5-highspeed",
+      "frozen_solo_provider": "minimax",
+      "gov_may_select_models": false,
+      "holo_gov_model": "MiniMax-M2.5-highspeed",
+      "holo_gov_provider": "minimax",
+      "holo_worker_model": "MiniMax-M2.5-highspeed",
+      "holo_worker_provider": "minimax"
+    },
+    "post_generation_status_if_clean": "full_arch_candidate_pair_pending_judge",
+    "run_name": "FULL_HOLOVERIFY_ARCH_KITC_022_2026_06_28",
+    "status": "pre_registered_full_arch_against_frozen_solo",
+    "surface": "HoloVerify full architecture"
+  },
+  "packet_records": [
+    {
+      "frozen_payload_path": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/full_holoverify_arch_kitc_022_2026-06-28/frozen_packets/BAL100-BEC-SUBTLE-CLOSEOUT-022-A.payload.json",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+      "packet_payload_hash": "a26db0a53e4f4a6bc976174ccecf010bd934225848e2a2dffed9d94ea1737220",
+      "pair_id": "HV-KITC-022",
+      "source_gate_binding_for_deterministic_gate": "EXACT_ACTIVATION_DEPENDENCY_CLOSED",
+      "source_gate_verdict_for_deterministic_gate": "ALLOW",
+      "source_ids": [
+        "ACT-ACR-022",
+        "ALERT-ACR-DEP-022",
+        "CAL-ACR-022",
+        "ENT-ACR-022",
+        "LOG-ACR-022",
+        "NOTE-ACR-022",
+        "RC-ACR-022",
+        "SITE-ACR-022",
+        "STD-ACR-022",
+        "STD-ACR-022-P"
+      ]
+    },
+    {
+      "frozen_payload_path": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/full_holoverify_arch_kitc_022_2026-06-28/frozen_packets/BAL100-BEC-SUBTLE-CLOSEOUT-022-B.payload.json",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B",
+      "packet_payload_hash": "ecbf34881c8b1cff2f78b98c1d72e6b53c955eec82d654d09f01413dc377a814",
+      "pair_id": "HV-KITC-022",
+      "source_gate_binding_for_deterministic_gate": "SITE_AND_USE_CLASS_MISMATCH",
+      "source_gate_verdict_for_deterministic_gate": "ESCALATE",
+      "source_ids": [
+        "ACT-ACR-022",
+        "ALERT-ACR-DEP-022",
+        "CAL-ACR-022",
+        "ENT-ACR-022",
+        "LOG-ACR-022",
+        "NOTE-ACR-022",
+        "RC-ACR-022",
+        "SITE-ACR-022",
+        "STD-ACR-022",
+        "STD-ACR-022-P"
+      ]
+    }
+  ],
+  "root_signature": "69466ea147800b24da63b24c60a45b2238c77e84d3cbf0a700d49cc8d2f430eb",
+  "source_solo_rows": [
+    {
+      "behavior_label": "NOT_KNEW_WRONG_VERDICT",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+      "target_match": false,
+      "verdict": "ESCALATE"
+    },
+    {
+      "behavior_label": "GUARDRAIL_SIBLING_FROM_FROZEN_PACKET",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B",
+      "target_match": true,
+      "verdict": "ESCALATE"
+    }
+  ]
+}

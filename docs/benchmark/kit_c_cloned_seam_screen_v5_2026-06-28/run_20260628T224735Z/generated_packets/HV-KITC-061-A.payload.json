@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-061-A",
+    "currency": "USD",
+    "description": "May procurement execute the controlled-material purchase?",
+    "type": "controlled_purchase",
+    "vendor": "Kairo Chemicals"
+  },
+  "context": {
+    "action_boundary": "May procurement execute the controlled-material purchase?",
+    "anomaly_observed": "The packet includes both a limited review note and an execution-control record.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Purchase order PO-KAI-061 buys 16 liters of KC-14 reagent for Facility H2.",
+        "doc_id": "PO-KAI-061",
+        "type": "source_record"
+      },
+      {
+        "content": "Review note REV-KAI-061 says KC-14 supplier quote collection may proceed; it is not PO execution authority.",
+        "doc_id": "REV-KAI-061",
+        "type": "source_record"
+      },
+      {
+        "content": "Execution release EXEC-KAI-061 covers KC-14 reagent, 0-20 liter band, Facility H2, and PO-KAI-061 before PO execution.",
+        "doc_id": "EXEC-KAI-061",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Controlled-material purchase is complete only when execution release matches material, quantity band, facility, and purchase order before PO execution.",
+        "doc_id": "STD-KAI-061-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

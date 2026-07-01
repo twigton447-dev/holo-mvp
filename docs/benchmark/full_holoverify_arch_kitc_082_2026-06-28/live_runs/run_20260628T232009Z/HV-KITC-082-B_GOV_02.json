@@ -1,0 +1,47 @@
+{
+  "blocked_moves": [
+    "Claiming activation authority closes consent-status class when AUTH-BOR-082 says consent C12 remains pending",
+    "Treating AUTH-BOR-082 'current IRB-approved consent C12' as equivalent to consent-status-class CLOSED without addressing explicit 'remains pending' qualifier",
+    "Using FEAS-BOR-082 planning-only status to override AUTH-BOR-082 source language about pending consent",
+    "Abstracting away 'remains pending' qualifier as operational equivalent to CLOSED",
+    "Treating ESCALATE verdict as warning that can be 'resolved' by worker interpretation rather than by source resolution",
+    "Warning fixation on FEAS-BOR-082 feasibility note as if it could substitute for AUTH-BOR-082 consent-status class resolution"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "CONSENT_STATUS_PENDING is established binding from AUTH-BOR-082 controlling source language",
+    "ESCALATE verdict is deterministic gate result confirming Worker 02 output matches source evidence",
+    "STD-BOR-082-P requires consent-status class in activation authority before enrollment - requirement currently unsatisfied",
+    "FEAS-BOR-082 planning-only status acknowledged but does not resolve consent-status class",
+    "ACT-BOR-082 activation record confirmed but does not resolve pending consent status",
+    "No dependency resolution possible until consent C12 status changes from pending to closed in source documents"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "AUTH-BOR-082 verbatim: 'consent C12 remains pending' - this qualifier controls consent-status class not document status",
+    "CONSENT_STATUS_PENDING binding established by AUTH-BOR-082 controlling language",
+    "ESCALATE verdict reflects actual source evidence that consent status is unresolved",
+    "FEAS-BOR-082 is planning-only preliminary artifact per FP_EXCEPTION_PATH_FREEZE and does not alter consent-status class",
+    "STD-BOR-082-P consent-status class requirement not satisfied because AUTH-BOR-082 states consent remains pending not closed"
+  ],
+  "must_repair": [
+    "No repair needed - Worker 02 passed deterministic gate with correct source binding and verdict",
+    "Prior artifact (Worker 01) misinterpretation of 'current IRB-approved consent C12' as CLOSED has been superseded by correct CONSENT_STATUS_PENDING binding"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "N/A - gate passed with correct verdict and binding",
+    "monotonic_preservation": [
+      "AUTH-BOR-082 'consent C12 remains pending' verbatim language",
+      "CONSENT_STATUS_PENDING consent-status class binding",
+      "ESCALATE activation verdict",
+      "FEAS-BOR-082 planning-only preliminary status",
+      "STD-BOR-082-P unsatisfied consent-status class requirement"
+    ],
+    "objective": "Preserve final ESCALATE verdict and CONSENT_STATUS_PENDING binding for final compiler compilation",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "Worker 02 correctly interpreted source_gate_binding:CONSENT_STATUS_PENDING and source_gate_verdict:ESCALATE as matching AUTH-BOR-082 explicit 'remains pending' qualifier. Deterministic gate PASSED confirms artifact binding and verdict align with source evidence. No reinterpretation needed.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

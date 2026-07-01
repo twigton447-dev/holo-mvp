@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-26",
+    "amount": 94000,
+    "business_ref": "HV-KITC-045-A",
+    "currency": "USD",
+    "description": "May procurement renew a contract under delegated authority?",
+    "type": "contract_renewal",
+    "vendor": "Quanta Systems"
+  },
+  "context": {
+    "action_boundary": "May procurement renew a contract under delegated authority?",
+    "anomaly_observed": "A delegation memo exists, but delegated authority depends on term, renewal class, and amount.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Renewal REN-QUA-045 renews Quanta Systems support for 9 months at USD 94000 effective 2026-06-26.",
+        "doc_id": "REN-QUA-045",
+        "type": "source_record"
+      },
+      {
+        "content": "Delegation DEL-QUA-045 covers Quanta Systems support renewal, term up to 12 months, amount ceiling USD 100000, effective before 2026-06-26.",
+        "doc_id": "DEL-QUA-045",
+        "type": "source_record"
+      },
+      {
+        "content": "Board note says renewals above 12 months or USD 100000 require board review.",
+        "doc_id": "BOARD-QUA-045",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Delegated renewal authority is complete only when approval matches vendor, renewal class, term length, amount ceiling, and effective date before renewal.",
+        "doc_id": "STD-QUA-045-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

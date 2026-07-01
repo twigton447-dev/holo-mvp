@@ -1,0 +1,47 @@
+{
+  "blocked_moves": [
+    "Accept INV-OVX-021 as equivalent substitute for action business_ref INV-OVX-2026-7021",
+    "Treat citation of INV-OVX-021 as fulfilling the requirement to cite the actual action document INV-OVX-2026-7021",
+    "Treat cited evidence as sufficient when the source document IDs do not match the action business reference",
+    "Dismiss the gate failure as non-critical when the action's business_ref cannot be verified against source documents"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "INV-OVX-2026-7021 requires direct citation from source documents (INV-OVX-021 contains related content but uses different document ID)",
+    "DISP-OVX-021 row QD-74 authority citation is valid and must be preserved",
+    "quality_hold_closeout_binding requires exact match of business_ref from action context",
+    "EXACT_HOLD_CLOSEOUT_CLOSED binding requires all four fields: product OVX-9, lot L-882, hold class thermal-transport, release path"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "DISP-OVX-021 row QD-74 explicitly assigns board MAT-R authority for OVX-9 lot L-882 under thermal-transport hold class",
+    "ALERT-OVX-HOLD-021 closed warning status with thermal-transport hold class field matching disposition",
+    "EXACT_HOLD_CLOSEOUT_CLOSED binding structure with product OVX-9 lot L-882 thermal-transport hold class release path",
+    "Release path from inventory release to MOVE-OVX-021 sellable inventory bin confirmation"
+  ],
+  "must_repair": [
+    "worker citation used document ID INV-OVX-021 instead of action business_ref INV-OVX-2026-7021 - these are different documents and cannot be substituted",
+    "gate requires verification that the action business_ref INV-OVX-2026-7021 appears in source records with matching fields",
+    "evidence must demonstrate that INV-OVX-2026-7021 itself (not an alternative document) contains the concrete inventory release record for OVX-9 lot L-882"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Verify that the action business_ref INV-OVX-2026-7021 itself (not a related document with different ID) appears in source records with concrete fields matching product OVX-9 lot L-882 thermal-transport hold class release path to sellable inventory",
+    "monotonic_preservation": [
+      "DISP-OVX-021 row QD-74 board MAT-R authority for thermal-transport hold class on OVX-9 lot L-882",
+      "ALERT-OVX-HOLD-021 closed warning with thermal-transport hold class field",
+      "release path from inventory release to MOVE-OVX-021 sellable inventory bin",
+      "EXACT_HOLD_CLOSEOUT_CLOSED binding for four required fields"
+    ],
+    "objective": "Repair source binding to cite the actual action business_ref INV-OVX-2026-7021 and verify it contains matching concrete fields rather than substituting a different document ID",
+    "required_repairs": [
+      "Cite INV-OVX-2026-7021 (the business_ref from action context) directly in evidence rather than INV-OVX-021",
+      "Demonstrate that INV-OVX-2026-7021 record contains product OVX-9 lot L-882 thermal-transport hold class and release path to sellable inventory",
+      "Do not substitute document IDs - use exact match from action context",
+      "Confirm the gate failure knew_term_missing:INV-OVX-2026-7021 is resolved by direct citation"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate failed because worker cited INV-OVX-021 (related internal document) but did not verify that the actual action business_ref INV-OVX-2026-7021 appears in source records with matching fields. The binding requires exact match between action business_ref and source document citation. INV-OVX-021 is not a substitute for INV-OVX-2026-7021 - these are distinct document identifiers.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

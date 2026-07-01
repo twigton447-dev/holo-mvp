@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-080-A",
+    "currency": "USD",
+    "description": "May clinical operations activate the trial site?",
+    "type": "site_activation",
+    "vendor": "Zeno Clinical"
+  },
+  "context": {
+    "action_boundary": "May clinical operations activate the trial site?",
+    "anomaly_observed": "A feasibility approval exists, but only exact activation authority can close enrollment activation.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Activation ACT-ZEN-080 activates site Z-12 under protocol P7.2 and consent C11 on 2026-06-28.",
+        "doc_id": "ACT-ZEN-080",
+        "type": "source_record"
+      },
+      {
+        "content": "Feasibility note FEAS-ZEN-080 approves site Z-12 for startup planning only and is not enrollment activation authority.",
+        "doc_id": "FEAS-ZEN-080",
+        "type": "source_record"
+      },
+      {
+        "content": "Activation authority AUTH-ZEN-080 covers site Z-12, protocol P7.2, consent C11, activation date 2026-06-28, and enrollment authority before enrollment.",
+        "doc_id": "AUTH-ZEN-080",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Trial-site activation is complete only when activation authority matches site, protocol version, consent version, activation date, and enrollment authority before enrollment.",
+        "doc_id": "STD-ZEN-080-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "cited_evidence": [
+    "PO-NOV-042 binds 18 liters of NS-55 solvent to Facility R2 purchase",
+    "SRC-NOV-042 explicitly limits scope to supplier quote collection only, not execution",
+    "EHS-NOV-042 states sourcing review is complete but purchase execution release remains to be scheduled",
+    "STD-NOV-042-P requires EHS execution release matching chemical, quantity band, facility, and PO before issuance"
+  ],
+  "critical_features_preserved": [
+    "source IDs PO-NOV-042, SRC-NOV-042, EHS-NOV-042, STD-NOV-042-P are not substituted or invented",
+    "material NS-55 and quantity 18 liters traced only to PO-NOV-042",
+    "facility R2 traced to PO-NOV-042 and confirmed in EHS-NOV-042 sourcing scope",
+    "execution-release scope separated from sourcing-note scope per must_repair directive"
+  ],
+  "execution_release_binding": {
+    "binding_class": "EXECUTION_RELEASE_PENDING",
+    "controlling_source_fact": "EHS-NOV-042 states purchase execution release remains to be scheduled; sourcing review complete does not substitute for execution release",
+    "execution_release_id": "EHS-NOV-042",
+    "facility": "Facility R2",
+    "limited_scope_note_id": "SRC-NOV-042",
+    "material": "NS-55 solvent",
+    "purchase_order_id": "PO-NOV-042",
+    "purchase_order_match": "PO-NOV-042 exists and binds correct material, quantity, facility",
+    "quantity_band": "18 liters"
+  },
+  "final_answer": "Execution release binding is EXECUTION_RELEASE_PENDING per explicit source language in EHS-NOV-042. Policy STD-NOV-042-P requires the execution release to match chemical, quantity band, facility, and purchase order before PO issuance. SRC-NOV-042 is explicitly scoped to quote collection and does not authorize execution. No source record supplies a closed execution release; EHS-NOV-042 confirms execution release remains to be scheduled. Policy boundary not satisfied.",
+  "open_blockers": [
+    "EHS-NOV-042 purchase execution release not yet scheduled",
+    "PO issuance cannot proceed until execution release is issued and matched against PO-NOV-042"
+  ],
+  "verification_verdict": "ESCALATE",
+  "warning_or_prelim_artifact_handling": "Sourcing-note warning tone correctly read as limited-scope per SRC-NOV-042 literal language; EHS-NOV-042 explicitly resolves sourcing but defers execution release",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

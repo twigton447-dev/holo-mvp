@@ -1,0 +1,31 @@
+{
+  "cited_evidence": [
+    "SHIP-SOR-047 consignee role literal string: service depot",
+    "EXC-SOR-047 consignee role literal string: internal repair center",
+    "STD-SOR-047-P requires exact consignee role match before exception closes",
+    "GEN-SOR-047 flags exact-match requirement for controlled items; role literal mismatch satisfies this warning"
+  ],
+  "critical_features_preserved": [
+    "Exact item match: controlled analyzer part C-17 (SHIP-SOR-047 \u2194 EXC-SOR-047)",
+    "Exact destination match: Canada",
+    "Exact shipment date match: 2026-06-23",
+    "Item control status: controlled"
+  ],
+  "final_answer": "Rebound consignee role under strict literal comparison. SHIP-SOR-047 declares service depot; EXC-SOR-047 declares internal repair center. Literal strings differ; functional equivalence reasoning suppressed per gate. Binding corrected to CONSIGNEE_ROLE_MISMATCH; verdict corrected to ESCALATE. GEN-SOR-047 warning satisfied by flagging the mismatch, not dismissed. Exception boundary remains open until role strings align.",
+  "license_exception_binding": {
+    "binding_class": "CONSIGNEE_ROLE_MISMATCH",
+    "controlling_source_fact": "Literal string mismatch on consignee role blocks exception closure",
+    "destination": "Canada",
+    "exception_consignee_role": "internal repair center",
+    "exception_id": "EXC-SOR-047",
+    "general_warning_id": "GEN-SOR-047",
+    "item_control_status": "controlled",
+    "shipment_consignee_role": "service depot",
+    "shipment_date": "2026-06-23",
+    "shipment_id": "SHIP-SOR-047"
+  },
+  "open_blockers": [],
+  "verification_verdict": "ESCALATE",
+  "warning_or_prelim_artifact_handling": "GEN-SOR-047 interpreted as confirming exact-match requirement; role literal mismatch satisfies warning condition by surfacing mismatch rather than suppressing it",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

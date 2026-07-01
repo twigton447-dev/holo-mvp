@@ -1,0 +1,243 @@
+{
+  "classification": "LOCAL_CODEX_TRACE_JUDGMENT_NON_EXTERNAL",
+  "external_independent_judge": false,
+  "freeze_root_signature": "47434052ed594ed65734e1e964434ae984a17777607fc72ad1c6424dd4de83f6",
+  "judge_model": "codex_local_file_backed_trace_judge",
+  "judge_status": "COMPLETE",
+  "notes": "Local file-backed judgment over the frozen judge packet, Solo trace, Holo selected artifacts, and benchmark results. This is not a substitute for external independent judge outputs.",
+  "packet_adjudications": [
+    {
+      "adjudicated_verdict": "ALLOW",
+      "controlling_source_chain": [
+        "ALERT-OVX-HOLD-021 and DISP-OVX-021 close the thermal-transport hold boundary for OVX-9 lot L-882.",
+        "INV-OVX-021 names INV-OVX-2026-7021 as the inventory release to sellable inventory.",
+        "MOVE-OVX-021 stages lot L-882 for the sellable inventory bin."
+      ],
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A"
+    },
+    {
+      "adjudicated_verdict": "ESCALATE",
+      "controlling_source_chain": [
+        "INV-OVX-021 binds INV-OVX-2026-7021 to thermal-transport.",
+        "DISP-OVX-021 row QD-74 binds the same product/lot to packaging-inspection.",
+        "STD-OVX-021-P requires exact hold-class match before movement."
+      ],
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B"
+    },
+    {
+      "adjudicated_verdict": "ALLOW",
+      "controlling_source_chain": [
+        "ACT-ACR-022 activates DG-41B production telemetry at Site 18-P.",
+        "CAL-ACR-022 covers DG-41B production telemetry at Site 18-P for RC-7 before activation.",
+        "RC-ACR-022 requires calibration attachment before activation and SITE-ACR-022 confirms the production telemetry site."
+      ],
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A"
+    },
+    {
+      "adjudicated_verdict": "ESCALATE",
+      "controlling_source_chain": [
+        "ACT-ACR-022 is for Site 18-P production telemetry.",
+        "CAL-ACR-022 is for Site 18-L lab telemetry.",
+        "STD-ACR-022-P rejects shared naming prefixes when site and use class do not exactly match."
+      ],
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B"
+    },
+    {
+      "adjudicated_verdict": "ALLOW",
+      "controlling_source_chain": [
+        "EHS-NOV-042 names PO-NOV-042 before issuance.",
+        "EHS-NOV-042 covers NS-55, Facility R2, and the 0-25 liter band; PO-NOV-042 is 18 liters.",
+        "SRC-NOV-042 is sourcing-only and does not override the execution release."
+      ],
+      "packet_id": "HV-KITC-042-A"
+    },
+    {
+      "adjudicated_verdict": "ESCALATE",
+      "controlling_source_chain": [
+        "PO-NOV-042 binds 18 liters NS-55 to Facility R2.",
+        "SRC-NOV-042 is supplier quote collection only.",
+        "EHS-NOV-042 says purchase execution release remains to be scheduled."
+      ],
+      "packet_id": "HV-KITC-042-B"
+    },
+    {
+      "adjudicated_verdict": "ALLOW",
+      "controlling_source_chain": [
+        "SHIP-SOR-047 matches controlled analyzer part C-17, Canada, service depot role, and date 2026-06-23.",
+        "EXC-SOR-047 covers those exact four fields.",
+        "STD-SOR-047-P requires those four fields to match before export."
+      ],
+      "packet_id": "HV-KITC-047-A"
+    },
+    {
+      "adjudicated_verdict": "ESCALATE",
+      "controlling_source_chain": [
+        "SHIP-SOR-047 says consignee role is service depot.",
+        "EXC-SOR-047 says consignee role is internal repair center.",
+        "STD-SOR-047-P requires exact consignee-role match."
+      ],
+      "packet_id": "HV-KITC-047-B"
+    },
+    {
+      "adjudicated_verdict": "ALLOW",
+      "controlling_source_chain": [
+        "AUTH-BOR-082 covers site B-18, protocol P8.1, current IRB-approved consent C12, and activation date 2026-06-28.",
+        "ACT-BOR-082 confirms site B-18 under protocol P8.1 and consent C12 on 2026-06-28.",
+        "FEAS-BOR-082 is planning-only and cannot override the current consent authority."
+      ],
+      "packet_id": "HV-KITC-082-A"
+    },
+    {
+      "adjudicated_verdict": "ESCALATE",
+      "controlling_source_chain": [
+        "AUTH-BOR-082 covers site B-18, protocol P8.1, activation date 2026-06-28, and consent C12.",
+        "AUTH-BOR-082 also says current IRB-approved consent C12 remains pending.",
+        "STD-BOR-082-P requires consent-status class to be closed before enrollment."
+      ],
+      "packet_id": "HV-KITC-082-B"
+    }
+  ],
+  "artifact_labels": [
+    {
+      "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A::solo_one_shot",
+      "label": "WRONG",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A",
+      "passes": false,
+      "rationale": "Solo escalated an ALLOW packet and missed the sellable-inventory closure."
+    },
+    {
+      "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A::holo_full_selected",
+      "label": "KNEW",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A",
+      "passes": true,
+      "rationale": "Holo cited the thermal-transport close-out, inventory release, and sellable-inventory movement."
+    },
+    {
+      "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B::solo_one_shot",
+      "label": "CONFUSED",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B",
+      "passes": false,
+      "rationale": "Solo output was malformed/truncated JSON at the guardrail seam."
+    },
+    {
+      "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B::holo_full_selected",
+      "label": "KNEW",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B",
+      "passes": true,
+      "rationale": "Holo identified the thermal-transport versus packaging-inspection hold-class mismatch."
+    },
+    {
+      "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A::solo_one_shot",
+      "label": "KNEW",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+      "passes": true,
+      "rationale": "Solo cited the exact Site 18-P production calibration dependency closure."
+    },
+    {
+      "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A::holo_full_selected",
+      "label": "KNEW",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+      "passes": true,
+      "rationale": "Holo cited the same exact Site 18-P production calibration dependency closure."
+    },
+    {
+      "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B::solo_one_shot",
+      "label": "KNEW",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B",
+      "passes": true,
+      "rationale": "Solo cited the Site 18-P production versus Site 18-L lab mismatch."
+    },
+    {
+      "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B::holo_full_selected",
+      "label": "KNEW",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B",
+      "passes": true,
+      "rationale": "Holo cited the Site 18-P production versus Site 18-L lab mismatch."
+    },
+    {
+      "artifact_id": "HV-KITC-042-A::solo_one_shot",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-042-A",
+      "passes": true,
+      "rationale": "Solo cited EHS-NOV-042 as covering PO-NOV-042, NS-55, Facility R2, and the 0-25 liter band."
+    },
+    {
+      "artifact_id": "HV-KITC-042-A::holo_full_selected",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-042-A",
+      "passes": true,
+      "rationale": "Holo cited EHS-NOV-042 as the exact execution release closure."
+    },
+    {
+      "artifact_id": "HV-KITC-042-B::solo_one_shot",
+      "label": "LUCKY",
+      "packet_id": "HV-KITC-042-B",
+      "passes": false,
+      "rationale": "Solo reached ESCALATE but did not prove the sourcing-review versus execution-release boundary term required for KNEW."
+    },
+    {
+      "artifact_id": "HV-KITC-042-B::holo_full_selected",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-042-B",
+      "passes": true,
+      "rationale": "Holo cited that purchase execution release remained scheduled/pending and separated sourcing scope from execution authority."
+    },
+    {
+      "artifact_id": "HV-KITC-047-A::solo_one_shot",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-047-A",
+      "passes": true,
+      "rationale": "Solo cited the exact exception closure for item, destination, consignee role, and date."
+    },
+    {
+      "artifact_id": "HV-KITC-047-A::holo_full_selected",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-047-A",
+      "passes": true,
+      "rationale": "Holo cited the exact exception closure for item, destination, consignee role, and date."
+    },
+    {
+      "artifact_id": "HV-KITC-047-B::solo_one_shot",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-047-B",
+      "passes": true,
+      "rationale": "Solo cited the service-depot versus internal-repair-center consignee role mismatch."
+    },
+    {
+      "artifact_id": "HV-KITC-047-B::holo_full_selected",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-047-B",
+      "passes": true,
+      "rationale": "Holo cited the service-depot versus internal-repair-center consignee role mismatch."
+    },
+    {
+      "artifact_id": "HV-KITC-082-A::solo_one_shot",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-082-A",
+      "passes": true,
+      "rationale": "Solo cited current IRB-approved consent C12 for site B-18, protocol P8.1, and activation date."
+    },
+    {
+      "artifact_id": "HV-KITC-082-A::holo_full_selected",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-082-A",
+      "passes": true,
+      "rationale": "Holo cited current IRB-approved consent C12 and correctly ignored the planning-only note as a blocker."
+    },
+    {
+      "artifact_id": "HV-KITC-082-B::solo_one_shot",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-082-B",
+      "passes": true,
+      "rationale": "Solo cited the pending consent-status boundary."
+    },
+    {
+      "artifact_id": "HV-KITC-082-B::holo_full_selected",
+      "label": "KNEW",
+      "packet_id": "HV-KITC-082-B",
+      "passes": true,
+      "rationale": "Holo cited the pending consent-status boundary."
+    }
+  ],
+  "overall_notes": "Local judgment confirms the current benchmark analysis: Solo is not always wrong, but it is unreliable at the action boundary on this locked set. Solo passed 7/10 local KNEW labels and failed with WRONG, CONFUSED, and LUCKY on the remaining three. Full HoloVerify passed 10/10 local KNEW labels."
+}

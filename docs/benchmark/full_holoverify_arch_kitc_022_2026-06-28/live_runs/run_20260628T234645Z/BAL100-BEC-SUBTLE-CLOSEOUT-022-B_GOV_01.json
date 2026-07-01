@@ -1,0 +1,30 @@
+{
+  "blocked_moves": [
+    "Treat NOTE-ACR-022 shared-prefix warning as sufficient evidence for activation despite site-use-class mismatch",
+    "Substitute Site 18-L lab calibration for Site 18-P production calibration based on DG-41B prefix alone",
+    "Close activation dependency with CAL-ACR-022 evidence without Site 18-P production unit calibration",
+    "Permit activation of production telemetry without exact calibration match per binding class SITE_AND_USE_CLASS_MISMATCH"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "ACT-ACR-2026-8022 (activation) has open dependency on calibration matching DG-41B production units at Site 18-P",
+    "CAL-ACR-022 satisfies RC-7 release condition but covers Site 18-L lab units not Site 18-P production units",
+    "ENT-ACR-022 (entitlement) verified; does not resolve calibration-site mismatch",
+    "SITE-ACR-022 confirms DG-41B production units at Site 18-P; no calibration evidence for those units attached",
+    "ALERT-ACR-DEP-022 correctly flags the mismatch requiring exact match per STD-ACR-022-P"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "device_group DG-41B prefix shared across calibration and activation records",
+    "release_condition RC-7 verified in calibration packet CAL-ACR-022 and release condition record RC-ACR-022",
+    "timing dependency: calibration must precede activation per RC-7 requirement",
+    "source binding SITE_AND_USE_CLASS_MISMATCH correctly identified and preserved by Worker 01",
+    "critical_feature_count 4 preserved: device_group_prefix, site_binding, use_class, release_condition"
+  ],
+  "must_repair": [],
+  "next_worker_baton": null,
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "WORKER_SOURCE_BOUND_GATE passed; artifact binding SITE_AND_USE_CLASS_MISMATCH exactly matches source gate binding. Calibration record CAL-ACR-022 covers DG-41B lab telemetry at Site 18-L; activation ACT-ACR-2026-8022 targets DG-41B production telemetry at Site 18-P. Per STD-ACR-022-P, shared naming prefixes are insufficient. The dependency cannot be satisfied with current calibration evidence. Escalation verdict is correct and binding must be preserved through final compilation.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

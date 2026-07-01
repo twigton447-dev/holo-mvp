@@ -1,0 +1,33 @@
+{
+  "cited_evidence": [
+    "SHIP-SOR-047 literal consignee role: service depot",
+    "EXC-SOR-047 literal consignee role: internal repair center",
+    "STD-SOR-047-P requires exact consignee role match before exception closes",
+    "GEN-SOR-047 satisfied by surfacing role literal mismatch, not suppressing it"
+  ],
+  "critical_features_preserved": [
+    "Exact item match: controlled analyzer part C-17",
+    "Exact destination match: Canada",
+    "Exact shipment date match: 2026-06-23",
+    "Literal consignee role binding: CONSIGNEE_ROLE_MISMATCH"
+  ],
+  "final_answer": "Final source-bound compilation confirms CONSIGNEE_ROLE_MISMATCH binding persists. SHIP-SOR-047 declares service depot; EXC-SOR-047 declares internal repair center. Literal strings differ at character level; functional equivalence reasoning suppressed per gate enforcement. Binding remains CONSIGNEE_ROLE_MISMATCH; exception boundary remains open. Item C-17, destination Canada, and date 2026-06-23 align exactly across source documents. GEN-SOR-047 warning satisfied by exposing mismatch rather than resolving it. ESCALATE verdict final; no repair required. Monotonic preservation maintained across all critical features and binding class.",
+  "license_exception_binding": {
+    "binding_class": "CONSIGNEE_ROLE_MISMATCH",
+    "controlling_source_fact": "Literal string mismatch on consignee role blocks exception closure",
+    "destination": "Canada",
+    "exception_consignee_role": "internal repair center",
+    "exception_id": "EXC-SOR-047",
+    "general_warning_id": "GEN-SOR-047",
+    "item_control_status": "controlled",
+    "shipment_consignee_role": "service depot",
+    "shipment_date": "2026-06-23",
+    "shipment_id": "SHIP-SOR-047"
+  },
+  "open_blockers": [
+    "Consignee role literal mismatch: service depot vs internal repair center prevents exception closure until strings align"
+  ],
+  "verification_verdict": "ESCALATE",
+  "warning_or_prelim_artifact_handling": "GEN-SOR-047 warning condition satisfied by surfacing role literal mismatch; warning does not override strict literal comparison requirement",
+  "worker_role": "FINAL_COMPILER"
+}

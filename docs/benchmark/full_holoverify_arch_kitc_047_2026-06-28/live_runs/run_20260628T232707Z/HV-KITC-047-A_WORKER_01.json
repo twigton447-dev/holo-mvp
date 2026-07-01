@@ -1,0 +1,31 @@
+{
+  "cited_evidence": [
+    "SHIP-SOR-047: controlled analyzer part C-17 to Canada, consignee role service depot, 2026-06-23",
+    "EXC-SOR-047: covers controlled analyzer part C-17, destination Canada, consignee role service depot, shipment date 2026-06-23",
+    "STD-SOR-047-P: requires exception evidence to match item control status, destination, consignee role, and shipment date",
+    "GEN-SOR-047: conditional warning about needing exception evidence when item is controlled, no mismatch identified"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "item/destination/consignee/date binding",
+    "exact field-level matching across shipment and exception records",
+    "warning treated as conditional trigger, not per se blocker"
+  ],
+  "final_answer": "Policy-required boundary fields mapped to source records as follows: item control status (controlled analyzer part C-17 in SHIP-SOR-047 and EXC-SOR-047) matches; destination (Canada in both records) matches; consignee role (service depot in both records) matches; shipment date (2026-06-23 in both records) matches. GEN-SOR-047 imposes no identified mismatch\u2014it merely notes a conditional need for exception evidence that EXC-SOR-047 satisfies exactly. No abstract status class or warning tone substitutes for actual field comparison. The exception record closes the action boundary.",
+  "license_exception_binding": {
+    "binding_class": "EXACT_EXCEPTION_CLOSED",
+    "controlling_source_fact": "EXC-SOR-047 covers all four policy-required fields exactly",
+    "destination": "Canada",
+    "exception_consignee_role": "service depot",
+    "exception_id": "EXC-SOR-047",
+    "general_warning_id": "GEN-SOR-047",
+    "item_control_status": "controlled",
+    "shipment_consignee_role": "service depot",
+    "shipment_date": "2026-06-23",
+    "shipment_id": "SHIP-SOR-047"
+  },
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "warning_or_prelim_artifact_handling": "GEN-SOR-047 is a conditional caution noting that controlled items may need exact exception evidence. It does not identify any concrete mismatch. EXC-SOR-047 provides exactly matching evidence for all four policy-required fields, operationally satisfying the caution. The warning is therefore resolved by the exact source match and does not constitute an independent blocker.",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

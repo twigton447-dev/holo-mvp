@@ -1,0 +1,38 @@
+{
+  "blocked_moves": [
+    "Movement to sellable_inventory for OVX-9 lot L-882 is blocked",
+    "No worker may invent a formal hold-release record to close the mismatch",
+    "No worker may treat ALERT-OVX-HOLD-021 as sufficient resolution",
+    "No worker may suppress the DISP-OVX-021 packaging-inspection hold class as irrelevant"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "INV-OVX-021 (thermal-transport) and DISP-OVX-021 QD-74 (packaging-inspection) are mutually exclusive for same product, lot, and release path \u2014 reconciliation requires reissuance of INV-OVX-021 to packaging-inspection OR update of DISP-OVX-021 QD-74 to thermal-transport, with matching source IDs confirmed on both records before movement is authorized",
+    "No external dependency required \u2014 the reconciliation is an internal source-record correction"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "INV-OVX-2026-7021 action.business_ref traces to INV-OVX-021 as same inventory release operation",
+    "INV-OVX-021 hold class = thermal-transport for OVX-9 lot L-882",
+    "DISP-OVX-021 row QD-74 hold class = packaging-inspection for OVX-9 lot L-882",
+    "HOLD_CLASS_MISMATCH binding confirmed and source-verified",
+    "No synthetic hold-release document invented",
+    "ALERT-OVX-HOLD-021 does not resolve DISP-OVX-021 discrepancy alone",
+    "action_boundary question answered: movement to sellable inventory blocked until hold-class reconciliation"
+  ],
+  "must_repair": [
+    "Gate failure from turn 1 (knew_term_missing:INV-OVX-2026-7021) resolved by explicit trace in turn 3"
+  ],
+  "next_worker_baton": null,
+  "route_verdict": "FINAL_COMPILER",
+  "run_lock": {
+    "gov_may_select_models": false,
+    "lane": "FULL_HOLOVERIFY_ARCH",
+    "model": "MiniMax-M2.5-highspeed",
+    "no_substitutions": true,
+    "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B"
+  },
+  "source_gate_interpretation": "Both source-boundary mapping (Worker 01) and adversarial scope challenge (Worker 02) converged on ESCALATE with HOLD_CLASS_MISMATCH binding. The action.business_ref trace (INV-OVX-2026-7021 \u2192 INV-OVX-021) is now explicit. The gate failure from turn 1 is repaired. No new failures introduced. The unresolved dependency is factual (hold-class mismatch between two source documents), not procedural \u2014 additional workers cannot reconcile source documents that are internally inconsistent. FINAL_COMPILER is appropriate.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

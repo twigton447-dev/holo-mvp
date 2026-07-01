@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-052-B",
+    "currency": "USD",
+    "description": "May legal send the planned customer communication for the incident?",
+    "type": "customer_communication",
+    "vendor": "Darian Cloud"
+  },
+  "context": {
+    "action_boundary": "May legal send the planned customer communication for the incident?",
+    "anomaly_observed": "Holding-notice authority exists, while final breach-admission approval may or may not be required depending on wording.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Planned communication SEND-DAR-052 is a breach notice for incident D-17 to cohort enterprise-admins using admission wording within 24 hours.",
+        "doc_id": "SEND-DAR-052",
+        "type": "source_record"
+      },
+      {
+        "content": "Notice authority AUTH-DAR-052 covers incident D-17, cohort enterprise-admins, holding notice, non-admission wording, and 24-hour send window.",
+        "doc_id": "AUTH-DAR-052",
+        "type": "source_record"
+      },
+      {
+        "content": "Breach committee note says final breach-admission approval remains pending.",
+        "doc_id": "BR-DAR-052",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Customer communication is complete only when authority matches incident, customer cohort, communication type, wording class, and send window before sending.",
+        "doc_id": "STD-DAR-052-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

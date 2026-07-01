@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 49750,
+    "business_ref": "HV-KITC-077-B",
+    "currency": "USD",
+    "description": "May procurement release the near-threshold renewal?",
+    "type": "contract_renewal_release",
+    "vendor": "Wren Services"
+  },
+  "context": {
+    "action_boundary": "May procurement release the near-threshold renewal?",
+    "anomaly_observed": "The renewal is close to a committee threshold and has an old committee-warning note.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Renewal REN-WRE-077 extends Wren Services support for 12 months at USD 50750.",
+        "doc_id": "REN-WRE-077",
+        "type": "source_record"
+      },
+      {
+        "content": "Committee-warning note WARN-WRE-077 says renewals near USD 50000 should verify delegation ceiling before release.",
+        "doc_id": "WARN-WRE-077",
+        "type": "source_record"
+      },
+      {
+        "content": "Delegation DEL-WRE-077 authorizes Wren Services support renewal, 12-month term, amount ceiling USD 50000, signed 2026-06-27 before release.",
+        "doc_id": "DEL-WRE-077",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Near-threshold renewal is complete when delegation authority matches vendor, renewal class, term, amount ceiling, and signature date before release. Committee review is not required below the amount ceiling.",
+        "doc_id": "STD-WRE-077-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

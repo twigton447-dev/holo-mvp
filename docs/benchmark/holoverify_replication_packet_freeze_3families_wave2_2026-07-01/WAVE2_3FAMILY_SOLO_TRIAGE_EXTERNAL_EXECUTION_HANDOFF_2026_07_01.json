@@ -1,0 +1,96 @@
+{
+  "classification": "WAVE2_3FAMILY_SOLO_TRIAGE_EXTERNAL_EXECUTION_HANDOFF",
+  "purpose": "Run Wave 2 solo one-shot triage outside Codex because Codex cannot export frozen benchmark prompts to external providers.",
+  "packet_freeze_commit": "c03114ed",
+  "freeze_root_hash": "80d8106d7efe72bee44d2c05648b71814204c08e1f96934afefd3d75d242845f",
+  "runner": "docs/benchmark/run_replication_3family_wave2_solo_triage_2026_07_01.py",
+  "families": [
+    {
+      "family_id": "HV-HRWF-REP-2026-07-01",
+      "domain": "HR / payroll / workforce controls",
+      "batch_label": "wave2_workforce_solo_triage",
+      "run_order": 1
+    },
+    {
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "domain": "Data privacy / customer data release controls",
+      "batch_label": "wave2_data_privacy_solo_triage",
+      "run_order": 2
+    },
+    {
+      "family_id": "HV-FINC-REP-2026-07-01",
+      "domain": "Finance close / revenue / expense recognition controls",
+      "batch_label": "wave2_finance_close_solo_triage",
+      "run_order": 3
+    }
+  ],
+  "per_family_scope": {
+    "packets": 40,
+    "pairs": 20,
+    "expected_provider_calls": 120,
+    "gov_calls": 0,
+    "holo_calls": 0,
+    "judge_calls": 0
+  },
+  "all_family_preflight": {
+    "status": "PASS",
+    "packets": 120,
+    "pairs": 60,
+    "truth_counts": {
+      "ALLOW": 60,
+      "ESCALATE": 60
+    },
+    "expected_provider_calls": 360,
+    "expected_gov_calls": 0,
+    "expected_holo_calls": 0,
+    "expected_judge_calls": 0,
+    "prompt_leakage_rows": [],
+    "openai_w2_is_gpt_5_4_mini": true,
+    "no_gpt_4o_mini_in_triage_roster": true
+  },
+  "required_env": [
+    "XAI_API_KEY",
+    "OPENAI_API_KEY",
+    "MINIMAX_API_KEY"
+  ],
+  "solo_roster": [
+    "xai/grok-3-mini",
+    "openai/gpt-5.4-mini",
+    "minimax/MiniMax-M2.5-highspeed"
+  ],
+  "run_commands": [
+    "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001 && set -a; source .env; set +a; python3 -B docs/benchmark/run_replication_3family_wave2_solo_triage_2026_07_01.py --run-live --family HV-HRWF-REP-2026-07-01 --batch-label wave2_workforce_solo_triage",
+    "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001 && set -a; source .env; set +a; python3 -B docs/benchmark/run_replication_3family_wave2_solo_triage_2026_07_01.py --run-live --family HV-DPRV-REP-2026-07-01 --batch-label wave2_data_privacy_solo_triage",
+    "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001 && set -a; source .env; set +a; python3 -B docs/benchmark/run_replication_3family_wave2_solo_triage_2026_07_01.py --run-live --family HV-FINC-REP-2026-07-01 --batch-label wave2_finance_close_solo_triage"
+  ],
+  "expected_outputs_per_family": [
+    "SOLO_TRIAGE_PREFLIGHT.json",
+    "SOLO_TRIAGE_TRACE.jsonl",
+    "solo_triage_results.json",
+    "solo_triage_summary.md",
+    "SOLO_TRIAGE_LOCK_MANIFEST.json",
+    "SOLO_TRIAGE_LOCK_VALIDATION.json",
+    "prompts/*.prompt.txt"
+  ],
+  "pass_conditions_per_family": [
+    "provider_calls_120_of_120",
+    "provider_failures_none",
+    "gov_calls_0",
+    "holo_calls_0",
+    "judge_calls_0",
+    "packet_identity_matches_wave2_freeze",
+    "prompt_leakage_rows_none",
+    "active_models_match_solo_roster"
+  ],
+  "fail_conditions": [
+    "provider_failure",
+    "model_substitution",
+    "packet_hash_mismatch",
+    "prompt_hash_mismatch",
+    "gov_call_present",
+    "holo_call_present",
+    "judge_call_present",
+    "prompt_leakage_hit",
+    "openai_gpt_4o_mini_used"
+  ]
+}

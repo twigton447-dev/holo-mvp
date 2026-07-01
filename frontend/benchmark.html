@@ -28,10 +28,15 @@
   </header>
   <main class="wrap">
     <section class="paper-section takeaway-panel" id="brief-takeaway">
-      <div class="takeaway-kicker">Benchmark Update</div>
-      <p class="takeaway-line"><strong>454/454 frozen action-boundary packets correct.</strong> Zero observed false positives and zero observed false negatives.</p>
-      <p class="takeaway-note">Read the table left to right: <strong>Errors</strong> is what happened in the test, <strong>n</strong> is the denominator, and the two right columns are 95% upper bounds on the unknown real error rate.</p>
+      <div class="takeaway-kicker">HoloVerify Result</div>
       <div class="table-scroll takeaway-table"><table><thead><tr><th>Metric</th><th>Errors</th><th>n</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Overall packet error</td><td>0</td><td>454</td><td>0.658%</td><td>0.839%</td></tr><tr><td>False positive rate</td><td>0</td><td>227</td><td>1.311%</td><td>1.664%</td></tr><tr><td>False negative rate</td><td>0</td><td>227</td><td>1.311%</td><td>1.664%</td></tr></tbody></table></div>
+      <p class="takeaway-note"><strong>What this table measures:</strong> the full HoloVerify governed architecture across 454 clean frozen action-boundary packets. This is the Holo result: 454/454 packets correct, with zero observed false positives and zero observed false negatives.</p>
+      <p class="takeaway-note"><strong>What it is compared against:</strong> the same mini-model families run alone as one-shot solo baselines. Solo gets one call per packet. No Gov, no shared state, no deterministic rescue layer, and no final selector.</p>
+      <h3>Models Used Inside HoloVerify</h3>
+      <div class="table-scroll"><table><thead><tr><th>Role</th><th>Model</th><th>Job</th></tr></thead><tbody><tr><td>Worker 1</td><td><code>xai/grok-3-mini</code></td><td>Source-boundary mapping</td></tr><tr><td>Gov 1</td><td><code>minimax/MiniMax-M2.5-highspeed</code></td><td>Control routing</td></tr><tr><td>Worker 2</td><td><code>openai/gpt-5.4-mini</code></td><td>Adversarial scope challenge</td></tr><tr><td>Gov 2</td><td><code>minimax/MiniMax-M2.5-highspeed</code></td><td>Control routing</td></tr><tr><td>Worker 3</td><td><code>minimax/MiniMax-M2.5-highspeed</code></td><td>Final compiler</td></tr></tbody></table></div>
+      <h3>Same Models, Run Alone</h3>
+      <p class="takeaway-note">Matched solo comparison, same 100 packets. Solo audit-failure rate means the solo output was not KNEW/admissible: it had the wrong verdict, failed to parse, or lacked the required source-grounded structure.</p>
+      <div class="table-scroll"><table><thead><tr><th>Solo model</th><th>Calls</th><th>KNEW/admissible</th><th>Solo audit-failure rate</th><th>Wrong verdict</th><th>Parse fail</th><th>Structural/evidence fail</th></tr></thead><tbody><tr><td><code>openai/gpt-5.4-mini</code></td><td>100</td><td>82/100</td><td>18%</td><td>0</td><td>0</td><td>18</td></tr><tr><td><code>minimax/MiniMax-M2.5-highspeed</code></td><td>100</td><td>26/100</td><td>74%</td><td>0</td><td>40</td><td>34</td></tr><tr><td><code>xai/grok-3-mini</code></td><td>100</td><td>8/100</td><td>92%</td><td>13</td><td>0</td><td>79</td></tr></tbody></table></div>
     </section>
     <section class="paper-section" id="what-is-holoengine"><h2>What Is HoloEngine?</h2>
 <p>HoloEngine is an AI control system for high-stakes actions. It is designed for cases where an AI system may approve, release, grant, execute, escalate, or prepare something that affects the real world.</p>

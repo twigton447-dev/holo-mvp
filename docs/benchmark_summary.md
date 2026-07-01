@@ -1,17 +1,41 @@
-## Benchmark Update
-
-454/454 frozen action-boundary packets correct. Zero observed false positives
-and zero observed false negatives.
-
-Read the table left to right: **Errors** is what happened in the test, **n** is
-the denominator, and the two right columns are 95% upper bounds on the unknown
-real error rate.
+## HoloVerify Result
 
 | Metric | Errors | n | Exact 95% upper bound | Wilson 95% upper bound |
 | --- | ---: | ---: | ---: | ---: |
 | Overall packet error | 0 | 454 | 0.658% | 0.839% |
 | False positive rate | 0 | 227 | 1.311% | 1.664% |
 | False negative rate | 0 | 227 | 1.311% | 1.664% |
+
+**What this table measures:** the full HoloVerify governed architecture across
+454 clean frozen action-boundary packets. This is the Holo result: 454/454
+packets correct, with zero observed false positives and zero observed false
+negatives.
+
+**What it is compared against:** the same mini-model families run alone as
+one-shot solo baselines. Solo gets one call per packet. No Gov, no shared state,
+no deterministic rescue layer, and no final selector.
+
+HoloVerify's current locked roster:
+
+| Role | Model | Job |
+| --- | --- | --- |
+| Worker 1 | `xai/grok-3-mini` | Source-boundary mapping |
+| Gov 1 | `minimax/MiniMax-M2.5-highspeed` | Control routing |
+| Worker 2 | `openai/gpt-5.4-mini` | Adversarial scope challenge |
+| Gov 2 | `minimax/MiniMax-M2.5-highspeed` | Control routing |
+| Worker 3 | `minimax/MiniMax-M2.5-highspeed` | Final compiler |
+
+Matched solo comparison, same 100 packets:
+
+| Solo model | Calls | KNEW/admissible | Solo audit-failure rate | Wrong verdict | Parse fail | Structural/evidence fail |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `openai/gpt-5.4-mini` | 100 | 82/100 | 18% | 0 | 0 | 18 |
+| `minimax/MiniMax-M2.5-highspeed` | 100 | 26/100 | 74% | 0 | 40 | 34 |
+| `xai/grok-3-mini` | 100 | 8/100 | 92% | 13 | 0 | 79 |
+
+Solo audit-failure rate means the solo output was not KNEW/admissible: it had
+the wrong verdict, failed to parse, or lacked the required source-grounded
+structure. That is stricter than "sounded plausible."
 
 ---
 

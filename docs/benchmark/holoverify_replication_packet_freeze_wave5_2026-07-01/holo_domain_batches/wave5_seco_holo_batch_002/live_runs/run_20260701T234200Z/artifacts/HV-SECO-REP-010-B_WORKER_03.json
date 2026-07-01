@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the security operator execute the incident-response action now? Focus: privileged session termination.",
+    "allow_rule_assessment": "Exact boundary not closed by source records",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-9047D6ABE629-CTL",
+    "escalate_rule_assessment": "Missing session ID and containment authority match",
+    "timing_scope_authority_dependency_check": "Unresolved dependency blocks execution"
+  },
+  "cited_evidence": [
+    "SRC-9047D6ABE629-CTL",
+    "SRC-9047D6ABE629-BND",
+    "SRC-9047D6ABE629-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records do not close the exact privileged-session-termination boundary. The controlling control record says the required dependency is missing or mismatched, and the boundary note requires current incident authority to close it. Execution should not proceed yet; escalate until session ID and containment authority match is verified.",
+  "open_blockers": [
+    "current session ID and containment authority match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

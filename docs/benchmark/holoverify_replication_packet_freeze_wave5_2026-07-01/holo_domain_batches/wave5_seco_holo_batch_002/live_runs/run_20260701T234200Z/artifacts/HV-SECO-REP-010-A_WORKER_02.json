@@ -1,0 +1,29 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the security operator execute the incident-response action now? Focus: privileged session termination.",
+    "allow_rule_assessment": "Exact control record closes boundary",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-19D72C19290A-CTL",
+    "escalate_rule_assessment": "No exact-source defect remains open",
+    "timing_scope_authority_dependency_check": "current session ID and containment authority match"
+  },
+  "cited_evidence": [
+    "SRC-19D72C19290A-CTL",
+    "SRC-19D72C19290A-BND",
+    "SRC-19D72C19290A-FBK",
+    "SRC-19D72C19290A-POL",
+    "SRC-19D72C19290A-REQ"
+  ],
+  "critical_features_preserved": [
+    "session ID match",
+    "authority match",
+    "current session ID and containment authority match",
+    "SRC-19D72C19290A-CTL",
+    "SRC-19D72C19290A-BND"
+  ],
+  "final_answer": "ALLOW: the packet\u2019s controlling source records close the exact execution boundary for privileged session termination. The current control record states the required dependency is satisfied, and policy requires source control rather than sensitivity cues. No open blocker remains in the packet evidence, so the action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

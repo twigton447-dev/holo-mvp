@@ -60,9 +60,9 @@ JSON_ARTIFACTS = {
         "/holo_target_batches/wave2_holo_target_batch_005"
         "/WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT_2026_07_01.json"
     ),
-    "combined_memo_001_002_003": (
+    "combined_memo_001_002_003_004": (
         "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01"
-        "/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+        "/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
     ),
     "control_room": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_CONTROL_ROOM_2026_07_01.json",
     "domain_ledger": (
@@ -223,7 +223,7 @@ def build_validation() -> dict[str, Any]:
         / "WAVE2_HOLO_TARGET_BATCH_005_PROVIDER_APPROVAL_PACKET_2026_07_01.json"
     )
     checks = {
-        "approval_packet_ready": approval.get("status") == "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+        "approval_packet_preserved": approval.get("status") in {"READY_FOR_EXPLICIT_PROVIDER_APPROVAL", "NOT_READY"},
         "approval_packet_does_not_self_grant": approval.get("approval_granted_by_this_packet") is False,
         "commands_passed": all(row["passed"] for row in command_rows),
         "control_room_pass": control_room.get("status") == "PASS",
@@ -266,7 +266,7 @@ def build_validation() -> dict[str, Any]:
             "This validation does not approve provider calls.",
             "This validation does not run Batch 004 or Batch 005 live execution.",
             "Batch 004 still requires the exact approval statement and current approval packet SHA.",
-            "Batch 005 remains locked until Batch 004 has clean live evidence, comparison, promotion, and separate approval.",
+            "Batch 005 remains locked behind a separate approval packet even though the Batch 004 evidence gate is complete.",
         ],
         "summary": {
             "commands_failed": sum(1 for row in command_rows if not row["passed"]),

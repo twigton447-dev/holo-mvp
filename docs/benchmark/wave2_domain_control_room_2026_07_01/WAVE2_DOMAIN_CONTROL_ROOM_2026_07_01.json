@@ -21,8 +21,8 @@
         "checks_failed": 0,
         "checks_passed": 33,
         "checks_total": 33,
-        "ready_for_batch004_provider_approval": true,
-        "ready_for_batch005_provider_approval": false
+        "ready_for_batch004_provider_approval": false,
+        "ready_for_batch005_provider_approval": true
       },
       "passed": true
     },
@@ -39,21 +39,21 @@
       "passed": true
     },
     {
-      "check_id": "current_phase_pre_batch004_live",
+      "check_id": "current_phase_post_batch004_evidence_locked",
       "evidence": {
-        "batch_005_gate": "LOCKED_UNTIL_BATCH_004_LIVE_COMPARISON_PROMOTION_AND_EXPLICIT_PROVIDER_APPROVAL",
-        "current_phase": "PRE_BATCH_004_LIVE",
-        "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_004",
+        "batch_005_gate": "EVIDENCE_UNLOCKED_PENDING_EXPLICIT_PROVIDER_APPROVAL",
+        "current_phase": "POST_BATCH_004_EVIDENCE_LOCKED",
+        "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_005",
         "provider_calls_allowed_by_this_verifier": false
       },
       "passed": true
     },
     {
-      "check_id": "next_allowed_live_batch004",
+      "check_id": "next_allowed_live_batch005",
       "evidence": {
-        "batch_005_gate": "LOCKED_UNTIL_BATCH_004_LIVE_COMPARISON_PROMOTION_AND_EXPLICIT_PROVIDER_APPROVAL",
-        "current_phase": "PRE_BATCH_004_LIVE",
-        "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_004",
+        "batch_005_gate": "EVIDENCE_UNLOCKED_PENDING_EXPLICIT_PROVIDER_APPROVAL",
+        "current_phase": "POST_BATCH_004_EVIDENCE_LOCKED",
+        "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_005",
         "provider_calls_allowed_by_this_verifier": false
       },
       "passed": true
@@ -74,8 +74,8 @@
       "passed": true
     },
     {
-      "check_id": "batch004_approval_ready",
-      "evidence": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+      "check_id": "batch004_approval_packet_preserved",
+      "evidence": "NOT_READY",
       "passed": true
     },
     {
@@ -85,17 +85,20 @@
     },
     {
       "check_id": "batch004_approval_hash_valid",
-      "evidence": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
+      "evidence": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
       "passed": true
     },
     {
-      "check_id": "batch004_approval_command_resolves_hash_in_markdown",
-      "evidence": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
+      "check_id": "batch004_approval_markdown_matches_packet_state",
+      "evidence": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
       "passed": true
     },
     {
-      "check_id": "batch004_run_command_embeds_exact_hash_and_statement",
-      "evidence": "python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5 --approval-statement \"I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
+      "check_id": "batch004_run_command_not_current_permission",
+      "evidence": {
+        "approval_status": "NOT_READY",
+        "historical_command": "python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd --approval-statement \"I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\""
+      },
       "passed": true
     },
     {
@@ -130,7 +133,7 @@
         },
         "live_holo_started": false,
         "live_preflight_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_LIVE_PREFLIGHT_2026_07_01.json",
-        "live_preflight_root_signature": "bfa320f216b25ac3f5f9c321573ae56270a66292906f0038531ae12bce5c0a3b",
+        "live_preflight_root_signature": "7e9e5dd2b0fff1f8614aa23c0d4570b828c2b31e671748de2001b96e9942dbd9",
         "live_preflight_status": "PASS",
         "packet_count": 20,
         "pair_count": 10,
@@ -187,7 +190,7 @@
         },
         "live_holo_started": false,
         "live_preflight_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_LIVE_PREFLIGHT_2026_07_01.json",
-        "live_preflight_root_signature": "bfa320f216b25ac3f5f9c321573ae56270a66292906f0038531ae12bce5c0a3b",
+        "live_preflight_root_signature": "7e9e5dd2b0fff1f8614aa23c0d4570b828c2b31e671748de2001b96e9942dbd9",
         "live_preflight_status": "PASS",
         "packet_count": 20,
         "pair_count": 10,
@@ -210,44 +213,41 @@
       "passed": true
     },
     {
-      "check_id": "batch005_gate_expected_locked_state",
+      "check_id": "batch005_gate_expected_evidence_unlocked_state",
       "evidence": {
-        "batch_005_gate": "LOCKED_UNTIL_BATCH_004_LIVE_COMPARISON_PROMOTION_AND_EXPLICIT_PROVIDER_APPROVAL",
-        "current_phase": "PRE_BATCH_004_LIVE",
-        "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_004",
+        "batch_005_gate": "EVIDENCE_UNLOCKED_PENDING_EXPLICIT_PROVIDER_APPROVAL",
+        "current_phase": "POST_BATCH_004_EVIDENCE_LOCKED",
+        "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_005",
         "provider_calls_allowed_by_this_verifier": false
       },
       "passed": true
     },
     {
-      "check_id": "batch005_live_gate_locked",
+      "check_id": "batch005_live_gate_pass",
       "evidence": {
-        "blocked_reason": [
-          "batch_004_comparison_exists",
-          "batch_004_combined_memo_exists"
-        ],
+        "blocked_reason": null,
         "checks": {
-          "batch_004_combined_memo_exists": false,
-          "batch_004_comparison_exists": false
+          "batch_004_combined_memo_exists": true,
+          "batch_004_combined_memo_has_74_scored_packets": true,
+          "batch_004_combined_memo_has_no_next_target_batch": true,
+          "batch_004_combined_memo_scores_all_37_selected_targets": true,
+          "batch_004_comparison_exists": true
         },
         "required_before_live": [
           "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_SOLO_VS_HOLO_COMPARISON_2026_07_01.json",
           "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
         ],
-        "scored_packets_in_promoted_selected_target_memo": null,
-        "scored_pairs_in_promoted_selected_target_memo": null,
-        "selected_target_pair_pool": null,
+        "scored_packets_in_promoted_selected_target_memo": 74,
+        "scored_pairs_in_promoted_selected_target_memo": 37,
+        "selected_target_pair_pool": 37,
         "selection_mode": "full-family-remainder",
-        "status": "LOCKED"
+        "status": "PASS"
       },
       "passed": true
     },
     {
-      "check_id": "batch005_lock_blockers_exact",
-      "evidence": [
-        "batch_004_comparison_exists",
-        "batch_004_combined_memo_exists"
-      ],
+      "check_id": "batch005_lock_blockers_cleared",
+      "evidence": null,
       "passed": true
     },
     {
@@ -265,27 +265,27 @@
         },
         "judges_started": false,
         "live_execution_gate": {
-          "blocked_reason": [
-            "batch_004_comparison_exists",
-            "batch_004_combined_memo_exists"
-          ],
+          "blocked_reason": null,
           "checks": {
-            "batch_004_combined_memo_exists": false,
-            "batch_004_comparison_exists": false
+            "batch_004_combined_memo_exists": true,
+            "batch_004_combined_memo_has_74_scored_packets": true,
+            "batch_004_combined_memo_has_no_next_target_batch": true,
+            "batch_004_combined_memo_scores_all_37_selected_targets": true,
+            "batch_004_comparison_exists": true
           },
           "required_before_live": [
             "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_SOLO_VS_HOLO_COMPARISON_2026_07_01.json",
             "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
           ],
-          "scored_packets_in_promoted_selected_target_memo": null,
-          "scored_pairs_in_promoted_selected_target_memo": null,
-          "selected_target_pair_pool": null,
+          "scored_packets_in_promoted_selected_target_memo": 74,
+          "scored_pairs_in_promoted_selected_target_memo": 37,
+          "selected_target_pair_pool": 37,
           "selection_mode": "full-family-remainder",
-          "status": "LOCKED"
+          "status": "PASS"
         },
         "live_holo_started": false,
         "live_preflight_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT_2026_07_01.json",
-        "live_preflight_root_signature": "3cf24480f79bde31d58774d5e2a32290f97f2c1ab9d5088b9f1eaf676909b46b",
+        "live_preflight_root_signature": "a99fba06753da20549e6fea991c2c2a3d829e07aaf4541813ffa31a1f484c12d",
         "live_preflight_status": "PASS",
         "packet_count": 46,
         "pair_count": 23,
@@ -348,27 +348,27 @@
         },
         "judges_started": false,
         "live_execution_gate": {
-          "blocked_reason": [
-            "batch_004_comparison_exists",
-            "batch_004_combined_memo_exists"
-          ],
+          "blocked_reason": null,
           "checks": {
-            "batch_004_combined_memo_exists": false,
-            "batch_004_comparison_exists": false
+            "batch_004_combined_memo_exists": true,
+            "batch_004_combined_memo_has_74_scored_packets": true,
+            "batch_004_combined_memo_has_no_next_target_batch": true,
+            "batch_004_combined_memo_scores_all_37_selected_targets": true,
+            "batch_004_comparison_exists": true
           },
           "required_before_live": [
             "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_SOLO_VS_HOLO_COMPARISON_2026_07_01.json",
             "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
           ],
-          "scored_packets_in_promoted_selected_target_memo": null,
-          "scored_pairs_in_promoted_selected_target_memo": null,
-          "selected_target_pair_pool": null,
+          "scored_packets_in_promoted_selected_target_memo": 74,
+          "scored_pairs_in_promoted_selected_target_memo": 37,
+          "selected_target_pair_pool": 37,
           "selection_mode": "full-family-remainder",
-          "status": "LOCKED"
+          "status": "PASS"
         },
         "live_holo_started": false,
         "live_preflight_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT_2026_07_01.json",
-        "live_preflight_root_signature": "3cf24480f79bde31d58774d5e2a32290f97f2c1ab9d5088b9f1eaf676909b46b",
+        "live_preflight_root_signature": "a99fba06753da20549e6fea991c2c2a3d829e07aaf4541813ffa31a1f484c12d",
         "live_preflight_status": "PASS",
         "packet_count": 46,
         "pair_count": 23,
@@ -409,169 +409,15 @@
       "passed": true
     },
     {
-      "check_id": "current_scored_pairs_27",
+      "check_id": "current_scored_pairs_37",
       "evidence": {
         "remaining_selected_targets_after_staged": 0,
-        "scored_batches": "001-003",
-        "scored_packets": 54,
-        "scored_packets_correct_admissible": 54,
-        "scored_pairs": 27,
+        "scored_batches": "001-004",
+        "scored_packets": 74,
+        "scored_packets_correct_admissible": 74,
+        "scored_pairs": 37,
         "selected_target_pair_pool": 37,
-        "staged_next_batch": {
-          "batch": "004",
-          "batch_id": "WAVE2_HOLO_TARGET_BATCH_004",
-          "claim_boundary": "Staged/preflight evidence only; not counted as Holo result, solo comparison, judge result, or statistical proof.",
-          "expected_counts": {
-            "gov_calls": 40,
-            "judge_calls": 0,
-            "packets": 20,
-            "pairs": 10,
-            "solo_calls": 0,
-            "total_provider_calls": 100,
-            "worker_calls": 60
-          },
-          "judges_started": false,
-          "live_execution_gate": {
-            "blocked_reason": null,
-            "required_before_live": [],
-            "selection_mode": "target-selection",
-            "status": "PASS"
-          },
-          "live_holo_started": false,
-          "live_preflight_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_LIVE_PREFLIGHT_2026_07_01.json",
-          "live_preflight_root_signature": "bfa320f216b25ac3f5f9c321573ae56270a66292906f0038531ae12bce5c0a3b",
-          "providers_called": 0,
-          "ready_for_live_holo": true,
-          "selected_pair_ids": [
-            "HV-FINC-REP-016",
-            "HV-DPRV-REP-005",
-            "HV-DPRV-REP-007",
-            "HV-DPRV-REP-008",
-            "HV-FINC-REP-002",
-            "HV-FINC-REP-017",
-            "HV-FINC-REP-020",
-            "HV-HRWF-REP-006",
-            "HV-HRWF-REP-007",
-            "HV-HRWF-REP-010"
-          ],
-          "selected_pairs": [
-            {
-              "domain": "Finance close / revenue / expense recognition controls",
-              "family_id": "HV-FINC-REP-2026-07-01",
-              "not_knew_count": 4,
-              "pair_id": "HV-FINC-REP-016",
-              "parse_or_provider_fail_count": 1,
-              "priority_score": 9,
-              "target_bucket": "hard_escalate",
-              "triage_class": "STRONG_SOLO_COLLAPSE",
-              "wrong_verdict_count": 0
-            },
-            {
-              "domain": "Data privacy / customer data release controls",
-              "family_id": "HV-DPRV-REP-2026-07-01",
-              "not_knew_count": 4,
-              "pair_id": "HV-DPRV-REP-005",
-              "parse_or_provider_fail_count": 0,
-              "priority_score": 8,
-              "target_bucket": "hard_allow",
-              "triage_class": "STRONG_SOLO_COLLAPSE",
-              "wrong_verdict_count": 0
-            },
-            {
-              "domain": "Data privacy / customer data release controls",
-              "family_id": "HV-DPRV-REP-2026-07-01",
-              "not_knew_count": 4,
-              "pair_id": "HV-DPRV-REP-007",
-              "parse_or_provider_fail_count": 0,
-              "priority_score": 8,
-              "target_bucket": "hard_allow",
-              "triage_class": "STRONG_SOLO_COLLAPSE",
-              "wrong_verdict_count": 0
-            },
-            {
-              "domain": "Data privacy / customer data release controls",
-              "family_id": "HV-DPRV-REP-2026-07-01",
-              "not_knew_count": 4,
-              "pair_id": "HV-DPRV-REP-008",
-              "parse_or_provider_fail_count": 0,
-              "priority_score": 8,
-              "target_bucket": "hard_allow",
-              "triage_class": "STRONG_SOLO_COLLAPSE",
-              "wrong_verdict_count": 0
-            },
-            {
-              "domain": "Finance close / revenue / expense recognition controls",
-              "family_id": "HV-FINC-REP-2026-07-01",
-              "not_knew_count": 4,
-              "pair_id": "HV-FINC-REP-002",
-              "parse_or_provider_fail_count": 0,
-              "priority_score": 8,
-              "target_bucket": "hard_allow",
-              "triage_class": "STRONG_SOLO_COLLAPSE",
-              "wrong_verdict_count": 0
-            },
-            {
-              "domain": "Finance close / revenue / expense recognition controls",
-              "family_id": "HV-FINC-REP-2026-07-01",
-              "not_knew_count": 4,
-              "pair_id": "HV-FINC-REP-017",
-              "parse_or_provider_fail_count": 0,
-              "priority_score": 8,
-              "target_bucket": "hard_escalate",
-              "triage_class": "STRONG_SOLO_COLLAPSE",
-              "wrong_verdict_count": 0
-            },
-            {
-              "domain": "Finance close / revenue / expense recognition controls",
-              "family_id": "HV-FINC-REP-2026-07-01",
-              "not_knew_count": 4,
-              "pair_id": "HV-FINC-REP-020",
-              "parse_or_provider_fail_count": 0,
-              "priority_score": 8,
-              "target_bucket": "hard_escalate",
-              "triage_class": "STRONG_SOLO_COLLAPSE",
-              "wrong_verdict_count": 0
-            },
-            {
-              "domain": "HR / payroll / workforce controls",
-              "family_id": "HV-HRWF-REP-2026-07-01",
-              "not_knew_count": 4,
-              "pair_id": "HV-HRWF-REP-006",
-              "parse_or_provider_fail_count": 0,
-              "priority_score": 8,
-              "target_bucket": "hard_allow",
-              "triage_class": "STRONG_SOLO_COLLAPSE",
-              "wrong_verdict_count": 0
-            },
-            {
-              "domain": "HR / payroll / workforce controls",
-              "family_id": "HV-HRWF-REP-2026-07-01",
-              "not_knew_count": 4,
-              "pair_id": "HV-HRWF-REP-007",
-              "parse_or_provider_fail_count": 0,
-              "priority_score": 8,
-              "target_bucket": "hard_allow",
-              "triage_class": "STRONG_SOLO_COLLAPSE",
-              "wrong_verdict_count": 0
-            },
-            {
-              "domain": "HR / payroll / workforce controls",
-              "family_id": "HV-HRWF-REP-2026-07-01",
-              "not_knew_count": 4,
-              "pair_id": "HV-HRWF-REP-010",
-              "parse_or_provider_fail_count": 0,
-              "priority_score": 8,
-              "target_bucket": "hard_allow",
-              "triage_class": "STRONG_SOLO_COLLAPSE",
-              "wrong_verdict_count": 0
-            }
-          ],
-          "selected_pairs_match_expected_pool": true,
-          "selection_mode": "target-selection",
-          "selection_mode_defaulted": true,
-          "solo_started": false,
-          "status": "PASS"
-        }
+        "staged_next_batch": {}
       },
       "passed": true
     },
@@ -589,9 +435,9 @@
         "after_batch_004_live_pairs": 37,
         "after_batch_004_live_pairs_needed_for_60_per_class": 23,
         "after_batch_004_live_per_class_n": 37,
-        "current_pairs_needed_for_60_per_class": 33,
-        "current_per_class_n": 27,
-        "current_scored_pairs": 27,
+        "current_pairs_needed_for_60_per_class": 23,
+        "current_per_class_n": 37,
+        "current_scored_pairs": 37,
         "full_family_packets": 120,
         "full_family_pairs": 60,
         "full_family_pairs_remaining_after_staged_target_lane": 23,
@@ -611,27 +457,27 @@
           },
           "judges_started": false,
           "live_execution_gate": {
-            "blocked_reason": [
-              "batch_004_comparison_exists",
-              "batch_004_combined_memo_exists"
-            ],
+            "blocked_reason": null,
             "checks": {
-              "batch_004_combined_memo_exists": false,
-              "batch_004_comparison_exists": false
+              "batch_004_combined_memo_exists": true,
+              "batch_004_combined_memo_has_74_scored_packets": true,
+              "batch_004_combined_memo_has_no_next_target_batch": true,
+              "batch_004_combined_memo_scores_all_37_selected_targets": true,
+              "batch_004_comparison_exists": true
             },
             "required_before_live": [
               "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_SOLO_VS_HOLO_COMPARISON_2026_07_01.json",
               "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
             ],
-            "scored_packets_in_promoted_selected_target_memo": null,
-            "scored_pairs_in_promoted_selected_target_memo": null,
-            "selected_target_pair_pool": null,
+            "scored_packets_in_promoted_selected_target_memo": 74,
+            "scored_pairs_in_promoted_selected_target_memo": 37,
+            "selected_target_pair_pool": 37,
             "selection_mode": "full-family-remainder",
-            "status": "LOCKED"
+            "status": "PASS"
           },
           "live_holo_started": false,
           "live_preflight_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT_2026_07_01.json",
-          "live_preflight_root_signature": "3cf24480f79bde31d58774d5e2a32290f97f2c1ab9d5088b9f1eaf676909b46b",
+          "live_preflight_root_signature": "a99fba06753da20549e6fea991c2c2a3d829e07aaf4541813ffa31a1f484c12d",
           "providers_called": 0,
           "ready_for_live_holo": true,
           "registration_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_REGISTRATION_2026_07_01.json",
@@ -1794,34 +1640,34 @@
         "significance_rows": [
           {
             "metric": "FNR",
-            "n": 27,
+            "n": 37,
             "observed_errors": 0,
             "observed_rate": "0.0",
-            "wilson_95_high": "0.124555",
+            "wilson_95_high": "0.094058",
             "zero_error_n_for_95_upper_lt_5pct": 60
           },
           {
             "metric": "FPR",
-            "n": 27,
+            "n": 37,
             "observed_errors": 0,
             "observed_rate": "0.0",
-            "wilson_95_high": "0.124555",
+            "wilson_95_high": "0.094058",
             "zero_error_n_for_95_upper_lt_5pct": 60
           },
           {
             "metric": "overall_error",
-            "n": 54,
+            "n": 74,
             "observed_errors": 0,
             "observed_rate": "0.0",
-            "wilson_95_high": "0.066414",
+            "wilson_95_high": "0.04935",
             "zero_error_n_for_95_upper_lt_5pct": 60
           },
           {
             "metric": "operational_non_success",
-            "n": 54,
+            "n": 74,
             "observed_errors": 0,
             "observed_rate": "0.0",
-            "wilson_95_high": "0.066414",
+            "wilson_95_high": "0.04935",
             "zero_error_n_for_95_upper_lt_5pct": 60
           }
         ]
@@ -1846,12 +1692,12 @@
           "full_family_pairs_remaining_after_staged_target_lane": 8,
           "full_family_pairs_unstaged_after_future_stage": 0,
           "remaining_selected_targets_after_staged": 0,
-          "scored_holo_target_pairs": 9,
+          "scored_holo_target_pairs": 12,
           "solo_knew_admissible": 49,
           "solo_not_knew": 71,
           "solo_provider_calls": 120,
           "staged_full_family_remainder_pairs": 8,
-          "staged_holo_target_pairs": 3,
+          "staged_holo_target_pairs": 0,
           "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
           "top_holo_targets": 12
         },
@@ -1865,12 +1711,12 @@
           "full_family_pairs_remaining_after_staged_target_lane": 4,
           "full_family_pairs_unstaged_after_future_stage": 0,
           "remaining_selected_targets_after_staged": 0,
-          "scored_holo_target_pairs": 12,
+          "scored_holo_target_pairs": 16,
           "solo_knew_admissible": 39,
           "solo_not_knew": 81,
           "solo_provider_calls": 120,
           "staged_full_family_remainder_pairs": 4,
-          "staged_holo_target_pairs": 4,
+          "staged_holo_target_pairs": 0,
           "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
           "top_holo_targets": 16
         },
@@ -1884,12 +1730,12 @@
           "full_family_pairs_remaining_after_staged_target_lane": 11,
           "full_family_pairs_unstaged_after_future_stage": 0,
           "remaining_selected_targets_after_staged": 0,
-          "scored_holo_target_pairs": 6,
+          "scored_holo_target_pairs": 9,
           "solo_knew_admissible": 52,
           "solo_not_knew": 68,
           "solo_provider_calls": 120,
           "staged_full_family_remainder_pairs": 11,
-          "staged_holo_target_pairs": 3,
+          "staged_holo_target_pairs": 0,
           "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
           "top_holo_targets": 9
         }
@@ -1898,21 +1744,21 @@
     }
   ],
   "classification": "WAVE2_DOMAIN_CONTROL_ROOM_NO_PROVIDER_2026_07_01",
-  "created_at_utc": "2026-07-01T08:14:26.390084+00:00",
+  "created_at_utc": "2026-07-01T14:05:48.063840+00:00",
   "current_state": {
-    "batch005_gate": "LOCKED_UNTIL_BATCH_004_LIVE_COMPARISON_PROMOTION_AND_EXPLICIT_PROVIDER_APPROVAL",
-    "current_correct_admissible_packets": 54,
-    "current_per_class_n": 27,
-    "current_phase": "PRE_BATCH_004_LIVE",
-    "current_scored_packets": 54,
-    "current_scored_pairs": 27,
+    "batch005_gate": "EVIDENCE_UNLOCKED_PENDING_EXPLICIT_PROVIDER_APPROVAL",
+    "current_correct_admissible_packets": 74,
+    "current_per_class_n": 37,
+    "current_phase": "POST_BATCH_004_EVIDENCE_LOCKED",
+    "current_scored_packets": 74,
+    "current_scored_pairs": 37,
     "full_family_pairs": 60,
-    "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_004",
+    "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_005",
     "pairs_needed_for_60_per_class_after_batch004": 23,
-    "pairs_needed_for_60_per_class_now": 33,
+    "pairs_needed_for_60_per_class_now": 23,
     "per_class_n_after_clean_batch004": 37,
     "per_class_n_after_clean_batch004_and_batch005": 60,
-    "scored_batches": "001-003",
+    "scored_batches": "001-004",
     "selected_target_pair_pool": 37,
     "selected_targets_remaining_after_batch004_staging": 0
   },
@@ -1921,9 +1767,9 @@
       "domain": "Data privacy / customer data release controls",
       "family_id": "HV-DPRV-REP-2026-07-01",
       "frozen_pairs": 20,
-      "scored_holo_target_pairs": 9,
+      "scored_holo_target_pairs": 12,
       "staged_full_family_remainder_pairs": 8,
-      "staged_holo_target_pairs": 3,
+      "staged_holo_target_pairs": 0,
       "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
       "unstaged_full_family_pairs_after_batch005": 0
     },
@@ -1931,9 +1777,9 @@
       "domain": "Finance close / revenue / expense recognition controls",
       "family_id": "HV-FINC-REP-2026-07-01",
       "frozen_pairs": 20,
-      "scored_holo_target_pairs": 12,
+      "scored_holo_target_pairs": 16,
       "staged_full_family_remainder_pairs": 4,
-      "staged_holo_target_pairs": 4,
+      "staged_holo_target_pairs": 0,
       "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
       "unstaged_full_family_pairs_after_batch005": 0
     },
@@ -1941,9 +1787,9 @@
       "domain": "HR / payroll / workforce controls",
       "family_id": "HV-HRWF-REP-2026-07-01",
       "frozen_pairs": 20,
-      "scored_holo_target_pairs": 6,
+      "scored_holo_target_pairs": 9,
       "staged_full_family_remainder_pairs": 11,
-      "staged_holo_target_pairs": 3,
+      "staged_holo_target_pairs": 0,
       "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
       "unstaged_full_family_pairs_after_batch005": 0
     }
@@ -1952,8 +1798,8 @@
     "batch004": {
       "approval_granted_by_packet": false,
       "approval_packet_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.json",
-      "approval_packet_sha256": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
-      "approval_status": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+      "approval_packet_sha256": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
+      "approval_status": "NOT_READY",
       "batch_id": "WAVE2_HOLO_TARGET_BATCH_004",
       "expected_counts": {
         "gov_calls": 40,
@@ -1973,13 +1819,13 @@
       },
       "live_holo_started": false,
       "live_preflight_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_LIVE_PREFLIGHT_2026_07_01.json",
-      "live_preflight_root_signature": "bfa320f216b25ac3f5f9c321573ae56270a66292906f0038531ae12bce5c0a3b",
+      "live_preflight_root_signature": "7e9e5dd2b0fff1f8614aa23c0d4570b828c2b31e671748de2001b96e9942dbd9",
       "live_preflight_status": "PASS",
       "packet_count": 20,
       "pair_count": 10,
       "providers_called": 0,
       "required_approval_statement": "I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.",
-      "run_command_after_explicit_approval": "python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5 --approval-statement \"I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
+      "run_command_after_explicit_approval": "python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd --approval-statement \"I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
       "selected_pair_ids": [
         "HV-FINC-REP-016",
         "HV-DPRV-REP-005",
@@ -1994,7 +1840,7 @@
       ],
       "selection_mode": "target-selection",
       "solo_started": false,
-      "state": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL"
+      "state": "HISTORICAL_BATCH004_APPROVAL_PACKET_BATCH004_ALREADY_PROMOTED"
     },
     "batch005": {
       "batch_id": "WAVE2_HOLO_TARGET_BATCH_005",
@@ -2009,27 +1855,27 @@
       },
       "judges_started": false,
       "live_execution_gate": {
-        "blocked_reason": [
-          "batch_004_comparison_exists",
-          "batch_004_combined_memo_exists"
-        ],
+        "blocked_reason": null,
         "checks": {
-          "batch_004_combined_memo_exists": false,
-          "batch_004_comparison_exists": false
+          "batch_004_combined_memo_exists": true,
+          "batch_004_combined_memo_has_74_scored_packets": true,
+          "batch_004_combined_memo_has_no_next_target_batch": true,
+          "batch_004_combined_memo_scores_all_37_selected_targets": true,
+          "batch_004_comparison_exists": true
         },
         "required_before_live": [
           "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_SOLO_VS_HOLO_COMPARISON_2026_07_01.json",
           "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
         ],
-        "scored_packets_in_promoted_selected_target_memo": null,
-        "scored_pairs_in_promoted_selected_target_memo": null,
-        "selected_target_pair_pool": null,
+        "scored_packets_in_promoted_selected_target_memo": 74,
+        "scored_pairs_in_promoted_selected_target_memo": 37,
+        "selected_target_pair_pool": 37,
         "selection_mode": "full-family-remainder",
-        "status": "LOCKED"
+        "status": "PASS"
       },
       "live_holo_started": false,
       "live_preflight_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT_2026_07_01.json",
-      "live_preflight_root_signature": "3cf24480f79bde31d58774d5e2a32290f97f2c1ab9d5088b9f1eaf676909b46b",
+      "live_preflight_root_signature": "a99fba06753da20549e6fea991c2c2a3d829e07aaf4541813ffa31a1f484c12d",
       "live_preflight_status": "PASS",
       "packet_count": 46,
       "pair_count": 23,
@@ -2065,7 +1911,7 @@
       ],
       "selection_mode": "full-family-remainder",
       "solo_started": false,
-      "state": "LOCKED_UNTIL_BATCH004_LIVE_COMPARISON_PROMOTION_AND_SEPARATE_APPROVAL"
+      "state": "EVIDENCE_UNLOCKED_PENDING_SEPARATE_PROVIDER_APPROVAL_PACKET"
     }
   },
   "generated_without_provider_calls": true,
@@ -2112,8 +1958,8 @@
       "provider_calls": 0
     },
     {
-      "action": "batch004_live_only_after_explicit_provider_approval",
-      "command": "python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5 --approval-statement \"I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
+      "action": "batch004_live_complete_and_promoted",
+      "command": "python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd --approval-statement \"I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
       "expected_provider_calls": 100,
       "provider_calls_allowed_by_this_artifact": false
     },
@@ -2133,20 +1979,17 @@
       "provider_calls": 0
     },
     {
-      "action": "batch005_remains_locked",
-      "blocked_by": [
-        "batch_004_comparison_exists",
-        "batch_004_combined_memo_exists"
-      ],
+      "action": "batch005_requires_separate_future_approval",
+      "blocked_by": null,
       "expected_provider_calls_after_future_separate_approval": 230
     }
   ],
-  "package_sha256": "06110e4c86904686a3ac730620e88d838a0c6221e461fdcca152700a2d7960db",
+  "package_sha256": "18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116",
   "source_paths": {
     "batch004_approval_packet": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.json",
     "batch004_live_preflight": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_LIVE_PREFLIGHT_2026_07_01.json",
     "batch005_live_preflight": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT_2026_07_01.json",
-    "combined_memo": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json",
+    "combined_memo": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json",
     "ledger": "docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_2026_07_01.json",
     "metrics_package": "docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/compiled_metrics_package.json",
     "ordering": "docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/WAVE2_DOMAIN_ORDERING_VERIFICATION_2026_07_01.json",
@@ -2156,21 +1999,21 @@
     "batch004_approval_packet": {
       "classification": "WAVE2_BATCH004_PROVIDER_APPROVAL_PACKET_NO_PROVIDER_2026_07_01",
       "package_hash_valid": true,
-      "package_sha256": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
+      "package_sha256": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
       "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.json",
-      "status": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL"
+      "status": "NOT_READY"
     },
     "combined_memo": {
       "classification": "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_NO_PROVIDER",
       "package_hash_valid": true,
-      "package_sha256": "d74d76ce0e13fe1cf31cc8ca731eb315d744fbc1f2122923216c90c41bfdfda6",
-      "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json",
+      "package_sha256": "d4ad201b4c177154741ec8b3ee7b4929c3db764451a2ef8862e3148d44b0198d",
+      "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json",
       "status": null
     },
     "ledger": {
       "classification": "HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_NO_PROVIDER_2026_07_01",
       "package_hash_valid": true,
-      "package_sha256": "c25a0e50de1fd23aebd758a179cc61167e585c9b96a33da1cb70bd0d3f881aea",
+      "package_sha256": "5532559c86db2ae04579e4edff9472f3807a2ba5a5a3866af17802d67c75c63e",
       "path": "docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_2026_07_01.json",
       "status": null
     },
@@ -2184,14 +2027,14 @@
     "ordering": {
       "classification": "WAVE2_DOMAIN_ORDERING_VERIFICATION_NO_PROVIDER_2026_07_01",
       "package_hash_valid": true,
-      "package_sha256": "0a93c2dcdc98f6df2a0ab08d82a66d0389aa56669493b5448f3dd2348b29a435",
+      "package_sha256": "091aaafaf70ca6413614a54497ddb794be58552aae608635794bbe504abcee2b",
       "path": "docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/WAVE2_DOMAIN_ORDERING_VERIFICATION_2026_07_01.json",
       "status": "PASS"
     },
     "readiness": {
       "classification": "WAVE2_DOMAIN_COMPLETION_READINESS_NO_PROVIDER_2026_07_01",
       "package_hash_valid": true,
-      "package_sha256": "5a50849c7db8c49b74b7d3eeaabf05d4a3d2292843b626bd65e2a0bd724ec017",
+      "package_sha256": "f58e2474d38183addad8b2e93a6c133f4020d584488631333670cadcf10e292f",
       "path": "docs/benchmark/wave2_domain_completion_readiness_2026_07_01/WAVE2_DOMAIN_COMPLETION_READINESS_2026_07_01.json",
       "status": "PASS"
     }
@@ -2200,7 +2043,7 @@
   "stop_rules": [
     "This artifact does not approve provider calls.",
     "Run Batch 004 only after the exact approval statement and exact approval packet SHA are supplied.",
-    "Do not run Batch 005 until Batch 004 has a clean live result, comparison, promoted 001_002_003_004 memo, and separate approval.",
+    "Do not run Batch 005 until a separate Batch 005 approval packet and explicit approval exist.",
     "Do not run solo or judge lanes from this control-room lane.",
     "Preserve selected-target evidence separately from full-family statistical proof until Batch 005 has live evidence."
   ],

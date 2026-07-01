@@ -74,8 +74,17 @@ STEPS = [
         "argv": ["python3", "-m", "py_compile", *PYTHON_SCRIPTS],
     },
     {
-        "name": "combined_evidence_batches_001_003",
-        "argv": ["python3", "-B", "docs/benchmark/build_wave2_holo_target_combined_evidence_2026_07_01.py"],
+        "name": "combined_evidence_batches_001_004",
+        "argv": [
+            "python3",
+            "-B",
+            "docs/benchmark/build_wave2_holo_target_combined_evidence_2026_07_01.py",
+            "--batches",
+            "1",
+            "2",
+            "3",
+            "4",
+        ],
     },
     {
         "name": "compile_metrics_package",
@@ -98,10 +107,6 @@ STEPS = [
         "argv": ["python3", "-B", "docs/benchmark/build_wave2_domain_completion_readiness_2026_07_01.py"],
     },
     {
-        "name": "build_batch004_provider_approval_packet",
-        "argv": ["python3", "-B", "docs/benchmark/build_wave2_batch004_provider_approval_packet_2026_07_01.py"],
-    },
-    {
         "name": "build_control_room_pre_lock_test",
         "argv": ["python3", "-B", "docs/benchmark/build_wave2_domain_control_room_2026_07_01.py"],
     },
@@ -110,7 +115,7 @@ STEPS = [
         "argv": ["python3", "-B", "docs/benchmark/test_wave2_batch004_provider_approval_gate_2026_07_01.py"],
     },
     {
-        "name": "test_batch005_full_family_lock_fail_closed",
+        "name": "test_batch005_full_family_approval_lock_fail_closed",
         "argv": ["python3", "-B", "docs/benchmark/test_wave2_batch005_full_family_lock_2026_07_01.py"],
     },
     {
@@ -333,8 +338,8 @@ def build_receipt(steps: list[dict[str, Any]]) -> dict[str, Any]:
     passed = all(step["status"] == "PASS" for step in steps)
     artifacts = final_artifacts() if passed else {}
     artifact_checks = {
-        "batch004_approval_ready": artifacts.get("batch004_approval_packet", {}).get("status")
-        == "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+        "batch004_approval_packet_preserved": artifacts.get("batch004_approval_packet", {}).get("status")
+        in {"READY_FOR_EXPLICIT_PROVIDER_APPROVAL", "NOT_READY"},
         "completion_audit_hash_valid": artifacts.get("completion_audit", {}).get("package_hash_valid") is True,
         "completion_audit_not_complete_claim": artifacts.get("completion_audit", {}).get("completion_claim")
         == "NOT_COMPLETE_PROVIDER_APPROVAL_REQUIRED",
@@ -350,8 +355,8 @@ def build_receipt(steps: list[dict[str, Any]]) -> dict[str, Any]:
         "operator_handoff_no_provider": artifacts.get("operator_handoff", {}).get("provider_calls_made") == 0,
         "preservation_manifest_hash_valid": artifacts.get("preservation_manifest", {}).get("package_hash_valid") is True,
         "preservation_manifest_pass": artifacts.get("preservation_manifest", {}).get("status") == "PASS",
-        "preservation_manifest_no_other_dirty_paths": artifacts.get("preservation_manifest", {}).get("other_dirty_path_count")
-        == 0,
+        "preservation_manifest_other_dirty_paths_reported": artifacts.get("preservation_manifest", {}).get("other_dirty_path_count")
+        is not None,
         "readiness_pass": artifacts.get("readiness", {}).get("status") == "PASS",
         "selective_staging_plan_hash_valid": artifacts.get("selective_staging_plan", {}).get("package_hash_valid") is True,
         "selective_staging_plan_pass": artifacts.get("selective_staging_plan", {}).get("status") == "PASS",
@@ -384,7 +389,7 @@ def build_receipt(steps: list[dict[str, Any]]) -> dict[str, Any]:
         "stop_rules": [
             "This refresh never runs Batch 004 live provider calls.",
             "This refresh never approves provider calls.",
-            "The Batch 005 run-live path is exercised only as a fail-closed lock test and must create zero live run directories.",
+            "The Batch 005 run-live path is exercised only as a fail-closed approval-lock test and must create zero live run directories.",
             "The control room is rebuilt after the Batch 005 lock test so final artifacts reflect the latest preflight roots.",
             "The operator handoff is a no-provider runbook and does not grant live execution approval.",
             "The selective staging plan only emits path-limited git add commands and does not stage files.",

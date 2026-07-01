@@ -25,10 +25,15 @@ FREEZE_MANIFEST = FREEZE_ROOT / "FREEZE_MANIFEST.json"
 PACKET_INDEX = FREEZE_ROOT / "manifests/PACKET_INDEX.json"
 SOLO_PACKAGE = FREEZE_ROOT / "solo_triage_3mini/WAVE2_3FAMILY_SOLO_TRIAGE_EVIDENCE_PACKAGE_2026_07_01.json"
 TARGET_SELECTION = FREEZE_ROOT / "solo_triage_3mini/WAVE2_HOLO_TARGET_SELECTION_FROM_SOLO_TRIAGE_2026_07_01.json"
-COMBINED_MEMO = (
+COMBINED_MEMO_001_003 = (
     FREEZE_ROOT
     / "holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
 )
+COMBINED_MEMO_001_004 = (
+    FREEZE_ROOT
+    / "holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+)
+COMBINED_MEMO = COMBINED_MEMO_001_004 if COMBINED_MEMO_001_004.exists() else COMBINED_MEMO_001_003
 BATCH004_APPROVAL_PACKET = (
     FREEZE_ROOT
     / "holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.json"
@@ -82,6 +87,10 @@ def load_batch004_approval_packet() -> dict[str, Any]:
         "run_command_after_approval": packet.get("provider_boundary", {}).get("run_command_after_approval"),
         "status": packet.get("status"),
     }
+
+
+def selected_scored_batches(scored_pairs: int, selected_target_pairs: int) -> str:
+    return "001-004" if scored_pairs >= selected_target_pairs else "001-003"
 
 
 def int_value(value: str | int | None) -> int:
@@ -389,10 +398,16 @@ def build_wave2_status() -> dict[str, Any]:
     total_pairs = freeze_manifest["scope"]["pairs"]
     per_class_required_5pct = 60
 
+    selected_complete = scored_pairs >= selected_target_pairs
+
     return {
         "claim_boundaries": combined_memo["claim_boundaries"]
         + [
-            "Batch 004 is staged/preflight-only until an explicitly approved live Holo run exists.",
+            (
+                "Batch 004 is scored selected-target evidence in this post-live package."
+                if selected_complete
+                else "Batch 004 is staged/preflight-only until an explicitly approved live Holo run exists."
+            ),
             "Completing the selected-target pool is not the same as completing all 60 frozen Wave 2 pairs.",
             "The full-family statistical lane requires the remaining non-target pairs after the selected-target lane.",
         ],
@@ -411,7 +426,7 @@ def build_wave2_status() -> dict[str, Any]:
             "domain_target_counts": target_counts,
         },
         "selected_target_holo": {
-            "scored_batches": "001-003",
+            "scored_batches": selected_scored_batches(scored_pairs, selected_target_pairs),
             "scored_pairs": scored_pairs,
             "scored_packets": combined_metrics["holo_packets"],
             "scored_packets_correct_admissible": combined_metrics["holo_packets_correct_admissible"],
@@ -502,6 +517,8 @@ def render_markdown(ledger: dict[str, Any]) -> str:
     selected = wave2["selected_target_holo"]
     approval = ledger.get("approval_packets", {}).get("batch004", {})
     full_stage = statistical.get("full_family_remainder_staged_batch") or {}
+    staged_next = selected.get("staged_next_batch") or {}
+    staged_next_pairs = staged_next.get("expected_counts", {}).get("pairs", 0)
     full_stage_pairs = statistical.get("full_family_remainder_staged_pairs", 0)
     full_stage_calls = full_stage.get("expected_counts", {}).get("total_provider_calls", 0)
     full_stage_gate = full_stage.get("live_execution_gate", {}).get("status", "MISSING_REPO_EVIDENCE")
@@ -547,8 +564,8 @@ def render_markdown(ledger: dict[str, Any]) -> str:
         (
             "| Wave 2 Holo selected targets | "
             f"`{selected['scored_pairs']}` scored pairs plus "
-            f"`{selected['staged_next_batch']['expected_counts']['pairs']}` staged pairs | "
-            f"`{ledger['source_paths']['combined_memo']}` | Batch 004 live Holo requires explicit provider approval |"
+            f"`{staged_next_pairs}` staged pairs | "
+            f"`{ledger['source_paths']['combined_memo']}` | Selected-target lane is complete when staged pairs are `0` |"
         ),
         (
             "| Wave 2 full-family remainder | "
@@ -647,7 +664,7 @@ def render_markdown(ledger: dict[str, Any]) -> str:
             f"`{row['architecture_packet_correct']}` | `{row['solo_packets_or_attempts']}` | {tiers} |"
         )
 
-    staged = selected["staged_next_batch"]
+    staged = selected.get("staged_next_batch") or {}
     lines += [
         "",
         "## Next Gates",
@@ -714,9 +731,14 @@ def render_markdown(ledger: dict[str, Any]) -> str:
     ]
     lines += [f"- {item}" for item in ledger["claim_boundaries"]]
     lines += [f"- {item}" for item in wave2["claim_boundaries"]]
-    lines += [
-        f"- Batch 004 live preflight root signature: `{staged['live_preflight_root_signature']}`.",
-    ]
+    if staged:
+        lines += [
+            f"- Batch 004 live preflight root signature: `{staged['live_preflight_root_signature']}`.",
+        ]
+    else:
+        lines += [
+            "- Batch 004 selected-target evidence is promoted; no staged selected-target batch remains.",
+        ]
     if full_stage:
         lines.append(f"- Batch 005 live preflight root signature: `{full_stage['live_preflight_root_signature']}`.")
     lines.append("")

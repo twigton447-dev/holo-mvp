@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""No-provider regression test for the Wave 2 Batch 005 full-family lock."""
+"""No-provider regression test for the Wave 2 Batch 005 approval lock."""
 
 from __future__ import annotations
 
@@ -39,11 +39,8 @@ def main() -> int:
     gate = manifest["live_execution_gate"]
     assert manifest["status"] == "PASS", manifest
     assert manifest["selection_mode"] == "full-family-remainder", manifest
-    assert gate["status"] == "LOCKED", gate
-    assert set(gate["blocked_reason"]) == {
-        "batch_004_comparison_exists",
-        "batch_004_combined_memo_exists",
-    }, gate
+    assert gate["status"] == "PASS", gate
+    assert gate["blocked_reason"] is None, gate
     assert manifest["providers_called"] == 0, manifest
     assert manifest["live_holo_started"] is False, manifest
     assert manifest["solo_started"] is False, manifest
@@ -56,7 +53,7 @@ def main() -> int:
     else:
         raise AssertionError("Batch 005 run_live unexpectedly passed")
 
-    assert error.startswith("wave2_holo_live_execution_gate_locked:"), error
+    assert error.startswith("wave2_holo_provider_approval_gate_locked:"), error
     assert "OPENAI_API_KEY" not in error
     assert "MINIMAX" not in error.upper()
     assert "XAI" not in error.upper()
@@ -68,7 +65,7 @@ def main() -> int:
             {
                 "status": "PASS",
                 "batch_id": "WAVE2_HOLO_TARGET_BATCH_005",
-                "checked_lock": gate["blocked_reason"],
+                "checked_lock": "provider_approval_packet_required",
                 "run_live_error": error,
                 "provider_calls_made": 0,
                 "live_run_dirs_created": 0,

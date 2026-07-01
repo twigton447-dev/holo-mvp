@@ -57,9 +57,9 @@ def main() -> int:
     assert "full-family Wave 2 statistical proof complete" in claim["disallowed_current_claims"], claim
 
     lane = actual["statistical_lane"]
-    assert lane["current_scored_pairs"] == 27, lane
-    assert lane["current_scored_packets"] == 54, lane
-    assert lane["current_per_class_n"] == 27, lane
+    assert lane["current_scored_pairs"] == 37, lane
+    assert lane["current_scored_packets"] == 74, lane
+    assert lane["current_per_class_n"] == 37, lane
     assert lane["full_family_pairs"] == 60, lane
     assert lane["per_class_n_after_clean_batch004"] == 37, lane
     assert lane["per_class_n_after_clean_batch004_and_batch005"] == 60, lane
@@ -68,12 +68,12 @@ def main() -> int:
         "metrics_claim_boundary_declared",
         "ledger_claim_boundary_declared",
         "current_wave2_holo_metric_rows_are_selected_target_tier",
-        "current_selected_target_counts_27_pairs_54_packets",
+        "current_selected_target_counts_37_pairs_74_packets",
         "current_per_class_n_below_full_family_n",
         "rule_of_three_threshold_not_met_for_fpr_fnr",
         "after_batch004_still_below_60_per_class",
-        "batch004_staged_not_scored",
-        "batch005_needed_for_60_per_class_is_locked",
+        "batch004_scored_selected_target_evidence",
+        "batch005_needed_for_60_per_class_requires_separate_approval",
         "batch005_has_no_approval_packet",
         "future_planning_rows_present",
         "missing_repo_evidence_not_inferred",
@@ -84,10 +84,10 @@ def main() -> int:
     assert not BATCH005_APPROVAL.exists(), BATCH005_APPROVAL
 
     metrics = {row["metric"]: row for row in lane["significance_rows"]}
-    assert metrics["FNR"]["n"] == 27, metrics
-    assert metrics["FPR"]["n"] == 27, metrics
-    assert metrics["overall_error"]["n"] == 54, metrics
-    assert metrics["operational_non_success"]["n"] == 54, metrics
+    assert metrics["FNR"]["n"] == 37, metrics
+    assert metrics["FPR"]["n"] == 37, metrics
+    assert metrics["overall_error"]["n"] == 74, metrics
+    assert metrics["operational_non_success"]["n"] == 74, metrics
     assert metrics["FNR"]["zero_error_n_for_95_upper_lt_5pct"] == 60, metrics
     assert metrics["FPR"]["zero_error_n_for_95_upper_lt_5pct"] == 60, metrics
 

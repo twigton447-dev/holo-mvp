@@ -16,7 +16,9 @@ BATCHES_ROOT = FREEZE_ROOT / "holo_target_batches"
 LEDGER = BENCHMARK_ROOT / "holoverify_domain_consolidation_ledger_2026_07_01/HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_2026_07_01.json"
 ORDERING = BENCHMARK_ROOT / "holoverify_domain_consolidation_ledger_2026_07_01/WAVE2_DOMAIN_ORDERING_VERIFICATION_2026_07_01.json"
 READINESS = BENCHMARK_ROOT / "wave2_domain_completion_readiness_2026_07_01/WAVE2_DOMAIN_COMPLETION_READINESS_2026_07_01.json"
-COMBINED_MEMO = BATCHES_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+COMBINED_MEMO_001_003 = BATCHES_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+COMBINED_MEMO_001_004 = BATCHES_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+COMBINED_MEMO = COMBINED_MEMO_001_004 if COMBINED_MEMO_001_004.exists() else COMBINED_MEMO_001_003
 METRICS_PACKAGE = BENCHMARK_ROOT / "compiled_holoverify_holobuild_metrics_2026_07_01/compiled_metrics_package.json"
 BATCH004_APPROVAL = (
     BATCHES_ROOT
@@ -158,21 +160,20 @@ def build_control_room() -> dict[str, Any]:
     check(checks, "readiness_pass", readiness.get("status") == "PASS", readiness.get("status"))
     check(checks, "readiness_no_failed_checks", readiness.get("summary", {}).get("checks_failed") == 0, readiness.get("summary"))
     check(checks, "declared_source_package_hashes_valid", all(value is not False for value in source_hash_validity.values()), source_hash_validity)
-    check(checks, "current_phase_pre_batch004_live", gate_state.get("current_phase") == "PRE_BATCH_004_LIVE", gate_state)
-    check(checks, "next_allowed_live_batch004", gate_state.get("next_allowed_live_batch") == "WAVE2_HOLO_TARGET_BATCH_004", gate_state)
+    check(checks, "current_phase_post_batch004_evidence_locked", gate_state.get("current_phase") == "POST_BATCH_004_EVIDENCE_LOCKED", gate_state)
+    check(checks, "next_allowed_live_batch005", gate_state.get("next_allowed_live_batch") == "WAVE2_HOLO_TARGET_BATCH_005", gate_state)
     check(checks, "compiled_metrics_no_provider", metrics.get("generated_without_provider_calls") is True, metrics.get("generated_without_provider_calls"))
     check(checks, "combined_memo_no_provider", combined.get("no_provider_calls_for_this_package") is True, combined.get("no_provider_calls_for_this_package"))
     check(checks, "combined_memo_no_judges", combined.get("no_judge_calls_for_this_package") is True, combined.get("no_judge_calls_for_this_package"))
-    check(checks, "batch004_approval_ready", approval.get("status") == "READY_FOR_EXPLICIT_PROVIDER_APPROVAL", approval.get("status"))
+    check(checks, "batch004_approval_packet_preserved", approval.get("status") in {"READY_FOR_EXPLICIT_PROVIDER_APPROVAL", "NOT_READY"}, approval.get("status"))
     check(checks, "batch004_approval_does_not_self_grant", approval.get("approval_granted_by_this_packet") is False, approval.get("approval_granted_by_this_packet"))
     check(checks, "batch004_approval_hash_valid", package_hash_valid(approval), approval.get("package_sha256"))
-    check(checks, "batch004_approval_command_resolves_hash_in_markdown", f"--approval-packet-sha256 {approval.get('package_sha256')}" in approval_md, approval.get("package_sha256"))
+    check(checks, "batch004_approval_markdown_matches_packet_state", f"Package SHA-256: `{approval.get('package_sha256')}`" in approval_md, approval.get("package_sha256"))
     check(
         checks,
-        "batch004_run_command_embeds_exact_hash_and_statement",
-        f"--approval-packet-sha256 {approval.get('package_sha256')}" in batch004_run_command
-        and approval.get("approval_statement_required") in batch004_run_command,
-        batch004_run_command,
+        "batch004_run_command_not_current_permission",
+        approval.get("approval_granted_by_this_packet") is False,
+        {"approval_status": approval.get("status"), "historical_command": batch004_run_command},
     )
     check(checks, "batch004_live_gate_pass", batch004["live_execution_gate"].get("status") == "PASS", batch004["live_execution_gate"])
     check(checks, "batch004_no_provider_calls_started", batch004["providers_called"] == 0 and not batch004["live_holo_started"], batch004)
@@ -180,22 +181,22 @@ def build_control_room() -> dict[str, Any]:
     check(checks, "batch004_selected_target_count_10", batch004["pair_count"] == 10 and batch004["packet_count"] == 20, batch004)
     check(
         checks,
-        "batch005_gate_expected_locked_state",
-        gate_state.get("batch_005_gate") == "LOCKED_UNTIL_BATCH_004_LIVE_COMPARISON_PROMOTION_AND_EXPLICIT_PROVIDER_APPROVAL",
+        "batch005_gate_expected_evidence_unlocked_state",
+        gate_state.get("batch_005_gate") == "EVIDENCE_UNLOCKED_PENDING_EXPLICIT_PROVIDER_APPROVAL",
         gate_state,
     )
-    check(checks, "batch005_live_gate_locked", batch005["live_execution_gate"].get("status") == "LOCKED", batch005["live_execution_gate"])
+    check(checks, "batch005_live_gate_pass", batch005["live_execution_gate"].get("status") == "PASS", batch005["live_execution_gate"])
     check(
         checks,
-        "batch005_lock_blockers_exact",
-        batch005["live_execution_gate"].get("blocked_reason") == EXPECTED_BATCH005_LOCK_BLOCKERS,
+        "batch005_lock_blockers_cleared",
+        batch005["live_execution_gate"].get("blocked_reason") is None,
         batch005["live_execution_gate"].get("blocked_reason"),
     )
     check(checks, "batch005_no_provider_calls_started", batch005["providers_called"] == 0 and not batch005["live_holo_started"], batch005)
     check(checks, "batch005_expected_provider_calls_230", batch005["expected_counts"].get("total_provider_calls") == 230, batch005["expected_counts"])
     check(checks, "batch005_remainder_count_23", batch005["pair_count"] == 23 and batch005["packet_count"] == 46, batch005)
     check(checks, "batch005_has_no_approval_packet", not BATCH005_APPROVAL.exists(), str(BATCH005_APPROVAL))
-    check(checks, "current_scored_pairs_27", selected.get("scored_pairs") == 27, selected)
+    check(checks, "current_scored_pairs_37", selected.get("scored_pairs") == 37, selected)
     check(checks, "selected_target_lane_closes_after_batch004", selected.get("remaining_selected_targets_after_staged") == 0, selected.get("remaining_selected_targets_after_staged"))
     check(checks, "full_family_remainder_staged_to_60", statistical.get("after_batch_004_and_remainder_stage_per_class_n") == 60, statistical)
     check(checks, "full_family_no_unstaged_pairs_after_batch005", statistical.get("full_family_pairs_unstaged_after_future_stage") == 0, statistical.get("full_family_pairs_unstaged_after_future_stage"))
@@ -251,12 +252,12 @@ def build_control_room() -> dict[str, Any]:
                 "approval_granted_by_packet": approval.get("approval_granted_by_this_packet"),
                 "required_approval_statement": approval.get("approval_statement_required"),
                 "run_command_after_explicit_approval": batch004_run_command,
-                "state": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+                "state": "HISTORICAL_BATCH004_APPROVAL_PACKET_BATCH004_ALREADY_PROMOTED",
             },
             "batch005": {
                 **batch005,
                 "required_before_live": batch005["live_execution_gate"].get("required_before_live", []),
-                "state": "LOCKED_UNTIL_BATCH004_LIVE_COMPARISON_PROMOTION_AND_SEPARATE_APPROVAL",
+                "state": "EVIDENCE_UNLOCKED_PENDING_SEPARATE_PROVIDER_APPROVAL_PACKET",
             },
         },
         "next_actions": [
@@ -302,7 +303,7 @@ def build_control_room() -> dict[str, Any]:
                 "provider_calls": 0,
             },
             {
-                "action": "batch004_live_only_after_explicit_provider_approval",
+                "action": "batch004_live_complete_and_promoted",
                 "command": approval_run_command(approval),
                 "expected_provider_calls": batch004["expected_counts"]["total_provider_calls"],
                 "provider_calls_allowed_by_this_artifact": False,
@@ -323,7 +324,7 @@ def build_control_room() -> dict[str, Any]:
                 "provider_calls": 0,
             },
             {
-                "action": "batch005_remains_locked",
+                "action": "batch005_requires_separate_future_approval",
                 "blocked_by": batch005["live_execution_gate"].get("blocked_reason"),
                 "expected_provider_calls_after_future_separate_approval": batch005["expected_counts"]["total_provider_calls"],
             },
@@ -351,7 +352,7 @@ def build_control_room() -> dict[str, Any]:
         "stop_rules": [
             "This artifact does not approve provider calls.",
             "Run Batch 004 only after the exact approval statement and exact approval packet SHA are supplied.",
-            "Do not run Batch 005 until Batch 004 has a clean live result, comparison, promoted 001_002_003_004 memo, and separate approval.",
+            "Do not run Batch 005 until a separate Batch 005 approval packet and explicit approval exist.",
             "Do not run solo or judge lanes from this control-room lane.",
             "Preserve selected-target evidence separately from full-family statistical proof until Batch 005 has live evidence.",
         ],

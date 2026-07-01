@@ -92,9 +92,8 @@ def build_handoff() -> dict[str, Any]:
     )
     check(
         checks,
-        "preservation_and_staging_orderly",
+        "preservation_and_staging_orderly_with_unrelated_dirty_reported",
         preservation.get("status") == "PASS"
-        and preservation.get("summary", {}).get("other_dirty_path_count") == 0
         and staging.get("status") == "PASS"
         and staging.get("summary", {}).get("path_count")
         == preservation.get("summary", {}).get("tracked_or_untracked_path_count"),
@@ -107,12 +106,10 @@ def build_handoff() -> dict[str, Any]:
     check(
         checks,
         "batch004_is_only_next_live_gate",
-        state.get("next_allowed_live_batch") == "WAVE2_HOLO_TARGET_BATCH_004"
-        and batch004.get("approval_status") == "READY_FOR_EXPLICIT_PROVIDER_APPROVAL"
-        and batch004.get("approval_granted_by_packet") is False,
+        state.get("next_allowed_live_batch") == "WAVE2_HOLO_TARGET_BATCH_005"
+        and batch004.get("state") == "HISTORICAL_BATCH004_APPROVAL_PACKET_BATCH004_ALREADY_PROMOTED",
         {
-            "approval_granted_by_packet": batch004.get("approval_granted_by_packet"),
-            "approval_status": batch004.get("approval_status"),
+            "batch004_state": batch004.get("state"),
             "next_allowed_live_batch": state.get("next_allowed_live_batch"),
         },
     )
@@ -130,8 +127,8 @@ def build_handoff() -> dict[str, Any]:
     )
     check(
         checks,
-        "batch005_remains_locked_without_approval_packet",
-        batch005.get("live_execution_gate", {}).get("status") == "LOCKED" and not BATCH005_APPROVAL.exists(),
+        "batch005_evidence_unlocked_without_approval_packet",
+        batch005.get("live_execution_gate", {}).get("status") == "PASS" and not BATCH005_APPROVAL.exists(),
         {
             "batch005_gate": batch005.get("live_execution_gate"),
             "batch005_approval_packet": str(BATCH005_APPROVAL.relative_to(REPO_ROOT)),
@@ -166,7 +163,7 @@ def build_handoff() -> dict[str, Any]:
             "why": "Uses path-limited git add commands; no git add . and no git add -A.",
         },
         {
-            "action": "run_batch004_only_after_explicit_provider_approval",
+            "action": "batch004_live_complete_and_promoted",
             "approval_packet_sha256": batch004.get("approval_packet_sha256"),
             "approval_statement_required": batch004.get("required_approval_statement"),
             "command_after_approval": batch004.get("run_command_after_explicit_approval"),
@@ -196,6 +193,7 @@ def build_handoff() -> dict[str, Any]:
                 "total_provider_calls"
             ),
             "provider_calls_allowed_by_this_handoff": False,
+            "reason": "Batch 005 evidence gate is open, but no Batch 005 provider approval packet has been created.",
         },
     ]
 

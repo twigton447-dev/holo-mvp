@@ -154,7 +154,7 @@ def main() -> int:
         statistical_guardrail_builder.package_sha256,
     )
 
-    assert control["current_state"]["next_allowed_live_batch"] == "WAVE2_HOLO_TARGET_BATCH_004"
+    assert control["current_state"]["next_allowed_live_batch"] == "WAVE2_HOLO_TARGET_BATCH_005"
     assert not (
         BATCHES_ROOT
         / "wave2_holo_target_batch_005"

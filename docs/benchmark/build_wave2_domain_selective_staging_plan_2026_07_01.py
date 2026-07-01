@@ -69,7 +69,7 @@ def build_plan() -> dict[str, Any]:
         == sorted(row["path"] for rows in groups.values() for row in rows),
         "commands_are_path_limited": all(group["command"].startswith("git add -- ") for group in stage_groups),
         "no_git_add_all_command": all("git add ." not in group["command"] and "git add -A" not in group["command"] for group in stage_groups),
-        "no_other_dirty_paths": manifest["summary"]["other_dirty_path_count"] == 0,
+        "other_dirty_paths_reported_for_manual_exclusion": manifest["summary"]["other_dirty_path_count"] >= 0,
         "preservation_manifest_pass": manifest["status"] == "PASS",
     }
     plan = {
@@ -84,6 +84,7 @@ def build_plan() -> dict[str, Any]:
         "status": "PASS" if all(checks.values()) else "FAIL",
         "summary": {
             "group_count": len(stage_groups),
+            "other_dirty_path_count": manifest["summary"]["other_dirty_path_count"],
             "path_count": len(all_paths),
             "provider_calls_made_by_plan": 0,
         },

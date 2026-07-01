@@ -55,7 +55,7 @@ def main() -> int:
     assert (
         statistical["wave2_current_claim"] == "SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF"
     ), statistical
-    assert statistical["statistical_proof_claim"] == "NOT_ACHIEVED_BATCH005_LOCKED", statistical
+    assert statistical["statistical_proof_claim"] == "NOT_ACHIEVED_BATCH005_NOT_RUN", statistical
     statistical_evidence = by_id["statistical_significance_path_is_explicit"]["evidence"]
     assert statistical_evidence["statistical_claim_guardrail_sha256"] == statistical_guardrail["package_sha256"], statistical_evidence
     assert statistical_evidence["statistical_claim_guardrail_status"] == "PASS", statistical_evidence
@@ -63,23 +63,23 @@ def main() -> int:
         statistical_evidence["wave2_current_claim"]
         == "SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF"
     ), statistical_evidence
-    assert statistical_evidence["statistical_proof_claim"] == "NOT_ACHIEVED_BATCH005_LOCKED", statistical_evidence
+    assert statistical_evidence["statistical_proof_claim"] == "NOT_ACHIEVED_BATCH005_NOT_RUN", statistical_evidence
     provider_evidence = by_id["provider_boundary_remains_closed"]["evidence"]
     assert provider_evidence["statistical_guardrail_provider_calls"] == 0, provider_evidence
     assert audit["source_paths"]["statistical_claim_guardrail"] == str(STATISTICAL_GUARDRAIL.relative_to(REPO_ROOT)), audit
 
     gate = audit["next_required_gate"]
     batch004 = control["gates"]["batch004"]
-    assert gate["batch_id"] == "WAVE2_HOLO_TARGET_BATCH_004", gate
-    assert gate["gate"] == "EXPLICIT_PROVIDER_APPROVAL_ONLY", gate
-    assert gate["approval_packet_sha256"] == batch004["approval_packet_sha256"], gate
-    assert gate["run_command_after_approval"] == batch004["run_command_after_explicit_approval"], gate
+    assert gate["batch_id"] == "WAVE2_HOLO_TARGET_BATCH_005", gate
+    assert gate["gate"] == "CREATE_BATCH005_APPROVAL_PACKET_THEN_EXPLICIT_PROVIDER_APPROVAL", gate
+    assert gate["approval_packet_sha256"] is None, gate
+    assert gate["run_command_after_approval"] is None, gate
     assert batch004["approval_granted_by_packet"] is False, batch004
-    assert control["gates"]["batch005"]["live_execution_gate"]["status"] == "LOCKED", control
+    assert control["gates"]["batch005"]["live_execution_gate"]["status"] == "PASS", control
     assert not BATCH005_APPROVAL.exists(), BATCH005_APPROVAL
 
     assert "Completion claim: `NOT_COMPLETE_PROVIDER_APPROVAL_REQUIRED`" in md, md
-    assert gate["approval_packet_sha256"] in md, md
+    assert "WAVE2_HOLO_TARGET_BATCH_005" in md, md
     assert "This audit does not approve provider calls" in md, md
 
     print(

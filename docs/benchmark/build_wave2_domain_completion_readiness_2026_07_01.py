@@ -18,7 +18,9 @@ OUT_MD = OUT_ROOT / "WAVE2_DOMAIN_COMPLETION_READINESS_2026_07_01.md"
 
 PACKET_INDEX = FREEZE_ROOT / "manifests/PACKET_INDEX.json"
 TARGET_SELECTION = FREEZE_ROOT / "solo_triage_3mini/WAVE2_HOLO_TARGET_SELECTION_FROM_SOLO_TRIAGE_2026_07_01.json"
-COMBINED_MEMO = BATCHES_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+COMBINED_MEMO_001_003 = BATCHES_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+COMBINED_MEMO_001_004 = BATCHES_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+COMBINED_MEMO = COMBINED_MEMO_001_004 if COMBINED_MEMO_001_004.exists() else COMBINED_MEMO_001_003
 COMPILED_PACKAGE = Path("docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/compiled_metrics_package.json")
 LEDGER = Path("docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_2026_07_01.json")
 ORDERING_VERIFICATION = Path(
@@ -153,6 +155,7 @@ def build_report() -> dict[str, Any]:
     full_family_remainder_ids = [pair_id for pair_id in sorted(packet_pairs) if pair_id not in target_pair_set]
 
     combined = read_json(COMBINED_MEMO)
+    batch004_comparison = read_json(batch_paths(4)["comparison"]) if batch_paths(4)["comparison"].exists() else {}
     compiled = read_json(COMPILED_PACKAGE)
     ledger = read_json(LEDGER)
     wave2 = ledger["wave2"]
@@ -166,19 +169,19 @@ def build_report() -> dict[str, Any]:
     check(checks, "combined_memo_no_judges", combined.get("no_judge_calls_for_this_package") is True, combined.get("no_judge_calls_for_this_package"))
     check(checks, "wave2_freeze_full_60_pairs", wave2["freeze"]["scope"].get("pairs") == 60, wave2["freeze"]["scope"])
     check(checks, "solo_triage_target_pool_37", selected.get("selected_target_pair_pool") == 37, selected.get("selected_target_pair_pool"))
-    check(checks, "scored_batches_001_003_only", selected.get("scored_batches") == "001-003", selected.get("scored_batches"))
-    check(checks, "current_scored_pairs_27", selected.get("scored_pairs") == 27, selected.get("scored_pairs"))
-    check(checks, "current_holo_packets_54_of_54", selected.get("scored_packets") == 54 and selected.get("scored_packets_correct_admissible") == 54, selected)
-    check(checks, "statistical_lane_current_27", statistical.get("current_per_class_n") == 27, statistical)
+    check(checks, "scored_batches_001_004", selected.get("scored_batches") == "001-004", selected.get("scored_batches"))
+    check(checks, "current_scored_pairs_37", selected.get("scored_pairs") == 37, selected.get("scored_pairs"))
+    check(checks, "current_holo_packets_74_of_74", selected.get("scored_packets") == 74 and selected.get("scored_packets_correct_admissible") == 74, selected)
+    check(checks, "statistical_lane_current_37", statistical.get("current_per_class_n") == 37, statistical)
     check(checks, "statistical_lane_after_batch004_37", statistical.get("after_batch_004_live_per_class_n") == 37, statistical)
     check(checks, "statistical_lane_after_batch005_60", statistical.get("after_batch_004_and_remainder_stage_per_class_n") == 60, statistical)
 
     batch004 = load_batch_stage(4)
     batch004_pair_ids = batch004["selected_pair_ids"]
-    remaining_target_ids = [row["pair_id"] for row in combined["remaining_target_pool"].get("next_batch_preview_pairs", [])]
+    scored_batch004_ids = [row["pair_id"] for row in batch004_comparison.get("pair_rows", [])]
     check(checks, "batch004_selection_mode_target", batch004["selection_mode"] == "target-selection", batch004["selection_mode"])
     check(checks, "batch004_pair_count_10", len(batch004_pair_ids) == 10, batch004_pair_ids)
-    check(checks, "batch004_pairs_match_remaining_targets", batch004_pair_ids == remaining_target_ids, {"batch004": batch004_pair_ids, "remaining": remaining_target_ids})
+    check(checks, "batch004_pairs_match_scored_comparison", set(batch004_pair_ids) == set(scored_batch004_ids), {"batch004": batch004_pair_ids, "comparison": scored_batch004_ids})
     check(checks, "batch004_expected_counts_100", batch004["expected_counts"] == expected_counts(10), batch004["expected_counts"])
     check(checks, "batch004_preflight_pass", batch004["preflight_status"] == "PASS" and batch004["preflight_ready_for_live_holo"] is True, batch004)
     check(checks, "batch004_live_preflight_no_provider", batch004["live_preflight_status"] == "PASS" and batch004["providers_called"] == 0, batch004)
@@ -197,8 +200,9 @@ def build_report() -> dict[str, Any]:
     check(checks, "batch005_live_preflight_no_provider", batch005["live_preflight_status"] == "PASS" and batch005["providers_called"] == 0, batch005)
     check(
         checks,
-        "batch005_live_execution_gate_locked_until_batch004_promotion",
-        batch005["live_execution_gate"].get("status") == "LOCKED",
+        "batch005_live_execution_gate_pass_after_batch004_promotion",
+        batch005["live_execution_gate"].get("status") == "PASS"
+        and batch005["live_execution_gate"].get("blocked_reason") is None,
         batch005["live_execution_gate"],
     )
     check(checks, "batch005_no_live_started", not batch005["live_holo_started"] and not batch005["solo_started"] and not batch005["judges_started"], batch005)
@@ -236,18 +240,18 @@ def build_report() -> dict[str, Any]:
                 "command": "python3 -B docs/benchmark/verify_wave2_domain_ordering_2026_07_01.py",
             },
             {
-                "gate": "batch004_approval_packet",
-                "status": "REFRESH_REQUIRED_BEFORE_PROVIDER_APPROVAL",
-                "command": "python3 -B docs/benchmark/build_wave2_batch004_provider_approval_packet_2026_07_01.py",
+                "gate": "batch005_approval_packet",
+                "status": "NOT_CREATED_SEPARATE_APPROVAL_REQUIRED",
+                "command": "create a separate WAVE2_HOLO_TARGET_BATCH_005 provider approval packet before live execution",
             },
             {
                 "gate": "domain_control_room",
-                "status": "REFRESH_REQUIRED_BEFORE_PROVIDER_APPROVAL",
+                "status": "REFRESH_REQUIRED_AFTER_BATCH004_PROMOTION",
                 "command": "python3 -B docs/benchmark/build_wave2_domain_control_room_2026_07_01.py",
             },
             {
                 "gate": "batch004_live",
-                "status": "LOCKED_PENDING_EXPLICIT_PROVIDER_APPROVAL",
+                "status": "COMPLETE_AND_PROMOTED",
                 "command": batch_live_approval_command(4),
             },
             {
@@ -265,7 +269,7 @@ def build_report() -> dict[str, Any]:
             },
             {
                 "gate": "batch005_full_family_remainder_live",
-                "status": "LOCKED_BEHIND_BATCH004_PROMOTION_AND_PROVIDER_APPROVAL",
+                "status": "EVIDENCE_UNLOCKED_PENDING_SEPARATE_PROVIDER_APPROVAL",
                 "command": batch_live_approval_command(5),
             },
         ],
@@ -283,8 +287,8 @@ def build_report() -> dict[str, Any]:
             "checks_failed": sum(1 for row in checks if not row["passed"]),
             "checks_passed": sum(1 for row in checks if row["passed"]),
             "checks_total": len(checks),
-            "ready_for_batch004_provider_approval": passed,
-            "ready_for_batch005_provider_approval": False,
+            "ready_for_batch004_provider_approval": False,
+            "ready_for_batch005_provider_approval": passed,
         },
     }
     report["package_sha256"] = package_sha256(report)

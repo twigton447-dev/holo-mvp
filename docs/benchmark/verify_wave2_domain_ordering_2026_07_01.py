@@ -21,7 +21,9 @@ OUT_MD = OUT_ROOT / "WAVE2_DOMAIN_ORDERING_VERIFICATION_2026_07_01.md"
 FREEZE_MANIFEST = FREEZE_ROOT / "FREEZE_MANIFEST.json"
 PACKET_INDEX = FREEZE_ROOT / "manifests/PACKET_INDEX.json"
 TARGET_SELECTION = FREEZE_ROOT / "solo_triage_3mini/WAVE2_HOLO_TARGET_SELECTION_FROM_SOLO_TRIAGE_2026_07_01.json"
-COMBINED_MEMO = BATCHES_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+COMBINED_MEMO_001_003 = BATCHES_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+COMBINED_MEMO_001_004 = BATCHES_ROOT / "WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
+COMBINED_MEMO = COMBINED_MEMO_001_004 if COMBINED_MEMO_001_004.exists() else COMBINED_MEMO_001_003
 DOMAIN_LEDGER = OUT_ROOT / "HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_2026_07_01.json"
 
 
@@ -149,20 +151,22 @@ def build_verification() -> dict[str, Any]:
     statistical = domain_ledger["wave2"]["statistical_lane"]
     selected = domain_ledger["wave2"]["selected_target_holo"]
     combined_metrics = combined_memo.get("combined_metrics") or combined_memo.get("summary_metrics", {})
+    batch004_comparison_pair_ids = pair_ids_from_comparison(4) if comparison_path(4).exists() else []
 
     checks = {
         "freeze_scope_60_pairs_120_packets": freeze_manifest["scope"]["pairs"] == 60
         and freeze_manifest["scope"]["packets"] == 120,
         "target_selection_has_37_pairs": len(target_pair_ids) == 37,
-        "completed_comparison_batches_are_001_002_003": completed_batches == [1, 2, 3],
+        "completed_comparison_batches_are_001_002_003_004": completed_batches == [1, 2, 3, 4],
         "combined_memo_no_provider": combined_memo.get("no_provider_calls_for_this_package") is True,
         "domain_ledger_no_provider": domain_ledger.get("generated_without_provider_calls") is True,
-        "scored_pairs_27_packets_54": combined_metrics.get("holo_pairs") == 27
-        and combined_metrics.get("holo_packets") == 54
-        and combined_metrics.get("holo_packets_correct_admissible") == 54,
-        "batch_004_comparison_absent": not comparison_path(4).exists(),
+        "scored_pairs_37_packets_74": combined_metrics.get("holo_pairs") == 37
+        and combined_metrics.get("holo_packets") == 74
+        and combined_metrics.get("holo_packets_correct_admissible") == 74,
+        "batch_004_comparison_present": comparison_path(4).exists(),
         "batch_004_effective_selection_mode_target_selection": batch_004["effective_selection_mode"] == "target-selection",
-        "batch_004_selected_pairs_match_remaining_target_pool": batch_004["selected_pair_ids"] == remaining_target_pair_ids,
+        "batch_004_selected_pairs_match_scored_comparison": set(batch_004["selected_pair_ids"])
+        == set(batch004_comparison_pair_ids),
         "batch_004_expected_counts_10_pairs_20_packets_100_calls": batch_004["expected_counts"].get("pairs") == 10
         and batch_004["expected_counts"].get("packets") == 20
         and batch_004["expected_counts"].get("total_provider_calls") == 100
@@ -190,18 +194,18 @@ def build_verification() -> dict[str, Any]:
         "batch_005_preflights_passed": batch_005["staging_preflight_status"] == "PASS"
         and batch_005["live_preflight_status"] == "PASS"
         and batch_005["staging_ready_for_live_holo"] is True,
-        "batch_005_live_execution_gate_locked_until_batch004_promotion": batch_005["live_execution_gate"].get("status")
-        == "LOCKED"
-        and set(batch_005["live_execution_gate"].get("blocked_reason") or [])
-        == {"batch_004_comparison_exists", "batch_004_combined_memo_exists"},
+        "batch_005_live_execution_gate_pass_after_batch004_promotion": batch_005["live_execution_gate"].get("status")
+        == "PASS"
+        and batch_005["live_execution_gate"].get("blocked_reason") is None,
         "batch_005_not_started": batch_005["providers_called"] == 0
         and batch_005["live_holo_started"] is False
         and batch_005["solo_started"] is False
         and batch_005["judges_started"] is False,
         "batch_005_root_signature_present": check_hex_sha(batch_005["live_preflight_root_signature"]),
-        "ledger_selected_targets_fully_staged_not_scored": selected["scored_pairs"] == 27
+        "ledger_selected_targets_fully_scored": selected["scored_pairs"] == 37
+        and selected["scored_packets"] == 74
         and selected["remaining_selected_targets_after_staged"] == 0,
-        "ledger_statistical_lane_27_37_60": statistical["current_per_class_n"] == 27
+        "ledger_statistical_lane_37_37_60": statistical["current_per_class_n"] == 37
         and statistical["after_batch_004_live_per_class_n"] == 37
         and statistical["after_batch_004_and_remainder_stage_per_class_n"] == 60,
         "ledger_full_family_remainder_fully_staged_not_scored": statistical[
@@ -212,9 +216,9 @@ def build_verification() -> dict[str, Any]:
     }
 
     gate_state = {
-        "current_phase": "PRE_BATCH_004_LIVE",
-        "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_004",
-        "batch_005_gate": "LOCKED_UNTIL_BATCH_004_LIVE_COMPARISON_PROMOTION_AND_EXPLICIT_PROVIDER_APPROVAL",
+        "current_phase": "POST_BATCH_004_EVIDENCE_LOCKED",
+        "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_005",
+        "batch_005_gate": "EVIDENCE_UNLOCKED_PENDING_EXPLICIT_PROVIDER_APPROVAL",
         "provider_calls_allowed_by_this_verifier": False,
     }
     verification = {
@@ -304,8 +308,8 @@ def render_markdown(verification: dict[str, Any]) -> str:
         "",
         "## Next Gates",
         "",
-        "1. Batch 004 live Holo is the only next live execution lane, and it still requires explicit provider-call approval.",
-        "2. Batch 004 comparison and combined-memo promotion must happen before Batch 005 can become eligible.",
+        "1. Batch 004 live Holo evidence has been promoted into the selected-target comparison and combined memo.",
+        "2. Batch 005 is the next eligible live lane, but it still requires a separate provider approval packet and explicit approval.",
         "3. Batch 005 remains full-family remainder only; it is not selected-target evidence and is not scored proof while staged.",
         "",
         "## Root Signatures",

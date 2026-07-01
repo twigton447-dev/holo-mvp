@@ -7,17 +7,17 @@ Generated without provider calls: `True`
 
 | Item | Value |
 | --- | --- |
-| Current phase | `PRE_BATCH_004_LIVE` |
-| Next allowed live batch | `WAVE2_HOLO_TARGET_BATCH_004` |
-| Current scored pairs | `27` |
+| Current phase | `POST_BATCH_004_EVIDENCE_LOCKED` |
+| Next allowed live batch | `WAVE2_HOLO_TARGET_BATCH_005` |
+| Current scored pairs | `37` |
 | Per-class n after clean Batch004 | `37` |
 | Per-class n after clean Batch004+Batch005 | `60` |
-| Batch004 approval packet SHA-256 | `77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5` |
+| Batch004 approval packet SHA-256 | `a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd` |
 | Batch004 live gate | `PASS` |
 | Batch004 expected provider calls | `100` |
 | Batch004 provider calls made | `0` |
-| Batch005 live gate | `LOCKED` |
-| Batch005 blocked by | `['batch_004_comparison_exists', 'batch_004_combined_memo_exists']` |
+| Batch005 live gate | `PASS` |
+| Batch005 blocked by | `None` |
 | Batch005 expected provider calls after future approval | `230` |
 | Batch005 provider calls made | `0` |
 
@@ -25,7 +25,7 @@ Generated without provider calls: `True`
 
 | Check | Result |
 | --- | --- |
-| `approval_packet_ready` | `PASS` |
+| `approval_packet_preserved` | `PASS` |
 | `approval_packet_does_not_self_grant` | `PASS` |
 | `commands_passed` | `PASS` |
 | `control_room_pass` | `PASS` |
@@ -60,22 +60,22 @@ Generated without provider calls: `True`
 
 | Artifact | Result | Package SHA-256 |
 | --- | --- | --- |
-| `batch004_approval_packet` | `PASS` | `77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5` |
+| `batch004_approval_packet` | `PASS` | `a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd` |
 | `batch004_live_preflight` | `PASS` | `None` |
 | `batch005_live_preflight` | `PASS` | `None` |
-| `combined_memo_001_002_003` | `PASS` | `d74d76ce0e13fe1cf31cc8ca731eb315d744fbc1f2122923216c90c41bfdfda6` |
-| `control_room` | `PASS` | `06110e4c86904686a3ac730620e88d838a0c6221e461fdcca152700a2d7960db` |
-| `domain_ledger` | `PASS` | `c25a0e50de1fd23aebd758a179cc61167e585c9b96a33da1cb70bd0d3f881aea` |
-| `ordering` | `PASS` | `0a93c2dcdc98f6df2a0ab08d82a66d0389aa56669493b5448f3dd2348b29a435` |
-| `operator_handoff` | `PASS` | `b5eeaae7b9cc762195008cd8ddf115c89135f25a1375bf86c0a2646f27d289ad` |
-| `preservation` | `PASS` | `9d7242752c609e97c899035b6f6f3881dbb8e24748e2d2ed2f414529a8a45c1c` |
-| `selective_staging_plan` | `PASS` | `73d7d01d4828f06fdc70447b8848e3f49aed7600c3aacf8185e5fa6ed696f988` |
-| `statistical_claim_guardrail` | `PASS` | `086f77cfae5273fc4835bb1be0137db558be55cc242cc2775ed1984cc2f9286c` |
-| `readiness` | `PASS` | `5a50849c7db8c49b74b7d3eeaabf05d4a3d2292843b626bd65e2a0bd724ec017` |
+| `combined_memo_001_002_003_004` | `PASS` | `d4ad201b4c177154741ec8b3ee7b4929c3db764451a2ef8862e3148d44b0198d` |
+| `control_room` | `PASS` | `18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116` |
+| `domain_ledger` | `PASS` | `5532559c86db2ae04579e4edff9472f3807a2ba5a5a3866af17802d67c75c63e` |
+| `ordering` | `PASS` | `091aaafaf70ca6413614a54497ddb794be58552aae608635794bbe504abcee2b` |
+| `operator_handoff` | `PASS` | `33a369b9c33265fd8f0189f2884d6ced69db8df3f97bcdec84b9ff17215851e3` |
+| `preservation` | `PASS` | `fb5b364a87f8479c62ab588a9323eb409d9d3373c7fe72574fcbd464990a4387` |
+| `selective_staging_plan` | `PASS` | `c0c1bab57dba1b8914e98cfa5e5bb11671207490a4a7cef0fd4c411c327d041b` |
+| `statistical_claim_guardrail` | `PASS` | `f1234a344da2aedd428a022a2a2190ba77172c6e4a7ffdf06f7c7082ec450474` |
+| `readiness` | `PASS` | `f58e2474d38183addad8b2e93a6c133f4020d584488631333670cadcf10e292f` |
 
 ## Stop Rules
 
 - This validation does not approve provider calls.
 - This validation does not run Batch 004 or Batch 005 live execution.
 - Batch 004 still requires the exact approval statement and current approval packet SHA.
-- Batch 005 remains locked until Batch 004 has clean live evidence, comparison, promotion, and separate approval.
+- Batch 005 remains locked behind a separate approval packet even though the Batch 004 evidence gate is complete.

@@ -41,7 +41,7 @@ def main() -> int:
     statement = approval["approval_statement_required"]
     packet_sha = approval["package_sha256"]
 
-    assert approval["status"] == "READY_FOR_EXPLICIT_PROVIDER_APPROVAL"
+    assert approval["status"] in {"READY_FOR_EXPLICIT_PROVIDER_APPROVAL", "NOT_READY"}
     assert approval["approval_granted_by_this_packet"] is False
     assert approval["expected_calls_if_approved"]["total_provider_calls"] == 100
     assert approval["expected_calls_if_approved"]["solo_calls"] == 0
@@ -66,9 +66,14 @@ def main() -> int:
     assert_locked(wrong_hash, {"approval_packet_sha256_exact_match"})
 
     exact = runner.provider_approval_gate(statement, packet_sha, manifest)
-    assert exact["status"] == "PASS", exact
-    assert exact["blocked_reason"] is None, exact
-    assert all(exact["checks"].values()), exact
+    if approval["status"] == "READY_FOR_EXPLICIT_PROVIDER_APPROVAL":
+        assert exact["status"] == "PASS", exact
+        assert exact["blocked_reason"] is None, exact
+        assert all(exact["checks"].values()), exact
+        checked_current_path = "exact_statement_and_exact_packet_hash"
+    else:
+        assert_locked(exact, {"approval_packet_status_ready"})
+        checked_current_path = "retired_packet_cannot_unlock_batch004"
 
     md = APPROVAL_PACKET_MD.read_text()
     assert f"--approval-packet-sha256 {packet_sha}" in md
@@ -85,7 +90,7 @@ def main() -> int:
                     "wrong_statement",
                     "wrong_hash",
                 ],
-                "checked_pass_path": "exact_statement_and_exact_packet_hash",
+                "checked_current_path": checked_current_path,
                 "provider_calls_made": 0,
             },
             indent=2,

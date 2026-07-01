@@ -41,7 +41,7 @@ WAVE2_FAMILY = "Wave 2 / HR-Data Privacy-Finance Targeted Holo Runs"
 WAVE2_HOLO_TIER = "wave2_selected_target_batches_complete"
 WAVE2_SOLO_TIER = "wave2_selected_target_solo_triage_exact_roster"
 CURRENT_CLAIM = "SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF"
-STATISTICAL_PROOF_CLAIM = "NOT_ACHIEVED_BATCH005_LOCKED"
+STATISTICAL_PROOF_CLAIM = "NOT_ACHIEVED_BATCH005_NOT_RUN"
 REQUIRED_PLANNING_METRICS = {
     "detect_error_drop_20%_to_5%",
     "detect_error_drop_15%_to_5%",
@@ -204,27 +204,27 @@ def build_guardrail() -> dict[str, Any]:
     )
     check(
         checks,
-        "current_selected_target_counts_27_pairs_54_packets",
-        selected.get("scored_pairs") == 27
-        and selected.get("scored_packets") == 54
-        and selected.get("scored_packets_correct_admissible") == 54
-        and current.get("current_scored_pairs") == 27
-        and current.get("current_scored_packets") == 54,
+        "current_selected_target_counts_37_pairs_74_packets",
+        selected.get("scored_pairs") == 37
+        and selected.get("scored_packets") == 74
+        and selected.get("scored_packets_correct_admissible") == 74
+        and current.get("current_scored_pairs") == 37
+        and current.get("current_scored_packets") == 74,
         {"control_room": current, "ledger_selected_target": selected},
     )
     check(
         checks,
         "current_per_class_n_below_full_family_n",
-        statistical.get("current_per_class_n") == 27
+        statistical.get("current_per_class_n") == 37
         and statistical.get("full_family_pairs") == 60
-        and statistical.get("current_pairs_needed_for_60_per_class") == 33,
+        and statistical.get("current_pairs_needed_for_60_per_class") == 23,
         statistical,
     )
     check(
         checks,
         "rule_of_three_threshold_not_met_for_fpr_fnr",
         all(
-            int_value(holo_metric_by_name.get(metric, {}).get("n")) == 27
+            int_value(holo_metric_by_name.get(metric, {}).get("n")) == 37
             and int_value(holo_metric_by_name.get(metric, {}).get("if_zero_errors_n_for_95_upper_lt_5pct")) == 60
             and int_value(holo_metric_by_name.get(metric, {}).get("observed_errors")) == 0
             for metric in ("FNR", "FPR")
@@ -240,25 +240,21 @@ def build_guardrail() -> dict[str, Any]:
     )
     check(
         checks,
-        "batch004_staged_not_scored",
-        batch004.get("providers_called") == 0
-        and batch004.get("live_holo_started") is False
-        and approval.get("approval_granted_by_this_packet") is False
-        and approval.get("status") == "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+        "batch004_scored_selected_target_evidence",
+        batch004.get("state") == "HISTORICAL_BATCH004_APPROVAL_PACKET_BATCH004_ALREADY_PROMOTED"
+        and statistical.get("current_per_class_n") == 37,
         {
-            "approval_granted_by_this_packet": approval.get("approval_granted_by_this_packet"),
-            "approval_status": approval.get("status"),
-            "batch004_live_holo_started": batch004.get("live_holo_started"),
-            "batch004_providers_called": batch004.get("providers_called"),
+            "batch004_state": batch004.get("state"),
+            "current_per_class_n": statistical.get("current_per_class_n"),
         },
     )
     check(
         checks,
-        "batch005_needed_for_60_per_class_is_locked",
-        batch005.get("live_execution_gate", {}).get("status") == "LOCKED"
+        "batch005_needed_for_60_per_class_requires_separate_approval",
+        batch005.get("live_execution_gate", {}).get("status") == "PASS"
         and batch005.get("providers_called") == 0
         and statistical.get("after_batch_004_and_remainder_stage_per_class_n") == 60
-        and readiness.get("summary", {}).get("ready_for_batch005_provider_approval") is False,
+        and readiness.get("summary", {}).get("ready_for_batch005_provider_approval") is True,
         {
             "batch005_gate": batch005.get("live_execution_gate"),
             "per_class_n_after_batch004_and_batch005": statistical.get("after_batch_004_and_remainder_stage_per_class_n"),
@@ -309,16 +305,16 @@ def build_guardrail() -> dict[str, Any]:
         "checks": checks,
         "claim_boundary": {
             "allowed_current_claims": [
-                "Batch001-003 selected-target Wave 2 Holo evidence: 27 pairs / 54 packets / 54 correct admissible packets.",
+                "Batch001-004 selected-target Wave 2 Holo evidence: 37 pairs / 74 packets / 74 correct admissible packets.",
                 "Planning-only statistical lane: 60 per-class target is identified, not currently achieved.",
-                "Batch004 and Batch005 are staged or gated evidence until approved live runs exist.",
+                "Batch005 is evidence-unlocked but not live evidence until a separate approval packet and clean live run exist.",
             ],
             "current_claim": CURRENT_CLAIM,
             "disallowed_current_claims": [
                 "all-domain live proof complete",
                 "full-family Wave 2 statistical proof complete",
                 "per-domain statistical proof complete",
-                "Batch004 or Batch005 live evidence counted before explicit provider approval and clean live results",
+                "Batch005 live evidence counted before explicit provider approval and clean live results",
             ],
             "statistical_proof_claim": STATISTICAL_PROOF_CLAIM,
         },
@@ -359,8 +355,8 @@ def build_guardrail() -> dict[str, Any]:
         "stop_rules": [
             "This guardrail does not approve provider calls.",
             "Do not call current Wave 2 selected-target evidence full-family statistical proof.",
-            "Do not count Batch004 as live evidence until explicit approval and a clean live result exist.",
-            "Do not count Batch005 as live evidence until Batch004 is promoted and a separate approval exists.",
+            "Batch004 selected-target evidence is already promoted in this package.",
+            "Do not count Batch005 as live evidence until a separate approval exists and a clean live run completes.",
             "Do not infer missing repository evidence into proof-credit.",
         ],
         "summary": {

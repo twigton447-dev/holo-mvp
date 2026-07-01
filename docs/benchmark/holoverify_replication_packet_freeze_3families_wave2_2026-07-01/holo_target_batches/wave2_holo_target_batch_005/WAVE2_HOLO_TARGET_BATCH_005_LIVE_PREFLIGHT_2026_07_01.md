@@ -5,7 +5,7 @@ Batch: `WAVE2_HOLO_TARGET_BATCH_005`
 Selection mode: `full-family-remainder`
 Selection mode defaulted: `False`
 Freeze root: `80d8106d7efe72bee44d2c05648b71814204c08e1f96934afefd3d75d242845f`
-Root signature: `3cf24480f79bde31d58774d5e2a32290f97f2c1ab9d5088b9f1eaf676909b46b`
+Root signature: `a99fba06753da20549e6fea991c2c2a3d829e07aaf4541813ffa31a1f484c12d`
 
 ## Expected Calls
 
@@ -63,8 +63,7 @@ Root signature: `3cf24480f79bde31d58774d5e2a32290f97f2c1ab9d5088b9f1eaf676909b46
 
 ## Live Execution Gate
 
-Status: `LOCKED`
-Blocked reason: `['batch_004_comparison_exists', 'batch_004_combined_memo_exists']`
+Status: `PASS`
 
 Required before live:
 
@@ -82,4 +81,4 @@ Required approval statement:
 
 ## Next Step
 
-Do not run live. Batch 005 remains locked behind Batch 004 comparison and promotion.
+Run `python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 5 --run-live --approval-packet-sha256 APPROVAL_PACKET_SHA256_FROM_PROVIDER_APPROVAL_PACKET --approval-statement "I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_005 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_005_PROVIDER_APPROVAL_PACKET_2026_07_01."` only when provider calls are explicitly approved.

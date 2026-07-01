@@ -2,7 +2,7 @@
 
 Status: `PASS`
 Completion claim: `NOT_COMPLETE_PROVIDER_APPROVAL_REQUIRED`
-Package SHA-256: `8cdfad7f01405a49957c414ab47dd12226e65995f969f5a4c80e5e615a41120b`
+Package SHA-256: `b97950895d9161e9c4b82cecafa0bb1ab81098a26a8a7ffb20d4789efeb612f2`
 Generated without provider calls: `True`
 
 ## Requirement Audit
@@ -16,16 +16,16 @@ Generated without provider calls: `True`
 | `all_domains_ordered_for_completion` | `ACHIEVED_NO_PROVIDER` | All frozen domain pairs are either scored or staged, but full-family proof still needs future live evidence. |
 | `provider_boundary_remains_closed` | `ACHIEVED` | This consolidation lane made no provider calls. |
 | `review_and_preservation_are_orderly` | `ACHIEVED` | The current dirty state is grouped for review with path-limited staging commands and a no-provider operator handoff. |
-| `all_domains_live_scored` | `NOT_ACHIEVED_APPROVAL_GATED` | Completing all domains requires explicit Batch004 provider approval, then Batch004 comparison/promotion, then separate Batch005 approval. |
+| `all_domains_live_scored` | `NOT_ACHIEVED_APPROVAL_GATED` | Completing all domains requires a separate Batch005 approval packet and clean Batch005 live run. |
 
 ## Next Required Gate
 
-- Batch: `WAVE2_HOLO_TARGET_BATCH_004`
-- Gate: `EXPLICIT_PROVIDER_APPROVAL_ONLY`
-- Approval packet SHA-256: `77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5`
+- Batch: `WAVE2_HOLO_TARGET_BATCH_005`
+- Gate: `CREATE_BATCH005_APPROVAL_PACKET_THEN_EXPLICIT_PROVIDER_APPROVAL`
+- Approval packet SHA-256: `N/A`
 
 ```bash
-python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5 --approval-statement "I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
+# Batch 005 approval packet has not been created yet.
 ```
 
 ## Boundary

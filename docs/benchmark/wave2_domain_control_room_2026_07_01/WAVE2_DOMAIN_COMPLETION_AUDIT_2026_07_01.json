@@ -1,19 +1,19 @@
 {
   "classification": "WAVE2_DOMAIN_COMPLETION_AUDIT_NO_PROVIDER_2026_07_01",
   "completion_claim": "NOT_COMPLETE_PROVIDER_APPROVAL_REQUIRED",
-  "created_at_utc": "2026-07-01T08:14:28.339855+00:00",
+  "created_at_utc": "2026-07-01T14:05:50.131201+00:00",
   "generated_without_provider_calls": true,
   "next_required_gate": {
-    "approval_packet_sha256": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
-    "batch_id": "WAVE2_HOLO_TARGET_BATCH_004",
-    "gate": "EXPLICIT_PROVIDER_APPROVAL_ONLY",
-    "run_command_after_approval": "python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5 --approval-statement \"I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\""
+    "approval_packet_sha256": null,
+    "batch_id": "WAVE2_HOLO_TARGET_BATCH_005",
+    "gate": "CREATE_BATCH005_APPROVAL_PACKET_THEN_EXPLICIT_PROVIDER_APPROVAL",
+    "run_command_after_approval": null
   },
-  "package_sha256": "8cdfad7f01405a49957c414ab47dd12226e65995f969f5a4c80e5e615a41120b",
+  "package_sha256": "b97950895d9161e9c4b82cecafa0bb1ab81098a26a8a7ffb20d4789efeb612f2",
   "requirements": [
     {
       "evidence": {
-        "control_room_sha256": "06110e4c86904686a3ac730620e88d838a0c6221e461fdcca152700a2d7960db",
+        "control_room_sha256": "18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116",
         "control_room_status": "PASS"
       },
       "note": "The control room is the current single no-provider front door.",
@@ -22,9 +22,9 @@
     },
     {
       "evidence": {
-        "current_scored_packets": 54,
-        "current_scored_pairs": 27,
-        "scored_batches": "001-003"
+        "current_scored_packets": 74,
+        "current_scored_pairs": 37,
+        "scored_batches": "001-004"
       },
       "note": "Batches 001-003 are represented as the completed scored base.",
       "requirement_id": "account_for_batch003_finished_state",
@@ -39,9 +39,9 @@
             "domain": "Data privacy / customer data release controls",
             "family_id": "HV-DPRV-REP-2026-07-01",
             "frozen_pairs": 20,
-            "scored_holo_target_pairs": 9,
+            "scored_holo_target_pairs": 12,
             "staged_full_family_remainder_pairs": 8,
-            "staged_holo_target_pairs": 3,
+            "staged_holo_target_pairs": 0,
             "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
             "unstaged_full_family_pairs_after_batch005": 0
           },
@@ -49,9 +49,9 @@
             "domain": "Finance close / revenue / expense recognition controls",
             "family_id": "HV-FINC-REP-2026-07-01",
             "frozen_pairs": 20,
-            "scored_holo_target_pairs": 12,
+            "scored_holo_target_pairs": 16,
             "staged_full_family_remainder_pairs": 4,
-            "staged_holo_target_pairs": 4,
+            "staged_holo_target_pairs": 0,
             "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
             "unstaged_full_family_pairs_after_batch005": 0
           },
@@ -59,9 +59,9 @@
             "domain": "HR / payroll / workforce controls",
             "family_id": "HV-HRWF-REP-2026-07-01",
             "frozen_pairs": 20,
-            "scored_holo_target_pairs": 6,
+            "scored_holo_target_pairs": 9,
             "staged_full_family_remainder_pairs": 11,
-            "staged_holo_target_pairs": 3,
+            "staged_holo_target_pairs": 0,
             "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
             "unstaged_full_family_pairs_after_batch005": 0
           }
@@ -73,12 +73,12 @@
     },
     {
       "evidence": {
-        "current_per_class_n": 27,
+        "current_per_class_n": 37,
         "per_class_n_after_clean_batch004": 37,
         "per_class_n_after_clean_batch004_and_batch005": 60,
-        "statistical_claim_guardrail_sha256": "086f77cfae5273fc4835bb1be0137db558be55cc242cc2775ed1984cc2f9286c",
+        "statistical_claim_guardrail_sha256": "f1234a344da2aedd428a022a2a2190ba77172c6e4a7ffdf06f7c7082ec450474",
         "statistical_claim_guardrail_status": "PASS",
-        "statistical_proof_claim": "NOT_ACHIEVED_BATCH005_LOCKED",
+        "statistical_proof_claim": "NOT_ACHIEVED_BATCH005_NOT_RUN",
         "wave2_current_claim": "SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF"
       },
       "note": "The statistical guardrail enforces selected-target evidence as distinct from full-family statistical proof.",
@@ -87,7 +87,7 @@
     },
     {
       "evidence": {
-        "batch005_state": "LOCKED_UNTIL_BATCH004_LIVE_COMPARISON_PROMOTION_AND_SEPARATE_APPROVAL",
+        "batch005_state": "EVIDENCE_UNLOCKED_PENDING_SEPARATE_PROVIDER_APPROVAL_PACKET",
         "unstaged_full_family_pairs": 0
       },
       "note": "All frozen domain pairs are either scored or staged, but full-family proof still needs future live evidence.",
@@ -108,10 +108,10 @@
     },
     {
       "evidence": {
-        "dirty_paths": 66,
-        "operator_handoff_sha256": "b5eeaae7b9cc762195008cd8ddf115c89135f25a1375bf86c0a2646f27d289ad",
+        "dirty_paths": 64,
+        "operator_handoff_sha256": "33a369b9c33265fd8f0189f2884d6ced69db8df3f97bcdec84b9ff17215851e3",
         "operator_handoff_status": "PASS",
-        "other_dirty_paths": 0,
+        "other_dirty_paths": 1,
         "safe_staging_policy": {
           "do_not_use": [
             "git add .",
@@ -120,8 +120,8 @@
           "preserve_unrelated_dirty_paths": true,
           "stage_by_named_group_only": true
         },
-        "selective_staging_path_count": 66,
-        "selective_staging_sha256": "73d7d01d4828f06fdc70447b8848e3f49aed7600c3aacf8185e5fa6ed696f988",
+        "selective_staging_path_count": 64,
+        "selective_staging_sha256": "c0c1bab57dba1b8914e98cfa5e5bb11671207490a4a7cef0fd4c411c327d041b",
         "selective_staging_status": "PASS"
       },
       "note": "The current dirty state is grouped for review with path-limited staging commands and a no-provider operator handoff.",
@@ -130,17 +130,14 @@
     },
     {
       "evidence": {
-        "batch004_approval_packet_sha256": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
-        "batch004_state": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
-        "batch005_blocked_by": [
-          "batch_004_comparison_exists",
-          "batch_004_combined_memo_exists"
-        ],
-        "batch005_state": "LOCKED_UNTIL_BATCH004_LIVE_COMPARISON_PROMOTION_AND_SEPARATE_APPROVAL",
-        "ready_for_batch004_provider_approval": true,
-        "ready_for_batch005_provider_approval": false
+        "batch004_approval_packet_sha256": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
+        "batch004_state": "HISTORICAL_BATCH004_APPROVAL_PACKET_BATCH004_ALREADY_PROMOTED",
+        "batch005_blocked_by": null,
+        "batch005_state": "EVIDENCE_UNLOCKED_PENDING_SEPARATE_PROVIDER_APPROVAL_PACKET",
+        "ready_for_batch004_provider_approval": false,
+        "ready_for_batch005_provider_approval": true
       },
-      "note": "Completing all domains requires explicit Batch004 provider approval, then Batch004 comparison/promotion, then separate Batch005 approval.",
+      "note": "Completing all domains requires a separate Batch005 approval packet and clean Batch005 live run.",
       "requirement_id": "all_domains_live_scored",
       "status": "NOT_ACHIEVED_APPROVAL_GATED"
     }

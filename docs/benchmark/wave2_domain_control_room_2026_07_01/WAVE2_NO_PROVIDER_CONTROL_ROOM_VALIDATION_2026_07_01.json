@@ -1,7 +1,7 @@
 {
   "checks": {
     "approval_packet_does_not_self_grant": true,
-    "approval_packet_ready": true,
+    "approval_packet_preserved": true,
     "commands_passed": true,
     "control_room_no_failed_checks": true,
     "control_room_pass": true,
@@ -28,7 +28,7 @@
       "passed": true,
       "returncode": 0,
       "stderr": "",
-      "stdout": "{\n  \"approval_packet_sha256\": \"77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5\",\n  \"checked_locked_paths\": [\n    \"missing_statement_and_hash\",\n    \"wrong_statement\",\n    \"wrong_hash\"\n  ],\n  \"checked_pass_path\": \"exact_statement_and_exact_packet_hash\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+      "stdout": "{\n  \"approval_packet_sha256\": \"a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd\",\n  \"checked_current_path\": \"retired_packet_cannot_unlock_batch004\",\n  \"checked_locked_paths\": [\n    \"missing_statement_and_hash\",\n    \"wrong_statement\",\n    \"wrong_hash\"\n  ],\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
     },
     {
       "argv": [
@@ -39,7 +39,7 @@
       "passed": true,
       "returncode": 0,
       "stderr": "",
-      "stdout": "{\n  \"batch_id\": \"WAVE2_HOLO_TARGET_BATCH_005\",\n  \"checked_lock\": [\n    \"batch_004_comparison_exists\",\n    \"batch_004_combined_memo_exists\"\n  ],\n  \"live_run_dirs_created\": 0,\n  \"provider_calls_made\": 0,\n  \"run_live_error\": \"wave2_holo_live_execution_gate_locked:['batch_004_comparison_exists', 'batch_004_combined_memo_exists']\",\n  \"status\": \"PASS\"\n}\n"
+      "stdout": "{\n  \"batch_id\": \"WAVE2_HOLO_TARGET_BATCH_005\",\n  \"checked_lock\": \"provider_approval_packet_required\",\n  \"live_run_dirs_created\": 0,\n  \"provider_calls_made\": 0,\n  \"run_live_error\": \"wave2_holo_provider_approval_gate_locked:['approval_packet_exists', 'approval_packet_status_ready', 'approval_packet_does_not_self_grant', 'approval_packet_batch_matches', 'approval_packet_root_signature_matches_preflight', 'approval_packet_expected_calls_match_preflight', 'approval_statement_provided', 'approval_statement_exact_match', 'approval_packet_sha256_provided']\",\n  \"status\": \"PASS\"\n}\n"
     },
     {
       "argv": [
@@ -50,7 +50,7 @@
       "passed": true,
       "returncode": 0,
       "stderr": "",
-      "stdout": "{\n  \"approval_packet_sha256\": \"77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5\",\n  \"batch004_expected_provider_calls\": 100,\n  \"batch005_blocked_by\": [\n    \"batch_004_comparison_exists\",\n    \"batch_004_combined_memo_exists\"\n  ],\n  \"control_room_package_sha256\": \"06110e4c86904686a3ac730620e88d838a0c6221e461fdcca152700a2d7960db\",\n  \"domain_pairs\": 60,\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+      "stdout": "{\n  \"approval_packet_sha256\": \"a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd\",\n  \"batch004_expected_provider_calls\": 100,\n  \"batch005_blocked_by\": null,\n  \"control_room_package_sha256\": \"18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116\",\n  \"domain_pairs\": 60,\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
     },
     {
       "argv": [
@@ -61,7 +61,7 @@
       "passed": true,
       "returncode": 0,
       "stderr": "",
-      "stdout": "{\n  \"current_claim\": \"SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF\",\n  \"operator_handoff_sha256\": \"b5eeaae7b9cc762195008cd8ddf115c89135f25a1375bf86c0a2646f27d289ad\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+      "stdout": "{\n  \"current_claim\": \"SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF\",\n  \"operator_handoff_sha256\": \"33a369b9c33265fd8f0189f2884d6ced69db8df3f97bcdec84b9ff17215851e3\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
     },
     {
       "argv": [
@@ -72,7 +72,7 @@
       "passed": true,
       "returncode": 0,
       "stderr": "",
-      "stdout": "{\n  \"dirty_paths\": 66,\n  \"other_dirty_paths\": 0,\n  \"preservation_manifest_sha256\": \"9d7242752c609e97c899035b6f6f3881dbb8e24748e2d2ed2f414529a8a45c1c\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+      "stdout": "{\n  \"dirty_paths\": 64,\n  \"other_dirty_paths\": 1,\n  \"preservation_manifest_sha256\": \"fb5b364a87f8479c62ab588a9323eb409d9d3373c7fe72574fcbd464990a4387\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
     },
     {
       "argv": [
@@ -83,7 +83,7 @@
       "passed": true,
       "returncode": 0,
       "stderr": "",
-      "stdout": "{\n  \"path_count\": 66,\n  \"provider_calls_made\": 0,\n  \"selective_staging_plan_sha256\": \"73d7d01d4828f06fdc70447b8848e3f49aed7600c3aacf8185e5fa6ed696f988\",\n  \"status\": \"PASS\"\n}\n"
+      "stdout": "{\n  \"path_count\": 64,\n  \"provider_calls_made\": 0,\n  \"selective_staging_plan_sha256\": \"c0c1bab57dba1b8914e98cfa5e5bb11671207490a4a7cef0fd4c411c327d041b\",\n  \"status\": \"PASS\"\n}\n"
     },
     {
       "argv": [
@@ -94,7 +94,7 @@
       "passed": true,
       "returncode": 0,
       "stderr": "",
-      "stdout": "{\n  \"current_claim\": \"SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF\",\n  \"provider_calls_made\": 0,\n  \"statistical_guardrail_sha256\": \"086f77cfae5273fc4835bb1be0137db558be55cc242cc2775ed1984cc2f9286c\",\n  \"status\": \"PASS\"\n}\n"
+      "stdout": "{\n  \"current_claim\": \"SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF\",\n  \"provider_calls_made\": 0,\n  \"statistical_guardrail_sha256\": \"f1234a344da2aedd428a022a2a2190ba77172c6e4a7ffdf06f7c7082ec450474\",\n  \"status\": \"PASS\"\n}\n"
     },
     {
       "argv": [
@@ -105,7 +105,7 @@
       "passed": true,
       "returncode": 0,
       "stderr": "",
-      "stdout": "{\n  \"approval_packet_sha256\": \"77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5\",\n  \"checked_artifacts\": [\n    \"approval_builder\",\n    \"runner_approval_gate\",\n    \"control_room\",\n    \"ledger\",\n    \"ordering\",\n    \"readiness\",\n    \"validation\",\n    \"preservation\",\n    \"completion_audit\",\n    \"selective_staging\",\n    \"operator_handoff\",\n    \"statistical_guardrail\"\n  ],\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+      "stdout": "{\n  \"approval_packet_sha256\": \"a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd\",\n  \"checked_artifacts\": [\n    \"approval_builder\",\n    \"runner_approval_gate\",\n    \"control_room\",\n    \"ledger\",\n    \"ordering\",\n    \"readiness\",\n    \"validation\",\n    \"preservation\",\n    \"completion_audit\",\n    \"selective_staging\",\n    \"operator_handoff\",\n    \"statistical_guardrail\"\n  ],\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
     },
     {
       "argv": [
@@ -119,22 +119,19 @@
       "stdout": ""
     }
   ],
-  "created_at_utc": "2026-07-01T08:14:28.293640+00:00",
+  "created_at_utc": "2026-07-01T14:05:50.080225+00:00",
   "gate_summary": {
-    "approval_packet_sha256": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
+    "approval_packet_sha256": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
     "batch004_expected_provider_calls": 100,
     "batch004_live_gate": "PASS",
     "batch004_provider_calls_made": 0,
-    "batch005_blocked_by": [
-      "batch_004_comparison_exists",
-      "batch_004_combined_memo_exists"
-    ],
+    "batch005_blocked_by": null,
     "batch005_expected_provider_calls": 230,
-    "batch005_live_gate": "LOCKED",
+    "batch005_live_gate": "PASS",
     "batch005_provider_calls_made": 0,
-    "current_phase": "PRE_BATCH_004_LIVE",
-    "current_scored_pairs": 27,
-    "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_004",
+    "current_phase": "POST_BATCH_004_EVIDENCE_LOCKED",
+    "current_scored_pairs": 37,
+    "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_005",
     "per_class_n_after_clean_batch004": 37,
     "per_class_n_after_clean_batch004_and_batch005": 60
   },
@@ -142,16 +139,16 @@
   "json_artifacts": {
     "batch004_approval_packet": {
       "classification": "WAVE2_BATCH004_PROVIDER_APPROVAL_PACKET_NO_PROVIDER_2026_07_01",
-      "file_sha256": "78fea3482e199473a66beed97202928620b73bf63b1d04f68614fd79388043d9",
+      "file_sha256": "44bdc7c86da9af09f275419b8362ca2b907ea104fa182eafed5cd617e18daf79",
       "package_hash_valid": true,
-      "package_sha256": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
+      "package_sha256": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
       "passed": true,
       "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.json",
-      "status": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL"
+      "status": "NOT_READY"
     },
     "batch004_live_preflight": {
       "classification": "WAVE2_HOLO_TARGET_BATCH_004_LIVE_PREFLIGHT",
-      "file_sha256": "ce1d47a81b0b7a7b989701e1e5fc9957a00b102dac05832f0f9c8109aefb260f",
+      "file_sha256": "c157e476234297b7fba40799a34d2f0b0aa72b3b16e2cd53e2994fcff277e4ab",
       "package_hash_valid": null,
       "package_sha256": null,
       "passed": true,
@@ -160,27 +157,27 @@
     },
     "batch005_live_preflight": {
       "classification": "WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT",
-      "file_sha256": "c84d69bb3e3fda252a0da5a6cbc71e455a7f71dd45b659c0bad2b16af0fabce4",
+      "file_sha256": "4e494462832c22cc5b4d4c848c0f4f433a4dada72002a2ee033bcbacebe518c3",
       "package_hash_valid": null,
       "package_sha256": null,
       "passed": true,
       "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT_2026_07_01.json",
       "status": "PASS"
     },
-    "combined_memo_001_002_003": {
+    "combined_memo_001_002_003_004": {
       "classification": "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_NO_PROVIDER",
-      "file_sha256": "d36f3398670df8921be8fafb273d6b532d727e50ea9fb86264414dd32d6a42be",
+      "file_sha256": "29f67201321fd69213988ff8629fe483cba15a11b484eb2114abbd8e23d6857a",
       "package_hash_valid": true,
-      "package_sha256": "d74d76ce0e13fe1cf31cc8ca731eb315d744fbc1f2122923216c90c41bfdfda6",
+      "package_sha256": "d4ad201b4c177154741ec8b3ee7b4929c3db764451a2ef8862e3148d44b0198d",
       "passed": true,
-      "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json",
+      "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json",
       "status": null
     },
     "control_room": {
       "classification": "WAVE2_DOMAIN_CONTROL_ROOM_NO_PROVIDER_2026_07_01",
-      "file_sha256": "4a6abd73565922da8ba4a03b9aea8ce5023f165fd8f14ce2e5a1d362cb4f9174",
+      "file_sha256": "ceebff81f68f78ea79288aff25ba790ca7dc4e7a247f90ff541afbcf8c3aadfb",
       "package_hash_valid": true,
-      "package_sha256": "06110e4c86904686a3ac730620e88d838a0c6221e461fdcca152700a2d7960db",
+      "package_sha256": "18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116",
       "passed": true,
       "path": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_CONTROL_ROOM_2026_07_01.json",
       "status": "PASS",
@@ -193,45 +190,45 @@
     },
     "domain_ledger": {
       "classification": "HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_NO_PROVIDER_2026_07_01",
-      "file_sha256": "004612f8ccea13616ac5df77eb0281235864c3771414d4b1b0ab035e1f864b0a",
+      "file_sha256": "0af396c999679fe34a7902cbdcc492dd91600bbfc853452ee464fb15606aca32",
       "package_hash_valid": true,
-      "package_sha256": "c25a0e50de1fd23aebd758a179cc61167e585c9b96a33da1cb70bd0d3f881aea",
+      "package_sha256": "5532559c86db2ae04579e4edff9472f3807a2ba5a5a3866af17802d67c75c63e",
       "passed": true,
       "path": "docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_2026_07_01.json",
       "status": null
     },
     "operator_handoff": {
       "classification": "WAVE2_DOMAIN_OPERATOR_HANDOFF_NO_PROVIDER_2026_07_01",
-      "file_sha256": "994b8fda01e5b6893c3a3a4ddddd9982e9c1db9c53710426547b8a0070b5066a",
+      "file_sha256": "98faba2293c80bf26be746a4d46d24e3d3cf00454ff6788e24672dd2b463bcf1",
       "package_hash_valid": true,
-      "package_sha256": "b5eeaae7b9cc762195008cd8ddf115c89135f25a1375bf86c0a2646f27d289ad",
+      "package_sha256": "33a369b9c33265fd8f0189f2884d6ced69db8df3f97bcdec84b9ff17215851e3",
       "passed": true,
       "path": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_OPERATOR_HANDOFF_2026_07_01.json",
       "status": "PASS"
     },
     "ordering": {
       "classification": "WAVE2_DOMAIN_ORDERING_VERIFICATION_NO_PROVIDER_2026_07_01",
-      "file_sha256": "e19c53143e178fa2c15fbf17412355717e956166878c61e32a73d10b3d0b620e",
+      "file_sha256": "d91d34c034487d5fb4918845541bb0bd585cd491128bb0c35f00f701c3af6537",
       "package_hash_valid": true,
-      "package_sha256": "0a93c2dcdc98f6df2a0ab08d82a66d0389aa56669493b5448f3dd2348b29a435",
+      "package_sha256": "091aaafaf70ca6413614a54497ddb794be58552aae608635794bbe504abcee2b",
       "passed": true,
       "path": "docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/WAVE2_DOMAIN_ORDERING_VERIFICATION_2026_07_01.json",
       "status": "PASS"
     },
     "preservation": {
       "classification": "WAVE2_DOMAIN_PRESERVATION_MANIFEST_NO_PROVIDER_2026_07_01",
-      "file_sha256": "194bbbee193ab3a356c38eee2a5824343faff593aefd9fe3c95ff38998c3452c",
+      "file_sha256": "cb602634c7c3cb80ca1650eaae753fa97392e332bf9c2683016087195a68dd81",
       "package_hash_valid": true,
-      "package_sha256": "9d7242752c609e97c899035b6f6f3881dbb8e24748e2d2ed2f414529a8a45c1c",
+      "package_sha256": "fb5b364a87f8479c62ab588a9323eb409d9d3373c7fe72574fcbd464990a4387",
       "passed": true,
       "path": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_PRESERVATION_MANIFEST_2026_07_01.json",
       "status": "PASS"
     },
     "readiness": {
       "classification": "WAVE2_DOMAIN_COMPLETION_READINESS_NO_PROVIDER_2026_07_01",
-      "file_sha256": "9e20515363a0a3ac523f8058d4a7a8a85d9d21eb2a8229130d8384f0dd2175f6",
+      "file_sha256": "1a0f50692695bb5ea589ab24a325abf8a2662f3b9be8c04b8c5b62468450a6c3",
       "package_hash_valid": true,
-      "package_sha256": "5a50849c7db8c49b74b7d3eeaabf05d4a3d2292843b626bd65e2a0bd724ec017",
+      "package_sha256": "f58e2474d38183addad8b2e93a6c133f4020d584488631333670cadcf10e292f",
       "passed": true,
       "path": "docs/benchmark/wave2_domain_completion_readiness_2026_07_01/WAVE2_DOMAIN_COMPLETION_READINESS_2026_07_01.json",
       "status": "PASS",
@@ -239,15 +236,15 @@
         "checks_failed": 0,
         "checks_passed": 33,
         "checks_total": 33,
-        "ready_for_batch004_provider_approval": true,
-        "ready_for_batch005_provider_approval": false
+        "ready_for_batch004_provider_approval": false,
+        "ready_for_batch005_provider_approval": true
       }
     },
     "selective_staging_plan": {
       "classification": "WAVE2_DOMAIN_SELECTIVE_STAGING_PLAN_NO_PROVIDER_2026_07_01",
-      "file_sha256": "6d7dfcec944ae0c0465f4bdd03dbf5c03e8d655fd179692eb96b6ad991dd1dc7",
+      "file_sha256": "f322f2fb91f777bc29bb64d0519eb52eb8086ea87c35119412239134d39f3f90",
       "package_hash_valid": true,
-      "package_sha256": "73d7d01d4828f06fdc70447b8848e3f49aed7600c3aacf8185e5fa6ed696f988",
+      "package_sha256": "c0c1bab57dba1b8914e98cfa5e5bb11671207490a4a7cef0fd4c411c327d041b",
       "passed": true,
       "path": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_SELECTIVE_STAGING_PLAN_2026_07_01.json",
       "status": "PASS"
@@ -255,23 +252,23 @@
     "statistical_claim_guardrail": {
       "claim_boundary": {
         "allowed_current_claims": [
-          "Batch001-003 selected-target Wave 2 Holo evidence: 27 pairs / 54 packets / 54 correct admissible packets.",
+          "Batch001-004 selected-target Wave 2 Holo evidence: 37 pairs / 74 packets / 74 correct admissible packets.",
           "Planning-only statistical lane: 60 per-class target is identified, not currently achieved.",
-          "Batch004 and Batch005 are staged or gated evidence until approved live runs exist."
+          "Batch005 is evidence-unlocked but not live evidence until a separate approval packet and clean live run exist."
         ],
         "current_claim": "SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF",
         "disallowed_current_claims": [
           "all-domain live proof complete",
           "full-family Wave 2 statistical proof complete",
           "per-domain statistical proof complete",
-          "Batch004 or Batch005 live evidence counted before explicit provider approval and clean live results"
+          "Batch005 live evidence counted before explicit provider approval and clean live results"
         ],
-        "statistical_proof_claim": "NOT_ACHIEVED_BATCH005_LOCKED"
+        "statistical_proof_claim": "NOT_ACHIEVED_BATCH005_NOT_RUN"
       },
       "classification": "WAVE2_STATISTICAL_CLAIM_GUARDRAIL_NO_PROVIDER_2026_07_01",
-      "file_sha256": "ff3e6e2077e70738a602bebe453208b164df2346402dfc1633369532ae8eef31",
+      "file_sha256": "57e042588c785ff8b32fe21072760afbd2dabb54c6d1d0a0634c5c5b07c69460",
       "package_hash_valid": true,
-      "package_sha256": "086f77cfae5273fc4835bb1be0137db558be55cc242cc2775ed1984cc2f9286c",
+      "package_sha256": "f1234a344da2aedd428a022a2a2190ba77172c6e4a7ffdf06f7c7082ec450474",
       "passed": true,
       "path": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_STATISTICAL_CLAIM_GUARDRAIL_2026_07_01.json",
       "status": "PASS",
@@ -283,7 +280,7 @@
       }
     }
   },
-  "package_sha256": "3a024d3e8d556a735ac363c49cf0d70d7c1669278df5456bb67a1a541b61291d",
+  "package_sha256": "241bedcce162595db3fce2760e84364ac3353eb8253dd2a8caa13dd05eb04a24",
   "python_ast_parse": [
     {
       "passed": true,
@@ -375,7 +372,7 @@
     "This validation does not approve provider calls.",
     "This validation does not run Batch 004 or Batch 005 live execution.",
     "Batch 004 still requires the exact approval statement and current approval packet SHA.",
-    "Batch 005 remains locked until Batch 004 has clean live evidence, comparison, promotion, and separate approval."
+    "Batch 005 remains locked behind a separate approval packet even though the Batch 004 evidence gate is complete."
   ],
   "summary": {
     "commands_failed": 0,

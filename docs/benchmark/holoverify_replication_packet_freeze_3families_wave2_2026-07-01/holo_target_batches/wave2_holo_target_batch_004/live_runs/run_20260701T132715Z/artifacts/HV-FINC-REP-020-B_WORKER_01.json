@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May finance book, release, defer, capitalize, consolidate, or recognize the requested accounting action now? Focus: lease expense classification with unsigned accounting memo.",
+    "allow_rule_assessment": "No source record closes lease classification boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-4381B93C9BA5-CTL",
+    "escalate_rule_assessment": "Unsigned memo leaves dependency unresolved",
+    "timing_scope_authority_dependency_check": "lease memo, term, and classification criteria match"
+  },
+  "cited_evidence": [
+    "SRC-4381B93C9BA5-CTL",
+    "SRC-4381B93C9BA5-REQ",
+    "SRC-4381B93C9BA5-BND",
+    "SRC-4381B93C9BA5-FBK",
+    "SRC-4381B93C9BA5-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "lease memo, term, and classification criteria match",
+    "SRC-4381B93C9BA5-CTL",
+    "SRC-4381B93C9BA5-BND"
+  ],
+  "final_answer": "Source records show missing lease memo match. Action boundary remains open. Do not proceed with lease expense classification. Escalate for required documentation before any booking or recognition.",
+  "open_blockers": [
+    "lease memo term classification match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

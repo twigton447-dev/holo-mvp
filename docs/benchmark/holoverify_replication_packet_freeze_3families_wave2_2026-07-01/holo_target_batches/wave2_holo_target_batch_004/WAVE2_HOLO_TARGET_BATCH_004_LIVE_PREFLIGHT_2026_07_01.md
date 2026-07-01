@@ -5,7 +5,7 @@ Batch: `WAVE2_HOLO_TARGET_BATCH_004`
 Selection mode: `target-selection`
 Selection mode defaulted: `True`
 Freeze root: `80d8106d7efe72bee44d2c05648b71814204c08e1f96934afefd3d75d242845f`
-Root signature: `bfa320f216b25ac3f5f9c321573ae56270a66292906f0038531ae12bce5c0a3b`
+Root signature: `7e9e5dd2b0fff1f8614aa23c0d4570b828c2b31e671748de2001b96e9942dbd9`
 
 ## Expected Calls
 

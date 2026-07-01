@@ -53,21 +53,17 @@ def main() -> int:
 
     state = actual["current_state"]
     assert state["all_domain_live_proof"] == "NOT_COMPLETE_PROVIDER_APPROVAL_REQUIRED", state
-    assert state["current_scored_pairs"] == 27, state
-    assert state["current_scored_packets"] == 54, state
-    assert state["current_per_class_n"] == 27, state
-    assert state["next_allowed_live_batch"] == "WAVE2_HOLO_TARGET_BATCH_004", state
+    assert state["current_scored_pairs"] == 37, state
+    assert state["current_scored_packets"] == 74, state
+    assert state["current_per_class_n"] == 37, state
+    assert state["next_allowed_live_batch"] == "WAVE2_HOLO_TARGET_BATCH_005", state
     assert state["per_class_n_after_clean_batch004"] == 37, state
     assert state["per_class_n_after_clean_batch004_and_batch005"] == 60, state
 
     by_action = {row["action"]: row for row in actual["operator_path"]}
-    batch004 = by_action["run_batch004_only_after_explicit_provider_approval"]
+    batch004 = by_action["batch004_live_complete_and_promoted"]
     assert batch004["expected_provider_calls"] == 100, batch004
     assert batch004["provider_calls_allowed_by_this_handoff"] is False, batch004
-    assert f"--approval-packet-sha256 {batch004['approval_packet_sha256']}" in batch004[
-        "command_after_approval"
-    ], batch004
-    assert batch004["approval_statement_required"] in batch004["command_after_approval"], batch004
 
     batch005 = by_action["batch005_requires_separate_future_approval"]
     assert batch005["expected_provider_calls_after_future_approval"] == 230, batch005
@@ -77,9 +73,9 @@ def main() -> int:
     required_checks = {
         "batch004_approval_packet_current",
         "batch004_is_only_next_live_gate",
-        "batch005_remains_locked_without_approval_packet",
+        "batch005_evidence_unlocked_without_approval_packet",
         "control_room_pass",
-        "preservation_and_staging_orderly",
+        "preservation_and_staging_orderly_with_unrelated_dirty_reported",
         "provider_boundary_closed_by_handoff",
         "readiness_pass",
         "statistical_guardrail_pass",

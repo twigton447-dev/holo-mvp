@@ -160,7 +160,7 @@ def build_audit() -> dict[str, Any]:
             "ready_for_batch004_provider_approval": readiness["summary"]["ready_for_batch004_provider_approval"],
             "ready_for_batch005_provider_approval": readiness["summary"]["ready_for_batch005_provider_approval"],
         },
-        "Completing all domains requires explicit Batch004 provider approval, then Batch004 comparison/promotion, then separate Batch005 approval.",
+        "Completing all domains requires a separate Batch005 approval packet and clean Batch005 live run.",
     )
 
     achieved = [row for row in requirements if row["status"].startswith("ACHIEVED")]
@@ -171,10 +171,10 @@ def build_audit() -> dict[str, Any]:
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "generated_without_provider_calls": True,
         "next_required_gate": {
-            "batch_id": "WAVE2_HOLO_TARGET_BATCH_004",
-            "gate": "EXPLICIT_PROVIDER_APPROVAL_ONLY",
-            "approval_packet_sha256": batch004["approval_packet_sha256"],
-            "run_command_after_approval": batch004["run_command_after_explicit_approval"],
+            "batch_id": "WAVE2_HOLO_TARGET_BATCH_005",
+            "gate": "CREATE_BATCH005_APPROVAL_PACKET_THEN_EXPLICIT_PROVIDER_APPROVAL",
+            "approval_packet_sha256": None,
+            "run_command_after_approval": None,
         },
         "package_sha256": "",
         "requirements": requirements,
@@ -216,6 +216,7 @@ def render_md(audit: dict[str, Any]) -> str:
     for row in audit["requirements"]:
         lines.append(f"| `{row['requirement_id']}` | `{row['status']}` | {row['note']} |")
     gate = audit["next_required_gate"]
+    run_command = gate.get("run_command_after_approval") or "# Batch 005 approval packet has not been created yet."
     lines.extend(
         [
             "",
@@ -223,10 +224,10 @@ def render_md(audit: dict[str, Any]) -> str:
             "",
             f"- Batch: `{gate['batch_id']}`",
             f"- Gate: `{gate['gate']}`",
-            f"- Approval packet SHA-256: `{gate['approval_packet_sha256']}`",
+            f"- Approval packet SHA-256: `{gate.get('approval_packet_sha256') or 'N/A'}`",
             "",
             "```bash",
-            gate["run_command_after_approval"],
+            run_command,
             "```",
             "",
             "## Boundary",

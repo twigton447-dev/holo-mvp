@@ -1,8 +1,8 @@
 # Wave 2 Batch 004 Provider Approval Packet
 
 Classification: `WAVE2_BATCH004_PROVIDER_APPROVAL_PACKET_NO_PROVIDER_2026_07_01`
-Package SHA-256: `77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5`
-Status: `READY_FOR_EXPLICIT_PROVIDER_APPROVAL`
+Package SHA-256: `a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd`
+Status: `NOT_READY`
 Generated without provider calls: `True`
 Approval granted by this packet: `False`
 
@@ -25,7 +25,7 @@ Approval granted by this packet: `False`
 ## Run Command After Approval
 
 ```bash
-python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5 --approval-statement "I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd --approval-statement "I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Model Roster
@@ -57,8 +57,8 @@ python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-numb
 
 | Command | Status | Package SHA-256 |
 | --- | --- | --- |
-| `python3 -B docs/benchmark/verify_wave2_domain_ordering_2026_07_01.py` | `PASS` | `0a93c2dcdc98f6df2a0ab08d82a66d0389aa56669493b5448f3dd2348b29a435` |
-| `python3 -B docs/benchmark/build_wave2_domain_completion_readiness_2026_07_01.py` | `PASS` | `5a50849c7db8c49b74b7d3eeaabf05d4a3d2292843b626bd65e2a0bd724ec017` |
+| `python3 -B docs/benchmark/verify_wave2_domain_ordering_2026_07_01.py` | `PASS` | `091aaafaf70ca6413614a54497ddb794be58552aae608635794bbe504abcee2b` |
+| `python3 -B docs/benchmark/build_wave2_domain_completion_readiness_2026_07_01.py` | `PASS` | `7afcd57b7fc82da32982bf2523eee5455b1a6c36b4ecaac527ca40a78c1ed506` |
 
 ## Checks
 
@@ -72,7 +72,7 @@ python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-numb
 | `ordering_verification_pass` | `PASS` |
 | `readiness_pass` | `PASS` |
 | `readiness_all_checks_passed` | `PASS` |
-| `readiness_batch004_true_batch005_false` | `PASS` |
+| `readiness_batch004_true_batch005_false` | `FAIL` |
 | `expected_provider_calls_100` | `PASS` |
 | `expected_solo_calls_0` | `PASS` |
 | `expected_judge_calls_0` | `PASS` |

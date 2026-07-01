@@ -46,15 +46,15 @@ def main() -> int:
     passed_checks = {row["check_id"] for row in actual["checks"] if row["passed"]}
     required_checks = {
         "declared_source_package_hashes_valid",
-        "current_phase_pre_batch004_live",
-        "next_allowed_live_batch004",
+        "current_phase_post_batch004_evidence_locked",
+        "next_allowed_live_batch005",
         "batch004_approval_hash_valid",
-        "batch004_run_command_embeds_exact_hash_and_statement",
+        "batch004_run_command_not_current_permission",
         "batch004_live_gate_pass",
         "batch004_no_provider_calls_started",
-        "batch005_gate_expected_locked_state",
-        "batch005_live_gate_locked",
-        "batch005_lock_blockers_exact",
+        "batch005_gate_expected_evidence_unlocked_state",
+        "batch005_live_gate_pass",
+        "batch005_lock_blockers_cleared",
         "batch005_no_provider_calls_started",
         "batch005_has_no_approval_packet",
         "full_family_remainder_staged_to_60",
@@ -64,9 +64,9 @@ def main() -> int:
     assert not missing_checks, missing_checks
 
     current = actual["current_state"]
-    assert current["current_phase"] == "PRE_BATCH_004_LIVE", current
-    assert current["next_allowed_live_batch"] == "WAVE2_HOLO_TARGET_BATCH_004", current
-    assert current["current_scored_pairs"] == 27, current
+    assert current["current_phase"] == "POST_BATCH_004_EVIDENCE_LOCKED", current
+    assert current["next_allowed_live_batch"] == "WAVE2_HOLO_TARGET_BATCH_005", current
+    assert current["current_scored_pairs"] == 37, current
     assert current["per_class_n_after_clean_batch004"] == 37, current
     assert current["per_class_n_after_clean_batch004_and_batch005"] == 60, current
 
@@ -74,15 +74,14 @@ def main() -> int:
     batch005 = actual["gates"]["batch005"]
     approval_sha = batch004["approval_packet_sha256"]
     run_command = batch004["run_command_after_explicit_approval"]
-    assert batch004["approval_status"] == "READY_FOR_EXPLICIT_PROVIDER_APPROVAL", batch004
+    assert batch004["approval_status"] in {"READY_FOR_EXPLICIT_PROVIDER_APPROVAL", "NOT_READY"}, batch004
     assert batch004["approval_granted_by_packet"] is False, batch004
-    assert f"--approval-packet-sha256 {approval_sha}" in run_command, run_command
-    assert batch004["required_approval_statement"] in run_command, run_command
+    assert approval_sha, batch004
     assert batch004["expected_counts"]["total_provider_calls"] == 100, batch004
     assert batch004["providers_called"] == 0 and batch004["live_holo_started"] is False, batch004
 
-    assert batch005["live_execution_gate"]["status"] == "LOCKED", batch005
-    assert batch005["live_execution_gate"]["blocked_reason"] == builder.EXPECTED_BATCH005_LOCK_BLOCKERS, batch005
+    assert batch005["live_execution_gate"]["status"] == "PASS", batch005
+    assert batch005["live_execution_gate"]["blocked_reason"] is None, batch005
     assert batch005["expected_counts"]["total_provider_calls"] == 230, batch005
     assert batch005["providers_called"] == 0 and batch005["live_holo_started"] is False, batch005
     assert not builder.BATCH005_APPROVAL.exists(), builder.BATCH005_APPROVAL
@@ -99,13 +98,13 @@ def main() -> int:
     assert sum(row["frozen_pairs"] for row in actual["domain_rows"]) == 60, actual["domain_rows"]
 
     assert f"Package SHA-256: `{actual['package_sha256']}`" in md
-    assert run_command in md
+    assert "Batch004 | `HISTORICAL_BATCH004_APPROVAL_PACKET_BATCH004_ALREADY_PROMOTED`" in md
     assert "python3 -B docs/benchmark/run_wave2_domain_no_provider_refresh_2026_07_01.py" in md
     assert "python3 -B docs/benchmark/validate_wave2_no_provider_control_room_2026_07_01.py" in md
     assert "python3 -B docs/benchmark/build_wave2_statistical_claim_guardrail_2026_07_01.py" in md
     assert "python3 -B docs/benchmark/build_wave2_domain_selective_staging_plan_2026_07_01.py" in md
     assert "python3 -B docs/benchmark/build_wave2_domain_operator_handoff_2026_07_01.py" in md
-    assert "Batch005 | `LOCKED_UNTIL_BATCH004_LIVE_COMPARISON_PROMOTION_AND_SEPARATE_APPROVAL`" in md
+    assert "Batch005 | `EVIDENCE_UNLOCKED_PENDING_SEPARATE_PROVIDER_APPROVAL_PACKET`" in md
 
     print(
         json.dumps(

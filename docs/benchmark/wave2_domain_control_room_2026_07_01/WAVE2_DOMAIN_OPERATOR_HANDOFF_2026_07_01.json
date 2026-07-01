@@ -2,81 +2,80 @@
   "checks": [
     {
       "check_id": "control_room_pass",
-      "evidence": "06110e4c86904686a3ac730620e88d838a0c6221e461fdcca152700a2d7960db",
+      "evidence": "18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116",
       "passed": true
     },
     {
       "check_id": "readiness_pass",
-      "evidence": "5a50849c7db8c49b74b7d3eeaabf05d4a3d2292843b626bd65e2a0bd724ec017",
+      "evidence": "f58e2474d38183addad8b2e93a6c133f4020d584488631333670cadcf10e292f",
       "passed": true
     },
     {
       "check_id": "statistical_guardrail_pass",
       "evidence": {
         "allowed_current_claims": [
-          "Batch001-003 selected-target Wave 2 Holo evidence: 27 pairs / 54 packets / 54 correct admissible packets.",
+          "Batch001-004 selected-target Wave 2 Holo evidence: 37 pairs / 74 packets / 74 correct admissible packets.",
           "Planning-only statistical lane: 60 per-class target is identified, not currently achieved.",
-          "Batch004 and Batch005 are staged or gated evidence until approved live runs exist."
+          "Batch005 is evidence-unlocked but not live evidence until a separate approval packet and clean live run exist."
         ],
         "current_claim": "SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF",
         "disallowed_current_claims": [
           "all-domain live proof complete",
           "full-family Wave 2 statistical proof complete",
           "per-domain statistical proof complete",
-          "Batch004 or Batch005 live evidence counted before explicit provider approval and clean live results"
+          "Batch005 live evidence counted before explicit provider approval and clean live results"
         ],
-        "statistical_proof_claim": "NOT_ACHIEVED_BATCH005_LOCKED"
+        "statistical_proof_claim": "NOT_ACHIEVED_BATCH005_NOT_RUN"
       },
       "passed": true
     },
     {
-      "check_id": "preservation_and_staging_orderly",
+      "check_id": "preservation_and_staging_orderly_with_unrelated_dirty_reported",
       "evidence": {
-        "dirty_paths": 66,
-        "other_dirty_paths": 0,
-        "staging_paths": 66
+        "dirty_paths": 64,
+        "other_dirty_paths": 1,
+        "staging_paths": 64
       },
       "passed": true
     },
     {
       "check_id": "batch004_is_only_next_live_gate",
       "evidence": {
-        "approval_granted_by_packet": false,
-        "approval_status": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
-        "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_004"
+        "batch004_state": "HISTORICAL_BATCH004_APPROVAL_PACKET_BATCH004_ALREADY_PROMOTED",
+        "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_005"
       },
       "passed": true
     },
     {
       "check_id": "batch004_approval_packet_current",
       "evidence": {
-        "approval_packet_sha256": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
+        "approval_packet_sha256": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
         "required_approval_statement": "I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
       },
       "passed": true
     },
     {
-      "check_id": "batch005_remains_locked_without_approval_packet",
+      "check_id": "batch005_evidence_unlocked_without_approval_packet",
       "evidence": {
         "batch005_approval_packet": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_PROVIDER_APPROVAL_PACKET_2026_07_01.json",
         "batch005_gate": {
-          "blocked_reason": [
-            "batch_004_comparison_exists",
-            "batch_004_combined_memo_exists"
-          ],
+          "blocked_reason": null,
           "checks": {
-            "batch_004_combined_memo_exists": false,
-            "batch_004_comparison_exists": false
+            "batch_004_combined_memo_exists": true,
+            "batch_004_combined_memo_has_74_scored_packets": true,
+            "batch_004_combined_memo_has_no_next_target_batch": true,
+            "batch_004_combined_memo_scores_all_37_selected_targets": true,
+            "batch_004_comparison_exists": true
           },
           "required_before_live": [
             "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_SOLO_VS_HOLO_COMPARISON_2026_07_01.json",
             "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
           ],
-          "scored_packets_in_promoted_selected_target_memo": null,
-          "scored_pairs_in_promoted_selected_target_memo": null,
-          "selected_target_pair_pool": null,
+          "scored_packets_in_promoted_selected_target_memo": 74,
+          "scored_pairs_in_promoted_selected_target_memo": 37,
+          "selected_target_pair_pool": 37,
           "selection_mode": "full-family-remainder",
-          "status": "LOCKED"
+          "status": "PASS"
         }
       },
       "passed": true
@@ -92,14 +91,14 @@
     }
   ],
   "classification": "WAVE2_DOMAIN_OPERATOR_HANDOFF_NO_PROVIDER_2026_07_01",
-  "created_at_utc": "2026-07-01T08:14:26.708032+00:00",
+  "created_at_utc": "2026-07-01T14:05:48.347032+00:00",
   "current_claim": "SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF",
   "current_state": {
     "all_domain_live_proof": "NOT_COMPLETE_PROVIDER_APPROVAL_REQUIRED",
-    "current_per_class_n": 27,
-    "current_scored_packets": 54,
-    "current_scored_pairs": 27,
-    "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_004",
+    "current_per_class_n": 37,
+    "current_scored_packets": 74,
+    "current_scored_pairs": 37,
+    "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_005",
     "per_class_n_after_clean_batch004": 37,
     "per_class_n_after_clean_batch004_and_batch005": 60
   },
@@ -118,10 +117,10 @@
       "why": "Uses path-limited git add commands; no git add . and no git add -A."
     },
     {
-      "action": "run_batch004_only_after_explicit_provider_approval",
-      "approval_packet_sha256": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
+      "action": "batch004_live_complete_and_promoted",
+      "approval_packet_sha256": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
       "approval_statement_required": "I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.",
-      "command_after_approval": "python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5 --approval-statement \"I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
+      "command_after_approval": "python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd --approval-statement \"I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
       "expected_provider_calls": 100,
       "provider_calls_allowed_by_this_handoff": false
     },
@@ -143,22 +142,20 @@
     },
     {
       "action": "batch005_requires_separate_future_approval",
-      "blocked_by": [
-        "batch_004_comparison_exists",
-        "batch_004_combined_memo_exists"
-      ],
+      "blocked_by": null,
       "expected_provider_calls_after_future_approval": 230,
-      "provider_calls_allowed_by_this_handoff": false
+      "provider_calls_allowed_by_this_handoff": false,
+      "reason": "Batch 005 evidence gate is open, but no Batch 005 provider approval packet has been created."
     }
   ],
-  "package_sha256": "b5eeaae7b9cc762195008cd8ddf115c89135f25a1375bf86c0a2646f27d289ad",
+  "package_sha256": "33a369b9c33265fd8f0189f2884d6ced69db8df3f97bcdec84b9ff17215851e3",
   "source_packages": {
-    "batch004_approval_packet": "77eaac13e100cdec0db514ac2e0e7cf4b06bb43afe5dae6d20038a3ac5e59af5",
-    "control_room": "06110e4c86904686a3ac730620e88d838a0c6221e461fdcca152700a2d7960db",
-    "preservation_manifest": "9d7242752c609e97c899035b6f6f3881dbb8e24748e2d2ed2f414529a8a45c1c",
-    "readiness": "5a50849c7db8c49b74b7d3eeaabf05d4a3d2292843b626bd65e2a0bd724ec017",
-    "selective_staging_plan": "73d7d01d4828f06fdc70447b8848e3f49aed7600c3aacf8185e5fa6ed696f988",
-    "statistical_guardrail": "086f77cfae5273fc4835bb1be0137db558be55cc242cc2775ed1984cc2f9286c"
+    "batch004_approval_packet": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
+    "control_room": "18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116",
+    "preservation_manifest": "fb5b364a87f8479c62ab588a9323eb409d9d3373c7fe72574fcbd464990a4387",
+    "readiness": "f58e2474d38183addad8b2e93a6c133f4020d584488631333670cadcf10e292f",
+    "selective_staging_plan": "c0c1bab57dba1b8914e98cfa5e5bb11671207490a4a7cef0fd4c411c327d041b",
+    "statistical_guardrail": "f1234a344da2aedd428a022a2a2190ba77172c6e4a7ffdf06f7c7082ec450474"
   },
   "status": "PASS",
   "stop_rules": [

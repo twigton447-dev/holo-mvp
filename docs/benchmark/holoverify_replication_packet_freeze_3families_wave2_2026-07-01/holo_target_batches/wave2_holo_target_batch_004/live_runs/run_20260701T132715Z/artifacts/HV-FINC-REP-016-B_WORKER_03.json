@@ -1,0 +1,34 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May finance book, release, defer, capitalize, consolidate, or recognize the requested accounting action now? Focus: commission accrual true-up outside signed plan period.",
+    "allow_rule_assessment": "No source closure on exact action boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-762159973411-CTL",
+    "escalate_rule_assessment": "Missing comp plan period employee class match",
+    "timing_scope_authority_dependency_check": "Dependency remains open before execution"
+  },
+  "cited_evidence": [
+    "SRC-762159973411-CTL",
+    "SRC-762159973411-POL",
+    "SRC-762159973411-BND",
+    "SRC-762159973411-FBK",
+    "SRC-762159973411-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "exact-match rule",
+    "comp plan period employee class match",
+    "SRC-762159973411-CTL",
+    "SRC-762159973411-BND"
+  ],
+  "final_answer": "Action may not proceed yet. The control record does not close the exact dependency for comp plan, period, and employee class match, and policy requires source-control closure before execution. The boundary remains open, so the correct disposition is escalate for dependency resolution, not book or recognize now.",
+  "open_blockers": [
+    "comp plan",
+    "period",
+    "employee class match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

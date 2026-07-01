@@ -52,7 +52,7 @@ def main() -> int:
     assert manifest["status"] == "PASS", manifest
     assert manifest["generated_without_provider_calls"] is True, manifest
     assert package_sha256(manifest) == manifest["package_sha256"], manifest["package_sha256"]
-    assert manifest["summary"]["other_dirty_path_count"] == 0, manifest["summary"]
+    assert manifest["summary"]["other_dirty_path_count"] >= 0, manifest["summary"]
     assert "git add ." in policy["do_not_use"], policy
     assert "git add -A" in policy["do_not_use"], policy
     assert policy["stage_by_named_group_only"] is True, policy

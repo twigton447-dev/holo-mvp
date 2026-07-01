@@ -6,7 +6,7 @@
       "expected_provider_calls": 100,
       "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.json",
       "run_command_after_approval": "python3 -B docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py --batch-number 4 --run-live --approval-packet-sha256 APPROVAL_PACKET_SHA256_FROM_PROVIDER_APPROVAL_PACKET --approval-statement \"I explicitly approve provider calls for WAVE2_HOLO_TARGET_BATCH_004 only, exactly as scoped in WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
-      "status": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL"
+      "status": "NOT_READY"
     }
   },
   "claim_boundaries": [
@@ -158,10 +158,10 @@
       }
     },
     {
-      "architecture_packet_correct": 54,
+      "architecture_packet_correct": 74,
       "architecture_packet_correct_missing_rows": 0,
-      "architecture_packets": 54,
-      "architecture_provider_calls": 270,
+      "architecture_packets": 74,
+      "architecture_provider_calls": 370,
       "domains": [
         "HR, data privacy, and finance close controls"
       ],
@@ -170,33 +170,33 @@
         "wave2_selected_target_batches_complete",
         "wave2_selected_target_solo_triage_exact_roster"
       ],
-      "row_count": 6,
-      "solo_packets_or_attempts": 54,
-      "solo_provider_calls": 162,
+      "row_count": 8,
+      "solo_packets_or_attempts": 74,
+      "solo_provider_calls": 222,
       "systems": {
-        "HoloVerify governed architecture": 3,
-        "Selected solo one-shot triage": 3
+        "HoloVerify governed architecture": 4,
+        "Selected solo one-shot triage": 4
       }
     }
   ],
   "compiled_metrics_snapshot": {
     "classification": "HOLOVERIFY_HOLOBUILD_HASH_LOCKED_METRICS_COMPILE",
-    "lock_inventory_count": 112,
+    "lock_inventory_count": 115,
     "metric_summary_count": 128,
-    "packet_row_count": 933,
-    "run_summary_count": 21,
-    "source_audit_count": 38
+    "packet_row_count": 1013,
+    "run_summary_count": 23,
+    "source_audit_count": 40
   },
-  "created_at_utc": "2026-07-01T08:14:25.636603+00:00",
+  "created_at_utc": "2026-07-01T14:05:47.279765+00:00",
   "generated_without_provider_calls": true,
-  "package_sha256": "c25a0e50de1fd23aebd758a179cc61167e585c9b96a33da1cb70bd0d3f881aea",
+  "package_sha256": "5532559c86db2ae04579e4edff9472f3807a2ba5a5a3866af17802d67c75c63e",
   "repo": {
     "branch": "codex/ap-publication-integration",
-    "head": "930ac680cd8b57198a3f8e53eb6176044bf3c64e"
+    "head": "0a3a5f5d8fe943eb0e597a0a4c821293f1b9cd5e"
   },
   "source_paths": {
     "batch004_provider_approval_packet": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.json",
-    "combined_memo": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_2026_07_01.json",
+    "combined_memo": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json",
     "compiled_metrics_package": "docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/compiled_metrics_package.json",
     "freeze_manifest": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/FREEZE_MANIFEST.json",
     "ordering_verification": "docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/WAVE2_DOMAIN_ORDERING_VERIFICATION_2026_07_01.json",
@@ -207,15 +207,15 @@
   },
   "wave2": {
     "claim_boundaries": [
-      "This memo covers only Wave 2 Holo target Batches 001, 002, 003, not the entire Wave 2 frozen packet bank.",
-      "Holo solved all selected target packets run in these batches: 54/54 packets and 27/27 sibling pairs.",
-      "The matched solo one-shot results on the same selected packets were unreliable: 119/162 attempts were not KNEW/admissible.",
+      "This memo covers only Wave 2 Holo target Batches 001, 002, 003, 004, not the entire Wave 2 frozen packet bank.",
+      "Holo solved all selected target packets run in these batches: 74/74 packets and 37/37 sibling pairs.",
+      "The matched solo one-shot results on the same selected packets were unreliable: 159/222 attempts were not KNEW/admissible.",
       "Selected-target evidence remains separate from full-family statistical proof until the non-target remainder has live Holo evidence.",
       "Any staged selected-target or full-family remainder section is preflight-only and excluded from scored totals.",
       "Token ratio is operational bookkeeping only. It is not a proof claim because solo was one-shot while Holo used governed multi-turn architecture.",
       "No judges are included in this package. No new provider calls were made to create this combined memo.",
       "Internal Holo worker misses are separated from external solo failures. They show governance correction, not standalone solo failure.",
-      "Batch 004 is staged/preflight-only until an explicitly approved live Holo run exists.",
+      "Batch 004 is scored selected-target evidence in this post-live package.",
       "Completing the selected-target pool is not the same as completing all 60 frozen Wave 2 pairs.",
       "The full-family statistical lane requires the remaining non-target pairs after the selected-target lane."
     ],
@@ -230,12 +230,12 @@
         "full_family_pairs_remaining_after_staged_target_lane": 8,
         "full_family_pairs_unstaged_after_future_stage": 0,
         "remaining_selected_targets_after_staged": 0,
-        "scored_holo_target_pairs": 9,
+        "scored_holo_target_pairs": 12,
         "solo_knew_admissible": 49,
         "solo_not_knew": 71,
         "solo_provider_calls": 120,
         "staged_full_family_remainder_pairs": 8,
-        "staged_holo_target_pairs": 3,
+        "staged_holo_target_pairs": 0,
         "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
         "top_holo_targets": 12
       },
@@ -249,12 +249,12 @@
         "full_family_pairs_remaining_after_staged_target_lane": 4,
         "full_family_pairs_unstaged_after_future_stage": 0,
         "remaining_selected_targets_after_staged": 0,
-        "scored_holo_target_pairs": 12,
+        "scored_holo_target_pairs": 16,
         "solo_knew_admissible": 39,
         "solo_not_knew": 81,
         "solo_provider_calls": 120,
         "staged_full_family_remainder_pairs": 4,
-        "staged_holo_target_pairs": 4,
+        "staged_holo_target_pairs": 0,
         "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
         "top_holo_targets": 16
       },
@@ -268,12 +268,12 @@
         "full_family_pairs_remaining_after_staged_target_lane": 11,
         "full_family_pairs_unstaged_after_future_stage": 0,
         "remaining_selected_targets_after_staged": 0,
-        "scored_holo_target_pairs": 6,
+        "scored_holo_target_pairs": 9,
         "solo_knew_admissible": 52,
         "solo_not_knew": 68,
         "solo_provider_calls": 120,
         "staged_full_family_remainder_pairs": 11,
-        "staged_holo_target_pairs": 3,
+        "staged_holo_target_pairs": 0,
         "status": "TARGET_POOL_STAGED_COMPLETE_FULL_FAMILY_REMAINDER_STAGED_NOT_SCORED",
         "top_holo_targets": 9
       }
@@ -633,166 +633,12 @@
     ],
     "selected_target_holo": {
       "remaining_selected_targets_after_staged": 0,
-      "scored_batches": "001-003",
-      "scored_packets": 54,
-      "scored_packets_correct_admissible": 54,
-      "scored_pairs": 27,
+      "scored_batches": "001-004",
+      "scored_packets": 74,
+      "scored_packets_correct_admissible": 74,
+      "scored_pairs": 37,
       "selected_target_pair_pool": 37,
-      "staged_next_batch": {
-        "batch": "004",
-        "batch_id": "WAVE2_HOLO_TARGET_BATCH_004",
-        "claim_boundary": "Staged/preflight evidence only; not counted as Holo result, solo comparison, judge result, or statistical proof.",
-        "expected_counts": {
-          "gov_calls": 40,
-          "judge_calls": 0,
-          "packets": 20,
-          "pairs": 10,
-          "solo_calls": 0,
-          "total_provider_calls": 100,
-          "worker_calls": 60
-        },
-        "judges_started": false,
-        "live_execution_gate": {
-          "blocked_reason": null,
-          "required_before_live": [],
-          "selection_mode": "target-selection",
-          "status": "PASS"
-        },
-        "live_holo_started": false,
-        "live_preflight_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_LIVE_PREFLIGHT_2026_07_01.json",
-        "live_preflight_root_signature": "bfa320f216b25ac3f5f9c321573ae56270a66292906f0038531ae12bce5c0a3b",
-        "providers_called": 0,
-        "ready_for_live_holo": true,
-        "selected_pair_ids": [
-          "HV-FINC-REP-016",
-          "HV-DPRV-REP-005",
-          "HV-DPRV-REP-007",
-          "HV-DPRV-REP-008",
-          "HV-FINC-REP-002",
-          "HV-FINC-REP-017",
-          "HV-FINC-REP-020",
-          "HV-HRWF-REP-006",
-          "HV-HRWF-REP-007",
-          "HV-HRWF-REP-010"
-        ],
-        "selected_pairs": [
-          {
-            "domain": "Finance close / revenue / expense recognition controls",
-            "family_id": "HV-FINC-REP-2026-07-01",
-            "not_knew_count": 4,
-            "pair_id": "HV-FINC-REP-016",
-            "parse_or_provider_fail_count": 1,
-            "priority_score": 9,
-            "target_bucket": "hard_escalate",
-            "triage_class": "STRONG_SOLO_COLLAPSE",
-            "wrong_verdict_count": 0
-          },
-          {
-            "domain": "Data privacy / customer data release controls",
-            "family_id": "HV-DPRV-REP-2026-07-01",
-            "not_knew_count": 4,
-            "pair_id": "HV-DPRV-REP-005",
-            "parse_or_provider_fail_count": 0,
-            "priority_score": 8,
-            "target_bucket": "hard_allow",
-            "triage_class": "STRONG_SOLO_COLLAPSE",
-            "wrong_verdict_count": 0
-          },
-          {
-            "domain": "Data privacy / customer data release controls",
-            "family_id": "HV-DPRV-REP-2026-07-01",
-            "not_knew_count": 4,
-            "pair_id": "HV-DPRV-REP-007",
-            "parse_or_provider_fail_count": 0,
-            "priority_score": 8,
-            "target_bucket": "hard_allow",
-            "triage_class": "STRONG_SOLO_COLLAPSE",
-            "wrong_verdict_count": 0
-          },
-          {
-            "domain": "Data privacy / customer data release controls",
-            "family_id": "HV-DPRV-REP-2026-07-01",
-            "not_knew_count": 4,
-            "pair_id": "HV-DPRV-REP-008",
-            "parse_or_provider_fail_count": 0,
-            "priority_score": 8,
-            "target_bucket": "hard_allow",
-            "triage_class": "STRONG_SOLO_COLLAPSE",
-            "wrong_verdict_count": 0
-          },
-          {
-            "domain": "Finance close / revenue / expense recognition controls",
-            "family_id": "HV-FINC-REP-2026-07-01",
-            "not_knew_count": 4,
-            "pair_id": "HV-FINC-REP-002",
-            "parse_or_provider_fail_count": 0,
-            "priority_score": 8,
-            "target_bucket": "hard_allow",
-            "triage_class": "STRONG_SOLO_COLLAPSE",
-            "wrong_verdict_count": 0
-          },
-          {
-            "domain": "Finance close / revenue / expense recognition controls",
-            "family_id": "HV-FINC-REP-2026-07-01",
-            "not_knew_count": 4,
-            "pair_id": "HV-FINC-REP-017",
-            "parse_or_provider_fail_count": 0,
-            "priority_score": 8,
-            "target_bucket": "hard_escalate",
-            "triage_class": "STRONG_SOLO_COLLAPSE",
-            "wrong_verdict_count": 0
-          },
-          {
-            "domain": "Finance close / revenue / expense recognition controls",
-            "family_id": "HV-FINC-REP-2026-07-01",
-            "not_knew_count": 4,
-            "pair_id": "HV-FINC-REP-020",
-            "parse_or_provider_fail_count": 0,
-            "priority_score": 8,
-            "target_bucket": "hard_escalate",
-            "triage_class": "STRONG_SOLO_COLLAPSE",
-            "wrong_verdict_count": 0
-          },
-          {
-            "domain": "HR / payroll / workforce controls",
-            "family_id": "HV-HRWF-REP-2026-07-01",
-            "not_knew_count": 4,
-            "pair_id": "HV-HRWF-REP-006",
-            "parse_or_provider_fail_count": 0,
-            "priority_score": 8,
-            "target_bucket": "hard_allow",
-            "triage_class": "STRONG_SOLO_COLLAPSE",
-            "wrong_verdict_count": 0
-          },
-          {
-            "domain": "HR / payroll / workforce controls",
-            "family_id": "HV-HRWF-REP-2026-07-01",
-            "not_knew_count": 4,
-            "pair_id": "HV-HRWF-REP-007",
-            "parse_or_provider_fail_count": 0,
-            "priority_score": 8,
-            "target_bucket": "hard_allow",
-            "triage_class": "STRONG_SOLO_COLLAPSE",
-            "wrong_verdict_count": 0
-          },
-          {
-            "domain": "HR / payroll / workforce controls",
-            "family_id": "HV-HRWF-REP-2026-07-01",
-            "not_knew_count": 4,
-            "pair_id": "HV-HRWF-REP-010",
-            "parse_or_provider_fail_count": 0,
-            "priority_score": 8,
-            "target_bucket": "hard_allow",
-            "triage_class": "STRONG_SOLO_COLLAPSE",
-            "wrong_verdict_count": 0
-          }
-        ],
-        "selected_pairs_match_expected_pool": true,
-        "selection_mode": "target-selection",
-        "selection_mode_defaulted": true,
-        "solo_started": false,
-        "status": "PASS"
-      }
+      "staged_next_batch": {}
     },
     "solo_triage": {
       "aggregate_totals": {
@@ -854,9 +700,9 @@
       "after_batch_004_live_pairs": 37,
       "after_batch_004_live_pairs_needed_for_60_per_class": 23,
       "after_batch_004_live_per_class_n": 37,
-      "current_pairs_needed_for_60_per_class": 33,
-      "current_per_class_n": 27,
-      "current_scored_pairs": 27,
+      "current_pairs_needed_for_60_per_class": 23,
+      "current_per_class_n": 37,
+      "current_scored_pairs": 37,
       "full_family_packets": 120,
       "full_family_pairs": 60,
       "full_family_pairs_remaining_after_staged_target_lane": 23,
@@ -876,27 +722,27 @@
         },
         "judges_started": false,
         "live_execution_gate": {
-          "blocked_reason": [
-            "batch_004_comparison_exists",
-            "batch_004_combined_memo_exists"
-          ],
+          "blocked_reason": null,
           "checks": {
-            "batch_004_combined_memo_exists": false,
-            "batch_004_comparison_exists": false
+            "batch_004_combined_memo_exists": true,
+            "batch_004_combined_memo_has_74_scored_packets": true,
+            "batch_004_combined_memo_has_no_next_target_batch": true,
+            "batch_004_combined_memo_scores_all_37_selected_targets": true,
+            "batch_004_comparison_exists": true
           },
           "required_before_live": [
             "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_SOLO_VS_HOLO_COMPARISON_2026_07_01.json",
             "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
           ],
-          "scored_packets_in_promoted_selected_target_memo": null,
-          "scored_pairs_in_promoted_selected_target_memo": null,
-          "selected_target_pair_pool": null,
+          "scored_packets_in_promoted_selected_target_memo": 74,
+          "scored_pairs_in_promoted_selected_target_memo": 37,
+          "selected_target_pair_pool": 37,
           "selection_mode": "full-family-remainder",
-          "status": "LOCKED"
+          "status": "PASS"
         },
         "live_holo_started": false,
         "live_preflight_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT_2026_07_01.json",
-        "live_preflight_root_signature": "3cf24480f79bde31d58774d5e2a32290f97f2c1ab9d5088b9f1eaf676909b46b",
+        "live_preflight_root_signature": "a99fba06753da20549e6fea991c2c2a3d829e07aaf4541813ffa31a1f484c12d",
         "providers_called": 0,
         "ready_for_live_holo": true,
         "registration_path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_REGISTRATION_2026_07_01.json",
@@ -2059,34 +1905,34 @@
       "significance_rows": [
         {
           "metric": "FNR",
-          "n": 27,
+          "n": 37,
           "observed_errors": 0,
           "observed_rate": "0.0",
-          "wilson_95_high": "0.124555",
+          "wilson_95_high": "0.094058",
           "zero_error_n_for_95_upper_lt_5pct": 60
         },
         {
           "metric": "FPR",
-          "n": 27,
+          "n": 37,
           "observed_errors": 0,
           "observed_rate": "0.0",
-          "wilson_95_high": "0.124555",
+          "wilson_95_high": "0.094058",
           "zero_error_n_for_95_upper_lt_5pct": 60
         },
         {
           "metric": "overall_error",
-          "n": 54,
+          "n": 74,
           "observed_errors": 0,
           "observed_rate": "0.0",
-          "wilson_95_high": "0.066414",
+          "wilson_95_high": "0.04935",
           "zero_error_n_for_95_upper_lt_5pct": 60
         },
         {
           "metric": "operational_non_success",
-          "n": 54,
+          "n": 74,
           "observed_errors": 0,
           "observed_rate": "0.0",
-          "wilson_95_high": "0.066414",
+          "wilson_95_high": "0.04935",
           "zero_error_n_for_95_upper_lt_5pct": 60
         }
       ]

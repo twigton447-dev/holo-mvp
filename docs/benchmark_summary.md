@@ -1,17 +1,89 @@
-## Benchmark Update
-
-454/454 frozen action-boundary packets correct. Zero observed false positives
-and zero observed false negatives.
-
-Read the table left to right: **Errors** is what happened in the test, **n** is
-the denominator, and the two right columns are 95% upper bounds on the unknown
-real error rate.
+## HoloVerify Result
 
 | Metric | Errors | n | Exact 95% upper bound | Wilson 95% upper bound |
 | --- | ---: | ---: | ---: | ---: |
 | Overall packet error | 0 | 454 | 0.658% | 0.839% |
 | False positive rate | 0 | 227 | 1.311% | 1.664% |
 | False negative rate | 0 | 227 | 1.311% | 1.664% |
+
+**What this table measures:** the full HoloVerify governed architecture across
+454 clean frozen action-boundary packets. This is the Holo result, not a solo
+model result.
+
+**What it is compared against:** the same mini-model families run alone as
+one-shot solo baselines. Solo gets one call per packet. No Gov, no shared state,
+no deterministic rescue layer, and no final selector.
+
+### Holo vs Solo, By Domain
+
+This is the clean matched solo comparison slice: the same 100 packets were run
+through HoloVerify and through the same three mini-model families as one-shot
+solo baselines.
+
+| Domain | Holo result | Solo KNEW/admissible | Solo audit-failure rate | Solo failure mix |
+| --- | ---: | ---: | ---: | --- |
+| HR / payroll / workforce controls | 22/22 | 22/66 | 66.7% | 1 wrong verdict, 10 parse fails, 33 structural/evidence fails |
+| Data privacy / customer data release controls | 16/16 | 26/48 | 45.8% | 1 wrong verdict, 3 parse fails, 18 structural/evidence fails |
+| Banking / KYC / AML controls | 10/10 | 10/30 | 66.7% | 4 wrong verdicts, 6 parse fails, 10 structural/evidence fails |
+| Benefits / public casework controls | 8/8 | 8/24 | 66.7% | 1 wrong verdict, 2 parse fails, 13 structural/evidence fails |
+| Finance close / revenue / expense controls | 8/8 | 14/24 | 41.7% | 2 wrong verdicts, 2 parse fails, 6 structural/evidence fails |
+| Government procurement / grants controls | 6/6 | 6/18 | 66.7% | 1 wrong verdict, 4 parse fails, 7 structural/evidence fails |
+| Defense administration / logistics controls | 12/12 | 12/36 | 66.7% | 2 wrong verdicts, 3 parse fails, 19 structural/evidence fails |
+| Insurance claims / coverage controls | 14/14 | 14/42 | 66.7% | 0 wrong verdicts, 8 parse fails, 20 structural/evidence fails |
+| Energy / utilities / infrastructure controls | 4/4 | 4/12 | 66.7% | 1 wrong verdict, 2 parse fails, 5 structural/evidence fails |
+
+Solo audit-failure rate means the solo output was not KNEW/admissible: it had
+the wrong verdict, failed to parse, or lacked the required source-grounded
+structure. That is stricter than "sounded plausible."
+
+Important scope note: the Holo-vs-solo table above uses the matched 100-packet
+solo comparison slice. The domain Wilson table below uses the full current
+454-packet Holo denominator.
+
+### Holo Domain Risk Bounds
+
+The benchmark starts strong overall, then gets more detailed by domain. The
+grand-total Wilson number is not the same as the domain-level Wilson number.
+Each domain has its own denominator, so each domain has its own 95% upper bound.
+
+| Counted Holo domain | Packets | Errors | Exact 95% upper bound | Wilson 95% upper bound |
+| --- | ---: | ---: | ---: | ---: |
+| Clinical activation controls | 40 | 0 | 7.216% | 8.762% |
+| Vendor-master payment controls | 40 | 0 | 7.216% | 8.762% |
+| Agentic commerce order execution | 40 | 0 | 7.216% | 8.762% |
+| IT access permission change | 40 | 0 | 7.216% | 8.762% |
+| HR workforce controls | 40 | 0 | 7.216% | 8.762% |
+| Data privacy release controls | 40 | 0 | 7.216% | 8.762% |
+| Finance close / control overrides | 40 | 0 | 7.216% | 8.762% |
+| Benefits enrollment controls | 8 | 0 | 31.234% | 32.441% |
+| Banking / KYC controls | 10 | 0 | 25.887% | 27.753% |
+| Defense administration controls | 12 | 0 | 22.092% | 24.249% |
+| Government / public sector controls | 6 | 0 | 39.304% | 39.033% |
+| Insurance claims controls | 14 | 0 | 19.264% | 21.531% |
+| Energy / utilities controls | 4 | 0 | 52.713% | 48.989% |
+| Medical treatment activation controls | 40 | 0 | 7.216% | 8.762% |
+| Treasury / wire controls | 40 | 0 | 7.216% | 8.762% |
+| Legal / regulatory filing controls | 40 | 0 | 7.216% | 8.762% |
+
+### Models Used
+
+HoloVerify's current locked roster:
+
+| Role | Model | Job |
+| --- | --- | --- |
+| Worker 1 | `xai/grok-3-mini` | Source-boundary mapping |
+| Gov 1 | `minimax/MiniMax-M2.5-highspeed` | Control routing |
+| Worker 2 | `openai/gpt-5.4-mini` | Adversarial scope challenge |
+| Gov 2 | `minimax/MiniMax-M2.5-highspeed` | Control routing |
+| Worker 3 | `minimax/MiniMax-M2.5-highspeed` | Final compiler |
+
+Same models, run alone on the matched 100-packet solo comparison slice:
+
+| Solo model | Calls | KNEW/admissible | Solo audit-failure rate | Wrong verdict | Parse fail | Structural/evidence fail |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `openai/gpt-5.4-mini` | 100 | 82/100 | 18% | 0 | 0 | 18 |
+| `minimax/MiniMax-M2.5-highspeed` | 100 | 26/100 | 74% | 0 | 40 | 34 |
+| `xai/grok-3-mini` | 100 | 8/100 | 92% | 13 | 0 | 79 |
 
 ---
 

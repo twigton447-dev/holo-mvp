@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoloEngine · The Action Boundary Benchmark · Version 7.60 · July 2026</title>
+<title>HoloEngine · The Action Boundary Benchmark · Version 7.61 · July 2026</title>
 <meta name="description" content="Measuring AI reliability before irreversible enterprise action.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@
     <div class="toplinks"><a href="/">Home</a><a href="/whitepaper">Whitepaper</a><a href="/benchmark">Benchmark</a><a href="/payloads/">Payloads</a></div>
   </nav>
   <header class="hero">
-    <div class="eyebrow">HoloVerify · Version 7.60 · July 2026</div>
+    <div class="eyebrow">HoloVerify · Version 7.61 · July 2026</div>
     <h1>The Action Boundary Benchmark</h1>
     <p class="subtitle">Measuring AI reliability before irreversible enterprise action</p>
     <div class="meta-row"><div class="meta-card"><span>HoloVerify observed result</span><strong>614/614</strong></div><div class="meta-card"><span>HoloVerify total errors</span><strong>0 / 614</strong></div><div class="meta-card"><span>HoloVerify 95% Wilson upper bound</span><strong>0.622%</strong></div></div>
@@ -38,6 +38,7 @@
         <li><a href="#how-holoverify-works">How HoloVerify works</a></li>
         <li><a href="#how-policies-are-handled">How policies are handled and design partner API</a></li>
         <li><a href="#cost">Cost and safety premium</a></li>
+        <li><a href="#hard-objections">Hard objections</a></li>
         <li><a href="#audit-sources">Audit sources</a></li>
       </ul>
       <hr/>
@@ -266,6 +267,12 @@
 <blockquote><p>On the current clean locked denominator, HoloVerify has produced zero observed<br>false-positive or false-negative errors across 614 action-boundary packets,<br>with a measured statistical upper risk band.</p></blockquote>
 <hr/>
 </section>
+<section class="paper-section" id="hard-objections"><h2>Hard Objections</h2>
+<p>These are the objections a serious buyer, auditor, regulator, or engineer should raise. HoloVerify is stronger if these risks are named directly.</p>
+<div class="table-scroll"><table><thead><tr><th>Objection</th><th>Why It Is Real</th><th>HoloVerify Answer</th></tr></thead><tbody><tr><td>Frozen packets are cleaner than enterprise data.</td><td>Real records arrive as PDFs, emails, screenshots, stale ERP fields, partial tickets, and conflicting system exports.</td><td>The frozen benchmark proves the decision core after an action-boundary packet exists. Production also needs an Action Packet Compiler that normalizes messy inputs, assigns source IDs, maps policies/SOPs, and fails closed when evidence cannot be trusted.</td></tr><tr><td>Deterministic gates could become a maintenance burden.</td><td>Enterprise policies, SOPs, schemas, and approval rules change constantly.</td><td>The scalable product cannot be hand-coded gates forever. Policies and SOPs need to become versioned control packs: reviewed, hash-locked, regression-tested, and updated when the client changes its workflow.</td></tr><tr><td>Escalations could create alert fatigue.</td><td>If HoloVerify escalates too often, operators may see it as a blocker and route around it.</td><td>The rollout should start in shadow mode, measure natural escalation rates by action class, then gate only high-risk workflows. Production success is not only low FPR/FNR; it is useful escalations without breaking the operating team.</td></tr><tr><td>Model drift is a real dependency.</td><td>Foundation models change behavior, formatting, refusals, and latency over time.</td><td>The architecture treats models as replaceable reasoning engines, not final authorities. Canary packets, parser contracts, model-health checks, pinned rosters, and regression runs are part of operating the system.</td></tr><tr><td>Latency may not fit every action boundary.</td><td>Multi-turn Gov/worker adjudication is acceptable for AP, access, claims, or compliance review, but not every live transaction can wait.</td><td>HoloVerify should run in modes: fast deterministic ALLOW/ESCALATE when evidence is obvious, full Holo adjudication for ambiguous or high-risk cases, and async review for workflows where latency is acceptable.</td></tr><tr><td>The benchmark does not prove all production readiness.</td><td>A clean 614-packet result does not by itself prove messy ingestion, policy lifecycle, operator adoption, or client-specific latency.</td><td>Correct. The benchmark proves the governed decision core. Design-partner pilots must prove ingestion, policy/SOP compilation, escalation rate, trace delivery, and workflow fit.</td></tr></tbody></table></div>
+<p>The honest claim is narrower and stronger: HoloVerify has a hash-locked governed decision core that can be inspected. The next commercial proof is whether that core can be connected to messy enterprise inputs without creating maintenance or workflow drag.</p>
+<hr/>
+</section>
 <section class="paper-section" id="next-packet-families"><h2>Next Packet Families</h2>
 <p>The next packet expansion should prioritize more irreversible action boundaries, not generic reasoning tasks.</p>
 <p>Recommended next families:</p>
@@ -288,7 +295,7 @@
 </section>
   </main>
   <footer>
-    <div><strong>HoloEngine</strong><br>Version 7.60 · July 2026</div>
+    <div><strong>HoloEngine</strong><br>Version 7.61 · July 2026</div>
     <div><a href="/whitepaper">holoengine.ai/whitepaper</a><br><a href="/benchmark">holoengine.ai/benchmark</a></div>
   </footer>
   <script>

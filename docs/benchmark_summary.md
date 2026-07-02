@@ -47,6 +47,7 @@ paragraph.
 - [How HoloVerify works](#how-holoverify-works)
 - [How policies are handled and design partner API](#how-policies-are-handled)
 - [Cost and safety premium](#cost)
+- [Hard objections](#hard-objections)
 - [Audit sources](#audit-sources)
 
 ### Counted Families in the 614
@@ -644,6 +645,27 @@ This benchmark does claim:
 > On the current clean locked denominator, HoloVerify has produced zero observed
 > false-positive or false-negative errors across 614 action-boundary packets,
 > with a measured statistical upper risk band.
+
+---
+
+## Hard Objections
+
+These are the objections a serious buyer, auditor, regulator, or engineer should
+raise. HoloVerify is stronger if these risks are named directly.
+
+| Objection | Why It Is Real | HoloVerify Answer |
+| --- | --- | --- |
+| Frozen packets are cleaner than enterprise data. | Real records arrive as PDFs, emails, screenshots, stale ERP fields, partial tickets, and conflicting system exports. | The frozen benchmark proves the decision core after an action-boundary packet exists. Production also needs an Action Packet Compiler that normalizes messy inputs, assigns source IDs, maps policies/SOPs, and fails closed when evidence cannot be trusted. |
+| Deterministic gates could become a maintenance burden. | Enterprise policies, SOPs, schemas, and approval rules change constantly. | The scalable product cannot be hand-coded gates forever. Policies and SOPs need to become versioned control packs: reviewed, hash-locked, regression-tested, and updated when the client changes its workflow. |
+| Escalations could create alert fatigue. | If HoloVerify escalates too often, operators may see it as a blocker and route around it. | The rollout should start in shadow mode, measure natural escalation rates by action class, then gate only high-risk workflows. Production success is not only low FPR/FNR; it is useful escalations without breaking the operating team. |
+| Model drift is a real dependency. | Foundation models change behavior, formatting, refusals, and latency over time. | The architecture treats models as replaceable reasoning engines, not final authorities. Canary packets, parser contracts, model-health checks, pinned rosters, and regression runs are part of operating the system. |
+| Latency may not fit every action boundary. | Multi-turn Gov/worker adjudication is acceptable for AP, access, claims, or compliance review, but not every live transaction can wait. | HoloVerify should run in modes: fast deterministic ALLOW/ESCALATE when evidence is obvious, full Holo adjudication for ambiguous or high-risk cases, and async review for workflows where latency is acceptable. |
+| The benchmark does not prove all production readiness. | A clean 614-packet result does not by itself prove messy ingestion, policy lifecycle, operator adoption, or client-specific latency. | Correct. The benchmark proves the governed decision core. Design-partner pilots must prove ingestion, policy/SOP compilation, escalation rate, trace delivery, and workflow fit. |
+
+The honest claim is narrower and stronger: HoloVerify has a hash-locked governed
+decision core that can be inspected. The next commercial proof is whether that
+core can be connected to messy enterprise inputs without creating maintenance or
+workflow drag.
 
 ---
 

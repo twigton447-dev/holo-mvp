@@ -1,0 +1,47 @@
+{
+  "classification": "HOLOVERIFY_BLIND_RUNNER_V0_FABLE_THIRD_BLOCK_REPAIR_REPORT",
+  "created_at": "2026-07-02",
+  "status": "LOCAL_NO_PROVIDER_REPAIR_COMPLETE",
+  "provider_calls": 0,
+  "judge_calls": 0,
+  "fable_verdict_repaired": "BLOCK_CANARY",
+  "repairs": {
+    "B1_public_private_salt": {
+      "status": "repaired",
+      "implementation": "build-time secrets.token_hex(32); stored only in post-hoc scoring map",
+      "validation": "T5 asserts old public bank-hash recipe does not match private_runtime_salt"
+    },
+    "B2_no_live_execution_harness": {
+      "status": "repaired",
+      "implementation": "holoverify_blind_runner_v0.run_blind_runtime_manifest",
+      "validation": "T5 filesystem-isolation shim restricts reads to runtime manifest and opaque payloads, writes to out_dir"
+    },
+    "B3_import_closure_ast_scan": {
+      "status": "repaired",
+      "implementation": "blind_lane_suite.static_guards.source_import_closure and scan_import_closure_for_truth_reachability",
+      "validation": "T2 scans registered runner repo-local import closure"
+    }
+  },
+  "current_local_result": {
+    "passed": 31,
+    "skipped": 0,
+    "failed": 0
+  },
+  "regenerated_package": {
+    "audit_manifest": "docs/benchmark/holoverify_blind_canary_manifest_2026_07_02.json",
+    "runtime_manifest": "docs/benchmark/holoverify_blind_canary_runtime_manifest_2026_07_02.json",
+    "posthoc_scoring_map": "docs/benchmark/holoverify_blind_canary_scoring_map_2026_07_02.json",
+    "runtime_payload_dir": "docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/",
+    "prompt_dir": "docs/benchmark/blind_lane_fixture_prompts_2026_07_02/prompts/"
+  },
+  "hashes": {
+    "audit_manifest_sha256": "fa6a32cde377ca4d32387fae697b9a11b07fb977de4ff95572ee306c3147adcb",
+    "runtime_manifest_sha256": "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7",
+    "posthoc_scoring_map_sha256": "5bb6fea5c3f2d72ae0b092eb168aeebc6ab4dcd6bc897b784c563dc455822c2b"
+  },
+  "runtime_ordering": {
+    "truth_sequence_after_opaque_id_sort": "EAEEAEEEAAAAEAEAEAEA",
+    "adjacent_sibling_pairs": 1
+  },
+  "claim_boundary": "No benchmark evidence. No live canary until explicit PASS_TO_CANARY."
+}

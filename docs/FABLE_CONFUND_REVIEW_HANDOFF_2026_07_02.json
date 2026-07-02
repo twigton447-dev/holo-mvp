@@ -1,0 +1,36 @@
+{
+  "classification": "READ_ONLY_FABLE_CONFUND_REVIEW_HANDOFF",
+  "created_at": "2026-07-02",
+  "provider_calls": 0,
+  "judge_calls": 0,
+  "codex_role": "execute_repo_local_audit_and_prepare_blind_gate_spec",
+  "fable_role": "adversarial_review_only",
+  "files_to_review": [
+    "docs/benchmark/FABLE_ORACLE_INFLUENCE_CENSUS_2026_07_02.md",
+    "docs/benchmark/FABLE_ORACLE_INFLUENCE_CENSUS_2026_07_02.json",
+    "docs/benchmark/FABLE_RUN_FUNNEL_RECONCILIATION_2026_07_02.md",
+    "docs/benchmark/FABLE_RUN_FUNNEL_RECONCILIATION_2026_07_02.json",
+    "docs/benchmark/FABLE_RUN_FUNNEL_RECONCILIATION_2026_07_02.csv",
+    "docs/benchmark/HOLOVERIFY_BLIND_GATE_REPLICATION_SPEC_2026_07_02.md",
+    "docs/benchmark/HOLOVERIFY_BLIND_GATE_REPLICATION_SPEC_2026_07_02.json",
+    "docs/benchmark/FABLE_BLIND_LANE_DISCONFIRMATION_BATTERY_2026_07_02.md",
+    "docs/benchmark/audit_holoverify_oracle_confounds_2026_07_02.py"
+  ],
+  "forbidden": [
+    "edit_frozen_evidence",
+    "run_providers",
+    "run_judges",
+    "change_packet_truths",
+    "change_prompt_payloads",
+    "reclassify_invalid_runs_as_successful",
+    "publish_new_public_claims"
+  ],
+  "review_questions": [
+    "Does the audit correctly identify every truth-conditioned runtime path?",
+    "Are any truth-conditioned paths missed because they use different wording?",
+    "Does the run funnel distinguish invalid traces, complete traces, and included public evidence cleanly enough?",
+    "Is the blind-gate replication spec strict enough to prevent reward hacking?",
+    "What no-provider fixtures should be added before any live blind-gate canary?",
+    "Does the updated spec faithfully incorporate T1-T7 from the disconfirmation battery?"
+  ]
+}

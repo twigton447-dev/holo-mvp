@@ -1,0 +1,70 @@
+{
+  "classification": "FABLE_BLIND_RUNNER_V0_REVIEW_HANDOFF",
+  "created_at": "2026-07-02",
+  "provider_calls": 0,
+  "judge_calls": 0,
+  "status": "READY_FOR_READ_ONLY_ADVERSARIAL_REREVIEW_AFTER_BLOCK_REPAIR",
+  "current_local_result": {
+    "passed": 31,
+    "skipped": 0,
+    "failed": 0
+  },
+  "block_repair_summary": {
+    "F1": "seed derived from frozen bank hash; no author-selected seed; no redraw loop",
+    "F2": "prompt fixtures cover full 20-packet canary set",
+    "F3": "T1 detector validation uses synthetic dirty prompt",
+    "F4": "T5 uses one-sided exact binomial skew check",
+    "F5": "runtime manifest/payloads split from post-hoc scoring map",
+    "F6": "canary samples 10 sibling pairs with both sides",
+    "F7": "contradiction_free criterion backed by structural gate failures",
+    "F8": "max output budget set to 1024 and checked by T6",
+    "F9": "selector tie-break prefers earliest turn",
+    "second_F1": "runtime manifest sorted by opaque ID hash order; ordering parity test added",
+    "second_F2": "runtime manifest strips bank hash and seed material",
+    "second_F3": "first-turn bank frozen to disk and hash-pinned",
+    "second_F4": "runtime/scoring split tests added",
+    "third_B1": "private runtime salt uses build-time secrets.token_hex(32), stored only in post-hoc scoring map",
+    "third_B2": "live executor surface run_blind_runtime_manifest added and bound by filesystem-isolation test",
+    "third_B3": "registered runner import closure is scanned for truth reachability"
+  },
+  "current_package": {
+    "runtime_truth_sequence_after_opaque_sort": "EAEEAEEEAAAAEAEAEAEA",
+    "adjacent_sibling_pairs_in_runtime_order": 1,
+    "runtime_manifest_sha256": "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7",
+    "posthoc_scoring_map_sha256": "5bb6fea5c3f2d72ae0b092eb168aeebc6ab4dcd6bc897b784c563dc455822c2b"
+  },
+  "files_to_review": [
+    "holoverify_blind_runner_v0.py",
+    "docs/benchmark/generate_blind_lane_fixture_prompts_2026_07_02.py",
+    "docs/benchmark/build_blind_canary_manifest_2026_07_02.py",
+    "docs/benchmark/blind_lane_fixture_prompts_2026_07_02/prompts/",
+    "docs/benchmark/holoverify_blind_canary_manifest_2026_07_02.json",
+    "docs/benchmark/holoverify_blind_canary_runtime_manifest_2026_07_02.json",
+    "docs/benchmark/holoverify_blind_canary_scoring_map_2026_07_02.json",
+    "docs/benchmark/HOLOVERIFY_BLIND_GATE_REPLICATION_SPEC_2026_07_02.md",
+    "docs/benchmark/HOLOVERIFY_BLIND_RUNNER_V0_NO_PROVIDER_PROOF_2026_07_02.md",
+    "docs/benchmark/HOLOVERIFY_BLIND_RUNNER_V0_FABLE_THIRD_BLOCK_REPAIR_REPORT_2026_07_02.md",
+    "docs/benchmark/FABLE_BLIND_LANE_SUITE_IMPLEMENTATION_NOTES_2026_07_02.md",
+    "tests/test_blind_lane_t1_id_channel.py",
+    "tests/test_blind_lane_t2_poisoned_spec.py",
+    "tests/test_blind_lane_t3_hash_chain.py",
+    "tests/test_blind_lane_t4_selector_sweep.py",
+    "tests/test_blind_lane_t5_canary_skew.py",
+    "tests/test_blind_lane_t6_budget_parity.py",
+    "tests/test_blind_lane_t7_claim_lint.py",
+    "blind_lane_suite/"
+  ],
+  "requested_verdicts": [
+    "PASS_TO_CANARY",
+    "BLOCK_CANARY"
+  ],
+  "review_focus": [
+    "truth_channel",
+    "reward_hacking_path",
+    "selector_loophole",
+    "artifact_mutation_risk",
+    "sampling_or_cherry_picking_risk",
+    "budget_retry_risk",
+    "claim_boundary_risk"
+  ]
+}

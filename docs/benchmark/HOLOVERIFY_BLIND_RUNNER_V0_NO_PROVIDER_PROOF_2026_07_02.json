@@ -1,0 +1,53 @@
+{
+  "classification": "HOLOVERIFY_BLIND_RUNNER_V0_NO_PROVIDER_PROOF",
+  "created_at": "2026-07-02",
+  "provider_calls": 0,
+  "judge_calls": 0,
+  "runner_module": "holoverify_blind_runner_v0",
+  "prompt_dir": "docs/benchmark/blind_lane_fixture_prompts_2026_07_02/prompts",
+  "canary_manifest": "docs/benchmark/holoverify_blind_canary_manifest_2026_07_02.json",
+  "pytest_command": "BLIND_RUNNER_MODULE=holoverify_blind_runner_v0 BLIND_LANE_PROMPTS_DIR=docs/benchmark/blind_lane_fixture_prompts_2026_07_02/prompts python3 -B -m pytest -q -rs tests/test_blind_lane_t1_id_channel.py tests/test_blind_lane_t2_poisoned_spec.py tests/test_blind_lane_t3_hash_chain.py tests/test_blind_lane_t4_selector_sweep.py tests/test_blind_lane_t5_canary_skew.py tests/test_blind_lane_t6_budget_parity.py tests/test_blind_lane_t7_claim_lint.py",
+  "pytest_result": {
+    "passed": 31,
+    "skipped": 0,
+    "failed": 0
+  },
+  "prompt_scan": {
+    "prompt_files_scanned": 100,
+    "suffix_channel_hit_count": 0,
+    "deterministic_tokens": [],
+    "violation": false
+  },
+  "static_guard": {
+    "runner_findings": [],
+    "runner_import_closure_findings": []
+  },
+  "canary_manifest_summary": {
+    "seed": "derived_from_bank_hash_no_author_seed",
+    "packet_count": 20,
+    "pair_count": 10,
+    "legacy_allow_count": 10,
+    "legacy_escalate_count": 10,
+    "bank_first_turn_rate": 0.9043887147335423,
+    "sample_first_turn_rate": 0.9,
+    "one_sided_binomial_p_value": 0.7018792921880527,
+    "skew_violation": false,
+    "bank_hash": "a686aaf1eb4bb7e7ec49a82fbae540b8bdb78a3569e4f100bdb15ac6ddb303e7",
+    "frozen_bank": "docs/benchmark/holoverify_blind_canary_bank_2026_07_02.json",
+    "runtime_manifest": "docs/benchmark/holoverify_blind_canary_runtime_manifest_2026_07_02.json",
+    "scoring_map": "docs/benchmark/holoverify_blind_canary_scoring_map_2026_07_02.json",
+    "runtime_truth_sequence_after_opaque_sort": "EAEEAEEEAAAAEAEAEAEA",
+    "adjacent_sibling_pairs_in_runtime_order": 1
+  },
+  "manifest_hashes": {
+    "audit_manifest_sha256": "fa6a32cde377ca4d32387fae697b9a11b07fb977de4ff95572ee306c3147adcb",
+    "runtime_manifest_sha256": "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7",
+    "posthoc_scoring_map_sha256": "5bb6fea5c3f2d72ae0b092eb168aeebc6ab4dcd6bc897b784c563dc455822c2b"
+  },
+  "runtime_executor": {
+    "surface": "holoverify_blind_runner_v0.run_blind_runtime_manifest",
+    "filesystem_isolation_test": "PASS",
+    "expected_calls_under_injected_transport": 100
+  },
+  "claim_limit": "This proves only that the no-provider runner fixture currently shows no detected truth channel under T1-T7. It is not a live benchmark result and not an error-rate claim."
+}

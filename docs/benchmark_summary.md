@@ -34,6 +34,11 @@ deterministic gate results, token accounting, and final-selection rationale can
 be stored by the customer or delivered to an auditor as a tamper-evident record
 of why the system allowed or escalated the action.
 
+For insurance, compliance, and regulated operations, that means a claims team,
+coverage reviewer, risk officer, or regulator can see the exact evidence path
+behind a decision instead of reconstructing it from chat logs or a final
+paragraph.
+
 ## On This Page
 
 - [Result and counted families](#holoverify-result)
@@ -548,8 +553,9 @@ Example response:
 The response is not only a yes/no decision. It can include or point to an
 immutable decision evidence pack: the policy version, cited records, clear
 rationale, Gov/worker trace, deterministic gate results, token accounting, and
-final-selector reason. That gives audit, compliance, legal, and operations teams
-a record they can store in GRC, ERP, ticketing, or case-management systems.
+final-selector reason. That gives audit, compliance, insurance, legal, and
+operations teams a record they can store in GRC, ERP, claims, ticketing, or
+case-management systems.
 
 Physically, this means:
 

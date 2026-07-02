@@ -2,19 +2,19 @@
 
 | Metric | Errors | n | Exact 95% upper bound | Wilson 95% upper bound |
 | --- | ---: | ---: | ---: | ---: |
-| Overall packet error | 0 | 564 | 0.530% | 0.677% |
-| False positive rate | 0 | 282 | 1.057% | 1.344% |
-| False negative rate | 0 | 282 | 1.057% | 1.344% |
+| Overall packet error | 0 | 614 | 0.487% | 0.622% |
+| False positive rate | 0 | 307 | 0.971% | 1.236% |
+| False negative rate | 0 | 307 | 0.971% | 1.236% |
 
 **What this table measures:** the full HoloVerify governed architecture across
-564 clean frozen action-boundary packets. This is the Holo result, not a solo
+614 clean frozen action-boundary packets. This is the Holo result, not a solo
 model result.
 
 **What it is compared against:** the same mini-model families run alone as
 one-shot solo baselines. Solo gets one call per packet. No Gov, no shared state,
 no deterministic rescue layer, and no final selector.
 
-### Counted Families in the 564
+### Counted Families in the 614
 
 | Family | Domain | Packets | HoloVerify |
 | --- | --- | ---: | ---: |
@@ -23,7 +23,7 @@ no deterministic rescue layer, and no final selector.
 | Agentic Commerce Order Execution | Refunds, purchases, fulfillment, credits, and order-release controls | 40 | 40/40 |
 | IT Access Permission Change | Admin access, role escalation, offboarding, and break-glass controls | 40 | 40/40 |
 | Wave2-4 Expansion | HR, privacy, finance, government, benefits, banking, defense admin, insurance, and utilities | 174 | 174/174 |
-| Wave5 Clean Batches Entered | Medical, treasury, legal, infrastructure, security, and public-sector controls | 230 | 230/230 |
+| Wave5 Completed 7-Domain Expansion | Medical, treasury, legal, infrastructure, security, public-sector, and operational technology controls | 280 | 280/280 |
 
 ### Holo vs Solo, By Domain
 
@@ -49,7 +49,7 @@ structure. That is stricter than "sounded plausible."
 
 Important scope note: the Holo-vs-solo table above uses the matched 100-packet
 solo comparison slice. The domain Wilson table below uses the full current
-564-packet Holo denominator.
+614-packet Holo denominator.
 
 ### Holo Domain Risk Bounds
 
@@ -77,7 +77,8 @@ Each domain has its own denominator, so each domain has its own 95% upper bound.
 | Legal / regulatory filing controls | 40 | 0 | 7.216% | 8.762% |
 | Cloud infrastructure controls | 40 | 0 | 7.216% | 8.762% |
 | Security operations controls | 40 | 0 | 7.216% | 8.762% |
-| Public-sector records controls | 30 | 0 | 9.503% | 11.352% |
+| Public-sector records controls | 40 | 0 | 7.216% | 8.762% |
+| Operational technology / industrial safety controls | 40 | 0 | 7.216% | 8.762% |
 
 ### Models Used
 
@@ -165,25 +166,25 @@ The current clean benchmark-grade HoloVerify counted sample is:
 
 | Metric | Value |
 | --- | ---: |
-| Frozen action-boundary packets | 564 |
-| Sibling pairs | 282 |
-| ALLOW truths | 282 |
-| ESCALATE truths | 282 |
-| Correct HoloVerify packets | 564 |
+| Frozen action-boundary packets | 614 |
+| Sibling pairs | 307 |
+| ALLOW truths | 307 |
+| ESCALATE truths | 307 |
+| Correct HoloVerify packets | 614 |
 | Observed false positives | 0 |
 | Observed false negatives | 0 |
 
 Observed result:
 
-> HoloVerify produced zero observed false positives and zero observed false negatives across 564 clean benchmark-grade action-boundary packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
+> HoloVerify produced zero observed false positives and zero observed false negatives across 614 clean benchmark-grade action-boundary packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
 
 The honest statistical statement is:
 
 | Metric | Errors | n | Exact 95% upper bound | Wilson 95% upper bound |
 | --- | ---: | ---: | ---: | ---: |
-| Overall packet error | 0 | 564 | 0.530% | 0.677% |
-| False positive rate | 0 | 282 | 1.057% | 1.344% |
-| False negative rate | 0 | 282 | 1.057% | 1.344% |
+| Overall packet error | 0 | 614 | 0.487% | 0.622% |
+| False positive rate | 0 | 307 | 0.971% | 1.236% |
+| False negative rate | 0 | 307 | 0.971% | 1.236% |
 
 Exact and Wilson are two standard ways to put a confidence band around an error
 rate. They answer the same basic question:
@@ -197,14 +198,14 @@ bounded by the confidence interval.
 
 In simpler terms:
 
-> We saw zero errors in 564 counted packets. Statistics still requires humility:
+> We saw zero errors in 614 counted packets. Statistics still requires humility:
 > the real error rate could be above zero, so we report the upper bound.
 
-Plain English: this moved the benchmark from roughly under 1.14% packet-level
-Wilson risk to roughly under 0.68% packet-level Wilson risk.
+Plain English: this moved the benchmark from roughly under 0.68% packet-level
+Wilson risk to roughly under 0.62% packet-level Wilson risk.
 
 The stricter false-positive and false-negative side-specific number is higher
-because each side has half the examples: 282 ALLOW and 282 ESCALATE.
+because each side has half the examples: 307 ALLOW and 307 ESCALATE.
 
 ---
 
@@ -220,12 +221,12 @@ The business question is:
 Side-specific false-positive and false-negative risk is the primary safety bar
 because ALLOW and ESCALATE fail in different ways.
 
-| Target side-specific upper bound | Required ALLOW examples | Required ESCALATE examples | Required total packets | Additional packets from current 564 |
+| Target side-specific upper bound | Required ALLOW examples | Required ESCALATE examples | Required total packets | Additional packets from current 614 |
 | --- | ---: | ---: | ---: | ---: |
-| < 1.0% | 299 | 299 | 598 | 34 |
-| < 0.5% | 598 | 598 | 1,196 | 632 |
-| < 0.25% | 1,197 | 1,197 | 2,394 | 1,830 |
-| < 0.1% | 2,995 | 2,995 | 5,990 | 5,426 |
+| < 1.0% | 299 | 299 | 598 | 0 |
+| < 0.5% | 598 | 598 | 1,196 | 582 |
+| < 0.25% | 1,197 | 1,197 | 2,394 | 1,780 |
+| < 0.1% | 2,995 | 2,995 | 5,990 | 5,376 |
 
 Recommended threshold policy:
 
@@ -250,7 +251,7 @@ error rate.
 
 That distinction matters.
 
-If HoloVerify gets 564 out of 564 packets right, the observed error rate is 0%.
+If HoloVerify gets 614 out of 614 packets right, the observed error rate is 0%.
 But the real world is larger than the sample. A perfect sample does not prove a
 perfect system.
 
@@ -297,8 +298,8 @@ the positive event.
 
 | Actual / Predicted | ESCALATE | ALLOW |
 | --- | ---: | ---: |
-| Actual ESCALATE | Correctly escalated = 282 | Missed escalation = 0 |
-| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 282 |
+| Actual ESCALATE | Correctly escalated = 307 | Missed escalation = 0 |
+| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 307 |
 
 Observed rates:
 
@@ -369,7 +370,7 @@ That is the benchmark's main architecture finding.
 
 ## What Counts
 
-Only clean benchmark-grade evidence is counted in the 564-packet denominator.
+Only clean benchmark-grade evidence is counted in the 614-packet denominator.
 
 Included:
 
@@ -404,7 +405,7 @@ as on what is counted.
 | Agentic Commerce Order Execution | Order execution controls | 40 | 20 | 40/40 |
 | IT Access Permission Change | Access / privilege controls | 40 | 20 | 40/40 |
 | Wave2-4 Expansion | HR, privacy, finance, government, benefits, banking, defense admin, insurance, utilities | 174 | 87 | 174/174 |
-| Wave5 Clean Batches Entered | Medical, treasury, legal, infrastructure, security, and public-sector controls | 230 | 115 | 230/230 |
+| Wave5 Completed 7-Domain Expansion | Medical, treasury, legal, infrastructure, security, public-sector, and operational technology controls | 280 | 140 | 280/280 |
 
 Other locked evidence exists, but is not counted in the clean denominator:
 
@@ -514,7 +515,7 @@ This benchmark does not claim:
 This benchmark does claim:
 
 > On the current clean locked denominator, HoloVerify has produced zero observed
-> false-positive or false-negative errors across 564 action-boundary packets,
+> false-positive or false-negative errors across 614 action-boundary packets,
 > with a measured statistical upper risk band.
 
 ---

@@ -24,6 +24,7 @@ DOMAIN_LEDGER = (
 )
 WAVE_COMBINED = BENCHMARK_ROOT / "HOLOVERIFY_WAVE2_WAVE3_WAVE4_COMBINED_EVIDENCE_MEMO_2026_07_01.json"
 WAVE34_FINAL = BENCHMARK_ROOT / "HOLOVERIFY_WAVE3_WAVE4_FINAL_EVIDENCE_MEMO_2026_07_01.json"
+WAVE5_COMPLETED = BENCHMARK_ROOT / "HOLOVERIFY_WAVE5_COMPLETED_BATCH_EVIDENCE_2026_07_01.json"
 
 OUT_JSON = BENCHMARK_ROOT / "HOLOVERIFY_STATISTICAL_APPENDIX_2026_07_01.json"
 OUT_MD = BENCHMARK_ROOT / "HOLOVERIFY_STATISTICAL_APPENDIX_2026_07_01.md"
@@ -89,6 +90,13 @@ def zero_error_n_for_upper_below(threshold: float, alpha: float = ALPHA) -> int:
 
 def pct(value: float) -> float:
     return round(value * 100.0, 6)
+
+
+def pct_label(value: float) -> str:
+    text = f"{value:.2f}".rstrip("0").rstrip(".")
+    if "." not in text:
+        text += ".0"
+    return text
 
 
 def rate(num: int, den: int) -> float:
@@ -183,13 +191,60 @@ def wave_family_from_combined(wave: dict[str, Any], wave34: dict[str, Any]) -> d
     }
 
 
+def wave5_family_from_completed(wave5: dict[str, Any]) -> dict[str, Any]:
+    totals = wave5["totals"]
+    required = {
+        "completed_batches": 28,
+        "completed_pairs": 140,
+        "completed_packets": 280,
+        "completed_correct_packets": 280,
+        "allow_packets": 140,
+        "allow_correct": 140,
+        "escalate_packets": 140,
+        "escalate_correct": 140,
+        "observed_provider_calls_for_completed_batches": 1400,
+        "expected_provider_calls_for_completed_batches": 1400,
+        "judge_calls": 0,
+        "invalid_batches": 0,
+    }
+    mismatches = {key: (totals.get(key), expected) for key, expected in required.items() if totals.get(key) != expected}
+    if mismatches:
+        raise RuntimeError(f"wave5_completed_totals_mismatch:{mismatches}")
+    if wave5.get("status") != "PASS" or wave5.get("evidence_state") != "WAVE5_COMPLETE":
+        raise RuntimeError("wave5_completed_status_mismatch")
+    return {
+        "evidence_family": "Wave5 Completed 7-Domain Expansion / Medical-Treasury-Legal-Cloud-Security-PublicSector-OT",
+        "domains": [
+            "Medical treatment activation controls",
+            "Treasury / wire controls",
+            "Legal / regulatory filing controls",
+            "Cloud infrastructure controls",
+            "Security operations controls",
+            "Public-sector records controls",
+            "Operational technology / industrial safety controls",
+        ],
+        "packets": totals["completed_packets"],
+        "pairs": totals["completed_pairs"],
+        "correct_packets": totals["completed_correct_packets"],
+        "errors": totals["completed_packets"] - totals["completed_correct_packets"],
+        "source": "wave5_completed_batch_evidence",
+        "source_roots": {
+            "wave5_status": wave5.get("status"),
+            "wave5_evidence_state": wave5.get("evidence_state"),
+            "wave5_root_signature": wave5.get("root_signature"),
+        },
+    }
+
+
 def build() -> dict[str, Any]:
     ledger = load_json(DOMAIN_LEDGER)
     wave = load_json(WAVE_COMBINED)
     wave34 = load_json(WAVE34_FINAL)
+    wave5 = load_json(WAVE5_COMPLETED)
 
     included = included_families_from_ledger(ledger)
     included.append(wave_family_from_combined(wave, wave34))
+    included.append(wave5_family_from_completed(wave5))
     excluded = excluded_families_from_ledger(ledger)
 
     packets = sum(row["packets"] for row in included)
@@ -199,7 +254,7 @@ def build() -> dict[str, Any]:
     allow_truths = pairs
     escalate_truths = pairs
 
-    if packets != 334 or pairs != 167:
+    if packets != 614 or pairs != 307:
         raise RuntimeError(f"unexpected_grand_total:{packets}_packets_{pairs}_pairs")
     if errors != 0:
         raise RuntimeError(f"unexpected_errors:{errors}")
@@ -215,7 +270,7 @@ def build() -> dict[str, Any]:
     per_class_wilson = wilson_upper_zero_errors(allow_truths)
 
     sample_size_targets = []
-    for threshold in (0.05, 0.025, 0.01, 0.005):
+    for threshold in (0.01, 0.005, 0.0025, 0.001):
         n = zero_error_n_for_upper_below(threshold)
         sample_size_targets.append(
             {
@@ -241,6 +296,8 @@ def build() -> dict[str, Any]:
             "wave2_wave3_wave4_combined_evidence_sha256": sha256_file(WAVE_COMBINED),
             "wave3_wave4_final_evidence": str(WAVE34_FINAL.relative_to(BENCHMARK_ROOT)),
             "wave3_wave4_final_evidence_sha256": sha256_file(WAVE34_FINAL),
+            "wave5_completed_batch_evidence": str(WAVE5_COMPLETED.relative_to(BENCHMARK_ROOT)),
+            "wave5_completed_batch_evidence_sha256": sha256_file(WAVE5_COMPLETED),
         },
         "claim_boundary": {
             "included_denominator": "clean benchmark-grade HoloVerify action-boundary packets only",
@@ -315,30 +372,30 @@ def build() -> dict[str, Any]:
         "sample_size_planning": sample_size_targets,
         "plain_english": {
             "current_claim": (
-                "Across 334 clean benchmark-grade HoloVerify action-boundary packets, "
+                "Across 614 clean benchmark-grade HoloVerify action-boundary packets, "
                 "the architecture observed 0 errors. The exact one-sided 95% upper "
-                "bound on packet-level error is 0.893%, with a Wilson upper band of 1.137%."
+                "bound on packet-level error is 0.487%, with a Wilson upper band of 0.622%."
             ),
             "per_class_claim": (
-                "With 167 ALLOW and 167 ESCALATE truths, observed FPR and FNR are 0%. "
-                "The exact one-sided 95% upper bound per side is 1.778%, with a Wilson upper band of 2.248%."
+                "With 307 ALLOW and 307 ESCALATE truths, observed FPR and FNR are 0%. "
+                "The exact one-sided 95% upper bound per side is 0.971%, with a Wilson upper band of 1.236%."
             ),
             "zero_error_caveat": (
                 "Zero observed errors means no failures appeared in this locked sample. "
                 "It does not prove the true error rate is zero; it means the plausible upper risk is bounded by the confidence interval."
             ),
             "next_statistical_milestone": (
-                "A balanced 299 ALLOW / 299 ESCALATE zero-error denominator is enough to put FPR and FNR exact one-sided 95% upper bounds below 1%."
+                "The clean benchmark-grade denominator now clears the balanced 299 ALLOW / 299 ESCALATE threshold for FPR and FNR exact one-sided 95% upper bounds below 1%."
             ),
         },
         "assertions": {
-            "packets_334": "PASS",
-            "pairs_167": "PASS",
-            "allow_truths_167": "PASS",
-            "escalate_truths_167": "PASS",
+            "packets_614": "PASS",
+            "pairs_307": "PASS",
+            "allow_truths_307": "PASS",
+            "escalate_truths_307": "PASS",
             "observed_errors_zero": "PASS",
-            "tp_167": "PASS",
-            "tn_167": "PASS",
+            "tp_307": "PASS",
+            "tn_307": "PASS",
             "fp_zero": "PASS",
             "fn_zero": "PASS",
             "no_provider_calls": "PASS",
@@ -447,7 +504,7 @@ def render_md(report: dict[str, Any]) -> str:
     )
     for row in report["sample_size_planning"]:
         lines.append(
-            f"| < {row['target_upper_bound_percent']:.1f}% | "
+            f"| < {pct_label(row['target_upper_bound_percent'])}% | "
             f"{row['zero_error_n_required_exact_one_sided']} | "
             f"{row['additional_packets_needed_for_overall']} | "
             f"{row['additional_balanced_pairs_needed_for_both_fpr_and_fnr']} | "

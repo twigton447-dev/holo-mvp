@@ -1,19 +1,19 @@
 # HoloVerify Statistical Appendix
 
 Classification: `HOLOVERIFY_STATISTICAL_APPENDIX_NO_PROVIDER_2026_07_01`
-Root signature: `5f2d56c95c6b063ecfe616b7b7f197c40dc5901f221c911b10c4ed2ca7c0e172`
+Root signature: `6ae112ed1043af2f0182e8f6bf6e5e0d7e6246f7dcd2d1cb446eb0c3ffddc8f8`
 
 This appendix packages the current clean benchmark-grade HoloVerify action-boundary denominator.
 It was generated without provider calls and excludes canaries, precursors, and missing-evidence rows.
 
 ## Current Denominator
 
-- Packets: `334`
-- Correct packets: `334`
+- Packets: `614`
+- Correct packets: `614`
 - Observed errors: `0`
-- Sibling pairs: `167`
-- ALLOW truths: `167`
-- ESCALATE truths: `167`
+- Sibling pairs: `307`
+- ALLOW truths: `307`
+- ESCALATE truths: `307`
 
 ## Confusion Matrix
 
@@ -21,8 +21,8 @@ Positive class: `ESCALATE`. Negative class: `ALLOW`.
 
 | Metric | Count |
 | --- | ---: |
-| TP | 167 |
-| TN | 167 |
+| TP | 307 |
+| TN | 307 |
 | FP | 0 |
 | FN | 0 |
 
@@ -39,9 +39,9 @@ Positive class: `ESCALATE`. Negative class: `ALLOW`.
 
 | Metric | Errors | n | Exact one-sided 95% upper | Wilson 95% upper | Rule of three |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Overall packet error | 0 | 334 | 0.893% | 1.137% | 0.898% |
-| False positive rate | 0 | 167 | 1.778% | 2.249% | 1.796% |
-| False negative rate | 0 | 167 | 1.778% | 2.249% | 1.796% |
+| Overall packet error | 0 | 614 | 0.487% | 0.622% | 0.489% |
+| False positive rate | 0 | 307 | 0.971% | 1.236% | 0.977% |
+| False negative rate | 0 | 307 | 0.971% | 1.236% | 0.977% |
 
 ## Included Evidence Families
 
@@ -52,6 +52,7 @@ Positive class: `ESCALATE`. Negative class: `ALLOW`.
 | `IT Access / Permission Change Replication` | 40 | 20 | 40 | `domain_consolidation_ledger` |
 | `Vendor-Master Payment Controls / AP Replication` | 40 | 20 | 40 | `domain_consolidation_ledger` |
 | `Wave2+Wave3+Wave4 / HR-Privacy-Finance-Government-Benefits-Banking-Defense-Insurance-Utilities` | 174 | 87 | 174 | `wave2_wave3_wave4_combined_evidence` |
+| `Wave5 Completed 7-Domain Expansion / Medical-Treasury-Legal-Cloud-Security-PublicSector-OT` | 280 | 140 | 280 | `wave5_completed_batch_evidence` |
 
 ## Excluded From Clean Denominator
 
@@ -66,10 +67,10 @@ Positive class: `ESCALATE`. Negative class: `ALLOW`.
 
 | Target upper bound | n needed with zero errors | More packets for overall | More balanced pairs for both FP/FN | More balanced packets for both FP/FN |
 | ---: | ---: | ---: | ---: | ---: |
-| < 5.0% | 59 | 0 | 0 | 0 |
-| < 2.5% | 119 | 0 | 0 | 0 |
-| < 1.0% | 299 | 0 | 132 | 264 |
-| < 0.5% | 598 | 264 | 431 | 862 |
+| < 1.0% | 299 | 0 | 0 | 0 |
+| < 0.5% | 598 | 0 | 291 | 582 |
+| < 0.25% | 1197 | 583 | 890 | 1780 |
+| < 0.1% | 2995 | 2381 | 2688 | 5376 |
 
 ## Why Zero Errors Does Not Mean Zero Risk
 
@@ -77,23 +78,23 @@ Zero observed errors means no failures appeared in this locked sample. It does n
 
 The current honest packet-level statement is:
 
-> Across 334 clean benchmark-grade HoloVerify action-boundary packets, the architecture observed 0 errors. The exact one-sided 95% upper bound on packet-level error is 0.893%, with a Wilson upper band of 1.137%.
+> Across 614 clean benchmark-grade HoloVerify action-boundary packets, the architecture observed 0 errors. The exact one-sided 95% upper bound on packet-level error is 0.487%, with a Wilson upper band of 0.622%.
 
 The current honest FP/FN statement is:
 
-> With 167 ALLOW and 167 ESCALATE truths, observed FPR and FNR are 0%. The exact one-sided 95% upper bound per side is 1.778%, with a Wilson upper band of 2.248%.
+> With 307 ALLOW and 307 ESCALATE truths, observed FPR and FNR are 0%. The exact one-sided 95% upper bound per side is 0.971%, with a Wilson upper band of 1.236%.
 
 ## Assertions
 
 | Assertion | Status |
 | --- | --- |
-| `packets_334` | `PASS` |
-| `pairs_167` | `PASS` |
-| `allow_truths_167` | `PASS` |
-| `escalate_truths_167` | `PASS` |
+| `packets_614` | `PASS` |
+| `pairs_307` | `PASS` |
+| `allow_truths_307` | `PASS` |
+| `escalate_truths_307` | `PASS` |
 | `observed_errors_zero` | `PASS` |
-| `tp_167` | `PASS` |
-| `tn_167` | `PASS` |
+| `tp_307` | `PASS` |
+| `tn_307` | `PASS` |
 | `fp_zero` | `PASS` |
 | `fn_zero` | `PASS` |
 | `no_provider_calls` | `PASS` |

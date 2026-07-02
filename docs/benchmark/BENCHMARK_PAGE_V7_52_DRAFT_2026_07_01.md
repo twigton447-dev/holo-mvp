@@ -45,17 +45,17 @@ The current clean benchmark-grade HoloVerify denominator is:
 
 | Metric | Value |
 | --- | ---: |
-| Frozen action-boundary packets | 334 |
-| Sibling pairs | 167 |
-| ALLOW truths | 167 |
-| ESCALATE truths | 167 |
-| Correct HoloVerify packets | 334 |
+| Frozen action-boundary packets | 614 |
+| Sibling pairs | 307 |
+| ALLOW truths | 307 |
+| ESCALATE truths | 307 |
+| Correct HoloVerify packets | 614 |
 | Observed FP errors | 0 |
 | Observed FN errors | 0 |
 
 Observed result:
 
-> HoloVerify solved 334/334 clean benchmark-grade action-boundary packets with
+> HoloVerify solved 614/614 clean benchmark-grade action-boundary packets with
 > zero observed false positives and zero observed false negatives.
 
 That does not mean zero risk.
@@ -64,9 +64,9 @@ The honest statistical statement is:
 
 | Metric | Errors | n | Exact 95% upper bound | Wilson 95% upper bound |
 | --- | ---: | ---: | ---: | ---: |
-| Overall packet error | 0 | 334 | 0.893% | 1.137% |
-| False positive rate | 0 | 167 | 1.778% | 2.249% |
-| False negative rate | 0 | 167 | 1.778% | 2.249% |
+| Overall packet error | 0 | 614 | 0.487% | 0.622% |
+| False positive rate | 0 | 307 | 0.971% | 1.236% |
+| False negative rate | 0 | 307 | 0.971% | 1.236% |
 
 Zero observed errors means no failures appeared in this locked sample. It does
 not prove the true error rate is zero. It means the plausible upper risk is
@@ -80,8 +80,8 @@ Positive class: **ESCALATE**.
 
 | Actual / Predicted | ESCALATE | ALLOW |
 | --- | ---: | ---: |
-| Actual ESCALATE | TP = 167 | FN = 0 |
-| Actual ALLOW | FP = 0 | TN = 167 |
+| Actual ESCALATE | TP = 307 | FN = 0 |
+| Actual ALLOW | FP = 0 | TN = 307 |
 
 Observed rates:
 
@@ -99,7 +99,7 @@ language.
 
 ## What Counts
 
-Only clean benchmark-grade evidence is counted in the 334-packet denominator.
+Only clean benchmark-grade evidence is counted in the 614-packet denominator.
 
 Included:
 
@@ -134,6 +134,7 @@ as on what is counted.
 | Agentic Commerce Order Execution | Order execution controls | 40 | 20 | 40/40 |
 | IT Access Permission Change | Access / privilege controls | 40 | 20 | 40/40 |
 | Wave2-4 Expansion | HR, privacy, finance, government, benefits, banking, defense admin, insurance, utilities | 174 | 87 | 174/174 |
+| Wave5 Completed 7-Domain Expansion | Medical, treasury, legal, infrastructure, security, public-sector, and operational technology controls | 280 | 140 | 280/280 |
 
 Other locked evidence exists, but is not counted in the clean denominator:
 
@@ -269,14 +270,14 @@ This benchmark does not claim:
 This benchmark does claim:
 
 > On the current clean locked denominator, HoloVerify has produced zero observed
-> FP/FN errors across 334 action-boundary packets, with a measured statistical
+> FP/FN errors across 614 action-boundary packets, with a measured statistical
 > upper risk band.
 
 ---
 
-## Next Statistical Milestone
+## Wave5 Completion
 
-The next frozen packet bank is Wave5:
+Wave5 is now counted in the clean benchmark denominator:
 
 | Wave5 scope | Value |
 | --- | ---: |
@@ -296,19 +297,28 @@ Wave5 domains:
 - Public sector / citizen records controls.
 - Industrial / utility / OT safety controls.
 
-If Wave5 completes cleanly, the benchmark-grade denominator becomes:
+Wave5 completed cleanly:
 
-| Metric | Current | After clean Wave5 |
-| --- | ---: | ---: |
-| Packets | 334 | 614 |
-| Sibling pairs | 167 | 307 |
-| Packet-level exact 95% upper bound | 0.893% | about 0.487% |
-| FPR/FNR exact 95% upper bound | 1.778% | about 0.971% |
+| Metric | Value |
+| --- | ---: |
+| Completed Wave5 batches | 28/28 |
+| Wave5 packets | 280/280 |
+| Wave5 sibling pairs | 140/140 |
+| Wave5 observed FP errors | 0 |
+| Wave5 observed FN errors | 0 |
 
-That is the next milestone:
+That moved the benchmark-grade denominator to:
 
-> Below 0.5% packet-level upper risk and below 1.0% FP/FN upper risk, if Wave5
-> completes cleanly.
+| Metric | Value |
+| --- | ---: |
+| Total packets | 614 |
+| Total sibling pairs | 307 |
+| Packet-level exact 95% upper bound | 0.487% |
+| FPR/FNR exact 95% upper bound | 0.971% |
+
+That clears the prior milestone:
+
+> Below 0.5% packet-level upper risk and below 1.0% FP/FN upper risk.
 
 ---
 
@@ -321,7 +331,7 @@ The business question is:
 > How low does the upper risk bound need to be before this class of action can
 > be trusted with this level of autonomy?
 
-For ordinary internal workflow assistance, the current 334-packet result is
+For ordinary internal workflow assistance, the current 614-packet result is
 already a strong foundation. For irreversible clinical, financial, legal,
 defense, infrastructure, or regulated-data actions, the next thresholds should
 be stricter.
@@ -329,12 +339,12 @@ be stricter.
 Side-specific FP/FN risk is the primary safety bar because ALLOW and ESCALATE
 fail in different ways.
 
-| Target side-specific upper bound | Required ALLOW examples | Required ESCALATE examples | Required total packets | Additional packets from current 334 | Additional packets after clean Wave5 |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| < 1.0% | 299 | 299 | 598 | 264 | 0 |
-| < 0.5% | 598 | 598 | 1,196 | 862 | 582 |
-| < 0.25% | 1,197 | 1,197 | 2,394 | 2,060 | 1,780 |
-| < 0.1% | 2,995 | 2,995 | 5,990 | 5,656 | 5,376 |
+| Target side-specific upper bound | Required ALLOW examples | Required ESCALATE examples | Required total packets | Additional packets from current 614 |
+| --- | ---: | ---: | ---: | ---: |
+| < 1.0% | 299 | 299 | 598 | 0 |
+| < 0.5% | 598 | 598 | 1,196 | 582 |
+| < 0.25% | 1,197 | 1,197 | 2,394 | 1,780 |
+| < 0.1% | 2,995 | 2,995 | 5,990 | 5,376 |
 
 Recommended threshold policy:
 
@@ -349,8 +359,8 @@ The next practical target is not < 0.1%.
 
 The next practical target is:
 
-> Run Wave5 clean, then expand by roughly 582 additional balanced packets to
-> push side-specific FP/FN upper bounds below 0.5%.
+> Expand by roughly 582 additional balanced packets to push side-specific FP/FN
+> upper bounds below 0.5%.
 
 The < 0.1% tier should be treated as a production-scale validation program, not
 as the next public benchmark milestone.

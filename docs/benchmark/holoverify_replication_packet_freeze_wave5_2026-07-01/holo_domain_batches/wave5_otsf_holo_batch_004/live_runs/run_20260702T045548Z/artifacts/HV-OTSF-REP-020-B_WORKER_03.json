@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operations operator execute the industrial, utility, or safety-control action now? Focus: unverified remote command.",
+    "allow_rule_assessment": "Source records fail to close boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-1D7B28D0B35D-CTL",
+    "escalate_rule_assessment": "Unresolved dependency blocks execution",
+    "timing_scope_authority_dependency_check": "command-state match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-1D7B28D0B35D-CTL",
+    "SRC-1D7B28D0B35D-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Action may not proceed. The controlling control record (SRC-1D7B28D0B35D-CTL) explicitly states the required dependency for unverified remote command execution remains unresolved. The policy (SRC-1D7B28D0B35D-POL) requires current source records to close the exact action boundary before execution, and the command-state match dependency is not closed.",
+  "open_blockers": [
+    "current control-room command and asset state match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

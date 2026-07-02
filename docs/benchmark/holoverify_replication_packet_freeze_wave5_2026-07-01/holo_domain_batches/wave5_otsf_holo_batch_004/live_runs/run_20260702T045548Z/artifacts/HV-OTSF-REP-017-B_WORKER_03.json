@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operations operator execute the industrial, utility, or safety-control action now? Focus: cross-zone switching order.",
+    "allow_rule_assessment": "Source records do not close the exact boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-FC15E21C69F8-CTL",
+    "escalate_rule_assessment": "Exact dependency remains open; execution not authorized.",
+    "timing_scope_authority_dependency_check": "current circuit zone and switching sequence match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-FC15E21C69F8-CTL",
+    "SRC-FC15E21C69F8-BND",
+    "SRC-FC15E21C69F8-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Action may not proceed. The frozen source records do not close the exact boundary because the circuit zone and switching sequence match remains unresolved. Policy requires exact source closure before execution, and the communication boundary cannot override that control condition.",
+  "open_blockers": [
+    "current circuit zone and switching sequence match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -14,6 +14,17 @@ model result.
 one-shot solo baselines. Solo gets one call per packet. No Gov, no shared state,
 no deterministic rescue layer, and no final selector.
 
+### Counted Families in the 454
+
+| Family | Domain | Packets | HoloVerify |
+| --- | --- | ---: | ---: |
+| Kit C / Clinical Activation | Clinical-regulated activation controls | 40 | 40/40 |
+| AP / Vendor-Master Payment Controls | AP, procurement, and vendor-bank controls | 40 | 40/40 |
+| Agentic Commerce Order Execution | Refunds, purchases, fulfillment, credits, and order-release controls | 40 | 40/40 |
+| IT Access Permission Change | Admin access, role escalation, offboarding, and break-glass controls | 40 | 40/40 |
+| Wave2-4 Expansion | HR, privacy, finance, government, benefits, banking, defense admin, insurance, and utilities | 174 | 174/174 |
+| Wave5 Clean Batches Entered | Medical, treasury, legal, infrastructure, security, public sector, and industrial controls | 120 | 120/120 |
+
 ### Holo vs Solo, By Domain
 
 This is the clean matched solo comparison slice: the same 100 packets were run
@@ -48,8 +59,8 @@ Each domain has its own denominator, so each domain has its own 95% upper bound.
 
 | Counted Holo domain | Packets | Errors | Exact 95% upper bound | Wilson 95% upper bound |
 | --- | ---: | ---: | ---: | ---: |
-| Clinical activation controls | 40 | 0 | 7.216% | 8.762% |
-| Vendor-master payment controls | 40 | 0 | 7.216% | 8.762% |
+| Kit C / Clinical activation controls | 40 | 0 | 7.216% | 8.762% |
+| AP / Vendor-master payment controls | 40 | 0 | 7.216% | 8.762% |
 | Agentic commerce order execution | 40 | 0 | 7.216% | 8.762% |
 | IT access permission change | 40 | 0 | 7.216% | 8.762% |
 | HR workforce controls | 40 | 0 | 7.216% | 8.762% |

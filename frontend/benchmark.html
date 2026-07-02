@@ -84,6 +84,17 @@
 <p>The stricter false-positive and false-negative side-specific number is higher because each side has half the examples: 282 ALLOW and 282 ESCALATE.</p>
 <hr/>
 </section>
+<section class="paper-section" id="reliability-threshold-roadmap"><h2>Reliability Threshold Roadmap</h2>
+<p>The business question is not "did this sample pass?"</p>
+<p>The business question is:</p>
+<blockquote><p>How low does the upper risk bound need to be before this class of action can<br>be trusted with this level of autonomy?</p></blockquote>
+<p>Side-specific false-positive and false-negative risk is the primary safety bar because ALLOW and ESCALATE fail in different ways.</p>
+<div class="table-scroll"><table><thead><tr><th>Target side-specific upper bound</th><th>Required ALLOW examples</th><th>Required ESCALATE examples</th><th>Required total packets</th><th>Additional packets from current 564</th></tr></thead><tbody><tr><td>&lt; 1.0%</td><td>299</td><td>299</td><td>598</td><td>34</td></tr><tr><td>&lt; 0.5%</td><td>598</td><td>598</td><td>1,196</td><td>632</td></tr><tr><td>&lt; 0.25%</td><td>1,197</td><td>1,197</td><td>2,394</td><td>1,830</td></tr><tr><td>&lt; 0.1%</td><td>2,995</td><td>2,995</td><td>5,990</td><td>5,426</td></tr></tbody></table></div>
+<p>Recommended threshold policy:</p>
+<div class="table-scroll"><table><thead><tr><th>Use case tier</th><th>Suggested evidence threshold</th></tr></thead><tbody><tr><td>Internal decision support</td><td>Current clean ledger plus domain-specific review</td></tr><tr><td>Enterprise action recommendation</td><td>&lt; 1.0% false-positive / false-negative upper bound in-domain</td></tr><tr><td>High-stakes irreversible action gating</td><td>&lt; 0.5% false-positive / false-negative upper bound in-domain, plus human escalation policy</td></tr><tr><td>Safety-critical production autonomy</td><td>&lt; 0.1% false-positive / false-negative upper bound, external review, and ongoing monitoring</td></tr></tbody></table></div>
+<p>The &lt; 0.1% tier should be treated as a production-scale validation program, not as the next public benchmark milestone.</p>
+<hr/>
+</section>
 <section class="paper-section" id="how-to-read-the-statistics"><h2>How To Read The Statistics</h2>
 <p>The observed score is what happened in the test.</p>
 <p>The upper bound is what the test lets us responsibly say about the unknown real error rate.</p>
@@ -190,32 +201,8 @@
 <blockquote><p>On the current clean locked denominator, HoloVerify has produced zero observed<br>false-positive or false-negative errors across 564 action-boundary packets,<br>with a measured statistical upper risk band.</p></blockquote>
 <hr/>
 </section>
-<section class="paper-section" id="next-statistical-milestone"><h2>Next Statistical Milestone</h2>
-<p>The next frozen packet bank is Wave5:</p>
-<div class="table-scroll"><table><thead><tr><th>Wave5 scope</th><th>Value</th></tr></thead><tbody><tr><td>Domains</td><td>7</td></tr><tr><td>Sibling pairs</td><td>140</td></tr><tr><td>Packets</td><td>280</td></tr><tr><td>ALLOW truths</td><td>140</td></tr><tr><td>ESCALATE truths</td><td>140</td></tr></tbody></table></div>
-<p>Wave5 domains:</p>
-<ul><li>Clinical medication / treatment activation controls.</li><li>Treasury / wire / cash movement controls.</li><li>Legal / regulatory filing controls.</li><li>Cloud infrastructure / destructive admin controls.</li><li>Security operations / incident response controls.</li><li>Public sector / citizen records controls.</li><li>Industrial / utility / OT safety controls.</li></ul>
-<p>If the remaining 5 Wave5 batches complete cleanly, the benchmark-grade denominator becomes:</p>
-<div class="table-scroll"><table><thead><tr><th>Metric</th><th>Current</th><th>After remaining clean Wave5</th></tr></thead><tbody><tr><td>Packets</td><td>564</td><td>614</td></tr><tr><td>Sibling pairs</td><td>282</td><td>307</td></tr><tr><td>Packet-level exact 95% upper bound</td><td>0.530%</td><td>about 0.487%</td></tr><tr><td>False-positive / false-negative exact 95% upper bound</td><td>1.057%</td><td>about 0.971%</td></tr></tbody></table></div>
-<p>That is the next milestone:</p>
-<blockquote><p>Below 0.5% packet-level upper risk and below 1.0% false-positive /<br>false-negative upper risk, if Wave5 completes cleanly.</p></blockquote>
-<hr/>
-</section>
-<section class="paper-section" id="reliability-threshold-roadmap"><h2>Reliability Threshold Roadmap</h2>
-<p>The business question is not "did this sample pass?"</p>
-<p>The business question is:</p>
-<blockquote><p>How low does the upper risk bound need to be before this class of action can<br>be trusted with this level of autonomy?</p></blockquote>
-<p>Side-specific false-positive and false-negative risk is the primary safety bar because ALLOW and ESCALATE fail in different ways.</p>
-<div class="table-scroll"><table><thead><tr><th>Target side-specific upper bound</th><th>Required ALLOW examples</th><th>Required ESCALATE examples</th><th>Required total packets</th><th>Additional packets from current 564</th><th>Additional packets after clean Wave5</th></tr></thead><tbody><tr><td>&lt; 1.0%</td><td>299</td><td>299</td><td>598</td><td>34</td><td>0</td></tr><tr><td>&lt; 0.5%</td><td>598</td><td>598</td><td>1,196</td><td>632</td><td>582</td></tr><tr><td>&lt; 0.25%</td><td>1,197</td><td>1,197</td><td>2,394</td><td>1,830</td><td>1,780</td></tr><tr><td>&lt; 0.1%</td><td>2,995</td><td>2,995</td><td>5,990</td><td>5,426</td><td>5,376</td></tr></tbody></table></div>
-<p>Recommended threshold policy:</p>
-<div class="table-scroll"><table><thead><tr><th>Use case tier</th><th>Suggested evidence threshold</th></tr></thead><tbody><tr><td>Internal decision support</td><td>Current clean ledger plus domain-specific review</td></tr><tr><td>Enterprise action recommendation</td><td>&lt; 1.0% false-positive / false-negative upper bound in-domain</td></tr><tr><td>High-stakes irreversible action gating</td><td>&lt; 0.5% false-positive / false-negative upper bound in-domain, plus human escalation policy</td></tr><tr><td>Safety-critical production autonomy</td><td>&lt; 0.1% false-positive / false-negative upper bound, external review, and ongoing monitoring</td></tr></tbody></table></div>
-<p>The next practical target is:</p>
-<blockquote><p>Finish Wave5 clean, then expand by roughly 582 additional balanced packets to<br>push side-specific false-positive and false-negative upper bounds below 0.5%.</p></blockquote>
-<p>The &lt; 0.1% tier should be treated as a production-scale validation program, not as the next public benchmark milestone.</p>
-<hr/>
-</section>
 <section class="paper-section" id="next-packet-families"><h2>Next Packet Families</h2>
-<p>After Wave5, the next packet expansion should prioritize more irreversible action boundaries, not generic reasoning tasks.</p>
+<p>The next packet expansion should prioritize more irreversible action boundaries, not generic reasoning tasks.</p>
 <p>Recommended next families:</p>
 <div class="table-scroll"><table><thead><tr><th>Domain</th><th>Action boundary being tested</th></tr></thead><tbody><tr><td>Defense logistics / command authorization</td><td>Whether source authority permits movement, procurement, or operational release</td></tr><tr><td>Banking / AML / account freeze controls</td><td>Whether account restriction or release is justified by current evidence</td></tr><tr><td>Insurance claims / payout authorization</td><td>Whether payout, denial, or escalation is permitted</td></tr><tr><td>Pharma quality / batch release</td><td>Whether manufacturing or quality evidence permits product release</td></tr><tr><td>Privacy / data disclosure / consent controls</td><td>Whether records may be disclosed to a requester</td></tr><tr><td>Education / student record release</td><td>Whether student records can be released under current authority</td></tr><tr><td>Export control / customs / restricted shipment release</td><td>Whether shipment can proceed under current screening evidence</td></tr><tr><td>Real estate / mortgage / escrow release</td><td>Whether funds, documents, or approvals may be released</td></tr><tr><td>Manufacturing quality hold / supplier substitution</td><td>Whether an exception can override a quality hold</td></tr><tr><td>Tax / regulatory payment controls</td><td>Whether a filing, remittance, or exception is currently authorized</td></tr><tr><td>Customer account security / MFA reset</td><td>Whether identity proof closes the account-change boundary</td></tr><tr><td>Energy trading / credit-limit controls</td><td>Whether a trade, override, or exposure increase is permitted</td></tr><tr><td>Legal discovery / privilege / litigation hold release</td><td>Whether documents can be released or must be escalated</td></tr><tr><td>Healthcare claims / prior authorization</td><td>Whether coverage or authorization evidence closes the payment/action boundary</td></tr></tbody></table></div>
 <p>Each family should preserve the existing structure:</p>

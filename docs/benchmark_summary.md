@@ -208,6 +208,39 @@ because each side has half the examples: 282 ALLOW and 282 ESCALATE.
 
 ---
 
+## Reliability Threshold Roadmap
+
+The business question is not "did this sample pass?"
+
+The business question is:
+
+> How low does the upper risk bound need to be before this class of action can
+> be trusted with this level of autonomy?
+
+Side-specific false-positive and false-negative risk is the primary safety bar
+because ALLOW and ESCALATE fail in different ways.
+
+| Target side-specific upper bound | Required ALLOW examples | Required ESCALATE examples | Required total packets | Additional packets from current 564 |
+| --- | ---: | ---: | ---: | ---: |
+| < 1.0% | 299 | 299 | 598 | 34 |
+| < 0.5% | 598 | 598 | 1,196 | 632 |
+| < 0.25% | 1,197 | 1,197 | 2,394 | 1,830 |
+| < 0.1% | 2,995 | 2,995 | 5,990 | 5,426 |
+
+Recommended threshold policy:
+
+| Use case tier | Suggested evidence threshold |
+| --- | --- |
+| Internal decision support | Current clean ledger plus domain-specific review |
+| Enterprise action recommendation | < 1.0% false-positive / false-negative upper bound in-domain |
+| High-stakes irreversible action gating | < 0.5% false-positive / false-negative upper bound in-domain, plus human escalation policy |
+| Safety-critical production autonomy | < 0.1% false-positive / false-negative upper bound, external review, and ongoing monitoring |
+
+The < 0.1% tier should be treated as a production-scale validation program, not
+as the next public benchmark milestone.
+
+---
+
 ## How To Read The Statistics
 
 The observed score is what happened in the test.
@@ -486,86 +519,9 @@ This benchmark does claim:
 
 ---
 
-## Next Statistical Milestone
-
-The next frozen packet bank is Wave5:
-
-| Wave5 scope | Value |
-| --- | ---: |
-| Domains | 7 |
-| Sibling pairs | 140 |
-| Packets | 280 |
-| ALLOW truths | 140 |
-| ESCALATE truths | 140 |
-
-Wave5 domains:
-
-- Clinical medication / treatment activation controls.
-- Treasury / wire / cash movement controls.
-- Legal / regulatory filing controls.
-- Cloud infrastructure / destructive admin controls.
-- Security operations / incident response controls.
-- Public sector / citizen records controls.
-- Industrial / utility / OT safety controls.
-
-If the remaining 5 Wave5 batches complete cleanly, the benchmark-grade
-denominator becomes:
-
-| Metric | Current | After remaining clean Wave5 |
-| --- | ---: | ---: |
-| Packets | 564 | 614 |
-| Sibling pairs | 282 | 307 |
-| Packet-level exact 95% upper bound | 0.530% | about 0.487% |
-| False-positive / false-negative exact 95% upper bound | 1.057% | about 0.971% |
-
-That is the next milestone:
-
-> Below 0.5% packet-level upper risk and below 1.0% false-positive /
-> false-negative upper risk, if Wave5 completes cleanly.
-
----
-
-## Reliability Threshold Roadmap
-
-The business question is not "did this sample pass?"
-
-The business question is:
-
-> How low does the upper risk bound need to be before this class of action can
-> be trusted with this level of autonomy?
-
-Side-specific false-positive and false-negative risk is the primary safety bar
-because ALLOW and ESCALATE fail in different ways.
-
-| Target side-specific upper bound | Required ALLOW examples | Required ESCALATE examples | Required total packets | Additional packets from current 564 | Additional packets after clean Wave5 |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| < 1.0% | 299 | 299 | 598 | 34 | 0 |
-| < 0.5% | 598 | 598 | 1,196 | 632 | 582 |
-| < 0.25% | 1,197 | 1,197 | 2,394 | 1,830 | 1,780 |
-| < 0.1% | 2,995 | 2,995 | 5,990 | 5,426 | 5,376 |
-
-Recommended threshold policy:
-
-| Use case tier | Suggested evidence threshold |
-| --- | --- |
-| Internal decision support | Current clean ledger plus domain-specific review |
-| Enterprise action recommendation | < 1.0% false-positive / false-negative upper bound in-domain |
-| High-stakes irreversible action gating | < 0.5% false-positive / false-negative upper bound in-domain, plus human escalation policy |
-| Safety-critical production autonomy | < 0.1% false-positive / false-negative upper bound, external review, and ongoing monitoring |
-
-The next practical target is:
-
-> Finish Wave5 clean, then expand by roughly 582 additional balanced packets to
-> push side-specific false-positive and false-negative upper bounds below 0.5%.
-
-The < 0.1% tier should be treated as a production-scale validation program, not
-as the next public benchmark milestone.
-
----
-
 ## Next Packet Families
 
-After Wave5, the next packet expansion should prioritize more irreversible
+The next packet expansion should prioritize more irreversible
 action boundaries, not generic reasoning tasks.
 
 Recommended next families:

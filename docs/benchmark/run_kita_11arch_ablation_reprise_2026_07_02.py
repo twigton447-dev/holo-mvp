@@ -61,6 +61,13 @@ DEFAULT_REPRISE_ARCHITECTURES = (
     "provider_balanced_debate_no_gov_6call",
 )
 
+OPENAI54_HOMOGENEOUS_REPRISE_ARCHITECTURES = (
+    "openai54_reconsider_no_gov_6call",
+    "openai54_vote_no_gov_6call",
+    "openai54_council_no_gov_6call",
+    "openai54_debate_no_gov_6call",
+)
+
 ARCH_CALL_SHAPES = {
     "provider_balanced_reconsider_no_gov_6call": (
         ("xai", "initial_answer"),
@@ -93,6 +100,38 @@ ARCH_CALL_SHAPES = {
         ("openai_w2", "escalate_case_rebuttal"),
         ("minimax", "escalate_rebuttal"),
         ("minimax", "debate_final_decider"),
+    ),
+    "openai54_reconsider_no_gov_6call": (
+        ("openai_w2", "initial_answer"),
+        ("openai_w2", "self_reconsider"),
+        ("openai_w2", "independent_answer"),
+        ("openai_w2", "self_reconsider"),
+        ("openai_w2", "independent_answer"),
+        ("openai_w2", "final_reconsidered_synthesis"),
+    ),
+    "openai54_vote_no_gov_6call": (
+        ("openai_w2", "vote_member_round_1"),
+        ("openai_w2", "vote_member_round_2"),
+        ("openai_w2", "vote_member_round_1"),
+        ("openai_w2", "vote_member_round_2"),
+        ("openai_w2", "vote_member_round_1"),
+        ("openai_w2", "final_vote_synthesis"),
+    ),
+    "openai54_council_no_gov_6call": (
+        ("openai_w2", "council_turn_1"),
+        ("openai_w2", "council_turn_2"),
+        ("openai_w2", "council_turn_3"),
+        ("openai_w2", "council_turn_4"),
+        ("openai_w2", "council_turn_5"),
+        ("openai_w2", "council_turn_6_final"),
+    ),
+    "openai54_debate_no_gov_6call": (
+        ("openai_w2", "allow_advocate"),
+        ("openai_w2", "allow_case_rebuttal"),
+        ("openai_w2", "escalate_advocate"),
+        ("openai_w2", "escalate_case_rebuttal"),
+        ("openai_w2", "escalate_rebuttal"),
+        ("openai_w2", "debate_final_decider"),
     ),
 }
 
@@ -256,6 +295,18 @@ def build_call_plan(records: list[dict[str, Any]], architectures: tuple[str, ...
     return call_plan
 
 
+def expected_model_counts_for_architecture(architecture: str) -> dict[str, int]:
+    if architecture in DEFAULT_REPRISE_ARCHITECTURES:
+        return {"xai": 2, "openai_w2": 2, "minimax": 2}
+    if architecture in OPENAI54_HOMOGENEOUS_REPRISE_ARCHITECTURES:
+        return {"openai_w2": 6}
+    raise RuntimeError(f"unsupported_model_distribution:{architecture}")
+
+
+def check_passed(value: Any) -> bool:
+    return value is True or value == 0 or value == "N/A"
+
+
 def build_provider_prompt(record: dict[str, Any], call_row: dict[str, Any], prior_outputs: list[dict[str, Any]]) -> str:
     frozen_prompt = (BENCHMARK_ROOT / record["prompt_path"]).read_text()
     prior_block = "None."
@@ -400,6 +451,7 @@ def approval_packet(report: dict[str, Any]) -> dict[str, Any]:
             "selected_pair_ids": report["selected_pair_ids"],
             "selected_packet_count": report["selected_packet_count"],
             "selected_reprise_architectures": report["selected_reprise_architectures"],
+            "selected_architecture_model_distributions": report["selected_architecture_model_distributions"],
             "model_roster": report["model_roster"],
             "expected_provider_calls": report["expected_provider_calls"],
             "expected_gov_calls": 0,
@@ -410,7 +462,7 @@ def approval_packet(report: dict[str, Any]) -> dict[str, Any]:
         "forbidden": [
             "no Holo run",
             "no Gov calls",
-            "no solo one-shot rerun",
+            "no one-shot solo shortcut",
             "no judges",
             "no packet edits",
             "no prompt edits",
@@ -436,27 +488,40 @@ def preflight(pair_ids: tuple[str, ...], architectures: tuple[str, ...], label: 
             leakage_rows.append({"packet_id": record["packet_id"], "hits": hits})
 
     truth_counts = Counter(row["packet_truth"] for row in records)
-    model_keys = {row["model_key"] for row in MODEL_ROSTER}
-    provider_balance_failures = []
+    architecture_model_distribution_failures = []
+    architecture_model_distributions = {
+        architecture: expected_model_counts_for_architecture(architecture) for architecture in architectures
+    }
     for packet_id in sorted({row["packet_id"] for row in call_plan}):
         for architecture in architectures:
             subset = [row for row in call_plan if row["packet_id"] == packet_id and row["architecture"] == architecture]
             counts = Counter(row["model_key"] for row in subset)
-            if set(counts) != model_keys or any(count != 2 for count in counts.values()):
-                provider_balance_failures.append(
+            expected_counts = architecture_model_distributions[architecture]
+            if dict(counts) != expected_counts:
+                architecture_model_distribution_failures.append(
                     {
                         "packet_id": packet_id,
                         "architecture": architecture,
+                        "expected_model_turn_counts": expected_counts,
                         "model_turn_counts": dict(counts),
                     }
                 )
+    has_provider_balanced_architectures = any(architecture in DEFAULT_REPRISE_ARCHITECTURES for architecture in architectures)
+    provider_balanced_distribution_failures = [
+        failure
+        for failure in architecture_model_distribution_failures
+        if failure["architecture"] in DEFAULT_REPRISE_ARCHITECTURES
+    ]
     checks = {
         "freeze_root_matches": True,
         "packet_hashes_match": True,
         "prompt_hashes_match": True,
         "model_visible_payload_hashes_match": True,
         "selected_pairs_have_two_siblings": len(records) == len(pair_ids) * 2,
-        "provider_balanced_two_turns_each_model": not provider_balance_failures,
+        "architecture_model_distribution_matches_declared_family": not architecture_model_distribution_failures,
+        "provider_balanced_two_turns_each_model": (
+            not provider_balanced_distribution_failures if has_provider_balanced_architectures else "N/A"
+        ),
         "no_prompt_leakage": not leakage_rows,
         "no_gov_context_in_call_plan": all(row["gov_context_allowed"] is False for row in call_plan),
         "no_holo_state_in_call_plan": all(row["holo_state_allowed"] is False for row in call_plan),
@@ -467,24 +532,26 @@ def preflight(pair_ids: tuple[str, ...], architectures: tuple[str, ...], label: 
     }
     report = {
         "classification": "HOLOVERIFY_KITA_11ARCH_ABLATION_REPRISE_PREFLIGHT",
-        "status": "PASS" if all(value is True or value == 0 for value in checks.values()) else "FAIL",
+        "status": "PASS" if all(check_passed(value) for value in checks.values()) else "FAIL",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "label": label,
         "freeze_root": EXPECTED_FREEZE_ROOT_HASH,
         "recovered_architectures": list(RECOVERED_ARCHITECTURES),
         "selected_reprise_architectures": list(architectures),
+        "selected_architecture_model_distributions": architecture_model_distributions,
         "selected_pair_ids": list(pair_ids),
         "selected_packet_count": len(records),
         "truth_counts": dict(truth_counts),
         "model_roster": list(MODEL_ROSTER),
         "fairness_frame": {
-            "type": "provider_balanced_ablation_fairness",
+            "type": "six_call_no_gov_architecture_family_fairness",
             "calls_per_packet_per_architecture": 6,
-            "turns_per_model_per_packet_per_architecture": 2,
+            "architecture_model_distributions": architecture_model_distributions,
             "note": (
-                "Holo's original governed path used 5 calls per packet. This no-Gov reprise uses "
-                "6 calls per packet so each of the same three models receives exactly two turns. "
-                "That slightly favors the ablations on call budget."
+                "Every selected no-Gov architecture receives 6 calls per packet, the same frozen "
+                "packet set, the same output contract, and the same local gate. Provider-balanced "
+                "architectures split those calls 2/2/2 across the three model DNA. OpenAI-5.4 "
+                "homogeneous architectures bind all six calls to openai/gpt-5.4-mini."
             ),
         },
         "expected_provider_calls": len(call_plan),
@@ -493,7 +560,8 @@ def preflight(pair_ids: tuple[str, ...], architectures: tuple[str, ...], label: 
         "expected_judge_calls": 0,
         "checks": checks,
         "prompt_leakage_rows": leakage_rows,
-        "provider_balance_failures": provider_balance_failures,
+        "provider_balance_failures": architecture_model_distribution_failures,
+        "architecture_model_distribution_failures": architecture_model_distribution_failures,
         "selected_packets": records,
         "call_plan": call_plan,
     }
@@ -523,22 +591,25 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         "## Fairness Frame",
         "",
-        "- Provider-balanced no-Gov ablation fairness.",
+        "- Six-call no-Gov architecture-family fairness.",
         "- Calls per packet per architecture: `6`",
-        "- Turns per model per packet per architecture: `2`",
-        "- Holo's original governed path used 5 calls per packet; this 6-call reprise slightly favors the ablations.",
+        "- Same frozen packet set, output contract, and local gate for every selected architecture.",
+        "- Provider-balanced families split calls 2/2/2 across xAI, OpenAI, and MiniMax.",
+        "- OpenAI-5.4 homogeneous families bind all 6 calls to `openai/gpt-5.4-mini`.",
         "",
         "## Architectures",
         "",
     ]
     for architecture in report["selected_reprise_architectures"]:
-        lines.append(f"- `{architecture}`")
+        distribution = report["selected_architecture_model_distributions"][architecture]
+        turns = ", ".join(f"{model_key}: {count}" for model_key, count in distribution.items())
+        lines.append(f"- `{architecture}` ({turns})")
     lines.extend(["", "## Model Roster", ""])
     for row in report["model_roster"]:
         lines.append(f"- `{row['provider']}/{row['model']}` ({row['dna']})")
     lines.extend(["", "## Checks", ""])
     for key, value in report["checks"].items():
-        rendered = "PASS" if value is True or value == 0 else "FAIL"
+        rendered = "N/A" if value == "N/A" else "PASS" if check_passed(value) else "FAIL"
         lines.append(f"- `{key}`: `{rendered}`")
     lines.extend(["", "## Selected Packets", ""])
     for record in report["selected_packets"]:
@@ -550,7 +621,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         [
             "- This is a no-Gov diagnostic plan.",
             "- No-Gov architectures must not receive Gov baton, Holo state, Blindspot Atlas, artifact registry, or final selector.",
-            "- Existing one-shot solo results should be carried forward where already frozen instead of rerun.",
+            "- One-shot solo shortcuts are not comparable to these six-call architecture-family runs.",
             "- Deterministic policy gate, if tested later, must be reported separately from model architectures.",
         ]
     )
@@ -580,11 +651,27 @@ def render_approval_markdown(packet: dict[str, Any]) -> str:
         f"- Judge calls: `{scope['expected_judge_calls']}`",
         f"- Freeze root: `{scope['freeze_root']}`",
         "",
+        "## Architecture Model Distribution",
+        "",
+    ]
+    for architecture, distribution in scope["selected_architecture_model_distributions"].items():
+        turns = ", ".join(f"{model_key}: {count}" for model_key, count in distribution.items())
+        lines.append(f"- `{architecture}`: {turns}")
+    lines.extend(
+        [
+            "",
+            "Every selected architecture uses the same frozen packet set, same 6-call budget per packet, same output contract, and same deterministic local gate.",
+            "",
+        ]
+    )
+    lines.extend(
+        [
         "## Approval Hash",
         "",
         f"`{packet['approval_packet_sha256']}`",
         "",
-    ]
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -637,7 +724,9 @@ def run_live(
     if report["status"] != "PASS":
         raise RuntimeError(f"preflight_failed:{report['checks']}")
     if require_env:
-        missing = [env for env in env_requirements().values() if not os.getenv(env, "").strip()]
+        required_model_keys = sorted({row["model_key"] for row in report["call_plan"]})
+        env_by_model_key = env_requirements()
+        missing = [env_by_model_key[key] for key in required_model_keys if not os.getenv(env_by_model_key[key], "").strip()]
         if missing:
             raise RuntimeError("missing_required_env:" + ",".join(missing))
 

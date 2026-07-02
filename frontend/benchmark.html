@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoloEngine · The Action Boundary Benchmark · Version 7.56 · July 2026</title>
+<title>HoloEngine · The Action Boundary Benchmark · Version 7.57 · July 2026</title>
 <meta name="description" content="Measuring AI reliability before irreversible enterprise action.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,22 +21,12 @@
     <div class="toplinks"><a href="/">Home</a><a href="/whitepaper">Whitepaper</a><a href="/benchmark">Benchmark</a><a href="/payloads/">Payloads</a></div>
   </nav>
   <header class="hero">
-    <div class="eyebrow">HoloVerify · Version 7.56 · July 2026</div>
+    <div class="eyebrow">HoloVerify · Version 7.57 · July 2026</div>
     <h1>The Action Boundary Benchmark</h1>
     <p class="subtitle">Measuring AI reliability before irreversible enterprise action</p>
     <div class="meta-row"><div class="meta-card"><span>HoloVerify observed result</span><strong>614/614</strong></div><div class="meta-card"><span>HoloVerify total errors</span><strong>0 / 614</strong></div><div class="meta-card"><span>HoloVerify 95% Wilson upper bound</span><strong>0.622%</strong></div></div>
   </header>
   <main class="wrap">
-    <section class="paper-section" id="frozen-hash-lock">
-      <div class="section-label">Trust Layer</div>
-      <h2>What Frozen and Hash-Locked Mean</h2>
-      <p>The results are intentionally presented with an audit trail because they look too strong to ask anyone to accept on trust. This is also a vendor benchmark. HoloEngine built it because there was no existing benchmark for this exact action-boundary problem. That makes the integrity layer part of the claim, not an appendix.</p>
-      <p>A frozen packet is a test case saved before the run. Its source facts, action boundary, hidden dependency, expected verdict, model-visible prompt, and local audit rules are fixed. After freezing, the packet should not be edited to fit the answer.</p>
-      <p>A hash lock is a SHA-256 fingerprint of a frozen packet, prompt, trace, or evidence package. If one character changes, the hash changes. That makes later edits detectable.</p>
-      <div class="table-scroll"><table><thead><tr><th>Object</th><th>Plain-English Meaning</th><th>Why It Matters</th></tr></thead><tbody><tr><td>Frozen packet</td><td>The test case is fixed before the model sees it.</td><td>Prevents changing the question after seeing the answer.</td></tr><tr><td>Hash lock</td><td>A fingerprint of the exact file contents.</td><td>Makes packet, prompt, or trace edits visible.</td></tr><tr><td>Holo state</td><td>The run memory: worker outputs, Gov batons, gate results, artifact hashes, unresolved dependencies, and best-answer tracking.</td><td>Shows what Holo knew at each step instead of relying on a final answer alone.</td></tr><tr><td>Trace</td><td>The call-by-call record of models, Gov calls, tokens, gates, verdicts, failures, and final selection.</td><td>Acts like a camera on the run for auditors, regulators, design partners, and skeptics.</td></tr></tbody></table></div>
-      <p>The point is simple: vendors can overfit tests, drop failures, move goalposts, or rewrite prompts after the fact. The frozen packet bank, hash manifests, traces, and readiness audits are designed to make those moves detectable.</p>
-      <p>Hash-locking does not prove HoloVerify will be perfect in the real world. It preserves the evidence trail so a reviewer can inspect what happened inside Holo before the final ALLOW or ESCALATE decision.</p>
-    </section>
     <section class="paper-section" id="contents">
       <div class="section-label">On This Page</div>
       <h2>Benchmark Contents</h2>
@@ -58,6 +48,10 @@
       <div class="table-scroll takeaway-table"><table><thead><tr><th>Metric</th><th>Errors</th><th>n</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Overall packet error</td><td>0</td><td>614</td><td>0.487%</td><td>0.622%</td></tr><tr><td>False positive rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr><tr><td>False negative rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr></tbody></table></div>
       <p class="takeaway-note"><strong>What this table measures:</strong> the full HoloVerify governed architecture across 614 clean frozen action-boundary packets. This is the Holo result, not a solo model result.</p>
       <p class="takeaway-note"><strong>What it is compared against:</strong> the same mini-model families run alone as one-shot solo baselines. Solo gets one call per packet. No Gov, no shared state, no deterministic rescue layer, and no final selector.</p>
+      <h3 id="frozen-hash-lock">Frozen and Hash-Locked Records</h3>
+      <p class="takeaway-note">A frozen packet is a benchmark case saved before the run: source facts, action boundary, prompt, audit rules, and expected verdict are fixed before any model answers.</p>
+      <p class="takeaway-note">A hash lock is a SHA-256 fingerprint of a packet, prompt, trace, or evidence package. If the file changes later, the hash changes too.</p>
+      <p class="takeaway-note">This matters because HoloEngine is publishing a vendor benchmark in a category where no standard action-boundary test already existed. The hash-locked record helps reviewers see that the questions, prompts, Holo state, traces, token accounting, Gov calls, and final selections were not rewritten after the result.</p>
       <h3>Counted Families in the 614</h3>
       <div class="table-scroll"><table><thead><tr><th>Family</th><th>Domain</th><th>Packets</th><th>HoloVerify</th></tr></thead><tbody><tr><td>Kit C / Clinical Activation</td><td>Clinical-regulated activation controls</td><td>40</td><td>40/40</td></tr><tr><td>AP / Vendor-Master Payment Controls</td><td>AP, procurement, and vendor-bank controls</td><td>40</td><td>40/40</td></tr><tr><td>Agentic Commerce Order Execution</td><td>Refunds, purchases, fulfillment, credits, and order-release controls</td><td>40</td><td>40/40</td></tr><tr><td>IT Access Permission Change</td><td>Admin access, role escalation, offboarding, and break-glass controls</td><td>40</td><td>40/40</td></tr><tr><td>Wave2-4 Expansion</td><td>HR, privacy, finance, government, benefits, banking, defense admin, insurance, and utilities</td><td>174</td><td>174/174</td></tr><tr><td>Wave5 Completed 7-Domain Expansion</td><td>Medical, treasury, legal, infrastructure, security, public-sector, and operational technology controls</td><td>280</td><td>280/280</td></tr></tbody></table></div>
       <h3>Holo vs Solo, By Domain</h3>
@@ -288,7 +282,7 @@
 </section>
   </main>
   <footer>
-    <div><strong>HoloEngine</strong><br>Version 7.56 · July 2026</div>
+    <div><strong>HoloEngine</strong><br>Version 7.57 · July 2026</div>
     <div><a href="/whitepaper">holoengine.ai/whitepaper</a><br><a href="/benchmark">holoengine.ai/benchmark</a></div>
   </footer>
   <script>

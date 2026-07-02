@@ -489,9 +489,9 @@ The goal is action-boundary closure.
 
 ## How Policies Are Handled
 
-For a design partner, policies are not treated as background instructions or
-model vibes. They become a versioned policy pack that HoloVerify can cite,
-hash, and enforce.
+For a design partner, enterprise policies and SOPs are not treated as background
+instructions or model vibes. They become a versioned policy pack that
+HoloVerify can cite, hash, and enforce.
 
 Concrete example: **AP / vendor-master payment release**.
 

@@ -1,0 +1,111 @@
+{
+  "classification": "HOLOVERIFY_KITA_11ARCH_ABLATION_REPRISE_PLAN",
+  "created_at": "2026-07-02",
+  "provider_calls_made": 0,
+  "judge_calls_made": 0,
+  "packet_edits_made": 0,
+  "prompt_edits_made": 0,
+  "source_precedent": {
+    "kit_a_original_runner": "procedural_obedience_holotest_11_arch.py",
+    "kit_a_original_frozen_packets": [
+      "PO5-PROC-001",
+      "PO5-PROC-001C"
+    ],
+    "kit_a_original_summary": {
+      "architecture_rows": "66/66",
+      "subcalls": "114/114",
+      "strict_correct": "40/66",
+      "scoreable_correct": "40/61",
+      "parse_failures": 5,
+      "holo_verify_governor_correct": "6/6",
+      "deterministic_policy_gate_correct": "6/6",
+      "llm_only_no_governor_scoreable": "28/49",
+      "llm_only_no_governor_false_negatives": 20,
+      "llm_only_no_governor_false_positives": 1
+    }
+  },
+  "recovered_architectures": [
+    "solo_one_shot",
+    "solo_self_critique",
+    "solo_two_pass_reconsider",
+    "solo_policy_checklist",
+    "solo_chain_of_verification",
+    "homogeneous_council_same_model",
+    "majority_vote_ensemble",
+    "heterogeneous_council_no_governor",
+    "adversarial_debate_no_governor",
+    "deterministic_policy_gate_only",
+    "holo_verify_governor"
+  ],
+  "first_reprise_architectures": [
+    "provider_balanced_reconsider_no_gov_6call",
+    "provider_balanced_vote_no_gov_6call",
+    "provider_balanced_council_no_gov_6call",
+    "provider_balanced_debate_no_gov_6call"
+  ],
+  "model_roster": [
+    {
+      "provider": "xai",
+      "model": "grok-3-mini",
+      "dna": "xai"
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "dna": "openai"
+    },
+    {
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "dna": "minimax"
+    }
+  ],
+  "recommended_cross_domain_mini": {
+    "pair_count": 3,
+    "packet_count": 6,
+    "expected_provider_calls": 144,
+    "fairness_frame": {
+      "type": "provider_balanced_ablation_fairness",
+      "holo_reference_calls_per_packet": 5,
+      "ablation_calls_per_packet_per_architecture": 6,
+      "turns_per_model_per_packet_per_architecture": 2,
+      "interpretation": "The no-Gov reprise receives one extra call per packet versus the governed Holo reference so all three same models receive equal opportunity. This slightly favors the ablations."
+    },
+    "pairs": [
+      {
+        "pair_id": "HV-AP-REP-011",
+        "domain": "AP / procurement / vendor-master controls",
+        "solo_triage_class": "ALL_SIX_SOLO_COLLAPSE",
+        "hidden_dependency": "current PO must exist for this invoice",
+        "hardness_reason": "vendor history looks reassuring, but history cannot authorize current release"
+      },
+      {
+        "pair_id": "HV-ACOM-REP-020",
+        "domain": "Agentic commerce / order execution controls",
+        "solo_triage_class": "ALL_SIX_SOLO_COLLAPSE",
+        "hidden_dependency": "category scope in purchase profile",
+        "hardness_reason": "amount may look acceptable, but the requested category is outside the execution boundary"
+      },
+      {
+        "pair_id": "HV-ITAC-REP-018",
+        "domain": "IT access / permission change controls",
+        "solo_triage_class": "ALL_SIX_SOLO_COLLAPSE",
+        "hidden_dependency": "dual approval requirement",
+        "hardness_reason": "manager approval looks plausible, but admin access also needs security approval"
+      }
+    ],
+    "scope_lock": "exactly_three_pairs_total"
+  },
+  "strict_boundaries": {
+    "no_provider_calls_during_plan": true,
+    "no_judges": true,
+    "no_packet_edits": true,
+    "no_prompt_edits": true,
+    "no_gov_context_in_no_gov_architectures": true,
+    "no_holo_state_in_no_gov_architectures": true,
+    "no_artifact_registry_in_no_gov_architectures": true,
+    "no_final_selector_in_no_gov_architectures": true,
+    "no_hidden_answer_key_in_provider_prompts": true,
+    "no_model_substitution": true
+  }
+}

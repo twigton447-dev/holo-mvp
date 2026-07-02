@@ -25,7 +25,7 @@
     <div class="eyebrow">HoloVerify · Version 7.53 · July 2026</div>
     <h1>The Action Boundary Benchmark</h1>
     <p class="subtitle">Measuring AI reliability before irreversible enterprise action</p>
-    <div class="meta-row"><div class="meta-card"><span>HoloVerify observed result</span><strong>614/614</strong></div><div class="meta-card"><span>Observed false positives / false negatives</span><strong>0 / 0</strong></div><div class="meta-card"><span>Overall 95% upper bound</span><strong>0.487% to 0.622%</strong></div></div>
+    <div class="meta-row"><div class="meta-card"><span>HoloVerify counted-run result</span><strong>614/614</strong></div><div class="meta-card"><span>Counted-lane false positives / false negatives</span><strong>0 / 0</strong></div><div class="meta-card"><span>Counted-lane 95% band</span><strong>0.487% to 0.622%</strong></div></div>
   </header>
   <main class="wrap">
     <section class="paper-section takeaway-panel" id="brief-takeaway">
@@ -37,16 +37,16 @@
       <p class="takeaway-note"><strong>Important:</strong> solo's 0.0% false-negative rate does not mean solo was reliable. It only means none of the 150 ESCALATE-truth solo calls returned the specific wrong binary verdict ALLOW. But 78 of those 150 ESCALATE-truth calls still failed parsing or source/evidence structure, so they were not KNEW/admissible.</p>
       <p class="takeaway-note"><strong>Solo failure by side:</strong> on ALLOW-truth calls, 106/150 solo outputs were not KNEW/admissible, a <strong>70.7%</strong> non-success rate; 13 of those were actual false positives, an <strong>8.7%</strong> FPR. On ESCALATE-truth calls, 78/150 solo outputs were not KNEW/admissible, a <strong>52.0%</strong> non-success rate; 0 were binary false negatives, a <strong>0.0%</strong> FNR.</p>
       <p class="takeaway-note"><strong>The Holo option:</strong> combine those same models into a governed 3-DNA sequence. HoloVerify is the surgical-team version: one model maps the case, another challenges it, <strong>Gov</strong> controls the handoff, deterministic gates enforce the checklist, and the final selector preserves the best admissible answer.</p>
-      <p class="takeaway-note"><strong>The point:</strong> these are the same model families. Alone, they averaged 38.7% KNEW/admissible on the matched slice. Inside HoloVerify, the governed architecture solved 614/614 counted packets; on the overall packet metric, the current 95% lower reliability bound is about <strong>99.38% to 99.51%</strong>, depending on Wilson versus exact calculation.</p>
+      <p class="takeaway-note"><strong>The point:</strong> these are the same model families. Alone, they averaged 38.7% KNEW/admissible on the matched slice. Inside HoloVerify, the governed architecture solved 614/614 counted packets. This is evidence for the control loop, but the current runner used truth-conditioned local gates and repair routing, so the 614 result is a governed-runtime counted result, not yet a blind production error-rate claim.</p>
       <p class="takeaway-note"><strong>Why this can work up and down model tiers:</strong> the architecture is not tied to one model. Better models may be stronger ingredients, but the tested mechanism is the same: structure, order, state, adversarial pressure, deterministic enforcement, and final selection.</p>
-      <p class="takeaway-note"><strong>Measured HoloVerify result:</strong> HoloVerify solved <strong>614/614</strong> frozen action-boundary packets. The counted sample has <strong>0 false positives</strong> and <strong>0 false negatives</strong>.</p>
+      <p class="takeaway-note"><strong>Current HoloVerify result:</strong> HoloVerify solved <strong>614/614</strong> frozen action-boundary packets in the counted governed lane. The counted lane has <strong>0 false positives</strong> and <strong>0 false negatives</strong>. A blind-gate replication is the next step before treating this as a production risk bound.</p>
       <div class="mobile-risk-cards" aria-label="HoloVerify risk metrics">
         <div class="risk-card"><span>Overall packet error</span><strong>0 / 614</strong><p>Exact 95% upper bound <b>0.487%</b><br>Wilson 95% upper bound <b>0.622%</b></p></div>
         <div class="risk-card"><span>False positive rate</span><strong>0 / 307</strong><p>Exact 95% upper bound <b>0.971%</b><br>Wilson 95% upper bound <b>1.236%</b></p></div>
         <div class="risk-card"><span>False negative rate</span><strong>0 / 307</strong><p>Exact 95% upper bound <b>0.971%</b><br>Wilson 95% upper bound <b>1.236%</b></p></div>
       </div>
       <div class="table-scroll takeaway-table"><table><thead><tr><th>Metric</th><th>Errors</th><th>n</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Overall packet error</td><td>0</td><td>614</td><td>0.487%</td><td>0.622%</td></tr><tr><td>False positive rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr><tr><td>False negative rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr></tbody></table></div>
-      <p class="takeaway-note"><strong>What this measures:</strong> the full HoloVerify governed architecture across <strong>614 clean frozen action-boundary packets</strong>. This is the <strong>HoloVerify result</strong>, not a solo model result.</p>
+      <p class="takeaway-note"><strong>What this measures:</strong> the full HoloVerify governed architecture across <strong>614 clean frozen action-boundary packets</strong> under the current governed-runtime harness. This is the <strong>HoloVerify counted-lane result</strong>, not a solo model result and not yet a blind-gate result.</p>
       <p class="takeaway-note"><strong>Why the comparison is fair:</strong> this is an architecture-isolation test, not a token-equivalence claim. Both lanes use the same frozen packet, source facts, and action-boundary task. Solo gets one call and decides alone. HoloVerify uses the same model families inside a governed sequence, so the measured difference is structure, state, Gov, gates, and final selection.</p>
       <p class="takeaway-note"><strong>What still needs ablation:</strong> we still need broader tests of other solo architectures, including more-turn and equal-token solo runs. Existing internal data suggests more turns do not automatically repair solo boundary failures, so equal token spend should not be assumed to erase the Holo gap.</p>
       <h3>Counted Families in the 614</h3>
@@ -87,9 +87,9 @@
 </section>
 <section class="paper-section" id="current-benchmark-ledger"><h2>Current Benchmark Ledger</h2>
 <p>The current clean benchmark-grade HoloVerify counted sample is:</p>
-<div class="table-scroll"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody><tr><td>Frozen action-boundary packets</td><td>614</td></tr><tr><td>Sibling pairs</td><td>307</td></tr><tr><td>ALLOW truths</td><td>307</td></tr><tr><td>ESCALATE truths</td><td>307</td></tr><tr><td>Correct HoloVerify packets</td><td>614</td></tr><tr><td>Observed false positives</td><td>0</td></tr><tr><td>Observed false negatives</td><td>0</td></tr></tbody></table></div>
+<div class="table-scroll"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody><tr><td>Frozen action-boundary packets</td><td>614</td></tr><tr><td>Sibling pairs</td><td>307</td></tr><tr><td>ALLOW truths</td><td>307</td></tr><tr><td>ESCALATE truths</td><td>307</td></tr><tr><td>Correct HoloVerify packets</td><td>614</td></tr><tr><td>Counted false positives</td><td>0</td></tr><tr><td>Counted false negatives</td><td>0</td></tr></tbody></table></div>
 <p>Observed result:</p>
-<blockquote><p>HoloVerify produced zero observed false positives and zero observed false negatives across 614 clean benchmark-grade action-boundary packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.</p></blockquote>
+<blockquote><p>HoloVerify produced zero counted false positives and zero counted false negatives across 614 clean benchmark-grade action-boundary packets in the governed-runtime lane. Because the current runtime gate can use packet truth for repair and final selection, these bounds describe the counted lane. Blind-gate replication is required before claiming a fully blind error-rate bound.</p></blockquote>
 <p>The honest statistical statement is:</p>
 <div class="table-scroll"><table><thead><tr><th>Metric</th><th>Errors</th><th>n</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Overall packet error</td><td>0</td><td>614</td><td>0.487%</td><td>0.622%</td></tr><tr><td>False positive rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr><tr><td>False negative rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr></tbody></table></div>
 <p>Exact and Wilson are two standard ways to put a confidence band around an error rate. They answer the same basic question:</p>
@@ -104,7 +104,7 @@
 <section class="paper-section" id="reliability-threshold-roadmap"><h2>Reliability Threshold Roadmap</h2>
 <p>The business question is not "did this sample pass?"</p>
 <p>The business question is:</p>
-<blockquote><p>How low does the upper risk bound need to be before this class of action can<br>be trusted with this level of autonomy?</p></blockquote>
+<blockquote><p>How low does the blind-gate upper risk bound need to be before this class of action can<br>be trusted with this level of autonomy?</p></blockquote>
 <p>Side-specific false-positive and false-negative risk is the primary safety bar because ALLOW and ESCALATE fail in different ways.</p>
 <div class="table-scroll"><table><thead><tr><th>Target side-specific upper bound</th><th>Required ALLOW examples</th><th>Required ESCALATE examples</th><th>Required total packets</th><th>Additional packets from current 614</th></tr></thead><tbody><tr><td>&lt; 1.0%</td><td>299</td><td>299</td><td>598</td><td>0</td></tr><tr><td>&lt; 0.5%</td><td>598</td><td>598</td><td>1,196</td><td>582</td></tr><tr><td>&lt; 0.25%</td><td>1,197</td><td>1,197</td><td>2,394</td><td>1,780</td></tr><tr><td>&lt; 0.1%</td><td>2,995</td><td>2,995</td><td>5,990</td><td>5,376</td></tr></tbody></table></div>
 <p>Recommended threshold policy:</p>
@@ -215,7 +215,7 @@
 <p>This benchmark does not claim:</p>
 <ul><li>HoloVerify has zero real-world risk.</li><li>HoloVerify is universally superior to every model.</li><li>HoloVerify replaces qualified human review in clinical, legal, financial, or defense contexts.</li><li>The tested packets cover every possible enterprise failure mode.</li><li>One-shot solo baselines represent every possible solo prompting method.</li></ul>
 <p>This benchmark does claim:</p>
-<blockquote><p>On the current clean locked denominator, HoloVerify has produced zero observed<br>false-positive or false-negative errors across 614 action-boundary packets,<br>with a measured statistical upper risk band.</p></blockquote>
+<blockquote><p>On the current clean locked counted lane, HoloVerify has produced zero counted<br>false-positive or false-negative errors across 614 action-boundary packets.<br>The next proof step is to rerun the same claim under blind runtime gates.</p></blockquote>
 <hr/>
 </section>
 <section class="paper-section" id="next-packet-families"><h2>Next Packet Families</h2>

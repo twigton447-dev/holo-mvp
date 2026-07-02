@@ -425,17 +425,17 @@ A **false negative** means Holo says ALLOW when the action should have escalated
 
 The current clean HoloVerify counted sample contains 614 frozen action-boundary packets across 307 sibling pairs: 307 ALLOW truths and 307 ESCALATE truths.
 
-HoloVerify produced zero observed false positives and zero observed false negatives across those 614 packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
+HoloVerify produced zero counted false positives and zero counted false negatives across those 614 packets in the governed-runtime lane. This is a counted-lane result, not yet a fully blind production error-rate claim, because the current deterministic gate can use packet truth for repair and final selection. The statistical upper bounds below describe that counted lane pending blind-gate replication.
 
 The exact one-sided 95% upper bound on overall packet error is 0.487%. The Wilson 95% upper bound is 0.622%. The side-specific upper bounds on false positives and false negatives are 0.971% exact and 1.236% Wilson, because each side currently has 307 examples.
 
 That phrase sounds more complicated than it is. It means:
 
-> Given this many tests and zero observed errors, this is the highest error rate that still remains statistically plausible at the 95% confidence level.
+> Given this many counted tests and zero counted errors, this is the highest counted-lane error rate that still remains statistically plausible at the 95% confidence level.
 
 Plainly:
 
-> We saw zero errors in 614 counted packets. That does not prove zero risk. It means the upper risk bound is now measured instead of guessed.
+> We saw zero counted errors in 614 counted packets under the governed-runtime harness. That does not prove zero risk, and it does not yet replace a blind-gate replication.
 
 Plain English: this moved the benchmark from roughly under 0.68% packet-level Wilson risk to roughly under 0.62% packet-level Wilson risk.
 
@@ -460,7 +460,7 @@ The confusion matrix is simple:
 
 That is the clean headline:
 
-> Zero observed false-positive or false-negative errors across 614 frozen action-boundary packets, with measured statistical uncertainty.
+> Zero counted false-positive or false-negative errors across 614 frozen action-boundary packets in the governed-runtime lane, with blind-gate replication still required.
 
 ### The same models alone
 

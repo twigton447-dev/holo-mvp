@@ -81,6 +81,25 @@ def duplicate_clean_run_refs(batches: list[dict[str, Any]]) -> list[dict[str, An
     return refs
 
 
+def preserved_prior_invalid_run_refs(batches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    refs = []
+    for batch in batches:
+        if batch["status"] != "COMPLETE_WITH_PRIOR_INVALID_RUNS":
+            continue
+        invalid_runs = [run for run in batch["runs"] if run.get("readiness_passed") is not True]
+        clean_runs = clean_runs_for_batch(batch)
+        refs.append(
+            {
+                "batch_id": batch["batch_id"],
+                "family_id": batch["family_id"],
+                "canonical_counted_run": clean_runs[-1]["run_dir"] if clean_runs else None,
+                "preserved_invalid_runs": [run["run_dir"] for run in invalid_runs],
+                "invalid_run_count": len(invalid_runs),
+            }
+        )
+    return refs
+
+
 def verdict_bucket_counts(results: list[dict[str, Any]]) -> dict[str, int]:
     counts = {
         "allow_packets": 0,
@@ -148,15 +167,12 @@ def run_refs(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def build() -> dict[str, Any]:
     ledger = load_json(LEDGER_JSON)
     batches = ledger["batch_rows"]
-    invalid_batches = [
-        row
-        for row in batches
-        if row["status"] in {"INVALID_STOP", "COMPLETE_WITH_PRIOR_INVALID_RUNS"}
-    ]
-    completed_batches = [row for row in batches if row["status"] == "COMPLETE"]
+    invalid_batches = [row for row in batches if row["status"] == "INVALID_STOP"]
+    completed_batches = [row for row in batches if row["status"] in {"COMPLETE", "COMPLETE_WITH_PRIOR_INVALID_RUNS"}]
     completed_results = [completed_result_for_batch(row) for row in completed_batches]
     completed_results = [row for row in completed_results if row is not None]
     duplicate_clean_runs = duplicate_clean_run_refs(completed_batches)
+    preserved_prior_invalid_runs = preserved_prior_invalid_run_refs(completed_batches)
 
     token_totals = aggregate_tokens(completed_results)
     verdict_counts = verdict_bucket_counts(completed_results)
@@ -229,6 +245,8 @@ def build() -> dict[str, Any]:
             "preserved_non_counted_clean_runs": sum(
                 len(row["preserved_non_counted_runs"]) for row in duplicate_clean_runs
             ),
+            "complete_with_prior_invalid_batches": len(preserved_prior_invalid_runs),
+            "preserved_prior_invalid_runs": sum(row["invalid_run_count"] for row in preserved_prior_invalid_runs),
         },
         "next_allowed_batch": ledger.get("next_allowed_batch") if not invalid_batches else None,
         "invalid_batches": [
@@ -242,6 +260,7 @@ def build() -> dict[str, Any]:
         ],
         "completed_run_refs": run_refs(completed_results),
         "duplicate_clean_runs": duplicate_clean_runs,
+        "preserved_prior_invalid_runs": preserved_prior_invalid_runs,
     }
     return report
 
@@ -293,6 +312,21 @@ def render_md(report: dict[str, Any]) -> str:
             )
     else:
         lines.append("No duplicate clean runs were found.")
+    lines.extend(["", "## Prior Invalid Runs Preserved", ""])
+    if report["preserved_prior_invalid_runs"]:
+        lines.extend(
+            [
+                "| Batch | Counted run | Preserved invalid runs |",
+                "| --- | --- | --- |",
+            ]
+        )
+        for row in report["preserved_prior_invalid_runs"]:
+            lines.append(
+                f"| `{row['batch_id']}` | `{row['canonical_counted_run']}` | "
+                f"`{', '.join(row['preserved_invalid_runs'])}` |"
+            )
+    else:
+        lines.append("No prior invalid runs were found in completed batches.")
     lines.extend(["", "## Next Allowed Batch", ""])
     next_batch = report.get("next_allowed_batch")
     if next_batch:

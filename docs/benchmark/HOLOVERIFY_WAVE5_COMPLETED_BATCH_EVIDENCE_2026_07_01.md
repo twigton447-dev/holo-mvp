@@ -1,52 +1,54 @@
 # HoloVerify Wave5 Completed Batch Evidence
 
-Status: `FAIL`
-Evidence state: `STOP_FOR_AUTOPSY`
-Source ledger queue state: `STOP_FOR_AUTOPSY`
-Source ledger builder SHA-256: `fbf47676e8de1d59fe685a7128e46523eac964eeea499187bb23f4c37d38ca03`
-Collector script SHA-256: `f26a0aa65ebb1d1474311558963bcdf7ff9ad5e1266641ffbf4d3f633f84abd5`
+Status: `PASS`
+Evidence state: `WAVE5_COMPLETE`
+Source ledger queue state: `COMPLETE`
+Source ledger builder SHA-256: `dc3a8e1de4e389be1cb16148431112c4b639609fe5b33138e36f25599178b52d`
+Collector script SHA-256: `6d3dab29d71bb28ac5684447156385d76649cbe8d519109cdbf683dda1f8ed4d`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 
 ## Claim Boundary
 
-- `full_wave5_claim_allowed`: `False`
+- `full_wave5_claim_allowed`: `True`
 - `partial_claim_allowed`: `False`
 - `zero_completed_batches_is_not_evidence`: `False`
-- `stop_if_invalid_batch_present`: `True`
+- `stop_if_invalid_batch_present`: `False`
 - `unrun_batches_count_as_no_evidence`: `True`
 
 ## Totals
 
 - `total_batches`: `28`
-- `completed_batches`: `27`
+- `completed_batches`: `28`
 - `not_started_batches`: `0`
-- `invalid_batches`: `1`
-- `completed_pairs`: `135`
-- `completed_packets`: `270`
-- `completed_correct_packets`: `270`
-- `expected_provider_calls_for_completed_batches`: `1350`
-- `observed_provider_calls_for_completed_batches`: `1350`
+- `invalid_batches`: `0`
+- `completed_pairs`: `140`
+- `completed_packets`: `280`
+- `completed_correct_packets`: `280`
+- `expected_provider_calls_for_completed_batches`: `1400`
+- `observed_provider_calls_for_completed_batches`: `1400`
 - `judge_calls`: `0`
 - `transport_recovered_call_count`: `3`
-- `input_tokens`: `2355662`
-- `output_tokens`: `460932`
-- `total_tokens`: `2999965`
-- `allow_packets`: `135`
-- `escalate_packets`: `135`
-- `allow_correct`: `135`
-- `escalate_correct`: `135`
-- `target_packets`: `135`
-- `guardrail_packets`: `135`
+- `input_tokens`: `2443289`
+- `output_tokens`: `477439`
+- `total_tokens`: `3110935`
+- `allow_packets`: `140`
+- `escalate_packets`: `140`
+- `allow_correct`: `140`
+- `escalate_correct`: `140`
+- `target_packets`: `140`
+- `guardrail_packets`: `140`
 - `duplicate_clean_run_batches`: `1`
 - `preserved_non_counted_clean_runs`: `1`
+- `complete_with_prior_invalid_batches`: `1`
+- `preserved_prior_invalid_runs`: `1`
 
 ## Checks
 
 | Check | Value |
 | --- | --- |
 | `ledger_status_pass` | `True` |
-| `ledger_queue_not_invalid` | `False` |
-| `invalid_batches_absent` | `False` |
+| `ledger_queue_not_invalid` | `True` |
+| `invalid_batches_absent` | `True` |
 | `completed_results_match_completed_batches` | `True` |
 | `provider_calls_match_completed_expectation` | `True` |
 | `no_judge_calls` | `True` |
@@ -85,6 +87,7 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 | `WAVE5_OTSF_HOLO_BATCH_001` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_001/live_runs/run_20260702T024125Z` | `50` | `10` | `10` | `5` |
 | `WAVE5_OTSF_HOLO_BATCH_002` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_002/live_runs/run_20260702T025607Z` | `50` | `10` | `10` | `5` |
 | `WAVE5_OTSF_HOLO_BATCH_003` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_003/live_runs/run_20260702T035651Z` | `50` | `10` | `10` | `5` |
+| `WAVE5_OTSF_HOLO_BATCH_004` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs/run_20260702T045548Z` | `50` | `10` | `10` | `5` |
 
 ## Duplicate Clean Runs Preserved
 
@@ -92,6 +95,12 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 | --- | --- | --- |
 | `WAVE5_LREG_HOLO_BATCH_003` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_lreg_holo_batch_003/live_runs/run_20260701T210956Z` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_lreg_holo_batch_003/live_runs/run_20260701T210231Z` |
 
+## Prior Invalid Runs Preserved
+
+| Batch | Counted run | Preserved invalid runs |
+| --- | --- | --- |
+| `WAVE5_OTSF_HOLO_BATCH_004` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs/run_20260702T045548Z` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs/run_20260702T040420Z` |
+
 ## Next Allowed Batch
 
-Stop for autopsy before running another Wave5 batch.
+No next batch is currently queued.

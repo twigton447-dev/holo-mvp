@@ -4,21 +4,21 @@
     "all_completed_packets_correct": true,
     "completed_results_match_completed_batches": true,
     "duplicate_clean_runs_preserved_and_not_counted": true,
-    "invalid_batches_absent": false,
-    "ledger_queue_not_invalid": false,
+    "invalid_batches_absent": true,
+    "ledger_queue_not_invalid": true,
     "ledger_status_pass": true,
     "no_judge_calls": true,
     "provider_calls_match_completed_expectation": true
   },
   "claim_boundary": {
-    "full_wave5_claim_allowed": false,
+    "full_wave5_claim_allowed": true,
     "partial_claim_allowed": false,
-    "stop_if_invalid_batch_present": true,
+    "stop_if_invalid_batch_present": false,
     "unrun_batches_count_as_no_evidence": true,
     "zero_completed_batches_is_not_evidence": false
   },
   "classification": "HOLOVERIFY_WAVE5_COMPLETED_BATCH_EVIDENCE_NO_PROVIDER",
-  "collector_script_sha256": "f26a0aa65ebb1d1474311558963bcdf7ff9ad5e1266641ffbf4d3f633f84abd5",
+  "collector_script_sha256": "6d3dab29d71bb28ac5684447156385d76649cbe8d519109cdbf683dda1f8ed4d",
   "completed_run_refs": [
     {
       "batch_id": "WAVE5_MEDX_HOLO_BATCH_001",
@@ -316,6 +316,17 @@
       "trace_hash": "ba663a92fd131e884b1d5614b5e3a37fcbaf1c3326984e78c1f40ed482c07693",
       "transport_recovered_call_count": 2,
       "valid_pairs": 5
+    },
+    {
+      "batch_id": "WAVE5_OTSF_HOLO_BATCH_004",
+      "live_results_ref": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs/run_20260702T045548Z/live_results.json",
+      "packet_correct": 10,
+      "packet_count": 10,
+      "provider_calls": 50,
+      "run_dir": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs/run_20260702T045548Z",
+      "trace_hash": "d25653600c868eac3bea9cf70134fd25e830c730838e272034e42adb11c373b7",
+      "transport_recovered_call_count": 0,
+      "valid_pairs": 5
     }
   ],
   "created_at_utc": "2026-07-01T00:00:00+00:00",
@@ -330,78 +341,50 @@
       ]
     }
   ],
-  "evidence_state": "STOP_FOR_AUTOPSY",
+  "evidence_state": "WAVE5_COMPLETE",
   "freeze_root_hash": "3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf",
-  "invalid_batches": [
-    {
-      "batch_id": "WAVE5_OTSF_HOLO_BATCH_004",
-      "family_id": "HV-OTSF-REP-2026-07-01",
-      "latest_run": {
-        "classification": "WAVE5_OTSF_HOLO_BATCH_004_INVALID_OR_INCOMPLETE",
-        "expected_provider_calls": 50,
-        "gov_calls": 18,
-        "invalidation_reason": "PROVIDER_FAILURE",
-        "judge_calls": 0,
-        "lock_validation_exists": true,
-        "packet_correct": 9,
-        "packet_count": 10,
-        "provider_calls": 46,
-        "readiness_passed": false,
-        "root_failure": {
-          "admissible": false,
-          "call_kind": "worker",
-          "error": "TransportFailureAfterRetries: HTTP_429",
-          "finish_reason": null,
-          "model": "grok-3-mini",
-          "packet_id": "HV-OTSF-REP-020-B",
-          "parse_ok": false,
-          "provider": "xai",
-          "provider_call_ok": false,
-          "transport_attempt_count": 3,
-          "transport_final_failure_class": "HTTP_429",
-          "transport_recovered": false,
-          "turn_id": "HV-OTSF-REP-020-B_W1"
-        },
-        "run_dir": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs/run_20260702T040420Z",
-        "run_id": "run_20260702T040420Z",
-        "status": "INVALID_OR_INCOMPLETE",
-        "summary_exists": true,
-        "trace_exists": true,
-        "transport_recovered_call_count": 1,
-        "valid_pairs": 4,
-        "worker_calls": 28
-      },
-      "status": "INVALID_STOP"
-    }
-  ],
+  "invalid_batches": [],
   "ledger_ref": "docs/benchmark/HOLOVERIFY_WAVE5_BATCH_PROGRESS_LEDGER_2026_07_01.json",
   "metadata_note": "This output records input provenance and script hash rather than current Git head, because committing generated output necessarily changes HEAD.",
   "next_allowed_batch": null,
-  "source_ledger_progress_builder_sha256": "fbf47676e8de1d59fe685a7128e46523eac964eeea499187bb23f4c37d38ca03",
-  "source_ledger_queue_state": "STOP_FOR_AUTOPSY",
-  "status": "FAIL",
+  "preserved_prior_invalid_runs": [
+    {
+      "batch_id": "WAVE5_OTSF_HOLO_BATCH_004",
+      "canonical_counted_run": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs/run_20260702T045548Z",
+      "family_id": "HV-OTSF-REP-2026-07-01",
+      "invalid_run_count": 1,
+      "preserved_invalid_runs": [
+        "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs/run_20260702T040420Z"
+      ]
+    }
+  ],
+  "source_ledger_progress_builder_sha256": "dc3a8e1de4e389be1cb16148431112c4b639609fe5b33138e36f25599178b52d",
+  "source_ledger_queue_state": "COMPLETE",
+  "status": "PASS",
   "totals": {
-    "allow_correct": 135,
-    "allow_packets": 135,
-    "completed_batches": 27,
-    "completed_correct_packets": 270,
-    "completed_packets": 270,
-    "completed_pairs": 135,
+    "allow_correct": 140,
+    "allow_packets": 140,
+    "complete_with_prior_invalid_batches": 1,
+    "completed_batches": 28,
+    "completed_correct_packets": 280,
+    "completed_packets": 280,
+    "completed_pairs": 140,
     "duplicate_clean_run_batches": 1,
-    "escalate_correct": 135,
-    "escalate_packets": 135,
-    "expected_provider_calls_for_completed_batches": 1350,
-    "guardrail_packets": 135,
-    "input_tokens": 2355662,
-    "invalid_batches": 1,
+    "escalate_correct": 140,
+    "escalate_packets": 140,
+    "expected_provider_calls_for_completed_batches": 1400,
+    "guardrail_packets": 140,
+    "input_tokens": 2443289,
+    "invalid_batches": 0,
     "judge_calls": 0,
     "not_started_batches": 0,
-    "observed_provider_calls_for_completed_batches": 1350,
-    "output_tokens": 460932,
+    "observed_provider_calls_for_completed_batches": 1400,
+    "output_tokens": 477439,
     "preserved_non_counted_clean_runs": 1,
-    "target_packets": 135,
+    "preserved_prior_invalid_runs": 1,
+    "target_packets": 140,
     "total_batches": 28,
-    "total_tokens": 2999965,
+    "total_tokens": 3110935,
     "transport_recovered_call_count": 3
   }
 }

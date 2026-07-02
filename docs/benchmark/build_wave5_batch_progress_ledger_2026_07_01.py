@@ -124,7 +124,7 @@ def summarize_batch(batch: dict[str, Any]) -> dict[str, Any]:
 
 def compute_next_allowed(batch_rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     for row in batch_rows:
-        if row["status"] == "COMPLETE":
+        if row["status"] in {"COMPLETE", "COMPLETE_WITH_PRIOR_INVALID_RUNS"}:
             continue
         if row["status"] == "NOT_STARTED":
             return {
@@ -141,7 +141,7 @@ def compute_next_allowed(batch_rows: list[dict[str, Any]]) -> dict[str, Any] | N
 def build() -> dict[str, Any]:
     handoff = load_json(HANDOFF_JSON)
     batches = [summarize_batch(batch) for batch in handoff["batch_queue"]]
-    invalid_stop = next((row for row in batches if row["status"] in {"INVALID_STOP", "COMPLETE_WITH_PRIOR_INVALID_RUNS"}), None)
+    invalid_stop = next((row for row in batches if row["status"] == "INVALID_STOP"), None)
     next_allowed = None if invalid_stop else compute_next_allowed(batches)
     checks = {
         "handoff_pass": handoff.get("status") == "PASS",
@@ -166,6 +166,11 @@ def build() -> dict[str, Any]:
             "not_started_batches": sum(1 for row in batches if row["status"] == "NOT_STARTED"),
             "invalid_stop_batches": sum(1 for row in batches if row["status"] == "INVALID_STOP"),
             "complete_with_prior_invalid_batches": sum(1 for row in batches if row["status"] == "COMPLETE_WITH_PRIOR_INVALID_RUNS"),
+            "preserved_prior_invalid_runs": sum(
+                row["invalid_or_incomplete_run_count"]
+                for row in batches
+                if row["status"] == "COMPLETE_WITH_PRIOR_INVALID_RUNS"
+            ),
             "completed_pairs": sum(row["pairs"] for row in completed),
             "completed_packets": sum(row["packets"] for row in completed),
             "provider_calls_observed": sum((run.get("provider_calls") or 0) for row in batches for run in row["runs"]),

@@ -1,28 +1,29 @@
 # HoloVerify Wave5 Batch Progress Ledger
 
 Status: `PASS`
-Queue state: `STOP_FOR_AUTOPSY`
+Queue state: `COMPLETE`
 Source handoff builder SHA-256: `4be1494ac860a424387002fd75c6e2e344b466bb861790161c6c4a9dee4f9a21`
-Progress builder SHA-256: `fbf47676e8de1d59fe685a7128e46523eac964eeea499187bb23f4c37d38ca03`
+Progress builder SHA-256: `dc3a8e1de4e389be1cb16148431112c4b639609fe5b33138e36f25599178b52d`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 
 ## Totals
 
 - `batches`: `28`
-- `completed_batches`: `27`
+- `completed_batches`: `28`
 - `not_started_batches`: `0`
-- `invalid_stop_batches`: `1`
-- `complete_with_prior_invalid_batches`: `0`
-- `completed_pairs`: `135`
-- `completed_packets`: `270`
-- `provider_calls_observed`: `1446`
-- `expected_provider_calls_for_completed_batches`: `1350`
+- `invalid_stop_batches`: `0`
+- `complete_with_prior_invalid_batches`: `1`
+- `preserved_prior_invalid_runs`: `1`
+- `completed_pairs`: `140`
+- `completed_packets`: `280`
+- `provider_calls_observed`: `1496`
+- `expected_provider_calls_for_completed_batches`: `1400`
 - `providers_called_by_ledger`: `0`
 - `judges_called_by_ledger`: `0`
 
 ## Next Allowed Batch
 
-Stop for autopsy before continuing. First blocking batch: `WAVE5_OTSF_HOLO_BATCH_004`
+No next batch. Queue is complete.
 
 ## Batch State
 
@@ -55,7 +56,7 @@ Stop for autopsy before continuing. First blocking batch: `WAVE5_OTSF_HOLO_BATCH
 | `25` | `WAVE5_OTSF_HOLO_BATCH_001` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `26` | `WAVE5_OTSF_HOLO_BATCH_002` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `27` | `WAVE5_OTSF_HOLO_BATCH_003` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
-| `28` | `WAVE5_OTSF_HOLO_BATCH_004` | `HV-OTSF-REP-2026-07-01` | `INVALID_STOP` | `1` | `46` | `PROVIDER_FAILURE` |
+| `28` | `WAVE5_OTSF_HOLO_BATCH_004` | `HV-OTSF-REP-2026-07-01` | `COMPLETE_WITH_PRIOR_INVALID_RUNS` | `2` | `96` | `N/A` |
 
 ## Boundary
 

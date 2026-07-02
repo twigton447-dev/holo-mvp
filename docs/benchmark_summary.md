@@ -31,7 +31,7 @@ This is the clean matched solo comparison slice: the same 100 packets were run
 through HoloVerify and through the same three mini-model families as one-shot
 solo baselines.
 
-| Domain | Holo result | Solo KNEW/admissible | Solo audit-failure rate | Solo failure mix |
+| Domain | Holo KNEW | Solo KNEW | Solo audit-failure rate | Solo failure mix |
 | --- | ---: | ---: | ---: | --- |
 | HR / payroll / workforce controls | 22/22 | 22/66 | 66.7% | 1 wrong verdict, 10 parse fails, 33 structural/evidence fails |
 | Data privacy / customer data release controls | 16/16 | 26/48 | 45.8% | 1 wrong verdict, 3 parse fails, 18 structural/evidence fails |

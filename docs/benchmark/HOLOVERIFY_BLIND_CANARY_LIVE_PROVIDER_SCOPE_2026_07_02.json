@@ -1,0 +1,108 @@
+{
+  "classification": "HOLOVERIFY_BLIND_CANARY_LIVE_PROVIDER_SCOPE",
+  "status": "PRE_PROVIDER_APPROVAL_SCOPE_ONLY",
+  "created_at": "2026-07-02",
+  "provider_calls_made_by_scope_document": 0,
+  "judge_calls_made_by_scope_document": 0,
+  "purpose": "Define exact provider scope for first live 20-packet blind canary runtime-firewall test.",
+  "committed_firewall_package": {
+    "commit": "55d5877fe4cd2b4157691bdc54772e5bf09ecf04",
+    "runtime_manifest": "docs/benchmark/holoverify_blind_canary_runtime_manifest_2026_07_02.json",
+    "runtime_manifest_sha256": "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7",
+    "posthoc_scoring_map": "docs/benchmark/holoverify_blind_canary_scoring_map_2026_07_02.json",
+    "posthoc_scoring_map_sha256": "5bb6fea5c3f2d72ae0b092eb168aeebc6ab4dcd6bc897b784c563dc455822c2b",
+    "fable_gate_record": "docs/benchmark/FABLE_CANARY_GATE_RECORD_2026_07_02.md"
+  },
+  "scope": {
+    "packets": 20,
+    "calls_per_packet": 5,
+    "expected_provider_calls": 100,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "runtime_inputs": "runtime_manifest_plus_opaque_runtime_payloads_only",
+    "scoring_map_access": "forbidden_until_after_trace_freeze"
+  },
+  "roster": [
+    {
+      "slot": "W1",
+      "role": "worker",
+      "provider": "xai",
+      "model": "grok-3-mini",
+      "expected_calls": 20
+    },
+    {
+      "slot": "G1",
+      "role": "gov",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "expected_calls": 20
+    },
+    {
+      "slot": "W2",
+      "role": "worker",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "expected_calls": 20
+    },
+    {
+      "slot": "G2",
+      "role": "gov",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "expected_calls": 20
+    },
+    {
+      "slot": "W3",
+      "role": "worker",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "expected_calls": 20
+    }
+  ],
+  "provider_totals": {
+    "xai": 20,
+    "openai": 20,
+    "minimax": 60
+  },
+  "required_env_vars": [
+    "XAI_API_KEY",
+    "OPENAI_API_KEY",
+    "MINIMAX_API_KEY"
+  ],
+  "optional_env_vars": [
+    "MINIMAX_BASE_URL"
+  ],
+  "preflight_requirements": [
+    "head_commit_matches_or_newer_commit_explicitly_recorded",
+    "runtime_manifest_hash_matches",
+    "posthoc_scoring_map_hash_matches",
+    "runtime_manifest_runtime_consumable_true",
+    "runtime_manifest_contains_only_opaque_runtime_ids_and_payload_refs",
+    "runtime_prompts_have_no_truth_or_legacy_fields",
+    "scoring_map_not_loaded_before_trace_freeze",
+    "model_roster_exact",
+    "expected_provider_calls_100",
+    "solo_and_judge_disabled"
+  ],
+  "stop_conditions": [
+    "model_substitution_needed",
+    "provider_key_missing",
+    "provider_call_fails_unrecovered",
+    "runtime_manifest_hash_mismatch",
+    "runtime_prompt_or_payload_leakage",
+    "scoring_map_access_before_trace_freeze",
+    "content_parse_verdict_schema_or_gov_baton_failure_requires_retry",
+    "observed_call_count_not_100",
+    "solo_or_judge_call_attempted"
+  ],
+  "claim_boundary": {
+    "allowed": "blind runtime-firewall result only",
+    "forbidden": [
+      "public benchmark claim",
+      "FP/FN claim",
+      "error-rate claim",
+      "architecture-advantage claim"
+    ]
+  },
+  "exact_approval_sentence": "I approve live provider execution for HOLOVERIFY_BLIND_CANARY_20PKT_RUNTIME_FIREWALL_V0 using commit 55d5877fe4cd2b4157691bdc54772e5bf09ecf04, runtime manifest b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7, and exactly 100 provider calls: W1 xai/grok-3-mini x20, G1 minimax/MiniMax-M2.5-highspeed x20, W2 openai/gpt-5.4-mini x20, G2 minimax/MiniMax-M2.5-highspeed x20, W3 minimax/MiniMax-M2.5-highspeed x20. No judges, no solo, no scoring map before trace freeze, no substitutions, no public claims."
+}

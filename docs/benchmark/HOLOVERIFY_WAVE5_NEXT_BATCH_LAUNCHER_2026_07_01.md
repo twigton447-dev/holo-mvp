@@ -6,19 +6,19 @@ Judge calls by this report: `0`
 
 ## Next Batch
 
-- Batch: `WAVE5_PSRC_HOLO_BATCH_004`
-- Family: `HV-PSRC-REP-2026-07-01`
-- Batch number: `4`
-- Approval SHA: `8ce4c1fc50f5bed1e69b20096cc2a13ccfe503c781a1d4dee36399cdf862b80d`
+- Batch: `WAVE5_OTSF_HOLO_BATCH_001`
+- Family: `HV-OTSF-REP-2026-07-01`
+- Batch number: `1`
+- Approval SHA: `e147a28332e16e01a1d780039b30a6315a95df4a0345b1fbaca8d28b4258f788`
 
 Required approval statement:
 
-`I explicitly approve provider calls for WAVE5_PSRC_HOLO_BATCH_004 only, exactly as scoped in WAVE5_PSRC_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.`
+`I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_001 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01.`
 
 Command after explicit approval:
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-PSRC-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 8ce4c1fc50f5bed1e69b20096cc2a13ccfe503c781a1d4dee36399cdf862b80d --approval-statement "I explicitly approve provider calls for WAVE5_PSRC_HOLO_BATCH_004 only, exactly as scoped in WAVE5_PSRC_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 1 --run-live --approval-packet-sha256 e147a28332e16e01a1d780039b30a6315a95df4a0345b1fbaca8d28b4258f788 --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_001 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_001_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Boundary

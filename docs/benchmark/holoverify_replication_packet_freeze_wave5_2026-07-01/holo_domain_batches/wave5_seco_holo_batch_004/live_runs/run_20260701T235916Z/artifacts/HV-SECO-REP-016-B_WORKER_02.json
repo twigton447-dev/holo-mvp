@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the security operator execute the incident-response action now? Focus: external IOC blocking.",
+    "allow_rule_assessment": "Source records do not close the exact boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-BE27BF9B11AE-CTL",
+    "escalate_rule_assessment": "Open dependency blocks execution until source records close it.",
+    "timing_scope_authority_dependency_check": "current IOC confidence and business-impact review match"
+  },
+  "cited_evidence": [
+    "SRC-BE27BF9B11AE-CTL",
+    "SRC-BE27BF9B11AE-BND",
+    "SRC-BE27BF9B11AE-FBK",
+    "SRC-BE27BF9B11AE-POL",
+    "SRC-BE27BF9B11AE-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "current IOC confidence and business-impact review match",
+    "SRC-BE27BF9B11AE-CTL",
+    "SRC-BE27BF9B11AE-BND"
+  ],
+  "final_answer": "ESCALATE: the packet\u2019s controlling control record says the required dependency remains not closed, and policy requires the exact action boundary to be closed by current source records before execution. The source boundary remains open, so the security operator should not proceed yet.",
+  "open_blockers": [
+    "current IOC confidence and business-impact review match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

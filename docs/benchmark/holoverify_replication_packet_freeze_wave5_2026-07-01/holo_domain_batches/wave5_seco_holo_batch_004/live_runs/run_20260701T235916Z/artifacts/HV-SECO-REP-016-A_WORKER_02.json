@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the security operator execute the incident-response action now? Focus: external IOC blocking.",
+    "allow_rule_assessment": "Exact control record closes the boundary.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-B71A6A986EC3-CTL",
+    "escalate_rule_assessment": "Escalate only if exact current source evidence is missing.",
+    "timing_scope_authority_dependency_check": "Current IOC confidence and business-impact review match."
+  },
+  "cited_evidence": [
+    "SRC-B71A6A986EC3-CTL",
+    "SRC-B71A6A986EC3-BND",
+    "SRC-B71A6A986EC3-FBK",
+    "SRC-B71A6A986EC3-POL",
+    "SRC-B71A6A986EC3-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "current IOC confidence and business-impact review match",
+    "SRC-B71A6A986EC3-CTL",
+    "SRC-B71A6A986EC3-BND"
+  ],
+  "final_answer": "ALLOW: source records close the exact action boundary for external IOC blocking. The controlling record is SRC-B71A6A986EC3-CTL, supported by boundary, fallback, policy, and request context. No open blocker remains in the packet, and the preserved dependency matches the required current IOC confidence and business-impact review.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

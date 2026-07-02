@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operations operator execute the industrial, utility, or safety-control action now? Focus: substation relay setting update.",
+    "allow_rule_assessment": "Source records fail to close exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-2507B7A9C17C-CTL",
+    "escalate_rule_assessment": "Missing relay file asset and engineering approval match",
+    "timing_scope_authority_dependency_check": "current relay file | asset | engineering approval match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-2507B7A9C17C-CTL",
+    "SRC-2507B7A9C17C-BND",
+    "SRC-2507B7A9C17C-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records do not close the exact action boundary for the relay setting update. The controlling control record says the relay file, asset, and engineering approval match are missing or unresolved, and policy requires exact source closure before execution. Therefore the operator may not proceed yet; escalation is required until the dependency is closed.",
+  "open_blockers": [
+    "current relay file, asset, and engineering approval match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

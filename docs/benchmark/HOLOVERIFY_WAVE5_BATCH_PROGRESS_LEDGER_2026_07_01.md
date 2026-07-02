@@ -9,25 +9,25 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 ## Totals
 
 - `batches`: `28`
-- `completed_batches`: `25`
-- `not_started_batches`: `3`
+- `completed_batches`: `26`
+- `not_started_batches`: `2`
 - `invalid_stop_batches`: `0`
 - `complete_with_prior_invalid_batches`: `0`
-- `completed_pairs`: `125`
-- `completed_packets`: `250`
-- `provider_calls_observed`: `1300`
-- `expected_provider_calls_for_completed_batches`: `1250`
+- `completed_pairs`: `130`
+- `completed_packets`: `260`
+- `provider_calls_observed`: `1350`
+- `expected_provider_calls_for_completed_batches`: `1300`
 - `providers_called_by_ledger`: `0`
 - `judges_called_by_ledger`: `0`
 
 ## Next Allowed Batch
 
-- Batch: `WAVE5_OTSF_HOLO_BATCH_002`
+- Batch: `WAVE5_OTSF_HOLO_BATCH_003`
 - Family: `HV-OTSF-REP-2026-07-01`
-- Approval SHA: `959c8b1ab4d004b91bd1f346661d29302376baba323488c36ad2b0e362982091`
+- Approval SHA: `891f64accd2a625b995e42f967c78595cd1d5149488c4c8ef70f2c08edfbb9d5`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 959c8b1ab4d004b91bd1f346661d29302376baba323488c36ad2b0e362982091 --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_002 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 3 --run-live --approval-packet-sha256 891f64accd2a625b995e42f967c78595cd1d5149488c4c8ef70f2c08edfbb9d5 --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_003 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_003_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Batch State
@@ -59,7 +59,7 @@ python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-
 | `23` | `WAVE5_PSRC_HOLO_BATCH_003` | `HV-PSRC-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `24` | `WAVE5_PSRC_HOLO_BATCH_004` | `HV-PSRC-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `25` | `WAVE5_OTSF_HOLO_BATCH_001` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
-| `26` | `WAVE5_OTSF_HOLO_BATCH_002` | `HV-OTSF-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |
+| `26` | `WAVE5_OTSF_HOLO_BATCH_002` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `27` | `WAVE5_OTSF_HOLO_BATCH_003` | `HV-OTSF-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |
 | `28` | `WAVE5_OTSF_HOLO_BATCH_004` | `HV-OTSF-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |
 

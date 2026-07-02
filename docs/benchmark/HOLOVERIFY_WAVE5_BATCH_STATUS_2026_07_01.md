@@ -8,22 +8,22 @@ Judge calls by this status check: `0`
 ## Totals
 
 - `selected_batches`: `28`
-- `run_folders`: `26`
-- `completed_batches`: `25`
-- `not_started_batches`: `3`
+- `run_folders`: `27`
+- `completed_batches`: `26`
+- `not_started_batches`: `2`
 - `invalid_stop_batches`: `0`
 - `in_progress_or_incomplete_batches`: `0`
-- `provider_calls_observed_from_artifacts`: `1300`
+- `provider_calls_observed_from_artifacts`: `1350`
 
 ## Next Or Blocking Batch
 
-- Batch: `WAVE5_OTSF_HOLO_BATCH_002`
+- Batch: `WAVE5_OTSF_HOLO_BATCH_003`
 - Family: `HV-OTSF-REP-2026-07-01`
 - Status: `NOT_STARTED`
-- Approval SHA: `959c8b1ab4d004b91bd1f346661d29302376baba323488c36ad2b0e362982091`
+- Approval SHA: `891f64accd2a625b995e42f967c78595cd1d5149488c4c8ef70f2c08edfbb9d5`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 959c8b1ab4d004b91bd1f346661d29302376baba323488c36ad2b0e362982091 --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_002 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 3 --run-live --approval-packet-sha256 891f64accd2a625b995e42f967c78595cd1d5149488c4c8ef70f2c08edfbb9d5 --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_003 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_003_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```
 
 ## Batch Rows
@@ -55,7 +55,7 @@ python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-
 | `WAVE5_PSRC_HOLO_BATCH_003` | `HV-PSRC-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260702T002818Z` | `50` | `N/A` |
 | `WAVE5_PSRC_HOLO_BATCH_004` | `HV-PSRC-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260702T003553Z` | `50` | `N/A` |
 | `WAVE5_OTSF_HOLO_BATCH_001` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260702T024125Z` | `50` | `N/A` |
-| `WAVE5_OTSF_HOLO_BATCH_002` | `HV-OTSF-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |
+| `WAVE5_OTSF_HOLO_BATCH_002` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260702T025607Z` | `50` | `N/A` |
 | `WAVE5_OTSF_HOLO_BATCH_003` | `HV-OTSF-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |
 | `WAVE5_OTSF_HOLO_BATCH_004` | `HV-OTSF-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |
 

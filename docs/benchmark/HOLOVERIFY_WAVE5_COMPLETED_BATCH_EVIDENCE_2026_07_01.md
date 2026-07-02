@@ -18,25 +18,25 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 ## Totals
 
 - `total_batches`: `28`
-- `completed_batches`: `25`
-- `not_started_batches`: `3`
+- `completed_batches`: `26`
+- `not_started_batches`: `2`
 - `invalid_batches`: `0`
-- `completed_pairs`: `125`
-- `completed_packets`: `250`
-- `completed_correct_packets`: `250`
-- `expected_provider_calls_for_completed_batches`: `1250`
-- `observed_provider_calls_for_completed_batches`: `1250`
+- `completed_pairs`: `130`
+- `completed_packets`: `260`
+- `completed_correct_packets`: `260`
+- `expected_provider_calls_for_completed_batches`: `1300`
+- `observed_provider_calls_for_completed_batches`: `1300`
 - `judge_calls`: `0`
 - `transport_recovered_call_count`: `1`
-- `input_tokens`: `2180083`
-- `output_tokens`: `426855`
-- `total_tokens`: `2776575`
-- `allow_packets`: `125`
-- `escalate_packets`: `125`
-- `allow_correct`: `125`
-- `escalate_correct`: `125`
-- `target_packets`: `125`
-- `guardrail_packets`: `125`
+- `input_tokens`: `2268293`
+- `output_tokens`: `443566`
+- `total_tokens`: `2888828`
+- `allow_packets`: `130`
+- `escalate_packets`: `130`
+- `allow_correct`: `130`
+- `escalate_correct`: `130`
+- `target_packets`: `130`
+- `guardrail_packets`: `130`
 - `duplicate_clean_run_batches`: `1`
 - `preserved_non_counted_clean_runs`: `1`
 
@@ -83,6 +83,7 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 | `WAVE5_PSRC_HOLO_BATCH_003` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_psrc_holo_batch_003/live_runs/run_20260702T002818Z` | `50` | `10` | `10` | `5` |
 | `WAVE5_PSRC_HOLO_BATCH_004` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_psrc_holo_batch_004/live_runs/run_20260702T003553Z` | `50` | `10` | `10` | `5` |
 | `WAVE5_OTSF_HOLO_BATCH_001` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_001/live_runs/run_20260702T024125Z` | `50` | `10` | `10` | `5` |
+| `WAVE5_OTSF_HOLO_BATCH_002` | `docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_002/live_runs/run_20260702T025607Z` | `50` | `10` | `10` | `5` |
 
 ## Duplicate Clean Runs Preserved
 
@@ -92,10 +93,10 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 
 ## Next Allowed Batch
 
-- Batch: `WAVE5_OTSF_HOLO_BATCH_002`
+- Batch: `WAVE5_OTSF_HOLO_BATCH_003`
 - Family: `HV-OTSF-REP-2026-07-01`
-- Approval SHA: `959c8b1ab4d004b91bd1f346661d29302376baba323488c36ad2b0e362982091`
+- Approval SHA: `891f64accd2a625b995e42f967c78595cd1d5149488c4c8ef70f2c08edfbb9d5`
 
 ```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 2 --run-live --approval-packet-sha256 959c8b1ab4d004b91bd1f346661d29302376baba323488c36ad2b0e362982091 --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_002 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_002_PROVIDER_APPROVAL_PACKET_2026_07_01."
+python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 3 --run-live --approval-packet-sha256 891f64accd2a625b995e42f967c78595cd1d5149488c4c8ef70f2c08edfbb9d5 --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_003 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_003_PROVIDER_APPROVAL_PACKET_2026_07_01."
 ```

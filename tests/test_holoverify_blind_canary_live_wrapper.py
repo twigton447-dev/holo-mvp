@@ -146,3 +146,9 @@ def test_valid_contract_passes():
             "finish_reason": "stop",
         },
     )
+
+
+def test_pass_condition_uses_scoped_expected_call_count():
+    source = SCRIPT_PATH.read_text()
+    assert "len(transport.provider_rows) == expected_call_count" in source
+    assert "len(transport.provider_rows) == EXPECTED_CALL_COUNT" not in source

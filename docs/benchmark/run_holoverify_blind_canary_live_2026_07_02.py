@@ -748,7 +748,7 @@ def run_live(approval_statement: str, packet_limit: int | None = None) -> dict[s
             "passed_runtime_firewall": (
                 runtime_result is not None
                 and posthoc is not None
-                and len(transport.provider_rows) == EXPECTED_CALL_COUNT
+                and len(transport.provider_rows) == expected_call_count
                 and not provider_failures
                 and final_verdicts_valid
             ),

@@ -46,6 +46,7 @@
     <section class="paper-section takeaway-panel" id="brief-takeaway">
       <div class="takeaway-kicker">HoloVerify Result</div>
       <p class="takeaway-line"><strong>HoloVerify solved 614/614 frozen action-boundary packets.</strong> The counted sample has <strong>0 false positives</strong> and <strong>0 false negatives</strong>.</p>
+      <p class="takeaway-note"><strong>Solo baseline role:</strong> the same mini-model families were also run alone as one-shot baselines. That shows what the raw models did without <strong>Gov</strong>, shared state, deterministic gates, or a final selector.</p>
       <div class="mobile-risk-cards" aria-label="HoloVerify risk metrics">
         <div class="risk-card"><span>Overall packet error</span><strong>0 / 614</strong><p>Exact 95% upper bound <b>0.487%</b><br>Wilson 95% upper bound <b>0.622%</b></p></div>
         <div class="risk-card"><span>False positive rate</span><strong>0 / 307</strong><p>Exact 95% upper bound <b>0.971%</b><br>Wilson 95% upper bound <b>1.236%</b></p></div>
@@ -53,7 +54,7 @@
       </div>
       <div class="table-scroll takeaway-table"><table><thead><tr><th>Metric</th><th>Errors</th><th>n</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Overall packet error</td><td>0</td><td>614</td><td>0.487%</td><td>0.622%</td></tr><tr><td>False positive rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr><tr><td>False negative rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr></tbody></table></div>
       <p class="takeaway-note"><strong>What this measures:</strong> the full HoloVerify governed architecture across <strong>614 clean frozen action-boundary packets</strong>. This is the <strong>HoloVerify result</strong>, not a solo model result.</p>
-      <p class="takeaway-note"><strong>What it is compared against:</strong> the same mini-model families run alone as one-shot solo baselines. Solo gets <strong>one call per packet</strong>. No Gov, no shared state, no deterministic rescue layer, and no final selector.</p>
+      <p class="takeaway-note"><strong>Why this comparison matters:</strong> solo gets <strong>one call per packet</strong>. HoloVerify uses the same model families, then adds governance, memory, deterministic enforcement, and final selection around them.</p>
       <h3 id="frozen-hash-lock">Frozen and Hash-Locked Records</h3>
       <p class="takeaway-note">A frozen packet is a benchmark case saved before the run: source facts, action boundary, prompt, audit rules, and expected verdict are fixed before any model answers.</p>
       <p class="takeaway-note">A hash lock is a SHA-256 fingerprint of a packet, prompt, trace, or evidence package. If the file changes later, the hash changes too.</p>

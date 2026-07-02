@@ -55,6 +55,16 @@ EXACT_APPROVAL_SENTENCE = (
     "trace freeze, no substitutions, no public claims."
 )
 
+ONE_PACKET_APPROVAL_SENTENCE = (
+    "I approve live provider execution for HOLOVERIFY_BLIND_CANARY_1PKT_RUNTIME_FIREWALL_V0 "
+    "using the committed blind canary runtime manifest "
+    "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7, first opaque packet only, "
+    "and exactly 5 provider calls: W1 xai/grok-3-mini x1, G1 minimax/MiniMax-M2.5-highspeed x1, "
+    "W2 openai/gpt-5.4-mini x1, G2 minimax/MiniMax-M2.5-highspeed x1, "
+    "W3 minimax/MiniMax-M2.5-highspeed x1. No judges, no solo, no scoring map before "
+    "trace freeze, no substitutions, no public claims."
+)
+
 FORBIDDEN_RUNTIME_STRINGS = (
     "packet_truth",
     "legacy_truth",
@@ -157,6 +167,49 @@ def strip_thinking_blocks(text: str) -> str:
     text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S | re.I)
     text = re.sub(r"<thinking>.*?</thinking>", "", text, flags=re.S | re.I)
     return text.strip()
+
+
+def parse_key_value(text: str) -> dict[str, str]:
+    parsed: dict[str, str] = {}
+    for line in text.splitlines():
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if key:
+            parsed[key] = value.strip()
+    return parsed
+
+
+def validate_live_output_contract(slot: str, response: dict[str, Any]) -> None:
+    text = str(response.get("text") or "")
+    finish_reason = str(response.get("finish_reason") or "").lower()
+    if not text.strip():
+        raise RuntimeError(f"{slot}_empty_text")
+    if finish_reason == "length":
+        raise RuntimeError(f"{slot}_finish_reason_length")
+
+    parsed = parse_key_value(text)
+    if slot.startswith("W"):
+        required = (
+            "worker_role",
+            "verification_verdict",
+            "action_boundary",
+            "binding_class",
+            "cited_evidence",
+            "final_answer",
+        )
+        missing = [key for key in required if not parsed.get(key)]
+        if missing:
+            raise RuntimeError(f"{slot}_worker_contract_missing:{','.join(missing)}")
+        if parsed.get("verification_verdict") not in {"ALLOW", "ESCALATE"}:
+            raise RuntimeError(f"{slot}_worker_contract_bad_verdict:{parsed.get('verification_verdict')}")
+        return
+
+    required_gov = ("route_verdict", "repair_target", "blocked_move")
+    missing_gov = [key for key in required_gov if not parsed.get(key)]
+    if missing_gov:
+        raise RuntimeError(f"{slot}_gov_contract_missing:{','.join(missing_gov)}")
 
 
 def env_presence() -> dict[str, str]:
@@ -406,6 +459,7 @@ class LiveTransport:
         error: str | None = None
         try:
             response = call_provider(config, messages)
+            validate_live_output_contract(slot, response)
             return str(response.get("text") or "")
         except Exception as exc:
             error = str(exc)
@@ -458,9 +512,30 @@ class LiveTransport:
             )
 
 
-def scan_runtime_inputs(manifest: dict[str, Any]) -> list[str]:
+def materialize_runtime_subset(run_dir: Path, packet_limit: int | None) -> Path:
+    if packet_limit is None:
+        return RUNTIME_MANIFEST
+    if packet_limit <= 0:
+        raise ValueError("packet_limit must be positive")
+    source = load_json(RUNTIME_MANIFEST)
+    packets = list(source.get("packets") or [])[:packet_limit]
+    subset = {
+        **source,
+        "packet_count": len(packets),
+        "packets": packets,
+        "source_runtime_manifest": str(RUNTIME_MANIFEST.relative_to(REPO_ROOT)),
+        "source_runtime_manifest_sha256": sha256_file(RUNTIME_MANIFEST),
+        "subset_runtime_manifest": True,
+        "subset_packet_limit": packet_limit,
+    }
+    path = run_dir / f"runtime_manifest_subset_{packet_limit:03d}.json"
+    write_json(path, subset)
+    return path
+
+
+def scan_runtime_inputs(manifest_path: Path, manifest: dict[str, Any]) -> list[str]:
     hits: list[str] = []
-    manifest_text = RUNTIME_MANIFEST.read_text(errors="replace")
+    manifest_text = manifest_path.read_text(errors="replace")
     for term in FORBIDDEN_RUNTIME_STRINGS:
         if term.lower() in manifest_text.lower():
             hits.append(f"runtime_manifest:{term}")
@@ -475,9 +550,9 @@ def scan_runtime_inputs(manifest: dict[str, Any]) -> list[str]:
     return hits
 
 
-def prompt_probe_no_leakage(manifest: dict[str, Any], probe_dir: Path) -> list[str]:
-    result = BLIND.run_blind_runtime_manifest(str(RUNTIME_MANIFEST), str(probe_dir), transport=make_mock_transport())
-    if result.get("observed_call_count") != EXPECTED_CALL_COUNT:
+def prompt_probe_no_leakage(manifest_path: Path, expected_call_count: int, probe_dir: Path) -> list[str]:
+    result = BLIND.run_blind_runtime_manifest(str(manifest_path), str(probe_dir), transport=make_mock_transport())
+    if result.get("observed_call_count") != expected_call_count:
         return [f"prompt_probe_call_count:{result.get('observed_call_count')}"]
     hits: list[str] = []
     for prompt in (probe_dir).glob("*/prompts/*.json"):
@@ -490,29 +565,32 @@ def prompt_probe_no_leakage(manifest: dict[str, Any], probe_dir: Path) -> list[s
     return hits
 
 
-def preflight(run_dir: Path) -> dict[str, Any]:
-    runtime_hash = sha256_file(RUNTIME_MANIFEST)
+def preflight(run_dir: Path, runtime_manifest_path: Path = RUNTIME_MANIFEST) -> dict[str, Any]:
+    runtime_hash = sha256_file(runtime_manifest_path)
+    source_runtime_hash = sha256_file(RUNTIME_MANIFEST)
     scoring_hash = sha256_file(SCORING_MAP)
-    manifest = load_json(RUNTIME_MANIFEST)
+    manifest = load_json(runtime_manifest_path)
     packet_refs = [row.get("runtime_payload_ref") for row in manifest.get("packets", [])]
+    expected_packet_count = int(manifest.get("packet_count") or len(packet_refs))
+    expected_call_count = expected_packet_count * len(CALL_SEQUENCE)
     payload_paths = [REPO_ROOT / str(ref) for ref in packet_refs]
     missing_payloads = [str(path) for path in payload_paths if not path.exists()]
-    leakage_hits = scan_runtime_inputs(manifest)
-    probe_hits = prompt_probe_no_leakage(manifest, run_dir / "preflight_prompt_probe")
+    leakage_hits = scan_runtime_inputs(runtime_manifest_path, manifest)
+    probe_hits = prompt_probe_no_leakage(runtime_manifest_path, expected_call_count, run_dir / "preflight_prompt_probe")
     env = env_presence()
     provider_counts = {
-        "xai": EXPECTED_PACKET_COUNT,
-        "openai": EXPECTED_PACKET_COUNT,
-        "minimax": EXPECTED_PACKET_COUNT * 3,
+        "xai": expected_packet_count,
+        "openai": expected_packet_count,
+        "minimax": expected_packet_count * 3,
     }
     checks = {
-        "runtime_manifest_hash": runtime_hash == EXPECTED_RUNTIME_MANIFEST_SHA256,
+        "source_runtime_manifest_hash": source_runtime_hash == EXPECTED_RUNTIME_MANIFEST_SHA256,
         "scoring_map_hash": scoring_hash == EXPECTED_SCORING_MAP_SHA256,
         "runtime_consumable": manifest.get("runtime_consumable") is True,
-        "packet_count": manifest.get("packet_count") == EXPECTED_PACKET_COUNT and len(packet_refs) == EXPECTED_PACKET_COUNT,
+        "packet_count": manifest.get("packet_count") == expected_packet_count and len(packet_refs) == expected_packet_count,
         "payloads_present": not missing_payloads,
-        "expected_call_count": EXPECTED_PACKET_COUNT * len(CALL_SEQUENCE) == EXPECTED_CALL_COUNT,
-        "provider_counts": provider_counts == {"xai": 20, "openai": 20, "minimax": 60},
+        "expected_call_count": expected_call_count == expected_packet_count * 5,
+        "provider_counts": provider_counts == {"xai": expected_packet_count, "openai": expected_packet_count, "minimax": expected_packet_count * 3},
         "solo_calls_disabled": manifest.get("solo_calls", 0) == 0,
         "judge_calls_disabled": manifest.get("judge_calls", 0) == 0,
         "provider_calls_not_yet_made": True,
@@ -524,13 +602,14 @@ def preflight(run_dir: Path) -> dict[str, Any]:
         "classification": "HOLOVERIFY_BLIND_CANARY_LIVE_PREFLIGHT_V0",
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "current_head": current_head(),
-        "runtime_manifest": str(RUNTIME_MANIFEST.relative_to(REPO_ROOT)),
+        "runtime_manifest": str(runtime_manifest_path.relative_to(REPO_ROOT)) if runtime_manifest_path.is_relative_to(REPO_ROOT) else str(runtime_manifest_path),
         "runtime_manifest_sha256": runtime_hash,
+        "source_runtime_manifest_sha256": source_runtime_hash,
         "scoring_map_sha256_preflight_only": scoring_hash,
         "expected_runtime_manifest_sha256": EXPECTED_RUNTIME_MANIFEST_SHA256,
         "expected_scoring_map_sha256": EXPECTED_SCORING_MAP_SHA256,
-        "packets": EXPECTED_PACKET_COUNT,
-        "expected_provider_calls": EXPECTED_CALL_COUNT,
+        "packets": expected_packet_count,
+        "expected_provider_calls": expected_call_count,
         "call_sequence": list(CALL_SEQUENCE),
         "roster": {slot: {k: v for k, v in resolved_config(slot).items() if k != "api_key_env"} for slot in CALL_SEQUENCE},
         "env_presence": env,
@@ -546,7 +625,7 @@ def preflight(run_dir: Path) -> dict[str, Any]:
         "",
         f"- Passed: `{report['passed']}`",
         f"- Runtime manifest hash: `{runtime_hash}`",
-        f"- Expected provider calls: `{EXPECTED_CALL_COUNT}`",
+        f"- Expected provider calls: `{expected_call_count}`",
         f"- Env keys: `{env}`",
         f"- Leakage hits: `{len(leakage_hits) + len(probe_hits)}`",
         "",
@@ -610,13 +689,16 @@ def posthoc_score(run_dir: Path, runtime_result: dict[str, Any], provider_rows: 
     return report
 
 
-def run_live(approval_statement: str) -> dict[str, Any]:
-    if approval_statement != EXACT_APPROVAL_SENTENCE:
+def run_live(approval_statement: str, packet_limit: int | None = None) -> dict[str, Any]:
+    expected_approval = ONE_PACKET_APPROVAL_SENTENCE if packet_limit == 1 else EXACT_APPROVAL_SENTENCE
+    if approval_statement != expected_approval:
         raise RuntimeError("approval_statement_mismatch")
 
     run_dir = LIVE_ROOT / f"run_{utc_stamp()}"
     run_dir.mkdir(parents=True, exist_ok=False)
-    preflight_report = preflight(run_dir)
+    runtime_manifest_path = materialize_runtime_subset(run_dir, packet_limit)
+    expected_call_count = int(load_json(runtime_manifest_path).get("packet_count") or 0) * len(CALL_SEQUENCE)
+    preflight_report = preflight(run_dir, runtime_manifest_path)
     if not preflight_report.get("passed"):
         raise RuntimeError(f"preflight_failed:{preflight_report.get('checks')}")
 
@@ -626,11 +708,11 @@ def run_live(approval_statement: str) -> dict[str, Any]:
     posthoc: dict[str, Any] | None = None
     failure: str | None = None
     try:
-        runtime_result = BLIND.run_blind_runtime_manifest(str(RUNTIME_MANIFEST), str(run_dir), transport=transport)
+        runtime_result = BLIND.run_blind_runtime_manifest(str(runtime_manifest_path), str(run_dir), transport=transport)
         write_provider_trace(run_dir, transport.provider_rows)
         trace_frozen = True
         observed = runtime_result.get("observed_call_count")
-        if observed != EXPECTED_CALL_COUNT or len(transport.provider_rows) != EXPECTED_CALL_COUNT:
+        if observed != expected_call_count or len(transport.provider_rows) != expected_call_count:
             raise RuntimeError(f"observed_call_count_mismatch:{observed}:{len(transport.provider_rows)}")
         posthoc = posthoc_score(run_dir, runtime_result, transport.provider_rows)
     except Exception as exc:
@@ -640,13 +722,21 @@ def run_live(approval_statement: str) -> dict[str, Any]:
         raise
     finally:
         provider_failures = [row for row in transport.provider_rows if row.get("provider_call_ok") is not True]
+        final_verdicts = [
+            (row.get("final") or {}).get("verdict")
+            for row in (runtime_result or {}).get("results", [])
+        ]
+        final_verdicts_valid = bool(final_verdicts) and all(verdict in {"ALLOW", "ESCALATE"} for verdict in final_verdicts)
         summary = {
             "classification": "HOLOVERIFY_BLIND_CANARY_LIVE_RUN_SUMMARY_V0",
             "created_at_utc": datetime.now(timezone.utc).isoformat(),
             "run_dir": str(run_dir.relative_to(REPO_ROOT)),
             "current_head": current_head(),
-            "runtime_manifest_sha256": sha256_file(RUNTIME_MANIFEST),
-            "expected_provider_calls": EXPECTED_CALL_COUNT,
+            "runtime_manifest": str(runtime_manifest_path.relative_to(REPO_ROOT)) if runtime_manifest_path.is_relative_to(REPO_ROOT) else str(runtime_manifest_path),
+            "runtime_manifest_sha256": sha256_file(runtime_manifest_path),
+            "source_runtime_manifest_sha256": sha256_file(RUNTIME_MANIFEST),
+            "packet_limit": packet_limit,
+            "expected_provider_calls": expected_call_count,
             "observed_provider_calls": len(transport.provider_rows),
             "trace_frozen_before_scoring": trace_frozen,
             "provider_failures": provider_failures,
@@ -654,11 +744,13 @@ def run_live(approval_statement: str) -> dict[str, Any]:
             "provider_trace_ref": "TRACE_PROVIDER_CALLS.jsonl",
             "posthoc_score_ref": "blind_canary_posthoc_score.json" if posthoc else None,
             "failure": failure,
+            "final_verdicts_valid": final_verdicts_valid,
             "passed_runtime_firewall": (
                 runtime_result is not None
                 and posthoc is not None
                 and len(transport.provider_rows) == EXPECTED_CALL_COUNT
                 and not provider_failures
+                and final_verdicts_valid
             ),
         }
         write_json(run_dir / "blind_canary_live_summary.json", summary)
@@ -666,7 +758,7 @@ def run_live(approval_statement: str) -> dict[str, Any]:
             "# HoloVerify Blind Canary Live Summary",
             "",
             f"- Runtime firewall passed: `{summary['passed_runtime_firewall']}`",
-            f"- Observed provider calls: `{summary['observed_provider_calls']}` / `{EXPECTED_CALL_COUNT}`",
+            f"- Observed provider calls: `{summary['observed_provider_calls']}` / `{expected_call_count}`",
             f"- Provider failures: `{len(provider_failures)}`",
             f"- Trace frozen before scoring: `{trace_frozen}`",
             f"- Failure: `{failure}`",
@@ -677,16 +769,18 @@ def run_live(approval_statement: str) -> dict[str, Any]:
     return load_json(run_dir / "blind_canary_live_summary.json")
 
 
-def run_preflight_only() -> dict[str, Any]:
+def run_preflight_only(packet_limit: int | None = None) -> dict[str, Any]:
     run_dir = LIVE_ROOT / f"preflight_{utc_stamp()}"
     run_dir.mkdir(parents=True, exist_ok=False)
-    return preflight(run_dir)
+    runtime_manifest_path = materialize_runtime_subset(run_dir, packet_limit)
+    return preflight(run_dir, runtime_manifest_path)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--run-live", action="store_true")
+    parser.add_argument("--packet-limit", type=int, default=None)
     parser.add_argument("--approval-statement", default="")
     args = parser.parse_args()
 
@@ -694,10 +788,10 @@ def main() -> int:
         raise SystemExit("choose exactly one of --preflight or --run-live")
 
     if args.preflight:
-        print(json.dumps(run_preflight_only(), indent=2, sort_keys=True))
+        print(json.dumps(run_preflight_only(args.packet_limit), indent=2, sort_keys=True))
         return 0
 
-    summary = run_live(args.approval_statement)
+    summary = run_live(args.approval_statement, args.packet_limit)
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0
 

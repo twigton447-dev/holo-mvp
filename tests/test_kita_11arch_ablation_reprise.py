@@ -17,6 +17,18 @@ VALID_RUN_DIR = (
     / "run_20260702T184308Z"
 )
 AUTOPSY_PATH = VALID_RUN_DIR / "KITA_11ARCH_ABLATION_REPRISE_6CALL_AUTOPSY_2026_07_02.json"
+OPENAI54_RUN_DIR = (
+    REPO_ROOT
+    / "docs"
+    / "benchmark"
+    / "kita_11arch_ablation_reprise_2026-07-02"
+    / "openai54_homogeneous_6call_same_arch_family"
+    / "live_runs"
+    / "run_20260702T193334Z"
+)
+OPENAI54_RESULTS_PATH = OPENAI54_RUN_DIR / "live_results.json"
+OPENAI54_AUDIT_PATH = OPENAI54_RUN_DIR / "KITA_OPENAI54_HOMOGENEOUS_6CALL_COMPLETION_AUDIT_2026_07_02.json"
+OPENAI54_AUTOPSY_PATH = OPENAI54_RUN_DIR / "KITA_OPENAI54_HOMOGENEOUS_6CALL_AUTOPSY_2026_07_02.json"
 
 
 def load_runner():
@@ -297,3 +309,48 @@ def test_committed_autopsy_uses_normalized_failure_topology():
         assert row["admissibility_status"] in {"ADMISSIBLE", "NOT_ADMISSIBLE"}
         assert row["missing_source_ids_or_closure_defect"]
         assert row["failure_explanation"]
+
+
+def test_openai54_homogeneous_live_run_is_comparable_and_complete():
+    results = json.loads(OPENAI54_RESULTS_PATH.read_text())
+    audit = json.loads(OPENAI54_AUDIT_PATH.read_text())
+    autopsy = json.loads(OPENAI54_AUTOPSY_PATH.read_text())
+    trace_rows = [
+        json.loads(line)
+        for line in (OPENAI54_RUN_DIR / "TRACE_CALLS.jsonl").read_text().splitlines()
+        if line.strip()
+    ]
+
+    assert results["classification"] == "KITA_11ARCH_ABLATION_REPRISE_LIVE_COMPLETE"
+    assert results["provider_calls"] == 144
+    assert results["expected_provider_calls"] == 144
+    assert results["gov_calls"] == 0
+    assert results["holo_calls"] == 0
+    assert results["judge_calls"] == 0
+    assert results["provider_failures"] == 0
+    assert results["parse_failures"] == 0
+    assert results["selected_pair_ids"] == ["HV-AP-REP-011", "HV-ACOM-REP-020", "HV-ITAC-REP-018"]
+    assert results["selected_packet_count"] == 6
+    assert results["selected_reprise_architectures"] == [
+        "openai54_reconsider_no_gov_6call",
+        "openai54_vote_no_gov_6call",
+        "openai54_council_no_gov_6call",
+        "openai54_debate_no_gov_6call",
+    ]
+    assert len(trace_rows) == 144
+    assert {(row["provider"], row["model"], row["model_key"]) for row in trace_rows} == {
+        ("openai", "gpt-5.4-mini", "openai_w2")
+    }
+    assert all(row["gov_context_in_prompt"] is False for row in trace_rows)
+    assert all(row["holo_state_in_prompt"] is False for row in trace_rows)
+    assert all(row["artifact_registry_in_prompt"] is False for row in trace_rows)
+    assert all(row["final_selector_in_prompt"] is False for row in trace_rows)
+    assert audit["status"] == "PASS"
+    assert all(audit["requirements"].values())
+    assert autopsy["result_summary"]["strict_admissible_correct"] == 13
+    assert autopsy["result_summary"]["failure_topology_counts"] == {
+        "missing_binding_authority_source": 7,
+        "strict_admissible_correct": 13,
+        "unsupported_escalation": 4,
+    }
+    assert len(autopsy["failure_topology_rows"]) == 24

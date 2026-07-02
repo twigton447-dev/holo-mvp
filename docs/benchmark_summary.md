@@ -14,6 +14,15 @@ model result.
 one-shot solo baselines. Solo gets one call per packet. No Gov, no shared state,
 no deterministic rescue layer, and no final selector.
 
+## On This Page
+
+- [Result and counted families](#holoverify-result)
+- [Current benchmark ledger](#current-benchmark-ledger)
+- [How HoloVerify works](#how-holoverify-works)
+- [How policies are handled and design partner API](#how-policies-are-handled)
+- [Cost and safety premium](#cost)
+- [Audit sources](#audit-sources)
+
 ### Counted Families in the 614
 
 | Family | Domain | Packets | HoloVerify |

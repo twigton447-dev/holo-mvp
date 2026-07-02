@@ -1647,16 +1647,88 @@
       "batch_id": "WAVE5_OTSF_HOLO_BATCH_004",
       "expected_provider_calls": 50,
       "family_id": "HV-OTSF-REP-2026-07-01",
-      "latest_run": null,
-      "nonready_run_count": 0,
+      "latest_run": {
+        "artifact_flags": {
+          "live_results_exists": true,
+          "live_summary_exists": true,
+          "lock_validation_exists": true,
+          "no_leakage_audit_exists": true,
+          "trace_exists": true
+        },
+        "classification": "WAVE5_OTSF_HOLO_BATCH_004_INVALID_OR_INCOMPLETE",
+        "expected_provider_calls": 50,
+        "gov_calls": 18,
+        "invalidation_reason": "PROVIDER_FAILURE",
+        "judge_calls": 0,
+        "provider_calls": 46,
+        "readiness_passed": false,
+        "root_failure": {
+          "admissible": false,
+          "call_kind": "worker",
+          "error": "TransportFailureAfterRetries: HTTP_429",
+          "finish_reason": null,
+          "model": "grok-3-mini",
+          "packet_id": "HV-OTSF-REP-020-B",
+          "parse_ok": false,
+          "provider": "xai",
+          "provider_call_ok": false,
+          "transport_attempt_count": 3,
+          "transport_final_failure_class": "HTTP_429",
+          "transport_recovered": false,
+          "turn_id": "HV-OTSF-REP-020-B_W1"
+        },
+        "run_dir": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs/run_20260702T040420Z",
+        "run_id": "run_20260702T040420Z",
+        "status": "INVALID_OR_INCOMPLETE",
+        "trace_line_count": 46,
+        "worker_calls": 28
+      },
+      "nonready_run_count": 1,
       "packets": 10,
       "pairs": 5,
       "ready_run_count": 0,
       "run_command_after_explicit_approval": "python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 c2950e6375a565cebaa753607aa9d3363b7b5a3565bb7678f4b5b5ab57293b07 --approval-statement \"I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_004 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
-      "run_count": 0,
+      "run_count": 1,
       "run_root": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs",
-      "runs": [],
-      "status": "NOT_STARTED"
+      "runs": [
+        {
+          "artifact_flags": {
+            "live_results_exists": true,
+            "live_summary_exists": true,
+            "lock_validation_exists": true,
+            "no_leakage_audit_exists": true,
+            "trace_exists": true
+          },
+          "classification": "WAVE5_OTSF_HOLO_BATCH_004_INVALID_OR_INCOMPLETE",
+          "expected_provider_calls": 50,
+          "gov_calls": 18,
+          "invalidation_reason": "PROVIDER_FAILURE",
+          "judge_calls": 0,
+          "provider_calls": 46,
+          "readiness_passed": false,
+          "root_failure": {
+            "admissible": false,
+            "call_kind": "worker",
+            "error": "TransportFailureAfterRetries: HTTP_429",
+            "finish_reason": null,
+            "model": "grok-3-mini",
+            "packet_id": "HV-OTSF-REP-020-B",
+            "parse_ok": false,
+            "provider": "xai",
+            "provider_call_ok": false,
+            "transport_attempt_count": 3,
+            "transport_final_failure_class": "HTTP_429",
+            "transport_recovered": false,
+            "turn_id": "HV-OTSF-REP-020-B_W1"
+          },
+          "run_dir": "docs/benchmark/holoverify_replication_packet_freeze_wave5_2026-07-01/holo_domain_batches/wave5_otsf_holo_batch_004/live_runs/run_20260702T040420Z",
+          "run_id": "run_20260702T040420Z",
+          "status": "INVALID_OR_INCOMPLETE",
+          "trace_line_count": 46,
+          "worker_calls": 28
+        }
+      ],
+      "status": "INVALID_STOP"
     }
   ],
   "checks": {
@@ -1677,18 +1749,18 @@
     "batch_id": "WAVE5_OTSF_HOLO_BATCH_004",
     "family_id": "HV-OTSF-REP-2026-07-01",
     "run_command_after_explicit_approval": "python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 c2950e6375a565cebaa753607aa9d3363b7b5a3565bb7678f4b5b5ab57293b07 --approval-statement \"I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_004 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.\"",
-    "status": "NOT_STARTED"
+    "status": "INVALID_STOP"
   },
   "provider_calls_by_this_status_check": 0,
-  "queue_state": "READY_FOR_NEXT_BATCH",
+  "queue_state": "STOP_FOR_AUTOPSY",
   "status": "PASS",
   "totals": {
     "completed_batches": 27,
     "in_progress_or_incomplete_batches": 0,
-    "invalid_stop_batches": 0,
-    "not_started_batches": 1,
-    "provider_calls_observed_from_artifacts": 1400,
-    "run_folders": 28,
+    "invalid_stop_batches": 1,
+    "not_started_batches": 0,
+    "provider_calls_observed_from_artifacts": 1446,
+    "run_folders": 29,
     "selected_batches": 28
   }
 }

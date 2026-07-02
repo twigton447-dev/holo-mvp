@@ -1,8 +1,8 @@
 # HoloVerify Wave5 Completed Batch Evidence
 
-Status: `PASS`
-Evidence state: `PARTIAL_CLEAN_EVIDENCE`
-Source ledger queue state: `READY_FOR_NEXT_BATCH`
+Status: `FAIL`
+Evidence state: `STOP_FOR_AUTOPSY`
+Source ledger queue state: `STOP_FOR_AUTOPSY`
 Source ledger builder SHA-256: `fbf47676e8de1d59fe685a7128e46523eac964eeea499187bb23f4c37d38ca03`
 Collector script SHA-256: `f26a0aa65ebb1d1474311558963bcdf7ff9ad5e1266641ffbf4d3f633f84abd5`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
@@ -10,17 +10,17 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 ## Claim Boundary
 
 - `full_wave5_claim_allowed`: `False`
-- `partial_claim_allowed`: `True`
+- `partial_claim_allowed`: `False`
 - `zero_completed_batches_is_not_evidence`: `False`
-- `stop_if_invalid_batch_present`: `False`
+- `stop_if_invalid_batch_present`: `True`
 - `unrun_batches_count_as_no_evidence`: `True`
 
 ## Totals
 
 - `total_batches`: `28`
 - `completed_batches`: `27`
-- `not_started_batches`: `1`
-- `invalid_batches`: `0`
+- `not_started_batches`: `0`
+- `invalid_batches`: `1`
 - `completed_pairs`: `135`
 - `completed_packets`: `270`
 - `completed_correct_packets`: `270`
@@ -45,8 +45,8 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 | Check | Value |
 | --- | --- |
 | `ledger_status_pass` | `True` |
-| `ledger_queue_not_invalid` | `True` |
-| `invalid_batches_absent` | `True` |
+| `ledger_queue_not_invalid` | `False` |
+| `invalid_batches_absent` | `False` |
 | `completed_results_match_completed_batches` | `True` |
 | `provider_calls_match_completed_expectation` | `True` |
 | `no_judge_calls` | `True` |
@@ -94,10 +94,4 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 
 ## Next Allowed Batch
 
-- Batch: `WAVE5_OTSF_HOLO_BATCH_004`
-- Family: `HV-OTSF-REP-2026-07-01`
-- Approval SHA: `c2950e6375a565cebaa753607aa9d3363b7b5a3565bb7678f4b5b5ab57293b07`
-
-```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 c2950e6375a565cebaa753607aa9d3363b7b5a3565bb7678f4b5b5ab57293b07 --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_004 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
-```
+Stop for autopsy before running another Wave5 batch.

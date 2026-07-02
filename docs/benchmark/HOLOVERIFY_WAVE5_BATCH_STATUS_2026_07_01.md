@@ -1,25 +1,25 @@
 # HoloVerify Wave5 Batch Status
 
 Status: `PASS`
-Queue state: `READY_FOR_NEXT_BATCH`
+Queue state: `STOP_FOR_AUTOPSY`
 Provider calls by this status check: `0`
 Judge calls by this status check: `0`
 
 ## Totals
 
 - `selected_batches`: `28`
-- `run_folders`: `28`
+- `run_folders`: `29`
 - `completed_batches`: `27`
-- `not_started_batches`: `1`
-- `invalid_stop_batches`: `0`
+- `not_started_batches`: `0`
+- `invalid_stop_batches`: `1`
 - `in_progress_or_incomplete_batches`: `0`
-- `provider_calls_observed_from_artifacts`: `1400`
+- `provider_calls_observed_from_artifacts`: `1446`
 
 ## Next Or Blocking Batch
 
 - Batch: `WAVE5_OTSF_HOLO_BATCH_004`
 - Family: `HV-OTSF-REP-2026-07-01`
-- Status: `NOT_STARTED`
+- Status: `INVALID_STOP`
 - Approval SHA: `c2950e6375a565cebaa753607aa9d3363b7b5a3565bb7678f4b5b5ab57293b07`
 
 ```bash
@@ -57,7 +57,7 @@ python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-
 | `WAVE5_OTSF_HOLO_BATCH_001` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260702T024125Z` | `50` | `N/A` |
 | `WAVE5_OTSF_HOLO_BATCH_002` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260702T025607Z` | `50` | `N/A` |
 | `WAVE5_OTSF_HOLO_BATCH_003` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `run_20260702T035651Z` | `50` | `N/A` |
-| `WAVE5_OTSF_HOLO_BATCH_004` | `HV-OTSF-REP-2026-07-01` | `NOT_STARTED` | `0` | `N/A` | `0` | `N/A` |
+| `WAVE5_OTSF_HOLO_BATCH_004` | `HV-OTSF-REP-2026-07-01` | `INVALID_STOP` | `1` | `run_20260702T040420Z` | `46` | `PROVIDER_FAILURE` |
 
 ## Boundary
 

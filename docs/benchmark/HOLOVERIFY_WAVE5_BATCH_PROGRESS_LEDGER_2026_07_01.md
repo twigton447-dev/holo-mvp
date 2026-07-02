@@ -1,7 +1,7 @@
 # HoloVerify Wave5 Batch Progress Ledger
 
 Status: `PASS`
-Queue state: `READY_FOR_NEXT_BATCH`
+Queue state: `STOP_FOR_AUTOPSY`
 Source handoff builder SHA-256: `4be1494ac860a424387002fd75c6e2e344b466bb861790161c6c4a9dee4f9a21`
 Progress builder SHA-256: `fbf47676e8de1d59fe685a7128e46523eac964eeea499187bb23f4c37d38ca03`
 Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
@@ -10,25 +10,19 @@ Freeze root: `3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf`
 
 - `batches`: `28`
 - `completed_batches`: `27`
-- `not_started_batches`: `1`
-- `invalid_stop_batches`: `0`
+- `not_started_batches`: `0`
+- `invalid_stop_batches`: `1`
 - `complete_with_prior_invalid_batches`: `0`
 - `completed_pairs`: `135`
 - `completed_packets`: `270`
-- `provider_calls_observed`: `1400`
+- `provider_calls_observed`: `1446`
 - `expected_provider_calls_for_completed_batches`: `1350`
 - `providers_called_by_ledger`: `0`
 - `judges_called_by_ledger`: `0`
 
 ## Next Allowed Batch
 
-- Batch: `WAVE5_OTSF_HOLO_BATCH_004`
-- Family: `HV-OTSF-REP-2026-07-01`
-- Approval SHA: `c2950e6375a565cebaa753607aa9d3363b7b5a3565bb7678f4b5b5ab57293b07`
-
-```bash
-python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-OTSF-REP-2026-07-01 --batch-number 4 --run-live --approval-packet-sha256 c2950e6375a565cebaa753607aa9d3363b7b5a3565bb7678f4b5b5ab57293b07 --approval-statement "I explicitly approve provider calls for WAVE5_OTSF_HOLO_BATCH_004 only, exactly as scoped in WAVE5_OTSF_HOLO_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01."
-```
+Stop for autopsy before continuing. First blocking batch: `WAVE5_OTSF_HOLO_BATCH_004`
 
 ## Batch State
 
@@ -61,7 +55,7 @@ python3 -B docs/benchmark/run_wave5_holo_domain_batch_2026_07_01.py --family HV-
 | `25` | `WAVE5_OTSF_HOLO_BATCH_001` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `26` | `WAVE5_OTSF_HOLO_BATCH_002` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
 | `27` | `WAVE5_OTSF_HOLO_BATCH_003` | `HV-OTSF-REP-2026-07-01` | `COMPLETE` | `1` | `50` | `N/A` |
-| `28` | `WAVE5_OTSF_HOLO_BATCH_004` | `HV-OTSF-REP-2026-07-01` | `NOT_STARTED` | `0` | `0` | `N/A` |
+| `28` | `WAVE5_OTSF_HOLO_BATCH_004` | `HV-OTSF-REP-2026-07-01` | `INVALID_STOP` | `1` | `46` | `PROVIDER_FAILURE` |
 
 ## Boundary
 

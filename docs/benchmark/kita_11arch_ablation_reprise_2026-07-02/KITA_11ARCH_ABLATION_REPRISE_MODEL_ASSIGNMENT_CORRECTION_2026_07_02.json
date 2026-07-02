@@ -1,0 +1,45 @@
+{
+  "classification": "KITA_11ARCH_ABLATION_REPRISE_MODEL_ASSIGNMENT_CORRECTION",
+  "created_at": "2026-07-02",
+  "purpose": "Restore the canonical interpretation of the Kit A 11-architecture ablation reprise to the provider-balanced model assignment from commit a33c196d3.",
+  "baseline_commit_being_matched": "a33c196d3",
+  "canonical_baseline_matched_run": {
+    "run_id": "run_20260702T184308Z",
+    "run_path": "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/cross_domain_3pair_hard/live_runs/run_20260702T184308Z",
+    "evidence_status": "CANONICAL_PROVIDER_BALANCED_BASELINE_MATCH",
+    "provider_calls": 144,
+    "expected_provider_calls": 144,
+    "model_counts": {
+      "grok-3-mini": 48,
+      "gpt-5.4-mini": 48,
+      "MiniMax-M2.5-highspeed": 48
+    },
+    "selected_pair_ids": [
+      "HV-AP-REP-011",
+      "HV-ACOM-REP-020",
+      "HV-ITAC-REP-018"
+    ],
+    "selected_packet_count": 6,
+    "selected_reprise_architectures": [
+      "provider_balanced_reconsider_no_gov_6call",
+      "provider_balanced_vote_no_gov_6call",
+      "provider_balanced_council_no_gov_6call",
+      "provider_balanced_debate_no_gov_6call"
+    ],
+    "calls_per_packet_architecture_unit": 6,
+    "packet_architecture_units": 24,
+    "gov_calls": 0,
+    "holo_calls": 0,
+    "judge_calls": 0,
+    "forbidden_holo_controls_present": false,
+    "output_contract_and_adjudication_harness": "same runner, same JSON output contract, same local deterministic adjudication harness"
+  },
+  "homogeneous_openai54_run": {
+    "commit": "b43eb7628",
+    "run_id": "run_20260702T193334Z",
+    "run_path": "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/openai54_homogeneous_6call_same_arch_family/live_runs/run_20260702T193334Z",
+    "evidence_status": "DIAGNOSTIC_ONLY_NOT_BASELINE_MATCHED",
+    "reason": "All 144 calls use openai/gpt-5.4-mini, so the run does not preserve the a33c196d3 provider-balanced 48/48/48 model assignment."
+  },
+  "required_verification_line": "Model mix verified: grok-3-mini=48, gpt-5.4-mini=48, MiniMax-M2.5-highspeed=48"
+}

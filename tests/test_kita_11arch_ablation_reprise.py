@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+from collections import Counter
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -29,6 +30,13 @@ OPENAI54_RUN_DIR = (
 OPENAI54_RESULTS_PATH = OPENAI54_RUN_DIR / "live_results.json"
 OPENAI54_AUDIT_PATH = OPENAI54_RUN_DIR / "KITA_OPENAI54_HOMOGENEOUS_6CALL_COMPLETION_AUDIT_2026_07_02.json"
 OPENAI54_AUTOPSY_PATH = OPENAI54_RUN_DIR / "KITA_OPENAI54_HOMOGENEOUS_6CALL_AUTOPSY_2026_07_02.json"
+MODEL_ASSIGNMENT_CORRECTION_PATH = (
+    REPO_ROOT
+    / "docs"
+    / "benchmark"
+    / "kita_11arch_ablation_reprise_2026-07-02"
+    / "KITA_11ARCH_ABLATION_REPRISE_MODEL_ASSIGNMENT_CORRECTION_2026_07_02.json"
+)
 
 
 def load_runner():
@@ -311,10 +319,49 @@ def test_committed_autopsy_uses_normalized_failure_topology():
         assert row["failure_explanation"]
 
 
-def test_openai54_homogeneous_live_run_is_comparable_and_complete():
+def test_provider_balanced_live_run_matches_a33c196d3_model_assignment():
+    results = json.loads((VALID_RUN_DIR / "live_results.json").read_text())
+    trace_rows = [
+        json.loads(line)
+        for line in (VALID_RUN_DIR / "TRACE_CALLS.jsonl").read_text().splitlines()
+        if line.strip()
+    ]
+    model_counts = Counter((row["provider"], row["model"], row["model_key"]) for row in trace_rows)
+    unit_counts = Counter((row["packet_id"], row["architecture"]) for row in trace_rows)
+
+    assert results["classification"] == "KITA_11ARCH_ABLATION_REPRISE_LIVE_COMPLETE"
+    assert results["provider_calls"] == 144
+    assert results["expected_provider_calls"] == 144
+    assert results["gov_calls"] == 0
+    assert results["holo_calls"] == 0
+    assert results["judge_calls"] == 0
+    assert results["selected_pair_ids"] == ["HV-AP-REP-011", "HV-ACOM-REP-020", "HV-ITAC-REP-018"]
+    assert results["selected_packet_count"] == 6
+    assert results["selected_reprise_architectures"] == [
+        "provider_balanced_reconsider_no_gov_6call",
+        "provider_balanced_vote_no_gov_6call",
+        "provider_balanced_council_no_gov_6call",
+        "provider_balanced_debate_no_gov_6call",
+    ]
+    assert len(trace_rows) == 144
+    assert model_counts == {
+        ("xai", "grok-3-mini", "xai"): 48,
+        ("openai", "gpt-5.4-mini", "openai_w2"): 48,
+        ("minimax", "MiniMax-M2.5-highspeed", "minimax"): 48,
+    }
+    assert len(unit_counts) == 24
+    assert set(unit_counts.values()) == {6}
+    assert all(row["gov_context_in_prompt"] is False for row in trace_rows)
+    assert all(row["holo_state_in_prompt"] is False for row in trace_rows)
+    assert all(row["artifact_registry_in_prompt"] is False for row in trace_rows)
+    assert all(row["final_selector_in_prompt"] is False for row in trace_rows)
+
+
+def test_openai54_homogeneous_live_run_is_diagnostic_not_baseline_match():
     results = json.loads(OPENAI54_RESULTS_PATH.read_text())
     audit = json.loads(OPENAI54_AUDIT_PATH.read_text())
     autopsy = json.loads(OPENAI54_AUTOPSY_PATH.read_text())
+    correction = json.loads(MODEL_ASSIGNMENT_CORRECTION_PATH.read_text())
     trace_rows = [
         json.loads(line)
         for line in (OPENAI54_RUN_DIR / "TRACE_CALLS.jsonl").read_text().splitlines()
@@ -340,6 +387,13 @@ def test_openai54_homogeneous_live_run_is_comparable_and_complete():
     assert len(trace_rows) == 144
     assert {(row["provider"], row["model"], row["model_key"]) for row in trace_rows} == {
         ("openai", "gpt-5.4-mini", "openai_w2")
+    }
+    assert correction["homogeneous_openai54_run"]["evidence_status"] == "DIAGNOSTIC_ONLY_NOT_BASELINE_MATCHED"
+    assert correction["canonical_baseline_matched_run"]["run_id"] == "run_20260702T184308Z"
+    assert correction["canonical_baseline_matched_run"]["model_counts"] == {
+        "grok-3-mini": 48,
+        "gpt-5.4-mini": 48,
+        "MiniMax-M2.5-highspeed": 48,
     }
     assert all(row["gov_context_in_prompt"] is False for row in trace_rows)
     assert all(row["holo_state_in_prompt"] is False for row in trace_rows)

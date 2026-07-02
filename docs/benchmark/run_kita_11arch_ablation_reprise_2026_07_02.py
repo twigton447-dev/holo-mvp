@@ -551,7 +551,8 @@ def preflight(pair_ids: tuple[str, ...], architectures: tuple[str, ...], label: 
                 "Every selected no-Gov architecture receives 6 calls per packet, the same frozen "
                 "packet set, the same output contract, and the same local gate. Provider-balanced "
                 "architectures split those calls 2/2/2 across the three model DNA. OpenAI-5.4 "
-                "homogeneous architectures bind all six calls to openai/gpt-5.4-mini."
+                "homogeneous architectures bind all six calls to openai/gpt-5.4-mini and are "
+                "diagnostic-only, not a baseline-matched rerun of commit a33c196d3."
             ),
         },
         "expected_provider_calls": len(call_plan),
@@ -595,7 +596,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "- Calls per packet per architecture: `6`",
         "- Same frozen packet set, output contract, and local gate for every selected architecture.",
         "- Provider-balanced families split calls 2/2/2 across xAI, OpenAI, and MiniMax.",
-        "- OpenAI-5.4 homogeneous families bind all 6 calls to `openai/gpt-5.4-mini`.",
+        "- OpenAI-5.4 homogeneous families bind all 6 calls to `openai/gpt-5.4-mini` and are diagnostic-only.",
         "",
         "## Architectures",
         "",
@@ -622,6 +623,7 @@ def render_markdown(report: dict[str, Any]) -> str:
             "- This is a no-Gov diagnostic plan.",
             "- No-Gov architectures must not receive Gov baton, Holo state, Blindspot Atlas, artifact registry, or final selector.",
             "- One-shot solo shortcuts are not comparable to these six-call architecture-family runs.",
+            "- Homogeneous all-OpenAI-5.4 runs are not comparable to provider-balanced baseline-matched runs.",
             "- Deterministic policy gate, if tested later, must be reported separately from model architectures.",
         ]
     )

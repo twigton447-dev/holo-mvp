@@ -423,11 +423,11 @@ A **false positive** means Holo says ESCALATE when the action was actually allow
 
 A **false negative** means Holo says ALLOW when the action should have escalated. That is usually the dangerous miss.
 
-The current clean HoloVerify counted sample contains 454 frozen action-boundary packets across 227 sibling pairs: 227 ALLOW truths and 227 ESCALATE truths.
+The current clean HoloVerify counted sample contains 614 frozen action-boundary packets across 307 sibling pairs: 307 ALLOW truths and 307 ESCALATE truths.
 
-HoloVerify produced zero observed false positives and zero observed false negatives across those 454 packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
+HoloVerify produced zero observed false positives and zero observed false negatives across those 614 packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
 
-The exact one-sided 95% upper bound on overall packet error is 0.658%. The Wilson 95% upper bound is 0.839%. The side-specific upper bounds on false positives and false negatives are 1.311% exact and 1.664% Wilson, because each side currently has 227 examples.
+The exact one-sided 95% upper bound on overall packet error is 0.487%. The Wilson 95% upper bound is 0.622%. The side-specific upper bounds on false positives and false negatives are 0.971% exact and 1.236% Wilson, because each side currently has 307 examples.
 
 That phrase sounds more complicated than it is. It means:
 
@@ -435,9 +435,9 @@ That phrase sounds more complicated than it is. It means:
 
 Plainly:
 
-> We saw zero errors in 454 counted packets. That does not prove zero risk. It means the upper risk bound is now measured instead of guessed.
+> We saw zero errors in 614 counted packets. That does not prove zero risk. It means the upper risk bound is now measured instead of guessed.
 
-Plain English: this moved the benchmark from roughly under 1.14% packet-level Wilson risk to roughly under 0.84% packet-level Wilson risk.
+Plain English: this moved the benchmark from roughly under 0.68% packet-level Wilson risk to roughly under 0.62% packet-level Wilson risk.
 
 That is why the benchmark reports confidence bands, not only the observed score.
 
@@ -455,12 +455,12 @@ The confusion matrix is simple:
 
 | Actual / predicted | ESCALATE | ALLOW |
 | --- | ---: | ---: |
-| Actual ESCALATE | Correctly escalated = 227 | Missed escalation = 0 |
-| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 227 |
+| Actual ESCALATE | Correctly escalated = 307 | Missed escalation = 0 |
+| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 307 |
 
 That is the clean headline:
 
-> Zero observed false-positive or false-negative errors across 454 frozen action-boundary packets, with measured statistical uncertainty.
+> Zero observed false-positive or false-negative errors across 614 frozen action-boundary packets, with measured statistical uncertainty.
 
 ### The same models alone
 
@@ -547,19 +547,19 @@ Holo solved all 6 packets and all 3 sibling pairs. The run completed 30/30 provi
 
 This is not a completed 20-pair Commerce family. It should be read as locked canary evidence: the failure pattern reappeared in Commerce, and the governed architecture held on the selected all-six-collapse pairs.
 
-### Next statistical milestone
+### Statistical milestone
 
-The next frozen packet bank is Wave5: seven domains, 140 sibling pairs, and 280 packets. The domains include clinical medication activation, treasury wire movement, legal and regulatory filing, cloud destructive admin controls, security operations, public sector citizen records, and industrial / utility safety controls.
+Wave5 is complete: seven domains, 140 sibling pairs, and 280 packets. The domains include clinical medication activation, treasury wire movement, legal and regulatory filing, cloud destructive admin controls, security operations, public sector citizen records, and industrial / utility safety controls.
 
-If the remaining 16 Wave5 batches complete cleanly, the benchmark-grade denominator moves from 454 packets to 614 packets. The side-specific ALLOW and ESCALATE counts move from 227 each to 307 each.
+That moved the benchmark-grade denominator to 614 packets. The side-specific ALLOW and ESCALATE counts are now 307 each.
 
-That would lower the exact 95% upper bound on packet-level error from 0.658% to about 0.487%, and lower the side-specific false-positive and false-negative upper bound from 1.311% to about 0.971%.
+That lowers the exact 95% upper bound on packet-level error to about 0.487%, and lowers the side-specific false-positive and false-negative upper bound to about 0.971%.
 
-That is the right next public threshold:
+That clears the prior public threshold:
 
-> Below 0.5% packet-level upper risk and below 1.0% false-positive / false-negative upper risk, if Wave5 completes cleanly.
+> Below 0.5% packet-level upper risk and below 1.0% false-positive / false-negative upper risk.
 
-After that, the next serious milestone is below 0.5% side-specific false-positive and false-negative risk. With zero observed errors, that requires about 598 ALLOW examples and 598 ESCALATE examples, or 1,196 total balanced packets. After a clean Wave5, that means roughly 582 additional balanced packets.
+The next serious milestone is below 0.5% side-specific false-positive and false-negative risk. With zero observed errors, that requires about 598 ALLOW examples and 598 ESCALATE examples, or 1,196 total balanced packets. From the current denominator, that means roughly 582 additional balanced packets.
 
 The 0.1% tier is different. That requires thousands of balanced examples plus external review and ongoing monitoring. It should be treated as production-scale validation, not as the next public benchmark step.
 

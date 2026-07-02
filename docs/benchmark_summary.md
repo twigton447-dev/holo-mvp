@@ -14,9 +14,42 @@ model result.
 one-shot solo baselines. Solo gets one call per packet. No Gov, no shared state,
 no deterministic rescue layer, and no final selector.
 
+## What Frozen and Hash-Locked Mean
+
+The results are intentionally presented with an audit trail because they look
+too strong to ask anyone to accept on trust. This is also a vendor benchmark.
+HoloEngine built it because there was no existing benchmark for this exact
+action-boundary problem. That makes the integrity layer part of the claim, not
+an appendix.
+
+A frozen packet is a test case saved before the run. Its source facts, action
+boundary, hidden dependency, expected verdict, model-visible prompt, and local
+audit rules are fixed. After freezing, the packet should not be edited to fit
+the answer.
+
+A hash lock is a SHA-256 fingerprint of a frozen packet, prompt, trace, or
+evidence package. If one character changes, the hash changes. That makes later
+edits detectable.
+
+| Object | Plain-English Meaning | Why It Matters |
+| --- | --- | --- |
+| Frozen packet | The test case is fixed before the model sees it. | Prevents changing the question after seeing the answer. |
+| Hash lock | A fingerprint of the exact file contents. | Makes packet, prompt, or trace edits visible. |
+| Holo state | The run memory: worker outputs, Gov batons, gate results, artifact hashes, unresolved dependencies, and best-answer tracking. | Shows what Holo knew at each step instead of relying on a final answer alone. |
+| Trace | The call-by-call record of models, Gov calls, tokens, gates, verdicts, failures, and final selection. | Acts like a camera on the run for auditors, regulators, design partners, and skeptics. |
+
+The point is simple: vendors can overfit tests, drop failures, move goalposts,
+or rewrite prompts after the fact. The frozen packet bank, hash manifests,
+traces, and readiness audits are designed to make those moves detectable.
+
+Hash-locking does not prove HoloVerify will be perfect in the real world. It
+preserves the evidence trail so a reviewer can inspect what happened inside
+Holo before the final ALLOW or ESCALATE decision.
+
 ## On This Page
 
 - [Result and counted families](#holoverify-result)
+- [Frozen packets, Holo state, and hash locks](#what-frozen-and-hash-locked-mean)
 - [Current benchmark ledger](#current-benchmark-ledger)
 - [How HoloVerify works](#how-holoverify-works)
 - [How policies are handled and design partner API](#how-policies-are-handled)

@@ -7,6 +7,16 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RUNNER_PATH = REPO_ROOT / "docs" / "benchmark" / "run_kita_11arch_ablation_reprise_2026_07_02.py"
+VALID_RUN_DIR = (
+    REPO_ROOT
+    / "docs"
+    / "benchmark"
+    / "kita_11arch_ablation_reprise_2026-07-02"
+    / "cross_domain_3pair_hard"
+    / "live_runs"
+    / "run_20260702T184308Z"
+)
+AUTOPSY_PATH = VALID_RUN_DIR / "KITA_11ARCH_ABLATION_REPRISE_6CALL_AUTOPSY_2026_07_02.json"
 
 
 def load_runner():
@@ -138,3 +148,25 @@ def test_approval_packet_statement_and_hash_are_stable_for_preflight():
     assert packet["approval_scope"]["expected_holo_calls"] == 0
     assert packet["approval_scope"]["expected_judge_calls"] == 0
     assert packet["approval_packet_sha256"] == report["approval_packet_sha256"]
+
+
+def test_committed_autopsy_uses_normalized_failure_topology():
+    data = json.loads(AUTOPSY_PATH.read_text())
+    allowed = set(data["normalized_failure_class_taxonomy"]["allowed_classes"])
+    rows = data["failure_topology_rows"]
+
+    assert len(rows) == 24
+    assert {row["normalized_failure_class"] for row in rows} <= allowed
+    assert data["failure_topology_summary"]["normalized_failure_class_counts"] == {
+        "missing_binding_authority_source": 6,
+        "missing_policy_source": 3,
+        "parse_failure_unusable_artifact": 2,
+        "strict_admissible_correct": 8,
+        "unsupported_escalation": 5,
+    }
+    for row in rows:
+        assert row["packet_pair"]
+        assert row["architecture"]
+        assert row["admissibility_status"] in {"ADMISSIBLE", "NOT_ADMISSIBLE"}
+        assert row["missing_source_ids_or_closure_defect"]
+        assert row["failure_explanation"]

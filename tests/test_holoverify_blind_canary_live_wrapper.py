@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -46,6 +47,19 @@ def test_one_packet_preflight_limits_scope_to_five_calls(tmp_path, monkeypatch):
     assert report["checks"]["provider_calls_not_yet_made"] is True
 
 
+def test_one_packet_subset_can_select_second_opaque_packet(tmp_path):
+    script = load_script()
+    source = json.loads(script.RUNTIME_MANIFEST.read_text())
+
+    manifest_path = script.materialize_runtime_subset(tmp_path, 1, packet_index=2)
+    subset = json.loads(manifest_path.read_text())
+
+    assert subset["packet_count"] == 1
+    assert subset["subset_packet_start_index_1based"] == 2
+    assert subset["packets"][0]["opaque_runtime_id"] == source["packets"][1]["opaque_runtime_id"]
+    assert subset["packets"][0]["opaque_runtime_id"] != source["packets"][0]["opaque_runtime_id"]
+
+
 def test_live_requires_exact_approval_before_preflight(monkeypatch):
     script = load_script()
     called = {"preflight": False}
@@ -71,6 +85,23 @@ def test_one_packet_live_uses_separate_approval_sentence(monkeypatch):
     monkeypatch.setattr(script, "preflight", fail_if_called)
     with pytest.raises(RuntimeError, match="approval_statement_mismatch"):
         script.run_live(script.EXACT_APPROVAL_SENTENCE, packet_limit=1)
+    assert called["preflight"] is False
+
+
+def test_one_packet_approval_sentence_binds_packet_index(monkeypatch):
+    script = load_script()
+    assert "opaque packet index 2 only" in script.one_packet_approval_sentence(2)
+    assert script.one_packet_approval_sentence(1) != script.one_packet_approval_sentence(2)
+
+    called = {"preflight": False}
+
+    def fail_if_called(_run_dir, _runtime_manifest_path=None):
+        called["preflight"] = True
+        raise AssertionError("preflight should not run on wrong packet-index approval")
+
+    monkeypatch.setattr(script, "preflight", fail_if_called)
+    with pytest.raises(RuntimeError, match="approval_statement_mismatch"):
+        script.run_live(script.one_packet_approval_sentence(1), packet_limit=1, packet_index=2)
     assert called["preflight"] is False
 
 

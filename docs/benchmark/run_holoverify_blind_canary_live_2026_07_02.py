@@ -55,15 +55,17 @@ EXACT_APPROVAL_SENTENCE = (
     "trace freeze, no substitutions, no public claims."
 )
 
-ONE_PACKET_APPROVAL_SENTENCE = (
-    "I approve live provider execution for HOLOVERIFY_BLIND_CANARY_1PKT_RUNTIME_FIREWALL_V0 "
-    "using the committed blind canary runtime manifest "
-    "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7, first opaque packet only, "
-    "and exactly 5 provider calls: W1 xai/grok-3-mini x1, G1 minimax/MiniMax-M2.5-highspeed x1, "
-    "W2 openai/gpt-5.4-mini x1, G2 minimax/MiniMax-M2.5-highspeed x1, "
-    "W3 minimax/MiniMax-M2.5-highspeed x1. No judges, no solo, no scoring map before "
-    "trace freeze, no substitutions, no public claims."
-)
+def one_packet_approval_sentence(packet_index: int) -> str:
+    return (
+        "I approve live provider execution for HOLOVERIFY_BLIND_CANARY_1PKT_RUNTIME_FIREWALL_V0 "
+        "using the committed blind canary runtime manifest "
+        "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7, "
+        f"opaque packet index {packet_index} only, "
+        "and exactly 5 provider calls: W1 xai/grok-3-mini x1, G1 minimax/MiniMax-M2.5-highspeed x1, "
+        "W2 openai/gpt-5.4-mini x1, G2 minimax/MiniMax-M2.5-highspeed x1, "
+        "W3 minimax/MiniMax-M2.5-highspeed x1. No judges, no solo, no scoring map before "
+        "trace freeze, no substitutions, no public claims."
+    )
 
 FORBIDDEN_RUNTIME_STRINGS = (
     "packet_truth",
@@ -512,13 +514,19 @@ class LiveTransport:
             )
 
 
-def materialize_runtime_subset(run_dir: Path, packet_limit: int | None) -> Path:
+def materialize_runtime_subset(run_dir: Path, packet_limit: int | None, packet_index: int = 1) -> Path:
     if packet_limit is None:
         return RUNTIME_MANIFEST
     if packet_limit <= 0:
         raise ValueError("packet_limit must be positive")
+    if packet_index <= 0:
+        raise ValueError("packet_index must be 1-based and positive")
     source = load_json(RUNTIME_MANIFEST)
-    packets = list(source.get("packets") or [])[:packet_limit]
+    source_packets = list(source.get("packets") or [])
+    start = packet_index - 1
+    packets = source_packets[start : start + packet_limit]
+    if len(packets) != packet_limit:
+        raise ValueError(f"packet subset out of range: index={packet_index} limit={packet_limit}")
     subset = {
         **source,
         "packet_count": len(packets),
@@ -527,8 +535,10 @@ def materialize_runtime_subset(run_dir: Path, packet_limit: int | None) -> Path:
         "source_runtime_manifest_sha256": sha256_file(RUNTIME_MANIFEST),
         "subset_runtime_manifest": True,
         "subset_packet_limit": packet_limit,
+        "subset_packet_start_index_1based": packet_index,
+        "subset_opaque_runtime_ids": [row.get("opaque_runtime_id") for row in packets],
     }
-    path = run_dir / f"runtime_manifest_subset_{packet_limit:03d}.json"
+    path = run_dir / f"runtime_manifest_subset_i{packet_index:03d}_n{packet_limit:03d}.json"
     write_json(path, subset)
     return path
 
@@ -689,14 +699,14 @@ def posthoc_score(run_dir: Path, runtime_result: dict[str, Any], provider_rows: 
     return report
 
 
-def run_live(approval_statement: str, packet_limit: int | None = None) -> dict[str, Any]:
-    expected_approval = ONE_PACKET_APPROVAL_SENTENCE if packet_limit == 1 else EXACT_APPROVAL_SENTENCE
+def run_live(approval_statement: str, packet_limit: int | None = None, packet_index: int = 1) -> dict[str, Any]:
+    expected_approval = one_packet_approval_sentence(packet_index) if packet_limit == 1 else EXACT_APPROVAL_SENTENCE
     if approval_statement != expected_approval:
         raise RuntimeError("approval_statement_mismatch")
 
     run_dir = LIVE_ROOT / f"run_{utc_stamp()}"
     run_dir.mkdir(parents=True, exist_ok=False)
-    runtime_manifest_path = materialize_runtime_subset(run_dir, packet_limit)
+    runtime_manifest_path = materialize_runtime_subset(run_dir, packet_limit, packet_index)
     expected_call_count = int(load_json(runtime_manifest_path).get("packet_count") or 0) * len(CALL_SEQUENCE)
     preflight_report = preflight(run_dir, runtime_manifest_path)
     if not preflight_report.get("passed"):
@@ -736,6 +746,7 @@ def run_live(approval_statement: str, packet_limit: int | None = None) -> dict[s
             "runtime_manifest_sha256": sha256_file(runtime_manifest_path),
             "source_runtime_manifest_sha256": sha256_file(RUNTIME_MANIFEST),
             "packet_limit": packet_limit,
+            "packet_index": packet_index if packet_limit is not None else None,
             "expected_provider_calls": expected_call_count,
             "observed_provider_calls": len(transport.provider_rows),
             "trace_frozen_before_scoring": trace_frozen,
@@ -769,10 +780,10 @@ def run_live(approval_statement: str, packet_limit: int | None = None) -> dict[s
     return load_json(run_dir / "blind_canary_live_summary.json")
 
 
-def run_preflight_only(packet_limit: int | None = None) -> dict[str, Any]:
+def run_preflight_only(packet_limit: int | None = None, packet_index: int = 1) -> dict[str, Any]:
     run_dir = LIVE_ROOT / f"preflight_{utc_stamp()}"
     run_dir.mkdir(parents=True, exist_ok=False)
-    runtime_manifest_path = materialize_runtime_subset(run_dir, packet_limit)
+    runtime_manifest_path = materialize_runtime_subset(run_dir, packet_limit, packet_index)
     return preflight(run_dir, runtime_manifest_path)
 
 
@@ -781,6 +792,7 @@ def main() -> int:
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--run-live", action="store_true")
     parser.add_argument("--packet-limit", type=int, default=None)
+    parser.add_argument("--packet-index", type=int, default=1)
     parser.add_argument("--approval-statement", default="")
     args = parser.parse_args()
 
@@ -788,10 +800,10 @@ def main() -> int:
         raise SystemExit("choose exactly one of --preflight or --run-live")
 
     if args.preflight:
-        print(json.dumps(run_preflight_only(args.packet_limit), indent=2, sort_keys=True))
+        print(json.dumps(run_preflight_only(args.packet_limit, args.packet_index), indent=2, sort_keys=True))
         return 0
 
-    summary = run_live(args.approval_statement, args.packet_limit)
+    summary = run_live(args.approval_statement, args.packet_limit, args.packet_index)
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0
 

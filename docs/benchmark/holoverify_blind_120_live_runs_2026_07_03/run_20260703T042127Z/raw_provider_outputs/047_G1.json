@@ -1,0 +1,27 @@
+{
+  "call_number": 47,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "574901241af88cdf48942d4f9b0c326444e1b5a8789f1cacd0926a2f436a3f86",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user is asking for a three-line status record based on a packet_id and status_values fields: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs. The system message says: Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus we should output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut the input includes a packet_id=BLIND120-EEFF4309D81A6E8C7221. Should we include that? The spec says \"three key=value lines\", fields in order: route_verdict, repair_target, blocked_move. It does not mention packet_id. So we should not include it.\n\nThus answer is exactly those three lines.\n\nBut we must also ensure we don't add extra whitespace or newline after the final line. It's a plain text record, three lines. No extra lines. So final answer is:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must not add anything else.\n\nThus output exactly that.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "7188a5400bdd3d24222a62b274b9018972396f86a51ff87ba89052734d6dbaa2",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 122,
+    "output_tokens": 313,
+    "raw_text": "<think>\nThe user is asking for a three-line status record based on a packet_id and status_values fields: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs. The system message says: Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus we should output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut the input includes a packet_id=BLIND120-EEFF4309D81A6E8C7221. Should we include that? The spec says \"three key=value lines\", fields in order: route_verdict, repair_target, blocked_move. It does not mention packet_id. So we should not include it.\n\nThus answer is exactly those three lines.\n\nBut we must also ensure we don't add extra whitespace or newline after the final line. It's a plain text record, three lines. No extra lines. So final answer is:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must not add anything else.\n\nThus output exactly that.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06966cc59e3db9131f926680c30edba6",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 435,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

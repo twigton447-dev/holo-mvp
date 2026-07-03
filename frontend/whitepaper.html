@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoloEngine · AI at the Action Boundary · Version 7.83 · July 2026</title>
+<title>HoloEngine · AI at the Action Boundary · Version 7.84 · July 2026</title>
 <meta name="description" content="Why smart models still need a checkpoint before real-world action.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,14 +20,14 @@
     <div class="toplinks"><a href="/">Home</a><a href="/whitepaper">Whitepaper</a><a href="/benchmark">Benchmark</a><a href="/payloads/">Payloads</a></div>
   </nav>
   <header class="hero">
-    <div class="eyebrow">Version 7.83 · July 2026</div>
+    <div class="eyebrow">Version 7.84 · July 2026</div>
     <h1>HoloEngine</h1>
     <p class="subtitle">AI at the Action Boundary</p>
   </header>
   <main class="wrap">
     <section class="paper-section" id="ai-at-the-action-boundary"><h2>AI at the Action Boundary</h2>
 <h3>Why smart models still need a checkpoint before real-world action</h3>
-<p>Version 7.83 · July 2026</p>
+<p>Version 7.84 · July 2026</p>
 <p>Taylor Wigton Founder, HoloEngine</p>
 <p>Patent pending</p>
 <hr/>
@@ -227,71 +227,31 @@
 </section>
 <section class="paper-section" id="09-what-the-benchmark-has-shown-so-far"><h2>09. What the benchmark has shown so far</h2>
 <p>The benchmark evidence is still internally built. It is not a universal claim. It is not third-party validation. It should not be treated as unconstrained production reliability.</p>
-<p>But the pattern is now large enough to describe precisely.</p>
+<p>But the current public claim must be narrower than the internal evidence package.</p>
 <p>First, the terms:</p>
 <p>A <strong>packet</strong> is one frozen test case: a proposed action plus the documents and facts the AI is allowed to use.</p>
 <p>A <strong>sibling pair</strong> is two related packets. One should ALLOW and the other should ESCALATE. The difference is usually narrow, so the system has to read carefully.</p>
 <p>The <strong>clean denominator</strong> is the set of packets we are willing to count publicly. Canaries, drafts, broken runs, and diagnostic tests are kept separate.</p>
 <p>A <strong>false positive</strong> means Holo says ESCALATE when the action was actually allowed. That creates friction.</p>
 <p>A <strong>false negative</strong> means Holo says ALLOW when the action should have escalated. That is usually the dangerous miss.</p>
-<p>The current clean HoloVerify counted sample contains 614 frozen action-boundary packets across 307 sibling pairs: 307 ALLOW truths and 307 ESCALATE truths.</p>
-<p>HoloVerify produced zero counted false positives and zero counted false negatives across those 614 packets in the governed-runtime lane. This is a counted-lane result, not yet a fully blind production error-rate claim, because the current deterministic gate can use packet truth for repair and final selection. The statistical upper bounds below describe that counted lane pending blind-gate replication.</p>
-<p>The exact one-sided 95% upper bound on overall packet error is 0.487%. The Wilson 95% upper bound is 0.622%. The side-specific upper bounds on false positives and false negatives are 0.971% exact and 1.236% Wilson, because each side currently has 307 examples.</p>
-<p>That phrase sounds more complicated than it is. It means:</p>
-<blockquote><p>Given this many counted tests and zero counted errors, this is the highest counted-lane error rate that still remains statistically plausible at the 95% confidence level.</p></blockquote>
-<p>Plainly:</p>
-<blockquote><p>We saw zero counted errors in 614 counted packets under the governed-runtime harness. That does not prove zero risk, and it does not yet replace a blind-gate replication.</p></blockquote>
-<p>Plain English: this moved the benchmark from roughly under 0.68% packet-level Wilson risk to roughly under 0.62% packet-level Wilson risk.</p>
-<p>That is why the benchmark reports confidence bands, not only the observed score.</p>
-<p>The observed score says what happened in the sample.</p>
-<p>The upper bound says how much uncertainty remains.</p>
-<p>We use an exact binomial upper bound as the headline risk number because it is a conservative one-sided bound for zero-error runs. We also report Wilson score intervals in the benchmark page because Wilson is a standard way to put a confidence band around a proportion without pretending the sample percentage is the whole story.</p>
-<p>The reason for a one-sided upper bound is simple: for a safety system, the question is not whether the error rate could be lower. The question is how high it could still plausibly be.</p>
-<p>That is also why false positives and false negatives are separated. A false ESCALATE creates friction. A false ALLOW can let a bad action proceed. They are different business risks and should not be hidden inside one blended accuracy number.</p>
-<p>The confusion matrix is simple:</p>
-<div class="table-scroll"><table><thead><tr><th>Actual / predicted</th><th>ESCALATE</th><th>ALLOW</th></tr></thead><tbody><tr><td>Actual ESCALATE</td><td>Correctly escalated = 307</td><td>Missed escalation = 0</td></tr><tr><td>Actual ALLOW</td><td>Wrongly escalated = 0</td><td>Correctly allowed = 307</td></tr></tbody></table></div>
-<p>That is the clean headline:</p>
-<blockquote><p>Zero counted false-positive or false-negative errors across 614 frozen action-boundary packets in the governed-runtime lane, with blind-gate replication still required.</p></blockquote>
+<p>The current clean HoloVerify evidence package contains a counted governed-runtime result across the current packet bank. That result remains useful architecture and debugging evidence.</p>
+<p>It is not yet a blind production error-rate claim.</p>
+<p>The reason is simple: the current governed-runtime harness included answer-aware deterministic repair gates. Those gates could use packet truth during runtime repair and final selection. That makes the lane useful for hardening the engine, but not clean enough for public statistical risk bounds.</p>
+<p>The current sanctioned claim is:</p>
+<blockquote><p>HoloVerify has a counted governed-runtime result across the current packet bank. The current runtime included answer-aware deterministic repair gates, so a blind-gate replication is required before reporting the result as a production error-rate bound.</p></blockquote>
+<p>The next benchmark step is therefore a blind-gate replication:</p>
+<ul><li>runtime packet IDs must be opaque</li><li>Gov must not see answer truth</li><li>deterministic gates must not know ALLOW or ESCALATE truth</li><li>final selection must not use the answer key</li><li>wrong final answers must count as false positives or false negatives after the trace is frozen</li><li>statistical bounds return only after that blind lane reports</li></ul>
 <h3>The same models alone</h3>
 <p>The most important comparison is not Holo against a weaker hidden baseline.</p>
-<p>The matched solo baselines used the same mini-model families that were used inside HoloVerify. The difference was architecture.</p>
-<p>The solo models received the same frozen packets, but they did not receive Gov, shared state, deterministic gates, artifact memory, best-answer preservation, or a final selector.</p>
-<p>Each solo model received exactly one independent call per packet. HoloVerify used those same model families inside a governed multi-turn architecture.</p>
-<p>A solo output only counted as KNEW/admissible if it gave the right verdict and produced a source-bound, machine-checkable explanation.</p>
-<p>In plain English, KNEW/admissible means:</p>
-<blockquote><p>The model did not just guess the right answer. It showed its work in a way the system could audit.</p></blockquote>
-<div class="table-scroll"><table><thead><tr><th>Evidence slice</th><th>HoloVerify</th><th>Same models alone, one-shot</th><th>Meaning</th></tr></thead><tbody><tr><td>Clinical Activation Boundary Controls</td><td>40/40 packets</td><td>6/120 KNEW/admissible</td><td>Broad solo collapse; Holo solved both siblings across 20 pairs</td></tr><tr><td>Vendor-Master Payment Controls</td><td>40/40 packets</td><td>53/120 KNEW/admissible</td><td>Solo sometimes succeeded, but every pair still had strict one-shot failures</td></tr><tr><td>Wave3/Wave4 focused slice</td><td>54/54 packets</td><td>54/162 KNEW/admissible</td><td>27/27 strong solo-collapse pairs in the focused expansion</td></tr><tr><td>Wave2B5 + Wave3/Wave4 matched expansion</td><td>100/100 packets</td><td>116/300 KNEW/admissible</td><td>Larger matched slice with same-model solo instability preserved</td></tr></tbody></table></div>
-<p>This is not a claim that every solo model always fails.</p>
-<p>It is a narrower and more useful claim:</p>
-<blockquote><p>The same model families that were brittle as isolated one-shot decision makers became reliable when placed inside the governed HoloVerify architecture.</p></blockquote>
-<p>That is the architecture result.</p>
-<h3>Kit A: Accounts Payable and BEC</h3>
-<p>In one AP case, a payment looked ready to release. The vendor was real. The payment controls looked clean. The workflow referenced a purchase order.</p>
-<p>But the purchase order was missing.</p>
-<p>That missing PO mattered because it was the proof of spending authority.</p>
-<p>Non-Holo configurations approved the payment. Holo escalated.</p>
-<p>The model did not fail because it lacked facts. It saw enough to know the PO was missing. It failed because it did not treat that missing proof as a stop condition.</p>
-<p>That is the action-boundary problem in plain sight.</p>
-<h3>Kit B: Agentic Commerce</h3>
-<p>In an agentic commerce case, an AI purchasing agent prepared an order that looked routine. The vendor was approved. The amount was low. The checklist said there were no blockers.</p>
-<p>But the item required a safety review.</p>
-<p>In one packet, the policy language was vague. In another, the approval was stale. In a third, the current approval was valid.</p>
-<p>That mix matters.</p>
-<p>A serious trust layer must escalate the first two and allow the third.</p>
-<p>Holo did that.</p>
-<p>Several non-Holo configurations either let unsafe orders through or overblocked the valid one.</p>
-<h3>Replication Family: Vendor-Master Payment Controls</h3>
-<p>Then we asked a harder question: does the pattern hold in a larger AP / procurement family where solo models sometimes do fine?</p>
-<p>We built 20 sibling pairs, or 40 frozen packets. Each pair had one case where payment could proceed and one case where it had to stop. The difference was narrow: vendor-master authority, approval chain, callback provenance, duplicate-payment risk, or an emergency exception.</p>
-<p>HoloVerify solved 40/40 packets and 20/20 sibling pairs. The matching solo baseline used the same three mini-model families. Each solo model got one chance at each packet, without Gov, shared state, artifact memory, or a final selector. Across those 120 solo calls, 53 produced an audit-grade answer: the right verdict with reasoning clean enough to rely on.</p>
-<p>That means AP was not a story of total solo collapse. It was a story of instability. In every AP pair, at least two of the six solo attempts failed the strict standard, while Holo solved both siblings. One pair showed complete six-of-six solo collapse.</p>
-<p>The cost was higher than the first 20-pair HoloVerify family. Holo used 414,016 tokens versus 146,061 for the solo one-shot baseline, or about 2.84x the solo budget. That cost delta is part of the finding: governed verification buys reliability by spending more work at the action boundary.</p>
-<p>Across the two committed internal HoloVerify families, Holo solved 80/80 frozen action-boundary packets and 40/40 sibling pairs. The two families had different solo-baseline behavior: the clinical activation family produced broad clean solo collapse, while AP produced mixed solo behavior with strict failures present in every pair.</p>
-<h3>Replication Canary: Agentic Commerce All-Six Collapse</h3>
-<p>The next Commerce result is smaller, but still useful.</p>
-<p>In a later Agentic Commerce canary, we selected three frozen sibling pairs where all six same-family solo one-shots had failed in triage. HoloVerify then ran those six packets through the governed architecture.</p>
-<p>Holo solved all 6 packets and all 3 sibling pairs. The run completed 30/30 provider calls, including 18 worker calls and 12 Gov calls, with no solo calls and no judges. The canary is lock-root validated with root signature <code>a19bd1e5e47411597ccf5fd941f1a24ba4269215a2fb72a4c2aabe68dc001948</code>.</p>
-<p>This is not a completed 20-pair Commerce family. It should be read as locked canary evidence: the failure pattern reappeared in Commerce, and the governed architecture held on the selected all-six-collapse pairs.</p>
+<p>The internal baselines used the same mini-model families that were used inside HoloVerify. The difference was architecture.</p>
+<p>The solo models received frozen packets, but they did not receive Gov, shared state, deterministic gates, artifact memory, best-answer preservation, or a final selector.</p>
+<p>That comparison remains useful internal evidence. But because the governed-runtime lane used answer-aware deterministic repair gates, public ratio tables and statistical bounds are paused until the blind-gate lane reports.</p>
+<p>The safe lesson is narrower:</p>
+<blockquote><p>The architecture may improve how the same model families behave at the action boundary, but the production error-rate claim requires blind runtime gates and post-hoc scoring only.</p></blockquote>
+<h3>Internal replication notes</h3>
+<p>The internal packet bank includes clinical activation, AP / vendor-master payment controls, agentic commerce, IT access, HR, privacy, finance, public-sector controls, treasury, legal, cloud infrastructure, security operations, and operational technology.</p>
+<p>Those traces remain preserved as engineering evidence. They are not being erased. The public claim is simply being narrowed until the blind-gate replication proves that prompts, Gov, gates, artifact registry, and final selection cannot see or infer answer truth.</p>
+<p>The next live proof is not a bigger headline. It is a cleaner lane.</p>
 <h3>HoloBuild and stronger baselines</h3>
 <p>The HoloBuild lane tests a different question than HoloVerify.</p>
 <p>HoloVerify asks whether an action should execute.</p>

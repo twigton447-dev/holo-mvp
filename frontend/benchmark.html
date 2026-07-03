@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoloEngine · The Action Boundary Benchmark · Version 7.53 · July 2026</title>
+<title>HoloEngine · The Action Boundary Benchmark · Version 7.54 · July 2026</title>
 <meta name="description" content="Measuring AI reliability before irreversible enterprise action.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,47 +22,22 @@
     <div class="toplinks"><a href="/">Home</a><a href="/whitepaper">Whitepaper</a><a href="/benchmark">Benchmark</a><a href="/payloads/">Payloads</a></div>
   </nav>
   <header class="hero">
-    <div class="eyebrow">HoloVerify · Version 7.53 · July 2026</div>
+    <div class="eyebrow">HoloVerify · Version 7.54 · July 2026</div>
     <h1>The Action Boundary Benchmark</h1>
     <p class="subtitle">Measuring AI reliability before irreversible enterprise action</p>
-    <div class="meta-row"><div class="meta-card"><span>HoloVerify counted-run result</span><strong>614/614</strong></div><div class="meta-card"><span>Counted-lane false positives / false negatives</span><strong>0 / 0</strong></div><div class="meta-card"><span>Counted-lane 95% band</span><strong>0.487% to 0.622%</strong></div></div>
+    <div class="meta-row"><div class="meta-card"><span>Claim status</span><strong>Under blind-gate review</strong></div><div class="meta-card"><span>Current lane</span><strong>Governed runtime</strong></div><div class="meta-card"><span>Next proof</span><strong>Blind replication</strong></div></div>
   </header>
   <main class="wrap">
     <section class="paper-section takeaway-panel" id="brief-takeaway">
       <div class="takeaway-kicker">What This Benchmark Is Testing</div>
-      <p class="takeaway-line"><strong>Can the same LLMs protect the action boundary alone?</strong> This benchmark tests identical model families as one-shot solos versus inside HoloVerify governance.</p>
-      <p class="takeaway-note"><strong>Packets are domain-specific pressure tests.</strong> Each packet is a hard ALLOW or hard ESCALATE case built from real-world action-boundary patterns in payments, access control, clinical workflow, commerce, finance, public-sector records, infrastructure, and other operational domains.</p>
-      <p class="takeaway-note"><strong>The packets are designed to break systems.</strong> We want to expose solo-agent collapse and Holo failure modes, not hide them. Early HoloVerify false-positive rates were over <strong>80%</strong>; the current result came from repeated engineering work on the architecture, runner, gates, Gov handoffs, and final-selection logic.</p>
-      <p class="takeaway-note"><strong>Solo baseline:</strong> the same three model families were run alone on the matched 100-packet slice: <code>xai/grok-3-mini</code>, <code>openai/gpt-5.4-mini</code>, and <code>minimax/MiniMax-M2.5-highspeed</code>. Averaged across those three solo models, the one-shot pass rate was <strong>38.7%</strong> (116 KNEW/admissible outputs across 300 calls), so the solo non-success rate was <strong>61.3%</strong>. Parse errors are included in that failure bucket: if a model cannot return an auditable answer, it did not protect the action boundary.</p>
-      <p class="takeaway-note"><strong>Important:</strong> solo's 0.0% false-negative rate does not mean solo was reliable. It only means none of the 150 ESCALATE-truth solo calls returned the specific wrong binary verdict ALLOW. But 78 of those 150 ESCALATE-truth calls still failed parsing or source/evidence structure, so they were not KNEW/admissible.</p>
-      <p class="takeaway-note"><strong>Solo failure by side:</strong> on ALLOW-truth calls, 106/150 solo outputs were not KNEW/admissible, a <strong>70.7%</strong> non-success rate; 13 of those were actual false positives, an <strong>8.7%</strong> FPR. On ESCALATE-truth calls, 78/150 solo outputs were not KNEW/admissible, a <strong>52.0%</strong> non-success rate; 0 were binary false negatives, a <strong>0.0%</strong> FNR.</p>
-      <p class="takeaway-note"><strong>The Holo option:</strong> combine those same models into a governed 3-DNA sequence. HoloVerify is the surgical-team version: one model maps the case, another challenges it, <strong>Gov</strong> controls the handoff, deterministic gates enforce the checklist, and the final selector preserves the best admissible answer.</p>
-      <p class="takeaway-note"><strong>The point:</strong> these are the same model families. Alone, they averaged 38.7% KNEW/admissible on the matched slice. Inside HoloVerify, the governed architecture solved 614/614 counted packets. This is evidence for the control loop, but the current runner used truth-conditioned local gates and repair routing, so the 614 result is a governed-runtime counted result, not yet a blind production error-rate claim.</p>
-      <p class="takeaway-note"><strong>Why this can work up and down model tiers:</strong> the architecture is not tied to one model. Better models may be stronger ingredients, but the tested mechanism is the same: structure, order, state, adversarial pressure, deterministic enforcement, and final selection.</p>
-      <p class="takeaway-note"><strong>Current HoloVerify result:</strong> HoloVerify solved <strong>614/614</strong> frozen action-boundary packets in the counted governed lane. The counted lane has <strong>0 false positives</strong> and <strong>0 false negatives</strong>. A blind-gate replication is the next step before treating this as a production risk bound.</p>
-      <div class="mobile-risk-cards" aria-label="HoloVerify risk metrics">
-        <div class="risk-card"><span>Overall packet error</span><strong>0 / 614</strong><p>Exact 95% upper bound <b>0.487%</b><br>Wilson 95% upper bound <b>0.622%</b></p></div>
-        <div class="risk-card"><span>False positive rate</span><strong>0 / 307</strong><p>Exact 95% upper bound <b>0.971%</b><br>Wilson 95% upper bound <b>1.236%</b></p></div>
-        <div class="risk-card"><span>False negative rate</span><strong>0 / 307</strong><p>Exact 95% upper bound <b>0.971%</b><br>Wilson 95% upper bound <b>1.236%</b></p></div>
-      </div>
-      <div class="table-scroll takeaway-table"><table><thead><tr><th>Metric</th><th>Errors</th><th>n</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Overall packet error</td><td>0</td><td>614</td><td>0.487%</td><td>0.622%</td></tr><tr><td>False positive rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr><tr><td>False negative rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr></tbody></table></div>
-      <p class="takeaway-note"><strong>What this measures:</strong> the full HoloVerify governed architecture across <strong>614 clean frozen action-boundary packets</strong> under the current governed-runtime harness. This is the <strong>HoloVerify counted-lane result</strong>, not a solo model result and not yet a blind-gate result.</p>
-      <p class="takeaway-note"><strong>Why the comparison is fair:</strong> this is an architecture-isolation test, not a token-equivalence claim. Both lanes use the same frozen packet, source facts, and action-boundary task. Solo gets one call and decides alone. HoloVerify uses the same model families inside a governed sequence, so the measured difference is structure, state, Gov, gates, and final selection.</p>
-      <p class="takeaway-note"><strong>What still needs ablation:</strong> we still need broader tests of other solo architectures, including more-turn and equal-token solo runs. Existing internal data suggests more turns do not automatically repair solo boundary failures, so equal token spend should not be assumed to erase the Holo gap.</p>
-      <h3>Counted Families in the 614</h3>
-      <div class="table-scroll family-table"><table><thead><tr><th>Family</th><th>Domain</th><th>Packets</th><th>HoloVerify</th></tr></thead><tbody><tr><td>Kit C / Clinical Activation</td><td>Clinical-regulated activation controls</td><td>40</td><td>40/40</td></tr><tr><td>AP / Vendor-Master Payment Controls</td><td>AP, procurement, and vendor-bank controls</td><td>40</td><td>40/40</td></tr><tr><td>Agentic Commerce Order Execution</td><td>Refunds, purchases, fulfillment, credits, and order-release controls</td><td>40</td><td>40/40</td></tr><tr><td>IT Access Permission Change</td><td>Admin access, role escalation, offboarding, and break-glass controls</td><td>40</td><td>40/40</td></tr><tr><td>Wave2-4 Expansion</td><td>HR, privacy, finance, government, benefits, banking, defense admin, insurance, and utilities</td><td>174</td><td>174/174</td></tr><tr><td>Wave5 Completed 7-Domain Expansion</td><td>Medical, treasury, legal, infrastructure, security, public-sector, and operational technology controls</td><td>280</td><td>280/280</td></tr></tbody></table></div>
-      <h3>Holo vs Solo, By Domain</h3>
-      <p class="takeaway-note">This is the clean matched solo comparison slice: the same 100 packets were run through HoloVerify and through the same three mini-model families as one-shot solo baselines.</p>
-      <div class="table-scroll comparison-table"><table><thead><tr><th>Domain</th><th>Holo KNEW</th><th>Solo KNEW</th><th>Solo audit-failure rate</th><th>Solo failure mix</th></tr></thead><tbody><tr><td>HR / payroll / workforce controls</td><td>22/22</td><td>22/66</td><td>66.7%</td><td>1 wrong verdict, 10 parse fails, 33 structural/evidence fails</td></tr><tr><td>Data privacy / customer data release controls</td><td>16/16</td><td>26/48</td><td>45.8%</td><td>1 wrong verdict, 3 parse fails, 18 structural/evidence fails</td></tr><tr><td>Banking / KYC / AML controls</td><td>10/10</td><td>10/30</td><td>66.7%</td><td>4 wrong verdicts, 6 parse fails, 10 structural/evidence fails</td></tr><tr><td>Benefits / public casework controls</td><td>8/8</td><td>8/24</td><td>66.7%</td><td>1 wrong verdict, 2 parse fails, 13 structural/evidence fails</td></tr><tr><td>Finance close / revenue / expense controls</td><td>8/8</td><td>14/24</td><td>41.7%</td><td>2 wrong verdicts, 2 parse fails, 6 structural/evidence fails</td></tr><tr><td>Government procurement / grants controls</td><td>6/6</td><td>6/18</td><td>66.7%</td><td>1 wrong verdict, 4 parse fails, 7 structural/evidence fails</td></tr><tr><td>Defense administration / logistics controls</td><td>12/12</td><td>12/36</td><td>66.7%</td><td>2 wrong verdicts, 3 parse fails, 19 structural/evidence fails</td></tr><tr><td>Insurance claims / coverage controls</td><td>14/14</td><td>14/42</td><td>66.7%</td><td>0 wrong verdicts, 8 parse fails, 20 structural/evidence fails</td></tr><tr><td>Energy / utilities / infrastructure controls</td><td>4/4</td><td>4/12</td><td>66.7%</td><td>1 wrong verdict, 2 parse fails, 5 structural/evidence fails</td></tr></tbody></table></div>
-      <p class="takeaway-note">Solo audit-failure rate means the solo output was not KNEW/admissible: it had the wrong verdict, failed to parse, or lacked the required source-grounded structure. That is stricter than "sounded plausible."</p>
-      <p class="takeaway-note"><strong>Scope note:</strong> the Holo-vs-solo table above uses the matched 100-packet solo comparison slice. The domain Wilson table below uses the full current 614-packet Holo denominator.</p>
-      <h3>Holo Domain Risk Bounds</h3>
-      <p class="takeaway-note">The benchmark starts strong overall, then gets more detailed by domain. The grand-total Wilson number is not the same as the domain-level Wilson number. Each domain has its own denominator, so each domain has its own 95% upper bound.</p>
-      <div class="table-scroll domain-risk-table"><table><thead><tr><th>Counted Holo domain</th><th>Packets</th><th>Errors</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Kit C / Clinical activation controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>AP / Vendor-master payment controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>Agentic commerce order execution</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>IT access permission change</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>HR workforce controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>Data privacy release controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>Finance close / control overrides</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>Benefits enrollment controls</td><td>8</td><td>0</td><td>31.234%</td><td>32.441%</td></tr><tr><td>Banking / KYC controls</td><td>10</td><td>0</td><td>25.887%</td><td>27.753%</td></tr><tr><td>Defense administration controls</td><td>12</td><td>0</td><td>22.092%</td><td>24.249%</td></tr><tr><td>Government / public sector controls</td><td>6</td><td>0</td><td>39.304%</td><td>39.033%</td></tr><tr><td>Insurance claims controls</td><td>14</td><td>0</td><td>19.264%</td><td>21.531%</td></tr><tr><td>Energy / utilities controls</td><td>4</td><td>0</td><td>52.713%</td><td>48.989%</td></tr><tr><td>Medical treatment activation controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>Treasury / wire controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>Legal / regulatory filing controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>Cloud infrastructure controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>Security operations controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>Public-sector records controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr><tr><td>Operational technology / industrial safety controls</td><td>40</td><td>0</td><td>7.216%</td><td>8.762%</td></tr></tbody></table></div>
-      <h3>Models Used</h3>
-      <div class="table-scroll"><table><thead><tr><th>Role</th><th>Model</th><th>Job</th></tr></thead><tbody><tr><td>Worker 1</td><td><code>xai/grok-3-mini</code></td><td>Source-boundary mapping</td></tr><tr><td>Gov 1</td><td><code>minimax/MiniMax-M2.5-highspeed</code></td><td>Control routing</td></tr><tr><td>Worker 2</td><td><code>openai/gpt-5.4-mini</code></td><td>Adversarial scope challenge</td></tr><tr><td>Gov 2</td><td><code>minimax/MiniMax-M2.5-highspeed</code></td><td>Control routing</td></tr><tr><td>Worker 3</td><td><code>minimax/MiniMax-M2.5-highspeed</code></td><td>Final compiler</td></tr></tbody></table></div>
-      <p class="takeaway-note">Same models, run alone on the matched 100-packet solo comparison slice:</p>
-      <div class="table-scroll"><table><thead><tr><th>Solo model</th><th>Calls</th><th>KNEW/admissible</th><th>Solo audit-failure rate</th><th>Wrong verdict</th><th>Parse fail</th><th>Structural/evidence fail</th></tr></thead><tbody><tr><td><code>openai/gpt-5.4-mini</code></td><td>100</td><td>82/100</td><td>18%</td><td>0</td><td>0</td><td>18</td></tr><tr><td><code>minimax/MiniMax-M2.5-highspeed</code></td><td>100</td><td>26/100</td><td>74%</td><td>0</td><td>40</td><td>34</td></tr><tr><td><code>xai/grok-3-mini</code></td><td>100</td><td>8/100</td><td>92%</td><td>13</td><td>0</td><td>79</td></tr></tbody></table></div>
+      <p class="takeaway-line"><strong>Can a solo AI agent protect the action boundary before irreversible enterprise action?</strong> HoloVerify tests whether the same model families behave differently when run alone versus inside a governed architecture.</p>
+      <p class="takeaway-note"><strong>Packets are domain-specific pressure tests.</strong> Each packet asks whether the current evidence really authorizes an action such as releasing payment, granting access, executing an order, activating a clinical workflow, filing a legal action, or changing infrastructure.</p>
+      <p class="takeaway-note"><strong>The thesis:</strong> solo agents are brittle at the action boundary because plausible text is not the same as source-grounded permission. HoloVerify tries to make the same model families safer by changing the structure around them: worker rotation, Gov handoffs, deterministic checks, artifact preservation, and final selection.</p>
+      <p class="takeaway-note"><strong>The current claim boundary:</strong> HoloVerify has a counted governed-runtime result across the current packet bank. The current runtime included answer-aware deterministic repair gates, so a blind-gate replication is required before reporting the result as a production error-rate bound.</p>
+      <p class="takeaway-note"><strong>Why this matters:</strong> the architecture may still be valuable, but the public proof has to be stricter than the engineering harness. The next lane must prove that Gov, gates, prompts, and final selection cannot see or infer the answer during runtime.</p>
+      <p class="takeaway-note"><strong>Models used in the governed-runtime work:</strong> the benchmark lanes used mini-model families including <code>xai/grok-3-mini</code>, <code>openai/gpt-5.4-mini</code>, and <code>minimax/MiniMax-M2.5-highspeed</code>. The next public comparison will state model rosters only after the blind lane passes its no-provider disconfirmation tests.</p>
+      <h3>Blind-Gate Proof Before Public Rates</h3>
+      <p class="takeaway-note">Before any public error-rate or confidence-bound language returns, the blind lane must pass tests for ID leakage, poisoned truth metadata, artifact mutation, selector truth dependence, canary skew, budget parity, and claim-scope linting.</p>
     </section>
     <section class="paper-section" id="what-is-holoengine"><h2>What Is HoloEngine?</h2>
 <p>HoloEngine is an AI control system for high-stakes actions. It is designed for cases where an AI system may approve, release, grant, execute, escalate, or prepare something that affects the real world.</p>
@@ -85,93 +60,28 @@
 <div class="table-scroll"><table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>Packet</td><td>One frozen test case: a proposed action plus the documents and facts the AI is allowed to use.</td></tr><tr><td>Sibling pair</td><td>Two related packets. One should ALLOW and the other should ESCALATE. The difference is usually narrow, so the system has to read carefully.</td></tr><tr><td>Clean denominator</td><td>The set of packets we are willing to count publicly. Canaries, drafts, broken runs, and diagnostic tests are kept separate.</td></tr><tr><td>False positive</td><td>Holo says ESCALATE when the action was actually allowed. This creates friction.</td></tr><tr><td>False negative</td><td>Holo says ALLOW when the action should have escalated. This is usually the dangerous miss.</td></tr><tr><td>KNEW/admissible</td><td>A solo model did not merely guess the right verdict. It gave the right verdict in a structured, source-grounded way that local checks could audit.</td></tr><tr><td>Gov</td><td>The controller between worker models. Gov reads the last output and gate results, then tells the next worker what to preserve, repair, or block.</td></tr><tr><td>Deterministic gate</td><td>Local code, not an AI opinion. It checks required sections, source IDs, missing evidence, and action-boundary rules.</td></tr><tr><td>Final selector</td><td>A local rule that can keep the best valid answer instead of blindly trusting the last answer.</td></tr></tbody></table></div>
 <hr/>
 </section>
-<section class="paper-section" id="current-benchmark-ledger"><h2>Current Benchmark Ledger</h2>
-<p>The current clean benchmark-grade HoloVerify counted sample is:</p>
-<div class="table-scroll"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody><tr><td>Frozen action-boundary packets</td><td>614</td></tr><tr><td>Sibling pairs</td><td>307</td></tr><tr><td>ALLOW truths</td><td>307</td></tr><tr><td>ESCALATE truths</td><td>307</td></tr><tr><td>Correct HoloVerify packets</td><td>614</td></tr><tr><td>Counted false positives</td><td>0</td></tr><tr><td>Counted false negatives</td><td>0</td></tr></tbody></table></div>
-<p>Observed result:</p>
-<blockquote><p>HoloVerify produced zero counted false positives and zero counted false negatives across 614 clean benchmark-grade action-boundary packets in the governed-runtime lane. Because the current runtime gate can use packet truth for repair and final selection, these bounds describe the counted lane. Blind-gate replication is required before claiming a fully blind error-rate bound.</p></blockquote>
-<p>The honest statistical statement is:</p>
-<div class="table-scroll"><table><thead><tr><th>Metric</th><th>Errors</th><th>n</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Overall packet error</td><td>0</td><td>614</td><td>0.487%</td><td>0.622%</td></tr><tr><td>False positive rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr><tr><td>False negative rate</td><td>0</td><td>307</td><td>0.971%</td><td>1.236%</td></tr></tbody></table></div>
-<p>Exact and Wilson are two standard ways to put a confidence band around an error rate. They answer the same basic question:</p>
-<blockquote><p>Given this many tests and this many observed errors, how high could the real<br>error rate plausibly still be?</p></blockquote>
-<p>Zero observed errors means no failures appeared in this locked sample. It does not prove the true error rate is zero. It means the plausible upper risk is bounded by the confidence interval.</p>
-<p>In simpler terms:</p>
-<blockquote><p>We saw zero errors in 614 counted packets. Statistics still requires humility:<br>the real error rate could be above zero, so we report the upper bound.</p></blockquote>
-<p>Plain English: this moved the benchmark from roughly under 0.68% packet-level Wilson risk to roughly under 0.62% packet-level Wilson risk.</p>
-<p>The stricter false-positive and false-negative side-specific number is higher because each side has half the examples: 307 ALLOW and 307 ESCALATE.</p>
+<section class="paper-section" id="current-benchmark-ledger"><h2>Current Claim Boundary</h2>
+<p>The current HoloVerify evidence package preserves a counted governed-runtime result across the packet bank. That result is useful architecture and debugging evidence.</p>
+<p>It is not yet a blind production error-rate claim.</p>
+<blockquote><p>HoloVerify has a counted governed-runtime result across the current packet bank. The current runtime included answer-aware deterministic repair gates, so a blind-gate replication is required before reporting the result as a production error-rate bound.</p></blockquote>
+<p>The next benchmark step is a blind-gate replication. Runtime packet IDs must be opaque, Gov must not see answer truth, deterministic gates must not know ALLOW or ESCALATE truth, final selection must not use the answer key, and wrong final answers must count as false positives or false negatives only after the trace is frozen.</p>
 <hr/>
 </section>
-<section class="paper-section" id="reliability-threshold-roadmap"><h2>Reliability Threshold Roadmap</h2>
-<p>The business question is not "did this sample pass?"</p>
-<p>The business question is:</p>
-<blockquote><p>How low does the blind-gate upper risk bound need to be before this class of action can<br>be trusted with this level of autonomy?</p></blockquote>
-<p>Side-specific false-positive and false-negative risk is the primary safety bar because ALLOW and ESCALATE fail in different ways.</p>
-<div class="table-scroll"><table><thead><tr><th>Target side-specific upper bound</th><th>Required ALLOW examples</th><th>Required ESCALATE examples</th><th>Required total packets</th><th>Additional packets from current 614</th></tr></thead><tbody><tr><td>&lt; 1.0%</td><td>299</td><td>299</td><td>598</td><td>0</td></tr><tr><td>&lt; 0.5%</td><td>598</td><td>598</td><td>1,196</td><td>582</td></tr><tr><td>&lt; 0.25%</td><td>1,197</td><td>1,197</td><td>2,394</td><td>1,780</td></tr><tr><td>&lt; 0.1%</td><td>2,995</td><td>2,995</td><td>5,990</td><td>5,376</td></tr></tbody></table></div>
-<p>Recommended threshold policy:</p>
-<div class="table-scroll"><table><thead><tr><th>Use case tier</th><th>Suggested evidence threshold</th></tr></thead><tbody><tr><td>Internal decision support</td><td>Current clean ledger plus domain-specific review</td></tr><tr><td>Enterprise action recommendation</td><td>&lt; 1.0% false-positive / false-negative upper bound in-domain</td></tr><tr><td>High-stakes irreversible action gating</td><td>&lt; 0.5% false-positive / false-negative upper bound in-domain, plus human escalation policy</td></tr><tr><td>Safety-critical production autonomy</td><td>&lt; 0.1% false-positive / false-negative upper bound, external review, and ongoing monitoring</td></tr></tbody></table></div>
-<p>The &lt; 0.1% tier should be treated as a production-scale validation program, not as the next public benchmark milestone.</p>
-<hr/>
-</section>
-<section class="paper-section" id="how-to-read-the-statistics"><h2>How To Read The Statistics</h2>
-<p>The observed score is what happened in the test.</p>
-<p>The upper bound is what the test lets us responsibly say about the unknown real error rate.</p>
-<p>That distinction matters.</p>
-<p>If HoloVerify gets 614 out of 614 packets right, the observed error rate is 0%. But the real world is larger than the sample. A perfect sample does not prove a perfect system.</p>
-<p>So we report a <strong>95% upper bound</strong>.</p>
-<p>Plainly:</p>
-<blockquote><p>If the real error rate were higher than this upper bound, seeing zero errors<br>in a sample this large would be statistically unlikely.</p></blockquote>
-<p>We show two common confidence methods:</p>
-<div class="table-scroll"><table><thead><tr><th>Method</th><th>What it means</th><th>Why we show it</th></tr></thead><tbody><tr><td>Exact binomial upper bound</td><td>A conservative one-sided bound based directly on the binomial model.</td><td>This is the headline risk number because it is simple and conservative for zero-error runs.</td></tr><tr><td>Wilson score upper bound</td><td>A widely used confidence interval for proportions that behaves better than naive percentages in small samples.</td><td>This gives a second standard view, usually a little wider here.</td></tr></tbody></table></div>
-<p>We use a <strong>one-sided</strong> upper bound because the safety question is not "could the error rate be lower?" It is:</p>
-<blockquote><p>How high could the real error rate still plausibly be?</p></blockquote>
-<p>Side-specific bounds matter too. ALLOW and ESCALATE fail differently:</p>
-<ul><li>A false ALLOW can let an unsafe action proceed.</li><li>A false ESCALATE can block a valid action and create operational friction.</li></ul>
-<p>That is why the page reports both the overall packet error bound and separate false-positive / false-negative bounds.</p>
-<p>The practical rule:</p>
-<blockquote><p>Observed accuracy tells you what happened. The upper bound tells you how much<br>uncertainty remains.</p></blockquote>
-<hr/>
-</section>
-<section class="paper-section" id="confusion-matrix"><h2>Confusion Matrix</h2>
-<p>Positive class: <strong>ESCALATE</strong>.</p>
-<p>That means we treat "the system correctly stopped or escalated the action" as the positive event.</p>
-<div class="table-scroll"><table><thead><tr><th>Actual / Predicted</th><th>ESCALATE</th><th>ALLOW</th></tr></thead><tbody><tr><td>Actual ESCALATE</td><td>Correctly escalated = 307</td><td>Missed escalation = 0</td></tr><tr><td>Actual ALLOW</td><td>Wrongly escalated = 0</td><td>Correctly allowed = 307</td></tr></tbody></table></div>
-<p>Observed rates:</p>
-<div class="table-scroll"><table><thead><tr><th>Rate</th><th>Observed</th></tr></thead><tbody><tr><td>Sensitivity / true positive rate</td><td>100.00%</td></tr><tr><td>Specificity / true negative rate</td><td>100.00%</td></tr><tr><td>False positive rate</td><td>0.00%</td></tr><tr><td>False negative rate</td><td>0.00%</td></tr></tbody></table></div>
-<p>Observed rates describe what happened in the sample. The confidence bands above are the risk language.</p>
-<hr/>
-</section>
-<section class="paper-section" id="holo-versus-the-same-models-alone"><h2>Holo Versus The Same Models Alone</h2>
-<p>The central comparison is not "Holo used stronger models."</p>
-<p>It did not.</p>
-<p>The matched solo baselines used the same mini-model families that were used inside the governed HoloVerify architecture.</p>
-<p>The difference was not model strength.</p>
-<p>The difference was the control system around those models.</p>
-<p>For the solo baseline, each model received exactly one independent call per packet. No Gov, no shared state, no deterministic rescue layer, and no final selector were available to the solo runs.</p>
-<ul><li>Gov reviewed worker outputs between turns.</li><li>Each worker received the current state instead of starting from scratch.</li><li>Local code checked worker outputs after every turn.</li><li>The system saved the best valid answer it had seen so far.</li><li>The final answer could not quietly drop important proof from an earlier valid answer.</li><li>Every call, token count, gate result, and final-selection reason was logged.</li></ul>
-<p>Solo outputs only count as <strong>KNEW/admissible</strong> when they produce the right verdict, valid structure, required source grounding, no invented source IDs, and a machine-checkable action-boundary explanation.</p>
-<p>So the solo column is stricter than "did it sound right?"</p>
-<p>It asks:</p>
-<blockquote><p>Did the one-shot model actually know why the action should ALLOW or ESCALATE,<br>in a form that could survive an audit?</p></blockquote>
-<div class="table-scroll"><table><thead><tr><th>Evidence slice</th><th>HoloVerify</th><th>Same models alone, one-shot</th><th>What it shows</th></tr></thead><tbody><tr><td>Clinical Activation Boundary Controls</td><td>40/40 packets</td><td>6/120 KNEW/admissible</td><td>Broad solo collapse; Holo solved both siblings across 20 pairs</td></tr><tr><td>Vendor-Master Payment Controls</td><td>40/40 packets</td><td>53/120 KNEW/admissible</td><td>Solo sometimes succeeded, but every pair still had strict one-shot failures</td></tr><tr><td>Wave3/Wave4 focused slice</td><td>54/54 packets</td><td>54/162 KNEW/admissible</td><td>27/27 strong solo-collapse pairs in the focused expansion</td></tr><tr><td>Wave2B5 + Wave3/Wave4 matched expansion</td><td>100/100 packets</td><td>116/300 KNEW/admissible</td><td>Larger matched slice with same-model solo instability preserved</td></tr></tbody></table></div>
-<p>This does not prove that every solo model always fails.</p>
-<p>It shows something narrower and more useful:</p>
-<blockquote><p>The same model families that were brittle as isolated one-shot decision makers<br>became reliable when placed inside the governed HoloVerify architecture.</p></blockquote>
-<p>That is the benchmark's main architecture finding.</p>
+<section class="paper-section" id="blind-gate-disconfirmation"><h2>Blind-Gate Disconfirmation Plan</h2>
+<p>The blind lane must pass a no-provider disconfirmation battery before any live canary is treated as evidence.</p>
+<div class="table-scroll"><table><thead><tr><th>Test</th><th>What it tries to falsify</th></tr></thead><tbody><tr><td>T1</td><td>No runtime ID leaks answer truth or sibling role.</td></tr><tr><td>T2</td><td>Runtime prompts, gates, batons, and selector inputs are byte-identical when hidden truth metadata is poisoned.</td></tr><tr><td>T3</td><td>The harness does not mutate worker artifacts after provider return.</td></tr><tr><td>T4</td><td>The final selector chooses by declared blind criteria only.</td></tr><tr><td>T5</td><td>The canary sample is reproducible and not selected from the easy stratum.</td></tr><tr><td>T6</td><td>The blind lane is not privileged with extra turns, retries, or token budget versus the lane it replaces.</td></tr><tr><td>T7</td><td>No public rate claim is derived from a canary-sized denominator.</td></tr></tbody></table></div>
+<p>Passing this battery would not prove HoloVerify is reliable. It would only support one narrow sentence: the blind lane, as fixtured, shows no detected truth channel.</p>
 <hr/>
 </section>
 <section class="paper-section" id="what-counts"><h2>What Counts</h2>
-<p>Only clean benchmark-grade evidence is counted in the 614-packet denominator.</p>
-<p>Included:</p>
-<ul><li>Frozen packets.</li><li>Locked traces.</li><li>Hash-checked prompts and payloads.</li><li>Full HoloVerify governed architecture runs.</li><li>Balanced ALLOW/ESCALATE sibling pairs.</li><li>No prompt leakage.</li><li>No judges in the clean statistical denominator.</li></ul>
-<p>Excluded:</p>
-<ul><li>Canaries.</li><li>Precursors.</li><li>HoloBuild quality rows.</li><li>Missing-evidence rows.</li><li>Public-copy drafts.</li><li>Anything without a clean root package.</li></ul>
+<p>The public denominator is under blind-gate review.</p>
+<p>Internal governed-runtime traces remain preserved, but public rate language is paused until the blind lane proves that runtime prompts, gates, Gov batons, artifact registry, and final selection cannot see or infer packet truth.</p>
 <p>This matters because benchmark credibility depends as much on what is excluded as on what is counted.</p>
 <hr/>
 </section>
 <section class="paper-section" id="evidence-families"><h2>Evidence Families</h2>
-<div class="table-scroll"><table><thead><tr><th>Family</th><th>Domain</th><th>Packets</th><th>Pairs</th><th>HoloVerify</th></tr></thead><tbody><tr><td>Clinical Activation Boundary Controls</td><td>Clinical-regulated activation controls</td><td>40</td><td>20</td><td>40/40</td></tr><tr><td>Vendor-Master Payment Controls</td><td>AP / procurement / vendor-master controls</td><td>40</td><td>20</td><td>40/40</td></tr><tr><td>Agentic Commerce Order Execution</td><td>Order execution controls</td><td>40</td><td>20</td><td>40/40</td></tr><tr><td>IT Access Permission Change</td><td>Access / privilege controls</td><td>40</td><td>20</td><td>40/40</td></tr><tr><td>Wave2-4 Expansion</td><td>HR, privacy, finance, government, benefits, banking, defense admin, insurance, utilities</td><td>174</td><td>87</td><td>174/174</td></tr><tr><td>Wave5 Completed 7-Domain Expansion</td><td>Medical, treasury, legal, infrastructure, security, public-sector, and operational technology controls</td><td>280</td><td>140</td><td>280/280</td></tr></tbody></table></div>
-<p>Other locked evidence exists, but is not counted in the clean denominator:</p>
-<div class="table-scroll"><table><thead><tr><th>Evidence</th><th>Why separate</th></tr></thead><tbody><tr><td>Agentic Commerce all-six collapse canary</td><td>Lock-rooted canary, not full-family denominator</td></tr><tr><td>Hard ALLOW false-positive precursor</td><td>Frozen precursor, not clean denominator</td></tr><tr><td>D11 HoloBuild mini-suite</td><td>HoloBuild quality evidence, not HoloVerify action-boundary denominator</td></tr></tbody></table></div>
+<p>The internal packet bank covers action-boundary domains including clinical activation, vendor-master payments, agentic commerce, IT access, HR, privacy, finance, public-sector controls, treasury, legal, cloud infrastructure, security operations, and operational technology.</p>
+<p>The public family table will return after the blind-gate inclusion manifest maps each counted packet to one locked blind run with opaque runtime IDs and post-hoc scoring only.</p>
 <hr/>
 </section>
 <section class="paper-section" id="how-holoverify-works"><h2>How HoloVerify Works</h2>
@@ -213,9 +123,9 @@
 </section>
 <section class="paper-section" id="what-this-does-not-claim"><h2>What This Does Not Claim</h2>
 <p>This benchmark does not claim:</p>
-<ul><li>HoloVerify has zero real-world risk.</li><li>HoloVerify is universally superior to every model.</li><li>HoloVerify replaces qualified human review in clinical, legal, financial, or defense contexts.</li><li>The tested packets cover every possible enterprise failure mode.</li><li>One-shot solo baselines represent every possible solo prompting method.</li></ul>
-<p>This benchmark does claim:</p>
-<blockquote><p>On the current clean locked counted lane, HoloVerify has produced zero counted<br>false-positive or false-negative errors across 614 action-boundary packets.<br>The next proof step is to rerun the same claim under blind runtime gates.</p></blockquote>
+<ul><li>HoloVerify has zero real-world risk.</li><li>HoloVerify is universally superior to every model.</li><li>HoloVerify replaces qualified human review in clinical, legal, financial, or defense contexts.</li><li>The tested packets cover every possible enterprise failure mode.</li><li>One-shot solo baselines represent every possible solo prompting method.</li><li>The governed-runtime lane is already a blind production error-rate proof.</li></ul>
+<p>The only sanctioned public sentence right now is:</p>
+<blockquote><p>HoloVerify has a counted governed-runtime result across the current packet bank. The current runtime included answer-aware deterministic repair gates, so a blind-gate replication is required before reporting the result as a production error-rate bound.</p></blockquote>
 <hr/>
 </section>
 <section class="paper-section" id="next-packet-families"><h2>Next Packet Families</h2>

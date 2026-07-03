@@ -69,6 +69,28 @@ def one_packet_approval_sentence(packet_index: int) -> str:
         "trace freeze, no substitutions, no public claims."
     )
 
+
+def scoped_approval_sentence(packet_limit: int | None = None, packet_index: int = 1) -> str:
+    if packet_limit is None:
+        return EXACT_APPROVAL_SENTENCE
+    if packet_limit == EXPECTED_PACKET_COUNT and packet_index == 1:
+        return EXACT_APPROVAL_SENTENCE
+    if packet_limit == 1:
+        return one_packet_approval_sentence(packet_index)
+
+    end_index = packet_index + packet_limit - 1
+    total_calls = packet_limit * len(CALL_SEQUENCE)
+    return (
+        f"I approve live provider execution for HOLOVERIFY_BLIND_CANARY_{packet_limit}PKT_RUNTIME_FIREWALL_V0 "
+        "using the committed blind canary runtime manifest "
+        "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7, "
+        f"opaque packet indices {packet_index}-{end_index} only, "
+        f"and exactly {total_calls} provider calls: W1 xai/grok-3-mini x{packet_limit}, "
+        f"G1 minimax/MiniMax-M2.5-highspeed x{packet_limit}, W2 openai/gpt-5.4-mini x{packet_limit}, "
+        f"G2 minimax/MiniMax-M2.5-highspeed x{packet_limit}, W3 minimax/MiniMax-M2.5-highspeed x{packet_limit}. "
+        "No judges, no solo, no scoring map before trace freeze, no substitutions, no public claims."
+    )
+
 FORBIDDEN_RUNTIME_STRINGS = (
     "packet_truth",
     "legacy_truth",
@@ -715,7 +737,7 @@ def posthoc_score(run_dir: Path, runtime_result: dict[str, Any], provider_rows: 
 
 
 def run_live(approval_statement: str, packet_limit: int | None = None, packet_index: int = 1) -> dict[str, Any]:
-    expected_approval = one_packet_approval_sentence(packet_index) if packet_limit == 1 else EXACT_APPROVAL_SENTENCE
+    expected_approval = scoped_approval_sentence(packet_limit, packet_index)
     if approval_statement != expected_approval:
         raise RuntimeError("approval_statement_mismatch")
 

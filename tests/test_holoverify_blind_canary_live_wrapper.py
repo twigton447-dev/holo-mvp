@@ -105,6 +105,29 @@ def test_one_packet_approval_sentence_binds_packet_index(monkeypatch):
     assert called["preflight"] is False
 
 
+def test_partial_batch_approval_sentence_binds_scope(monkeypatch):
+    script = load_script()
+    approval = script.scoped_approval_sentence(packet_limit=3, packet_index=10)
+
+    assert "HOLOVERIFY_BLIND_CANARY_3PKT_RUNTIME_FIREWALL_V0" in approval
+    assert "opaque packet indices 10-12 only" in approval
+    assert "exactly 15 provider calls" in approval
+    assert "W1 xai/grok-3-mini x3" in approval
+    assert "W3 minimax/MiniMax-M2.5-highspeed x3" in approval
+    assert approval != script.EXACT_APPROVAL_SENTENCE
+
+    called = {"preflight": False}
+
+    def fail_if_called(_run_dir, _runtime_manifest_path=None):
+        called["preflight"] = True
+        raise AssertionError("preflight should not run on wrong batch approval")
+
+    monkeypatch.setattr(script, "preflight", fail_if_called)
+    with pytest.raises(RuntimeError, match="approval_statement_mismatch"):
+        script.run_live(script.EXACT_APPROVAL_SENTENCE, packet_limit=3, packet_index=10)
+    assert called["preflight"] is False
+
+
 def test_slot_order_enforced():
     script = load_script()
     script.assert_message_matches_slot(

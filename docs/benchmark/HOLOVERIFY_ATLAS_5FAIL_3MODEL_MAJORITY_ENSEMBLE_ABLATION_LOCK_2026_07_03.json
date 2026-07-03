@@ -1,0 +1,137 @@
+{
+  "classification": "HOLOVERIFY_ATLAS_5FAIL_3MODEL_MAJORITY_ENSEMBLE_ABLATION_LOCK_2026_07_03",
+  "status": "PREREGISTERED_NO_PROVIDERS",
+  "created_at_utc": "2026-07-03T18:15:00Z",
+  "lane_label": "HOLOVERIFY_ATLAS_5FAIL_3MODEL_MAJORITY_ENSEMBLE_ABLATION_V0",
+  "purpose": "Canonical non-Holo orchestration comparator: independent three-model answers with majority verdict.",
+  "provider_calls_made": 0,
+  "judge_calls_made": 0,
+  "gov_calls_made": 0,
+  "target_set": {
+    "source_register": "docs/benchmark/HOLOVERIFY_ATLAS_5_SOLO_FAILURES_ESTABLISHED_2026_07_03.json",
+    "pair_count": 5,
+    "packet_count": 10,
+    "pair_ids": [
+      "HV-ATLAS-DISC-020",
+      "HV-ATLAS-DISC-023",
+      "HV-ATLAS-DISC-025",
+      "HV-ATLAS-DISC-033",
+      "HV-ATLAS-DISC-035"
+    ],
+    "opaque_runtime_ids": [
+      "ATLASRESCUE-4D29A82BECA21E67C3C8",
+      "ATLASRESCUE-5F4D2BECC8894EA1B843",
+      "ATLASRESCUE-F9088C560DD2A436259C",
+      "ATLASRESCUE-A99C97DE339525880895",
+      "ATLASRESCUE-E01246E499290B3163AD",
+      "ATLASRESCUE-AEA4A946BF50E7131481",
+      "ATLASRESCUE-9D8631D7FB8017C6E397",
+      "ATLASRESCUE-93D992FE116415AEA6EE",
+      "ATLASRESCUE-C3FCACEB77CC0CCEBF77",
+      "ATLASRESCUE-9917935F9BA192D89299"
+    ],
+    "sibling_map": [
+      {
+        "pair_id": "HV-ATLAS-DISC-020",
+        "allow_sibling_opaque_runtime_id": "ATLASRESCUE-4D29A82BECA21E67C3C8",
+        "escalate_sibling_opaque_runtime_id": "ATLASRESCUE-5F4D2BECC8894EA1B843"
+      },
+      {
+        "pair_id": "HV-ATLAS-DISC-023",
+        "allow_sibling_opaque_runtime_id": "ATLASRESCUE-F9088C560DD2A436259C",
+        "escalate_sibling_opaque_runtime_id": "ATLASRESCUE-A99C97DE339525880895"
+      },
+      {
+        "pair_id": "HV-ATLAS-DISC-025",
+        "allow_sibling_opaque_runtime_id": "ATLASRESCUE-E01246E499290B3163AD",
+        "escalate_sibling_opaque_runtime_id": "ATLASRESCUE-AEA4A946BF50E7131481"
+      },
+      {
+        "pair_id": "HV-ATLAS-DISC-033",
+        "allow_sibling_opaque_runtime_id": "ATLASRESCUE-9D8631D7FB8017C6E397",
+        "escalate_sibling_opaque_runtime_id": "ATLASRESCUE-93D992FE116415AEA6EE"
+      },
+      {
+        "pair_id": "HV-ATLAS-DISC-035",
+        "allow_sibling_opaque_runtime_id": "ATLASRESCUE-C3FCACEB77CC0CCEBF77",
+        "escalate_sibling_opaque_runtime_id": "ATLASRESCUE-9917935F9BA192D89299"
+      }
+    ]
+  },
+  "freeze": {
+    "freeze_root_sha256": "d4e130d4598963b55e7cc6b708ff6b850a7e14df1a4b2d9bc2b24c3f08fbb7da",
+    "runtime_manifest": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/holoverify_atlas_holo_rescue_runtime_manifest_2026_07_03.json",
+    "runtime_manifest_sha256": "0cd8ab98da5c6a4089279922cf644d3cbcb0820555be65d14f88b68b99f453f7",
+    "runtime_payload_dir": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/runtime_payloads",
+    "scoring_map": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/holoverify_atlas_holo_rescue_scoring_map_2026_07_03.json",
+    "scoring_map_sha256": "70ddcbcf5a32e4c1a75ebef563dd60c0514e3cc40eda90f5653ef80974661e19",
+    "scoring_map_use": "post_trace_freeze_only"
+  },
+  "model_roster": [
+    {
+      "vote": "M1",
+      "provider": "xai",
+      "model": "grok-3-mini"
+    },
+    {
+      "vote": "M2",
+      "provider": "openai",
+      "model": "gpt-5.4-mini"
+    },
+    {
+      "vote": "M3",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed"
+    }
+  ],
+  "expected_runtime": {
+    "packets": 10,
+    "calls_per_packet": 3,
+    "provider_calls": 30,
+    "gov_calls": 0,
+    "judge_calls": 0,
+    "solo_calls": 0,
+    "substitutions_allowed": false
+  },
+  "orchestration_contract": {
+    "independent_model_calls": true,
+    "prior_turn_summaries": false,
+    "continuity": false,
+    "state_brief": false,
+    "gov": false,
+    "gov_baton": false,
+    "routing_lens": false,
+    "deterministic_gate_feedback_before_other_model_answers": false,
+    "artifact_registry": false,
+    "best_artifact_preservation": false,
+    "final_selector": "MAJORITY_VOTE_ONLY",
+    "judges": false
+  },
+  "majority_rule": {
+    "valid_vote_definition": "admissible ALLOW or ESCALATE verdict",
+    "packet_final_verdict": "majority of valid votes",
+    "majority_threshold": 2,
+    "no_majority_result": "NO_ADMISSIBLE_MAJORITY",
+    "parse_or_admissibility_failures_count_as_model_failures": true,
+    "packet_can_be_correct_if_two_valid_votes_agree": true,
+    "model_failures_remain_reported_even_if_packet_majority_is_correct": true
+  },
+  "comparison_anchors": {
+    "solo_side": "docs/benchmark/HOLOVERIFY_ATLAS_5_SOLO_FAILURES_ESTABLISHED_2026_07_03.json",
+    "full_holo_side": "docs/benchmark/HOLOVERIFY_ATLAS_SELECTOR_W3_PATCH_VALIDATION_RESULT_2026_07_03.json",
+    "auxiliary_workers_only_side": "docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_WORKERS_ONLY_ABLATION_RESULT_2026_07_03.json",
+    "workers_only_note": "Auxiliary diagnostic only; canonical existing-orchestration comparator is independent majority ensemble."
+  },
+  "interpretation_rules": {
+    "if_majority_ensemble_clears": "The five seams do not separate Full Holo from ordinary three-model majority voting.",
+    "if_majority_ensemble_fails_where_full_holo_passed": "The five seams separate Full Holo from ordinary independent multi-model voting.",
+    "do_not_claim_gov_alone": "This arm separates Full Holo from majority voting, not Gov alone from every other component."
+  },
+  "claim_boundary": {
+    "public_claims_allowed_before_execution": false,
+    "benchmark_rate_allowed": false,
+    "confidence_interval_allowed": false,
+    "universal_superiority_claim_allowed": false,
+    "allowed_internal_after_lock": "The Atlas five-failure target has a preregistered independent three-model majority ensemble comparator."
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "classification": "DERIVED_EVIDENCE_SUMMARY_NO_PROVIDER",
+  "created_at": "2026-07-02",
+  "provider_calls_made_while_creating": 0,
+  "judge_calls_made_while_creating": 0,
+  "packet_edits_made_while_creating": 0,
+  "prompt_edits_made_while_creating": 0,
+  "packet_scope": {
+    "pairs": [
+      "HV-ACOM-REP-020",
+      "HV-AP-REP-011",
+      "HV-ITAC-REP-018",
+      "HV-ACOM-REP-015",
+      "HV-GOVP-REP-006",
+      "HV-LREG-REP-014"
+    ],
+    "packets": 12,
+    "allow_packets": 6,
+    "escalate_packets": 6
+  },
+  "category_rollup": {
+    "legacy_kit_a_11_architecture_precedent": {
+      "architecture_rows": "66/66",
+      "subcalls": "114/114",
+      "strict_correct": "40/66",
+      "scoreable_correct": "40/61",
+      "parse_failures": 5,
+      "holo_verify_governor_correct": "6/6",
+      "deterministic_policy_gate_correct": "6/6",
+      "llm_only_no_governor_scoreable": "28/49",
+      "llm_only_no_governor_false_negatives": 20,
+      "llm_only_no_governor_false_positives": 1
+    },
+    "full_holoverify_reference": {
+      "strict_admissible_correct": "12/12",
+      "source": "existing family traces; no new Holo calls"
+    },
+    "solo_one_shot_3model": {
+      "provider_calls": "36/36",
+      "provider_failures": 0,
+      "parse_failures": 5,
+      "strict_admissible_correct": "15/36",
+      "label_correct": "26/36"
+    },
+    "no_gov_provider_balanced_canonical_plus_randomized": {
+      "provider_calls": "288/288",
+      "provider_failures": 0,
+      "strict_admissible_correct": "21/48",
+      "status": "conservative canonical hard-set reading plus randomized balanced run"
+    },
+    "no_gov_provider_balanced_audited_plus_randomized": {
+      "provider_calls": "288/288",
+      "provider_failures": 0,
+      "strict_admissible_correct": "24/48",
+      "by_architecture": {
+        "reconsider": "7/12",
+        "vote": "6/12",
+        "council": "7/12",
+        "debate": "4/12"
+      },
+      "by_truth": {
+        "allow": {
+          "units": 24,
+          "strict_pass": 4,
+          "wrong_verdict": 10,
+          "correct_not_admissible": 8,
+          "parse_fail": 2
+        },
+        "escalate": {
+          "units": 24,
+          "strict_pass": 20,
+          "wrong_verdict": 0,
+          "correct_not_admissible": 4,
+          "parse_fail": 0
+        }
+      }
+    },
+    "openai54_homogeneous_diagnostic": {
+      "provider_calls": "144/144",
+      "provider_failures": 0,
+      "strict_admissible_correct": "13/24",
+      "status": "diagnostic only, not baseline-matched"
+    },
+    "gpt54_solo_identical_hard_packet_set": {
+      "provider_calls": "6/6",
+      "provider_failures": 0,
+      "strict_admissible_correct": "4/6",
+      "label_correct": "4/6",
+      "status": "diagnostic solo control"
+    }
+  },
+  "inference": {
+    "strategy_lock_classification": "STRONG_ARCHITECTURE_SIGNAL",
+    "basis": [
+      "Full HoloVerify is 12/12 strict-admissible correct on the same packet IDs.",
+      "Solo one-shot is 15/36 strict-admissible correct.",
+      "No-Gov multi-call aggregate is 21/48 on the conservative canonical reading or 24/48 on the later audited reading.",
+      "No-Gov failures are distributed across architectures and packets, and are not provider failures.",
+      "OpenAI-only homogeneous diagnostic improves but does not close the gap."
+    ],
+    "main_failure_shape": "No-Gov and solo failures concentrate on ALLOW siblings: overblocking valid actions, missing required source closure, and parse/contract failures.",
+    "claim_boundary": "Supports architecture-causation interpretation on this frozen sample; does not prove universal superiority."
+  }
+}

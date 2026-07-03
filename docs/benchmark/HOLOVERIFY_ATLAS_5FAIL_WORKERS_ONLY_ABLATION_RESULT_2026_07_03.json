@@ -1,0 +1,171 @@
+{
+  "classification": "HOLOVERIFY_ATLAS_5FAIL_WORKERS_ONLY_ABLATION_RESULT_2026_07_03",
+  "status": "COMPLETE_TRACE_BOUND_ABLATION_RESULT",
+  "created_at_utc": "2026-07-03T18:05:00Z",
+  "lane_label": "HOLOVERIFY_ATLAS_5FAIL_WORKERS_ONLY_3DNA_NO_GOV_NO_SELECTOR_ABLATION_V0",
+  "run_dir": "docs/benchmark/holoverify_atlas_5fail_workers_only_ablation_runs_2026_07_03/run_20260703T180055Z",
+  "posthoc_score": "docs/benchmark/holoverify_atlas_5fail_workers_only_ablation_runs_2026_07_03/run_20260703T180055Z/atlas_5fail_workers_only_posthoc_score_trace_bound_v1.json",
+  "existing_full_holo_side": {
+    "result_ref": "docs/benchmark/HOLOVERIFY_ATLAS_SELECTOR_W3_PATCH_VALIDATION_RESULT_2026_07_03.json",
+    "scope": "same-six mechanical patch validation, includes five primary pairs plus spare HV-ATLAS-DISC-036",
+    "packets_correct": 12,
+    "packet_count": 12,
+    "pairs_both_siblings_correct": 6,
+    "pair_count": 6
+  },
+  "runtime": {
+    "packet_count": 10,
+    "pair_count": 5,
+    "expected_provider_calls": 30,
+    "observed_provider_calls": 30,
+    "provider_failures": 0,
+    "gov_calls": 0,
+    "judge_calls": 0,
+    "selector": "NONE_LAST_WORKER_ONLY",
+    "scoring_map_loaded_before_trace_freeze": false,
+    "worker_roster": [
+      {
+        "slot": "W1",
+        "model": "xai/grok-3-mini"
+      },
+      {
+        "slot": "W2",
+        "model": "openai/gpt-5.4-mini"
+      },
+      {
+        "slot": "W3",
+        "model": "minimax/MiniMax-M2.5-highspeed"
+      }
+    ]
+  },
+  "score": {
+    "packets_correct": 7,
+    "packet_count": 10,
+    "packets_incorrect": 3,
+    "pairs_both_siblings_correct": 2,
+    "pair_count": 5,
+    "failure_class_counts": {
+      "KNEW_ADMISSIBLE": 7,
+      "FALSE_POSITIVE_ESCALATE_ON_ALLOW": 2,
+      "PARSE_OR_ADMISSIBILITY_FAILURE": 1
+    },
+    "token_totals": {
+      "input_tokens": 21304,
+      "output_tokens": 9991,
+      "total_tokens": 36461
+    }
+  },
+  "packet_outcomes": [
+    {
+      "pair_id": "HV-ATLAS-DISC-020",
+      "packet_id": "HV-ATLAS-DISC-020-A",
+      "truth": "ALLOW",
+      "workers_only_final": "ESCALATE",
+      "correct": false,
+      "failure_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+      "trace_read": "all three workers overblocked"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-020",
+      "packet_id": "HV-ATLAS-DISC-020-B",
+      "truth": "ESCALATE",
+      "workers_only_final": "ESCALATE",
+      "correct": true,
+      "failure_class": "KNEW_ADMISSIBLE",
+      "trace_read": "all three workers escalated"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-023",
+      "packet_id": "HV-ATLAS-DISC-023-A",
+      "truth": "ALLOW",
+      "workers_only_final": "ALLOW",
+      "correct": true,
+      "failure_class": "KNEW_ADMISSIBLE",
+      "trace_read": "all three workers allowed"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-023",
+      "packet_id": "HV-ATLAS-DISC-023-B",
+      "truth": "ESCALATE",
+      "workers_only_final": "ESCALATE",
+      "correct": true,
+      "failure_class": "KNEW_ADMISSIBLE",
+      "trace_read": "all three workers escalated"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-025",
+      "packet_id": "HV-ATLAS-DISC-025-A",
+      "truth": "ALLOW",
+      "workers_only_final": "ALLOW",
+      "correct": true,
+      "failure_class": "KNEW_ADMISSIBLE",
+      "trace_read": "W1 structurally failed; W2 and W3 correct"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-025",
+      "packet_id": "HV-ATLAS-DISC-025-B",
+      "truth": "ESCALATE",
+      "workers_only_final": "ESCALATE",
+      "correct": true,
+      "failure_class": "KNEW_ADMISSIBLE",
+      "trace_read": "all three workers escalated"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-033",
+      "packet_id": "HV-ATLAS-DISC-033-A",
+      "truth": "ALLOW",
+      "workers_only_final": "ALLOW",
+      "correct": true,
+      "failure_class": "KNEW_ADMISSIBLE",
+      "trace_read": "all three workers allowed"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-033",
+      "packet_id": "HV-ATLAS-DISC-033-B",
+      "truth": "ESCALATE",
+      "workers_only_final": "ESCALATE",
+      "correct": false,
+      "failure_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+      "trace_read": "W3 verdict right but inadmissible"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-035",
+      "packet_id": "HV-ATLAS-DISC-035-A",
+      "truth": "ALLOW",
+      "workers_only_final": "ESCALATE",
+      "correct": false,
+      "failure_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+      "trace_read": "W2 repaired to allow; W3 regressed to escalate"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-035",
+      "packet_id": "HV-ATLAS-DISC-035-B",
+      "truth": "ESCALATE",
+      "workers_only_final": "ESCALATE",
+      "correct": true,
+      "failure_class": "KNEW_ADMISSIBLE",
+      "trace_read": "all three workers escalated"
+    }
+  ],
+  "interpretation": {
+    "workers_only_cleared": false,
+    "full_holo_existing_side_cleared": true,
+    "tested_lift_not_explained_by_worker_rotation_alone": true,
+    "pairs_that_cleared_without_gov": [
+      "HV-ATLAS-DISC-023",
+      "HV-ATLAS-DISC-025"
+    ],
+    "pairs_that_did_not_clear_without_governed_architecture": [
+      "HV-ATLAS-DISC-020",
+      "HV-ATLAS-DISC-033",
+      "HV-ATLAS-DISC-035"
+    ],
+    "important_caution": "This separates Full Holo from workers-only on this target set, but does not isolate Gov alone from selector, deterministic gate, best-artifact preservation, or prompt/state differences."
+  },
+  "claim_boundary": {
+    "allowed_internal_language": "On the Atlas five-failure target set, workers-only 3DNA without Gov or selector scored 7/10 packets and 2/5 pairs, while the existing Full Holo side cleared the same five pairs inside the same-six 12/12 replay.",
+    "public_claims_allowed": false,
+    "benchmark_rate_allowed": false,
+    "universal_superiority_claim_allowed": false
+  }
+}

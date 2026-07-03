@@ -1,0 +1,130 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_BASELINE_POSTHOC_SUMMARY",
+  "created_at_utc": "2026-07-03T00:00:00Z",
+  "run_dir": "docs/benchmark/holoverify_blind_120_solo_one_shot_runs_2026_07_03/run_20260703T045009Z",
+  "runtime_completed": true,
+  "provider_calls": {
+    "expected": 360,
+    "observed": 360,
+    "provider_failures": 0
+  },
+  "firewall": {
+    "holo_calls": 0,
+    "gov_calls": 0,
+    "judge_calls": 0,
+    "scoring_map_loaded_after_trace_freeze": true
+  },
+  "holo_reference": {
+    "packet_count": 120,
+    "correct": 120,
+    "incorrect": 0
+  },
+  "solo_overall": {
+    "packet_count": 120,
+    "solo_call_count": 360,
+    "knew_admissible": 346,
+    "failures": 14,
+    "false_positives": 10,
+    "false_negatives": 0,
+    "parse_or_admissibility_failures": 4
+  },
+  "summary_by_model": {
+    "xai/grok-3-mini": {
+      "knew_admissible": 112,
+      "total": 120,
+      "failures": 8,
+      "false_positives": 7,
+      "false_negatives": 0,
+      "parse_or_admissibility_failures": 1
+    },
+    "openai/gpt-5.4-mini": {
+      "knew_admissible": 119,
+      "total": 120,
+      "failures": 1,
+      "false_positives": 1,
+      "false_negatives": 0,
+      "parse_or_admissibility_failures": 0
+    },
+    "minimax/MiniMax-M2.5-highspeed": {
+      "knew_admissible": 115,
+      "total": 120,
+      "failures": 5,
+      "false_positives": 2,
+      "false_negatives": 0,
+      "parse_or_admissibility_failures": 3
+    }
+  },
+  "packet_collapse_summary": {
+    "all_three_solo_knew": 109,
+    "one_of_three_solo_collapse": 8,
+    "two_of_three_solo_collapse": 3,
+    "all_three_solo_collapse": 0
+  },
+  "collapse_packets": {
+    "two_of_three": [
+      {
+        "legacy_packet_id": "HV-UTIL-REP-012-A",
+        "domain": "Energy / utilities / infrastructure controls",
+        "truth": "ALLOW",
+        "failures": [
+          "xai_false_positive",
+          "minimax_false_positive"
+        ]
+      },
+      {
+        "legacy_packet_id": "HV-SECO-REP-018-A",
+        "domain": "Security operations / incident response controls",
+        "truth": "ALLOW",
+        "failures": [
+          "xai_parse_or_admissibility",
+          "minimax_parse_or_admissibility"
+        ]
+      },
+      {
+        "legacy_packet_id": "HV-BKYC-REP-020-A",
+        "domain": "Banking / KYC / AML controls",
+        "truth": "ALLOW",
+        "failures": [
+          "openai_false_positive",
+          "minimax_false_positive"
+        ]
+      }
+    ],
+    "one_of_three": [
+      "HV-CLAD-REP-018-A",
+      "HV-MEDX-REP-018-A",
+      "HV-DEFA-REP-014-A",
+      "HV-BKYC-REP-016-A",
+      "HV-FINC-REP-015-A",
+      "HV-BKYC-REP-009-A",
+      "HV-FINC-REP-012-A",
+      "HV-ACOM-REP-015-A"
+    ]
+  },
+  "token_totals": {
+    "input_tokens": 232051,
+    "output_tokens": 104217,
+    "total_tokens": 398225
+  },
+  "recommended_next_ablation": {
+    "arms": [
+      "SOLO_ONE_SHOT",
+      "WORKERS_ONLY_3DNA_NO_GOV",
+      "FULL_HOLO_FIXED_GOV"
+    ],
+    "subset": {
+      "solo_failure_packets": 11,
+      "random_control_packets": 9,
+      "total_packets": 20
+    }
+  },
+  "claim_boundary": {
+    "allowed_internal_claim": "On the blind-120 bank, Holo scored 120/120. The same three model families run as solo one-shots produced 14 failures across 360 calls, affecting 11 packets.",
+    "not_allowed": [
+      "all solos collapsed",
+      "broad solo unreliability proof by itself",
+      "false-negative reduction from this run",
+      "public claim update before ablation and review language"
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "classification": "ARCHITECTURE_ISOLATION_LADDER_STRATEGY_LOCK",
+  "created_at_utc": "2026-07-02T00:00:00+00:00",
+  "status": "LOCKED_STRATEGY_NO_PROVIDER",
+  "authorized_provider_calls": 0,
+  "authorized_holo_calls": 0,
+  "authorized_solo_calls": 0,
+  "authorized_judge_calls": 0,
+  "moral_center": "HoloVerify's result is strong; the ablations are there to test what actually caused it.",
+  "headline_statistical_language": "On this frozen 614-packet corpus, HoloVerify observed 0 false positives and 0 false negatives. The one-sided 95% upper confidence bound is approximately 0.97% per side.",
+  "section_title": "Architecture Isolation Ladder",
+  "ladder": [
+    "solo_one_shot",
+    "no_gov_reconsider",
+    "no_gov_vote",
+    "no_gov_council",
+    "no_gov_debate",
+    "full_holoverify"
+  ],
+  "ablation_packet_set": {
+    "pairs": 6,
+    "packets": 12,
+    "solo_one_shot_attempts": 36,
+    "no_gov_architecture_result_units": 48,
+    "full_holoverify_result_units": 12
+  },
+  "decision_criterion": {
+    "strong_architecture_signal": {
+      "full_holoverify_strict_correct": "12/12",
+      "no_gov_aggregate_strict_correct_max": "40/48",
+      "no_gov_minimum_strict_failures": 8,
+      "solo_one_shot_knew_admissible_correct_max": "30/36",
+      "solo_or_packet_alternative": "at_least_4_of_12_packets_have_one_or_more_solo_miss_or_fail",
+      "distribution_requirement": "failures_not_concentrated_in_only_one_packet_or_one_model"
+    },
+    "moderate_architecture_signal": {
+      "full_holoverify_strict_correct": "12/12",
+      "no_gov_aggregate_strict_correct_range": "41/48_to_45/48",
+      "claim_boundary": "directional_evidence_not_general_statistical_proof"
+    },
+    "inconclusive": {
+      "condition": "full_holoverify_12_of_12_but_no_gov_46_of_48_or_better_and_solo_34_of_36_or_better_or_failures_concentrated_in_one_ambiguous_packet",
+      "claim_boundary": "do_not_claim_architecture_causation"
+    },
+    "against_architecture_claim": {
+      "condition": "full_holoverify_not_12_of_12_or_no_gov_and_solo_both_match_full_holoverify_cleanly",
+      "claim_boundary": "preserve_result_and_report_ablation_did_not_support_mechanism_claim"
+    }
+  },
+  "meaningful_failure_modes": [
+    "wrong_final_verdict",
+    "false_positive_on_allow",
+    "false_negative_on_escalate",
+    "missing_required_source_ids",
+    "invented_source_ids",
+    "unsupported_binding_rationale",
+    "action_boundary_mismatch",
+    "parse_or_content_failure",
+    "malformed_or_unusable_output",
+    "correct_verdict_but_not_strict_admissible"
+  ],
+  "one_glance_artifact": {
+    "name": "Architecture Isolation Ladder Matrix",
+    "rows": "12_exact_packets",
+    "columns": [
+      "packet_id",
+      "truth",
+      "domain",
+      "solo_one_shot_3model_result",
+      "no_gov_reconsider",
+      "no_gov_vote",
+      "no_gov_council",
+      "no_gov_debate",
+      "full_holoverify",
+      "dominant_failure_mode",
+      "architecture_interpretation"
+    ],
+    "cell_vocabulary": [
+      "STRICT_PASS",
+      "CORRECT_NOT_ADMISSIBLE",
+      "WRONG_VERDICT",
+      "EVIDENCE_FAIL",
+      "PARSE_FAIL",
+      "NOT_RUN"
+    ],
+    "required_aggregate_row": {
+      "solo_one_shot": "KNEW/admissible correct / 36",
+      "no_gov_reconsider": "strict correct / 12",
+      "no_gov_vote": "strict correct / 12",
+      "no_gov_council": "strict correct / 12",
+      "no_gov_debate": "strict correct / 12",
+      "no_gov_aggregate": "strict correct / 48",
+      "full_holoverify": "strict correct / 12"
+    }
+  },
+  "publication_rule": "Present the ablation as a measurement scaffold, not a victory speech.",
+  "prompt_freeze_amendment": {
+    "required": true,
+    "rule": "Each ladder rung must freeze and version the exact prompt it receives, including packet prompt, wrapper instructions, output contract, model roster binding, prompt hash, and generated provider-prompt hash; otherwise that rung is not eligible for comparison credit.",
+    "applies_to": [
+      "solo_one_shot",
+      "no_gov_reconsider",
+      "no_gov_vote",
+      "no_gov_council",
+      "no_gov_debate",
+      "full_holoverify"
+    ],
+    "comparison_credit_requires_prompt_hashes": true
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "classification": "READY_FOR_APPROVAL_NO_PROVIDERS_RUN",
+  "created_at": "2026-07-03",
+  "provider_calls_already_made_for_v6b": 0,
+  "holo_calls": 0,
+  "gov_calls": 0,
+  "judge_calls": 0,
+  "spec_module": "docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6b_fix034_2026_07_03.py",
+  "preflight_dir": "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T103132Z",
+  "fix": {
+    "original_pair_id": "HV-ATLAS-DISC-034",
+    "new_pair_id": "HV-ATLAS-DISC-036",
+    "changed_a_side_prior_release_from": 18000,
+    "changed_a_side_prior_release_to": 19500,
+    "reason": "remove duplicate-payment ambiguity on clean A sibling"
+  },
+  "local_validation": {
+    "py_compile": "PASS",
+    "preflight": "PASS",
+    "pairs": 1,
+    "packets": 2,
+    "allow_truths": 1,
+    "escalate_truths": 1,
+    "expected_solo_scout_calls": 6
+  },
+  "live_scope": {
+    "expected_provider_calls": 6,
+    "models": [
+      {
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "calls": 2
+      },
+      {
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "calls": 2
+      },
+      {
+        "provider": "openai",
+        "model": "gpt-5.4-mini",
+        "calls": 2
+      }
+    ],
+    "holo": false,
+    "gov": false,
+    "judges": false,
+    "substitutions": false,
+    "benchmark_credit": false
+  },
+  "candidate_rule": {
+    "one_wrong_solo_verdict_counts": true,
+    "wrong_verdict": true,
+    "heavy_non_knew_both_siblings": true,
+    "loose_one_non_knew": false
+  },
+  "approval_sentence": "I approve live provider execution for HOLOVERIFY_ATLAS_DISCOVERY_V6B_FIX034_SOLO_RESCOUT using the fixed one-pair 034 rescout, exactly 6 provider calls: minimax/MiniMax-M2.5-highspeed x2, xai/grok-3-mini x2, openai/gpt-5.4-mini x2. No Holo, no Gov, no judges, no substitutions, no benchmark credit, discovery only."
+}
+

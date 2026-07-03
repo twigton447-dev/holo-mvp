@@ -1,0 +1,27 @@
+{
+  "call_number": 4,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "6a49afde761b3cc4263e3c912d52456083791c45d7bf83c4b5d339689b31a970",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user asks: \"packet_id=BLIND120-755CE56C96A12C4195D1 status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nSo they want a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. They said \"Do not add headings, explanations, JSON, Markdown, or extra lines.\" So just three lines like:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut the request says \"Return the three-line status record.\" They also gave a \"packet_id\". The output probably should include the packet_id? The specification says \"Fields, in order: route_verdict, repair_target, blocked_move.\" That's three fields only. The initial request says \"Return a plain text record with three key=value lines.\" So we should not include packet_id. It's not requested as part of the record. The user gave it as context. Probably we just output the three lines as described.\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra whitespace, no extra lines. So exactly three lines.\n\nWe should be careful about the line endings. Should we have trailing spaces? No. Just exactly as needed.\n\nThus final answer: exactly those three lines.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "3eca3b118e10fdd7088f6aa058c526ed71478b9fb9ab43d6968d6b3f3a9f0ce1",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 121,
+    "output_tokens": 338,
+    "raw_text": "<think>\nThe user asks: \"packet_id=BLIND120-755CE56C96A12C4195D1 status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nSo they want a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. They said \"Do not add headings, explanations, JSON, Markdown, or extra lines.\" So just three lines like:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut the request says \"Return the three-line status record.\" They also gave a \"packet_id\". The output probably should include the packet_id? The specification says \"Fields, in order: route_verdict, repair_target, blocked_move.\" That's three fields only. The initial request says \"Return a plain text record with three key=value lines.\" So we should not include packet_id. It's not requested as part of the record. The user gave it as context. Probably we just output the three lines as described.\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra whitespace, no extra lines. So exactly three lines.\n\nWe should be careful about the line endings. Should we have trailing spaces? No. Just exactly as needed.\n\nThus final answer: exactly those three lines.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "069663d3f03066510116fe6aaad5b304",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 459,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

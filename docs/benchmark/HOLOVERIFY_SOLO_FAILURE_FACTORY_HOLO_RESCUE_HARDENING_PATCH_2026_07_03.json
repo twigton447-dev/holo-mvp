@@ -1,0 +1,72 @@
+{
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_HOLO_RESCUE_HARDENING_PATCH_V1",
+  "created_at_utc": "2026-07-03T21:45:00Z",
+  "scope": "no-provider hardening after rescue autopsy",
+  "provider_calls": 0,
+  "judge_calls": 0,
+  "solo_calls": 0,
+  "live_holo_calls": 0,
+  "patched_files": [
+    "holoverify_blind_runner_v0.py",
+    "tests/test_holoverify_blind_selector_repair_regression.py",
+    "tests/test_holoverify_blind_canary_live_wrapper.py",
+    "tests/test_holoverify_blind_120_live_wrapper.py",
+    "tests/test_holoverify_atlas_holo_rescue_patch_validation_gate.py",
+    "docs/benchmark/run_holoverify_atlas_holo_rescue_live_2026_07_03.py"
+  ],
+  "selector_policy": {
+    "previous_version": "SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03",
+    "new_version": "SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03",
+    "new_sha256": "2ccc65cd993c93e18297937026d59b6c335a4dc9503e7dbe4b0d76b2d948cdd5",
+    "new_criteria_added": [
+      "deterministic_clean",
+      "verdict_corroboration_count"
+    ]
+  },
+  "worker_contract": {
+    "version": "WORKER_CONTRACT_V2_ARTIFACT_FIRST_2026_07_03",
+    "sha256": "d5fdea3133f2bcdea0a9c16f1261081a8fe5ca8264f2a2f0a7e43d41c69a0320",
+    "changed": false
+  },
+  "hardening_changes": [
+    "short_final_answer is now warning-only when the artifact is otherwise complete",
+    "source-derived deterministic checks added for refund balance, tolerance delta, timezone window, and senior authorization freshness",
+    "Gov baton now carries dependency_ledger from deterministic source checks",
+    "selector considers deterministic_clean and verdict_corroboration_count",
+    "selector fails closed with no_structurally_valid_artifact when every artifact is structurally invalid"
+  ],
+  "patched_replay_against_frozen_run": {
+    "source_run": "docs/benchmark/holoverify_solo_failure_factory_holo_rescue_2026_07_03/live_runs/run_20260703T210421Z",
+    "original_correct": "19/26",
+    "patched_replay_correct": "23/26",
+    "patched_replay_no_final_artifact": 3,
+    "fixed_packet_rows": [
+      "HVSF-FACTORY-009-B",
+      "HVSF-FACTORY-010-A",
+      "HVSF-FACTORY-010-B",
+      "HVSF-FACTORY2-005-B"
+    ],
+    "fail_closed_packet_rows": [
+      "HVSF-FACTORY3-008-B",
+      "HVSF-FACTORY4-008-B",
+      "HVSF-FACTORY4-010-B"
+    ]
+  },
+  "validation": {
+    "py_compile": "PASS",
+    "pytest_focused": "PASS",
+    "pytest_count": 50,
+    "provider_calls": 0,
+    "judge_calls": 0
+  },
+  "claim_boundary": {
+    "allowed_internal": "V3 no-provider patch fixes four prior wrong packet outcomes on frozen-output replay and turns three unanimous stale-authorization false ALLOWs into fail-closed outcomes.",
+    "forbidden": [
+      "public benchmark claim",
+      "new error-rate denominator",
+      "claim that Holo solved the 13-pair rescue set",
+      "claim that V3 is live-provider validated"
+    ]
+  },
+  "next_valid_move": "patch-validation-only rerun of the same 13-pair rescue set under SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03 if explicitly approved"
+}

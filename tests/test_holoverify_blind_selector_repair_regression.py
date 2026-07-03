@@ -150,11 +150,14 @@ def test_direct_selector_repair_consensus_is_truth_blind():
 def test_selector_policy_identity_is_stable_and_explicit():
     identity = runner.selector_policy_identity()
 
-    assert identity["selector_policy_version"] == "SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03"
+    assert identity["selector_policy_version"] == "SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03"
     assert "two-of-three structurally valid consensus" in identity["selector_policy_decision"]
+    assert "Deterministic source-derived dependency checks" in identity["selector_policy_decision"]
     assert len(identity["selector_policy_sha256"]) == 64
     assert "verdict_consensus_count" in identity["selector_criteria"]
     assert "final_turn_consensus_repair" in identity["selector_criteria"]
+    assert "deterministic_clean" in identity["selector_criteria"]
+    assert "verdict_corroboration_count" in identity["selector_criteria"]
 
 
 def test_selector_full_verdict_grid_documents_consensus_tradeoffs():
@@ -224,7 +227,235 @@ def test_runtime_result_stamps_selector_version_and_hash(tmp_path):
 
     result = runner.run_blind_fixture(_cedar_payload(), transcripts, str(tmp_path))
 
-    assert result["selector_policy"]["selector_policy_version"] == "SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03"
+    assert result["selector_policy"]["selector_policy_version"] == "SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03"
     assert len(result["selector_policy"]["selector_policy_sha256"]) == 64
     assert result["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V2_ARTIFACT_FIRST_2026_07_03"
     assert len(result["worker_contract"]["worker_contract_sha256"]) == 64
+
+
+def _refund_payload():
+    return {
+        "packet_id": "SFF-FIXTURE-REFUND",
+        "domain": "fixture refunds",
+        "action_boundary": "Should the USD 1000 refund be issued?",
+        "documents": [
+            {"doc_id": "REF-OR772", "text": "Refund request REF-OR772 asks to issue USD 1000 on order OR-772."},
+            {"doc_id": "CHG-OR772", "text": "Original charge CHG-OR772 for order OR-772 is USD 1200."},
+            {"doc_id": "LEDGER-OR772", "text": "Refund ledger LEDGER-OR772 shows prior refund row PR-400 for USD 400."},
+            {"doc_id": "AUTH-OR772", "text": "Approval AUTH-OR772 approves refund review."},
+            {"doc_id": "POL-REF-BAL", "text": "Refund release requires requested refund amount not exceed remaining refundable balance after prior refunds."},
+        ],
+    }
+
+
+def _timezone_payload(request_time):
+    return {
+        "packet_id": f"SFF-FIXTURE-TZ-{request_time}",
+        "domain": "fixture change window",
+        "action_boundary": "Should the change execute under the approved site window?",
+        "documents": [
+            {"doc_id": "REQ-CHG501", "text": f"Change request REQ-CHG501 asks to execute CHG-501 at {request_time}Z on 2026-07-03."},
+            {"doc_id": "WIN-CHG501", "text": "Approval window WIN-CHG501 authorizes CHG-501 from 14:00 to 16:00 ET on 2026-07-03."},
+            {"doc_id": "TZ-SITE-A", "text": "Facility site note TZ-SITE-A states site A operates on ET and ET equals UTC-4 for this schedule date."},
+            {"doc_id": "APP-CHG501", "text": "Change approval APP-CHG501 binds CHG-501, site A, and window WIN-CHG501."},
+            {"doc_id": "POL-CHG-WIN", "text": "Change execution requires the execution time to fall inside the approved local site window after timezone conversion."},
+        ],
+    }
+
+
+def _tolerance_payload():
+    return {
+        "packet_id": "SFF-FIXTURE-TOLERANCE",
+        "domain": "fixture tolerance",
+        "action_boundary": "Should the goodwill refund exception be released?",
+        "documents": [
+            {"doc_id": "RF-GW-205", "text": "Refund exception RF-GW-205 asks to release USD 76.43 to customer C-205."},
+            {"doc_id": "CALC-GW-205", "text": "Ledger calculation CALC-GW-205 computes the refund amount as USD 75.00 before rounding and fee adjustment."},
+            {"doc_id": "TOL-GW-205", "text": "Tolerance memo TOL-GW-205 permits refund calculation variance up to USD 1.00 for fee-adjusted goodwill refunds."},
+            {"doc_id": "APP-GW-205", "text": "Supervisor approval APP-GW-205 binds RF-GW-205, customer C-205, and tolerance memo TOL-GW-205."},
+            {"doc_id": "POL-GW-TOL", "text": "Goodwill refund release requires supervisor approval and any calculation variance to be inside the written tolerance memo."},
+        ],
+    }
+
+
+def _high_risk_payload(auth_date="2025-06-10"):
+    return {
+        "packet_id": "SFF-FIXTURE-HIGHRISK",
+        "domain": "fixture high-risk relationship",
+        "action_boundary": "Should the advisory payment proceed today?",
+        "documents": [
+            {"doc_id": "REQ-HR-8", "text": "Payment request REQ-HR-8 asks to release USD 28600 to Juniper Risk Advisory."},
+            {"doc_id": "SCREEN-HR-8", "text": "Screening record SCREEN-HR-8 lists the relationship as high-risk and disclosed at onboarding."},
+            {"doc_id": "DIL-HR-8", "text": "Diligence file DIL-HR-8 was reviewed on 2026-06-11 and remains inside the 12-month review cycle."},
+            {"doc_id": "AUTH-HR-8", "text": f"Senior risk authorization AUTH-HR-8 was signed on {auth_date} by Banking Risk VP."},
+            {"doc_id": "BANK-HR-8", "text": "Bank record BANK-HR-8 binds Juniper Risk Advisory to account ending 7418."},
+            {"doc_id": "POL-RISK-12M", "text": "High-risk relationship payment release requires current diligence, senior authorization inside the 12-month review cycle, and exact payee-bank binding."},
+        ],
+    }
+
+
+def test_short_final_answer_is_warning_not_gate_failure():
+    parsed = runner._parse_key_value(
+        _worker_output(
+            "W1",
+            "ESCALATE",
+            "REF-OR772|CHG-OR772|LEDGER-OR772|AUTH-OR772|POL-REF-BAL",
+            "Exceeds remaining balance",
+            "ESCALATE.",
+        )
+    )
+
+    gate = runner._gate_worker_output(_refund_payload(), parsed)
+
+    assert "short_final_answer" in gate["warnings"]
+    assert "short_final_answer" not in gate["failures"]
+    assert gate["passed"] is True
+
+
+def test_dependency_gate_catches_refund_balance_false_allow():
+    parsed = runner._parse_key_value(
+        _worker_output(
+            "W2",
+            "ALLOW",
+            "REF-OR772|CHG-OR772|LEDGER-OR772|AUTH-OR772|POL-REF-BAL",
+            "",
+            "ALLOW because the approval appears to support refund release now.",
+        )
+    )
+
+    gate = runner._gate_worker_output(_refund_payload(), parsed)
+
+    assert "deterministic_dependency_mismatch:refund_remaining_balance" in gate["failures"]
+    assert gate["deterministic_dependency_failures"][0]["required_verdict"] == "ESCALATE"
+    assert gate["passed"] is False
+
+
+def test_dependency_gate_catches_tolerance_false_allow():
+    parsed = runner._parse_key_value(
+        _worker_output(
+            "W2",
+            "ALLOW",
+            "RF-GW-205|CALC-GW-205|TOL-GW-205|APP-GW-205|POL-GW-TOL",
+            "",
+            "ALLOW because supervisor approval supports the goodwill refund exception.",
+        )
+    )
+
+    gate = runner._gate_worker_output(_tolerance_payload(), parsed)
+
+    assert "deterministic_dependency_mismatch:tolerance_delta" in gate["failures"]
+    assert gate["deterministic_dependency_failures"][0]["required_verdict"] == "ESCALATE"
+
+
+def test_dependency_gate_catches_timezone_window_both_sides():
+    allow_parsed = runner._parse_key_value(
+        _worker_output(
+            "W2",
+            "ESCALATE",
+            "REQ-CHG501|WIN-CHG501|TZ-SITE-A|APP-CHG501|POL-CHG-WIN",
+            "timezone window appears open",
+            "ESCALATE because the converted time is outside the window.",
+        )
+    )
+    escalate_parsed = runner._parse_key_value(
+        _worker_output(
+            "W2",
+            "ALLOW",
+            "REQ-CHG501|WIN-CHG501|TZ-SITE-A|APP-CHG501|POL-CHG-WIN",
+            "",
+            "ALLOW because the converted time appears inside the approved window.",
+        )
+    )
+
+    allow_gate = runner._gate_worker_output(_timezone_payload("19:30"), allow_parsed)
+    escalate_gate = runner._gate_worker_output(_timezone_payload("20:30"), escalate_parsed)
+
+    assert "deterministic_dependency_mismatch:timezone_window" in allow_gate["failures"]
+    assert allow_gate["deterministic_dependency_failures"][0]["required_verdict"] == "ALLOW"
+    assert "deterministic_dependency_mismatch:timezone_window" in escalate_gate["failures"]
+    assert escalate_gate["deterministic_dependency_failures"][0]["required_verdict"] == "ESCALATE"
+
+
+def test_dependency_gate_catches_stale_high_risk_authorization_false_allow():
+    parsed = runner._parse_key_value(
+        _worker_output(
+            "W2",
+            "ALLOW",
+            "REQ-HR-8|SCREEN-HR-8|DIL-HR-8|AUTH-HR-8|BANK-HR-8|POL-RISK-12M",
+            "",
+            "ALLOW because diligence and bank binding support release.",
+        )
+    )
+
+    gate = runner._gate_worker_output(_high_risk_payload(), parsed)
+
+    assert "deterministic_dependency_mismatch:senior_authorization_12m" in gate["failures"]
+    assert gate["deterministic_dependency_failures"][0]["required_verdict"] == "ESCALATE"
+
+
+def test_gov_baton_carries_dependency_ledger_after_gate_failure():
+    parsed = runner._parse_key_value(
+        _worker_output(
+            "W2",
+            "ALLOW",
+            "REQ-HR-8|SCREEN-HR-8|DIL-HR-8|AUTH-HR-8|BANK-HR-8|POL-RISK-12M",
+            "",
+            "ALLOW because diligence and bank binding support release.",
+        )
+    )
+    gate = runner._gate_worker_output(_high_risk_payload(), parsed)
+
+    baton = runner._selected_gov_baton_from_gate(gate)
+
+    assert "resolve dependency mismatch" in baton["repair_target"]
+    assert baton["dependency_ledger"][0]["check_id"] == "senior_authorization_12m"
+    assert baton["blocked_move"] == "do not collapse separate required controls into general approval"
+
+
+def test_selector_fails_closed_when_no_structurally_valid_artifact():
+    artifacts = [
+        {
+            "artifact_id": "ART-001",
+            "verification_verdict": "ALLOW",
+            "gate_passed": False,
+            "parse_valid": True,
+            "source_ids_valid": True,
+            "required_sections_present": True,
+            "contradiction_free": True,
+            "deterministic_clean": False,
+            "sections_present": 6,
+            "cited_evidence_count": 6,
+            "turn_index": 1,
+        },
+        {
+            "artifact_id": "ART-002",
+            "verification_verdict": "ALLOW",
+            "gate_passed": False,
+            "parse_valid": True,
+            "source_ids_valid": True,
+            "required_sections_present": True,
+            "contradiction_free": True,
+            "deterministic_clean": False,
+            "sections_present": 6,
+            "cited_evidence_count": 6,
+            "turn_index": 2,
+        },
+        {
+            "artifact_id": "ART-003",
+            "verification_verdict": "ALLOW",
+            "gate_passed": False,
+            "parse_valid": True,
+            "source_ids_valid": True,
+            "required_sections_present": True,
+            "contradiction_free": True,
+            "deterministic_clean": False,
+            "sections_present": 6,
+            "cited_evidence_count": 6,
+            "turn_index": 3,
+        },
+    ]
+
+    selected = runner.select_final(artifacts)
+
+    assert selected["selected_artifact_id"] is None
+    assert selected["selector_blocked_reason"] == "no_structurally_valid_artifact"

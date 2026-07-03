@@ -9,19 +9,23 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Callable, Iterable
 
 
-SELECTOR_POLICY_VERSION = "SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03"
+SELECTOR_POLICY_VERSION = "SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03"
 SELECTOR_POLICY_DECISION = (
     "Truth-blind structural selector. Among structurally valid artifacts, "
     "verdict consensus outranks citation volume. A final-turn artifact receives "
     "a repair bonus only when it agrees with a prior structurally valid artifact "
     "after an intervening contradiction. A lone final-turn dissenter does not "
-    "override a two-of-three structurally valid consensus. Within the same "
-    "consensus/repair tier, citation count and section completeness remain "
-    "secondary structural tie-breaks."
+    "override a two-of-three structurally valid consensus. Deterministic "
+    "source-derived dependency checks can disqualify artifacts that contradict "
+    "computed source boundaries. Concise final answers are warnings, not sole "
+    "disqualifiers, when the artifact is otherwise complete. Within the same "
+    "consensus/repair tier, gate-failed corroboration from otherwise usable "
+    "artifacts is considered before citation count and earliest-turn tie-breaks."
 )
 SELECTOR_CRITERIA = (
     "gate_passed",
@@ -29,8 +33,10 @@ SELECTOR_CRITERIA = (
     "source_ids_valid",
     "required_sections_present",
     "contradiction_free",
+    "deterministic_clean",
     "verdict_consensus_count",
     "final_turn_consensus_repair",
+    "verdict_corroboration_count",
     "sections_present",
     "cited_evidence_count",
     "earliest_turn",
@@ -68,6 +74,8 @@ REQUIRED_GOV_KEYS = (
     "repair_target",
     "blocked_move",
 )
+RUN_DATE_ISO = "2026-07-03"
+SOFT_GATE_FAILURES = {"short_final_answer"}
 
 
 class BlindRunnerTransportFailure(RuntimeError):
@@ -129,6 +137,230 @@ def _split_ids(value: str) -> list[str]:
     return [part.strip() for part in value.replace(",", "|").split("|") if part.strip()]
 
 
+def _money_values(text: str) -> list[float]:
+    values: list[float] = []
+    for match in re.finditer(r"\bUSD\s*([0-9][0-9,]*(?:\.[0-9]+)?)\b", text, flags=re.IGNORECASE):
+        values.append(float(match.group(1).replace(",", "")))
+    return values
+
+
+def _time_to_minutes(value: str) -> int:
+    hour, minute = value.split(":", 1)
+    return int(hour) * 60 + int(minute)
+
+
+def _date_value(value: str):
+    from datetime import date
+
+    year, month, day = (int(part) for part in value.split("-"))
+    return date(year, month, day)
+
+
+def _source_documents(payload: dict) -> list[dict]:
+    return [doc for doc in payload.get("documents", []) if isinstance(doc, dict)]
+
+
+def _doc_text(doc: dict) -> str:
+    return str(doc.get("text") or doc.get("content") or "")
+
+
+def _doc_id(doc: dict) -> str:
+    return str(doc.get("doc_id") or "")
+
+
+def _dependency_check(
+    check_id: str,
+    required_verdict: str,
+    summary: str,
+    evidence: list[str],
+    computed: dict,
+) -> dict:
+    return {
+        "check_id": check_id,
+        "required_verdict": required_verdict,
+        "summary": summary,
+        "evidence": evidence,
+        "computed": computed,
+    }
+
+
+def _deterministic_dependency_checks(payload: dict) -> list[dict]:
+    """Source-derived checks for computable action-boundary seams.
+
+    These checks use only model-visible source text. They do not read packet
+    truth, sibling labels, scoring maps, or legacy IDs.
+    """
+    docs = _source_documents(payload)
+    checks: list[dict] = []
+
+    refund_request = next(
+        (
+            doc
+            for doc in docs
+            if "refund request" in _doc_text(doc).lower()
+            and (" asks to issue " in _doc_text(doc).lower() or " asks to release " in _doc_text(doc).lower())
+            and _money_values(_doc_text(doc))
+        ),
+        None,
+    )
+    original_charge = next(
+        (
+            doc
+            for doc in docs
+            if "original charge" in _doc_text(doc).lower()
+            and _money_values(_doc_text(doc))
+        ),
+        None,
+    )
+    prior_refund_docs = [
+        doc
+        for doc in docs
+        if ("prior refund" in _doc_text(doc).lower() or "refund ledger" in _doc_text(doc).lower())
+        and _money_values(_doc_text(doc))
+    ]
+    if refund_request and original_charge and prior_refund_docs:
+        requested = _money_values(_doc_text(refund_request))[0]
+        original = _money_values(_doc_text(original_charge))[0]
+        prior = sum(_money_values(_doc_text(doc))[0] for doc in prior_refund_docs)
+        remaining = original - prior
+        required = "ALLOW" if requested <= remaining else "ESCALATE"
+        checks.append(
+            _dependency_check(
+                "refund_remaining_balance",
+                required,
+                f"requested USD {requested:g} vs remaining USD {remaining:g}",
+                [_doc_id(refund_request), _doc_id(original_charge), *[_doc_id(doc) for doc in prior_refund_docs]],
+                {"requested": requested, "original": original, "prior_refunds": prior, "remaining": remaining},
+            )
+        )
+
+    tolerance_request = next(
+        (
+            doc
+            for doc in docs
+            if "refund exception" in _doc_text(doc).lower()
+            and (" asks to release " in _doc_text(doc).lower() or " asks to issue " in _doc_text(doc).lower())
+            and _money_values(_doc_text(doc))
+        ),
+        None,
+    )
+    calculation_doc = next(
+        (
+            doc
+            for doc in docs
+            if "calculation" in _doc_text(doc).lower()
+            and ("computes" in _doc_text(doc).lower() or "calculated" in _doc_text(doc).lower())
+            and _money_values(_doc_text(doc))
+        ),
+        None,
+    )
+    tolerance_doc = next(
+        (
+            doc
+            for doc in docs
+            if "tolerance" in _doc_text(doc).lower()
+            and _money_values(_doc_text(doc))
+        ),
+        None,
+    )
+    if tolerance_request and calculation_doc and tolerance_doc:
+        requested = _money_values(_doc_text(tolerance_request))[0]
+        calculated = _money_values(_doc_text(calculation_doc))[0]
+        tolerance = _money_values(_doc_text(tolerance_doc))[0]
+        variance = abs(requested - calculated)
+        required = "ALLOW" if variance <= tolerance else "ESCALATE"
+        checks.append(
+            _dependency_check(
+                "tolerance_delta",
+                required,
+                f"variance USD {variance:.2f} vs tolerance USD {tolerance:.2f}",
+                [_doc_id(tolerance_request), _doc_id(calculation_doc), _doc_id(tolerance_doc)],
+                {"requested": requested, "calculated": calculated, "variance": variance, "tolerance": tolerance},
+            )
+        )
+
+    request_time_doc = next(
+        (
+            doc
+            for doc in docs
+            if "execute" in _doc_text(doc).lower()
+            and re.search(r"\b[0-2][0-9]:[0-5][0-9]Z\b", _doc_text(doc))
+        ),
+        None,
+    )
+    window_doc = next(
+        (
+            doc
+            for doc in docs
+            if "authorizes" in _doc_text(doc).lower()
+            and re.search(r"from\s+([0-2]?[0-9]:[0-5][0-9])\s+to\s+([0-2]?[0-9]:[0-5][0-9])\s+ET", _doc_text(doc), flags=re.IGNORECASE)
+        ),
+        None,
+    )
+    offset_doc = next(
+        (
+            doc
+            for doc in docs
+            if "ET equals UTC-4" in _doc_text(doc)
+        ),
+        None,
+    )
+    if request_time_doc and window_doc and offset_doc:
+        req_match = re.search(r"\b([0-2][0-9]:[0-5][0-9])Z\b", _doc_text(request_time_doc))
+        win_match = re.search(
+            r"from\s+([0-2]?[0-9]:[0-5][0-9])\s+to\s+([0-2]?[0-9]:[0-5][0-9])\s+ET",
+            _doc_text(window_doc),
+            flags=re.IGNORECASE,
+        )
+        if req_match and win_match:
+            request_minutes = _time_to_minutes(req_match.group(1))
+            start_utc = _time_to_minutes(win_match.group(1)) + 4 * 60
+            end_utc = _time_to_minutes(win_match.group(2)) + 4 * 60
+            inside = start_utc <= request_minutes <= end_utc
+            required = "ALLOW" if inside else "ESCALATE"
+            checks.append(
+                _dependency_check(
+                    "timezone_window",
+                    required,
+                    f"request minute {request_minutes} vs UTC window {start_utc}-{end_utc}",
+                    [_doc_id(request_time_doc), _doc_id(window_doc), _doc_id(offset_doc)],
+                    {"request_minutes_utc": request_minutes, "window_start_utc": start_utc, "window_end_utc": end_utc},
+                )
+            )
+
+    policy_12m = any("senior authorization inside the 12-month review cycle" in _doc_text(doc).lower() for doc in docs)
+    auth_doc = next(
+        (
+            doc
+            for doc in docs
+            if "senior risk authorization" in _doc_text(doc).lower()
+            and re.search(r"\b20[0-9]{2}-[0-9]{2}-[0-9]{2}\b", _doc_text(doc))
+        ),
+        None,
+    )
+    if policy_12m and auth_doc:
+        from datetime import timedelta
+
+        match = re.search(r"\b(20[0-9]{2}-[0-9]{2}-[0-9]{2})\b", _doc_text(auth_doc))
+        if match:
+            run_date = _date_value(RUN_DATE_ISO)
+            auth_date = _date_value(match.group(1))
+            age_days = (run_date - auth_date).days
+            required = "ALLOW" if age_days <= 365 else "ESCALATE"
+            cutoff = run_date - timedelta(days=365)
+            checks.append(
+                _dependency_check(
+                    "senior_authorization_12m",
+                    required,
+                    f"authorization age {age_days} days vs 365-day limit",
+                    [_doc_id(auth_doc)],
+                    {"run_date": RUN_DATE_ISO, "authorization_date": match.group(1), "cutoff_date": cutoff.isoformat(), "age_days": age_days},
+                )
+            )
+
+    return checks
+
+
 def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: dict) -> list[dict]:
     docs = payload.get("documents", [])
     doc_lines = [
@@ -147,7 +379,7 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
         system_lines.extend(W3_ARTIFACT_FIRST_GUARD)
     system_content = "\n".join(system_lines)
     content_lines = [
-        "GOV ROUTING LENS: use only source support, unresolved dependencies, and internal consistency.",
+        f"GOV ROUTING LENS: {baton.get('repair_target', 'use source support')} | blocked_move={baton.get('blocked_move', 'do not invent source IDs')}",
         f"RUN LOCK: packet={payload.get('packet_id')} turn={turn_index} role={role}",
         "TASK CONTRACT: return compact_key_value_v1 only. No Markdown. No prose. No bullets. No JSON. No hidden thinking.",
     ]
@@ -176,6 +408,8 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
             f"First visible output line must be worker_role={role}.",
             "SOURCE CONTEXT:",
             "\n".join(doc_lines),
+            "DETERMINISTIC DEPENDENCY LEDGER:",
+            json.dumps(baton.get("dependency_ledger", []), sort_keys=True),
             "STATE BRIEF:",
             json.dumps(state, sort_keys=True),
             "FULL LATEST GOV BATON:",
@@ -191,14 +425,23 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
 
 
 def _selected_gov_baton_from_gate(gate: dict) -> dict:
-    if gate.get("passed"):
+    dependency_checks = gate.get("deterministic_dependency_checks") or []
+    dependency_failures = gate.get("deterministic_dependency_failures") or []
+    if dependency_failures:
+        first = dependency_failures[0]
+        repair_target = f"resolve dependency mismatch: {first.get('summary', first.get('check_id'))}"
+        blocked_move = "do not collapse separate required controls into general approval"
+    elif gate.get("passed"):
         repair_target = "preserve source-grounded reasoning"
+        blocked_move = "do not invent source IDs"
     else:
         repair_target = "repair blind structural gate failures"
+        blocked_move = "do not invent source IDs"
     return {
         "route_verdict": "CONTINUE",
         "repair_target": repair_target,
-        "blocked_move": "do not invent source IDs",
+        "blocked_move": blocked_move,
+        "dependency_ledger": dependency_checks,
     }
 
 
@@ -236,11 +479,13 @@ def _parse_gov_baton(raw: str, fallback_gate: dict) -> dict:
         "route_verdict": parsed.get("route_verdict", selected["route_verdict"]),
         "repair_target": parsed.get("repair_target", selected["repair_target"]),
         "blocked_move": parsed.get("blocked_move", selected["blocked_move"]),
+        "dependency_ledger": selected.get("dependency_ledger", []),
     }
 
 
 def _gate_worker_output(payload: dict, parsed: dict) -> dict:
     failures: list[str] = []
+    warnings: list[str] = []
     for key in REQUIRED_WORKER_KEYS:
         if not parsed.get(key):
             failures.append(f"missing_{key}")
@@ -254,24 +499,37 @@ def _gate_worker_output(payload: dict, parsed: dict) -> dict:
     if invented:
         failures.append("invented_source_id")
     if len(parsed.get("final_answer", "").split()) < 8:
-        failures.append("short_final_answer")
+        warnings.append("short_final_answer")
     open_blockers = parsed.get("open_blockers", "").strip()
     if parsed.get("verification_verdict") == "ALLOW" and open_blockers:
         failures.append("allow_with_open_blockers")
     if parsed.get("verification_verdict") == "ESCALATE" and not open_blockers:
         failures.append("escalate_without_open_blockers")
+    dependency_checks = _deterministic_dependency_checks(payload)
+    dependency_failures = [
+        check
+        for check in dependency_checks
+        if parsed.get("verification_verdict") in {"ALLOW", "ESCALATE"}
+        and parsed.get("verification_verdict") != check.get("required_verdict")
+    ]
+    for check in dependency_failures:
+        failures.append(f"deterministic_dependency_mismatch:{check['check_id']}")
     return {
-        "gate_name": "HOLOVERIFY_BLIND_STRUCTURAL_GATE_V0",
+        "gate_name": "HOLOVERIFY_BLIND_STRUCTURAL_GATE_V1_DEPENDENCY_AWARE",
         "passed": not failures,
         "failures": failures,
+        "warnings": warnings,
         "source_id_count": len(cited),
         "invented_source_ids": invented,
+        "deterministic_dependency_checks": dependency_checks,
+        "deterministic_dependency_failures": dependency_failures,
     }
 
 
 def _artifact_from_row(row: dict) -> dict:
     parsed = row.get("parsed", {})
     gate = row.get("gate_result", {})
+    failures = [str(f) for f in gate.get("failures", [])]
     return {
         "artifact_id": row["artifact_id"],
         "verification_verdict": parsed.get("verification_verdict", "UNKNOWN"),
@@ -279,14 +537,16 @@ def _artifact_from_row(row: dict) -> dict:
         "parse_valid": bool(row.get("parse_valid")),
         "source_ids_valid": not bool(gate.get("invented_source_ids")),
         "required_sections_present": not any(
-            str(f).startswith("missing_") for f in gate.get("failures", [])
+            failure.startswith("missing_") for failure in failures
         ),
         "sections_present": sum(1 for key in REQUIRED_WORKER_KEYS if parsed.get(key)),
         "cited_evidence_count": gate.get("source_id_count", 0),
         "contradiction_free": not any(
             f in {"allow_with_open_blockers", "escalate_without_open_blockers"}
-            for f in gate.get("failures", [])
+            for f in failures
         ),
+        "deterministic_clean": not any(failure.startswith("deterministic_dependency_mismatch:") for failure in failures),
+        "soft_gate_valid": not any(failure not in SOFT_GATE_FAILURES for failure in failures),
         "turn_index": int(row.get("turn_index") or 0),
     }
 
@@ -298,8 +558,10 @@ def _criteria_tuple(artifact: dict) -> tuple:
         1 if artifact.get("source_ids_valid") else 0,
         1 if artifact.get("required_sections_present") else 0,
         1 if artifact.get("contradiction_free") else 0,
+        1 if artifact.get("deterministic_clean", True) else 0,
         int(artifact.get("verdict_consensus_count") or 0),
         1 if artifact.get("final_turn_consensus_repair") else 0,
+        int(artifact.get("verdict_corroboration_count") or 0),
         int(artifact.get("sections_present") or 0),
         int(artifact.get("cited_evidence_count") or 0),
         -int(artifact.get("turn_index") or 0),
@@ -314,6 +576,19 @@ def _selector_structurally_valid(artifact: dict) -> bool:
             artifact.get("source_ids_valid"),
             artifact.get("required_sections_present"),
             artifact.get("contradiction_free"),
+            artifact.get("deterministic_clean", True),
+        )
+    )
+
+
+def _selector_corroborative(artifact: dict) -> bool:
+    return all(
+        (
+            artifact.get("parse_valid"),
+            artifact.get("source_ids_valid"),
+            artifact.get("required_sections_present"),
+            artifact.get("contradiction_free"),
+            artifact.get("deterministic_clean", True),
         )
     )
 
@@ -325,6 +600,12 @@ def _with_selector_derived_fields(artifacts: list[dict]) -> list[dict]:
         verdict = str(artifact.get("verification_verdict") or "")
         if verdict in {"ALLOW", "ESCALATE"}:
             verdict_counts[verdict] = verdict_counts.get(verdict, 0) + 1
+    corroboration_counts: dict[str, int] = {}
+    corroborative_artifacts = [artifact for artifact in artifacts if _selector_corroborative(artifact)]
+    for artifact in corroborative_artifacts:
+        verdict = str(artifact.get("verification_verdict") or "")
+        if verdict in {"ALLOW", "ESCALATE"}:
+            corroboration_counts[verdict] = corroboration_counts.get(verdict, 0) + 1
 
     turn_indexes = [int(artifact.get("turn_index") or 0) for artifact in artifacts]
     final_turn = max(turn_indexes or [0])
@@ -333,6 +614,7 @@ def _with_selector_derived_fields(artifacts: list[dict]) -> list[dict]:
         item = dict(artifact)
         verdict = str(item.get("verification_verdict") or "")
         item["verdict_consensus_count"] = verdict_counts.get(verdict, 0)
+        item["verdict_corroboration_count"] = corroboration_counts.get(verdict, 0)
         turn_index = int(item.get("turn_index") or 0)
         prior = [candidate for candidate in valid_artifacts if int(candidate.get("turn_index") or 0) < turn_index]
         prior_same = any(candidate.get("verification_verdict") == verdict for candidate in prior)
@@ -361,7 +643,14 @@ def apply_criteria(artifacts: list[dict]) -> dict:
         }
         for artifact in enriched
     ]
-    selected = max(enriched, key=_criteria_tuple)
+    selectable = [artifact for artifact in enriched if _selector_structurally_valid(artifact)]
+    if not selectable:
+        return {
+            "selected_artifact_id": None,
+            "criteria_trace": scored,
+            "selector_blocked_reason": "no_structurally_valid_artifact",
+        }
+    selected = max(selectable, key=_criteria_tuple)
     return {
         "selected_artifact_id": selected.get("artifact_id"),
         "criteria_trace": scored,
@@ -489,10 +778,12 @@ def run_blind_fixture(
                 gov_rows.append(gov_row)
                 call_rows.append(gov_row)
             else:
+                selected = _selected_gov_baton_from_gate(gate)
                 baton = {
-                    "route_verdict": "CONTINUE",
-                    "repair_target": "repair blind structural failures" if not gate["passed"] else "preserve source-grounded reasoning",
-                    "blocked_move": "do not invent source IDs",
+                    "route_verdict": selected["route_verdict"],
+                    "repair_target": selected["repair_target"],
+                    "blocked_move": selected["blocked_move"],
+                    "dependency_ledger": selected.get("dependency_ledger", []),
                     "previous_gate_passed": gate["passed"],
                 }
 

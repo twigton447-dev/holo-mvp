@@ -1,0 +1,98 @@
+{
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_HOLO_RESCUE_AUTOPSY_V1",
+  "created_at_utc": "2026-07-03T21:30:00Z",
+  "scope": "no-provider post-run autopsy; no reruns, no judges, no solo, no public claims",
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_holo_rescue_2026_07_03/live_runs/run_20260703T210421Z",
+  "runtime_summary": {
+    "provider_calls_expected": 130,
+    "provider_calls_observed": 130,
+    "provider_failures": 0,
+    "trace_frozen_before_scoring": true,
+    "packets_correct": 19,
+    "packets_total": 26,
+    "pairs_both_siblings_correct": 7,
+    "pairs_total": 13,
+    "tokens_total": 105302
+  },
+  "failed_packets": [
+    {
+      "pair_id": "HVSF-FACTORY-009",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "final_verdict": "ALLOW",
+      "worker_pattern": "W1 ESCALATE gate-fail; W2 ALLOW pass; W3 ESCALATE pass",
+      "root_cause": "correct answer present but selector chose W2 by secondary tie-break after W1 gate exclusion"
+    },
+    {
+      "pair_id": "HVSF-FACTORY-010",
+      "sibling": "A",
+      "truth": "ALLOW",
+      "final_verdict": "ESCALATE",
+      "worker_pattern": "W1 ALLOW gate-fail; W2 ESCALATE pass; W3 ALLOW pass",
+      "root_cause": "correct answer present but selector chose W2 by earlier-turn tie-break after W1 gate exclusion"
+    },
+    {
+      "pair_id": "HVSF-FACTORY-010",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "final_verdict": "ALLOW",
+      "worker_pattern": "W1 ESCALATE gate-fail; W2 ALLOW pass; W3 ESCALATE pass",
+      "root_cause": "correct answer present but selector chose W2 by earlier-turn tie-break after W1 gate exclusion"
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-005",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "final_verdict": "ALLOW",
+      "worker_pattern": "W1 ESCALATE gate-fail; W2 ALLOW pass; W3 ESCALATE pass",
+      "root_cause": "correct answer present but selector chose W2 by earlier-turn tie-break after W1 gate exclusion"
+    },
+    {
+      "pair_id": "HVSF-FACTORY3-008",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "final_verdict": "ALLOW",
+      "worker_pattern": "W1 ALLOW gate-fail; W2 ALLOW pass; W3 ALLOW pass",
+      "root_cause": "all workers missed stale senior authorization dependency"
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-008",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "final_verdict": "ALLOW",
+      "worker_pattern": "W1 ALLOW pass; W2 ALLOW pass; W3 ALLOW pass",
+      "root_cause": "all workers missed stale senior authorization dependency"
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-010",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "final_verdict": "ALLOW",
+      "worker_pattern": "W1 ALLOW pass; W2 ALLOW pass; W3 ALLOW pass",
+      "root_cause": "all workers missed stale senior authorization dependency"
+    }
+  ],
+  "root_causes": [
+    "Gov in this lane is a compact structural baton, not full content-aware HoloGov actuator",
+    "short_final_answer gate disqualified concise but correct W1 artifacts",
+    "selector tie-breaks can pick wrong W2 when W1 is gate-failed and W2/W3 disagree",
+    "no deterministic seam calculators for refund balance, tolerance delta, UTC/local window, or 12-month authorization freshness",
+    "workers collapsed multi-control high-risk authorization into general approval sufficiency"
+  ],
+  "recommended_next_patches_no_provider_first": [
+    "relax short_final_answer as sole gate failure when required key fields are present",
+    "add selector disagreement guard for gate-failed corroboration",
+    "add Gov dependency ledger for monetary, timing, authorization freshness, and binding controls",
+    "add deterministic calculators for computable action-boundary seams",
+    "pre-register whether the next run validates selector, Gov actuator, deterministic gate, or fresh rescue"
+  ],
+  "claim_boundary": {
+    "allowed": "The run completed cleanly and produced mixed directional rescue evidence.",
+    "not_allowed": [
+      "clean Holo rescue claim for all 13 pairs",
+      "public benchmark evidence",
+      "error-rate denominator",
+      "general superiority claim"
+    ]
+  }
+}

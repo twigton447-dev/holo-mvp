@@ -91,22 +91,39 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
         for doc in docs
         if isinstance(doc, dict)
     ]
+    role = WORKER_ROLES[turn_index - 1]
+    system_lines = [
+        "SYSTEM ROLE: HoloVerify blind worker.",
+        "OUTPUT FIREWALL: emit compact_key_value_v1 only.",
+        "Do not emit hidden thinking, analysis, markdown, JSON, bullets, or prose.",
+        f"The first output characters must be exactly: worker_role={role}",
+    ]
+    if role == "W3":
+        system_lines.extend(
+            [
+                "FINAL COMPILER STRICT MODE.",
+                "Do not explain your reasoning before the fields.",
+                "Keep each field short enough to complete before the output limit.",
+                "Your entire response must be the required key=value lines and nothing else.",
+            ]
+        )
+    system_content = "\n".join(system_lines)
     content = "\n".join(
         [
-            "SYSTEM ROLE: HoloVerify blind worker.",
             "GOV ROUTING LENS: use only source support, unresolved dependencies, and internal consistency.",
-            f"RUN LOCK: packet={payload.get('packet_id')} turn={turn_index} role={WORKER_ROLES[turn_index - 1]}",
-            "TASK CONTRACT: return compact_key_value_v1 only. No Markdown. No prose. No bullets. No JSON.",
+            f"RUN LOCK: packet={payload.get('packet_id')} turn={turn_index} role={role}",
+            "TASK CONTRACT: return compact_key_value_v1 only. No Markdown. No prose. No bullets. No JSON. No hidden thinking.",
             "REQUIRED OUTPUT LINES EXACTLY:",
-            f"worker_role={WORKER_ROLES[turn_index - 1]}",
+            f"worker_role={role}",
             "verification_verdict=<ALLOW or ESCALATE>",
             "binding_class=<SOURCE_BOUNDARY_CLOSED or SOURCE_BOUNDARY_OPEN>",
-            "action_boundary=<short source-grounded boundary statement>",
+            "action_boundary=<short source-grounded boundary statement; max 18 words>",
             "cited_evidence=<provided source IDs separated by |>",
-            "open_blockers=<empty if ALLOW; blocker phrase if ESCALATE>",
-            "final_answer=<one sentence using ALLOW or ESCALATE>",
+            "open_blockers=<empty if ALLOW; blocker phrase if ESCALATE; max 12 words>",
+            "final_answer=<one sentence using ALLOW or ESCALATE; max 24 words>",
             "Do not use alternate keys such as decision, boundary_closed, or action_boundary_closed.",
             "Do not omit verification_verdict.",
+            f"First visible output line must be worker_role={role}.",
             "SOURCE CONTEXT:",
             "\n".join(doc_lines),
             "STATE BRIEF:",
@@ -116,7 +133,10 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
             "CURRENT TURN COMMAND: decide whether the visible source support closes the action boundary.",
         ]
     )
-    return [{"role": "user", "content": content}]
+    return [
+        {"role": "system", "content": system_content},
+        {"role": "user", "content": content},
+    ]
 
 
 def _selected_gov_baton_from_gate(gate: dict) -> dict:

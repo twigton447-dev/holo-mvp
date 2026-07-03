@@ -219,6 +219,9 @@ def validate_live_output_contract(slot: str, response: dict[str, Any]) -> None:
 
     parsed = parse_key_value(text)
     if slot.startswith("W"):
+        expected_first_line = f"worker_role={slot}"
+        if not text.lstrip().startswith(expected_first_line):
+            raise BLIND.BlindRunnerContentFailure(f"{slot}_worker_contract_bad_prefix")
         required = (
             "worker_role",
             "verification_verdict",
@@ -230,6 +233,8 @@ def validate_live_output_contract(slot: str, response: dict[str, Any]) -> None:
         missing = [key for key in required if not parsed.get(key)]
         if missing:
             raise BLIND.BlindRunnerContentFailure(f"{slot}_worker_contract_missing:{','.join(missing)}")
+        if parsed.get("worker_role") != slot:
+            raise BLIND.BlindRunnerContentFailure(f"{slot}_worker_contract_bad_role:{parsed.get('worker_role')}")
         if parsed.get("verification_verdict") not in {"ALLOW", "ESCALATE"}:
             raise BLIND.BlindRunnerContentFailure(f"{slot}_worker_contract_bad_verdict:{parsed.get('verification_verdict')}")
         return
@@ -448,7 +453,7 @@ def make_mock_transport() -> Any:
         slot = expected_slot_for_index(call_index["value"])
         call_index["value"] += 1
         assert_message_matches_slot(messages, slot)
-        content = messages[0].get("content", "")
+        content = "\n".join(message.get("content", "") for message in messages)
         if slot.startswith("G"):
             return "\n".join(
                 [

@@ -150,11 +150,55 @@ def test_slot_order_enforced():
 
 def test_worker_contract_failure_is_fail_closed():
     script = load_script()
-    with pytest.raises(RuntimeError, match="W1_worker_contract_missing"):
+    with pytest.raises(RuntimeError, match="W1_worker_contract_bad_prefix"):
         script.validate_live_output_contract(
             "W1",
             {
                 "text": "boundary_closed=false\nsource=SRC-1\nreason=missing approval",
+                "finish_reason": "stop",
+            },
+        )
+
+
+def test_worker_output_must_start_with_worker_role():
+    script = load_script()
+    with pytest.raises(script.BLIND.BlindRunnerContentFailure, match="W3_worker_contract_bad_prefix"):
+        script.validate_live_output_contract(
+            "W3",
+            {
+                "text": "\n".join(
+                    [
+                        "Here is the answer:",
+                        "worker_role=W3",
+                        "verification_verdict=ALLOW",
+                        "binding_class=SOURCE_BOUNDARY_CLOSED",
+                        "action_boundary=closed by current source",
+                        "cited_evidence=SRC-1",
+                        "final_answer=ALLOW because the cited source closes the current action boundary.",
+                    ]
+                ),
+                "finish_reason": "stop",
+            },
+        )
+
+
+def test_worker_output_role_must_match_slot():
+    script = load_script()
+    with pytest.raises(script.BLIND.BlindRunnerContentFailure, match="W3_worker_contract_bad_role:W2"):
+        script.validate_live_output_contract(
+            "W3",
+            {
+                "text": "\n".join(
+                    [
+                        "worker_role=W3",
+                        "worker_role=W2",
+                        "verification_verdict=ALLOW",
+                        "binding_class=SOURCE_BOUNDARY_CLOSED",
+                        "action_boundary=closed by current source",
+                        "cited_evidence=SRC-1",
+                        "final_answer=ALLOW because the cited source closes the current action boundary.",
+                    ]
+                ),
                 "finish_reason": "stop",
             },
         )
@@ -223,6 +267,24 @@ def test_gov_prompt_is_truth_free_copy_contract():
     assert "ALLOW" not in joined
     assert "ESCALATE" not in joined
     assert "packet_truth" not in joined
+
+
+def test_w3_prompt_uses_final_compiler_output_firewall():
+    script = load_script()
+    payload = {"packet_id": "BLIND-TEST", "documents": [{"doc_id": "SRC-1", "text": "fixture"}]}
+    messages = script.BLIND._build_worker_messages(
+        payload,
+        3,
+        {"turns_completed": []},
+        {"route_verdict": "CONTINUE", "repair_target": "preserve", "blocked_move": "do not invent"},
+    )
+    joined = "\n".join(message["content"] for message in messages)
+
+    assert messages[0]["role"] == "system"
+    assert "FINAL COMPILER STRICT MODE" in joined
+    assert "The first output characters must be exactly: worker_role=W3" in joined
+    assert "Do not emit hidden thinking" in joined
+    assert "First visible output line must be worker_role=W3" in joined
 
 
 def test_valid_contract_passes():

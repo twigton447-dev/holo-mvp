@@ -1,0 +1,39 @@
+{
+  "classification": "BLIND_CANARY_W3_FINAL_COMPILER_CONTRACT_PATCH",
+  "date": "2026-07-03",
+  "status": "NO_PROVIDER_PATCH_READY",
+  "trigger_run": "run_20260703T004112Z",
+  "trigger_failure": {
+    "slot": "W3",
+    "model": "minimax/MiniMax-M2.5-highspeed",
+    "error": "W3_empty_text",
+    "finish_reason": "length",
+    "interpretation": "content_contract_truncation_failure_not_verdict_failure"
+  },
+  "changes": [
+    "worker prompts include system-level output firewall",
+    "worker output first characters must be worker_role=<slot>",
+    "W3 receives FINAL COMPILER STRICT MODE",
+    "W3 is instructed not to explain reasoning before fields",
+    "W3 field lengths are bounded shorter",
+    "live validation rejects bad worker prefix",
+    "live validation rejects parsed worker_role mismatch"
+  ],
+  "non_changes": [
+    "no truth metadata added",
+    "no parser permissiveness added",
+    "no malformed output repair added",
+    "no content retry added",
+    "finish_reason_length_still_fails_closed",
+    "empty_visible_text_still_fails_closed",
+    "scoring_post_trace_freeze_only"
+  ],
+  "validation": {
+    "py_compile": "PASS",
+    "wrapper_tests": "19 passed",
+    "blind_lane_suite_plus_wrapper": "38 passed, 12 skipped",
+    "provider_calls": 0,
+    "judge_calls": 0
+  },
+  "next_action": "commit_patch_then_rerun_failed_scope_conservatively"
+}

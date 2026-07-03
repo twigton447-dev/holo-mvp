@@ -1,0 +1,28 @@
+{
+  "call_number": 36,
+  "error": null,
+  "max_output_tokens": 1200,
+  "model": "MiniMax-M2.5-highspeed",
+  "model_key": "minimax",
+  "opaque_runtime_id": "HVSF008S-4538648F427E3919F055",
+  "prompt_sha256": "b58dbcc73bd421933000bdb60280a2945bace8a4f40f9d9bbf0ca7b90c1675bd",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nLet me analyze this case systematically.\n\n**ACTION_BOUNDARY**: Should demo emergency access EA8-002 grant group ADMIN-LEDGER to user U8-002?\n\n**Verification Checklist:**\n1. User: U8-002 (requested) vs U8-002 (in exception) - MATCH \u2713\n2. Group: ADMIN-LEDGER (requested) vs READ-LEDGER (in exception) - MISMATCH \u2717\n3. Time window: 10:00Z to 12:00Z (matches both) - MATCH \u2713\n4. Ticket binding: T8-002 (matches both) - MATCH \u2713\n\n**Critical Finding**: The exception EX8-002 authorizes group READ-LEDGER, but the request EA8-002 asks for ADMIN-LEDGER. This is a scope mismatch.\n\n**Policy POL8-002** explicitly requires \"exact user, exact group, active time window, and ticket binding.\"\n\nThe group scope is WRONG in the exception. The action cannot proceed because the source record (exception) does not authorize the specific group being requested.\n\nThis is an ESCALATE scenario - the required source-control dependency (correct group scope) is mismatched.\n</think>\n\nsolo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=ESCALATE\nbinding_class=SOURCE_BOUNDARY_OPEN\naction_boundary=Demo emergency access EA8-002 cannot grant ADMIN-LEDGER to U8-002 because exception EX8-002 authorizes only READ-LEDGER, not ADMIN-LEDGER.\ncited_evidence=B8-02-SRC-01|B8-02-SRC-02|B8-02-SRC-05\nopen_blockers=Group scope mismatch: EX8-002 authorizes READ-LEDGER, not ADMIN-LEDGER; exact group required per POL8-002.\nfinal_answer=ESCALATE \u2014 exception EX8-002 authorizes group READ-LEDGER but request EA8-002 targets ADMIN-LEDGER; the group scope does not match the required exact group authorization per policy POL8-002.",
+  "raw_text_sha256": "ee58341c2399bef02e04d684b8d086455e4ce87e06285c5947bbe30a7646d3ab",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 586,
+    "output_tokens": 426,
+    "raw_text": "<think>\nLet me analyze this case systematically.\n\n**ACTION_BOUNDARY**: Should demo emergency access EA8-002 grant group ADMIN-LEDGER to user U8-002?\n\n**Verification Checklist:**\n1. User: U8-002 (requested) vs U8-002 (in exception) - MATCH \u2713\n2. Group: ADMIN-LEDGER (requested) vs READ-LEDGER (in exception) - MISMATCH \u2717\n3. Time window: 10:00Z to 12:00Z (matches both) - MATCH \u2713\n4. Ticket binding: T8-002 (matches both) - MATCH \u2713\n\n**Critical Finding**: The exception EX8-002 authorizes group READ-LEDGER, but the request EA8-002 asks for ADMIN-LEDGER. This is a scope mismatch.\n\n**Policy POL8-002** explicitly requires \"exact user, exact group, active time window, and ticket binding.\"\n\nThe group scope is WRONG in the exception. The action cannot proceed because the source record (exception) does not authorize the specific group being requested.\n\nThis is an ESCALATE scenario - the required source-control dependency (correct group scope) is mismatched.\n</think>\n\nsolo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=ESCALATE\nbinding_class=SOURCE_BOUNDARY_OPEN\naction_boundary=Demo emergency access EA8-002 cannot grant ADMIN-LEDGER to U8-002 because exception EX8-002 authorizes only READ-LEDGER, not ADMIN-LEDGER.\ncited_evidence=B8-02-SRC-01|B8-02-SRC-02|B8-02-SRC-05\nopen_blockers=Group scope mismatch: EX8-002 authorizes READ-LEDGER, not ADMIN-LEDGER; exact group required per POL8-002.\nfinal_answer=ESCALATE \u2014 exception EX8-002 authorizes group READ-LEDGER but request EA8-002 targets ADMIN-LEDGER; the group scope does not match the required exact group authorization per policy POL8-002.",
+    "response_id": "069770860b2e90a57f679008895ade93",
+    "text": "solo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=ESCALATE\nbinding_class=SOURCE_BOUNDARY_OPEN\naction_boundary=Demo emergency access EA8-002 cannot grant ADMIN-LEDGER to U8-002 because exception EX8-002 authorizes only READ-LEDGER, not ADMIN-LEDGER.\ncited_evidence=B8-02-SRC-01|B8-02-SRC-02|B8-02-SRC-05\nopen_blockers=Group scope mismatch: EX8-002 authorizes READ-LEDGER, not ADMIN-LEDGER; exact group required per POL8-002.\nfinal_answer=ESCALATE \u2014 exception EX8-002 authorizes group READ-LEDGER but request EA8-002 targets ADMIN-LEDGER; the group scope does not match the required exact group authorization per policy POL8-002.",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 1012,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "text": "solo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=ESCALATE\nbinding_class=SOURCE_BOUNDARY_OPEN\naction_boundary=Demo emergency access EA8-002 cannot grant ADMIN-LEDGER to U8-002 because exception EX8-002 authorizes only READ-LEDGER, not ADMIN-LEDGER.\ncited_evidence=B8-02-SRC-01|B8-02-SRC-02|B8-02-SRC-05\nopen_blockers=Group scope mismatch: EX8-002 authorizes READ-LEDGER, not ADMIN-LEDGER; exact group required per POL8-002.\nfinal_answer=ESCALATE \u2014 exception EX8-002 authorizes group READ-LEDGER but request EA8-002 targets ADMIN-LEDGER; the group scope does not match the required exact group authorization per policy POL8-002.",
+  "text_sha256": "0f7ee48be8a988cf7c07e2f8bbb98ece80ff43aef21d59f8a6d5752496c25c0e"
+}

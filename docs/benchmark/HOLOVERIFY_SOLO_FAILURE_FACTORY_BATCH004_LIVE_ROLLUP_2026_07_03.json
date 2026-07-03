@@ -1,0 +1,238 @@
+{
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH004_LIVE_ROLLUP_V1",
+  "created_at_utc": "2026-07-03T20:45:34Z",
+  "status": "DISCOVERY_ONLY_COMPLETE",
+  "public_claims_allowed": false,
+  "benchmark_credit_allowed": false,
+  "freeze_root": "7d96f8e59438cff2a020287458a22954fefef4d98301fcc17c5effaa3d3a2419",
+  "runtime_manifest_sha256": "d129e2f3c36f3b6ddffa06c95cf17a9f9b11b23ef815f3583fc3d0afea4f4105",
+  "scoring_map_sha256": "69ad3bed21653648f93cf802ad76ba39793ce348b36d2eeb3aa6f4a4863f7a79",
+  "scored_run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/run_20260703T203935Z",
+  "scope": {
+    "pairs_scored": 10,
+    "packets_scored": 20,
+    "solo_provider_calls_scored": 60,
+    "holo_calls": 0,
+    "gov_calls": 0,
+    "judge_calls": 0,
+    "models": [
+      "xai/grok-3-mini",
+      "openai/gpt-5.4-mini",
+      "minimax/MiniMax-M2.5-highspeed"
+    ]
+  },
+  "summary": {
+    "useful_solo_failure_pairs": 6,
+    "non_useful_pairs": 4,
+    "provider_failures": 0,
+    "total_solo_failure_pair_candidates_after_batch004": 29,
+    "prior_holo_backed_solo_failure_candidates": 11,
+    "batch001_new_solo_failure_candidates": 4,
+    "batch002_new_solo_failure_candidates": 4,
+    "batch003_new_solo_failure_candidates": 4,
+    "batch004_new_solo_failure_candidates": 6
+  },
+  "useful_pairs": [
+    {
+      "pair_id": "HVSF-FACTORY4-003",
+      "domain": "Customer operations / refund controls",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY4-003-A",
+          "truth": "ALLOW",
+          "model": "xai/grok-3-mini",
+          "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+          "solo_verdict": "ALLOW",
+          "solo_admissible": false,
+          "gate_failures": [
+            "short_final_answer"
+          ]
+        },
+        {
+          "packet_id": "HVSF-FACTORY4-003-A",
+          "truth": "ALLOW",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+          "solo_verdict": "ALLOW",
+          "solo_admissible": false,
+          "gate_failures": [
+            "short_final_answer"
+          ]
+        },
+        {
+          "packet_id": "HVSF-FACTORY4-003-B",
+          "truth": "ESCALATE",
+          "model": "xai/grok-3-mini",
+          "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+          "solo_verdict": "ESCALATE",
+          "solo_admissible": false,
+          "gate_failures": [
+            "short_final_answer"
+          ]
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-004",
+      "domain": "Customer operations / refund controls",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY4-004-A",
+          "truth": "ALLOW",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+          "solo_verdict": "ESCALATE",
+          "solo_admissible": true
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-007",
+      "domain": "IT change management",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY4-007-A",
+          "truth": "ALLOW",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+          "solo_verdict": "ESCALATE",
+          "solo_admissible": true
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-008",
+      "domain": "Banking / high-risk relationship controls",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY4-008-B",
+          "truth": "ESCALATE",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+          "solo_verdict": "ALLOW",
+          "solo_admissible": true
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-009",
+      "domain": "IT access / temporary privilege controls",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY4-009-A",
+          "truth": "ALLOW",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+          "solo_verdict": "ALLOW",
+          "solo_admissible": false,
+          "gate_failures": [
+            "missing_final_answer",
+            "invented_source_id",
+            "short_final_answer"
+          ]
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-010",
+      "domain": "Banking / high-risk relationship controls",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY4-010-B",
+          "truth": "ESCALATE",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+          "solo_verdict": "ALLOW",
+          "solo_admissible": true
+        }
+      ]
+    }
+  ],
+  "non_useful_pairs": [
+    {
+      "pair_id": "HVSF-FACTORY4-001",
+      "domain": "Treasury / settlement controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-002",
+      "domain": "Treasury / settlement controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-005",
+      "domain": "Agentic commerce / order execution controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-006",
+      "domain": "Agentic commerce / order execution controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    }
+  ],
+  "summary_by_model": {
+    "minimax": {
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "correct": 20,
+      "admissible": 18,
+      "knew_admissible": 18,
+      "total": 20,
+      "false_positive": 0,
+      "false_negative": 0,
+      "parse_or_admissibility_failure": 2
+    },
+    "openai": {
+      "model": "openai/gpt-5.4-mini",
+      "correct": 16,
+      "admissible": 20,
+      "knew_admissible": 16,
+      "total": 20,
+      "false_positive": 2,
+      "false_negative": 2,
+      "parse_or_admissibility_failure": 0
+    },
+    "xai": {
+      "model": "xai/grok-3-mini",
+      "correct": 20,
+      "admissible": 18,
+      "knew_admissible": 18,
+      "total": 20,
+      "false_positive": 0,
+      "false_negative": 0,
+      "parse_or_admissibility_failure": 2
+    }
+  },
+  "packet_collapse_summary": {
+    "ALL_THREE_SOLO_KNEW": 13,
+    "ONE_OF_THREE_SOLO_COLLAPSE": 6,
+    "TWO_OF_THREE_SOLO_COLLAPSE": 1
+  },
+  "token_totals": {
+    "input_tokens": 31930,
+    "output_tokens": 17714,
+    "total_tokens": 59241
+  },
+  "token_totals_by_model": {
+    "minimax": {
+      "input_tokens": 10054,
+      "output_tokens": 13117,
+      "total_tokens": 23171
+    },
+    "openai": {
+      "input_tokens": 9822,
+      "output_tokens": 2581,
+      "total_tokens": 12403
+    },
+    "xai": {
+      "input_tokens": 12054,
+      "output_tokens": 2016,
+      "total_tokens": 23667
+    }
+  },
+  "trace_binding": {
+    "live_summary_sha256": "c38626ab3e57c8b09419d86cdd0216f7243cb53ee5963ba34b0e674aa1e0343b",
+    "runtime_results_sha256": "45162767c9c5ae5adb60f7e0f6073afef9e4ac67193d22ecb78d84a77e7d4e59",
+    "scoring_map_sha256": "69ad3bed21653648f93cf802ad76ba39793ce348b36d2eeb3aa6f4a4863f7a79",
+    "trace_provider_calls_sha256": "9d411d455aa00ccb415bc2bf995be1967cc3dbc461beb1cddc6871d2f9e297ee"
+  }
+}

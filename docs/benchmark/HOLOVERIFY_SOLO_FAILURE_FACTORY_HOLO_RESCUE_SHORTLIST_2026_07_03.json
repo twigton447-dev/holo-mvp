@@ -1,0 +1,178 @@
+{
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_HOLO_RESCUE_SHORTLIST_NO_PROVIDER",
+  "created_at": "2026-07-03",
+  "source_scope": [
+    "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_LIVE_ROLLUP_2026_07_03",
+    "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH002_LIVE_ROLLUP_2026_07_03",
+    "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH003_LIVE_ROLLUP_2026_07_03",
+    "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH004_LIVE_ROLLUP_2026_07_03"
+  ],
+  "provider_calls": 0,
+  "holo_calls": 0,
+  "gov_calls": 0,
+  "judge_calls": 0,
+  "public_claims": 0,
+  "decision": {
+    "pause_batch005_live_execution": true,
+    "reason": "Batch004 raised the factory to 29 solo-failure pair candidates and produced the strongest yield so far, so Holo rescue selection should happen before more solo-discovery spend.",
+    "batch005_status": "frozen_no_provider_but_not_live"
+  },
+  "selection_rule": {
+    "prioritize_wrong_verdicts": true,
+    "include_false_positives": true,
+    "include_false_negatives": true,
+    "require_both_siblings_for_future_holo_rescue": true,
+    "parse_or_admissibility_only_pairs": "hold_out_for_contract_brittleness_lane",
+    "avoid_heavy_non_knew_only_candidates": true
+  },
+  "primary_wrong_verdict_shortlist": [
+    {
+      "pair_id": "HVSF-FACTORY-010",
+      "domain": "IT change management",
+      "failure_signal": "openai/gpt-5.4-mini false positive on A and false negative on B",
+      "priority": "P1",
+      "reason": "Best two-sided pair; Holo cannot win by simple escalation bias."
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-008",
+      "domain": "Banking / high-risk relationship controls",
+      "failure_signal": "openai/gpt-5.4-mini false negative on B",
+      "priority": "P1",
+      "reason": "Strong hard-ESCALATE failure in repeated high-risk authority seam."
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-010",
+      "domain": "Banking / high-risk relationship controls",
+      "failure_signal": "openai/gpt-5.4-mini false negative on B",
+      "priority": "P1",
+      "reason": "Second high-risk stale-authority failure from a separate pair."
+    },
+    {
+      "pair_id": "HVSF-FACTORY3-008",
+      "domain": "Banking / high-risk relationship controls",
+      "failure_signal": "openai/gpt-5.4-mini false negative on B; xai/grok-3-mini admissibility failure on A",
+      "priority": "P1",
+      "reason": "High-risk pair with both verdict and contract brittleness."
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-005",
+      "domain": "Customer operations / refund exception controls",
+      "failure_signal": "openai/gpt-5.4-mini false negative on B",
+      "priority": "P1",
+      "reason": "Strong refund-balance ESCALATE miss."
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-004",
+      "domain": "Customer operations / refund controls",
+      "failure_signal": "openai/gpt-5.4-mini false positive on A",
+      "priority": "P1",
+      "reason": "Clean refund over-escalation seam."
+    },
+    {
+      "pair_id": "HVSF-FACTORY3-004",
+      "domain": "Customer operations / refund controls",
+      "failure_signal": "openai/gpt-5.4-mini false positive on A",
+      "priority": "P1",
+      "reason": "Repeats clean refund over-escalation from a different packet."
+    },
+    {
+      "pair_id": "HVSF-FACTORY-009",
+      "domain": "Customer operations / refunds",
+      "failure_signal": "openai/gpt-5.4-mini false positive on A; xai/grok-3-mini admissibility failure on B",
+      "priority": "P1",
+      "reason": "Good refund pair with precision failure plus contract brittleness."
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-007",
+      "domain": "IT change management",
+      "failure_signal": "openai/gpt-5.4-mini false positive on A",
+      "priority": "P1",
+      "reason": "Repeated IT change/window clean-side overblock."
+    },
+    {
+      "pair_id": "HVSF-FACTORY3-007",
+      "domain": "IT change management",
+      "failure_signal": "openai/gpt-5.4-mini false positive on A",
+      "priority": "P1",
+      "reason": "Second clean-side IT overblock."
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-006",
+      "domain": "IT change management",
+      "failure_signal": "openai/gpt-5.4-mini false positive on A",
+      "priority": "P1",
+      "reason": "Earlier IT clean-side overblock, useful for seam repetition."
+    },
+    {
+      "pair_id": "HVSF-FACTORY3-006",
+      "domain": "IT change management",
+      "failure_signal": "openai/gpt-5.4-mini false positive on A; minimax/MiniMax-M2.5-highspeed admissibility failure on A",
+      "priority": "P1",
+      "reason": "IT clean-side overblock with second-model contract brittleness."
+    },
+    {
+      "pair_id": "HVSF-FACTORY-001",
+      "domain": "Banking / KYC / AML controls",
+      "failure_signal": "openai/gpt-5.4-mini false negative on B",
+      "priority": "P1",
+      "reason": "Broader banking high-risk cousin seam."
+    }
+  ],
+  "secondary_wrong_verdict_shortlist": [
+    {
+      "pair_id": "HVSF-FACTORY-004",
+      "domain": "Agentic commerce / order execution controls",
+      "failure_signal": "openai/gpt-5.4-mini false negative on B",
+      "priority": "P2",
+      "reason": "Useful, but later generic agentic-commerce variants did not keep firing."
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-003",
+      "domain": "Agentic commerce / order execution controls",
+      "failure_signal": "openai/gpt-5.4-mini false negative on B",
+      "priority": "P2",
+      "reason": "Useful, but should be sharpened or paired with a clearer authorization-boundary variant."
+    }
+  ],
+  "contract_brittleness_holdout": [
+    {
+      "pair_id": "HVSF-FACTORY2-004",
+      "domain": "Agentic commerce / subscription controls",
+      "failure_signal": "xai/grok-3-mini parse/admissibility failure on B; verdict direction was correct",
+      "recommendation": "hold for contract-brittleness lane"
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-003",
+      "domain": "Customer operations / refund controls",
+      "failure_signal": "xai/grok-3-mini and minimax/MiniMax-M2.5-highspeed parse/admissibility failures; verdict directions were correct",
+      "recommendation": "hold unless testing Holo ability to turn brittle outputs into admissible artifacts"
+    },
+    {
+      "pair_id": "HVSF-FACTORY4-009",
+      "domain": "IT access / temporary privilege controls",
+      "failure_signal": "minimax/MiniMax-M2.5-highspeed parse/admissibility failure on A; verdict direction was correct",
+      "recommendation": "hold for answer-contract brittleness"
+    }
+  ],
+  "recommended_first_rescue_domains": {
+    "refund_balance": [
+      "HVSF-FACTORY2-005",
+      "HVSF-FACTORY3-004",
+      "HVSF-FACTORY4-004",
+      "HVSF-FACTORY-009"
+    ],
+    "it_change_window": [
+      "HVSF-FACTORY-010",
+      "HVSF-FACTORY2-006",
+      "HVSF-FACTORY3-006",
+      "HVSF-FACTORY3-007",
+      "HVSF-FACTORY4-007"
+    ],
+    "banking_high_risk": [
+      "HVSF-FACTORY-001",
+      "HVSF-FACTORY3-008",
+      "HVSF-FACTORY4-008",
+      "HVSF-FACTORY4-010"
+    ]
+  }
+}

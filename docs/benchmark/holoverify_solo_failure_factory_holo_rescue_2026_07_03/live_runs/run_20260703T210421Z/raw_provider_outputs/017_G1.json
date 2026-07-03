@@ -1,0 +1,27 @@
+{
+  "call_number": 17,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "f377d73a6cc37187f0e194b225da1412e3609338d39621f2d6f508ff391852dc",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to parse the user request. The user says:\n\n\"packet_id=SFFRESCUE-125A70AE254D4E53D318\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThey want a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra spaces? The spec: \"key=value lines\" with no extra spaces. The user wrote \"preserve source-grounded reasoning\" with hyphens, but keep as is. Also blocked_move=do not invent source IDs. There's a space after do not. That's okay.\n\nThus output exactly those three lines. Ensure no trailing spaces. Let's respond.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "900d5f0056987ed99292e9faa4a6beb287169fcd99f6a05d9ea7af93c922854e",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 121,
+    "output_tokens": 250,
+    "raw_text": "<think>\nWe need to parse the user request. The user says:\n\n\"packet_id=SFFRESCUE-125A70AE254D4E53D318\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThey want a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra spaces? The spec: \"key=value lines\" with no extra spaces. The user wrote \"preserve source-grounded reasoning\" with hyphens, but keep as is. Also blocked_move=do not invent source IDs. There's a space after do not. That's okay.\n\nThus output exactly those three lines. Ensure no trailing spaces. Let's respond.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0697572f5b754e61c6f4aabaeb678927",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 371,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

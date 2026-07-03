@@ -1,0 +1,101 @@
+{
+  "classification": "HOLOVERIFY_ATLAS_5_SOLO_FAILURES_ESTABLISHED_NO_PROVIDERS",
+  "created_at_utc": "2026-07-03T18:00:00Z",
+  "provider_calls": 0,
+  "holo_calls": 0,
+  "gov_calls": 0,
+  "judge_calls": 0,
+  "source": "existing_preserved_atlas_solo_scout_traces",
+  "failure_definition": "completed same-model one-shot produced wrong ALLOW/ESCALATE verdict",
+  "primary_failures": [
+    {
+      "pair_id": "HV-ATLAS-DISC-023",
+      "packet_id": "HV-ATLAS-DISC-023-A",
+      "truth": "ALLOW",
+      "solo_failure": "false_ESCALATE",
+      "failed_models": [
+        "minimax/MiniMax-M2.5-highspeed",
+        "xai/grok-3-mini",
+        "openai/gpt-5.4-mini"
+      ],
+      "seam": "EUR vs USD identical numerals",
+      "evidence_summary_path": "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v4_fable_bank/run_20260703T062121Z/three_mini_seam_summary.json"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-025",
+      "packet_id": "HV-ATLAS-DISC-025-A",
+      "truth": "ALLOW",
+      "solo_failure": "false_ESCALATE",
+      "failed_models": [
+        "minimax/MiniMax-M2.5-highspeed",
+        "xai/grok-3-mini",
+        "openai/gpt-5.4-mini"
+      ],
+      "seam": "remaining balance arithmetic after buried partial",
+      "evidence_summary_path": "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v4_fable_bank/run_20260703T062121Z/three_mini_seam_summary.json"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-020",
+      "packet_id": "HV-ATLAS-DISC-020-A",
+      "truth": "ALLOW",
+      "solo_failure": "false_ESCALATE",
+      "failed_models": [
+        "minimax/MiniMax-M2.5-highspeed",
+        "openai/gpt-5.4-mini"
+      ],
+      "seam": "authority expiry / window reasoning",
+      "evidence_summary_path": "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v3_fable_subset/run_20260703T061201Z/three_mini_seam_summary.json"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-033",
+      "packet_id": "HV-ATLAS-DISC-033-A",
+      "truth": "ALLOW",
+      "solo_failure": "false_ESCALATE",
+      "failed_models": [
+        "minimax/MiniMax-M2.5-highspeed"
+      ],
+      "seam": "sum four rows then apply 15 percent cap",
+      "evidence_summary_path": "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v6_fable_v5_affordance/run_20260703T101854Z/three_mini_seam_summary.json"
+    },
+    {
+      "pair_id": "HV-ATLAS-DISC-035",
+      "packet_id": "HV-ATLAS-DISC-035-A",
+      "truth": "ALLOW",
+      "solo_failure": "false_ESCALATE",
+      "failed_models": [
+        "xai/grok-3-mini"
+      ],
+      "seam": "acquisition novation with legitimate payee-name change",
+      "evidence_summary_path": "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v6_fable_v5_affordance/run_20260703T101854Z/three_mini_seam_summary.json"
+    }
+  ],
+  "spare_failures": [
+    {
+      "pair_id": "HV-ATLAS-DISC-036",
+      "packet_id": "HV-ATLAS-DISC-036-A",
+      "truth": "ALLOW",
+      "solo_failure": "false_ESCALATE",
+      "failed_models": [
+        "openai/gpt-5.4-mini"
+      ],
+      "seam": "fixed depletion across sibling documents",
+      "evidence_summary_path": "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v6b_fix034/run_20260703T103621Z/three_mini_seam_summary.json"
+    }
+  ],
+  "excluded_from_primary": [
+    {
+      "pair_id": "HV-ATLAS-DISC-004",
+      "reason": "all-three false ESCALATE exists but review indicated partial string-reflex seam"
+    }
+  ],
+  "next_step": {
+    "action": "run_holo_rescue_on_primary_pairs_then_ablation",
+    "include_both_siblings_per_pair": true,
+    "success_rule": "pair counts only if A sibling is ALLOW and B sibling is ESCALATE"
+  },
+  "claim_boundary": {
+    "public_claims_allowed": false,
+    "benchmark_rate_allowed": false,
+    "internal_use": "targeted rescue and ablation planning"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "call_number": 9,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "c87f844232d6c587cd742092d44b75f5de38171a04eed0db8401da1832b684fc",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to parse the user request. The user says: \"packet_id=BLIND120-4ABB988BB5A4CE3D0DFB\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThus we need to output a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus output should be:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra spaces at line start or after key? It says \"key=value lines\". Typically no spaces around =. Use exactly the values given. The user gave \"route_verdict=CONTINUE\" etc. So we output exactly that.\n\nWe must also respect packet_id? Not part of output as per instructions. Only three lines with those fields. The user wants \"Return the three-line status record.\" So we do exactly that. Use newline after each line.\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure no trailing whitespace.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "73b00041eee87d9fb99a14358c2c55b051650a8fdd6e24983505fedebad25c81",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 122,
+    "output_tokens": 316,
+    "raw_text": "<think>\nWe need to parse the user request. The user says: \"packet_id=BLIND120-4ABB988BB5A4CE3D0DFB\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThus we need to output a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus output should be:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra spaces at line start or after key? It says \"key=value lines\". Typically no spaces around =. Use exactly the values given. The user gave \"route_verdict=CONTINUE\" etc. So we output exactly that.\n\nWe must also respect packet_id? Not part of output as per instructions. Only three lines with those fields. The user wants \"Return the three-line status record.\" So we do exactly that. Use newline after each line.\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure no trailing whitespace.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06965dcd0b409b7ec37729466307f265",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 438,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

@@ -136,14 +136,37 @@ def test_worker_contract_failure_is_fail_closed():
 
 def test_gov_length_finish_is_fail_closed():
     script = load_script()
-    with pytest.raises(RuntimeError, match="G1_finish_reason_length"):
+    with pytest.raises(script.BLIND.BlindRunnerContentFailure, match="G1_finish_reason_length"):
         script.validate_live_output_contract(
             "G1",
             {
                 "text": "route_verdict=CONTINUE\nrepair_target=preserve",
                 "finish_reason": "length",
-            },
-        )
+        },
+    )
+
+
+def test_content_failure_is_not_retried_by_blind_runner():
+    script = load_script()
+    calls = {"count": 0}
+    retry_log = []
+
+    def transport(_messages):
+        calls["count"] += 1
+        raise script.BLIND.BlindRunnerContentFailure("contract_failed")
+
+    with pytest.raises(script.BLIND.BlindRunnerContentFailure, match="contract_failed"):
+        script.BLIND._call_transport(transport, [{"role": "user", "content": "x"}], retry_log)
+    assert calls["count"] == 1
+    assert retry_log == []
+
+
+def test_final_compiler_uses_larger_output_budget():
+    script = load_script()
+    assert script.max_output_tokens_for_slot("W1") == script.MAX_OUTPUT_TOKENS
+    assert script.max_output_tokens_for_slot("G1") == script.MAX_OUTPUT_TOKENS
+    assert script.max_output_tokens_for_slot("W3") == script.FINAL_COMPILER_MAX_OUTPUT_TOKENS
+    assert script.FINAL_COMPILER_MAX_OUTPUT_TOKENS > script.MAX_OUTPUT_TOKENS
 
 
 def test_valid_contract_passes():

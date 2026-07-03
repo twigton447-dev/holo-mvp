@@ -47,6 +47,10 @@ class BlindRunnerTransportFailure(RuntimeError):
     """Raised when a fixture transport cannot produce a worker output."""
 
 
+class BlindRunnerContentFailure(RuntimeError):
+    """Raised when provider transport succeeds but content violates contract."""
+
+
 def _sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
@@ -244,6 +248,8 @@ def _call_transport(transport: Callable, messages: list[dict], retry_log: list[d
     for attempt in range(limit + 1):
         try:
             return transport(messages)
+        except BlindRunnerContentFailure:
+            raise
         except Exception as exc:
             if attempt >= limit:
                 raise BlindRunnerTransportFailure(str(exc)) from exc

@@ -40,6 +40,7 @@ EXPECTED_SCORING_MAP_SHA256 = "5bb6fea5c3f2d72ae0b092eb168aeebc6ab4dcd6bc897b784
 EXPECTED_PACKET_COUNT = 20
 EXPECTED_CALL_COUNT = 100
 MAX_OUTPUT_TOKENS = 1024
+FINAL_COMPILER_MAX_OUTPUT_TOKENS = 2048
 PROVIDER_TIMEOUT_SECONDS = 240
 TRANSPORT_MAX_RETRIES = 2
 TRANSPORT_BACKOFF_SECONDS = (2, 4)
@@ -187,9 +188,9 @@ def validate_live_output_contract(slot: str, response: dict[str, Any]) -> None:
     text = str(response.get("text") or "")
     finish_reason = str(response.get("finish_reason") or "").lower()
     if not text.strip():
-        raise RuntimeError(f"{slot}_empty_text")
+        raise BLIND.BlindRunnerContentFailure(f"{slot}_empty_text")
     if finish_reason == "length":
-        raise RuntimeError(f"{slot}_finish_reason_length")
+        raise BLIND.BlindRunnerContentFailure(f"{slot}_finish_reason_length")
 
     parsed = parse_key_value(text)
     if slot.startswith("W"):
@@ -203,15 +204,15 @@ def validate_live_output_contract(slot: str, response: dict[str, Any]) -> None:
         )
         missing = [key for key in required if not parsed.get(key)]
         if missing:
-            raise RuntimeError(f"{slot}_worker_contract_missing:{','.join(missing)}")
+            raise BLIND.BlindRunnerContentFailure(f"{slot}_worker_contract_missing:{','.join(missing)}")
         if parsed.get("verification_verdict") not in {"ALLOW", "ESCALATE"}:
-            raise RuntimeError(f"{slot}_worker_contract_bad_verdict:{parsed.get('verification_verdict')}")
+            raise BLIND.BlindRunnerContentFailure(f"{slot}_worker_contract_bad_verdict:{parsed.get('verification_verdict')}")
         return
 
     required_gov = ("route_verdict", "repair_target", "blocked_move")
     missing_gov = [key for key in required_gov if not parsed.get(key)]
     if missing_gov:
-        raise RuntimeError(f"{slot}_gov_contract_missing:{','.join(missing_gov)}")
+        raise BLIND.BlindRunnerContentFailure(f"{slot}_gov_contract_missing:{','.join(missing_gov)}")
 
 
 def env_presence() -> dict[str, str]:
@@ -310,12 +311,18 @@ def call_with_transport_retry(call_once, provider: str, model: str) -> dict[str,
     raise RuntimeError("transport_retry_exhausted")
 
 
-def call_openai_compatible(config: dict[str, Any], messages: list[dict[str, str]]) -> dict[str, Any]:
+def max_output_tokens_for_slot(slot: str) -> int:
+    if slot == "W3":
+        return FINAL_COMPILER_MAX_OUTPUT_TOKENS
+    return MAX_OUTPUT_TOKENS
+
+
+def call_openai_compatible(config: dict[str, Any], messages: list[dict[str, str]], max_tokens: int) -> dict[str, Any]:
     payload = {
         "model": config["model"],
         "messages": messages,
         "temperature": 0,
-        "max_tokens": MAX_OUTPUT_TOKENS,
+        "max_tokens": max_tokens,
     }
 
     def call_once() -> dict[str, Any]:
@@ -346,12 +353,12 @@ def call_openai_compatible(config: dict[str, Any], messages: list[dict[str, str]
     return call_with_transport_retry(call_once, config["provider"], config["model"])
 
 
-def call_openai_responses(config: dict[str, Any], messages: list[dict[str, str]]) -> dict[str, Any]:
+def call_openai_responses(config: dict[str, Any], messages: list[dict[str, str]], max_tokens: int) -> dict[str, Any]:
     prompt = "\n\n".join(f"{message['role'].upper()}:\n{message['content']}" for message in messages)
     payload = {
         "model": config["model"],
         "input": prompt,
-        "max_output_tokens": MAX_OUTPUT_TOKENS,
+        "max_output_tokens": max_tokens,
     }
 
     def call_once() -> dict[str, Any]:
@@ -387,10 +394,10 @@ def call_openai_responses(config: dict[str, Any], messages: list[dict[str, str]]
     return call_with_transport_retry(call_once, config["provider"], config["model"])
 
 
-def call_provider(config: dict[str, Any], messages: list[dict[str, str]]) -> dict[str, Any]:
+def call_provider(config: dict[str, Any], messages: list[dict[str, str]], max_tokens: int) -> dict[str, Any]:
     if config["kind"] == "openai_responses":
-        return call_openai_responses(config, messages)
-    return call_openai_compatible(config, messages)
+        return call_openai_responses(config, messages, max_tokens)
+    return call_openai_compatible(config, messages, max_tokens)
 
 
 def expected_slot_for_index(index: int) -> str:
@@ -455,12 +462,13 @@ class LiveTransport:
         prompt_text = json.dumps(messages, sort_keys=True, ensure_ascii=True)
         prompt_hash = sha256_text(prompt_text)
         call_number = self.call_index + 1
+        max_tokens = max_output_tokens_for_slot(slot)
         self.call_index += 1
         started = time.time()
         response: dict[str, Any] | None = None
         error: str | None = None
         try:
-            response = call_provider(config, messages)
+            response = call_provider(config, messages, max_tokens)
             validate_live_output_contract(slot, response)
             return str(response.get("text") or "")
         except Exception as exc:
@@ -482,6 +490,7 @@ class LiveTransport:
                     "provider_call_ok": response is not None and error is None,
                     "error": error,
                     "response": response,
+                    "max_output_tokens": max_tokens,
                     "text": text,
                     "raw_text": raw_text,
                     "text_sha256": sha256_text(text),
@@ -499,6 +508,7 @@ class LiveTransport:
                     "raw_output_ref": str(raw_ref.relative_to(self.run_dir)),
                     "provider_call_ok": response is not None and error is None,
                     "error": error,
+                    "max_output_tokens": max_tokens,
                     "finish_reason": (response or {}).get("finish_reason"),
                     "response_id": (response or {}).get("response_id"),
                     "input_tokens": (response or {}).get("input_tokens"),

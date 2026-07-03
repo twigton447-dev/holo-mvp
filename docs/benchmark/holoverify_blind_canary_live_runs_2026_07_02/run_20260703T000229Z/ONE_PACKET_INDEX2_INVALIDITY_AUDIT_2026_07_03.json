@@ -1,0 +1,106 @@
+{
+  "classification": "INVALID_ONE_PACKET_CONTENT_FAILURE_W3_LENGTH_WITH_RETRY_BOUNDARY_BUG",
+  "created_at_utc": "2026-07-03T00:04:51.711147+00:00",
+  "invalidity": {
+    "model_progress_before_failure": "W1, G1, W2, and G2 all returned valid contract-shaped output; W3 began valid ALLOW schema but truncated before completing required keys.",
+    "not_a_provider_transport_failure": true,
+    "not_a_valid_holo_score": true,
+    "provider_failures_field_count": 1,
+    "retry_boundary_bug": "Blind runner retried a content-contract exception as transport, producing misleading outer slot_message_mismatch:W1.",
+    "root_failure": "W3_finish_reason_length",
+    "slot_rows": [
+      {
+        "call_number": 1,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 669,
+        "model": "grok-3-mini",
+        "output_tokens": 93,
+        "provider": "xai",
+        "provider_call_ok": true,
+        "slot": "W1",
+        "text_preview": "worker_role=W1\nverification_verdict=ALLOW\nbinding_class=SOURCE_BOUNDARY_CLOSED\naction_boundary=current control record matches actor/scope for approval refreshed after stale predecessor\ncited_evidence=SRC-FCAADE8ED2C5-POL|SRC-FCAADE8ED2C5-CT",
+        "total_tokens": 1350
+      },
+      {
+        "call_number": 2,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 304,
+        "model": "MiniMax-M2.5-highspeed",
+        "output_tokens": 564,
+        "provider": "minimax",
+        "provider_call_ok": true,
+        "slot": "G1",
+        "text_preview": "route_verdict=CONTINUE\nrepair_target=NONE\nblocked_move=none",
+        "total_tokens": 868
+      },
+      {
+        "call_number": 3,
+        "error": null,
+        "finish_reason": "completed",
+        "input_tokens": 569,
+        "model": "gpt-5.4-mini",
+        "output_tokens": 128,
+        "provider": "openai",
+        "provider_call_ok": true,
+        "slot": "W2",
+        "text_preview": "worker_role=W2\nverification_verdict=ALLOW\nbinding_class=SOURCE_BOUNDARY_CLOSED\naction_boundary=current exact approval supersedes stale predecessor and authorizes the requested approval refreshed action within the matched actor/scope/system ",
+        "total_tokens": 697
+      },
+      {
+        "call_number": 4,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 327,
+        "model": "MiniMax-M2.5-highspeed",
+        "output_tokens": 694,
+        "provider": "minimax",
+        "provider_call_ok": true,
+        "slot": "G2",
+        "text_preview": "route_verdict=CONTINUE\nrepair_target=none\nblocked_move=none",
+        "total_tokens": 1021
+      },
+      {
+        "call_number": 5,
+        "error": "W3_finish_reason_length",
+        "finish_reason": "length",
+        "input_tokens": 635,
+        "model": "MiniMax-M2.5-highspeed",
+        "output_tokens": 1024,
+        "provider": "minimax",
+        "provider_call_ok": false,
+        "slot": "W3",
+        "text_preview": "worker_role=W3\nverification_verdict=ALLOW\nbinding_class=SOURCE_BOUNDARY_CLOSED\naction_boundary=Current approval supersedes stale predecessor and",
+        "total_tokens": 1659
+      }
+    ],
+    "summary_failure_field": "slot_message_mismatch:W1"
+  },
+  "packet_index": 2,
+  "packet_limit": 1,
+  "patches_required_before_rerun": [
+    "separate non-retryable content failure from retryable transport failure",
+    "do not retry content/schema/Gov baton failures as transport",
+    "raise W3 final compiler output budget above 1024"
+  ],
+  "provider_transport": {
+    "expected_provider_calls": 5,
+    "observed_provider_calls": 5,
+    "provider_counts": {
+      "minimax": 3,
+      "openai": 1,
+      "xai": 1
+    },
+    "slot_counts": {
+      "G1": 1,
+      "G2": 1,
+      "W1": 1,
+      "W2": 1,
+      "W3": 1
+    },
+    "transport_recovered_count": 0
+  },
+  "raw_run_preserved": true,
+  "run_dir": "docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/run_20260703T000229Z"
+}

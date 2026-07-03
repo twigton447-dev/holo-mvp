@@ -1,0 +1,86 @@
+{
+  "call_sequence": [
+    "W1",
+    "G1",
+    "W2",
+    "G2",
+    "W3"
+  ],
+  "checks": {
+    "env_keys_present": true,
+    "expected_call_count": true,
+    "judge_calls_disabled": true,
+    "packet_count": true,
+    "payloads_present": true,
+    "prompt_probe_leakage": true,
+    "provider_calls_not_yet_made": true,
+    "provider_counts": true,
+    "runtime_consumable": true,
+    "runtime_input_leakage": true,
+    "scoring_map_hash": true,
+    "solo_calls_disabled": true,
+    "source_runtime_manifest_hash": true
+  },
+  "classification": "HOLOVERIFY_BLIND_CANARY_LIVE_PREFLIGHT_V0",
+  "created_at_utc": "2026-07-03T00:16:16.793329+00:00",
+  "current_head": "55f91adb9f813f4590ab76af5f5557faff7bbab1",
+  "env_presence": {
+    "MINIMAX_API_KEY": "PRESENT",
+    "OPENAI_API_KEY": "PRESENT",
+    "XAI_API_KEY": "PRESENT"
+  },
+  "expected_provider_calls": 5,
+  "expected_runtime_manifest_sha256": "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7",
+  "expected_scoring_map_sha256": "5bb6fea5c3f2d72ae0b092eb168aeebc6ab4dcd6bc897b784c563dc455822c2b",
+  "missing_payloads": [],
+  "packets": 1,
+  "passed": true,
+  "prompt_probe_leakage_hits": [],
+  "roster": {
+    "G1": {
+      "kind": "openai_compatible",
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "role": "gov",
+      "slot": "G1",
+      "url": "https://api.minimax.io/v1/chat/completions"
+    },
+    "G2": {
+      "kind": "openai_compatible",
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "role": "gov",
+      "slot": "G2",
+      "url": "https://api.minimax.io/v1/chat/completions"
+    },
+    "W1": {
+      "kind": "openai_compatible",
+      "model": "grok-3-mini",
+      "provider": "xai",
+      "role": "worker",
+      "slot": "W1",
+      "url": "https://api.x.ai/v1/chat/completions"
+    },
+    "W2": {
+      "kind": "openai_responses",
+      "model": "gpt-5.4-mini",
+      "provider": "openai",
+      "role": "worker",
+      "slot": "W2",
+      "url": "https://api.openai.com/v1/responses"
+    },
+    "W3": {
+      "kind": "openai_compatible",
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "role": "worker",
+      "slot": "W3",
+      "url": "https://api.minimax.io/v1/chat/completions"
+    }
+  },
+  "runtime_input_leakage_hits": [],
+  "runtime_manifest": "docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/run_20260703T001616Z/runtime_manifest_subset_i003_n001.json",
+  "runtime_manifest_sha256": "10af8671093b77ed50338c13c1ed5904e07f37f31aa6eb36e74c42ac7d848b0b",
+  "scoring_map_sha256_preflight_only": "5bb6fea5c3f2d72ae0b092eb168aeebc6ab4dcd6bc897b784c563dc455822c2b",
+  "source_runtime_manifest_sha256": "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7"
+}

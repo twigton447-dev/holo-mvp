@@ -271,7 +271,7 @@ def test_final_compiler_uses_larger_output_budget():
     assert script.max_output_tokens_for_slot("W1") == script.MAX_OUTPUT_TOKENS
     assert script.max_output_tokens_for_slot("G1") == script.GOV_MAX_OUTPUT_TOKENS
     assert script.max_output_tokens_for_slot("G2") == script.GOV_MAX_OUTPUT_TOKENS
-    assert script.GOV_MAX_OUTPUT_TOKENS < script.MAX_OUTPUT_TOKENS
+    assert script.GOV_MAX_OUTPUT_TOKENS == script.MAX_OUTPUT_TOKENS
     assert script.max_output_tokens_for_slot("W3") == script.FINAL_COMPILER_MAX_OUTPUT_TOKENS
     assert script.FINAL_COMPILER_MAX_OUTPUT_TOKENS > script.MAX_OUTPUT_TOKENS
 
@@ -288,6 +288,8 @@ def test_gov_prompt_is_truth_free_copy_contract():
     assert "route_verdict=CONTINUE" in joined
     assert "repair_target=preserve source-grounded reasoning" in joined
     assert "blocked_move=do not invent source IDs" in joined
+    assert "BLIND_GATE_SUMMARY" not in joined
+    assert len(joined) < 900
     assert "ALLOW" not in joined
     assert "ESCALATE" not in joined
     assert "packet_truth" not in joined

@@ -35,6 +35,8 @@ EXPECTED_RUNTIME_MANIFEST_SHA256 = "c3a2bbe2ff2b4b4a3d2e4da0112489b3ba19d41147c5
 EXPECTED_SCORING_MAP_SHA256 = "b5f3c219c473aa2821540aca7cf84e5fc8d2441f977f69d9df226aad550ed166"
 EXPECTED_PACKET_COUNT = 120
 EXPECTED_CALL_COUNT = 600
+BATCH_SIZE = 10
+BATCH_COUNT = 12
 LANE_LABEL = "HOLOVERIFY_BLIND_120_RUNTIME_FIREWALL_V0"
 
 SCORING_MAP_READ_GUARD_TEST = (
@@ -92,6 +94,30 @@ def scoped_approval_sentence(packet_limit: int | None = None, packet_index: int 
     )
 
 
+def packet_index_for_batch(batch_number: int) -> int:
+    if batch_number < 1 or batch_number > BATCH_COUNT:
+        raise ValueError(f"batch_number must be 1-{BATCH_COUNT}")
+    return ((batch_number - 1) * BATCH_SIZE) + 1
+
+
+def batch_approval_sentence(batch_number: int) -> str:
+    return scoped_approval_sentence(packet_limit=BATCH_SIZE, packet_index=packet_index_for_batch(batch_number))
+
+
+def batch_scope(batch_number: int) -> dict[str, Any]:
+    start = packet_index_for_batch(batch_number)
+    return {
+        "batch_number": batch_number,
+        "batch_count": BATCH_COUNT,
+        "batch_size": BATCH_SIZE,
+        "packet_index": start,
+        "packet_limit": BATCH_SIZE,
+        "packet_index_end": start + BATCH_SIZE - 1,
+        "expected_provider_calls": BATCH_SIZE * len(CANARY.CALL_SEQUENCE),
+        "approval_sentence": batch_approval_sentence(batch_number),
+    }
+
+
 def configure_runtime() -> None:
     CANARY.RUNTIME_MANIFEST = RUNTIME_MANIFEST
     CANARY.LIVE_ROOT = LIVE_ROOT
@@ -140,13 +166,25 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--run-live", action="store_true")
+    parser.add_argument("--print-approval", action="store_true")
+    parser.add_argument("--batch-number", type=int, default=None)
     parser.add_argument("--packet-limit", type=int, default=None)
     parser.add_argument("--packet-index", type=int, default=1)
     parser.add_argument("--approval-statement", default="")
     args = parser.parse_args()
 
-    if args.preflight == args.run_live:
-        raise SystemExit("choose exactly one of --preflight or --run-live")
+    if sum(bool(value) for value in (args.preflight, args.run_live, args.print_approval)) != 1:
+        raise SystemExit("choose exactly one of --preflight, --run-live, or --print-approval")
+    if args.batch_number is not None:
+        if args.packet_limit is not None or args.packet_index != 1:
+            raise SystemExit("--batch-number cannot be combined with --packet-limit or --packet-index")
+        scope = batch_scope(args.batch_number)
+        args.packet_limit = scope["packet_limit"]
+        args.packet_index = scope["packet_index"]
+
+    if args.print_approval:
+        print(scoped_approval_sentence(args.packet_limit, args.packet_index))
+        return 0
 
     if args.preflight:
         print(json.dumps(run_preflight_only(args.packet_limit, args.packet_index), indent=2, sort_keys=True))

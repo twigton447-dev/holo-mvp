@@ -158,26 +158,17 @@ def _build_gov_messages(payload: dict, worker_row: dict, state: dict) -> list[di
     system_content = "\n".join(
         [
             "SYSTEM ROLE: HoloVerify blind Gov actuator.",
-            "Runtime firewall mode: copy the selected blind baton lines exactly.",
-            "Do not reason aloud. Do not emit hidden reasoning, analysis, <think> blocks, or explanations.",
-            "Your first output characters must be route_verdict=.",
+            "COPY MODE: output exactly the selected blind baton lines.",
+            "No reasoning. No hidden thinking. No analysis. No extra text.",
+            "First visible characters must be: route_verdict=",
         ]
     )
     user_content = "\n".join(
         [
-            "HoloGov-V blind micro-router v1.",
             f"RUN LOCK: packet={payload.get('packet_id')} role=GOV",
-            "GOV OUTPUT CONTRACT: return compact_key_value_v1 only.",
-            "Exactly three key=value lines. No prose. No reasoning. No JSON. No Markdown. No braces. No quotes.",
-            "Copy SELECTED_GOV_BATON_LINES exactly, preserving order and spelling.",
-            "Required keys in order: route_verdict, repair_target, blocked_move.",
-            "Do not include answer-key direction or source truth guesses.",
-            "BLIND_GATE_SUMMARY:",
-            f"gate_passed={bool(gate.get('passed'))}",
-            f"failure_count={len(gate.get('failures', []))}",
             "SELECTED_GOV_BATON_LINES:",
             *selected_lines,
-            "CURRENT TURN COMMAND: output only the three selected baton lines now.",
+            "CURRENT TURN COMMAND: copy exactly these three lines and stop:",
             *selected_lines,
         ]
     )

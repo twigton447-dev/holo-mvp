@@ -83,6 +83,33 @@ def test_120_partial_batch_approval_sentence_binds_scope():
     assert approval != script.EXACT_APPROVAL_SENTENCE
 
 
+def test_120_registered_batches_cover_all_packets_without_overlap():
+    script = load_script()
+    seen = []
+    for batch_number in range(1, 13):
+        scope = script.batch_scope(batch_number)
+        assert scope["batch_number"] == batch_number
+        assert scope["batch_count"] == 12
+        assert scope["batch_size"] == 10
+        assert scope["packet_limit"] == 10
+        assert scope["expected_provider_calls"] == 50
+        assert f"HOLOVERIFY_BLIND_120_10PKT_RUNTIME_FIREWALL_V0" in scope["approval_sentence"]
+        assert f"opaque packet indices {scope['packet_index']}-{scope['packet_index_end']} only" in scope["approval_sentence"]
+        seen.extend(range(scope["packet_index"], scope["packet_index_end"] + 1))
+
+    assert seen == list(range(1, 121))
+
+
+def test_120_batch_number_bounds():
+    script = load_script()
+    assert script.packet_index_for_batch(1) == 1
+    assert script.packet_index_for_batch(12) == 111
+    with pytest.raises(ValueError, match="batch_number must be 1-12"):
+        script.packet_index_for_batch(0)
+    with pytest.raises(ValueError, match="batch_number must be 1-12"):
+        script.packet_index_for_batch(13)
+
+
 def test_120_live_wrapper_does_not_keep_scoring_map_path_or_posthoc_scorer():
     source = SCRIPT_PATH.read_text()
 

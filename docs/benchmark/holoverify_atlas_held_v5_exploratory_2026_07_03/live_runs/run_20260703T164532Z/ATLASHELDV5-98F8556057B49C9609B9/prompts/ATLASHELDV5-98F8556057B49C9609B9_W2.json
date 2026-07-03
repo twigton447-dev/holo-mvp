@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "content": "SYSTEM ROLE: HoloVerify blind worker.\nOUTPUT FIREWALL: emit compact_key_value_v1 only.\nDo not emit hidden thinking, analysis, markdown, JSON, bullets, or prose.\nThe first output characters must be exactly: worker_role=W2",
+      "role": "system"
+    },
+    {
+      "content": "GOV ROUTING LENS: use only source support, unresolved dependencies, and internal consistency.\nRUN LOCK: packet=ATLASHELDV5-98F8556057B49C9609B9 turn=2 role=W2\nTASK CONTRACT: return compact_key_value_v1 only. No Markdown. No prose. No bullets. No JSON. No hidden thinking.\nREQUIRED OUTPUT LINES EXACTLY:\nworker_role=W2\nverification_verdict=<ALLOW or ESCALATE>\nbinding_class=<SOURCE_BOUNDARY_CLOSED or SOURCE_BOUNDARY_OPEN>\naction_boundary=<short source-grounded boundary statement; max 18 words>\ncited_evidence=<provided source IDs separated by |>\nopen_blockers=<empty if ALLOW; blocker phrase if ESCALATE; max 12 words>\nfinal_answer=<one sentence using ALLOW or ESCALATE; max 24 words>\nDo not use alternate keys such as decision, boundary_closed, or action_boundary_closed.\nDo not omit verification_verdict.\nFirst visible output line must be worker_role=W2.\nSOURCE CONTEXT:\nPO-HELDV5-014: Purchase order PO-HELDV5-014 covers 1200 units for Quill Metering at EUR 17.75 per unit.\nFX-HELDV5-014: Contract FX record FX-HELDV5-014 fixes the rate at 1.08 USD per EUR for PO-HELDV5-014.\nINV-HELDV5-014: Invoice INV-HELDV5-014 requests USD 24678 for 1200 units from Quill Metering.\nREL-HELDV5-014: Release REL-HELDV5-014 approves INV-HELDV5-014 against PO-HELDV5-014.\nSTD-HELDV5-014-P: A converted unit-price invoice is complete only when quantity, EUR unit price, contract FX rate, vendor identity, and USD total reconcile exactly.\nSTATE BRIEF:\n{\"blocked_moves\": [], \"packet_id\": \"ATLASHELDV5-98F8556057B49C9609B9\", \"turns_completed\": [{\"artifact_id\": \"ART-001\", \"gate_passed\": true, \"role\": \"W1\"}], \"unresolved_dependencies\": []}\nFULL LATEST GOV BATON:\n{\"blocked_move\": \"do not invent source IDs\", \"repair_target\": \"preserve source-grounded reasoning\", \"route_verdict\": \"CONTINUE\"}\nCURRENT TURN COMMAND: decide whether the visible source support closes the action boundary.",
+      "role": "user"
+    }
+  ]
+}

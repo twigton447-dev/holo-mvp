@@ -1,0 +1,27 @@
+{
+  "call_number": 27,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "84765c7dcd7e369f7f77a0de4c77477d58a21efc965189b7ff487994f5be0009",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to parse the user request. The user gave a snippet:\n\n```\npacket_id=ATLASHELDV5-98F8556057B49C9609B9\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n```\n\nThe user says \"Return the three-line status record.\"\n\nFields: route_verdict, repair_target, blocked_move. And the instructions say:\n\n\"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus we must output exactly three lines:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut check if there is any nuance about \"source-grounded reasoning\". Should we preserve that phrase as is? Probably yes. Also \"do not invent source IDs\" exactly.\n\nMake sure to have exactly three lines, no extra whitespace or line breaks beyond that. So final answer should be:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should not include any header, bullet points, or extra newline at end? Probably a trailing newline is fine. But we need to exactly produce three lines.\n\nThus answer accordingly.\n\nPotential nuance: The user may want the record as plain text with the three fields in that order. They gave the packet_id but not needed. So we ignore that.\n\nThus final output as described.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "294ffe35a6428af3cf44ae432686215292f74105502478f283b40b3da3ec48d8",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 124,
+    "output_tokens": 368,
+    "raw_text": "<think>\nWe need to parse the user request. The user gave a snippet:\n\n```\npacket_id=ATLASHELDV5-98F8556057B49C9609B9\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n```\n\nThe user says \"Return the three-line status record.\"\n\nFields: route_verdict, repair_target, blocked_move. And the instructions say:\n\n\"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus we must output exactly three lines:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut check if there is any nuance about \"source-grounded reasoning\". Should we preserve that phrase as is? Probably yes. Also \"do not invent source IDs\" exactly.\n\nMake sure to have exactly three lines, no extra whitespace or line breaks beyond that. So final answer should be:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should not include any header, bullet points, or extra newline at end? Probably a trailing newline is fine. But we need to exactly produce three lines.\n\nThus answer accordingly.\n\nPotential nuance: The user may want the record as plain text with the three fields in that order. They gave the packet_id but not needed. So we ignore that.\n\nThus final output as described.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06971acc3f7f8424afcebd551ed3192f",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 492,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

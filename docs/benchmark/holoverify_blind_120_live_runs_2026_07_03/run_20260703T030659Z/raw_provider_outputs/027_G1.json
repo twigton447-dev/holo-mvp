@@ -1,0 +1,27 @@
+{
+  "call_number": 27,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "5bcd606581b2ea1fbd5c8c94d0cde2fe95606f1cf114b15fdcf5c61798dae150",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user says: \"packet_id=BLIND120-3CF50C9BE7586D92A9D7\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe need to output a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. The data provided matches. So output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut also the packet_id field is given; but the instruction says \"Return the three-line status record.\" It mentions fields in order: route_verdict, repair_target, blocked_move. So we must ignore the packet_id. Possibly we can include packet_id? The spec says only three key=value lines. It says \"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move.\" So we output exactly three lines.\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nNo extra spaces? Probably okay.\n\nWe must not add headings or explanations.\n\nWe should ensure each line ends with newline.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "aa2c0f3f2694f939ee1665d1ae13751dd75d8acdb09a04fd7fa694d19d51da4a",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 123,
+    "output_tokens": 307,
+    "raw_text": "<think>\nThe user says: \"packet_id=BLIND120-3CF50C9BE7586D92A9D7\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe need to output a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. The data provided matches. So output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut also the packet_id field is given; but the instruction says \"Return the three-line status record.\" It mentions fields in order: route_verdict, repair_target, blocked_move. So we must ignore the packet_id. Possibly we can include packet_id? The spec says only three key=value lines. It says \"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move.\" So we output exactly three lines.\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nNo extra spaces? Probably okay.\n\nWe must not add headings or explanations.\n\nWe should ensure each line ends with newline.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06965aee35543b7a40beaa702dc8e7fc",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 430,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

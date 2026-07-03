@@ -1,0 +1,27 @@
+{
+  "call_number": 2,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "c4245e40e73d584ad086ed829cd8f46e27575bedecdd94cb6f6a3fc69a34e368",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user asks: \"packet_id=BLIND120-2EDFFAA4114188329885 status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nSo we need to produce a plain text record with three key=value lines. The fields are: route_verdict, repair_target, blocked_move. Must be in order: route_verdict, repair_target, blocked_move. No extra lines, headings, explanations, JSON, Markdown, etc. Should start with \"route_verdict=\".\n\nWe have packet_id? Possibly include packet_id? The user gave \"packet_id=BLIND120-2EDFFAA4114188329885\". But the three fields are route_verdict, repair_target, blocked_move. They didn't ask to include packet_id. So we output just those three lines.\n\nWe must preserve the exact strings: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must not add any extra lines.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "721dd74a499571e7f17e49bc2d769cfbdd2719d4e0a5d022b407f846b00d11ed",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 118,
+    "output_tokens": 285,
+    "raw_text": "<think>\nThe user asks: \"packet_id=BLIND120-2EDFFAA4114188329885 status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nSo we need to produce a plain text record with three key=value lines. The fields are: route_verdict, repair_target, blocked_move. Must be in order: route_verdict, repair_target, blocked_move. No extra lines, headings, explanations, JSON, Markdown, etc. Should start with \"route_verdict=\".\n\nWe have packet_id? Possibly include packet_id? The user gave \"packet_id=BLIND120-2EDFFAA4114188329885\". But the three fields are route_verdict, repair_target, blocked_move. They didn't ask to include packet_id. So we output just those three lines.\n\nWe must preserve the exact strings: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must not add any extra lines.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06965a5c52db4bb05e5f56d37d20e271",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 403,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

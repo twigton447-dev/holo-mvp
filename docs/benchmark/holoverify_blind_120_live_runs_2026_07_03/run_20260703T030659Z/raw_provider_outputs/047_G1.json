@@ -1,0 +1,27 @@
+{
+  "call_number": 47,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "da596c1131ece93bf3dbf6ddb952a89488c132d3e079eabc1e2b6f2f1e0e9813",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user gave a prompt:\n\n\"packet_id=BLIND120-45EE25DEF802BD41A316\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe need to output a plain text record with three key=value lines. The fields are: route_verdict, repair_target, blocked_move. In order: route_verdict, repair_target, blocked_move. No extra lines, no headings, no JSON, no markdown. Start with route_verdict=.\n\nThus the output should be:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut note: The blocked_move value originally given is \"do not invent source IDs\". The user says \"do not invent source IDs\". Should we preserve the case exactly as provided? The prompt says \"blocked_move=do not invent source IDs\". Lowercase 'do'. So we replicate exactly: \"do not invent source IDs\". The repair_target: \"preserve source-grounded reasoning\". We keep that as is.\n\nThus output exactly those three lines. Ensure no trailing whitespace, no extra blank line.\n\nThus final answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "2badb7b60c094fa12d56a917a0c93b81cea89adf9330f73ce05c04ec191cd340",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 118,
+    "output_tokens": 286,
+    "raw_text": "<think>\nThe user gave a prompt:\n\n\"packet_id=BLIND120-45EE25DEF802BD41A316\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe need to output a plain text record with three key=value lines. The fields are: route_verdict, repair_target, blocked_move. In order: route_verdict, repair_target, blocked_move. No extra lines, no headings, no JSON, no markdown. Start with route_verdict=.\n\nThus the output should be:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut note: The blocked_move value originally given is \"do not invent source IDs\". The user says \"do not invent source IDs\". Should we preserve the case exactly as provided? The prompt says \"blocked_move=do not invent source IDs\". Lowercase 'do'. So we replicate exactly: \"do not invent source IDs\". The repair_target: \"preserve source-grounded reasoning\". We keep that as is.\n\nThus output exactly those three lines. Ensure no trailing whitespace, no extra blank line.\n\nThus final answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06965b5f7891b57add924c76aeecdf84",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 404,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

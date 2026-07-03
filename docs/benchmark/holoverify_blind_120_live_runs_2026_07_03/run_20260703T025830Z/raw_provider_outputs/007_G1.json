@@ -1,0 +1,27 @@
+{
+  "call_number": 7,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "59e38c32cd8fb34cb61c8a9c182be21123bacc8be0f1d5a90369de49e33c1f41",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user asks: \"packet_id=BLIND120-1AFCE3993525666F06ED\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe must output a plain text record with three key=value lines. Fields in order: route_verdict, repair_target, blocked_move.\n\nWe must not add headings, explanations, JSON, Markdown, or extra lines.\n\nThus we should output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should verify that the order is correct. The user gave them in that order.\n\nAlso note that the user wrote \"packet_id=...\" but we are told to return only the three lines status record. The packet_id is not needed. So just those three lines.\n\nWe must not include anything else.\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nYes.\n\nPotential issues: Should we preserve the punctuation exactly as given? The user wrote \"preserve source-grounded reasoning\" and \"do not invent source IDs\". The format is key=value with no spaces around equals? The user wrote \"route_verdict=CONTINUE\". In the example they have no spaces around equals. They also used the words as given. The second line: \"repair_target=preserve source-grounded reasoning\". That's fine. The third line: \"blocked_move=do not invent source IDs\". That is fine.\n\nWe should not have any extra spaces after the line or before line. Should we include newline at end? Typically fine.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "bce0687555930a4ba60daa0e014e0ae2c68c5e981711aea644560c8a16d6c640",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 119,
+    "output_tokens": 388,
+    "raw_text": "<think>\nThe user asks: \"packet_id=BLIND120-1AFCE3993525666F06ED\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe must output a plain text record with three key=value lines. Fields in order: route_verdict, repair_target, blocked_move.\n\nWe must not add headings, explanations, JSON, Markdown, or extra lines.\n\nThus we should output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should verify that the order is correct. The user gave them in that order.\n\nAlso note that the user wrote \"packet_id=...\" but we are told to return only the three lines status record. The packet_id is not needed. So just those three lines.\n\nWe must not include anything else.\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nYes.\n\nPotential issues: Should we preserve the punctuation exactly as given? The user wrote \"preserve source-grounded reasoning\" and \"do not invent source IDs\". The format is key=value with no spaces around equals? The user wrote \"route_verdict=CONTINUE\". In the example they have no spaces around equals. They also used the words as given. The second line: \"repair_target=preserve source-grounded reasoning\". That's fine. The third line: \"blocked_move=do not invent source IDs\". That is fine.\n\nWe should not have any extra spaces after the line or before line. Should we include newline at end? Typically fine.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06965877f86a297c84a690c919e29260",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 507,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

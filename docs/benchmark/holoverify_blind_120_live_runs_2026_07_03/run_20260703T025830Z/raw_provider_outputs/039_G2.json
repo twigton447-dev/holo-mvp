@@ -1,0 +1,27 @@
+{
+  "call_number": 39,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "5b9ec7817cd87cfd115b8884c23a08541652cd4c646a5b6aea2de28429f7829c",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to parse the user request. The user gave:\n\n\"packet_id=BLIND120-299FB84B971D2465FA6C\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe need to output a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. Not extra headings, not JSON, not markdown. The order should be: route_verdict, repair_target, blocked_move.\n\nThe fields:\n\n- route_verdict: CONTINUE\n- repair_target: preserve source-grounded reasoning\n- blocked_move: do not invent source IDs\n\nThe packet_id is included, but not part of the three lines. The instruction says \"Return a plain text record with three key=value lines.\" The fields, in order: route_verdict, repair_target, blocked_move.\n\nThus we should output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure no extra spaces beyond what's typical. The example says \"key=value lines\". So we need exactly that. The first line is route_verdict=CONTINUE. The second line is repair_target=preserve source-grounded reasoning. The third line is blocked_move=do not invent source IDs.\n\nWe must ensure that there is no trailing spaces or extra lines. The output must be plain text. That is it.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "75ef2cf856e62f88daa1969d0de6ea623bd0128e7951836fbbcaf5638ec4a166",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 120,
+    "output_tokens": 338,
+    "raw_text": "<think>\nWe need to parse the user request. The user gave:\n\n\"packet_id=BLIND120-299FB84B971D2465FA6C\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe need to output a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. Not extra headings, not JSON, not markdown. The order should be: route_verdict, repair_target, blocked_move.\n\nThe fields:\n\n- route_verdict: CONTINUE\n- repair_target: preserve source-grounded reasoning\n- blocked_move: do not invent source IDs\n\nThe packet_id is included, but not part of the three lines. The instruction says \"Return a plain text record with three key=value lines.\" The fields, in order: route_verdict, repair_target, blocked_move.\n\nThus we should output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure no extra spaces beyond what's typical. The example says \"key=value lines\". So we need exactly that. The first line is route_verdict=CONTINUE. The second line is repair_target=preserve source-grounded reasoning. The third line is blocked_move=do not invent source IDs.\n\nWe must ensure that there is no trailing spaces or extra lines. The output must be plain text. That is it.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0696593e8f18629c4f29d29d13cdc829",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 458,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

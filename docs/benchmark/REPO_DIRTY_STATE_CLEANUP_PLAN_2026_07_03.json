@@ -1,105 +1,79 @@
 {
-  "schema": "repo_dirty_state_cleanup_plan_v2_post_cleanup_commits",
-  "generated_at_utc": "2026-07-03T20:54:38.273720+00:00",
+  "schema": "repo_dirty_state_cleanup_plan_v3_post_public_copy_cleanup",
+  "generated_at_utc": "2026-07-03T20:57:32.312546+00:00",
   "repo": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
   "branch": "codex/ap-publication-integration",
-  "head_short": "fb6d4da9d",
-  "head_subject": "benchmark: freeze solo failure factory batch005",
+  "head_short": "f4c712b12",
+  "head_subject": "benchmark: add solo failure holo rescue shortlist",
   "basis": "docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.json",
   "completed_cleanup_commits_visible_at_refresh": [
+    "f4c712b12 benchmark: add solo failure holo rescue shortlist",
+    "32689b1ca docs: narrow public benchmark claim boundary",
+    "59cd50eac docs: refresh repo cleanup triage after preservation",
     "fb6d4da9d benchmark: freeze solo failure factory batch005",
     "771d2988c benchmark: preserve ablation and discovery summaries",
-    "d89427bbe docs: preserve Fable review handoffs",
-    "0ae4a8f23 docs: preserve repo dirty state cleanup plan",
-    "b0d836a99 benchmark: preserve solo failure factory batch004 scout"
-  ],
-  "guardrails": [
-    "No providers, Holo, solo, Gov, or judges.",
-    "No deletes, reverts, git add ., or git add -A.",
-    "Live-run/preflight/runtime payload/Batch004/factory materials remain unstaged pending owner review.",
-    "Remaining public-copy and code/script/test changes require owner review before staging.",
-    "Temporary-noise candidates are not deletion targets without explicit approval."
+    "d89427bbe docs: preserve Fable review handoffs"
   ],
   "remaining_counts": {
-    "total_paths_excluding_this_report": 3442,
+    "total_paths_excluding_this_report": 3411,
     "by_status_code": {
-      " M": 4,
-      "??": 3438
+      "??": 3410,
+      " M": 1
     },
     "tracked_modified_paths_excluding_this_report": [
-      "docs/benchmark/three_mini_seam_scout_2026_06_29.py",
-      "docs/whitepaper.md",
-      "frontend/benchmark.html",
-      "frontend/whitepaper.html"
+      "docs/benchmark/three_mini_seam_scout_2026_06_29.py"
     ],
     "bucket_counts": {
-      "website_public_copy_changes": 3,
+      "website_public_copy_changes": 0,
       "fable_review_docs": 0,
-      "benchmark_ablation_discovery_artifacts": 7,
-      "run_preflight_artifacts": 3408,
-      "code_scripts_tests": 24,
+      "benchmark_ablation_discovery_artifacts": 2,
+      "run_preflight_artifacts": 3388,
+      "code_scripts_tests": 21,
       "unknown_risky": 0
     },
     "recommendation_class_counts": {
-      "owner_review": 1695,
+      "owner_review": 1664,
       "temporary_noise_candidate": 1747
     }
   },
-  "recommended_order": [
-    "lane_00_cleanup_reports",
-    "lane_01_fable_review_docs",
-    "lane_02_benchmark_summary_docs_remaining",
-    "lane_03_public_copy_owner_review",
-    "lane_04_code_scripts_tests_owner_review",
-    "lane_05_live_run_and_preflight_evidence_hold",
-    "lane_06_temporary_noise_candidates_hold",
-    "lane_07_unknown_risky_hold"
+  "guardrails": [
+    "No providers, Holo, solo, Gov, or judges.",
+    "No deletes, reverts, git add ., or git add -A.",
+    "Remaining code/script/test changes require owner review and non-provider validation before staging.",
+    "Live-run/preflight/runtime payload/Batch004/Batch005/factory materials remain unstaged pending owner review.",
+    "Temporary-noise candidates are not deletion targets without explicit approval."
   ],
   "lanes": {
     "lane_00_cleanup_reports": {
-      "status": "preserved_then_refreshed",
-      "purpose": "Repo hygiene reports generated and then refreshed after cleanup commits.",
+      "status": "preserve_refresh",
       "paths": [
-        "docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.md",
-        "docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.json",
+        "docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.json",
         "docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.md",
-        "docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.json"
+        "docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.json",
+        "docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.md"
       ],
-      "stage_command": "git add -- docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.md docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.json docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.md docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.json"
+      "stage_command": "git add -- docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.json docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.md docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.json docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.md"
     },
     "lane_01_fable_review_docs": {
-      "status": "preserved_in_commit_d89427bbe",
-      "purpose": "Docs-only Fable review/design handoff material.",
+      "status": "preserved",
       "paths": [],
       "stage_command": "NO_REMAINING_PATHS"
     },
     "lane_02_benchmark_summary_docs_remaining": {
-      "status": "hold_owner_review_for_new_or_remaining_docs",
-      "purpose": "Remaining benchmark/discovery summaries after the preserved ablation/discovery commit; new files may have appeared during cleanup.",
-      "paths": [
-        "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH005_PACKET_FREEZE_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH005_PACKET_FREEZE_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.md",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_hash_manifest_2026_07_03.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_runtime_manifest_2026_07_03.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_scoring_map_2026_07_03.json"
-      ],
-      "stage_command": "DO_NOT_STAGE_YET"
-    },
-    "lane_03_public_copy_owner_review": {
       "status": "hold_owner_review",
-      "purpose": "Public website/whitepaper claim-boundary changes; review diffs before staging.",
       "paths": [
-        "docs/whitepaper.md",
-        "frontend/benchmark.html",
-        "frontend/whitepaper.html"
+        "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.json",
+        "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.md"
       ],
       "stage_command": "DO_NOT_STAGE_YET"
     },
-    "lane_04_code_scripts_tests_owner_review": {
+    "lane_03_public_copy": {
+      "status": "preserved",
+      "paths": [],
+      "stage_command": "NO_REMAINING_PATHS"
+    },
+    "lane_04_code_scripts_tests": {
       "status": "hold_owner_review_and_non_provider_validation",
-      "purpose": "Code/scripts/tests need diff review and non-provider validation before staging.",
       "paths": [
         "docs/benchmark/three_mini_seam_scout_2026_06_29.py",
         "docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_2026_07_03.py",
@@ -110,30 +84,23 @@
         "docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v5_fable_batch2_exact_2026_07_03.py",
         "docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6_fable_v5_affordance_2026_07_03.py",
         "docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6b_fix034_2026_07_03.py",
-        "docs/benchmark/build_holoverify_solo_failure_factory_batch005_2026_07_03.py",
         "docs/benchmark/build_randomized_corpus_balanced_ablation_sample_2026_07_02.py",
         "docs/benchmark/filter_holoverify_blind_120_solo_failure_packets_2026_07_03.py",
         "docs/benchmark/preflight_holoverify_atlas_seam_discovery_minirun_2026_07_03.py",
         "docs/benchmark/rescore_holoverify_atlas_seam_discovery_scouts_2026_07_03.py",
         "docs/benchmark/run_holoverify_atlas_5fail_majority_ensemble_ablation_2026_07_03.py",
         "docs/benchmark/run_holoverify_atlas_5fail_workers_only_ablation_2026_07_03.py",
-        "docs/benchmark/run_holoverify_solo_failure_factory_batch005_solo_scout_2026_07_03.py",
         "docs/benchmark/run_kita_ablation_series_solo_one_shot_2026_07_02.py",
         "docs/benchmark/run_kita_randomized_corpus_balanced_ablation_2026_07_02.py",
         "docs/benchmark/score_holoverify_atlas_5fail_majority_ensemble_ablation_2026_07_03.py",
         "docs/benchmark/score_holoverify_atlas_5fail_workers_only_ablation_2026_07_03.py",
-        "docs/benchmark/score_holoverify_solo_failure_factory_batch005_solo_scout_2026_07_03.py",
         "docs/benchmark/validate_holoverify_atlas_scout_candidate_rule_2026_07_03.py",
         "tests/test_kita_randomized_corpus_balanced_ablation.py"
       ],
-      "tracked_diff_summary": {
-        "docs/benchmark/three_mini_seam_scout_2026_06_29.py": "Tracked patch changes evidence text extraction, candidate criteria, --out-root, and selection-rule text."
-      },
       "stage_command": "DO_NOT_STAGE_YET"
     },
-    "lane_05_live_run_and_preflight_evidence_hold": {
+    "lane_05_live_preflight_evidence": {
       "status": "hold_do_not_touch",
-      "purpose": "Live-run, preflight, prompt, trace, runtime payload, and generated run artifacts. Preserve only through explicit evidence lane; do not delete.",
       "paths": [
         "docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/atlas_5fail_majority_ensemble_preflight.json",
         "docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/atlas_5fail_majority_ensemble_preflight.md",
@@ -1384,26 +1351,6 @@
         "docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-EE07FB0DCE4002FC.json",
         "docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/solo_one_shot_preflight.json",
         "docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/solo_one_shot_preflight.md",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-00F7616872BED2F88F3C.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-19D61F4C1D2AB58BD47F.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-40273E5BECB2E2987AE3.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-4CAE7C0EF35CEA75C1A8.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-68283855FB929F72FF5A.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-75C056AEE0FB75242334.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-79CD78EC3270DFC530AD.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-7B606B61B8482F1CB875.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-817E9E471B4C5E3FB019.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8473C8363337252AE6B2.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8DD56D14A3CE770E7FCD.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8F7DD7C9D7D708A0BD24.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-A7A3354745A9214F698B.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-B7BFF51B0C0816D66582.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-BBFE131763EFFCD2150D.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-C0EEBC118FECA209ECBD.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-C7925A1A32DD96310746.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-D222FC523042B82251EB.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-F5AD63532B2155A3C7EE.json",
-        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-FC90EF0A43623E832FDA.json",
         "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/solo_one_shot_preflight.json",
         "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/solo_one_shot_preflight.md",
         "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ablation_series_solo_one_shot_12packet_20260702/live_runs/run_20260702T213138Z/KITA_ABLATION_SERIES_SOLO_ONE_SHOT_PREFLIGHT.json",
@@ -1799,9 +1746,8 @@
       ],
       "stage_command": "DO_NOT_STAGE_YET"
     },
-    "lane_06_temporary_noise_candidates_hold": {
+    "lane_06_temporary_noise_candidates": {
       "status": "hold_no_delete_without_explicit_approval",
-      "purpose": "Preflight prompt probes and preflight_latest material likely to be noise, but no deletion is authorized.",
       "paths": [
         "docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/preflight_prompt_probe/ATLASRESCUE-4D29A82BECA21E67C3C8_M1.json",
         "docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/preflight_prompt_probe/ATLASRESCUE-4D29A82BECA21E67C3C8_M2.json",
@@ -3553,12 +3499,11 @@
       ],
       "stage_command": "DO_NOT_STAGE_YET"
     },
-    "lane_07_unknown_risky_hold": {
+    "lane_07_unknown_risky": {
       "status": "hold_owner_review",
-      "purpose": "Unclassified paths.",
       "paths": [],
       "stage_command": "DO_NOT_STAGE_YET"
     }
   },
-  "next_safe_action": "Stop automatic staging here. Remaining paths are owner-review, live/preflight evidence, code/script/test changes, public-copy changes, or temporary-noise candidates requiring explicit deletion approval."
+  "next_safe_action": "Stop automatic staging here. Remaining paths are code/script/test changes, owner-review benchmark docs, live/preflight evidence, or temporary-noise candidates."
 }

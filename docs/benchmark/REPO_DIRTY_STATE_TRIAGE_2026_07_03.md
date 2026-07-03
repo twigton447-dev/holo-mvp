@@ -1,200 +1,46 @@
 # Repo Dirty State Triage - 2026-07-03
 
-Classification: POST_CLEANUP_REPO_HYGIENE_CURRENT_HEAD
+Classification: POST_PUBLIC_COPY_CLEANUP_CURRENT_HEAD
 
 Repo: `/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001`
 Branch: `codex/ap-publication-integration`
-HEAD: `771d2988c` (`benchmark: preserve ablation and discovery summaries`)
+HEAD: `f4c712b12` (`benchmark: add solo failure holo rescue shortlist`)
 
-This snapshot excludes the triage and cleanup-plan report files themselves so the counts represent the remaining repo dirt after the docs cleanup commits.
-
-## Guardrails
-
-- No providers were run.
-- No Holo, solo, Gov, or judges were run.
-- No files were deleted or reverted.
-- Existing benchmark evidence and live-run artifacts were not modified.
-- This refresh only rewrote the cleanup triage markdown and JSON companion.
+This snapshot excludes the cleanup report files themselves.
 
 ## Completed Cleanup Commits Visible At Refresh
 
+- `f4c712b12 benchmark: add solo failure holo rescue shortlist`
+- `32689b1ca docs: narrow public benchmark claim boundary`
+- `59cd50eac docs: refresh repo cleanup triage after preservation`
+- `fb6d4da9d benchmark: freeze solo failure factory batch005`
 - `771d2988c benchmark: preserve ablation and discovery summaries`
 - `d89427bbe docs: preserve Fable review handoffs`
-- `0ae4a8f23 docs: preserve repo dirty state cleanup plan`
-- `b0d836a99 benchmark: preserve solo failure factory batch004 scout`
 
 ## Summary
 
-Remaining dirty paths excluding cleanup reports: `3442`
+Remaining dirty paths excluding cleanup reports: `3411`
 
-| Bucket | Count | Recommended action |
-| --- | ---: | --- |
-| `website_public_copy_changes` | 3 | Owner review before path-scoped staging. |
-| `fable_review_docs` | 0 | No remaining paths expected after Fable docs commit unless new files appeared. |
-| `benchmark_ablation_discovery_artifacts` | 7 | Only non-preserved owner-review summaries should remain. |
-| `run_preflight_artifacts` | 3408 | Do not touch; preserve only through an explicit evidence lane. |
-| `code_scripts_tests` | 24 | Owner review and non-provider tests before staging. |
-| `unknown_risky` | 0 | Leave unstaged pending owner identification. |
-
-## Recommendation
-
-- Do not stage remaining live evidence, runtime payloads, preflight probes, public-copy files, or code files without a new explicit lane.
-- Safe docs lanes already preserved are removed from the remaining dirty count.
-- Treat all remaining Batch004/factory/runtime payload/live-run/preflight directories as owner-review evidence material, not cleanup targets.
-- Review public-copy diffs before staging website/whitepaper files.
-- Review code/scripts/tests separately and run only non-provider tests before staging.
-- Temporary-noise candidates are report-only labels; do not delete them without explicit approval.
+| Bucket | Count |
+| --- | ---: |
+| `website_public_copy_changes` | 0 |
+| `fable_review_docs` | 0 |
+| `benchmark_ablation_discovery_artifacts` | 2 |
+| `run_preflight_artifacts` | 3388 |
+| `code_scripts_tests` | 21 |
+| `unknown_risky` | 0 |
 
 ## Tracked Modified Files
 
 - `docs/benchmark/three_mini_seam_scout_2026_06_29.py`
-- `docs/whitepaper.md`
-- `frontend/benchmark.html`
-- `frontend/whitepaper.html`
-
-## Raw `git status --short` Excluding Cleanup Reports
-
-```text
- M docs/benchmark/three_mini_seam_scout_2026_06_29.py
- M docs/whitepaper.md
- M frontend/benchmark.html
- M frontend/whitepaper.html
-?? docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH005_PACKET_FREEZE_2026_07_03.json
-?? docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH005_PACKET_FREEZE_2026_07_03.md
-?? docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.json
-?? docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.md
-?? docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_2026_07_03.py
-?? docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v2_2026_07_03.py
-?? docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v3_2026_07_03.py
-?? docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v3_fable_subset_2026_07_03.py
-?? docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v4_fable_bank_2026_07_03.py
-?? docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v5_fable_batch2_exact_2026_07_03.py
-?? docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6_fable_v5_affordance_2026_07_03.py
-?? docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6b_fix034_2026_07_03.py
-?? docs/benchmark/build_holoverify_solo_failure_factory_batch005_2026_07_03.py
-?? docs/benchmark/build_randomized_corpus_balanced_ablation_sample_2026_07_02.py
-?? docs/benchmark/filter_holoverify_blind_120_solo_failure_packets_2026_07_03.py
-?? docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/
-?? docs/benchmark/holoverify_atlas_5fail_workers_only_ablation_runs_2026_07_03/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T054107Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T054143Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T054318Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T055154Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T055231Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T060024Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T060101Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T060932Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T061135Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T061635Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T062818Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T063354Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T103132Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T103140Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T103736Z/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v2/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v3_fable_subset/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v4_fable_bank/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v6_fable_v5_affordance/
-?? docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/solo_scout_3mini_v6b_fix034/
-?? docs/benchmark/holoverify_blind_120_11pkt_workers_only_ablation_runs_2026_07_03/preflight_20260703T173211Z/
-?? docs/benchmark/holoverify_blind_120_live_runs_2026_07_03/preflight_20260703T023656Z/
-?? docs/benchmark/holoverify_blind_120_live_runs_2026_07_03/preflight_20260703T024856Z/
-?? docs/benchmark/holoverify_blind_120_solo_one_shot_runs_2026_07_03/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260702T233142Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260702T235710Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T000217Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T000517Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T000909Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T001429Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T001604Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T001803Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T002003Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T002143Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T002327Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T002547Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T002759Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T002951Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T003109Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T003423Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T003748Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T004057Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T005052Z/
-?? docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02/preflight_20260703T005209Z/
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-006516DA902FA12F.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-0868E7921724080A.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-0D23660DBFCE6C15.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-13541197657EA272.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-185300A704BEF346.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-28ACE8ABF0C430F8.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-2A9867F9024117DA.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-2ADC52B823E08FEE.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-2C533C34EF6E2F00.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-2C91F91029B47B34.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-30206255D6E5D20D.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-42E21E8B9568F83A.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-4871EABD32051E1D.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-5398DBB259FAB7D8.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-580A30ED96349183.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-640DCDBCC7B0299B.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-6E3C302FF46274CE.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-6F209B64A3D1ED07.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-7524C521B2D5F18A.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-77D0214A2D315958.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-81CDDBD8E0AFDF22.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-8BD8B82A8005DA28.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-8D24806D408C158E.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-8D3B15E1C696E604.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-982DCE010BAE8723.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-9BF738D1A2DC6FC6.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-9E34E60D08972659.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-A15D127943129BEF.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-A6C99ED4369C1583.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-B080CAB8F0B2FB02.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-B58C3FE9AC45EDC1.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-B84EA989BB6B960C.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-BEC95E2C7319564D.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-CA745CBBA28C6A2C.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-D06B5978C93991F9.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-E1CB21CF7A8CDEB4.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-E4E9CB04A323EDDF.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-EBE8DE588524AC48.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-EDD4B43F22E3AE1B.json
-?? docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-EE07FB0DCE4002FC.json
-?? docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/
-?? docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/
-?? docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/
-?? docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ablation_series_solo_one_shot_12packet_20260702/
-?? docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/cross_domain_3pair_hard/live_runs/run_20260702T182253Z/
-?? docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/cross_domain_3pair_hard_modelmix_rerun_20260702/
-?? docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/gpt54_solo_identical_frozen_packet_set/
-?? docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/live_runs/
-?? docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/preflight_latest/
-?? docs/benchmark/preflight_holoverify_atlas_seam_discovery_minirun_2026_07_03.py
-?? docs/benchmark/rescore_holoverify_atlas_seam_discovery_scouts_2026_07_03.py
-?? docs/benchmark/run_holoverify_atlas_5fail_majority_ensemble_ablation_2026_07_03.py
-?? docs/benchmark/run_holoverify_atlas_5fail_workers_only_ablation_2026_07_03.py
-?? docs/benchmark/run_holoverify_solo_failure_factory_batch005_solo_scout_2026_07_03.py
-?? docs/benchmark/run_kita_ablation_series_solo_one_shot_2026_07_02.py
-?? docs/benchmark/run_kita_randomized_corpus_balanced_ablation_2026_07_02.py
-?? docs/benchmark/score_holoverify_atlas_5fail_majority_ensemble_ablation_2026_07_03.py
-?? docs/benchmark/score_holoverify_atlas_5fail_workers_only_ablation_2026_07_03.py
-?? docs/benchmark/score_holoverify_solo_failure_factory_batch005_solo_scout_2026_07_03.py
-?? docs/benchmark/validate_holoverify_atlas_scout_candidate_rule_2026_07_03.py
-?? tests/test_kita_randomized_corpus_balanced_ablation.py
-```
 
 ## Bucket Details
 
 ### website_public_copy_changes
 
-Count: `3`
+Count: `0`
 
-| Status | Recommendation | Path |
-| --- | --- | --- |
-| ` M` | `owner_review` | `docs/whitepaper.md` |
-| ` M` | `owner_review` | `frontend/benchmark.html` |
-| ` M` | `owner_review` | `frontend/whitepaper.html` |
+- None
 
 ### fable_review_docs
 
@@ -204,21 +50,16 @@ Count: `0`
 
 ### benchmark_ablation_discovery_artifacts
 
-Count: `7`
+Count: `2`
 
 | Status | Recommendation | Path |
 | --- | --- | --- |
-| `??` | `owner_review` | `docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH005_PACKET_FREEZE_2026_07_03.json` |
-| `??` | `owner_review` | `docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH005_PACKET_FREEZE_2026_07_03.md` |
 | `??` | `owner_review` | `docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.json` |
 | `??` | `owner_review` | `docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.md` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_hash_manifest_2026_07_03.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_runtime_manifest_2026_07_03.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_scoring_map_2026_07_03.json` |
 
 ### run_preflight_artifacts
 
-Count: `3408`
+Count: `3388`
 
 | Status | Recommendation | Path |
 | --- | --- | --- |
@@ -3148,26 +2989,6 @@ Count: `3408`
 | `??` | `temporary_noise_candidate` | `docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/preflight_prompt_probe/020_HVSF004-F7EF7EA3699A6CE46168_xai.json` |
 | `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/solo_one_shot_preflight.json` |
 | `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/solo_one_shot_preflight.md` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-00F7616872BED2F88F3C.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-19D61F4C1D2AB58BD47F.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-40273E5BECB2E2987AE3.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-4CAE7C0EF35CEA75C1A8.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-68283855FB929F72FF5A.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-75C056AEE0FB75242334.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-79CD78EC3270DFC530AD.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-7B606B61B8482F1CB875.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-817E9E471B4C5E3FB019.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8473C8363337252AE6B2.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8DD56D14A3CE770E7FCD.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8F7DD7C9D7D708A0BD24.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-A7A3354745A9214F698B.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-B7BFF51B0C0816D66582.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-BBFE131763EFFCD2150D.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-C0EEBC118FECA209ECBD.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-C7925A1A32DD96310746.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-D222FC523042B82251EB.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-F5AD63532B2155A3C7EE.json` |
-| `??` | `owner_review` | `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-FC90EF0A43623E832FDA.json` |
 | `??` | `temporary_noise_candidate` | `docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/001_HVSF005-00F7616872BED2F88F3C_minimax.json` |
 | `??` | `temporary_noise_candidate` | `docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/001_HVSF005-00F7616872BED2F88F3C_openai.json` |
 | `??` | `temporary_noise_candidate` | `docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/001_HVSF005-00F7616872BED2F88F3C_xai.json` |
@@ -3633,7 +3454,7 @@ Count: `3408`
 
 ### code_scripts_tests
 
-Count: `24`
+Count: `21`
 
 | Status | Recommendation | Path |
 | --- | --- | --- |
@@ -3646,19 +3467,16 @@ Count: `24`
 | `??` | `owner_review` | `docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v5_fable_batch2_exact_2026_07_03.py` |
 | `??` | `owner_review` | `docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6_fable_v5_affordance_2026_07_03.py` |
 | `??` | `owner_review` | `docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6b_fix034_2026_07_03.py` |
-| `??` | `owner_review` | `docs/benchmark/build_holoverify_solo_failure_factory_batch005_2026_07_03.py` |
 | `??` | `owner_review` | `docs/benchmark/build_randomized_corpus_balanced_ablation_sample_2026_07_02.py` |
 | `??` | `owner_review` | `docs/benchmark/filter_holoverify_blind_120_solo_failure_packets_2026_07_03.py` |
 | `??` | `owner_review` | `docs/benchmark/preflight_holoverify_atlas_seam_discovery_minirun_2026_07_03.py` |
 | `??` | `owner_review` | `docs/benchmark/rescore_holoverify_atlas_seam_discovery_scouts_2026_07_03.py` |
 | `??` | `owner_review` | `docs/benchmark/run_holoverify_atlas_5fail_majority_ensemble_ablation_2026_07_03.py` |
 | `??` | `owner_review` | `docs/benchmark/run_holoverify_atlas_5fail_workers_only_ablation_2026_07_03.py` |
-| `??` | `owner_review` | `docs/benchmark/run_holoverify_solo_failure_factory_batch005_solo_scout_2026_07_03.py` |
 | `??` | `owner_review` | `docs/benchmark/run_kita_ablation_series_solo_one_shot_2026_07_02.py` |
 | `??` | `owner_review` | `docs/benchmark/run_kita_randomized_corpus_balanced_ablation_2026_07_02.py` |
 | `??` | `owner_review` | `docs/benchmark/score_holoverify_atlas_5fail_majority_ensemble_ablation_2026_07_03.py` |
 | `??` | `owner_review` | `docs/benchmark/score_holoverify_atlas_5fail_workers_only_ablation_2026_07_03.py` |
-| `??` | `owner_review` | `docs/benchmark/score_holoverify_solo_failure_factory_batch005_solo_scout_2026_07_03.py` |
 | `??` | `owner_review` | `docs/benchmark/validate_holoverify_atlas_scout_candidate_rule_2026_07_03.py` |
 | `??` | `owner_review` | `tests/test_kita_randomized_corpus_balanced_ablation.py` |
 
@@ -3670,18 +3488,8 @@ Count: `0`
 
 ## Do Not Stage Yet
 
-Every remaining dirty path below is a do-not-stage-yet path until Taylor or Codex lead authorizes a specific lane. This list excludes the cleanup report files themselves.
-
-- `docs/whitepaper.md`
-- `frontend/benchmark.html`
-- `frontend/whitepaper.html`
-- `docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH005_PACKET_FREEZE_2026_07_03.json`
-- `docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH005_PACKET_FREEZE_2026_07_03.md`
 - `docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.json`
 - `docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.md`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_hash_manifest_2026_07_03.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_runtime_manifest_2026_07_03.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_scoring_map_2026_07_03.json`
 - `docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/atlas_5fail_majority_ensemble_preflight.json`
 - `docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/atlas_5fail_majority_ensemble_preflight.md`
 - `docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/preflight_prompt_probe/ATLASRESCUE-4D29A82BECA21E67C3C8_M1.json`
@@ -6608,26 +6416,6 @@ Every remaining dirty path below is a do-not-stage-yet path until Taylor or Code
 - `docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/preflight_prompt_probe/020_HVSF004-F7EF7EA3699A6CE46168_xai.json`
 - `docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/solo_one_shot_preflight.json`
 - `docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/solo_one_shot_preflight.md`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-00F7616872BED2F88F3C.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-19D61F4C1D2AB58BD47F.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-40273E5BECB2E2987AE3.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-4CAE7C0EF35CEA75C1A8.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-68283855FB929F72FF5A.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-75C056AEE0FB75242334.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-79CD78EC3270DFC530AD.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-7B606B61B8482F1CB875.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-817E9E471B4C5E3FB019.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8473C8363337252AE6B2.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8DD56D14A3CE770E7FCD.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8F7DD7C9D7D708A0BD24.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-A7A3354745A9214F698B.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-B7BFF51B0C0816D66582.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-BBFE131763EFFCD2150D.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-C0EEBC118FECA209ECBD.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-C7925A1A32DD96310746.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-D222FC523042B82251EB.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-F5AD63532B2155A3C7EE.json`
-- `docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-FC90EF0A43623E832FDA.json`
 - `docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/001_HVSF005-00F7616872BED2F88F3C_minimax.json`
 - `docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/001_HVSF005-00F7616872BED2F88F3C_openai.json`
 - `docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/001_HVSF005-00F7616872BED2F88F3C_xai.json`
@@ -7099,19 +6887,16 @@ Every remaining dirty path below is a do-not-stage-yet path until Taylor or Code
 - `docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v5_fable_batch2_exact_2026_07_03.py`
 - `docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6_fable_v5_affordance_2026_07_03.py`
 - `docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6b_fix034_2026_07_03.py`
-- `docs/benchmark/build_holoverify_solo_failure_factory_batch005_2026_07_03.py`
 - `docs/benchmark/build_randomized_corpus_balanced_ablation_sample_2026_07_02.py`
 - `docs/benchmark/filter_holoverify_blind_120_solo_failure_packets_2026_07_03.py`
 - `docs/benchmark/preflight_holoverify_atlas_seam_discovery_minirun_2026_07_03.py`
 - `docs/benchmark/rescore_holoverify_atlas_seam_discovery_scouts_2026_07_03.py`
 - `docs/benchmark/run_holoverify_atlas_5fail_majority_ensemble_ablation_2026_07_03.py`
 - `docs/benchmark/run_holoverify_atlas_5fail_workers_only_ablation_2026_07_03.py`
-- `docs/benchmark/run_holoverify_solo_failure_factory_batch005_solo_scout_2026_07_03.py`
 - `docs/benchmark/run_kita_ablation_series_solo_one_shot_2026_07_02.py`
 - `docs/benchmark/run_kita_randomized_corpus_balanced_ablation_2026_07_02.py`
 - `docs/benchmark/score_holoverify_atlas_5fail_majority_ensemble_ablation_2026_07_03.py`
 - `docs/benchmark/score_holoverify_atlas_5fail_workers_only_ablation_2026_07_03.py`
-- `docs/benchmark/score_holoverify_solo_failure_factory_batch005_solo_scout_2026_07_03.py`
 - `docs/benchmark/validate_holoverify_atlas_scout_candidate_rule_2026_07_03.py`
 - `tests/test_kita_randomized_corpus_balanced_ablation.py`
 

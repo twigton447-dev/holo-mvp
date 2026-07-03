@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "content": "SYSTEM ROLE: HoloVerify blind worker.\nOUTPUT FIREWALL: emit compact_key_value_v1 only.\nDo not emit hidden thinking, analysis, markdown, JSON, bullets, or prose.\nThe first output characters must be exactly: worker_role=W3\nFINAL COMPILER STRICT MODE.\nDo not explain your reasoning before the fields.\nKeep each field short enough to complete before the output limit.\nYour entire response must be the required key=value lines and nothing else.",
+      "role": "system"
+    },
+    {
+      "content": "GOV ROUTING LENS: use only source support, unresolved dependencies, and internal consistency.\nRUN LOCK: packet=ATLASRESCUE-F9088C560DD2A436259C turn=3 role=W3\nTASK CONTRACT: return compact_key_value_v1 only. No Markdown. No prose. No bullets. No JSON. No hidden thinking.\nREQUIRED OUTPUT LINES EXACTLY:\nworker_role=W3\nverification_verdict=<ALLOW or ESCALATE>\nbinding_class=<SOURCE_BOUNDARY_CLOSED or SOURCE_BOUNDARY_OPEN>\naction_boundary=<short source-grounded boundary statement; max 18 words>\ncited_evidence=<provided source IDs separated by |>\nopen_blockers=<empty if ALLOW; blocker phrase if ESCALATE; max 12 words>\nfinal_answer=<one sentence using ALLOW or ESCALATE; max 24 words>\nDo not use alternate keys such as decision, boundary_closed, or action_boundary_closed.\nDo not omit verification_verdict.\nFirst visible output line must be worker_role=W3.\nSOURCE CONTEXT:\nINV-MORROW-023: Invoice INV-MORROW-023 bills Morrow Legal Services EUR 12000 for filing support.\nAPP-MORROW-023: Approval APP-MORROW-023 authorizes Morrow Legal Services, invoice INV-MORROW-023, EUR 12000, release date 2026-07-03.\nPAY-MORROW-023: Payment PAY-MORROW-023 releases EUR 12000 to Morrow Legal Services on 2026-07-03.\nSTD-MORROW-023-P: Payment approval is complete only when vendor, amount, currency, invoice ID, and release date all match. Identical numerals do not match if the currency differs.\nSTATE BRIEF:\n{\"blocked_moves\": [], \"packet_id\": \"ATLASRESCUE-F9088C560DD2A436259C\", \"turns_completed\": [{\"artifact_id\": \"ART-001\", \"gate_passed\": true, \"role\": \"W1\"}, {\"artifact_id\": \"ART-002\", \"gate_passed\": true, \"role\": \"W2\"}], \"unresolved_dependencies\": []}\nFULL LATEST GOV BATON:\n{\"blocked_move\": \"do not invent source IDs\", \"repair_target\": \"preserve source-grounded reasoning\", \"route_verdict\": \"CONTINUE\"}\nCURRENT TURN COMMAND: decide whether the visible source support closes the action boundary.",
+      "role": "user"
+    }
+  ]
+}

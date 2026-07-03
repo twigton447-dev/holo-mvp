@@ -1,0 +1,92 @@
+{
+  "classification": "HOLOVERIFY_ATLAS_HOLO_RESCUE_LIVE_HANDOFF",
+  "status": "READY_FOR_EXPLICIT_PROVIDER_APPROVAL",
+  "directional_evidence_only": true,
+  "public_error_rate_claim": false,
+  "scope": {
+    "pairs": 6,
+    "packets": 12,
+    "expected_provider_calls": 60,
+    "expected_worker_calls": 36,
+    "expected_gov_calls": 24,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "scoring_before_trace_freeze": false,
+    "substitutions_allowed": false
+  },
+  "promotion_pair_ids": [
+    "HV-ATLAS-DISC-020",
+    "HV-ATLAS-DISC-023",
+    "HV-ATLAS-DISC-025",
+    "HV-ATLAS-DISC-033",
+    "HV-ATLAS-DISC-035",
+    "HV-ATLAS-DISC-036"
+  ],
+  "excluded_pair_ids": [
+    "HV-ATLAS-DISC-034"
+  ],
+  "hashes": {
+    "freeze_root_sha256": "d4e130d4598963b55e7cc6b708ff6b850a7e14df1a4b2d9bc2b24c3f08fbb7da",
+    "runtime_manifest_sha256": "0cd8ab98da5c6a4089279922cf644d3cbcb0820555be65d14f88b68b99f453f7",
+    "scoring_map_sha256": "70ddcbcf5a32e4c1a75ebef563dd60c0514e3cc40eda90f5653ef80974661e19"
+  },
+  "roster": [
+    {
+      "slot": "W1",
+      "provider": "xai",
+      "model": "grok-3-mini",
+      "role": "worker"
+    },
+    {
+      "slot": "G1",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "role": "gov"
+    },
+    {
+      "slot": "W2",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "role": "worker"
+    },
+    {
+      "slot": "G2",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "role": "gov"
+    },
+    {
+      "slot": "W3",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "role": "worker"
+    }
+  ],
+  "validation": {
+    "py_compile": "PASS",
+    "runtime_bank_freeze": "PASS",
+    "live_preflight": "PASS",
+    "runtime_input_leakage": "PASS",
+    "prompt_probe_leakage": "PASS",
+    "scoring_map_absent_from_live_wrapper": "PASS",
+    "freeze_root_matches_hash_manifest": "PASS",
+    "provider_calls_during_prep": 0
+  },
+  "artifacts": {
+    "runtime_manifest": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/holoverify_atlas_holo_rescue_runtime_manifest_2026_07_03.json",
+    "scoring_map": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/holoverify_atlas_holo_rescue_scoring_map_2026_07_03.json",
+    "hash_manifest": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/holoverify_atlas_holo_rescue_hash_manifest_2026_07_03.json",
+    "preflight": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/preflight_20260703T105015Z/atlas_holo_rescue_live_preflight.json",
+    "packet_bank_freeze": "docs/benchmark/HOLOVERIFY_ATLAS_HOLO_RESCUE_PACKET_BANK_FREEZE_2026_07_03.json",
+    "blind_120_solo_failure_filter": "docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_FAILURE_PACKET_FILTER_2026_07_03.json"
+  },
+  "approval_sentence": "I approve live provider execution for HOLOVERIFY_ATLAS_HOLO_RESCUE_6PAIR_RUNTIME_FIREWALL_V0 using freeze root d4e130d4598963b55e7cc6b708ff6b850a7e14df1a4b2d9bc2b24c3f08fbb7da, runtime manifest 0cd8ab98da5c6a4089279922cf644d3cbcb0820555be65d14f88b68b99f453f7, opaque packet indices 1-12 only, and exactly 60 provider calls: W1 xai/grok-3-mini x12, G1 minimax/MiniMax-M2.5-highspeed x12, W2 openai/gpt-5.4-mini x12, G2 minimax/MiniMax-M2.5-highspeed x12, W3 minimax/MiniMax-M2.5-highspeed x12. No judges, no solo, no scoring map before trace freeze, no substitutions, no public claims.",
+  "live_command": "python3 -B docs/benchmark/run_holoverify_atlas_holo_rescue_live_2026_07_03.py --run-live --approval-statement \"<APPROVAL_SENTENCE>\"",
+  "posthoc_scoring_command": "python3 -B docs/benchmark/score_holoverify_atlas_holo_rescue_posthoc_2026_07_03.py --run-dir <RUN_DIR>",
+  "blind_120_solo_failure_filter": {
+    "selection_rule": "keep only packets where at least one same-model solo one-shot failed; parse/admissibility failures count as failures",
+    "total_packets": 120,
+    "kept_hard_seam_packets": 11,
+    "excluded_all_three_knew_packets": 109
+  }
+}

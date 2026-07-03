@@ -1,0 +1,101 @@
+{
+  "classification": "HOLOVERIFY_ATLAS_HOLO_RESCUE_POSTRUN_AUTOPSY",
+  "status": "TRACE_PRESERVED_POSTHOC_SCORED",
+  "directional_evidence_only": true,
+  "run_dir": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T140931Z",
+  "live_result": {
+    "provider_calls_observed": 60,
+    "provider_calls_expected": 60,
+    "provider_failures": 0,
+    "runtime_firewall_passed": true,
+    "trace_frozen_before_scoring": true,
+    "scoring_loaded_after_trace_freeze": true
+  },
+  "score_result": {
+    "packets_correct": 11,
+    "packets_total": 12,
+    "pairs_both_siblings_correct": 5,
+    "pairs_total": 6,
+    "incorrect_packets": [
+      {
+        "legacy_packet_id": "HV-ATLAS-DISC-033-B",
+        "opaque_runtime_id": "ATLASRESCUE-93D992FE116415AEA6EE",
+        "truth": "ESCALATE",
+        "final_verdict": "ALLOW",
+        "selected_artifact_id": "ART-002"
+      }
+    ]
+  },
+  "failed_packet_autopsy": {
+    "legacy_packet_id": "HV-ATLAS-DISC-033-B",
+    "opaque_runtime_id": "ATLASRESCUE-93D992FE116415AEA6EE",
+    "source_facts": {
+      "request_amount_usd": 5100,
+      "quarterly_spend_rows_usd": [
+        9200,
+        8100,
+        7400,
+        8800
+      ],
+      "trailing_spend_total_usd": 33500,
+      "policy_cap_percent": 15,
+      "policy_cap_usd": 5025,
+      "correct_verdict": "ESCALATE"
+    },
+    "turns": [
+      {
+        "slot": "W1",
+        "artifact_id": "ART-001",
+        "verdict": "ESCALATE",
+        "assessment": "correct"
+      },
+      {
+        "slot": "W2",
+        "artifact_id": "ART-002",
+        "verdict": "ALLOW",
+        "assessment": "wrong_intermediate_drift"
+      },
+      {
+        "slot": "W3",
+        "artifact_id": "ART-003",
+        "verdict": "ESCALATE",
+        "assessment": "correct_repair"
+      }
+    ],
+    "final_selector": {
+      "selected_artifact_id": "ART-002",
+      "selected_verdict": "ALLOW",
+      "correct_repaired_artifact_available": true,
+      "correct_repaired_artifact_id": "ART-003"
+    }
+  },
+  "failure_class": "FINAL_SELECTOR_REGRESSION",
+  "specific_failure_class": "FINAL_SELECTOR_CHOSE_WRONG_INTERMEDIATE_ARTIFACT_DESPITE_LATER_WORKER_REPAIR",
+  "not_failure_classes": [
+    "PROVIDER_FAILURE",
+    "GOV_PARSE_FAILURE",
+    "ALL_WORKERS_WRONG",
+    "PACKET_LEAKAGE"
+  ],
+  "hardening_next_step": {
+    "target_layer": "selector_actuator",
+    "do_not_patch": [
+      "packet_truth",
+      "packet_text",
+      "scoring_map",
+      "provider_roster"
+    ],
+    "fixture_required": "W1=ESCALATE, W2=ALLOW, W3=ESCALATE, truth hidden from runtime, selector must choose source-grounded W3 repair",
+    "rules_required": [
+      "selector must recognize verdict repair across turns",
+      "selector must not prefer an older structurally valid artifact over a later source-grounded arithmetic repair",
+      "final selector must compare final artifact against best source-grounded prior artifact"
+    ]
+  },
+  "evidence_paths": {
+    "score": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T140931Z/atlas_holo_rescue_posthoc_score_trace_bound_v1.json",
+    "runtime_results": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T140931Z/blind_canary_runtime_results.json",
+    "provider_trace": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T140931Z/TRACE_PROVIDER_CALLS.jsonl",
+    "failed_packet_payload": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/runtime_payloads/ATLASRESCUE-93D992FE116415AEA6EE.json"
+  }
+}

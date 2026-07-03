@@ -1,0 +1,112 @@
+{
+  "classification": "HOLOVERIFY_ATLAS_SELECTOR_REPAIR_PATCH_REPORT",
+  "status": "PATCHED_MORE_NO_PROVIDER",
+  "provider_calls": 0,
+  "judge_calls": 0,
+  "solo_calls": 0,
+  "source_failure": {
+    "run_dir": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T140931Z",
+    "score": "11/12 packets, 5/6 pairs",
+    "failed_packet": "HV-ATLAS-DISC-033-B",
+    "failure_class": "FINAL_SELECTOR_REGRESSION",
+    "specific_failure_class": "FINAL_SELECTOR_CHOSE_WRONG_INTERMEDIATE_ARTIFACT_DESPITE_LATER_WORKER_REPAIR",
+    "turn_pattern": [
+      {
+        "slot": "W1",
+        "verdict": "ESCALATE",
+        "status": "correct"
+      },
+      {
+        "slot": "W2",
+        "verdict": "ALLOW",
+        "status": "wrong_intermediate_drift"
+      },
+      {
+        "slot": "W3",
+        "verdict": "ESCALATE",
+        "status": "correct_repair"
+      }
+    ]
+  },
+  "patch": {
+    "file": "holoverify_blind_runner_v0.py",
+    "selector_fields_added": [
+      "verdict_consensus_count",
+      "final_turn_consensus_repair"
+    ],
+    "selector_policy_version": "SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03",
+    "selector_policy_sha256": "32663f8cd92298468ce3648ec57d9491f76ecf9a9ecb526eaf4bb0c8275118f6",
+    "architecture_decision": "Among structurally valid artifacts, verdict consensus outranks citation volume. A final-turn repair bonus applies only when final worker agrees with a prior structurally valid worker after an intervening contradiction. A lone final-turn dissenter does not override two-of-three structurally valid consensus. Within the same consensus/repair tier, citation count and section completeness remain secondary structural tie-breaks.",
+    "truth_visible_to_selector": false,
+    "scoring_map_visible_to_selector": false,
+    "rule_summary": "Prefer a final structurally valid worker repair when it agrees with a prior structurally valid worker after an intervening contradictory artifact."
+  },
+  "verdict_grid_policy": [
+    {
+      "w1": "ALLOW",
+      "w2": "ALLOW",
+      "w3": "ALLOW",
+      "selected_artifact": "ART-002"
+    },
+    {
+      "w1": "ALLOW",
+      "w2": "ALLOW",
+      "w3": "ESCALATE",
+      "selected_artifact": "ART-002"
+    },
+    {
+      "w1": "ALLOW",
+      "w2": "ESCALATE",
+      "w3": "ALLOW",
+      "selected_artifact": "ART-003"
+    },
+    {
+      "w1": "ALLOW",
+      "w2": "ESCALATE",
+      "w3": "ESCALATE",
+      "selected_artifact": "ART-003"
+    },
+    {
+      "w1": "ESCALATE",
+      "w2": "ALLOW",
+      "w3": "ALLOW",
+      "selected_artifact": "ART-003"
+    },
+    {
+      "w1": "ESCALATE",
+      "w2": "ALLOW",
+      "w3": "ESCALATE",
+      "selected_artifact": "ART-003"
+    },
+    {
+      "w1": "ESCALATE",
+      "w2": "ESCALATE",
+      "w3": "ALLOW",
+      "selected_artifact": "ART-002"
+    },
+    {
+      "w1": "ESCALATE",
+      "w2": "ESCALATE",
+      "w3": "ESCALATE",
+      "selected_artifact": "ART-002"
+    }
+  ],
+  "tests_added": [
+    "tests/test_holoverify_blind_selector_repair_regression.py"
+  ],
+  "validation": {
+    "py_compile": "PASS",
+    "selector_regression_grid_tests": "6 passed",
+    "selector_sweep": "3 passed",
+    "blind_suite_subset": "15 passed",
+    "wrapper_tests": "33 passed",
+    "atlas_rescue_preflight_after_patch": "PASS"
+  },
+  "next_step": "Fable review before any provider rerun",
+  "do_not_do": [
+    "do not reinterpret prior 11/12 run as clean",
+    "do not mutate packet text",
+    "do not mutate scoring map",
+    "do not run providers before review or explicit approval"
+  ]
+}

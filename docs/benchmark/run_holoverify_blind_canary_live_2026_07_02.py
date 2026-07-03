@@ -691,6 +691,8 @@ def preflight(run_dir: Path, runtime_manifest_path: Path = RUNTIME_MANIFEST) -> 
         },
         "posthoc_scoring_script": str(POSTHOC_SCORING_SCRIPT.relative_to(REPO_ROOT)),
         "posthoc_scoring_required_after_trace_freeze": True,
+        "selector_policy": BLIND.selector_policy_identity(),
+        "worker_contract": BLIND.worker_contract_identity(),
         "attempt_budget_policy": {
             "version": ATTEMPT_BUDGET_POLICY_VERSION,
             "max_content_contract_attempts_per_packet": MAX_CONTENT_CONTRACT_ATTEMPTS_PER_PACKET,
@@ -793,6 +795,8 @@ def run_live(approval_statement: str, packet_limit: int | None = None, packet_in
                 "posthoc_scorer_owns_scoring_map_path": str(POSTHOC_SCORING_SCRIPT.relative_to(REPO_ROOT)),
             },
             "posthoc_scoring_required_after_trace_freeze": True,
+            "selector_policy": BLIND.selector_policy_identity(),
+            "worker_contract": BLIND.worker_contract_identity(),
             "posthoc_scoring_command": (
                 f"python3 -B {POSTHOC_SCORING_SCRIPT.relative_to(REPO_ROOT)} --run-dir "
                 f"{run_dir.relative_to(REPO_ROOT)}"

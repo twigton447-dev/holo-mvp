@@ -13,15 +13,37 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 
+SELECTOR_POLICY_VERSION = "SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03"
+SELECTOR_POLICY_DECISION = (
+    "Truth-blind structural selector. Among structurally valid artifacts, "
+    "verdict consensus outranks citation volume. A final-turn artifact receives "
+    "a repair bonus only when it agrees with a prior structurally valid artifact "
+    "after an intervening contradiction. A lone final-turn dissenter does not "
+    "override a two-of-three structurally valid consensus. Within the same "
+    "consensus/repair tier, citation count and section completeness remain "
+    "secondary structural tie-breaks."
+)
 SELECTOR_CRITERIA = (
     "gate_passed",
     "parse_valid",
     "source_ids_valid",
     "required_sections_present",
     "contradiction_free",
+    "verdict_consensus_count",
+    "final_turn_consensus_repair",
     "sections_present",
     "cited_evidence_count",
     "earliest_turn",
+)
+
+WORKER_CONTRACT_VERSION = "WORKER_CONTRACT_V2_ARTIFACT_FIRST_2026_07_03"
+W3_ARTIFACT_FIRST_GUARD = (
+    "W3 ARTIFACT-FIRST CONTRACT V2.",
+    "Start immediately with worker_role=W3 before any reasoning.",
+    "Never output <think>, hidden reasoning, analysis, or deliberation.",
+    "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, and final_answer.",
+    "Do not debate competing interpretations outside the key=value fields.",
+    "Emit exactly the required key=value artifact lines, then stop.",
 )
 
 BUDGET_LIMITS = {
@@ -58,6 +80,29 @@ class BlindRunnerContentFailure(RuntimeError):
 
 def _sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def selector_policy_identity() -> dict:
+    payload = {
+        "selector_policy_version": SELECTOR_POLICY_VERSION,
+        "selector_policy_decision": SELECTOR_POLICY_DECISION,
+        "selector_criteria": list(SELECTOR_CRITERIA),
+    }
+    return {
+        **payload,
+        "selector_policy_sha256": _sha256_text(json.dumps(payload, sort_keys=True)),
+    }
+
+
+def worker_contract_identity() -> dict:
+    payload = {
+        "worker_contract_version": WORKER_CONTRACT_VERSION,
+        "w3_artifact_first_guard": list(W3_ARTIFACT_FIRST_GUARD),
+    }
+    return {
+        **payload,
+        "worker_contract_sha256": _sha256_text(json.dumps(payload, sort_keys=True)),
+    }
 
 
 def _parse_key_value(text: str) -> dict:
@@ -99,20 +144,25 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
         f"The first output characters must be exactly: worker_role={role}",
     ]
     if role == "W3":
-        system_lines.extend(
+        system_lines.extend(W3_ARTIFACT_FIRST_GUARD)
+    system_content = "\n".join(system_lines)
+    content_lines = [
+        "GOV ROUTING LENS: use only source support, unresolved dependencies, and internal consistency.",
+        f"RUN LOCK: packet={payload.get('packet_id')} turn={turn_index} role={role}",
+        "TASK CONTRACT: return compact_key_value_v1 only. No Markdown. No prose. No bullets. No JSON. No hidden thinking.",
+    ]
+    if role == "W3":
+        content_lines.extend(
             [
-                "FINAL COMPILER STRICT MODE.",
-                "Do not explain your reasoning before the fields.",
-                "Keep each field short enough to complete before the output limit.",
-                "Your entire response must be the required key=value lines and nothing else.",
+                "W3 ARTIFACT-FIRST GUARD:",
+                "Your first visible output line must be worker_role=W3.",
+                "If uncertain, still emit the compact artifact immediately.",
+                "Represent ambiguity only with verification_verdict, binding_class, open_blockers, and final_answer.",
+                "Do not write explanatory analysis before or after the artifact.",
             ]
         )
-    system_content = "\n".join(system_lines)
-    content = "\n".join(
+    content_lines.extend(
         [
-            "GOV ROUTING LENS: use only source support, unresolved dependencies, and internal consistency.",
-            f"RUN LOCK: packet={payload.get('packet_id')} turn={turn_index} role={role}",
-            "TASK CONTRACT: return compact_key_value_v1 only. No Markdown. No prose. No bullets. No JSON. No hidden thinking.",
             "REQUIRED OUTPUT LINES EXACTLY:",
             f"worker_role={role}",
             "verification_verdict=<ALLOW or ESCALATE>",
@@ -133,6 +183,7 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
             "CURRENT TURN COMMAND: decide whether the visible source support closes the action boundary.",
         ]
     )
+    content = "\n".join(content_lines)
     return [
         {"role": "system", "content": system_content},
         {"role": "user", "content": content},
@@ -247,23 +298,70 @@ def _criteria_tuple(artifact: dict) -> tuple:
         1 if artifact.get("source_ids_valid") else 0,
         1 if artifact.get("required_sections_present") else 0,
         1 if artifact.get("contradiction_free") else 0,
+        int(artifact.get("verdict_consensus_count") or 0),
+        1 if artifact.get("final_turn_consensus_repair") else 0,
         int(artifact.get("sections_present") or 0),
         int(artifact.get("cited_evidence_count") or 0),
         -int(artifact.get("turn_index") or 0),
     )
 
 
+def _selector_structurally_valid(artifact: dict) -> bool:
+    return all(
+        (
+            artifact.get("gate_passed"),
+            artifact.get("parse_valid"),
+            artifact.get("source_ids_valid"),
+            artifact.get("required_sections_present"),
+            artifact.get("contradiction_free"),
+        )
+    )
+
+
+def _with_selector_derived_fields(artifacts: list[dict]) -> list[dict]:
+    verdict_counts: dict[str, int] = {}
+    valid_artifacts = [artifact for artifact in artifacts if _selector_structurally_valid(artifact)]
+    for artifact in valid_artifacts:
+        verdict = str(artifact.get("verification_verdict") or "")
+        if verdict in {"ALLOW", "ESCALATE"}:
+            verdict_counts[verdict] = verdict_counts.get(verdict, 0) + 1
+
+    turn_indexes = [int(artifact.get("turn_index") or 0) for artifact in artifacts]
+    final_turn = max(turn_indexes or [0])
+    enriched: list[dict] = []
+    for artifact in artifacts:
+        item = dict(artifact)
+        verdict = str(item.get("verification_verdict") or "")
+        item["verdict_consensus_count"] = verdict_counts.get(verdict, 0)
+        turn_index = int(item.get("turn_index") or 0)
+        prior = [candidate for candidate in valid_artifacts if int(candidate.get("turn_index") or 0) < turn_index]
+        prior_same = any(candidate.get("verification_verdict") == verdict for candidate in prior)
+        prior_different = any(candidate.get("verification_verdict") != verdict for candidate in prior)
+        item["final_turn_consensus_repair"] = bool(
+            _selector_structurally_valid(item)
+            and turn_index > 0
+            and turn_index == final_turn
+            and item["verdict_consensus_count"] >= 2
+            and prior_same
+            and prior_different
+        )
+        enriched.append(item)
+    return enriched
+
+
 def apply_criteria(artifacts: list[dict]) -> dict:
     if not artifacts:
         return {"selected_artifact_id": None, "criteria_trace": []}
+    enriched = _with_selector_derived_fields(artifacts)
     scored = [
         {
             "artifact_id": artifact.get("artifact_id"),
+            "verification_verdict": artifact.get("verification_verdict"),
             "criteria": _criteria_tuple(artifact),
         }
-        for artifact in artifacts
+        for artifact in enriched
     ]
-    selected = max(artifacts, key=_criteria_tuple)
+    selected = max(enriched, key=_criteria_tuple)
     return {
         "selected_artifact_id": selected.get("artifact_id"),
         "criteria_trace": scored,
@@ -412,6 +510,8 @@ def run_blind_fixture(
             "artifact_id": selected_id,
         },
         "selection": selection,
+        "selector_policy": selector_policy_identity(),
+        "worker_contract": worker_contract_identity(),
         "retry_log": retry_log,
         "budget_limits": BUDGET_LIMITS,
     }
@@ -455,6 +555,9 @@ def run_blind_runtime_manifest(runtime_manifest_path: str, out_dir: str, transpo
             {
                 "packet_id": payload.get("packet_id"),
                 "final": result.get("final"),
+                "selection": result.get("selection"),
+                "selector_policy": result.get("selector_policy"),
+                "worker_contract": result.get("worker_contract"),
                 "retry_log": result.get("retry_log", []),
             }
         )
@@ -474,6 +577,8 @@ def run_blind_runtime_manifest(runtime_manifest_path: str, out_dir: str, transpo
         "observed_call_count": len(trace_rows),
         "results": packet_results,
         "trace_ref": str(trace_path),
+        "selector_policy": selector_policy_identity(),
+        "worker_contract": worker_contract_identity(),
     }
     (out_path / "blind_canary_runtime_results.json").write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n"

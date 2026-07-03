@@ -37,8 +37,9 @@ EXPECTED_PACKET_COUNT = 26
 EXPECTED_CALL_COUNT = 130
 LANE_LABEL = "HOLOVERIFY_SOLO_FAILURE_FACTORY_HOLO_RESCUE_13PAIR_RUNTIME_FIREWALL_V0"
 EVIDENCE_SCOPE = (
-    "FRESH DIRECTIONAL HOLO RESCUE SIGNAL ONLY for selected Batch001-Batch004 solo-failure pairs; "
-    "not public benchmark evidence and not an error-rate denominator."
+    "PATCH VALIDATION ONLY for SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03 "
+    "on the same selected Batch001-Batch004 solo-failure pairs; not fresh benchmark evidence, "
+    "not public benchmark evidence, and not an error-rate denominator."
 )
 
 SCORING_MAP_READ_GUARD_TEST = (

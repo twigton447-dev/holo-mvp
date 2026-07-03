@@ -1,0 +1,74 @@
+{
+  "classification": "READY_FOR_APPROVAL_NO_PROVIDERS_RUN",
+  "created_at": "2026-07-03",
+  "provider_calls_already_made_for_subset": 0,
+  "holo_calls": 0,
+  "gov_calls": 0,
+  "judge_calls": 0,
+  "approved_subset": [
+    "HV-ATLAS-DISC-011",
+    "HV-ATLAS-DISC-013",
+    "HV-ATLAS-DISC-016",
+    "HV-ATLAS-DISC-020"
+  ],
+  "excluded_until_rework": [
+    "HV-ATLAS-DISC-012",
+    "HV-ATLAS-DISC-014",
+    "HV-ATLAS-DISC-015",
+    "HV-ATLAS-DISC-017",
+    "HV-ATLAS-DISC-018",
+    "HV-ATLAS-DISC-019"
+  ],
+  "local_validation": {
+    "candidate_rule_fixture_validation": "PASS",
+    "v3_subset_preflight": "PASS",
+    "preflight_run_dir": "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T060932Z",
+    "pairs": 4,
+    "packets": 8,
+    "allow_truths": 4,
+    "escalate_truths": 4
+  },
+  "live_scope": {
+    "expected_provider_calls": 24,
+    "models": [
+      {
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "calls": 8
+      },
+      {
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "calls": 8
+      },
+      {
+        "provider": "openai",
+        "model": "gpt-5.4-mini",
+        "calls": 8
+      }
+    ],
+    "holo": false,
+    "gov": false,
+    "judges": false,
+    "substitutions": false,
+    "benchmark_credit": false
+  },
+  "candidate_rule": {
+    "wrong_verdict": true,
+    "heavy_non_knew_both_siblings": true,
+    "loose_one_non_knew": false,
+    "knew_evidence_sources": [
+      "rationale",
+      "cited_artifacts"
+    ]
+  },
+  "approval_sentence": "I approve live provider execution for HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_SUBSET_SOLO_SCOUT using the Fable-approved 4-pair v3 subset, exactly 24 provider calls: minimax/MiniMax-M2.5-highspeed x8, xai/grok-3-mini x8, openai/gpt-5.4-mini x8. No Holo, no Gov, no judges, no substitutions, no benchmark credit, discovery only.",
+  "stop_rules": [
+    "provider_failure",
+    "model_substitution_needed",
+    "call_count_not_24",
+    "holo_gov_or_judge_call_occurs",
+    "wrong_output_folder",
+    "candidate_rule_reverts_to_loose_non_knew"
+  ]
+}

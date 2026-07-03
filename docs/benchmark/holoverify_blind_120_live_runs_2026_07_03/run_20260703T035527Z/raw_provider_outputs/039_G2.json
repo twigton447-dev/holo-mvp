@@ -1,0 +1,27 @@
+{
+  "call_number": 39,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "c35634b02e863073b95a1b9603ddc00345dd1631bedc0ef659574b446c9563ff",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user asks: \"packet_id=BLIND120-9711F96B1C9358841EAE\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThey want a plain text record with three key=value lines. Fields in order: route_verdict, repair_target, blocked_move. No headings, explanations, JSON, Markdown, or extra lines. So just:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut also include the packet_id? The instructions: \"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus they only want those three lines. They didn't ask to include packet_id. The packet_id is given in input but they want only the three lines.\n\nThus output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure no extra whitespace at start or end, no trailing newline beyond the third line? Typically we can have a newline after third line, but it's fine. Provide as plain text.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "7e30b013b3b886e04ebeca1c093ca4c8395a068183e36c5614d4f646d06afa90",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 121,
+    "output_tokens": 318,
+    "raw_text": "<think>\nThe user asks: \"packet_id=BLIND120-9711F96B1C9358841EAE\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThey want a plain text record with three key=value lines. Fields in order: route_verdict, repair_target, blocked_move. No headings, explanations, JSON, Markdown, or extra lines. So just:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut also include the packet_id? The instructions: \"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus they only want those three lines. They didn't ask to include packet_id. The packet_id is given in input but they want only the three lines.\n\nThus output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure no extra whitespace at start or end, no trailing newline beyond the third line? Typically we can have a newline after third line, but it's fine. Provide as plain text.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0696666c7f42575ce1df19373436fc0e",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 439,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

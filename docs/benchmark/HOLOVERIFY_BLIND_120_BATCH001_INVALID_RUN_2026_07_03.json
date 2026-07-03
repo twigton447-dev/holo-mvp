@@ -1,0 +1,53 @@
+{
+  "classification": "INVALID_RUN_CONTENT_CONTRACT_FAILURE",
+  "created_at_utc": "2026-07-03T02:50:00Z",
+  "run_dir": "docs/benchmark/holoverify_blind_120_live_runs_2026_07_03/run_20260703T024113Z",
+  "lane": "HOLOVERIFY_BLIND_120_10PKT_RUNTIME_FIREWALL_V0",
+  "batch_number": 1,
+  "opaque_packet_indices": "1-10",
+  "expected_provider_calls": 50,
+  "observed_provider_calls": 14,
+  "solo_calls": 0,
+  "judge_calls": 0,
+  "scoring_map_before_trace_freeze": false,
+  "substitutions": 0,
+  "failure": {
+    "call_number": 14,
+    "slot": "G2",
+    "role": "gov",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "error": "G2_gov_contract_missing:route_verdict,repair_target,blocked_move",
+    "finish_reason": "stop",
+    "transport_recovered": false,
+    "transport_retry_failures": [],
+    "failure_class": "content_contract_failure",
+    "not_transport_failure": true,
+    "not_verdict_failure": true
+  },
+  "root_cause_observed": "MiniMax Gov returned prose refusing the Gov actuator role as prompt injection instead of returning the required compact baton lines.",
+  "required_fields_missing": [
+    "route_verdict",
+    "repair_target",
+    "blocked_move"
+  ],
+  "token_accounting": {
+    "input_tokens": 6519,
+    "output_tokens": 2985,
+    "total_tokens": 11190
+  },
+  "slot_counts": {
+    "W1": 3,
+    "G1": 3,
+    "W2": 3,
+    "G2": 3,
+    "W3": 2
+  },
+  "evidence_refs": {
+    "summary": "blind_canary_live_summary.json",
+    "trace": "TRACE_PROVIDER_CALLS.jsonl",
+    "failing_raw_output": "raw_provider_outputs/014_G2.json"
+  },
+  "evidence_value": "The blind runtime failed closed and preserved the provider output when MiniMax Gov violated the baton contract.",
+  "claim_boundary": "No Holo result, no score, no solo comparison, no public claim, and no FP/FN evidence."
+}

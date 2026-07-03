@@ -196,6 +196,10 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(errors="replace"))
 
 
+def disabled_call_count(value: Any) -> bool:
+    return value in (None, 0)
+
+
 def write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True) + "\n")
@@ -659,8 +663,8 @@ def preflight(run_dir: Path, runtime_manifest_path: Path = RUNTIME_MANIFEST) -> 
         "payloads_present": not missing_payloads,
         "expected_call_count": expected_call_count == expected_packet_count * 5,
         "provider_counts": provider_counts == {"xai": expected_packet_count, "openai": expected_packet_count, "minimax": expected_packet_count * 3},
-        "solo_calls_disabled": manifest.get("solo_calls", 0) == 0,
-        "judge_calls_disabled": manifest.get("judge_calls", 0) == 0,
+        "solo_calls_disabled": disabled_call_count(manifest.get("solo_calls")),
+        "judge_calls_disabled": disabled_call_count(manifest.get("judge_calls")),
         "provider_calls_not_yet_made": True,
         "env_keys_present": all(value == "PRESENT" for value in env.values()),
         "runtime_input_leakage": not leakage_hits,

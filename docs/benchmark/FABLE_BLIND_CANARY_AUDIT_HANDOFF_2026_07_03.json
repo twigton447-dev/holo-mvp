@@ -1,0 +1,70 @@
+{
+  "classification": "FABLE_BLIND_CANARY_AUDIT_HANDOFF",
+  "created_at_utc": "2026-07-03T00:57:21Z",
+  "provider_calls_made_by_handoff": 0,
+  "judge_calls_made_by_handoff": 0,
+  "mission": "Read-only adversarial audit of the repaired 20-packet blind canary runtime-firewall rollup.",
+  "primary_question": "Does file-backed evidence support the narrow claim that the repaired blind runtime completed 20 opaque packets, froze traces first, and only then scored 20/20 final verdicts against the hidden scoring map?",
+  "files_to_review_first": [
+    "docs/benchmark/HOLOVERIFY_BLIND_CANARY_20PKT_ROLLUP_2026_07_03.md",
+    "docs/benchmark/HOLOVERIFY_BLIND_CANARY_20PKT_ROLLUP_2026_07_03.json",
+    "docs/benchmark/FABLE_CANARY_GATE_RECORD_2026_07_02.md",
+    "docs/benchmark/HOLOVERIFY_BLIND_CANARY_LIVE_PROVIDER_SCOPE_2026_07_02.md",
+    "docs/benchmark/BLIND_CANARY_W3_FINAL_COMPILER_CONTRACT_PATCH_2026_07_03.md"
+  ],
+  "run_root": "docs/benchmark/holoverify_blind_canary_live_runs_2026_07_02",
+  "critical_review_questions": [
+    "Does the rollup correctly distinguish canonical passing traces from preserved invalid attempts?",
+    "Do the canonical passing traces cover 20 unique opaque packets and exactly 100 provider calls?",
+    "Is there evidence the scoring map was loaded before trace freeze in canonical passing traces?",
+    "Are legacy packet IDs, truth labels, sibling suffixes, knew_terms, allow_rule, or esc_rule visible in runtime prompts or payloads?",
+    "Did the W3 final compiler patch fix the specific run_20260703T004112Z failure rather than routing around it?",
+    "Does the rollup accidentally imply an error-rate, FP/FN, Wilson, or architecture-advantage result?",
+    "Are token totals, provider counts, run IDs, and packet rows reproducible from disk?",
+    "Is there any remaining ordering, manifest, file-access, import-closure, or payload-shape answer channel?"
+  ],
+  "acceptable_verdicts": [
+    "PASS_RUNTIME_FIREWALL_ROLLUP",
+    "PASS_WITH_LIMITATIONS",
+    "BLOCK_PUBLIC_LANGUAGE_ONLY",
+    "BLOCK_ROLLUP_CONFIRMED_DEFECT",
+    "BLOCK_NEEDS_TRACE_REBUILD"
+  ],
+  "non_negotiable_claim_boundary": {
+    "allowed_sentence": "No detected answer-key channel in the repaired 20-packet blind runtime firewall path, with post-hoc scoring after trace freeze showing 20/20 final verdicts matched the hidden map.",
+    "forbidden_claims": [
+      "public benchmark rate",
+      "confidence interval",
+      "false-positive or false-negative rate",
+      "Holo beats solo",
+      "old 614-packet result restored",
+      "general architecture validation"
+    ]
+  },
+  "invalid_lineage_to_verify_not_counted": [
+    {
+      "run_id": "run_20260702T233202Z",
+      "classification": "INVALID_RUN_CONTENT_CONTRACT_FAILURE_AFTER_SUCCESSFUL_TRANSPORT"
+    },
+    {
+      "run_id": "run_20260703T000229Z",
+      "classification": "INVALID_ONE_PACKET_CONTENT_FAILURE_W3_LENGTH_WITH_RETRY_BOUNDARY_BUG"
+    },
+    {
+      "run_id": "run_20260703T000924Z",
+      "classification": "INVALID_ONE_PACKET_CONTENT_FAILURE_G2_EMPTY_TEXT_AFTER_LENGTH"
+    },
+    {
+      "run_id": "run_20260703T004112Z",
+      "classification": "INVALID_RUN_CONTENT_CONTRACT_FAILURE_W3_LENGTH_EMPTY_TEXT"
+    }
+  ],
+  "requested_output": [
+    "verdict",
+    "findings ordered by severity",
+    "recomputed counts",
+    "claim-language corrections",
+    "recommended next move"
+  ]
+}
+

@@ -1,0 +1,89 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SEQUENCE_LOCK",
+  "created_at_utc": "2026-07-03T00:57:21Z",
+  "provider_calls_made_by_lock": 0,
+  "judge_calls_made_by_lock": 0,
+  "approved_order": [
+    "Get Fable to review the hardening patch.",
+    "Build/freeze the 120-packet blind runtime bank.",
+    "Run no-provider firewall tests.",
+    "Run Holo blind 120.",
+    "Score post-freeze.",
+    "Run solo one-shots on same 120.",
+    "Build comparison memo.",
+    "Run randomized ablation subset.",
+    "Only then update public claims."
+  ],
+  "gate_law": {
+    "previous_step_must_pass_before_next": true,
+    "providers_forbidden_until_fable_hardening_clearance": true,
+    "providers_forbidden_until_120_bank_freeze_and_no_provider_tests": true,
+    "public_claims_forbidden_until_holo_solo_comparison_and_ablation": true,
+    "ablation_deferral_requires_file_backed_memo": true
+  },
+  "blind_120_bank_requirements": {
+    "packets": 120,
+    "allow_truths": 60,
+    "escalate_truths": 60,
+    "multi_domain": true,
+    "opaque_runtime_ids": true,
+    "no_legacy_ids_in_prompts": true,
+    "no_suffix_answer_channels": true,
+    "runtime_manifest_separate_from_scoring_map": true,
+    "scoring_map_unavailable_to_live_wrapper": true,
+    "randomized_opaque_order": true,
+    "frozen_hashes": true,
+    "trace_hash_bound_posthoc_score": true,
+    "rollup_builder_must_recompute_score_artifact_trace_hashes": true
+  },
+  "holo_120_runtime_requirements": {
+    "fixed_model_roster": true,
+    "fixed_call_sequence": true,
+    "no_substitutions": true,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "no_scoring_before_trace_freeze": true,
+    "declared_attempt_budget": true,
+    "content_schema_failures_fail_closed": true,
+    "invalid_attempts_preserved": true,
+    "bounded_transport_retries_logged": true
+  },
+  "solo_one_shot_requirements": {
+    "same_120_packets": true,
+    "same_model_families_as_holo": true,
+    "one_call_per_packet_per_model": true,
+    "no_gov": true,
+    "no_holo_state_brief": true,
+    "no_artifact_registry": true,
+    "no_deterministic_rescue": true,
+    "no_final_selector": true,
+    "scoring_after_output_freeze": true,
+    "outcome_classes": [
+      "KNEW",
+      "WRONG_VERDICT",
+      "PARSE_FAILURE",
+      "EVIDENCE_FAILURE",
+      "RUNTIME_FAILURE"
+    ]
+  },
+  "randomized_ablation_requirements": {
+    "after_holo_and_solo_baselines": true,
+    "pre_registered_subset": true,
+    "suggested_packet_count": "30-40",
+    "balanced_by": [
+      "truth_label",
+      "domain",
+      "difficulty_or_failure_class_where_available"
+    ],
+    "candidate_arms": [
+      "full_holo",
+      "no_real_gov_calls_static_baton_only",
+      "no_deterministic_gate_after_worker",
+      "no_final_selector_best_artifact_preservation",
+      "no_gov_sandwich_state_brief_only",
+      "solo_multi_call_budget_parity_diagnostic"
+    ],
+    "purpose": "component_attribution_not_public_headline_scoring",
+    "deferral_rule": "If ablation is deferred before a public update, the deferral must be explicit, file-backed, and state which claims are weakened or forbidden by the deferral."
+  }
+}

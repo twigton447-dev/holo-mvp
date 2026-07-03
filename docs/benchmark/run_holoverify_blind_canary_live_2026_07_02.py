@@ -32,7 +32,6 @@ import holoverify_blind_runner_v0 as BLIND  # noqa: E402
 
 
 RUNTIME_MANIFEST = BENCHMARK_ROOT / "holoverify_blind_canary_runtime_manifest_2026_07_02.json"
-SCORING_MAP = BENCHMARK_ROOT / "holoverify_blind_canary_scoring_map_2026_07_02.json"
 LIVE_ROOT = BENCHMARK_ROOT / "holoverify_blind_canary_live_runs_2026_07_02"
 
 EXPECTED_RUNTIME_MANIFEST_SHA256 = "b80861ab6e407f98d69a7dd268ee102648b0455c19a1823ad0504fb321768bd7"
@@ -46,6 +45,18 @@ PROVIDER_TIMEOUT_SECONDS = 240
 TRANSPORT_MAX_RETRIES = 2
 TRANSPORT_BACKOFF_SECONDS = (2, 4)
 RETRYABLE_HTTP_STATUS = {429, 500, 502, 503, 504}
+ATTEMPT_BUDGET_POLICY_VERSION = "BLIND_RUNTIME_ATTEMPT_BUDGET_V1_2026_07_03"
+MAX_CONTENT_CONTRACT_ATTEMPTS_PER_PACKET = 1
+MAX_LIVE_RUN_ATTEMPTS_PER_PACKET = 1
+POSTHOC_SCORING_SCRIPT = BENCHMARK_ROOT / "score_holoverify_blind_canary_posthoc_2026_07_03.py"
+SCORING_MAP_READ_GUARD_TEST = (
+    "tests/test_holoverify_blind_canary_live_wrapper.py::"
+    "test_preflight_does_not_read_scoring_map_bytes"
+)
+WRAPPER_SCORING_SPLIT_TEST = (
+    "tests/test_holoverify_blind_canary_live_wrapper.py::"
+    "test_live_wrapper_does_not_keep_scoring_map_path_or_posthoc_scorer"
+)
 
 EXACT_APPROVAL_SENTENCE = (
     "I approve live provider execution for HOLOVERIFY_BLIND_CANARY_20PKT_RUNTIME_FIREWALL_V0 "
@@ -172,7 +183,13 @@ def utc_stamp() -> str:
 
 
 def current_head() -> str:
-    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True).strip()
+    try:
+        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True).strip()
+    except Exception as exc:
+        raise RuntimeError(
+            "git_head_unavailable: preflight requires a healthy git checkout. "
+            "Run `git status` in the repo and fix detached/broken worktree metadata before live execution."
+        ) from exc
 
 
 def load_json(path: Path) -> Any:
@@ -620,8 +637,8 @@ def prompt_probe_no_leakage(manifest_path: Path, expected_call_count: int, probe
 def preflight(run_dir: Path, runtime_manifest_path: Path = RUNTIME_MANIFEST) -> dict[str, Any]:
     runtime_hash = sha256_file(runtime_manifest_path)
     source_runtime_hash = sha256_file(RUNTIME_MANIFEST)
-    scoring_hash = sha256_file(SCORING_MAP)
     manifest = load_json(runtime_manifest_path)
+    live_wrapper_has_scoring_map_path = "SCORING_MAP" in globals()
     packet_refs = [row.get("runtime_payload_ref") for row in manifest.get("packets", [])]
     expected_packet_count = int(manifest.get("packet_count") or len(packet_refs))
     expected_call_count = expected_packet_count * len(CALL_SEQUENCE)
@@ -637,7 +654,6 @@ def preflight(run_dir: Path, runtime_manifest_path: Path = RUNTIME_MANIFEST) -> 
     }
     checks = {
         "source_runtime_manifest_hash": source_runtime_hash == EXPECTED_RUNTIME_MANIFEST_SHA256,
-        "scoring_map_hash": scoring_hash == EXPECTED_SCORING_MAP_SHA256,
         "runtime_consumable": manifest.get("runtime_consumable") is True,
         "packet_count": manifest.get("packet_count") == expected_packet_count and len(packet_refs) == expected_packet_count,
         "payloads_present": not missing_payloads,
@@ -649,6 +665,10 @@ def preflight(run_dir: Path, runtime_manifest_path: Path = RUNTIME_MANIFEST) -> 
         "env_keys_present": all(value == "PRESENT" for value in env.values()),
         "runtime_input_leakage": not leakage_hits,
         "prompt_probe_leakage": not probe_hits,
+        "scoring_map_path_absent_from_live_wrapper": not live_wrapper_has_scoring_map_path,
+        "posthoc_scoring_script_present": POSTHOC_SCORING_SCRIPT.exists(),
+        "content_contract_attempt_budget": MAX_CONTENT_CONTRACT_ATTEMPTS_PER_PACKET == 1,
+        "live_run_attempt_budget": MAX_LIVE_RUN_ATTEMPTS_PER_PACKET == 1,
     }
     report = {
         "classification": "HOLOVERIFY_BLIND_CANARY_LIVE_PREFLIGHT_V0",
@@ -657,9 +677,24 @@ def preflight(run_dir: Path, runtime_manifest_path: Path = RUNTIME_MANIFEST) -> 
         "runtime_manifest": str(runtime_manifest_path.relative_to(REPO_ROOT)) if runtime_manifest_path.is_relative_to(REPO_ROOT) else str(runtime_manifest_path),
         "runtime_manifest_sha256": runtime_hash,
         "source_runtime_manifest_sha256": source_runtime_hash,
-        "scoring_map_sha256_preflight_only": scoring_hash,
         "expected_runtime_manifest_sha256": EXPECTED_RUNTIME_MANIFEST_SHA256,
         "expected_scoring_map_sha256": EXPECTED_SCORING_MAP_SHA256,
+        "scoring_map_access_control": {
+            "live_wrapper_has_scoring_map_path": live_wrapper_has_scoring_map_path,
+            "live_wrapper_scoring_split_enforced_by": WRAPPER_SCORING_SPLIT_TEST,
+            "preflight_read_guard_enforced_by": SCORING_MAP_READ_GUARD_TEST,
+            "posthoc_scorer_owns_scoring_map_path": str(POSTHOC_SCORING_SCRIPT.relative_to(REPO_ROOT)),
+        },
+        "posthoc_scoring_script": str(POSTHOC_SCORING_SCRIPT.relative_to(REPO_ROOT)),
+        "posthoc_scoring_required_after_trace_freeze": True,
+        "attempt_budget_policy": {
+            "version": ATTEMPT_BUDGET_POLICY_VERSION,
+            "max_content_contract_attempts_per_packet": MAX_CONTENT_CONTRACT_ATTEMPTS_PER_PACKET,
+            "max_live_run_attempts_per_packet": MAX_LIVE_RUN_ATTEMPTS_PER_PACKET,
+            "transport_retries_per_call": TRANSPORT_MAX_RETRIES,
+            "content_failures_are_not_retried": True,
+            "manual_rerun_requires_new_approval_and_preserved_invalid_trace": True,
+        },
         "packets": expected_packet_count,
         "expected_provider_calls": expected_call_count,
         "call_sequence": list(CALL_SEQUENCE),
@@ -680,6 +715,9 @@ def preflight(run_dir: Path, runtime_manifest_path: Path = RUNTIME_MANIFEST) -> 
         f"- Expected provider calls: `{expected_call_count}`",
         f"- Env keys: `{env}`",
         f"- Leakage hits: `{len(leakage_hits) + len(probe_hits)}`",
+        f"- Live wrapper has scoring-map path: `{live_wrapper_has_scoring_map_path}`",
+        f"- Scoring-map read guard: `{SCORING_MAP_READ_GUARD_TEST}`",
+        f"- Attempt budget policy: `{ATTEMPT_BUDGET_POLICY_VERSION}`",
         "",
         "No provider calls were made by preflight.",
     ]
@@ -692,53 +730,6 @@ def write_provider_trace(run_dir: Path, rows: list[dict[str, Any]]) -> None:
     with trace_path.open("w", encoding="utf-8") as handle:
         for row in rows:
             handle.write(json.dumps(row, sort_keys=True) + "\n")
-
-
-def posthoc_score(run_dir: Path, runtime_result: dict[str, Any], provider_rows: list[dict[str, Any]]) -> dict[str, Any]:
-    scoring = load_json(SCORING_MAP)
-    truth_by_opaque = {
-        row["opaque_runtime_id"]: row["legacy_truth"]
-        for row in scoring.get("scoring_rows", [])
-    }
-    scored_rows = []
-    correct = 0
-    for row in runtime_result.get("results", []):
-        packet_id = row.get("packet_id")
-        verdict = (row.get("final") or {}).get("verdict")
-        truth = truth_by_opaque.get(packet_id)
-        is_correct = verdict == truth
-        correct += 1 if is_correct else 0
-        scored_rows.append(
-            {
-                "opaque_runtime_id": packet_id,
-                "final_verdict": verdict,
-                "posthoc_truth": truth,
-                "correct": is_correct,
-            }
-        )
-    token_totals: dict[str, int] = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
-    provider_token_totals: dict[str, dict[str, int]] = {}
-    for row in provider_rows:
-        provider = str(row.get("provider"))
-        bucket = provider_token_totals.setdefault(provider, {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0})
-        for key in token_totals:
-            value = row.get(key)
-            if isinstance(value, int):
-                token_totals[key] += value
-                bucket[key] += value
-    report = {
-        "classification": "HOLOVERIFY_BLIND_CANARY_POSTHOC_SCORE_V0",
-        "created_at_utc": datetime.now(timezone.utc).isoformat(),
-        "scoring_map_loaded_after_trace_freeze": True,
-        "packet_count": len(scored_rows),
-        "correct_count": correct,
-        "incorrect_count": len(scored_rows) - correct,
-        "score_rows": scored_rows,
-        "token_totals": token_totals,
-        "provider_token_totals": provider_token_totals,
-    }
-    write_json(run_dir / "blind_canary_posthoc_score.json", report)
-    return report
 
 
 def run_live(approval_statement: str, packet_limit: int | None = None, packet_index: int = 1) -> dict[str, Any]:
@@ -757,7 +748,6 @@ def run_live(approval_statement: str, packet_limit: int | None = None, packet_in
     transport = LiveTransport(run_dir)
     trace_frozen = False
     runtime_result: dict[str, Any] | None = None
-    posthoc: dict[str, Any] | None = None
     failure: str | None = None
     try:
         runtime_result = BLIND.run_blind_runtime_manifest(str(runtime_manifest_path), str(run_dir), transport=transport)
@@ -766,7 +756,6 @@ def run_live(approval_statement: str, packet_limit: int | None = None, packet_in
         observed = runtime_result.get("observed_call_count")
         if observed != expected_call_count or len(transport.provider_rows) != expected_call_count:
             raise RuntimeError(f"observed_call_count_mismatch:{observed}:{len(transport.provider_rows)}")
-        posthoc = posthoc_score(run_dir, runtime_result, transport.provider_rows)
     except Exception as exc:
         failure = str(exc)
         write_provider_trace(run_dir, transport.provider_rows)
@@ -779,6 +768,7 @@ def run_live(approval_statement: str, packet_limit: int | None = None, packet_in
             for row in (runtime_result or {}).get("results", [])
         ]
         final_verdicts_valid = bool(final_verdicts) and all(verdict in {"ALLOW", "ESCALATE"} for verdict in final_verdicts)
+        live_wrapper_has_scoring_map_path = "SCORING_MAP" in globals()
         summary = {
             "classification": "HOLOVERIFY_BLIND_CANARY_LIVE_RUN_SUMMARY_V0",
             "created_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -792,15 +782,33 @@ def run_live(approval_statement: str, packet_limit: int | None = None, packet_in
             "expected_provider_calls": expected_call_count,
             "observed_provider_calls": len(transport.provider_rows),
             "trace_frozen_before_scoring": trace_frozen,
+            "scoring_map_access_control": {
+                "live_wrapper_has_scoring_map_path": live_wrapper_has_scoring_map_path,
+                "live_wrapper_scoring_split_enforced_by": WRAPPER_SCORING_SPLIT_TEST,
+                "preflight_read_guard_enforced_by": SCORING_MAP_READ_GUARD_TEST,
+                "posthoc_scorer_owns_scoring_map_path": str(POSTHOC_SCORING_SCRIPT.relative_to(REPO_ROOT)),
+            },
+            "posthoc_scoring_required_after_trace_freeze": True,
+            "posthoc_scoring_command": (
+                f"python3 -B {POSTHOC_SCORING_SCRIPT.relative_to(REPO_ROOT)} --run-dir "
+                f"{run_dir.relative_to(REPO_ROOT)}"
+            ),
+            "attempt_budget_policy": {
+                "version": ATTEMPT_BUDGET_POLICY_VERSION,
+                "max_content_contract_attempts_per_packet": MAX_CONTENT_CONTRACT_ATTEMPTS_PER_PACKET,
+                "max_live_run_attempts_per_packet": MAX_LIVE_RUN_ATTEMPTS_PER_PACKET,
+                "transport_retries_per_call": TRANSPORT_MAX_RETRIES,
+                "content_failures_are_not_retried": True,
+                "manual_rerun_requires_new_approval_and_preserved_invalid_trace": True,
+            },
             "provider_failures": provider_failures,
             "runtime_result_ref": "blind_canary_runtime_results.json" if runtime_result else None,
             "provider_trace_ref": "TRACE_PROVIDER_CALLS.jsonl",
-            "posthoc_score_ref": "blind_canary_posthoc_score.json" if posthoc else None,
+            "posthoc_score_ref": None,
             "failure": failure,
             "final_verdicts_valid": final_verdicts_valid,
             "passed_runtime_firewall": (
                 runtime_result is not None
-                and posthoc is not None
                 and len(transport.provider_rows) == expected_call_count
                 and not provider_failures
                 and final_verdicts_valid
@@ -813,10 +821,13 @@ def run_live(approval_statement: str, packet_limit: int | None = None, packet_in
             f"- Runtime firewall passed: `{summary['passed_runtime_firewall']}`",
             f"- Observed provider calls: `{summary['observed_provider_calls']}` / `{expected_call_count}`",
             f"- Provider failures: `{len(provider_failures)}`",
-            f"- Trace frozen before scoring: `{trace_frozen}`",
+            f"- Trace frozen: `{trace_frozen}`",
+            f"- Live wrapper has scoring-map path: `{live_wrapper_has_scoring_map_path}`",
+            f"- Scoring-map read guard: `{SCORING_MAP_READ_GUARD_TEST}`",
+            f"- Post-hoc scoring command: `{summary['posthoc_scoring_command']}`",
             f"- Failure: `{failure}`",
             "",
-            "This run is a blind runtime-firewall test only. It is not an error-rate claim.",
+            "This run is a blind runtime-firewall trace only until the separate post-hoc scoring script is run. It is not an error-rate claim.",
         ]
         write_text(run_dir / "blind_canary_live_summary.md", "\n".join(lines) + "\n")
     return load_json(run_dir / "blind_canary_live_summary.json")

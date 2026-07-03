@@ -1,16 +1,35 @@
 import importlib.util
 import json
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
+from blind_lane_suite.static_guards import scan_import_closure_for_truth_reachability
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "docs" / "benchmark" / "run_holoverify_blind_canary_live_2026_07_02.py"
+SCORER_PATH = REPO_ROOT / "docs" / "benchmark" / "score_holoverify_blind_canary_posthoc_2026_07_03.py"
+CANONICAL_ONE_PACKET_RUN = (
+    REPO_ROOT
+    / "docs"
+    / "benchmark"
+    / "holoverify_blind_canary_live_runs_2026_07_02"
+    / "run_20260703T005220Z"
+)
 
 
 def load_script():
     spec = importlib.util.spec_from_file_location("blind_canary_live_wrapper_test", SCRIPT_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_scorer():
+    spec = importlib.util.spec_from_file_location("blind_canary_posthoc_scorer_test", SCORER_PATH)
     module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
     spec.loader.exec_module(module)
@@ -30,6 +49,9 @@ def test_preflight_passes_without_provider_calls(tmp_path, monkeypatch):
     assert report["checks"]["provider_calls_not_yet_made"] is True
     assert report["runtime_input_leakage_hits"] == []
     assert report["prompt_probe_leakage_hits"] == []
+    assert report["scoring_map_access_control"]["live_wrapper_has_scoring_map_path"] is False
+    assert "test_preflight_does_not_read_scoring_map_bytes" in report["scoring_map_access_control"]["preflight_read_guard_enforced_by"]
+    assert report["posthoc_scoring_required_after_trace_freeze"] is True
 
 
 def test_one_packet_preflight_limits_scope_to_five_calls(tmp_path, monkeypatch):
@@ -45,6 +67,8 @@ def test_one_packet_preflight_limits_scope_to_five_calls(tmp_path, monkeypatch):
     assert report["packets"] == 1
     assert report["expected_provider_calls"] == 5
     assert report["checks"]["provider_calls_not_yet_made"] is True
+    assert report["checks"]["content_contract_attempt_budget"] is True
+    assert report["checks"]["live_run_attempt_budget"] is True
 
 
 def test_one_packet_subset_can_select_second_opaque_packet(tmp_path):
@@ -324,3 +348,79 @@ def test_pass_condition_uses_scoped_expected_call_count():
     source = SCRIPT_PATH.read_text()
     assert "len(transport.provider_rows) == expected_call_count" in source
     assert "len(transport.provider_rows) == EXPECTED_CALL_COUNT" not in source
+
+
+def test_live_wrapper_does_not_keep_scoring_map_path_or_posthoc_scorer():
+    source = SCRIPT_PATH.read_text()
+
+    assert "SCORING_MAP =" not in source
+    assert "def posthoc_score" not in source
+    assert "load_json(SCORING_MAP)" not in source
+    assert "posthoc_scoring_required_after_trace_freeze" in source
+
+
+def test_preflight_does_not_read_scoring_map_bytes(tmp_path, monkeypatch):
+    script = load_script()
+    monkeypatch.setenv("XAI_API_KEY", "dummy")
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+    monkeypatch.setenv("MINIMAX_API_KEY", "dummy")
+    scoring_map_path = script.BENCHMARK_ROOT / "holoverify_blind_canary_scoring_map_2026_07_02.json"
+    real_sha256_file = script.sha256_file
+
+    def guarded_sha256_file(path):
+        assert Path(path).resolve() != scoring_map_path.resolve()
+        return real_sha256_file(path)
+
+    monkeypatch.setattr(script, "sha256_file", guarded_sha256_file)
+    report = script.preflight(tmp_path / "preflight_no_scoring_map_read")
+
+    assert report["passed"] is True
+    assert report["scoring_map_access_control"]["live_wrapper_has_scoring_map_path"] is False
+
+
+def test_current_head_reports_clear_git_preflight_blocker(monkeypatch):
+    script = load_script()
+
+    def broken_git(*_args, **_kwargs):
+        raise subprocess.CalledProcessError(128, ["git", "rev-parse", "HEAD"])
+
+    monkeypatch.setattr(script.subprocess, "check_output", broken_git)
+    with pytest.raises(RuntimeError, match="git_head_unavailable: preflight requires a healthy git checkout"):
+        script.current_head()
+
+
+def test_posthoc_scorer_binds_score_to_frozen_trace_hashes(tmp_path):
+    scorer = load_scorer()
+    for name in (
+        "TRACE_CALLS.jsonl",
+        "TRACE_PROVIDER_CALLS.jsonl",
+        "blind_canary_runtime_results.json",
+        "blind_canary_live_summary.json",
+    ):
+        shutil.copyfile(CANONICAL_ONE_PACKET_RUN / name, tmp_path / name)
+
+    report = scorer.posthoc_score(tmp_path)
+    binding = report["trace_binding"]
+
+    assert report["classification"] == "HOLOVERIFY_BLIND_CANARY_POSTHOC_SCORE_TRACE_BOUND_V1"
+    assert report["scoring_map_loaded_after_trace_hash_binding"] is True
+    assert binding["trace_calls_sha256"] == scorer.sha256_file(tmp_path / "TRACE_CALLS.jsonl")
+    assert binding["trace_provider_calls_sha256"] == scorer.sha256_file(tmp_path / "TRACE_PROVIDER_CALLS.jsonl")
+    assert binding["runtime_results_sha256"] == scorer.sha256_file(tmp_path / "blind_canary_runtime_results.json")
+    assert binding["live_summary_sha256"] == scorer.sha256_file(tmp_path / "blind_canary_live_summary.json")
+    assert report["packet_count"] == 1
+    assert report["correct_count"] == 1
+    assert report["incorrect_count"] == 0
+
+
+def test_live_wrapper_import_closure_scan_has_only_detector_literals():
+    findings = scan_import_closure_for_truth_reachability(SCRIPT_PATH, repo_root=REPO_ROOT)
+    allowed_detector_names = {"packet_truth", "knew_terms", "allow_rule", "esc_rule"}
+    unexpected = [
+        finding
+        for finding in findings
+        if finding.get("kind") != "forbidden_field_string"
+        or finding.get("name") not in allowed_detector_names
+    ]
+
+    assert unexpected == []

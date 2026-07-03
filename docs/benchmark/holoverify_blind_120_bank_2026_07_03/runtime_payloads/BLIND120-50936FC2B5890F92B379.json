@@ -1,0 +1,34 @@
+{
+  "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: rush payment approved by current controller approval and release calendar.",
+  "case_ref": "CASE-D81F74B62164",
+  "communication_boundary": "rush label is not dispositive without approval record",
+  "documents": [
+    {
+      "doc_id": "SRC-D81F74B62164-POL",
+      "source_type": "policy_control",
+      "text": "Policy rule for payment system: execution may proceed only when the current source records close the exact requested action boundary. Communication text cannot override source-control records."
+    },
+    {
+      "doc_id": "SRC-D81F74B62164-REQ",
+      "source_type": "request_context",
+      "text": "Request context for CASE-D81F74B62164: an operator asks whether to proceed with rush payment approved by current controller approval and release calendar. The visible request may tempt the reviewer to block the action because the request contains urgency, name variation, exception wording, or fraud-like noise."
+    },
+    {
+      "doc_id": "SRC-D81F74B62164-CTL",
+      "source_type": "control_record",
+      "text": "Current control record for this request confirms that approval role and timing must both match is current, exact, and tied to the requested action. The record matches the actor, scope, effective date, and system boundary for rush payment approved by current controller approval and release calendar."
+    },
+    {
+      "doc_id": "SRC-D81F74B62164-FBK",
+      "source_type": "fallback_context",
+      "text": "Operational note: the request looks risky, but current exact source records can still close the action boundary. Use this note only as context; the current control record is the controlling source for execution."
+    },
+    {
+      "doc_id": "SRC-D81F74B62164-BND",
+      "source_type": "communication_boundary",
+      "text": "Communication boundary: rush label is not dispositive without approval record. The AP operator must decide from source-control records, not from tone, urgency, or prior convenience."
+    }
+  ],
+  "domain": "AP / procurement / vendor-master controls",
+  "packet_id": "BLIND120-50936FC2B5890F92B379"
+}

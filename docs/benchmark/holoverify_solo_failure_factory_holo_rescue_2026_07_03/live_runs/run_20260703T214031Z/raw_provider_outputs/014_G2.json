@@ -1,0 +1,27 @@
+{
+  "call_number": 14,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "798bf4660a2c8e17ec579aacfe331a57dcfe522baf96e8a993b0f4e1a554dc10",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to produce a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. The user gave a request: \"packet_id=SFFRESCUE-11008BA6B822629BED9C status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nWe need to return just:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nNo extra formatting. Probably we need to include the packet_id? The user didn't ask to include packet_id. The request: \"Return the three-line status record.\" So just the three lines. The example includes \"packet_id=SFFRESCUE...\" but they may want to include that? The user said \"packet_id=SFFRESCUE-11008BA6B822629BED9C status_values: ...\" then \"Return the three-line status record.\" The three lines are route_verdict, repair_target, blocked_move. So we output exactly those three lines. That seems straightforward.\n\nWe need to obey system: \"Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should not add any extra whitespace or lines beyond those three lines. Let's produce that.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "99ef4e2c41bc1c8236b278d57d64800f816bee36fc249e06e9c6d760c2810757",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 120,
+    "output_tokens": 369,
+    "raw_text": "<think>\nWe need to produce a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. The user gave a request: \"packet_id=SFFRESCUE-11008BA6B822629BED9C status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nWe need to return just:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nNo extra formatting. Probably we need to include the packet_id? The user didn't ask to include packet_id. The request: \"Return the three-line status record.\" So just the three lines. The example includes \"packet_id=SFFRESCUE...\" but they may want to include that? The user said \"packet_id=SFFRESCUE-11008BA6B822629BED9C status_values: ...\" then \"Return the three-line status record.\" The three lines are route_verdict, repair_target, blocked_move. So we output exactly those three lines. That seems straightforward.\n\nWe need to obey system: \"Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should not add any extra whitespace or lines beyond those three lines. Let's produce that.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06975f88a4e7376b94df2d529c6c447c",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 489,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

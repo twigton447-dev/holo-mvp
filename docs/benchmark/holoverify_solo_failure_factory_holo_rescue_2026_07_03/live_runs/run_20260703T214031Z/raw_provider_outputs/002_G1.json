@@ -1,0 +1,27 @@
+{
+  "call_number": 2,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "09e95ebf392e469414bc09153af9beaa715d5fd1914ff8862a972c4582afb9ed",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to respond with a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. The user gave the data:\n\npacket_id=SFFRESCUE-020F312D1A5A832C82B1\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe need to output three lines: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs.\n\nWe need not include packet_id, nor any headings, no JSON, no markdown, no extra lines. Just those three lines.\n\nThe user wants \"Return the three-line status record.\" So just those lines.\n\nPotential nuance: The lines must be exactly \"route_verdict=CONTINUE\", \"repair_target=preserve source-grounded reasoning\", \"blocked_move=do not invent source IDs\". Possibly case-sensitive? The given values are capitalized: CONTINUE, preserve source-grounded reasoning, do not invent source IDs. Ensure spaces preserved: \"preserve source-grounded reasoning\" includes spaces and hyphen. \"do not invent source IDs\". Provide them exactly.\n\nNo extra spaces at start or end. Possibly we need to follow the format exactly: key=value with no spaces around \"=\". The user said \"key=value lines\". So we should not include spaces around \"=\". So the output will be:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure not to add any extra newline at the end? Usually it's okay to have a trailing newline. But we must not have any extra lines beyond three lines. We'll output exactly three lines.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "38f6f63b7a10663d36c576762ebbd203c7600e4d73a5738aaa84a82729db2506",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 123,
+    "output_tokens": 391,
+    "raw_text": "<think>\nWe need to respond with a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. The user gave the data:\n\npacket_id=SFFRESCUE-020F312D1A5A832C82B1\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe need to output three lines: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs.\n\nWe need not include packet_id, nor any headings, no JSON, no markdown, no extra lines. Just those three lines.\n\nThe user wants \"Return the three-line status record.\" So just those lines.\n\nPotential nuance: The lines must be exactly \"route_verdict=CONTINUE\", \"repair_target=preserve source-grounded reasoning\", \"blocked_move=do not invent source IDs\". Possibly case-sensitive? The given values are capitalized: CONTINUE, preserve source-grounded reasoning, do not invent source IDs. Ensure spaces preserved: \"preserve source-grounded reasoning\" includes spaces and hyphen. \"do not invent source IDs\". Provide them exactly.\n\nNo extra spaces at start or end. Possibly we need to follow the format exactly: key=value with no spaces around \"=\". The user said \"key=value lines\". So we should not include spaces around \"=\". So the output will be:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure not to add any extra newline at the end? Usually it's okay to have a trailing newline. But we must not have any extra lines beyond three lines. We'll output exactly three lines.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06975f549fa0891946c518b7f9c4a50f",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 514,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

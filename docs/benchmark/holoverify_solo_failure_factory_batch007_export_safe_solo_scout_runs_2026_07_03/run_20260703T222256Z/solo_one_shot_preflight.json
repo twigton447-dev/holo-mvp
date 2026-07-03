@@ -1,0 +1,69 @@
+{
+  "checks": {
+    "env_keys_present": true,
+    "expected_call_count": true,
+    "judge_calls_disabled": true,
+    "no_gov": true,
+    "no_holo_state": true,
+    "packet_count": true,
+    "payloads_present": true,
+    "posthoc_scoring_script_present": true,
+    "prompt_probe_leakage": true,
+    "provider_calls_not_yet_made": true,
+    "runtime_consumable": true,
+    "runtime_input_leakage": true,
+    "runtime_manifest_hash": true,
+    "scoring_map_path_absent_from_live_wrapper": true,
+    "solo_models_declared": true,
+    "source_runtime_manifest_hash": true
+  },
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_PREFLIGHT_V0",
+  "created_at_utc": "2026-07-03T22:22:56.777214+00:00",
+  "env_presence": {
+    "MINIMAX_API_KEY": "PRESENT",
+    "OPENAI_API_KEY": "PRESENT",
+    "XAI_API_KEY": "PRESENT"
+  },
+  "expected_provider_calls": 120,
+  "expected_runtime_manifest_sha256": "1e7c6013fa8a3d10a406a530a3e65546166c9359c082e1ea1f02e2dd35deeccf",
+  "expected_scoring_map_sha256": "a625b0ebef85ee8562f030bfdd3d0e0b4472ae11b1439afb4e0ff9f962f1ed09",
+  "freeze_root_sha256": "6c7a27e77440dd91e9f7c254244e4699b29bb2ad513c5fc1dea17ff026ca5fb5",
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH007_EXPORT_SAFE_20PAIR_SOLO_SCOUT_V0",
+  "missing_payloads": [],
+  "model_order": [
+    "xai",
+    "openai",
+    "minimax"
+  ],
+  "packet_count": 40,
+  "passed": true,
+  "prompt_probe_leakage_hits": [],
+  "roster": {
+    "minimax": {
+      "kind": "openai_compatible",
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "url": "https://api.minimax.io/v1/chat/completions"
+    },
+    "openai": {
+      "kind": "openai_responses",
+      "model": "gpt-5.4-mini",
+      "provider": "openai",
+      "url": "https://api.openai.com/v1/responses"
+    },
+    "xai": {
+      "kind": "openai_compatible",
+      "model": "grok-3-mini",
+      "provider": "xai",
+      "url": "https://api.x.ai/v1/chat/completions"
+    }
+  },
+  "runtime_input_leakage_hits": [],
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch007_export_safe_2026_07_03/holoverify_solo_failure_factory_batch007_export_safe_runtime_manifest_2026_07_03.json",
+  "runtime_manifest_sha256": "1e7c6013fa8a3d10a406a530a3e65546166c9359c082e1ea1f02e2dd35deeccf",
+  "scoring_map_access_control": {
+    "live_wrapper_has_scoring_map_path": false,
+    "posthoc_scorer_owns_scoring_map_path": "docs/benchmark/score_holoverify_solo_failure_factory_batch007_export_safe_solo_scout_2026_07_03.py"
+  },
+  "source_runtime_manifest_sha256": "1e7c6013fa8a3d10a406a530a3e65546166c9359c082e1ea1f02e2dd35deeccf"
+}

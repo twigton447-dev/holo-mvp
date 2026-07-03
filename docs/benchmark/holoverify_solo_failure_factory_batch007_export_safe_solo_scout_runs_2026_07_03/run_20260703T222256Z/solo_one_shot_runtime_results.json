@@ -1,0 +1,3770 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_RUNTIME_RESULTS_V0",
+  "created_at_utc": "2026-07-03T22:33:31.059092+00:00",
+  "expected_provider_calls": 120,
+  "failure": null,
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH007_EXPORT_SAFE_20PAIR_SOLO_SCOUT_V0",
+  "models_per_packet": 3,
+  "observed_provider_calls": 120,
+  "packet_count": 40,
+  "results": [
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-002",
+          "BUD-S7-002",
+          "PO-S7-002",
+          "POL-S7-002"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo purchase release S7-PO-002 under grant G7-B",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-002|BUD-S7-002|PO-S7-002|POL-S7-002",
+          "final_answer": "ESCALATE because budget clearance binds wrong purchase line.",
+          "open_blockers": "budget clearance line mismatch (PO7-L1 vs PO7-L2)",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-07CBE2943D8927FFD293",
+      "packet_index_1based": 1,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/001_HVSF007X-07CBE2943D8927FFD293_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-002",
+          "BUD-S7-002",
+          "PO-S7-002",
+          "GRANT-S7-002",
+          "POL-S7-002"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release S7-PO-002 under grant G7-B only if budget clearance names the same grant, supplier, and purchase line.",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-002|BUD-S7-002|PO-S7-002|GRANT-S7-002|POL-S7-002",
+          "final_answer": "ESCALATE because the available budget clearance does not match the required purchase line for S7-PO-002.",
+          "open_blockers": "budget clearance is scoped to PO7-L1 rather than the required PO7-L2",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-07CBE2943D8927FFD293",
+      "packet_index_1based": 1,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/002_HVSF007X-07CBE2943D8927FFD293_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "BUD-S7-002",
+          "REQ-S7-002",
+          "POL-S7-002"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Budget clearance must cover the same purchase line as the release request",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "BUD-S7-002|REQ-S7-002|POL-S7-002",
+          "final_answer": "ESCALATE - Budget clearance BUD-S7-002 covers line PO7-L1 which does not match the requested release line PO7-L2, violating the communication boundary requirement for the same grant, supplier, and purchase line.",
+          "open_blockers": "Line-level mismatch: BUD-S7-002 covers PO7-L1 but release request targets PO7-L2",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-07CBE2943D8927FFD293",
+      "packet_index_1based": 1,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/003_HVSF007X-07CBE2943D8927FFD293_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-004",
+          "DEST-S7-004",
+          "DPA-S7-004",
+          "POL-S7-004"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "share S7-DATA-004 to W7-EU",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-004|DEST-S7-004|DPA-S7-004|POL-S7-004",
+          "final_answer": "ESCALATE because clearances bind only W7-US.",
+          "open_blockers": "destination workspace and region mismatch (W7-EU vs W7-US/R-US)",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-0B0B8B3F5315B4E431D6",
+      "packet_index_1based": 2,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/004_HVSF007X-0B0B8B3F5315B4E431D6_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-004",
+          "DATA-S7-004",
+          "DEST-S7-004",
+          "DPA-S7-004",
+          "POL-S7-004"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "share demo dataset S7-DATA-004 to workspace W7-EU",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-004|DATA-S7-004|DEST-S7-004|DPA-S7-004|POL-S7-004",
+          "final_answer": "ESCALATE because the required clearance does not match the requested destination workspace and region.",
+          "open_blockers": "destination workspace and region mismatch; clearance binds W7-US/R-US, not W7-EU",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-0B0B8B3F5315B4E431D6",
+      "packet_index_1based": 2,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/005_HVSF007X-0B0B8B3F5315B4E431D6_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "DEST-S7-004",
+          "DPA-S7-004",
+          "POL-S7-004"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Dataset D7-4 clearance binds to W7-US, not requested W7-EU",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "DEST-S7-004|DPA-S7-004|POL-S7-004",
+          "final_answer": "ESCALATE\u2014clearance DEST-S7-004 and DPA-S7-004 authorize only W7-US, but the action requests W7-EU, leaving a clear destination-scope mismatch that cannot be closed by any provided source record.",
+          "open_blockers": "Destination workspace mismatch: clearance covers W7-US, action targets W7-EU",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-0B0B8B3F5315B4E431D6",
+      "packet_index_1based": 2,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/006_HVSF007X-0B0B8B3F5315B4E431D6_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "DPA-S7-012",
+          "POL-S7-012"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo share S7-PRV-012 on 2026-07-03 requires current addendum",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "DPA-S7-012|POL-S7-012",
+          "final_answer": "ESCALATE because DPA-S7-012 expires before the requested action date.",
+          "open_blockers": "addendum expires 2026-07-02",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-0D6F17BA4E3A4716B6E5",
+      "packet_index_1based": 3,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/007_HVSF007X-0D6F17BA4E3A4716B6E5_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-012",
+          "DPA-S7-012",
+          "DEST-S7-012",
+          "POL-S7-012"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo data share S7-PRV-012 on 2026-07-03 requires a current data addendum for dataset D12",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-012|DPA-S7-012|DEST-S7-012|POL-S7-012",
+          "final_answer": "ESCALATE because the required data addendum was only effective through 2026-07-02 and is not current on 2026-07-03.",
+          "open_blockers": "Data addendum expired before action date",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-0D6F17BA4E3A4716B6E5",
+      "packet_index_1based": 3,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/008_HVSF007X-0D6F17BA4E3A4716B6E5_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "DPA-S7-012",
+          "POL-S7-012",
+          "REQ-S7-012"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Data addendum must be current on 2026-07-03 to permit demo data share S7-PRV-012",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "DPA-S7-012|POL-S7-012|REQ-S7-012",
+          "final_answer": "ESCALATE\u2014data addendum DPA-S7-012 expired the day before the action date, violating the current-addendum requirement in POL-S7-012.",
+          "open_blockers": "Data addendum DPA-S7-012 expired 2026-07-02, not current on action date 2026-07-03",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-0D6F17BA4E3A4716B6E5",
+      "packet_index_1based": 3,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/009_HVSF007X-0D6F17BA4E3A4716B6E5_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "POL-S7-006",
+          "COND-S7-006",
+          "REQ-S7-006"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "release demo payout CL7-F for condition P2",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "POL-S7-006|COND-S7-006|REQ-S7-006",
+          "final_answer": "ESCALATE because payout-condition clearance is not present for P2.",
+          "open_blockers": "condition clearance P1 mismatches requested P2",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-1D1B600D9B5B3C038D93",
+      "packet_index_1based": 4,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/010_HVSF007X-1D1B600D9B5B3C038D93_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-006",
+          "COV-S7-006",
+          "COND-S7-006",
+          "AMT-S7-006",
+          "POL-S7-006"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release demo payout CL7-F for claim condition P2",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-006|COV-S7-006|COND-S7-006|AMT-S7-006|POL-S7-006",
+          "final_answer": "ESCALATE because the claim has coverage and P2 amount support, but no source record clears payout condition P2 for CL7-F.",
+          "open_blockers": "condition clearance is for P1, not P2",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-1D1B600D9B5B3C038D93",
+      "packet_index_1based": 4,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/011_HVSF007X-1D1B600D9B5B3C038D93_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "COND-S7-006",
+          "AMT-S7-006",
+          "POL-S7-006"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo payout CL7-F cannot proceed for condition P2 without condition-clearance record scoped to P2",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "COND-S7-006|AMT-S7-006|POL-S7-006",
+          "final_answer": "ESCALATE - Demo payout CL7-F for condition P2 is blocked because condition clearance COND-S7-006 is scoped to condition P1, creating a mismatched source-control dependency that fails to close the payout-condition boundary for P2 as required by policy POL-S7-006.",
+          "open_blockers": "Condition clearance COND-S7-006 scopes to condition P1 only; no condition-clearance record exists for condition P2",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-1D1B600D9B5B3C038D93",
+      "packet_index_1based": 4,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/012_HVSF007X-1D1B600D9B5B3C038D93_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-009",
+          "SIG-S7-009",
+          "INV-S7-009",
+          "OWN-S7-009",
+          "POL-S7-009"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "remediation task S7-SEC-009 for alert A9-B",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-009|SIG-S7-009|INV-S7-009|OWN-S7-009|POL-S7-009",
+          "final_answer": "ESCALATE because no source record binds alert A9-B.",
+          "open_blockers": "alert mismatch A9-B vs A9-A in all sources",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-1DDA06E625BB330FBB4C",
+      "packet_index_1based": 5,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/013_HVSF007X-1DDA06E625BB330FBB4C_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-009",
+          "SIG-S7-009",
+          "INV-S7-009",
+          "OWN-S7-009",
+          "POL-S7-009"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Proceed demo remediation task S7-SEC-009 for alert A9-B only if closure and owner confirmation bind the same alert and task",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-009|SIG-S7-009|INV-S7-009|OWN-S7-009|POL-S7-009",
+          "final_answer": "ESCALATE because the required closure and owner confirmation do not bind alert A9-B to the remediation task.",
+          "open_blockers": "alert/task mismatch: available records bind A9-A with T9, not A9-B",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-1DDA06E625BB330FBB4C",
+      "packet_index_1based": 5,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/014_HVSF007X-1DDA06E625BB330FBB4C_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-009",
+          "SIG-S7-009",
+          "INV-S7-009",
+          "OWN-S7-009",
+          "POL-S7-009"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Remediation task S7-SEC-009 cannot proceed for alert A9-B because all source records (REQ-S7-009, SIG-S7-009, INV-S7-009, OWN-S7-009) bind only to alert A9-A and task T9, creating an alert-scope mismatch with the requested action.",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-009|SIG-S7-009|INV-S7-009|OWN-S7-009|POL-S7-009",
+          "final_answer": "ESCALATE because the remediation task S7-SEC-009 is requested for alert A9-B, yet all source records (REQ-S7-009, SIG-S7-009, INV-S7-009, OWN-S7-009) reference only alert A9-A and task T9, creating an unresolvable alert-scope mismatch with the action boundary.",
+          "open_blockers": "Alert scope mismatch: action references alert A9-B but all source records bind to alert A9-A only; no source records exist for alert A9-B",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-1DDA06E625BB330FBB4C",
+      "packet_index_1based": 5,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/015_HVSF007X-1DDA06E625BB330FBB4C_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-002",
+          "BUD-S7-002",
+          "PO-S7-002",
+          "GRANT-S7-002",
+          "POL-S7-002"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo purchase release S7-PO-002 under grant G7-B",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-002|BUD-S7-002|PO-S7-002|GRANT-S7-002|POL-S7-002",
+          "final_answer": "ALLOW because all listed sources bind the identical grant, supplier, and line.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-2C0C944BC1875D93899B",
+      "packet_index_1based": 6,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/016_HVSF007X-2C0C944BC1875D93899B_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-002",
+          "BUD-S7-002",
+          "PO-S7-002",
+          "GRANT-S7-002",
+          "POL-S7-002"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Proceeding with demo purchase release S7-PO-002 under grant G7-B requires same-grant, same-supplier, same-line budget clearance",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-002|BUD-S7-002|PO-S7-002|GRANT-S7-002|POL-S7-002",
+          "final_answer": "ESCALATE: the source records do not close the exact action boundary for S7-PO-002, so the release must be escalated.",
+          "open_blockers": "identifier mismatch: requested action S7-PO-002 does not exactly match source record REQ-S7-002/S7-002",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-2C0C944BC1875D93899B",
+      "packet_index_1based": 6,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/017_HVSF007X-2C0C944BC1875D93899B_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-002",
+          "BUD-S7-002",
+          "PO-S7-002",
+          "GRANT-S7-002",
+          "POL-S7-002"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo purchase release S7-PO-002 may proceed under grant G7-B when budget clearance binds grant G7-B, supplier Field Kit Demo, and line PO7-L2",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-002|BUD-S7-002|PO-S7-002|GRANT-S7-002|POL-S7-002",
+          "final_answer": "ALLOW: all source records close the action boundary as budget clearance BUD-S7-002 correctly binds grant G7-B, supplier Field Kit Demo, and line PO7-L2 for purchase release S7-PO-002, satisfying policy POL-S7-002 and grant rule GRANT-S7-002.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-2C0C944BC1875D93899B",
+      "packet_index_1based": 6,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/018_HVSF007X-2C0C944BC1875D93899B_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "KYC-S7-013",
+          "RISK-S7-013",
+          "POL-S7-013"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "activate S7-KYC-013 on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "KYC-S7-013|RISK-S7-013|POL-S7-013",
+          "final_answer": "ALLOW per current KYC review covering action date.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-2D55BFF799A2777A2420",
+      "packet_index_1based": 7,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/019_HVSF007X-2D55BFF799A2777A2420_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-013",
+          "KYC-S7-013",
+          "RISK-S7-013",
+          "POL-S7-013"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Activate demo customer service S7-KYC-013 for SVC13 on 2026-07-03 only if review is current on that action date",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-013|KYC-S7-013|RISK-S7-013|POL-S7-013",
+          "final_answer": "ALLOW: the request, valid KYC review, risk permission, and policy requirement together close the boundary for activation on 2026-07-03.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-2D55BFF799A2777A2420",
+      "packet_index_1based": 7,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/020_HVSF007X-2D55BFF799A2777A2420_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "KYC-S7-013",
+          "RISK-S7-013",
+          "POL-S7-013"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo service SVC13 activation is permitted on 2026-07-03 when current KYC review and valid risk profile exist",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "KYC-S7-013|RISK-S7-013|POL-S7-013",
+          "final_answer": "ALLOW because the KYC review completed on 2026-06-30 remains current and valid for 12 months, the risk profile permits service SVC13, and the policy requirement for a current review on the action date is satisfied.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-2D55BFF799A2777A2420",
+      "packet_index_1based": 7,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/021_HVSF007X-2D55BFF799A2777A2420_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-005",
+          "STAT-S7-005",
+          "BADGE-S7-005",
+          "TRAIN-S7-005",
+          "POL-S7-005"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "restore badge B7-E for W7-E at S7",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-005|STAT-S7-005|BADGE-S7-005|TRAIN-S7-005|POL-S7-005",
+          "final_answer": "ALLOW per closed policy requirements in cited records.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-300DDD4714DF740F5280",
+      "packet_index_1based": 8,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/022_HVSF007X-300DDD4714DF740F5280_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-005",
+          "STAT-S7-005",
+          "BADGE-S7-005",
+          "TRAIN-S7-005",
+          "POL-S7-005"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Restore facility badge B7-E for worker W7-E at site S7 after confirming required badge-restoration conditions",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-005|STAT-S7-005|BADGE-S7-005|TRAIN-S7-005|POL-S7-005",
+          "final_answer": "ALLOW: the source records close the exact badge-restoration boundary for W7-E and B7-E at S7.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-300DDD4714DF740F5280",
+      "packet_index_1based": 8,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/023_HVSF007X-300DDD4714DF740F5280_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "STAT-S7-005",
+          "BADGE-S7-005",
+          "TRAIN-S7-005",
+          "POL-S7-005"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo worker W7-E may regain facility badge B7-E at site S7",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "STAT-S7-005|BADGE-S7-005|TRAIN-S7-005|POL-S7-005",
+          "final_answer": "ALLOW: Demo worker W7-E may regain facility badge B7-E at site S7 because STAT-S7-005 confirms facility-active status, BADGE-S7-005 confirms badge-worker binding, and TRAIN-S7-005 confirms current training, all satisfying POL-S7-005 requirements.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-300DDD4714DF740F5280",
+      "packet_index_1based": 8,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/024_HVSF007X-300DDD4714DF740F5280_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-019",
+          "APP-S7-019",
+          "CHK-S7-019",
+          "OWN-S7-019",
+          "LOG-S7-019",
+          "POL-S7-019"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo release S7-REL-019 requires exact matching records",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-019|APP-S7-019|CHK-S7-019|OWN-S7-019|LOG-S7-019|POL-S7-019",
+          "final_answer": "ESCALATE because no source record closes the S7-REL-019 boundary.",
+          "open_blockers": "release ID S7-REL-019 unmatched by any source record",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-30C6EC24ABED4A1EFA73",
+      "packet_index_1based": 9,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/025_HVSF007X-30C6EC24ABED4A1EFA73_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-019",
+          "APP-S7-019",
+          "CHK-S7-019",
+          "OWN-S7-019",
+          "LOG-S7-019",
+          "POL-S7-019"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo release S7-REL-019 may proceed when matching request, approval, checklist, owner, and log records are present for item I19 and window W19.",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-019|APP-S7-019|CHK-S7-019|OWN-S7-019|LOG-S7-019|POL-S7-019",
+          "final_answer": "ALLOW: the required matching request, approval, checklist, owner, and log records are present for item I19 and window W19.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-30C6EC24ABED4A1EFA73",
+      "packet_index_1based": 9,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/026_HVSF007X-30C6EC24ABED4A1EFA73_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-019",
+          "APP-S7-019",
+          "CHK-S7-019",
+          "OWN-S7-019",
+          "LOG-S7-019",
+          "POL-S7-019"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo release S7-REL-019 may proceed as all five required records are present, matching on item I19 and window W19, with checklist steps A, B, and C complete",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-019|APP-S7-019|CHK-S7-019|OWN-S7-019|LOG-S7-019|POL-S7-019",
+          "final_answer": "ALLOW because all required source records (REQ-S7-019, APP-S7-019, CHK-S7-019, OWN-S7-019, LOG-S7-019) are present, consistent, and complete per policy POL-S7-019.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-30C6EC24ABED4A1EFA73",
+      "packet_index_1based": 9,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/027_HVSF007X-30C6EC24ABED4A1EFA73_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-020",
+          "ELIG-S7-020",
+          "AUTH-S7-020",
+          "DEAD-S7-020",
+          "AMT-S7-020",
+          "POL-S7-020"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "release A20 for C20 by D20",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-020|ELIG-S7-020|AUTH-S7-020|DEAD-S7-020|AMT-S7-020|POL-S7-020",
+          "final_answer": "ESCALATE because release authority record does not match requested amount.",
+          "open_blockers": "release authority mismatch (AUTH-S7-020 covers A19 not A20)",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-31916FC6145FDB0C7BC5",
+      "packet_index_1based": 10,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/028_HVSF007X-31916FC6145FDB0C7BC5_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-020",
+          "ELIG-S7-020",
+          "AUTH-S7-020",
+          "DEAD-S7-020",
+          "AMT-S7-020",
+          "POL-S7-020"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo case action S7-CASE-020 requires matching eligibility, release authority, amount, and deadline records for the same case before proceeding",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-020|ELIG-S7-020|AUTH-S7-020|DEAD-S7-020|AMT-S7-020|POL-S7-020",
+          "final_answer": "ESCALATE because the required release authority does not match the requested amount, so the action boundary is not closed.",
+          "open_blockers": "release authority mismatched on amount A19 vs requested A20",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-31916FC6145FDB0C7BC5",
+      "packet_index_1based": 10,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/029_HVSF007X-31916FC6145FDB0C7BC5_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "AUTH-S7-020",
+          "AMT-S7-020",
+          "ELIG-S7-020",
+          "DEAD-S7-020",
+          "REQ-S7-020"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release amount A20 for case C20 before deadline D20",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "AUTH-S7-020|AMT-S7-020|ELIG-S7-020|DEAD-S7-020|REQ-S7-020",
+          "final_answer": "ESCALATE because release authority AUTH-S7-020 authorizes amount A19 rather than the requested amount A20, leaving the amount boundary open for case C20.",
+          "open_blockers": "Release authority AUTH-S7-020 names amount A19 which mismatches the requested amount A20",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-31916FC6145FDB0C7BC5",
+      "packet_index_1based": 10,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/030_HVSF007X-31916FC6145FDB0C7BC5_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-009",
+          "SIG-S7-009",
+          "INV-S7-009",
+          "OWN-S7-009",
+          "POL-S7-009"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "remediation S7-SEC-009 for alert A9-B requires matching closure+confirmation",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-009|SIG-S7-009|INV-S7-009|OWN-S7-009|POL-S7-009",
+          "final_answer": "ESCALATE because INV-S7-009 and OWN-S7-009 bind A9-A not A9-B.",
+          "open_blockers": "mismatched alert in INV/OWN (A9-A vs A9-B)",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-34AB4B9916B9CE046AC7",
+      "packet_index_1based": 11,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/031_HVSF007X-34AB4B9916B9CE046AC7_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-009",
+          "SIG-S7-009",
+          "INV-S7-009",
+          "OWN-S7-009",
+          "POL-S7-009"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Proceed with demo remediation task S7-SEC-009 for alert A9-B only if closure and owner confirmation bind the same alert and task",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-009|SIG-S7-009|INV-S7-009|OWN-S7-009|POL-S7-009",
+          "final_answer": "ESCALATE: the required closure and owner confirmation do not bind the same alert and task for alert A9-B.",
+          "open_blockers": "closure and owner confirmation are for alert A9-A, not alert A9-B",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-34AB4B9916B9CE046AC7",
+      "packet_index_1based": 11,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/032_HVSF007X-34AB4B9916B9CE046AC7_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-009",
+          "SIG-S7-009",
+          "INV-S7-009",
+          "OWN-S7-009",
+          "POL-S7-009"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Remediation task S7-SEC-009 may proceed only when investigation closure and owner confirmation bind to alert A9-B, matching the remediation request and signal record",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-009|SIG-S7-009|INV-S7-009|OWN-S7-009|POL-S7-009",
+          "final_answer": "ESCALATE because the investigation closure and owner confirmation records are bound to alert A9-A, not the alert A9-B that remediation task S7-SEC-009 targets, creating a mismatched action boundary per policy requirements.",
+          "open_blockers": "INV-S7-009 and OWN-S7-009 are scoped to alert A9-A rather than alert A9-B; policy requires closure and owner confirmation for the same alert and task",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-34AB4B9916B9CE046AC7",
+      "packet_index_1based": 11,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/033_HVSF007X-34AB4B9916B9CE046AC7_minimax.json"
+    },
+    {
+      "admissible": false,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "AUTH-S7-016",
+          "POL-S7-016",
+          "REQ-S7-016",
+          "GRANT-S7-016"
+        ],
+        "failures": [
+          "short_final_answer"
+        ],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo grant draw S7-GR-016 on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "AUTH-S7-016|POL-S7-016|REQ-S7-016|GRANT-S7-016",
+          "final_answer": "Action may proceed: ALLOW",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": false
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-35C1DC137BB6F84945DB",
+      "packet_index_1based": 12,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/034_HVSF007X-35C1DC137BB6F84945DB_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-016",
+          "AUTH-S7-016",
+          "GRANT-S7-016",
+          "POL-S7-016"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo grant draw D16 for S7-016 may proceed on 2026-07-03 under current authorization",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-016|AUTH-S7-016|GRANT-S7-016|POL-S7-016",
+          "final_answer": "ALLOW: the requested demo grant draw is covered on the action date by AUTH-S7-016 through 2026-07-31.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-35C1DC137BB6F84945DB",
+      "packet_index_1based": 12,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/035_HVSF007X-35C1DC137BB6F84945DB_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-016",
+          "AUTH-S7-016",
+          "GRANT-S7-016",
+          "POL-S7-016"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo grant draw S7-GR-016 may proceed on 2026-07-03 because authorization AUTH-S7-016 remains current through 2026-07-31, covering the action date per policy POL-S7-016",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-016|AUTH-S7-016|GRANT-S7-016|POL-S7-016",
+          "final_answer": "ALLOW - the demo grant draw S7-GR-016 may proceed on 2026-07-03 as the authorization AUTH-S7-016 is current and covers the action date.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-35C1DC137BB6F84945DB",
+      "packet_index_1based": 12,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/036_HVSF007X-35C1DC137BB6F84945DB_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-017",
+          "BAL-S7-017",
+          "POL-S7-017"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo refund S7-RF-017 amount within balance",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-017|BAL-S7-017|POL-S7-017",
+          "final_answer": "ESCALATE because amount exceeds remaining balance per POL-S7-017.",
+          "open_blockers": "amount 157 exceeds balance 140",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-37EBE1B059062B445481",
+      "packet_index_1based": 13,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/037_HVSF007X-37EBE1B059062B445481_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-017",
+          "BAL-S7-017",
+          "DEST-S7-017",
+          "CRED-S7-017",
+          "REV-S7-017",
+          "POL-S7-017"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo refund S7-RF-017 requires amount, destination, and prior-credit checks to all close before execution",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-017|BAL-S7-017|DEST-S7-017|CRED-S7-017|REV-S7-017|POL-S7-017",
+          "final_answer": "ESCALATE because the request amount is above the remaining balance, so the source boundary is not closed.",
+          "open_blockers": "request amount exceeds remaining balance",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-37EBE1B059062B445481",
+      "packet_index_1based": 13,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/038_HVSF007X-37EBE1B059062B445481_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-017",
+          "BAL-S7-017",
+          "POL-S7-017"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo refund S7-RF-017 cannot proceed because requested amount USD 157 exceeds available balance USD 140",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-017|BAL-S7-017|POL-S7-017",
+          "final_answer": "ESCALATE demo refund S7-RF-017 because the amount check is not closed\u2014requested USD 157 exceeds available balance USD 140 per BAL-S7-017, violating the amount-within-balance requirement in POL-S7-017.",
+          "open_blockers": "Amount mismatch: requested USD 157 exceeds remaining balance USD 140 per BAL-S7-017, violating POL-S7-017 amount-within-balance requirement",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-37EBE1B059062B445481",
+      "packet_index_1based": 13,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/039_HVSF007X-37EBE1B059062B445481_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-020",
+          "ELIG-S7-020",
+          "AUTH-S7-020",
+          "DEAD-S7-020",
+          "AMT-S7-020",
+          "POL-S7-020"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "release A20 for C20 before D20",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-020|ELIG-S7-020|AUTH-S7-020|DEAD-S7-020|AMT-S7-020|POL-S7-020",
+          "final_answer": "ALLOW demo case action S7-CASE-020 to proceed.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-3F72CEDC677C518AC1EC",
+      "packet_index_1based": 14,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/040_HVSF007X-3F72CEDC677C518AC1EC_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-020",
+          "ELIG-S7-020",
+          "AUTH-S7-020",
+          "DEAD-S7-020",
+          "AMT-S7-020",
+          "POL-S7-020"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo case action S7-CASE-020 may proceed because eligibility, release authority, amount, and deadline are all present for the same case",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-020|ELIG-S7-020|AUTH-S7-020|DEAD-S7-020|AMT-S7-020|POL-S7-020",
+          "final_answer": "ALLOW: the required eligibility, release authority, amount, and deadline records are all present and matched for case C20.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-3F72CEDC677C518AC1EC",
+      "packet_index_1based": 14,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/041_HVSF007X-3F72CEDC677C518AC1EC_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "ELIG-S7-020",
+          "AUTH-S7-020",
+          "AMT-S7-020",
+          "DEAD-S7-020",
+          "REQ-S7-020"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo case action S7-CASE-020 may proceed to release amount A20 for case C20 before deadline D20",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "ELIG-S7-020|AUTH-S7-020|AMT-S7-020|DEAD-S7-020|REQ-S7-020",
+          "final_answer": "ALLOW because all required source records (ELIG-S7-020, AUTH-S7-020, AMT-S7-020, DEAD-S7-020) are present and correctly scope eligibility, release authority, amount, and deadline to the same case C20.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-3F72CEDC677C518AC1EC",
+      "packet_index_1based": 14,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/042_HVSF007X-3F72CEDC677C518AC1EC_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "TRAIN-S7-014",
+          "POL-S7-014",
+          "REQ-S7-014",
+          "ROLE-S7-014"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Operator O14 training current on 2026-07-03 for task S7-SAFE-014",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "TRAIN-S7-014|POL-S7-014|REQ-S7-014|ROLE-S7-014",
+          "final_answer": "Action may proceed with ALLOW.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-5D969B53A0966BBE0B97",
+      "packet_index_1based": 15,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/043_HVSF007X-5D969B53A0966BBE0B97_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-014",
+          "TRAIN-S7-014",
+          "ROLE-S7-014",
+          "POL-S7-014"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Operator O14 may start task S7-SAFE-014 on 2026-07-03 only if training is current on that date and role/task binding exists",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-014|TRAIN-S7-014|ROLE-S7-014|POL-S7-014",
+          "final_answer": "ALLOW: the source records close the boundary because O14 is bound to the task and training is current on 2026-07-03.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-5D969B53A0966BBE0B97",
+      "packet_index_1based": 15,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/044_HVSF007X-5D969B53A0966BBE0B97_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "TRAIN-S7-014",
+          "ROLE-S7-014",
+          "REQ-S7-014"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo operator O14 is authorized to start task S7-SAFE-014 on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "TRAIN-S7-014|ROLE-S7-014|REQ-S7-014",
+          "final_answer": "ALLOW because training record TRAIN-S7-014 confirms current status through 2026-09-30 (covering action date 2026-07-03), role binding ROLE-S7-014 confirms operator O14 is assigned to task T14, and request REQ-S7-014 authorizes start on 2026-07-03.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-5D969B53A0966BBE0B97",
+      "packet_index_1based": 15,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/045_HVSF007X-5D969B53A0966BBE0B97_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-001",
+          "REL-S7-001",
+          "TYPE-S7-001",
+          "DEST-S7-001",
+          "POL-S7-001"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo transaction S7-TX-001 advisory-fee for C7-A",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-001|REL-S7-001|TYPE-S7-001|DEST-S7-001|POL-S7-001",
+          "final_answer": "Action may ALLOW per closed source records.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-69D477659B95CA04416A",
+      "packet_index_1based": 16,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/046_HVSF007X-69D477659B95CA04416A_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-001",
+          "REL-S7-001",
+          "TYPE-S7-001",
+          "POL-S7-001"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo transaction S7-TX-001 execution for counterparty C7-A requires matching relationship and transaction-type clearance for the same action",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-001|REL-S7-001|TYPE-S7-001|POL-S7-001",
+          "final_answer": "ESCALATE because the provided clearance is scoped to S7-001 advisory-fee payment, not the exact S7-TX-001 execution action.",
+          "open_blockers": "action identifier mismatch: request is S7-001/advisory-fee payment while boundary asks S7-TX-001 execution",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-69D477659B95CA04416A",
+      "packet_index_1based": 16,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/047_HVSF007X-69D477659B95CA04416A_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-001",
+          "REL-S7-001",
+          "TYPE-S7-001",
+          "DEST-S7-001",
+          "POL-S7-001"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo transaction S7-TX-001 advisory-fee payment to counterparty C7-A is authorized",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-001|REL-S7-001|TYPE-S7-001|DEST-S7-001|POL-S7-001",
+          "final_answer": "ALLOW: All required source records (relationship clearance, transaction-type clearance, destination binding, and policy coverage) are present, current, and aligned for demo transaction S7-TX-001 to execute for counterparty C7-A.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-69D477659B95CA04416A",
+      "packet_index_1based": 16,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/048_HVSF007X-69D477659B95CA04416A_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "TRAIN-S7-014",
+          "POL-S7-014"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Training must be current on action date 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "TRAIN-S7-014|POL-S7-014",
+          "final_answer": "ESCALATE required because training lapses before action date.",
+          "open_blockers": "Training current only through 2026-07-02",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-7A0B60495C43938EBF13",
+      "packet_index_1based": 17,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/049_HVSF007X-7A0B60495C43938EBF13_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-014",
+          "TRAIN-S7-014",
+          "ROLE-S7-014",
+          "POL-S7-014"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "operator O14 starting task S7-SAFE-014 on 2026-07-03 with training current on that date",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-014|TRAIN-S7-014|ROLE-S7-014|POL-S7-014",
+          "final_answer": "ESCALATE because the training record is stale for the action date, so the source boundary is not closed.",
+          "open_blockers": "training current through 2026-07-02 does not cover 2026-07-03",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-7A0B60495C43938EBF13",
+      "packet_index_1based": 17,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/050_HVSF007X-7A0B60495C43938EBF13_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "TRAIN-S7-014",
+          "POL-S7-014"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Training expired 2026-07-02; must be current on action date 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "TRAIN-S7-014|POL-S7-014",
+          "final_answer": "ESCALATE because training record TRAIN-S7-014 expired on 2026-07-02, making it stale and non-current for the scheduled action date of 2026-07-03 per policy POL-S7-014.",
+          "open_blockers": "Training expired 2026-07-02, not current on action date 2026-07-03",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-7A0B60495C43938EBF13",
+      "packet_index_1based": 17,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/051_HVSF007X-7A0B60495C43938EBF13_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-010",
+          "ELIG-S7-010",
+          "PAYAUTH-S7-010",
+          "AMT-S7-010",
+          "POL-S7-010"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "release demo benefit payment S7-BEN-010 for case C10",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-010|ELIG-S7-010|PAYAUTH-S7-010|AMT-S7-010|POL-S7-010",
+          "final_answer": "ESCALATE because payment-release authority is absent.",
+          "open_blockers": "payment-release authority record missing",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-89F9972C8D29C88850D0",
+      "packet_index_1based": 18,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/052_HVSF007X-89F9972C8D29C88850D0_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-010",
+          "ELIG-S7-010",
+          "PAYAUTH-S7-010",
+          "AMT-S7-010",
+          "POL-S7-010"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release demo benefit payment P10 for case C10 only when eligibility and payment authority match the same case and payment",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-010|ELIG-S7-010|PAYAUTH-S7-010|AMT-S7-010|POL-S7-010",
+          "final_answer": "ALLOW: The source records close the boundary for releasing payment P10 for case C10.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-89F9972C8D29C88850D0",
+      "packet_index_1based": 18,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/053_HVSF007X-89F9972C8D29C88850D0_openai.json"
+    },
+    {
+      "admissible": false,
+      "final_verdict": "UNKNOWN",
+      "gate_result": {
+        "cited_source_ids": [],
+        "failures": [
+          "bad_prefix",
+          "missing_solo_role",
+          "missing_verification_verdict",
+          "missing_binding_class",
+          "missing_action_boundary",
+          "missing_cited_evidence",
+          "missing_final_answer",
+          "invalid_verification_verdict",
+          "invalid_binding_class",
+          "missing_cited_evidence",
+          "short_final_answer"
+        ],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {},
+        "passed": false
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-89F9972C8D29C88850D0",
+      "packet_index_1based": 18,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/054_HVSF007X-89F9972C8D29C88850D0_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "AUTH-S7-016",
+          "POL-S7-016"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo grant draw S7-GR-016 on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "AUTH-S7-016|POL-S7-016",
+          "final_answer": "ESCALATE because AUTH-S7-016 does not cover 2026-07-03.",
+          "open_blockers": "authorization expires 2026-07-02",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-8B07969D818CFD745EFE",
+      "packet_index_1based": 19,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/055_HVSF007X-8B07969D818CFD745EFE_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-016",
+          "AUTH-S7-016",
+          "POL-S7-016"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo grant draw S7-GR-016 on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-016|AUTH-S7-016|POL-S7-016",
+          "final_answer": "ESCALATE because the authorization covered only through 2026-07-02 and the requested draw is on 2026-07-03.",
+          "open_blockers": "authorization not current on the action date",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-8B07969D818CFD745EFE",
+      "packet_index_1based": 19,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/056_HVSF007X-8B07969D818CFD745EFE_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "AUTH-S7-016",
+          "POL-S7-016"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Authorization AUTH-S7-016 covered through 2026-07-02 only; action date 2026-07-03 is outside authorization scope",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "AUTH-S7-016|POL-S7-016",
+          "final_answer": "ESCALATE - Grant draw S7-GR-016 may not proceed on 2026-07-03 because authorization AUTH-S7-016 only covered through 2026-07-02 and expired before the action date, failing the requirement in POL-S7-016 that authorization be current on the action date.",
+          "open_blockers": "Authorization AUTH-S7-016 expired 2026-07-02; does not cover action date 2026-07-03",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-8B07969D818CFD745EFE",
+      "packet_index_1based": 19,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/057_HVSF007X-8B07969D818CFD745EFE_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REV-S7-011",
+          "POL-S7-011"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Should demo vendor task S7-VC-011 proceed on 2026-07-03?",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REV-S7-011|POL-S7-011",
+          "final_answer": "Action must ESCALATE because compliance review is not current on 2026-07-03.",
+          "open_blockers": "compliance review expires 2026-07-02",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-93612DB465B38241E2C8",
+      "packet_index_1based": 20,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/058_HVSF007X-93612DB465B38241E2C8_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-011",
+          "REV-S7-011",
+          "POL-S7-011",
+          "VEND-S7-011"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Whether vendor task S7-VC-011 may start on 2026-07-03 with a current compliance review",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-011|REV-S7-011|POL-S7-011|VEND-S7-011",
+          "final_answer": "ESCALATE because the compliance review is not current on 2026-07-03, so the exact action boundary is not closed.",
+          "open_blockers": "compliance review expires before the action date",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-93612DB465B38241E2C8",
+      "packet_index_1based": 20,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/059_HVSF007X-93612DB465B38241E2C8_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REV-S7-011",
+          "POL-S7-011"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo vendor task S7-VC-011 may not proceed on 2026-07-03 because compliance review expired two days prior",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REV-S7-011|POL-S7-011",
+          "final_answer": "ESCALATE\u2014demo vendor task S7-VC-011 cannot proceed on 2026-07-03 because compliance review REV-S7-011 expired on 2026-07-01, leaving no current compliance record to satisfy POL-S7-011 on the required action date.",
+          "open_blockers": "Compliance review REV-S7-011 validity expired on 2026-07-01; current review not confirmed on action date 2026-07-03",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-93612DB465B38241E2C8",
+      "packet_index_1based": 20,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/060_HVSF007X-93612DB465B38241E2C8_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-001",
+          "REL-S7-001",
+          "TYPE-S7-001",
+          "POL-S7-001"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "execute demo transaction S7-TX-001 for C7-A",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-001|REL-S7-001|TYPE-S7-001|POL-S7-001",
+          "final_answer": "ESCALATE because transaction-type clearance does not cover the requested action.",
+          "open_blockers": "TYPE-S7-001 scoped to advisory-fee only; prepaid data-subscription purchase unmatched",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-9C53519113028C49BEC6",
+      "packet_index_1based": 21,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/061_HVSF007X-9C53519113028C49BEC6_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-001",
+          "REL-S7-001",
+          "TYPE-S7-001",
+          "POL-S7-001"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Execute demo transaction S7-TX-001 for counterparty C7-A",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-001|REL-S7-001|TYPE-S7-001|POL-S7-001",
+          "final_answer": "ESCALATE: the required transaction-type clearance does not cover the requested prepaid data-subscription purchase, so the source boundary is open.",
+          "open_blockers": "transaction-type clearance mismatched to requested prepaid data-subscription purchase",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-9C53519113028C49BEC6",
+      "packet_index_1based": 21,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/062_HVSF007X-9C53519113028C49BEC6_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "TYPE-S7-001",
+          "REL-S7-001",
+          "POL-S7-001",
+          "REQ-S7-001"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Execute demo transaction S7-TX-001 (prepaid data-subscription purchase) for counterparty C7-A",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "TYPE-S7-001|REL-S7-001|POL-S7-001|REQ-S7-001",
+          "final_answer": "ESCALATE because transaction-type clearance TYPE-S7-001 authorizes advisory-fee payments while the requested action is a prepaid data-subscription purchase, creating an action-scope mismatch that fails to close the transaction-type clearance boundary required by POL-S7-001.",
+          "open_blockers": "Transaction-type clearance TYPE-S7-001 scopes to advisory-fee payments only; REQ-S7-001 requests prepaid data-subscription purchase\u2014a mismatched action scope",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-9C53519113028C49BEC6",
+      "packet_index_1based": 21,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/063_HVSF007X-9C53519113028C49BEC6_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-007",
+          "CART-S7-007",
+          "TERMS-S7-007",
+          "BUD-S7-007",
+          "POL-S7-007"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo checkout S7-CART-007 create renewal subscription",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-007|CART-S7-007|TERMS-S7-007|BUD-S7-007|POL-S7-007",
+          "final_answer": "ESCALATE because cart and budget cover one-time SKU only while renewal obligation lacks matching clearance.",
+          "open_blockers": "Cart clearance one-time only; renewal clearance absent and separate",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-9E945FAE7207DD5D3384",
+      "packet_index_1based": 22,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/064_HVSF007X-9E945FAE7207DD5D3384_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-007",
+          "CART-S7-007",
+          "TERMS-S7-007",
+          "BUD-S7-007",
+          "POL-S7-007"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo checkout S7-CART-007 renewal subscription clearance",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-007|CART-S7-007|TERMS-S7-007|BUD-S7-007|POL-S7-007",
+          "final_answer": "ESCALATE because the available clearance is only for a one-time kit purchase and does not close the renewal-subscription boundary.",
+          "open_blockers": "missing exact clearance for renewal subscription purchase form",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-9E945FAE7207DD5D3384",
+      "packet_index_1based": 22,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/065_HVSF007X-9E945FAE7207DD5D3384_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CART-S7-007",
+          "BUD-S7-007",
+          "POL-S7-007"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo checkout S7-CART-007 may clear one-time kit purchase only; renewal subscription creation is not covered by current cart and budget clearances",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CART-S7-007|BUD-S7-007|POL-S7-007",
+          "final_answer": "ESCALATE - renewal subscription creation requires clearance for recurring purchase form not provided by current cart and budget records.",
+          "open_blockers": "Missing renewal obligation clearance; CART-S7-007 and BUD-S7-007 are scoped to one-time kit only, not recurring subscription",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-9E945FAE7207DD5D3384",
+      "packet_index_1based": 22,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/066_HVSF007X-9E945FAE7207DD5D3384_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "KYC-S7-013",
+          "POL-S7-013"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Review must be current on 2026-07-03 for SVC13 activation",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "KYC-S7-013|POL-S7-013",
+          "final_answer": "ESCALATE because KYC review is not current on the requested activation date.",
+          "open_blockers": "Review expires 2026-07-02 before action date",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-A38C8CCE5FD3CF680DDF",
+      "packet_index_1based": 23,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/067_HVSF007X-A38C8CCE5FD3CF680DDF_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-013",
+          "KYC-S7-013",
+          "RISK-S7-013",
+          "POL-S7-013"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Activate demo customer service S7-KYC-013 on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-013|KYC-S7-013|RISK-S7-013|POL-S7-013",
+          "final_answer": "ALLOW: the review is valid through the action date, the risk profile permits SVC13 with current review, and policy requires only that the review be current on 2026-07-03.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-A38C8CCE5FD3CF680DDF",
+      "packet_index_1based": 23,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/068_HVSF007X-A38C8CCE5FD3CF680DDF_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "KYC-S7-013",
+          "POL-S7-013",
+          "REQ-S7-013"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "KYC review validity expires one day before proposed activation date",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "KYC-S7-013|POL-S7-013|REQ-S7-013",
+          "final_answer": "ESCALATE because the KYC review (KYC-S7-013) expired on 2026-07-02 and the policy (POL-S7-013) requires a review current on the action date of 2026-07-03.",
+          "open_blockers": "KYC-S7-013 review expired on 2026-07-02; action date 2026-07-03 requires current review per POL-S7-013",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-A38C8CCE5FD3CF680DDF",
+      "packet_index_1based": 23,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/069_HVSF007X-A38C8CCE5FD3CF680DDF_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-008",
+          "CL-S7-008",
+          "POL-S7-008"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "add clause C8-B to demo contract S7-LGL-008",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-008|CL-S7-008|POL-S7-008",
+          "final_answer": "ESCALATE due to clause mismatch.",
+          "open_blockers": "clause approval scoped to C8-A only",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-A73AD2B4E330B10B0F71",
+      "packet_index_1based": 24,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/070_HVSF007X-A73AD2B4E330B10B0F71_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-008",
+          "VEND-S7-008",
+          "CL-S7-008",
+          "CTR-S7-008",
+          "POL-S7-008"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo contract change S7-LGL-008 add clause C8-B",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-008|VEND-S7-008|CL-S7-008|CTR-S7-008|POL-S7-008",
+          "final_answer": "ESCALATE because the source records approve clause C8-A, not the requested exact clause C8-B.",
+          "open_blockers": "missing exact clause approval for C8-B",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-A73AD2B4E330B10B0F71",
+      "packet_index_1based": 24,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/071_HVSF007X-A73AD2B4E330B10B0F71_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-008",
+          "VEND-S7-008",
+          "CL-S7-008",
+          "CTR-S7-008",
+          "POL-S7-008"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Add clause C8-B to demo contract for vendor V7",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-008|VEND-S7-008|CL-S7-008|CTR-S7-008|POL-S7-008",
+          "final_answer": "ESCALATE because clause approval CL-S7-008 names C8-A, not C8-B as required by the action boundary, and POL-S7-008 mandates approval for the exact clause.",
+          "open_blockers": "Missing clause approval for C8-B; available clause approval CL-S7-008 covers C8-A only",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-A73AD2B4E330B10B0F71",
+      "packet_index_1based": 24,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/072_HVSF007X-A73AD2B4E330B10B0F71_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-003",
+          "USR-S7-003",
+          "GRP-S7-003",
+          "ROLE-S7-003",
+          "POL-S7-003"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "add U7-C to G7-ADMIN",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-003|USR-S7-003|GRP-S7-003|ROLE-S7-003|POL-S7-003",
+          "final_answer": "ESCALATE because no source record authorizes G7-ADMIN.",
+          "open_blockers": "group mismatch G7-ADMIN vs G7-READ in clearances",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-AF63AFFCC55165729C21",
+      "packet_index_1based": 25,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/073_HVSF007X-AF63AFFCC55165729C21_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-003",
+          "USR-S7-003",
+          "GRP-S7-003",
+          "ROLE-S7-003",
+          "POL-S7-003"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Grant user U7-C membership in group G7-ADMIN",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-003|USR-S7-003|GRP-S7-003|ROLE-S7-003|POL-S7-003",
+          "final_answer": "ESCALATE because the source records only authorize a request for U7-C to join G7-READ, not G7-ADMIN, and privilege-group clearance is not closed for the requested action.",
+          "open_blockers": "missing clearance for G7-ADMIN and request is scoped to G7-READ",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-AF63AFFCC55165729C21",
+      "packet_index_1based": 25,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/074_HVSF007X-AF63AFFCC55165729C21_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-003",
+          "GRP-S7-003"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Add U7-C to G7-ADMIN requires clearance for group G7-ADMIN",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-003|GRP-S7-003",
+          "final_answer": "ESCALATE - the source records REQ-S7-003 and GRP-S7-003 address only G7-READ group membership; no source record authorizes G7-ADMIN for U7-C.",
+          "open_blockers": "No source record requests or clears G7-ADMIN privilege for user U7-C",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-AF63AFFCC55165729C21",
+      "packet_index_1based": 25,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/075_HVSF007X-AF63AFFCC55165729C21_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-019",
+          "APP-S7-019",
+          "CHK-S7-019",
+          "OWN-S7-019",
+          "LOG-S7-019",
+          "POL-S7-019"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo release S7-REL-019 requires matching request/approval windows",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-019|APP-S7-019|CHK-S7-019|OWN-S7-019|LOG-S7-019|POL-S7-019",
+          "final_answer": "ESCALATE because approval record does not match request window per POL-S7-019.",
+          "open_blockers": "approval window W18 mismatches request window W19",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-B2A9CAF2194F2336674E",
+      "packet_index_1based": 26,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/076_HVSF007X-B2A9CAF2194F2336674E_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-019",
+          "APP-S7-019",
+          "CHK-S7-019",
+          "OWN-S7-019",
+          "LOG-S7-019",
+          "POL-S7-019"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Proceeding with demo release S7-REL-019 requires matching request, approval, checklist, owner, and log records for item I19 and the same window.",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-019|APP-S7-019|CHK-S7-019|OWN-S7-019|LOG-S7-019|POL-S7-019",
+          "final_answer": "ESCALATE: demo release S7-REL-019 must not proceed because the approval window does not match the requested/logged window.",
+          "open_blockers": "approval window mismatch: APP-S7-019 names W18 while the request and log name W19",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-B2A9CAF2194F2336674E",
+      "packet_index_1based": 26,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/077_HVSF007X-B2A9CAF2194F2336674E_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-019",
+          "APP-S7-019",
+          "LOG-S7-019"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo release S7-REL-019 cannot proceed due to window scope mismatch between request and approval",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-019|APP-S7-019|LOG-S7-019",
+          "final_answer": "ESCALATE demo release S7-REL-019 because approval APP-S7-019 is scoped to window W18 whereas request REQ-S7-019 and log LOG-S7-019 are scoped to window W19, creating a source-control dependency mismatch.",
+          "open_blockers": "Approval APP-S7-019 names window W18 while request REQ-S7-019 and log LOG-S7-019 name window W19 \u2014 window scope mismatch violates policy POL-S7-019",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-B2A9CAF2194F2336674E",
+      "packet_index_1based": 26,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/078_HVSF007X-B2A9CAF2194F2336674E_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-010",
+          "ELIG-S7-010",
+          "PAYAUTH-S7-010",
+          "POL-S7-010"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "release demo benefit payment S7-BEN-010 for case C10",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-010|ELIG-S7-010|PAYAUTH-S7-010|POL-S7-010",
+          "final_answer": "ESCALATE because PAYAUTH-S7-010 does not authorize P10.",
+          "open_blockers": "payment authority mismatch (P9 vs P10)",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-BDB989C4603049BB6274",
+      "packet_index_1based": 27,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/079_HVSF007X-BDB989C4603049BB6274_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-010",
+          "ELIG-S7-010",
+          "PAYAUTH-S7-010",
+          "AMT-S7-010",
+          "POL-S7-010"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release demo benefit payment S7-BEN-010 for case C10 only if eligibility and payment authority both match the same case and payment",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-010|ELIG-S7-010|PAYAUTH-S7-010|AMT-S7-010|POL-S7-010",
+          "final_answer": "ESCALATE because the payment authority is scoped to P9 rather than the requested payment P10, so the release boundary is not closed.",
+          "open_blockers": "payment authority names P9, not requested payment P10",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-BDB989C4603049BB6274",
+      "packet_index_1based": 27,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/080_HVSF007X-BDB989C4603049BB6274_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "PAYAUTH-S7-010",
+          "REQ-S7-010",
+          "POL-S7-010"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Payment authority PAYAUTH-S7-010 must authorize the exact payment P10 requested by REQ-S7-010 for case C10 before release can proceed.",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "PAYAUTH-S7-010|REQ-S7-010|POL-S7-010",
+          "final_answer": "ESCALATE\u2014payment authority PAYAUTH-S7-010 authorizes payment P9, not the requested payment P10, creating a source-control dependency mismatch that prevents the payment-release action from closing.",
+          "open_blockers": "Payment authority PAYAUTH-S7-010 names payment P9, which is a different payment than P10 specified in REQ-S7-010; source record mismatch blocks release boundary.",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-BDB989C4603049BB6274",
+      "packet_index_1based": 27,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/081_HVSF007X-BDB989C4603049BB6274_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-008",
+          "VEND-S7-008",
+          "CL-S7-008",
+          "POL-S7-008"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "add clause C8-B requires exact clause approval",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-008|VEND-S7-008|CL-S7-008|POL-S7-008",
+          "final_answer": "ESCALATE because exact clause approval for C8-B is absent.",
+          "open_blockers": "clause approval CL-S7-008 covers C8-A not C8-B",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-C46E8D363A0EF0BC9960",
+      "packet_index_1based": 28,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/082_HVSF007X-C46E8D363A0EF0BC9960_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-008",
+          "VEND-S7-008",
+          "CL-S7-008",
+          "CTR-S7-008",
+          "POL-S7-008"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "add clause C8-B to demo contract change S7-LGL-008",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-008|VEND-S7-008|CL-S7-008|CTR-S7-008|POL-S7-008",
+          "final_answer": "ESCALATE: the source records do not close approval for clause C8-B, only for C8-A, so the action must be escalated.",
+          "open_blockers": "clause approval is for C8-A, not exact clause C8-B",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-C46E8D363A0EF0BC9960",
+      "packet_index_1based": 28,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/083_HVSF007X-C46E8D363A0EF0BC9960_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CL-S7-008",
+          "POL-S7-008",
+          "REQ-S7-008",
+          "VEND-S7-008"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo contract change S7-LGL-008 may add clause C8-B to vendor V7 only after receiving clause approval for the exact clause C8-B",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CL-S7-008|POL-S7-008|REQ-S7-008|VEND-S7-008",
+          "final_answer": "ESCALATE - clause approval record CL-S7-008 approves different clause C8-A instead of required clause C8-B, creating source-control mismatch that blocks execution of demo contract change S7-LGL-008.",
+          "open_blockers": "Clause approval mismatch - CL-S7-008 approves clause C8-A, which is not the exact clause C8-B requested in REQ-S7-008; policy POL-S7-008 requires clause approval for the exact clause",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-C46E8D363A0EF0BC9960",
+      "packet_index_1based": 28,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/084_HVSF007X-C46E8D363A0EF0BC9960_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "ADD-S7-015",
+          "POL-S7-015"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "clause action S7-LGL-015 on 2026-07-03 requires current addendum",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "ADD-S7-015|POL-S7-015",
+          "final_answer": "ESCALATE because addendum is not current on the action date.",
+          "open_blockers": "addendum expires 2026-07-02",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-C4D82713C758C6803E5F",
+      "packet_index_1based": 29,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/085_HVSF007X-C4D82713C758C6803E5F_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-015",
+          "ADD-S7-015",
+          "CTR-S7-015",
+          "POL-S7-015"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Whether demo clause action S7-LGL-015 may proceed on 2026-07-03 with a current addendum",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-015|ADD-S7-015|CTR-S7-015|POL-S7-015",
+          "final_answer": "ESCALATE because ADD-S7-015 is only current through 2026-07-02 and the action date is 2026-07-03.",
+          "open_blockers": "addendum expired before the action date",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-C4D82713C758C6803E5F",
+      "packet_index_1based": 29,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/086_HVSF007X-C4D82713C758C6803E5F_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "ADD-S7-015",
+          "POL-S7-015",
+          "REQ-S7-015"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo clause action S7-LGL-015 may not proceed on 2026-07-03 because addendum ADD-S7-015 coverage terminates on 2026-07-02, one day before the action date",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "ADD-S7-015|POL-S7-015|REQ-S7-015",
+          "final_answer": "ESCALATE - the addendum covering clause C15 expired before the action date, leaving the source boundary open and requiring resolution before proceeding.",
+          "open_blockers": "Addendum ADD-S7-015 is expired on action date 2026-07-03; clause action policy POL-S7-015 requires addendum current through action date; no valid source record confirms extension or renewal",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-C4D82713C758C6803E5F",
+      "packet_index_1based": 29,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/087_HVSF007X-C4D82713C758C6803E5F_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-018",
+          "USR-S7-018",
+          "GRP-S7-018",
+          "WIN-S7-018",
+          "TIC-S7-018",
+          "POL-S7-018"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo extension S7-EXT-018 remain active",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-018|USR-S7-018|GRP-S7-018|WIN-S7-018|TIC-S7-018|POL-S7-018",
+          "final_answer": "ALLOW per matching records on user/group/window/ticket.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-C983C23C1ACA201DD891",
+      "packet_index_1based": 30,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/088_HVSF007X-C983C23C1ACA201DD891_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-018",
+          "USR-S7-018",
+          "GRP-S7-018",
+          "WIN-S7-018",
+          "TIC-S7-018",
+          "POL-S7-018"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo extension S7-EXT-018 may remain active only if request and clearance records match the same user U18, group G18-READ, window W18, and ticket T18",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-018|USR-S7-018|GRP-S7-018|WIN-S7-018|TIC-S7-018|POL-S7-018",
+          "final_answer": "ALLOW: the source records close the exact user, group, window, and ticket boundary for S7-EXT-018.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-C983C23C1ACA201DD891",
+      "packet_index_1based": 30,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/089_HVSF007X-C983C23C1ACA201DD891_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-018",
+          "USR-S7-018",
+          "GRP-S7-018",
+          "WIN-S7-018",
+          "TIC-S7-018",
+          "POL-S7-018"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo extension S7-EXT-018 may remain active because user, group, window, and ticket alignment is confirmed",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-018|USR-S7-018|GRP-S7-018|WIN-S7-018|TIC-S7-018|POL-S7-018",
+          "final_answer": "ALLOW - All required elements (user U18, group G18-READ, window W18, ticket T18) align across request and clearance records per policy POL-S7-018, closing the action boundary for demo extension S7-EXT-018.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-C983C23C1ACA201DD891",
+      "packet_index_1based": 30,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/090_HVSF007X-C983C23C1ACA201DD891_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-017",
+          "BAL-S7-017",
+          "DEST-S7-017",
+          "CRED-S7-017",
+          "REV-S7-017",
+          "POL-S7-017"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo refund S7-RF-017 amount/destination/review checks",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-017|BAL-S7-017|DEST-S7-017|CRED-S7-017|REV-S7-017|POL-S7-017",
+          "final_answer": "Demo refund S7-RF-017 may ALLOW proceed.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-CFFF711D79BE0B4901C7",
+      "packet_index_1based": 31,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/091_HVSF007X-CFFF711D79BE0B4901C7_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-017",
+          "BAL-S7-017",
+          "DEST-S7-017",
+          "CRED-S7-017",
+          "REV-S7-017",
+          "POL-S7-017"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo refund S7-RF-017 may proceed because amount, destination, and prior-credit checks are closed by source records",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-017|BAL-S7-017|DEST-S7-017|CRED-S7-017|REV-S7-017|POL-S7-017",
+          "final_answer": "ALLOW: the source records close the required amount, destination, prior-credit, and current-review checks for demo refund S7-RF-017.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-CFFF711D79BE0B4901C7",
+      "packet_index_1based": 31,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/092_HVSF007X-CFFF711D79BE0B4901C7_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-017",
+          "BAL-S7-017",
+          "DEST-S7-017",
+          "CRED-S7-017",
+          "REV-S7-017",
+          "POL-S7-017"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo refund S7-RF-017 for USD 117 to wallet W17 may proceed because amount is within remaining balance, destination is bound to profile, and prior credit has been subtracted.",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-017 | BAL-S7-017 | DEST-S7-017 | CRED-S7-017 | REV-S7-017 | POL-S7-017",
+          "final_answer": "ALLOW: Demo refund S7-RF-017 may proceed as all source records close the amount, destination, and prior-credit boundaries.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-CFFF711D79BE0B4901C7",
+      "packet_index_1based": 31,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/093_HVSF007X-CFFF711D79BE0B4901C7_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-012",
+          "DPA-S7-012",
+          "DEST-S7-012",
+          "POL-S7-012"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo share S7-PRV-012 on 2026-07-03 requires current DPA",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-012|DPA-S7-012|DEST-S7-012|POL-S7-012",
+          "final_answer": "ALLOW because DPA-S7-012 remains current on the action date.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-D2832C9661836CD5AC10",
+      "packet_index_1based": 32,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/094_HVSF007X-D2832C9661836CD5AC10_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-012",
+          "DPA-S7-012",
+          "DEST-S7-012",
+          "POL-S7-012"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo data share S7-PRV-012 on 2026-07-03 may proceed if the addendum is current on that date",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-012|DPA-S7-012|DEST-S7-012|POL-S7-012",
+          "final_answer": "ALLOW: the request matches dataset D12 and the data addendum is current through 2026-07-31, so the action boundary is closed.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-D2832C9661836CD5AC10",
+      "packet_index_1based": 32,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/095_HVSF007X-D2832C9661836CD5AC10_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-012",
+          "DPA-S7-012",
+          "DEST-S7-012",
+          "POL-S7-012"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo data share S7-PRV-012 of dataset D12 may proceed on 2026-07-03 because the data addendum DPA-S7-012 remains effective through 2026-07-31, satisfying the policy requirement that the addendum be current on the action date",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-012|DPA-S7-012|DEST-S7-012|POL-S7-012",
+          "final_answer": "ALLOW: The data addendum DPA-S7-012 is current through 2026-07-31, satisfying the policy requirement for the action date 2026-07-03.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-D2832C9661836CD5AC10",
+      "packet_index_1based": 32,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/096_HVSF007X-D2832C9661836CD5AC10_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-005",
+          "STAT-S7-005",
+          "BADGE-S7-005",
+          "TRAIN-S7-005",
+          "POL-S7-005"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Restore facility badge B7-E for W7-E",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-005|STAT-S7-005|BADGE-S7-005|TRAIN-S7-005|POL-S7-005",
+          "final_answer": "ESCALATE because facility-active status is missing.",
+          "open_blockers": "facility-active status required by POL-S7-005 but STAT-S7-005 shows paused",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-D477EB1AEE9917A7A920",
+      "packet_index_1based": 33,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/097_HVSF007X-D477EB1AEE9917A7A920_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-005",
+          "STAT-S7-005",
+          "BADGE-S7-005",
+          "TRAIN-S7-005",
+          "POL-S7-005"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "restore facility badge B7-E for worker W7-E at site S7",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-005|STAT-S7-005|BADGE-S7-005|TRAIN-S7-005|POL-S7-005",
+          "final_answer": "ESCALATE: the required facility-active status is not present, so badge restoration may not proceed now.",
+          "open_blockers": "facility-active status is missing; status record says facility access remains paused",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-D477EB1AEE9917A7A920",
+      "packet_index_1based": 33,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/098_HVSF007X-D477EB1AEE9917A7A920_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "STAT-S7-005",
+          "POL-S7-005",
+          "REQ-S7-005"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Badge B7-E restoration for worker W7-E cannot proceed because facility access status is not active",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "STAT-S7-005|POL-S7-005|REQ-S7-005",
+          "final_answer": "ESCALATE - Badge B7-E restoration for worker W7-E is blocked because STAT-S7-005 shows the worker has only payroll-active status while facility access remains paused, which fails the facility-active-status requirement specified in POL-S7-005.",
+          "open_blockers": "Worker W7-E lacks facility-active status; STAT-S7-005 shows payroll-active only with facility access paused, which is required by POL-S7-005",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-D477EB1AEE9917A7A920",
+      "packet_index_1based": 33,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/099_HVSF007X-D477EB1AEE9917A7A920_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-004",
+          "DEST-S7-004",
+          "DPA-S7-004",
+          "POL-S7-004"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "share S7-DATA-004 to W7-EU",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-004|DEST-S7-004|DPA-S7-004|POL-S7-004",
+          "final_answer": "ESCALATE because source records bind only W7-US and do not close the W7-EU boundary.",
+          "open_blockers": "destination workspace mismatch W7-EU vs W7-US and region mismatch",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-D4F78E2FA17167B39690",
+      "packet_index_1based": 34,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/100_HVSF007X-D4F78E2FA17167B39690_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-004",
+          "DATA-S7-004",
+          "DEST-S7-004",
+          "DPA-S7-004",
+          "POL-S7-004"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Share demo dataset S7-DATA-004 to workspace W7-EU",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-004|DATA-S7-004|DEST-S7-004|DPA-S7-004|POL-S7-004",
+          "final_answer": "ESCALATE because the available clearance is bound to W7-US/R-US and does not match the requested W7-EU destination.",
+          "open_blockers": "destination and region mismatch: clearance is scoped to W7-US/R-US, not W7-EU",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-D4F78E2FA17167B39690",
+      "packet_index_1based": 34,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/101_HVSF007X-D4F78E2FA17167B39690_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "DEST-S7-004",
+          "DPA-S7-004",
+          "REQ-S7-004"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Share dataset S7-DATA-004 to workspace W7-EU with region confirmation",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "DEST-S7-004|DPA-S7-004|REQ-S7-004",
+          "final_answer": "ESCALATE because no source record authorizes the destination workspace W7-EU; all clearances are scoped to W7-US, creating a destination mismatch that violates the binding requirement.",
+          "open_blockers": "Clearance scope mismatch; destination workspace W7-EU has no matching clearance record; all source clearances (DEST-S7-004, DPA-S7-004) bind to W7-US",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-D4F78E2FA17167B39690",
+      "packet_index_1based": 34,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/102_HVSF007X-D4F78E2FA17167B39690_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-006",
+          "COV-S7-006",
+          "COND-S7-006",
+          "AMT-S7-006",
+          "POL-S7-006"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "release demo payout CL7-F for claim condition P2",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-006|COV-S7-006|COND-S7-006|AMT-S7-006|POL-S7-006",
+          "final_answer": "ESCALATE because no source record closes the P2 boundary.",
+          "open_blockers": "condition mismatch: P2 requested but all sources specify P1",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-D7519333A83A1315D9D2",
+      "packet_index_1based": 35,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/103_HVSF007X-D7519333A83A1315D9D2_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-006",
+          "COV-S7-006",
+          "COND-S7-006",
+          "AMT-S7-006",
+          "POL-S7-006"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release demo payout CL7-F only if coverage and payout-condition clearance match claim condition P2",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-006|COV-S7-006|COND-S7-006|AMT-S7-006|POL-S7-006",
+          "final_answer": "ESCALATE because the available clearance is for P1 and the requested action is for P2, so the source boundary is not closed.",
+          "open_blockers": "condition clearance is scoped to P1, not P2",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-D7519333A83A1315D9D2",
+      "packet_index_1based": 35,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/104_HVSF007X-D7519333A83A1315D9D2_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-006",
+          "COV-S7-006",
+          "COND-S7-006",
+          "AMT-S7-006",
+          "POL-S7-006"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo payout CL7-F release for condition P2 lacks matching condition-clearance, request, and amount worksheet records; available sources cover condition P1 only.",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-006|COV-S7-006|COND-S7-006|AMT-S7-006|POL-S7-006",
+          "final_answer": "ESCALATE - no source records authorize payout release for condition P2; all documented sources (request, condition clearance, amount worksheet) reference condition P1, creating a boundary mismatch requiring escalation.",
+          "open_blockers": "Condition P2 source-control dependency missing; no request, condition clearance, or amount worksheet on record for P2; mismatch between requested condition P2 and sourced condition P1",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-D7519333A83A1315D9D2",
+      "packet_index_1based": 35,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/105_HVSF007X-D7519333A83A1315D9D2_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-011",
+          "REV-S7-011",
+          "VEND-S7-011",
+          "POL-S7-011"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo vendor task S7-VC-011 on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-011|REV-S7-011|VEND-S7-011|POL-S7-011",
+          "final_answer": "ALLOW per current compliance review on action date.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-F7306A44E09E4803366C",
+      "packet_index_1based": 36,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/106_HVSF007X-F7306A44E09E4803366C_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-011",
+          "REV-S7-011",
+          "VEND-S7-011",
+          "POL-S7-011"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Proceed with demo vendor task S7-VC-011 on 2026-07-03 only if the compliance review is current on that date",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-011|REV-S7-011|VEND-S7-011|POL-S7-011",
+          "final_answer": "ALLOW: the source records show the task request, vendor binding, and a compliance review completed on 2026-06-30 that is valid for 12 months, satisfying the current-on-action-date requirement.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-F7306A44E09E4803366C",
+      "packet_index_1based": 36,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/107_HVSF007X-F7306A44E09E4803366C_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-011",
+          "REV-S7-011",
+          "VEND-S7-011",
+          "POL-S7-011"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Vendor task V11 may start on 2026-07-03 as compliance review REV-S7-011 (valid through 2027-06-30) is current on the action date per policy POL-S7-011",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-011|REV-S7-011|VEND-S7-011|POL-S7-011",
+          "final_answer": "ALLOW: demo vendor task S7-VC-011 may proceed on 2026-07-03 because compliance review REV-S7-011 completed 2026-06-30 with 12-month validity covers the action date.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-F7306A44E09E4803366C",
+      "packet_index_1based": 36,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/108_HVSF007X-F7306A44E09E4803366C_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-003",
+          "GRP-S7-003",
+          "POL-S7-003"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "add U7-C to G7-ADMIN",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-003|GRP-S7-003|POL-S7-003",
+          "final_answer": "ESCALATE due to clearance mismatch on requested group.",
+          "open_blockers": "privilege group mismatch per POL-S7-003",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-F9AE6D39A595576CFA20",
+      "packet_index_1based": 37,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/109_HVSF007X-F9AE6D39A595576CFA20_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-003",
+          "USR-S7-003",
+          "GRP-S7-003",
+          "POL-S7-003"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Assign demo user U7-C to group G7-ADMIN",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-003|USR-S7-003|GRP-S7-003|POL-S7-003",
+          "final_answer": "ESCALATE because the source records do not provide clearance naming G7-ADMIN for the requested privilege change.",
+          "open_blockers": "required same privilege group clearance for G7-ADMIN is missing",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-F9AE6D39A595576CFA20",
+      "packet_index_1based": 37,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/110_HVSF007X-F9AE6D39A595576CFA20_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "GRP-S7-003"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo user U7-C to group G7-ADMIN requires matching clearance for both user and target group",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "GRP-S7-003",
+          "final_answer": "ESCALATE because group clearance GRP-S7-003 does not name G7-ADMIN, and no source record provides authorization for this specific privilege-group assignment.",
+          "open_blockers": "GRP-S7-003 names G7-READ only; no clearance record names target group G7-ADMIN",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-F9AE6D39A595576CFA20",
+      "packet_index_1based": 37,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/111_HVSF007X-F9AE6D39A595576CFA20_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-007",
+          "CART-S7-007",
+          "TERMS-S7-007",
+          "BUD-S7-007",
+          "POL-S7-007"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo checkout S7-CART-007 creating renewal subscription",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-007|CART-S7-007|TERMS-S7-007|BUD-S7-007|POL-S7-007",
+          "final_answer": "ESCALATE because no source record closes renewal creation boundary.",
+          "open_blockers": "missing renewal obligation clearance; one-time only",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-FBE4EE3CF4D18F2278E4",
+      "packet_index_1based": 38,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/112_HVSF007X-FBE4EE3CF4D18F2278E4_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-007",
+          "CART-S7-007",
+          "TERMS-S7-007",
+          "BUD-S7-007",
+          "POL-S7-007"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo checkout S7-CART-007 renewal subscription authorization",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-007|CART-S7-007|TERMS-S7-007|BUD-S7-007|POL-S7-007",
+          "final_answer": "ESCALATE because the records only clear a one-time kit purchase and do not clear a renewal subscription.",
+          "open_blockers": "missing recurring-subscription clearance for the exact renewal purchase form",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-FBE4EE3CF4D18F2278E4",
+      "packet_index_1based": 38,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/113_HVSF007X-FBE4EE3CF4D18F2278E4_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "TERMS-S7-007",
+          "CART-S7-007",
+          "BUD-S7-007",
+          "POL-S7-007"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo checkout S7-CART-007 is authorized only for one-time kit purchase; source records do not authorize renewal subscription creation",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "TERMS-S7-007|CART-S7-007|BUD-S7-007|POL-S7-007",
+          "final_answer": "ESCALATE - renewal subscription action blocked: no source record authorizes this form of purchase, as source records close the boundary for one-time kit only.",
+          "open_blockers": "No source record approves renewal subscription for SKU-K7; TERMS-S7-007 explicitly states no renewal; BUD-S7-007 covers one-time only; POL-S7-007 requires exact-form clearance including renewal obligation which is absent",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-FBE4EE3CF4D18F2278E4",
+      "packet_index_1based": 38,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/114_HVSF007X-FBE4EE3CF4D18F2278E4_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-015",
+          "ADD-S7-015",
+          "CTR-S7-015",
+          "POL-S7-015"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "demo clause action S7-LGL-015 on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-015|ADD-S7-015|CTR-S7-015|POL-S7-015",
+          "final_answer": "ALLOW because addendum remains current on action date.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-FD2FDC2DCE7A6B3C3696",
+      "packet_index_1based": 39,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/115_HVSF007X-FD2FDC2DCE7A6B3C3696_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-015",
+          "ADD-S7-015",
+          "CTR-S7-015",
+          "POL-S7-015"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo clause action S7-LGL-015 may proceed on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-015|ADD-S7-015|CTR-S7-015|POL-S7-015",
+          "final_answer": "ALLOW: the addendum is current through 2026-12-31 and the clause is bound to the demo agreement, so the action boundary is closed on 2026-07-03.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-FD2FDC2DCE7A6B3C3696",
+      "packet_index_1based": 39,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/116_HVSF007X-FD2FDC2DCE7A6B3C3696_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-015",
+          "ADD-S7-015",
+          "CTR-S7-015",
+          "POL-S7-015"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo clause C15 action S7-LGL-015 may proceed on 2026-07-03 as ADD-S7-015 remains current through 2026-12-31",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-S7-015|ADD-S7-015|CTR-S7-015|POL-S7-015",
+          "final_answer": "ALLOW: all source records close the action boundary as addendum ADD-S7-015 is current on action date 2026-07-03, satisfying policy requirement POL-S7-015.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-FD2FDC2DCE7A6B3C3696",
+      "packet_index_1based": 39,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/117_HVSF007X-FD2FDC2DCE7A6B3C3696_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-018",
+          "USR-S7-018",
+          "GRP-S7-018",
+          "WIN-S7-018",
+          "TIC-S7-018",
+          "POL-S7-018"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Should demo extension S7-EXT-018 remain active?",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-018|USR-S7-018|GRP-S7-018|WIN-S7-018|TIC-S7-018|POL-S7-018",
+          "final_answer": "ESCALATE because group in request does not match group clearance.",
+          "open_blockers": "Group mismatch: G18-ADMIN vs G18-READ",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF007X-FE06094417BE2369ED98",
+      "packet_index_1based": 40,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/118_HVSF007X-FE06094417BE2369ED98_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-018",
+          "USR-S7-018",
+          "GRP-S7-018",
+          "WIN-S7-018",
+          "TIC-S7-018",
+          "POL-S7-018"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo extension S7-EXT-018 may remain active only if same user, group, window, and ticket are all matched by request and clearance records",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-018|USR-S7-018|GRP-S7-018|WIN-S7-018|TIC-S7-018|POL-S7-018",
+          "final_answer": "ESCALATE because the required same-group boundary is not closed by the source records.",
+          "open_blockers": "group mismatch: request G18-ADMIN vs clearance G18-READ",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF007X-FE06094417BE2369ED98",
+      "packet_index_1based": 40,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/119_HVSF007X-FE06094417BE2369ED98_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-S7-018",
+          "GRP-S7-018"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Demo extension S7-EXT-018 active status cannot be confirmed due to group clearance mismatch",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-S7-018|GRP-S7-018",
+          "final_answer": "ESCALATE - demo extension S7-EXT-018 cannot remain active because the group clearance (G18-READ) does not match the group specified in the request (G18-ADMIN), violating the exact-match requirement in policy POL-S7-018.",
+          "open_blockers": "Group clearance GRP-S7-018 specifies G18-READ but request REQ-S7-018 specifies group G18-ADMIN; policy POL-S7-018 requires exact match on all four elements",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF007X-FE06094417BE2369ED98",
+      "packet_index_1based": 40,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/120_HVSF007X-FE06094417BE2369ED98_minimax.json"
+    }
+  ],
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch007_export_safe_solo_scout_runs_2026_07_03/run_20260703T222256Z",
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch007_export_safe_2026_07_03/holoverify_solo_failure_factory_batch007_export_safe_runtime_manifest_2026_07_03.json",
+  "runtime_manifest_sha256": "1e7c6013fa8a3d10a406a530a3e65546166c9359c082e1ea1f02e2dd35deeccf",
+  "scoring_map_loaded": false,
+  "source_runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch007_export_safe_2026_07_03/holoverify_solo_failure_factory_batch007_export_safe_runtime_manifest_2026_07_03.json",
+  "source_runtime_manifest_sha256": "1e7c6013fa8a3d10a406a530a3e65546166c9359c082e1ea1f02e2dd35deeccf",
+  "subset_packet_indices_1based": null,
+  "subset_packet_limit": null,
+  "subset_packet_start_index_1based": 1,
+  "trace_frozen_before_scoring": true
+}

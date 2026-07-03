@@ -1,0 +1,215 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_RUNTIME_RESULTS_V0",
+  "created_at_utc": "2026-07-03T19:48:34.257474+00:00",
+  "expected_provider_calls": 6,
+  "failure": null,
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_10PAIR_SOLO_SCOUT_V0",
+  "models_per_packet": 3,
+  "observed_provider_calls": 6,
+  "packet_count": 2,
+  "results": [
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "JE-742-REQ",
+          "DEV-FLAG-742",
+          "EXC-JE-742",
+          "REV-JE-742",
+          "POL-MJE-EXC"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "manual journal JE-742 posting per exact ID/amount/reviewer/date",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "JE-742-REQ|DEV-FLAG-742|EXC-JE-742|REV-JE-742|POL-MJE-EXC",
+          "final_answer": "Action may ALLOW as all required source records close the exact boundary.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-997E3AE13741248B5D84",
+      "packet_index_1based": 1,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/001_HVSF001-997E3AE13741248B5D84_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "JE-742-REQ",
+          "DEV-FLAG-742",
+          "EXC-JE-742",
+          "REV-JE-742",
+          "POL-MJE-EXC"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Post manual journal entry JE-742 in the close system for USD 210000 on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "JE-742-REQ|DEV-FLAG-742|EXC-JE-742|REV-JE-742|POL-MJE-EXC",
+          "final_answer": "ALLOW: the exact journal ID, amount, reviewer, and effective date are covered by the final signed exception memo and matching reviewer record.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-997E3AE13741248B5D84",
+      "packet_index_1based": 1,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/002_HVSF001-997E3AE13741248B5D84_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "JE-742-REQ",
+          "DEV-FLAG-742",
+          "EXC-JE-742",
+          "REV-JE-742",
+          "POL-MJE-EXC"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Manual journal entry JE-742 for USD 210,000 reclass may be posted on 2026-07-03 as all required source-control dependencies are present and within scope",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "JE-742-REQ|DEV-FLAG-742|EXC-JE-742|REV-JE-742|POL-MJE-EXC",
+          "final_answer": "ALLOW because exception memo EXC-JE-742 is final, signed, and scoped to journal JE-742 for USD 210,000 by reviewer N. Vale, and the effective date of 2026-07-03 falls within the authorized window through 2026-07-05.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-997E3AE13741248B5D84",
+      "packet_index_1based": 1,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/003_HVSF001-997E3AE13741248B5D84_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "JE-742-REQ",
+          "DEV-FLAG-742",
+          "EXC-JE-741",
+          "REV-JE-742",
+          "POL-MJE-EXC"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "manual journal posting requires final exception memo scoped to exact JE-742 ID/amount/reviewer/date",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "JE-742-REQ|DEV-FLAG-742|EXC-JE-741|REV-JE-742|POL-MJE-EXC",
+          "final_answer": "ESCALATE because no source record provides an exception memo scoped to exact journal ID JE-742.",
+          "open_blockers": "exception memo EXC-JE-741 scoped to JE-741 not JE-742",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-1D559EFD13870CEE6B3E",
+      "packet_index_1based": 2,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/004_HVSF001-1D559EFD13870CEE6B3E_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "JE-742-REQ",
+          "DEV-FLAG-742",
+          "EXC-JE-741",
+          "REV-JE-742",
+          "POL-MJE-EXC"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Post manual journal entry JE-742 in the close system only if the final exception memo exactly scopes JE-742, amount, reviewer, and effective date",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "JE-742-REQ|DEV-FLAG-742|EXC-JE-741|REV-JE-742|POL-MJE-EXC",
+          "final_answer": "ESCALATE because the required final exception memo is scoped to JE-741 rather than the exact journal ID JE-742.",
+          "open_blockers": "exception memo EXC-JE-741 is scoped to JE-741, not the exact journal ID JE-742",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-1D559EFD13870CEE6B3E",
+      "packet_index_1based": 2,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/005_HVSF001-1D559EFD13870CEE6B3E_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "EXC-JE-741",
+          "REV-JE-742",
+          "POL-MJE-EXC"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Exception memo must be scoped to exact journal ID JE-742; current memo EXC-JE-741 covers JE-741",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "EXC-JE-741|REV-JE-742|POL-MJE-EXC",
+          "final_answer": "ESCALATE because exception memo EXC-JE-741 is scoped to journal JE-741 rather than the requested JE-742, failing the exact journal ID requirement under POL-MJE-EXC.",
+          "open_blockers": "Journal ID scope mismatch: EXC-JE-741 authorizes JE-741, not JE-742",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-1D559EFD13870CEE6B3E",
+      "packet_index_1based": 2,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/006_HVSF001-1D559EFD13870CEE6B3E_minimax.json"
+    }
+  ],
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194755Z",
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194755Z/runtime_manifest_subset_indices_011-003.json",
+  "runtime_manifest_sha256": "ffdc3e7b97eaad66023e8d865fc3dcdaa7fb31ba33385dfc209ad386e0b23705",
+  "scoring_map_loaded": false,
+  "source_runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_2026_07_03/holoverify_solo_failure_factory_batch001_runtime_manifest_2026_07_03.json",
+  "source_runtime_manifest_sha256": "f0927bd82ec4d04668f6b7ab4563d0a1bbe9236a7983beba7b36c06b5ce464d8",
+  "subset_packet_indices_1based": [
+    11,
+    3
+  ],
+  "subset_packet_limit": null,
+  "subset_packet_start_index_1based": 1,
+  "trace_frozen_before_scoring": true
+}

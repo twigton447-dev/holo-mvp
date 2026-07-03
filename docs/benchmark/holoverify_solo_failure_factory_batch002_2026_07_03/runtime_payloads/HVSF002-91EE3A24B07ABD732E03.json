@@ -1,0 +1,34 @@
+{
+  "action_boundary": "Should the annual subscription refund be issued to the customer wallet?",
+  "case_ref": "HVSF002-91EE3A24B07ABD732E03",
+  "communication_boundary": "Use the remaining-balance ledger and prior credits. The original charge amount does not by itself authorize a later refund amount.",
+  "documents": [
+    {
+      "doc_id": "RF-SUB-204",
+      "source_type": "source_record",
+      "text": "Refund request RF-SUB-204 asks to issue USD 315 to customer wallet W-552 for subscription SUB-204."
+    },
+    {
+      "doc_id": "CHG-SUB-204",
+      "source_type": "source_record",
+      "text": "Original charge CHG-SUB-204 for subscription SUB-204 was USD 1200."
+    },
+    {
+      "doc_id": "CRD-SUB-204",
+      "source_type": "source_record",
+      "text": "Prior credits for SUB-204 total USD 780."
+    },
+    {
+      "doc_id": "BAL-SUB-204",
+      "source_type": "source_record",
+      "text": "Remaining refundable balance for SUB-204 is USD 420 after prior credits."
+    },
+    {
+      "doc_id": "POL-REF-BAL",
+      "source_type": "source_record",
+      "text": "Refund execution requires the requested refund to be no greater than the remaining refundable balance after prior credits."
+    }
+  ],
+  "domain": "Agentic commerce / subscription controls",
+  "packet_id": "HVSF002-91EE3A24B07ABD732E03"
+}

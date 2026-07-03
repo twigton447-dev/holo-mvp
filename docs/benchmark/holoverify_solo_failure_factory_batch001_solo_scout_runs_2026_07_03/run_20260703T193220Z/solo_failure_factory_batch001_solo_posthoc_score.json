@@ -1,0 +1,249 @@
+{
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_SOLO_SCOUT_POSTHOC_SCORE_V1",
+  "created_at_utc": "2026-07-03T19:32:43.863850+00:00",
+  "models_per_packet": 3,
+  "packet_collapse_rows": [
+    {
+      "collapse_class": "ONE_OF_THREE_SOLO_COLLAPSE",
+      "domain": "IT change management",
+      "legacy_packet_id": "HVSF-FACTORY-010-B",
+      "model_outcomes": [
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "xai",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ESCALATE"
+        },
+        {
+          "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+          "model_key": "openai",
+          "solo_admissible": true,
+          "solo_knew_admissible": false,
+          "solo_verdict": "ALLOW"
+        },
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "minimax",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ESCALATE"
+        }
+      ],
+      "opaque_runtime_id": "HVSF001-A0BF513B7A9F30EDE2DC",
+      "pair_id": "HVSF-FACTORY-010",
+      "solo_failure_count": 1,
+      "solo_knew_count": 2,
+      "truth": "ESCALATE"
+    }
+  ],
+  "packet_collapse_summary": {
+    "ONE_OF_THREE_SOLO_COLLAPSE": 1
+  },
+  "packet_count": 1,
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T193220Z",
+  "score_rows": [
+    {
+      "domain": "IT change management",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-010-B",
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-A0BF513B7A9F30EDE2DC",
+      "pair_id": "HVSF-FACTORY-010",
+      "provider": "xai",
+      "provider_row": {
+        "call_number": 1,
+        "elapsed_ms": 4730,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 595,
+        "max_output_tokens": 1200,
+        "model": "grok-3-mini",
+        "model_key": "xai",
+        "opaque_runtime_id": "HVSF001-A0BF513B7A9F30EDE2DC",
+        "output_tokens": 134,
+        "packet_index_1based": 14,
+        "prompt_sha256": "fa426dd4646ace578a474ba28ebf78a953c07a2762fb56c65490737f332122ab",
+        "provider": "xai",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/001_HVSF001-A0BF513B7A9F30EDE2DC_xai.json",
+        "raw_text_sha256": "db0c37c882ac425fb83be7ea6070c906f3d6bafbcd90b700479c60c53fabface",
+        "response_id": "c737f4eb-f83c-9d1c-9d3b-55d7eba09af9",
+        "text_sha256": "db0c37c882ac425fb83be7ea6070c906f3d6bafbcd90b700479c60c53fabface",
+        "total_tokens": 1194,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ESCALATE",
+      "trace_call_number": 1,
+      "truth": "ESCALATE"
+    },
+    {
+      "domain": "IT change management",
+      "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-010-B",
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-A0BF513B7A9F30EDE2DC",
+      "pair_id": "HVSF-FACTORY-010",
+      "provider": "openai",
+      "provider_row": {
+        "call_number": 2,
+        "elapsed_ms": 1489,
+        "error": null,
+        "finish_reason": "completed",
+        "input_tokens": 491,
+        "max_output_tokens": 1200,
+        "model": "gpt-5.4-mini",
+        "model_key": "openai",
+        "opaque_runtime_id": "HVSF001-A0BF513B7A9F30EDE2DC",
+        "output_tokens": 115,
+        "packet_index_1based": 14,
+        "prompt_sha256": "fa426dd4646ace578a474ba28ebf78a953c07a2762fb56c65490737f332122ab",
+        "provider": "openai",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/002_HVSF001-A0BF513B7A9F30EDE2DC_openai.json",
+        "raw_text_sha256": "783b7ba8c050e2e363502e4280a7fe07df2ae800af4cf9c8f85396947ade815d",
+        "response_id": "resp_079c4756d0edd6e0006a480e49f164819bb7dd4f85922d532f",
+        "text_sha256": "783b7ba8c050e2e363502e4280a7fe07df2ae800af4cf9c8f85396947ade815d",
+        "total_tokens": 606,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": false,
+      "solo_knew_admissible": false,
+      "solo_verdict": "ALLOW",
+      "trace_call_number": 2,
+      "truth": "ESCALATE"
+    },
+    {
+      "domain": "IT change management",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-010-B",
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-A0BF513B7A9F30EDE2DC",
+      "pair_id": "HVSF-FACTORY-010",
+      "provider": "minimax",
+      "provider_row": {
+        "call_number": 3,
+        "elapsed_ms": 12373,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 493,
+        "max_output_tokens": 1200,
+        "model": "MiniMax-M2.5-highspeed",
+        "model_key": "minimax",
+        "opaque_runtime_id": "HVSF001-A0BF513B7A9F30EDE2DC",
+        "output_tokens": 720,
+        "packet_index_1based": 14,
+        "prompt_sha256": "fa426dd4646ace578a474ba28ebf78a953c07a2762fb56c65490737f332122ab",
+        "provider": "minimax",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/003_HVSF001-A0BF513B7A9F30EDE2DC_minimax.json",
+        "raw_text_sha256": "c5707700aeca1e2484caa2fcd8e891fb8a464b0955d4927506d8e5a19731d0b4",
+        "response_id": "0697414b25d45c85e3d345f6cc8ee273",
+        "text_sha256": "9e780d266e0dfc6963ec4f8068dc2d85f667077aa45afc72ad90b01e9e69359e",
+        "total_tokens": 1213,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ESCALATE",
+      "trace_call_number": 3,
+      "truth": "ESCALATE"
+    }
+  ],
+  "scoring_map": "docs/benchmark/holoverify_solo_failure_factory_batch001_2026_07_03/holoverify_solo_failure_factory_batch001_scoring_map_2026_07_03.json",
+  "scoring_map_loaded_after_trace_hash_binding": true,
+  "scoring_map_sha256_expected": "56349dc6fae27b45d4e97a9225efb8814b421ef333eb2f27647f6c047ea2f18a",
+  "solo_call_count": 3,
+  "solo_failure_factory_batch": "BATCH001",
+  "summary_by_domain_model": {
+    "IT change management|minimax": {
+      "KNEW_ADMISSIBLE": 1,
+      "knew_admissible": 1,
+      "total": 1
+    },
+    "IT change management|openai": {
+      "FALSE_NEGATIVE_ALLOW_ON_ESCALATE": 1,
+      "knew_admissible": 0,
+      "total": 1
+    },
+    "IT change management|xai": {
+      "KNEW_ADMISSIBLE": 1,
+      "knew_admissible": 1,
+      "total": 1
+    }
+  },
+  "summary_by_model": {
+    "minimax": {
+      "KNEW_ADMISSIBLE": 1,
+      "admissible": 1,
+      "correct": 1,
+      "false_negative": 0,
+      "false_positive": 0,
+      "knew_admissible": 1,
+      "total": 1
+    },
+    "openai": {
+      "FALSE_NEGATIVE_ALLOW_ON_ESCALATE": 1,
+      "admissible": 1,
+      "correct": 0,
+      "false_negative": 1,
+      "false_positive": 0,
+      "knew_admissible": 0,
+      "total": 1
+    },
+    "xai": {
+      "KNEW_ADMISSIBLE": 1,
+      "admissible": 1,
+      "correct": 1,
+      "false_negative": 0,
+      "false_positive": 0,
+      "knew_admissible": 1,
+      "total": 1
+    }
+  },
+  "token_totals": {
+    "input_tokens": 1579,
+    "output_tokens": 969,
+    "total_tokens": 3013
+  },
+  "token_totals_by_model": {
+    "minimax": {
+      "input_tokens": 493,
+      "output_tokens": 720,
+      "total_tokens": 1213
+    },
+    "openai": {
+      "input_tokens": 491,
+      "output_tokens": 115,
+      "total_tokens": 606
+    },
+    "xai": {
+      "input_tokens": 595,
+      "output_tokens": 134,
+      "total_tokens": 1194
+    }
+  },
+  "trace_binding": {
+    "live_summary_sha256": "9a29220c5e8a3903e0107697c847f886cadf0a547c581fd9a66838d6a433a786",
+    "runtime_results_sha256": "69c1c1a34a045101ddbe910817236b79f68e1c9c0cd711fb6d5fcdf413b8db40",
+    "scoring_map_sha256": "56349dc6fae27b45d4e97a9225efb8814b421ef333eb2f27647f6c047ea2f18a",
+    "trace_provider_calls_sha256": "72a0d2d2383b5e7094fdfba1defb6e4d04939c88120c3aa16016d78c869b8132"
+  }
+}

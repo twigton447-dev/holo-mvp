@@ -1,0 +1,165 @@
+{
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH002_LIVE_ROLLUP_V1",
+  "created_at_utc": "2026-07-03T20:12:19Z",
+  "status": "DISCOVERY_ONLY_COMPLETE",
+  "public_claims_allowed": false,
+  "benchmark_credit_allowed": false,
+  "freeze_root": "24fd390e0482d353f410915aa39a6de0a2bd9c6fb6ca71874e58e3f0d9395345",
+  "runtime_manifest_sha256": "37238e2ef97069344121c0ca02b5a5c3b227885d41d7356d58366ebad7f2f301",
+  "scoring_map_sha256": "2b3ee50bdbecac53b7b754bda73ba73b94ad5ac2b1f139bedc793c6765df3423",
+  "scored_run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch002_solo_scout_runs_2026_07_03/run_20260703T200600Z",
+  "scope": {
+    "pairs_scored": 10,
+    "packets_scored": 20,
+    "solo_provider_calls_scored": 60,
+    "holo_calls": 0,
+    "gov_calls": 0,
+    "judge_calls": 0,
+    "models": [
+      "xai/grok-3-mini",
+      "openai/gpt-5.4-mini",
+      "minimax/MiniMax-M2.5-highspeed"
+    ]
+  },
+  "summary": {
+    "useful_solo_failure_pairs": 4,
+    "non_useful_pairs": 6,
+    "provider_failures": 0
+  },
+  "useful_pairs": [
+    {
+      "pair_id": "HVSF-FACTORY2-003",
+      "domain": "Agentic commerce / order execution controls",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY2-003-B",
+          "truth": "ESCALATE",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+          "solo_verdict": "ALLOW",
+          "solo_admissible": true
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-004",
+      "domain": "Agentic commerce / subscription controls",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY2-004-B",
+          "truth": "ESCALATE",
+          "model": "xai/grok-3-mini",
+          "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+          "solo_verdict": "ESCALATE",
+          "solo_admissible": false,
+          "gate_failures": [
+            "short_final_answer"
+          ]
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-005",
+      "domain": "Customer operations / refund exception controls",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY2-005-B",
+          "truth": "ESCALATE",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+          "solo_verdict": "ALLOW",
+          "solo_admissible": true
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-006",
+      "domain": "IT change management",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY2-006-A",
+          "truth": "ALLOW",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+          "solo_verdict": "ESCALATE",
+          "solo_admissible": true
+        }
+      ]
+    }
+  ],
+  "non_useful_pairs": [
+    {
+      "pair_id": "HVSF-FACTORY2-001",
+      "domain": "Banking / KYC / AML controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-002",
+      "domain": "Banking / sanctions screening controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-007",
+      "domain": "IT operations / emergency change controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-008",
+      "domain": "AP / vendor-master controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-009",
+      "domain": "Treasury / FX settlement controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY2-010",
+      "domain": "IT access / offboarding conflict controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    }
+  ],
+  "summary_by_model": {
+    "minimax": {
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "correct": 20,
+      "admissible": 20,
+      "knew_admissible": 20,
+      "total": 20,
+      "false_positive": 0,
+      "false_negative": 0,
+      "parse_or_admissibility_failure": 0
+    },
+    "openai": {
+      "model": "openai/gpt-5.4-mini",
+      "correct": 17,
+      "admissible": 20,
+      "knew_admissible": 17,
+      "total": 20,
+      "false_positive": 1,
+      "false_negative": 2,
+      "parse_or_admissibility_failure": 0
+    },
+    "xai": {
+      "model": "xai/grok-3-mini",
+      "correct": 20,
+      "admissible": 19,
+      "knew_admissible": 19,
+      "total": 20,
+      "false_positive": 0,
+      "false_negative": 0,
+      "parse_or_admissibility_failure": 1
+    }
+  },
+  "token_totals": {
+    "input_tokens": 32745,
+    "output_tokens": 17144,
+    "total_tokens": 58687
+  },
+  "trace_binding": {
+    "live_summary_sha256": "50e4c5afe9a63477180652a52011ff6e980fa3ed6885cfcaee9066ec69477c07",
+    "runtime_results_sha256": "0ace3762424ab8311bb44d9f7b91ab0728057c554538d523981f11f7f2460b70",
+    "scoring_map_sha256": "2b3ee50bdbecac53b7b754bda73ba73b94ad5ac2b1f139bedc793c6765df3423",
+    "trace_provider_calls_sha256": "4af125c2fa90bdf7a6c44801fce08c53c4f26bd58f67e43a937dc941aa7b82b0"
+  }
+}

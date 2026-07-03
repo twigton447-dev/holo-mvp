@@ -1,0 +1,214 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_RUNTIME_RESULTS_V0",
+  "created_at_utc": "2026-07-03T19:37:25.011630+00:00",
+  "expected_provider_calls": 6,
+  "failure": null,
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_10PAIR_SOLO_SCOUT_V0",
+  "models_per_packet": 3,
+  "observed_provider_calls": 6,
+  "packet_count": 2,
+  "results": [
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-AR201",
+          "ENT-U14",
+          "SOD-AP",
+          "MGR-AR201",
+          "POL-SOD"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Approve AR-201 after SOD matrix check for U-14",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-AR201|ENT-U14|SOD-AP|MGR-AR201|POL-SOD",
+          "final_answer": "Action may proceed with ALLOW.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-EED69275B47B9F36EBC8",
+      "packet_index_1based": 1,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/001_HVSF001-EED69275B47B9F36EBC8_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-AR201",
+          "ENT-U14",
+          "SOD-AP",
+          "MGR-AR201",
+          "POL-SOD"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Approve AR-201 for AP-INVOICE-ENTRY for user U-14 based on current role pair check",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-AR201|ENT-U14|SOD-AP|MGR-AR201|POL-SOD",
+          "final_answer": "ALLOW: the request, current entitlement, segregation matrix, and manager approval together close the approval boundary for AR-201.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-EED69275B47B9F36EBC8",
+      "packet_index_1based": 1,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/002_HVSF001-EED69275B47B9F36EBC8_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-AR201",
+          "ENT-U14",
+          "SOD-AP",
+          "MGR-AR201",
+          "POL-SOD"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Access request AR-201 for AP-INVOICE-ENTRY role addition for user U-14 is compliant with segregation-of-duties matrix and has manager approval; all required source controls are satisfied and the action may proceed without escalation.",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-AR201|ENT-U14|SOD-AP|MGR-AR201|POL-SOD",
+          "final_answer": "ALLOW - access request AR-201 for AP-INVOICE-ENTRY is approved as the role combination with existing entitlement AP-REPORT-VIEW is explicitly permitted under SOD-AP and has received manager approval per MGR-AR201.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-EED69275B47B9F36EBC8",
+      "packet_index_1based": 1,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/003_HVSF001-EED69275B47B9F36EBC8_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SOD-AP",
+          "ENT-U14",
+          "POL-SOD"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "SOD check for AP-INVOICE-ENTRY addition",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "SOD-AP|ENT-U14|POL-SOD",
+          "final_answer": "ESCALATE due to active SOD violation.",
+          "open_blockers": "SOD prohibition on AP-INVOICE-ENTRY + AP-PAYMENT-RELEASE",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-AF31197420ED5152353D",
+      "packet_index_1based": 2,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/004_HVSF001-AF31197420ED5152353D_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-AR201",
+          "ENT-U14",
+          "SOD-AP",
+          "MGR-AR201",
+          "POL-SOD"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Approve AR-201 for AP-INVOICE-ENTRY by checking requested role against existing roles in the segregation matrix",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-AR201|ENT-U14|SOD-AP|MGR-AR201|POL-SOD",
+          "final_answer": "ESCALATE: AR-201 cannot be approved now because the segregation matrix prohibits AP-INVOICE-ENTRY together with U-14's existing AP-PAYMENT-RELEASE.",
+          "open_blockers": "requested role conflicts with existing role AP-PAYMENT-RELEASE under SOD-AP",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-AF31197420ED5152353D",
+      "packet_index_1based": 2,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/005_HVSF001-AF31197420ED5152353D_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SOD-AP",
+          "ENT-U14",
+          "REQ-AR201",
+          "POL-SOD"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Addition of AP-INVOICE-ENTRY role to user U-14 violates segregation-of-duties prohibition against holding AP-INVOICE-ENTRY concurrent with AP-PAYMENT-RELEASE",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "SOD-AP|ENT-U14|REQ-AR201|POL-SOD",
+          "final_answer": "ESCALATE - the access request AR-201 for user U-14 cannot be approved because granting AP-INVOICE-ENTRY would create a prohibited role combination with the user's existing AP-PAYMENT-RELEASE role, violating the segregation-of-duties matrix SOD-AP.",
+          "open_blockers": "SOD violation - requested role AP-INVOICE-ENTRY prohibited concurrent with existing role AP-PAYMENT-RELEASE per SOD-AP segregation matrix",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-AF31197420ED5152353D",
+      "packet_index_1based": 2,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/006_HVSF001-AF31197420ED5152353D_minimax.json"
+    }
+  ],
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T193650Z",
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T193650Z/runtime_manifest_subset_indices_018-015.json",
+  "runtime_manifest_sha256": "336f539fbe42716efe5b47c39a054485512b1c54495fbfe95caa7fae3bc58715",
+  "scoring_map_loaded": false,
+  "source_runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_2026_07_03/holoverify_solo_failure_factory_batch001_runtime_manifest_2026_07_03.json",
+  "source_runtime_manifest_sha256": "f0927bd82ec4d04668f6b7ab4563d0a1bbe9236a7983beba7b36c06b5ce464d8",
+  "subset_packet_indices_1based": [
+    18,
+    15
+  ],
+  "subset_packet_limit": null,
+  "subset_packet_start_index_1based": 1,
+  "trace_frozen_before_scoring": true
+}

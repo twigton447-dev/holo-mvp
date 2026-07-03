@@ -1,168 +1,105 @@
 {
-  "schema": "repo_dirty_state_cleanup_plan_v1",
-  "generated_at_utc": "2026-07-03T20:50:20.211472+00:00",
+  "schema": "repo_dirty_state_cleanup_plan_v2_post_cleanup_commits",
+  "generated_at_utc": "2026-07-03T20:54:38.273720+00:00",
   "repo": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
   "branch": "codex/ap-publication-integration",
-  "head_short": "b0d836a99",
-  "head_subject": "benchmark: preserve solo failure factory batch004 scout",
+  "head_short": "fb6d4da9d",
+  "head_subject": "benchmark: freeze solo failure factory batch005",
   "basis": "docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.json",
+  "completed_cleanup_commits_visible_at_refresh": [
+    "fb6d4da9d benchmark: freeze solo failure factory batch005",
+    "771d2988c benchmark: preserve ablation and discovery summaries",
+    "d89427bbe docs: preserve Fable review handoffs",
+    "0ae4a8f23 docs: preserve repo dirty state cleanup plan",
+    "b0d836a99 benchmark: preserve solo failure factory batch004 scout"
+  ],
   "guardrails": [
     "No providers, Holo, solo, Gov, or judges.",
-    "No deletes, reverts, git add ., git add -A, or commits outside the selected cleanup lane.",
+    "No deletes, reverts, git add ., or git add -A.",
     "Live-run/preflight/runtime payload/Batch004/factory materials remain unstaged pending owner review.",
-    "Every proposed preservation lane is path-scoped using exact paths from the refreshed triage JSON or the cleanup reports generated here."
+    "Remaining public-copy and code/script/test changes require owner review before staging.",
+    "Temporary-noise candidates are not deletion targets without explicit approval."
   ],
+  "remaining_counts": {
+    "total_paths_excluding_this_report": 3442,
+    "by_status_code": {
+      " M": 4,
+      "??": 3438
+    },
+    "tracked_modified_paths_excluding_this_report": [
+      "docs/benchmark/three_mini_seam_scout_2026_06_29.py",
+      "docs/whitepaper.md",
+      "frontend/benchmark.html",
+      "frontend/whitepaper.html"
+    ],
+    "bucket_counts": {
+      "website_public_copy_changes": 3,
+      "fable_review_docs": 0,
+      "benchmark_ablation_discovery_artifacts": 7,
+      "run_preflight_artifacts": 3408,
+      "code_scripts_tests": 24,
+      "unknown_risky": 0
+    },
+    "recommendation_class_counts": {
+      "owner_review": 1695,
+      "temporary_noise_candidate": 1747
+    }
+  },
   "recommended_order": [
     "lane_00_cleanup_reports",
     "lane_01_fable_review_docs",
-    "lane_02_benchmark_summary_docs",
-    "lane_03_batch004_factory_docs_owner_review",
-    "lane_04_public_copy_owner_review",
-    "lane_05_code_scripts_tests_owner_review",
-    "lane_06_live_run_and_preflight_evidence_hold",
-    "lane_07_temporary_noise_candidates_hold",
-    "lane_08_unknown_risky_hold"
+    "lane_02_benchmark_summary_docs_remaining",
+    "lane_03_public_copy_owner_review",
+    "lane_04_code_scripts_tests_owner_review",
+    "lane_05_live_run_and_preflight_evidence_hold",
+    "lane_06_temporary_noise_candidates_hold",
+    "lane_07_unknown_risky_hold"
   ],
   "lanes": {
     "lane_00_cleanup_reports": {
-      "status": "ready_to_preserve_when_authorized",
-      "purpose": "Preserve repo hygiene reports generated during cleanup.",
+      "status": "preserved_then_refreshed",
+      "purpose": "Repo hygiene reports generated and then refreshed after cleanup commits.",
       "paths": [
         "docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.md",
         "docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.json",
         "docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.md",
         "docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.json"
       ],
-      "proposed_commit": "docs: preserve repo dirty state cleanup plan",
-      "pre_stage_checks": [
-        "git diff --cached --name-only must be empty",
-        "git status --short confirms only these report files are being staged"
-      ],
       "stage_command": "git add -- docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.md docs/benchmark/REPO_DIRTY_STATE_TRIAGE_2026_07_03.json docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.md docs/benchmark/REPO_DIRTY_STATE_CLEANUP_PLAN_2026_07_03.json"
     },
     "lane_01_fable_review_docs": {
-      "status": "ready_to_preserve_after_owner_review",
+      "status": "preserved_in_commit_d89427bbe",
       "purpose": "Docs-only Fable review/design handoff material.",
-      "path_count": 40,
-      "paths": [
-        "docs/FABLE_HOLOENGINE_PRESSURE_TEST_HANDOFF_2026_07_02.json",
-        "docs/FABLE_HOLOENGINE_PRESSURE_TEST_HANDOFF_2026_07_02.md",
-        "docs/FABLE_HOLOENGINE_SINGLE_MANDATE_2026_07_02.json",
-        "docs/FABLE_HOLOENGINE_SINGLE_MANDATE_2026_07_02.md",
-        "docs/benchmark/FABLE_ATLAS_SEAM_REVIEW_AND_10_PAIR_DESIGNS_2026_07_03.md",
-        "docs/benchmark/FABLE_ATLAS_V3_SCOUT_REVIEW_2026_07_03.md",
-        "docs/benchmark/FABLE_BLIND_120_BATCH8_CHECKPOINT_AUDIT_2026_07_03.md",
-        "docs/benchmark/FABLE_BLIND_120_WRAPPER_GATE_2026_07_03.md",
-        "docs/benchmark/FABLE_HOLOBUILD_COMPARISON_TEST_DESIGN_2026_07_03.md",
-        "docs/benchmark/FABLE_SEAM_HUNTER_20_NEW_PAIRS_2026_07_03.md",
-        "docs/benchmark/FABLE_SEAM_MINING_20_PAIR_DESIGNS_2026_07_03.md",
-        "docs/benchmark/FABLE_SEAM_MINING_V5_DESIGNS_2026_07_03.md",
-        "docs/benchmark/FABLE_SELECTOR_REPAIR_PATCH_REVIEW_2026_07_03.md",
-        "docs/benchmark/FABLE_V6_RESCUE_CANDIDATE_REVIEW_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_HANDOFF_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_HANDOFF_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_SCOUT_GATE_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_SCOUT_GATE_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_SUBSET_LIVE_SCOUT_HANDOFF_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_SUBSET_LIVE_SCOUT_HANDOFF_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V4_FABLE_BANK_LIVE_SCOUT_HANDOFF_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V4_FABLE_BANK_LIVE_SCOUT_HANDOFF_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V5_FABLE_BATCH2_EXACT_LIVE_SCOUT_HANDOFF_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V5_FABLE_BATCH2_EXACT_LIVE_SCOUT_HANDOFF_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V6_FABLE_V5_AFFORDANCE_LIVE_SCOUT_HANDOFF_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V6_FABLE_V5_AFFORDANCE_LIVE_SCOUT_HANDOFF_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_FABLE_BATCH2_EXACT_20PAIR_REGISTRY_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_FABLE_BATCH2_EXACT_20PAIR_REGISTRY_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_FABLE_SEAM_BANK_40_DESIGN_ROLLUP_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_FABLE_SEAM_BANK_40_DESIGN_ROLLUP_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_FABLE_SEAM_BANK_V4_REGISTRY_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_FABLE_SEAM_BANK_V4_REGISTRY_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_FABLE_SEAM_HUNTER_ASSIGNMENT_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_FABLE_SEAM_HUNTER_ASSIGNMENT_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_FABLE_V4_TAXONOMY_AND_V6_AFFORDANCE_SCOUT_PLAN_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_FABLE_V4_TAXONOMY_AND_V6_AFFORDANCE_SCOUT_PLAN_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_FABLE_V6_REVIEW_PROMOTION_DECISION_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_FABLE_V6_REVIEW_PROMOTION_DECISION_2026_07_03.md",
-        "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/rescored_post_fable/ATLAS_DISCOVERY_RESCORING_POST_FABLE.json",
-        "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/rescored_post_fable/ATLAS_DISCOVERY_RESCORING_POST_FABLE.md"
-      ],
-      "proposed_commit": "docs: preserve Fable review handoffs",
-      "stage_command": "git add -- docs/FABLE_HOLOENGINE_PRESSURE_TEST_HANDOFF_2026_07_02.json docs/FABLE_HOLOENGINE_PRESSURE_TEST_HANDOFF_2026_07_02.md docs/FABLE_HOLOENGINE_SINGLE_MANDATE_2026_07_02.json docs/FABLE_HOLOENGINE_SINGLE_MANDATE_2026_07_02.md docs/benchmark/FABLE_ATLAS_SEAM_REVIEW_AND_10_PAIR_DESIGNS_2026_07_03.md docs/benchmark/FABLE_ATLAS_V3_SCOUT_REVIEW_2026_07_03.md docs/benchmark/FABLE_BLIND_120_BATCH8_CHECKPOINT_AUDIT_2026_07_03.md docs/benchmark/FABLE_BLIND_120_WRAPPER_GATE_2026_07_03.md docs/benchmark/FABLE_HOLOBUILD_COMPARISON_TEST_DESIGN_2026_07_03.md docs/benchmark/FABLE_SEAM_HUNTER_20_NEW_PAIRS_2026_07_03.md docs/benchmark/FABLE_SEAM_MINING_20_PAIR_DESIGNS_2026_07_03.md docs/benchmark/FABLE_SEAM_MINING_V5_DESIGNS_2026_07_03.md docs/benchmark/FABLE_SELECTOR_REPAIR_PATCH_REVIEW_2026_07_03.md docs/benchmark/FABLE_V6_RESCUE_CANDIDATE_REVIEW_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_HANDOFF_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_HANDOFF_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_SCOUT_GATE_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_SCOUT_GATE_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_SUBSET_LIVE_SCOUT_HANDOFF_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V3_FABLE_SUBSET_LIVE_SCOUT_HANDOFF_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V4_FABLE_BANK_LIVE_SCOUT_HANDOFF_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V4_FABLE_BANK_LIVE_SCOUT_HANDOFF_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V5_FABLE_BATCH2_EXACT_LIVE_SCOUT_HANDOFF_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V5_FABLE_BATCH2_EXACT_LIVE_SCOUT_HANDOFF_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V6_FABLE_V5_AFFORDANCE_LIVE_SCOUT_HANDOFF_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V6_FABLE_V5_AFFORDANCE_LIVE_SCOUT_HANDOFF_2026_07_03.md docs/benchmark/HOLOVERIFY_FABLE_BATCH2_EXACT_20PAIR_REGISTRY_2026_07_03.json docs/benchmark/HOLOVERIFY_FABLE_BATCH2_EXACT_20PAIR_REGISTRY_2026_07_03.md docs/benchmark/HOLOVERIFY_FABLE_SEAM_BANK_40_DESIGN_ROLLUP_2026_07_03.json docs/benchmark/HOLOVERIFY_FABLE_SEAM_BANK_40_DESIGN_ROLLUP_2026_07_03.md docs/benchmark/HOLOVERIFY_FABLE_SEAM_BANK_V4_REGISTRY_2026_07_03.json docs/benchmark/HOLOVERIFY_FABLE_SEAM_BANK_V4_REGISTRY_2026_07_03.md docs/benchmark/HOLOVERIFY_FABLE_SEAM_HUNTER_ASSIGNMENT_2026_07_03.json docs/benchmark/HOLOVERIFY_FABLE_SEAM_HUNTER_ASSIGNMENT_2026_07_03.md docs/benchmark/HOLOVERIFY_FABLE_V4_TAXONOMY_AND_V6_AFFORDANCE_SCOUT_PLAN_2026_07_03.json docs/benchmark/HOLOVERIFY_FABLE_V4_TAXONOMY_AND_V6_AFFORDANCE_SCOUT_PLAN_2026_07_03.md docs/benchmark/HOLOVERIFY_FABLE_V6_REVIEW_PROMOTION_DECISION_2026_07_03.json docs/benchmark/HOLOVERIFY_FABLE_V6_REVIEW_PROMOTION_DECISION_2026_07_03.md docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/rescored_post_fable/ATLAS_DISCOVERY_RESCORING_POST_FABLE.json docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/rescored_post_fable/ATLAS_DISCOVERY_RESCORING_POST_FABLE.md"
+      "paths": [],
+      "stage_command": "NO_REMAINING_PATHS"
     },
-    "lane_02_benchmark_summary_docs": {
-      "status": "ready_to_preserve_after_owner_review",
-      "purpose": "Benchmark summary, lock, result, registry, and rollup docs that are not live-run/preflight payloads.",
-      "path_count": 35,
+    "lane_02_benchmark_summary_docs_remaining": {
+      "status": "hold_owner_review_for_new_or_remaining_docs",
+      "purpose": "Remaining benchmark/discovery summaries after the preserved ablation/discovery commit; new files may have appeared during cleanup.",
       "paths": [
-        "docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_3MODEL_MAJORITY_ENSEMBLE_ABLATION_LOCK_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_3MODEL_MAJORITY_ENSEMBLE_ABLATION_LOCK_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_MAJORITY_ENSEMBLE_ABLATION_RESULT_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_MAJORITY_ENSEMBLE_ABLATION_RESULT_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_WORKERS_ONLY_ABLATION_RESULT_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_WORKERS_ONLY_ABLATION_RESULT_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V4_V5_RECONCILIATION_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V4_V5_RECONCILIATION_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V6B_FIX034_RESCOUT_HANDOFF_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V6B_FIX034_RESCOUT_HANDOFF_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_ATLAS_SEAM_DISCOVERY_MINIRUN_PLAN_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_ATLAS_SEAM_DISCOVERY_MINIRUN_PLAN_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_ABLATION_SEQUENCE_LOCK_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_ABLATION_SEQUENCE_LOCK_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_BASELINE_POSTHOC_SUMMARY_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_BASELINE_POSTHOC_SUMMARY_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_FAILURE_PACKET_FILTER_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_FAILURE_PACKET_FILTER_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_REPO_SEAM_INVENTORY_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_REPO_SEAM_INVENTORY_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_SOLO_COLLAPSE_HOLO_WIN_PAIR_REGISTRY_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_SOLO_COLLAPSE_HOLO_WIN_PAIR_REGISTRY_2026_07_03.md",
-        "docs/benchmark/HOLOVERIFY_SOLO_COLLAPSE_HOLO_WIN_REGISTRY_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_SOLO_COLLAPSE_HOLO_WIN_REGISTRY_2026_07_03.md",
-        "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/ATLAS_SCOUT_CANDIDATE_RULE_VALIDATION_2026_07_03.json",
-        "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/rescored_post_fable/v1_rescore.json",
-        "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/rescored_post_fable/v2_rescore.json",
-        "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ARCHITECTURE_ABLATION_CATEGORY_COMPARISON_2026_07_02.json",
-        "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ARCHITECTURE_ABLATION_CATEGORY_COMPARISON_2026_07_02.md",
-        "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ARCHITECTURE_ISOLATION_LADDER_STRATEGY_LOCK_2026_07_02.json",
-        "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ARCHITECTURE_ISOLATION_LADDER_STRATEGY_LOCK_2026_07_02.md",
-        "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/KITA_RANDOMIZED_CORPUS_BALANCED_ABLATION_PROVIDER_APPROVAL_PACKET_2026_07_02.json",
-        "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/KITA_RANDOMIZED_CORPUS_BALANCED_ABLATION_PROVIDER_APPROVAL_PACKET_2026_07_02.md",
-        "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/KITA_RANDOMIZED_CORPUS_BALANCED_SAMPLE_LOCK_2026_07_02.json",
-        "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/KITA_RANDOMIZED_CORPUS_BALANCED_SAMPLE_LOCK_2026_07_02.md"
-      ],
-      "proposed_commit": "benchmark: preserve ablation and discovery summaries",
-      "stage_command": "git add -- docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_3MODEL_MAJORITY_ENSEMBLE_ABLATION_LOCK_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_3MODEL_MAJORITY_ENSEMBLE_ABLATION_LOCK_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_MAJORITY_ENSEMBLE_ABLATION_RESULT_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_MAJORITY_ENSEMBLE_ABLATION_RESULT_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_WORKERS_ONLY_ABLATION_RESULT_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_WORKERS_ONLY_ABLATION_RESULT_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V4_V5_RECONCILIATION_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V4_V5_RECONCILIATION_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V6B_FIX034_RESCOUT_HANDOFF_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_DISCOVERY_V6B_FIX034_RESCOUT_HANDOFF_2026_07_03.md docs/benchmark/HOLOVERIFY_ATLAS_SEAM_DISCOVERY_MINIRUN_PLAN_2026_07_03.json docs/benchmark/HOLOVERIFY_ATLAS_SEAM_DISCOVERY_MINIRUN_PLAN_2026_07_03.md docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_ABLATION_SEQUENCE_LOCK_2026_07_03.json docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_ABLATION_SEQUENCE_LOCK_2026_07_03.md docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_BASELINE_POSTHOC_SUMMARY_2026_07_03.json docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_BASELINE_POSTHOC_SUMMARY_2026_07_03.md docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_FAILURE_PACKET_FILTER_2026_07_03.json docs/benchmark/HOLOVERIFY_BLIND_120_SOLO_FAILURE_PACKET_FILTER_2026_07_03.md docs/benchmark/HOLOVERIFY_REPO_SEAM_INVENTORY_2026_07_03.json docs/benchmark/HOLOVERIFY_REPO_SEAM_INVENTORY_2026_07_03.md docs/benchmark/HOLOVERIFY_SOLO_COLLAPSE_HOLO_WIN_PAIR_REGISTRY_2026_07_03.json docs/benchmark/HOLOVERIFY_SOLO_COLLAPSE_HOLO_WIN_PAIR_REGISTRY_2026_07_03.md docs/benchmark/HOLOVERIFY_SOLO_COLLAPSE_HOLO_WIN_REGISTRY_2026_07_03.json docs/benchmark/HOLOVERIFY_SOLO_COLLAPSE_HOLO_WIN_REGISTRY_2026_07_03.md docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/ATLAS_SCOUT_CANDIDATE_RULE_VALIDATION_2026_07_03.json docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/rescored_post_fable/v1_rescore.json docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/rescored_post_fable/v2_rescore.json docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ARCHITECTURE_ABLATION_CATEGORY_COMPARISON_2026_07_02.json docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ARCHITECTURE_ABLATION_CATEGORY_COMPARISON_2026_07_02.md docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ARCHITECTURE_ISOLATION_LADDER_STRATEGY_LOCK_2026_07_02.json docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ARCHITECTURE_ISOLATION_LADDER_STRATEGY_LOCK_2026_07_02.md docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/KITA_RANDOMIZED_CORPUS_BALANCED_ABLATION_PROVIDER_APPROVAL_PACKET_2026_07_02.json docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/KITA_RANDOMIZED_CORPUS_BALANCED_ABLATION_PROVIDER_APPROVAL_PACKET_2026_07_02.md docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/KITA_RANDOMIZED_CORPUS_BALANCED_SAMPLE_LOCK_2026_07_02.json docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/KITA_RANDOMIZED_CORPUS_BALANCED_SAMPLE_LOCK_2026_07_02.md"
-    },
-    "lane_03_batch004_factory_docs_owner_review": {
-      "status": "hold_owner_review",
-      "purpose": "Batch004/factory/next-bank docs; do not stage while active Batch004/factory work may be in flight.",
-      "path_count": 2,
-      "paths": [
+        "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH005_PACKET_FREEZE_2026_07_03.json",
+        "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH005_PACKET_FREEZE_2026_07_03.md",
         "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.json",
-        "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.md"
+        "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_SEAM_MINING_NEXT_BANK_2026_07_03.md",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_hash_manifest_2026_07_03.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_runtime_manifest_2026_07_03.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/holoverify_solo_failure_factory_batch005_scoring_map_2026_07_03.json"
       ],
       "stage_command": "DO_NOT_STAGE_YET"
     },
-    "lane_04_public_copy_owner_review": {
+    "lane_03_public_copy_owner_review": {
       "status": "hold_owner_review",
       "purpose": "Public website/whitepaper claim-boundary changes; review diffs before staging.",
-      "path_count": 3,
       "paths": [
         "docs/whitepaper.md",
         "frontend/benchmark.html",
         "frontend/whitepaper.html"
       ],
-      "diff_summary": {
-        "docs/whitepaper.md": "Narrows public benchmark language, removes current public statistical risk-bound claims, and moves to blind-gate replication boundary.",
-        "frontend/benchmark.html": "Version 7.54; replaces public 614/614 rate tables with under-blind-gate-review claim boundary and disconfirmation plan.",
-        "frontend/whitepaper.html": "Version 7.84; mirrors narrowed whitepaper claim boundary in rendered HTML."
-      },
       "stage_command": "DO_NOT_STAGE_YET"
     },
-    "lane_05_code_scripts_tests_owner_review": {
+    "lane_04_code_scripts_tests_owner_review": {
       "status": "hold_owner_review_and_non_provider_validation",
       "purpose": "Code/scripts/tests need diff review and non-provider validation before staging.",
-      "path_count": 21,
       "paths": [
         "docs/benchmark/three_mini_seam_scout_2026_06_29.py",
         "docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_2026_07_03.py",
@@ -173,33 +110,30 @@
         "docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v5_fable_batch2_exact_2026_07_03.py",
         "docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6_fable_v5_affordance_2026_07_03.py",
         "docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v6b_fix034_2026_07_03.py",
+        "docs/benchmark/build_holoverify_solo_failure_factory_batch005_2026_07_03.py",
         "docs/benchmark/build_randomized_corpus_balanced_ablation_sample_2026_07_02.py",
         "docs/benchmark/filter_holoverify_blind_120_solo_failure_packets_2026_07_03.py",
         "docs/benchmark/preflight_holoverify_atlas_seam_discovery_minirun_2026_07_03.py",
         "docs/benchmark/rescore_holoverify_atlas_seam_discovery_scouts_2026_07_03.py",
         "docs/benchmark/run_holoverify_atlas_5fail_majority_ensemble_ablation_2026_07_03.py",
         "docs/benchmark/run_holoverify_atlas_5fail_workers_only_ablation_2026_07_03.py",
+        "docs/benchmark/run_holoverify_solo_failure_factory_batch005_solo_scout_2026_07_03.py",
         "docs/benchmark/run_kita_ablation_series_solo_one_shot_2026_07_02.py",
         "docs/benchmark/run_kita_randomized_corpus_balanced_ablation_2026_07_02.py",
         "docs/benchmark/score_holoverify_atlas_5fail_majority_ensemble_ablation_2026_07_03.py",
         "docs/benchmark/score_holoverify_atlas_5fail_workers_only_ablation_2026_07_03.py",
+        "docs/benchmark/score_holoverify_solo_failure_factory_batch005_solo_scout_2026_07_03.py",
         "docs/benchmark/validate_holoverify_atlas_scout_candidate_rule_2026_07_03.py",
         "tests/test_kita_randomized_corpus_balanced_ablation.py"
       ],
       "tracked_diff_summary": {
-        "docs/benchmark/three_mini_seam_scout_2026_06_29.py": "Adds evidence text extraction from rationale/cited artifacts, tightens candidate criteria to wrong-verdict or heavy both-sibling non-KNEW signal, adds --out-root, and updates selection-rule text."
+        "docs/benchmark/three_mini_seam_scout_2026_06_29.py": "Tracked patch changes evidence text extraction, candidate criteria, --out-root, and selection-rule text."
       },
-      "allowed_validation_examples": [
-        "python3 -m py_compile docs/benchmark/three_mini_seam_scout_2026_06_29.py",
-        "python3 -m py_compile <selected untracked scripts>",
-        "pytest tests/test_kita_randomized_corpus_balanced_ablation.py -q if dependencies are local and no provider calls are triggered"
-      ],
       "stage_command": "DO_NOT_STAGE_YET"
     },
-    "lane_06_live_run_and_preflight_evidence_hold": {
+    "lane_05_live_run_and_preflight_evidence_hold": {
       "status": "hold_do_not_touch",
       "purpose": "Live-run, preflight, prompt, trace, runtime payload, and generated run artifacts. Preserve only through explicit evidence lane; do not delete.",
-      "path_count": 1639,
       "paths": [
         "docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/atlas_5fail_majority_ensemble_preflight.json",
         "docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/atlas_5fail_majority_ensemble_preflight.md",
@@ -1450,6 +1384,28 @@
         "docs/benchmark/holoverify_blind_canary_runtime_payloads_2026_07_02/BLIND-EE07FB0DCE4002FC.json",
         "docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/solo_one_shot_preflight.json",
         "docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/solo_one_shot_preflight.md",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-00F7616872BED2F88F3C.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-19D61F4C1D2AB58BD47F.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-40273E5BECB2E2987AE3.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-4CAE7C0EF35CEA75C1A8.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-68283855FB929F72FF5A.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-75C056AEE0FB75242334.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-79CD78EC3270DFC530AD.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-7B606B61B8482F1CB875.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-817E9E471B4C5E3FB019.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8473C8363337252AE6B2.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8DD56D14A3CE770E7FCD.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-8F7DD7C9D7D708A0BD24.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-A7A3354745A9214F698B.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-B7BFF51B0C0816D66582.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-BBFE131763EFFCD2150D.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-C0EEBC118FECA209ECBD.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-C7925A1A32DD96310746.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-D222FC523042B82251EB.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-F5AD63532B2155A3C7EE.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_2026_07_03/runtime_payloads/HVSF005-FC90EF0A43623E832FDA.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/solo_one_shot_preflight.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/solo_one_shot_preflight.md",
         "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ablation_series_solo_one_shot_12packet_20260702/live_runs/run_20260702T213138Z/KITA_ABLATION_SERIES_SOLO_ONE_SHOT_PREFLIGHT.json",
         "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ablation_series_solo_one_shot_12packet_20260702/live_runs/run_20260702T213138Z/KITA_ABLATION_SERIES_SOLO_ONE_SHOT_PROVIDER_APPROVAL_PACKET_2026_07_02.json",
         "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ablation_series_solo_one_shot_12packet_20260702/live_runs/run_20260702T213138Z/KITA_ABLATION_SERIES_SOLO_ONE_SHOT_PROVIDER_APPROVAL_PACKET_2026_07_02.md",
@@ -1843,10 +1799,9 @@
       ],
       "stage_command": "DO_NOT_STAGE_YET"
     },
-    "lane_07_temporary_noise_candidates_hold": {
+    "lane_06_temporary_noise_candidates_hold": {
       "status": "hold_no_delete_without_explicit_approval",
       "purpose": "Preflight prompt probes and preflight_latest material likely to be noise, but no deletion is authorized.",
-      "path_count": 1687,
       "paths": [
         "docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/preflight_prompt_probe/ATLASRESCUE-4D29A82BECA21E67C3C8_M1.json",
         "docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/preflight_20260703T182335Z/preflight_prompt_probe/ATLASRESCUE-4D29A82BECA21E67C3C8_M2.json",
@@ -3525,6 +3480,66 @@
         "docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/preflight_prompt_probe/020_HVSF004-F7EF7EA3699A6CE46168_minimax.json",
         "docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/preflight_prompt_probe/020_HVSF004-F7EF7EA3699A6CE46168_openai.json",
         "docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/preflight_20260703T203805Z/preflight_prompt_probe/020_HVSF004-F7EF7EA3699A6CE46168_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/001_HVSF005-00F7616872BED2F88F3C_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/001_HVSF005-00F7616872BED2F88F3C_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/001_HVSF005-00F7616872BED2F88F3C_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/002_HVSF005-19D61F4C1D2AB58BD47F_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/002_HVSF005-19D61F4C1D2AB58BD47F_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/002_HVSF005-19D61F4C1D2AB58BD47F_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/003_HVSF005-40273E5BECB2E2987AE3_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/003_HVSF005-40273E5BECB2E2987AE3_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/003_HVSF005-40273E5BECB2E2987AE3_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/004_HVSF005-4CAE7C0EF35CEA75C1A8_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/004_HVSF005-4CAE7C0EF35CEA75C1A8_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/004_HVSF005-4CAE7C0EF35CEA75C1A8_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/005_HVSF005-68283855FB929F72FF5A_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/005_HVSF005-68283855FB929F72FF5A_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/005_HVSF005-68283855FB929F72FF5A_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/006_HVSF005-75C056AEE0FB75242334_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/006_HVSF005-75C056AEE0FB75242334_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/006_HVSF005-75C056AEE0FB75242334_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/007_HVSF005-79CD78EC3270DFC530AD_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/007_HVSF005-79CD78EC3270DFC530AD_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/007_HVSF005-79CD78EC3270DFC530AD_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/008_HVSF005-7B606B61B8482F1CB875_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/008_HVSF005-7B606B61B8482F1CB875_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/008_HVSF005-7B606B61B8482F1CB875_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/009_HVSF005-817E9E471B4C5E3FB019_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/009_HVSF005-817E9E471B4C5E3FB019_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/009_HVSF005-817E9E471B4C5E3FB019_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/010_HVSF005-8473C8363337252AE6B2_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/010_HVSF005-8473C8363337252AE6B2_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/010_HVSF005-8473C8363337252AE6B2_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/011_HVSF005-8DD56D14A3CE770E7FCD_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/011_HVSF005-8DD56D14A3CE770E7FCD_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/011_HVSF005-8DD56D14A3CE770E7FCD_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/012_HVSF005-8F7DD7C9D7D708A0BD24_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/012_HVSF005-8F7DD7C9D7D708A0BD24_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/012_HVSF005-8F7DD7C9D7D708A0BD24_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/013_HVSF005-A7A3354745A9214F698B_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/013_HVSF005-A7A3354745A9214F698B_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/013_HVSF005-A7A3354745A9214F698B_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/014_HVSF005-B7BFF51B0C0816D66582_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/014_HVSF005-B7BFF51B0C0816D66582_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/014_HVSF005-B7BFF51B0C0816D66582_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/015_HVSF005-BBFE131763EFFCD2150D_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/015_HVSF005-BBFE131763EFFCD2150D_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/015_HVSF005-BBFE131763EFFCD2150D_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/016_HVSF005-C0EEBC118FECA209ECBD_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/016_HVSF005-C0EEBC118FECA209ECBD_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/016_HVSF005-C0EEBC118FECA209ECBD_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/017_HVSF005-C7925A1A32DD96310746_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/017_HVSF005-C7925A1A32DD96310746_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/017_HVSF005-C7925A1A32DD96310746_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/018_HVSF005-D222FC523042B82251EB_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/018_HVSF005-D222FC523042B82251EB_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/018_HVSF005-D222FC523042B82251EB_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/019_HVSF005-F5AD63532B2155A3C7EE_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/019_HVSF005-F5AD63532B2155A3C7EE_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/019_HVSF005-F5AD63532B2155A3C7EE_xai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/020_HVSF005-FC90EF0A43623E832FDA_minimax.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/020_HVSF005-FC90EF0A43623E832FDA_openai.json",
+        "docs/benchmark/holoverify_solo_failure_factory_batch005_solo_scout_runs_2026_07_03/preflight_20260703T205306Z/preflight_prompt_probe/020_HVSF005-FC90EF0A43623E832FDA_xai.json",
         "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ablation_series_solo_one_shot_12packet_20260702/preflight_latest/KITA_ABLATION_SERIES_SOLO_ONE_SHOT_PREFLIGHT.json",
         "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ablation_series_solo_one_shot_12packet_20260702/preflight_latest/KITA_ABLATION_SERIES_SOLO_ONE_SHOT_PREFLIGHT.md",
         "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/ablation_series_solo_one_shot_12packet_20260702/preflight_latest/KITA_ABLATION_SERIES_SOLO_ONE_SHOT_PROVIDER_APPROVAL_PACKET_2026_07_02.json",
@@ -3538,39 +3553,12 @@
       ],
       "stage_command": "DO_NOT_STAGE_YET"
     },
-    "lane_08_unknown_risky_hold": {
+    "lane_07_unknown_risky_hold": {
       "status": "hold_owner_review",
       "purpose": "Unclassified paths.",
-      "path_count": 0,
       "paths": [],
       "stage_command": "DO_NOT_STAGE_YET"
     }
   },
-  "current_counts": {
-    "total_paths_excluding_this_report": 3427,
-    "by_status_code": {
-      " M": 4,
-      "??": 3423
-    },
-    "tracked_modified_paths_excluding_this_report": [
-      "docs/benchmark/three_mini_seam_scout_2026_06_29.py",
-      "docs/whitepaper.md",
-      "frontend/benchmark.html",
-      "frontend/whitepaper.html"
-    ],
-    "bucket_counts": {
-      "website_public_copy_changes": 3,
-      "fable_review_docs": 40,
-      "benchmark_ablation_discovery_artifacts": 37,
-      "run_preflight_artifacts": 3326,
-      "code_scripts_tests": 21,
-      "unknown_risky": 0
-    },
-    "recommendation_class_counts": {
-      "owner_review": 1665,
-      "safe_to_preserve_later": 75,
-      "temporary_noise_candidate": 1687
-    }
-  },
-  "next_safe_action": "If authorized, stage and commit only lane_00_cleanup_reports first using exact listed paths. Otherwise continue owner review without staging."
+  "next_safe_action": "Stop automatic staging here. Remaining paths are owner-review, live/preflight evidence, code/script/test changes, public-copy changes, or temporary-noise candidates requiring explicit deletion approval."
 }

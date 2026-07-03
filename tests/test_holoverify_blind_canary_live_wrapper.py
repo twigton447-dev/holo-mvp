@@ -160,8 +160,8 @@ def test_slot_order_enforced():
     )
     script.assert_message_matches_slot(
         [
-            {"role": "system", "content": "SYSTEM ROLE: HoloVerify blind Gov actuator."},
-            {"role": "user", "content": "SELECTED_GOV_BATON_LINES:"},
+            {"role": "system", "content": "Data formatting task."},
+            {"role": "user", "content": "status_values:\nroute_verdict=CONTINUE"},
         ],
         "G1",
     )
@@ -284,11 +284,18 @@ def test_gov_prompt_is_truth_free_copy_contract():
     joined = "\n".join(message["content"] for message in messages)
 
     assert messages[0]["role"] == "system"
-    assert "SELECTED_GOV_BATON_LINES" in joined
+    assert "status_values:" in joined
     assert "route_verdict=CONTINUE" in joined
     assert "repair_target=preserve source-grounded reasoning" in joined
     assert "blocked_move=do not invent source IDs" in joined
     assert "BLIND_GATE_SUMMARY" not in joined
+    assert "Gov actuator" not in joined
+    assert "HoloGov" not in joined
+    assert "COPY MODE" not in joined
+    assert "copy exactly" not in joined
+    assert "RUN LOCK" not in joined
+    assert "role=GOV" not in joined
+    assert "hidden thinking" not in joined
     assert len(joined) < 900
     assert "ALLOW" not in joined
     assert "ESCALATE" not in joined

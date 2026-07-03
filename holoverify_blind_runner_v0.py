@@ -157,19 +157,19 @@ def _build_gov_messages(payload: dict, worker_row: dict, state: dict) -> list[di
     selected_lines = [f"{key}={selected[key]}" for key in REQUIRED_GOV_KEYS]
     system_content = "\n".join(
         [
-            "SYSTEM ROLE: HoloVerify blind Gov actuator.",
-            "COPY MODE: output exactly the selected blind baton lines.",
-            "No reasoning. No hidden thinking. No analysis. No extra text.",
-            "First visible characters must be: route_verdict=",
+            "Data formatting task.",
+            "Return a plain text record with three key=value lines.",
+            "Fields, in order: route_verdict, repair_target, blocked_move.",
+            "Do not add headings, explanations, JSON, Markdown, or extra lines.",
+            "Begin with route_verdict=.",
         ]
     )
     user_content = "\n".join(
         [
-            f"RUN LOCK: packet={payload.get('packet_id')} role=GOV",
-            "SELECTED_GOV_BATON_LINES:",
+            f"packet_id={payload.get('packet_id')}",
+            "status_values:",
             *selected_lines,
-            "CURRENT TURN COMMAND: copy exactly these three lines and stop:",
-            *selected_lines,
+            "Return the three-line status record.",
         ]
     )
     return [

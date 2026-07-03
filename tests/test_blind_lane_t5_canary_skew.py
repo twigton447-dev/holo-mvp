@@ -205,8 +205,8 @@ def test_runtime_executor_reads_only_runtime_manifest_payloads_and_outdir(monkey
         return original_open(self, mode, *args, **kwargs)
 
     def transport(messages):
-        content = messages[0]["content"]
-        if "blind Gov actuator" in content:
+        content = "\n".join(message.get("content", "") for message in messages)
+        if "status_values:" in content and "route_verdict=" in content:
             return "\n".join(
                 [
                     "route_verdict=CONTINUE",

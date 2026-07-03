@@ -463,7 +463,7 @@ def assert_message_matches_slot(messages: list[dict[str, str]], slot: str) -> No
         if f"role={slot}" not in content:
             raise RuntimeError(f"slot_message_mismatch:{slot}")
     else:
-        if "blind Gov actuator" not in content or "SELECTED_GOV_BATON_LINES" not in content:
+        if "status_values:" not in content or "route_verdict=" not in content:
             raise RuntimeError(f"slot_message_mismatch:{slot}")
 
 

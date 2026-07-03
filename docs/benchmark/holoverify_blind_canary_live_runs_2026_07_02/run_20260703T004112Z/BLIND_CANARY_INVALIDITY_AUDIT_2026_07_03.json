@@ -1,0 +1,36 @@
+{
+  "classification": "INVALID_RUN_CONTENT_CONTRACT_FAILURE_W3_LENGTH_EMPTY_TEXT",
+  "run_id": "run_20260703T004112Z",
+  "packet_index": 19,
+  "packet_limit": 2,
+  "expected_provider_calls": 10,
+  "observed_provider_calls": 10,
+  "solo_calls": 0,
+  "judge_calls": 0,
+  "substitutions": 0,
+  "trace_frozen_before_scoring": true,
+  "runtime_firewall_passed": false,
+  "posthoc_score_created": false,
+  "failure": {
+    "call_number": 10,
+    "slot": "W3",
+    "role": "worker",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "finish_reason": "length",
+    "error": "W3_empty_text",
+    "max_output_tokens": 2048,
+    "output_tokens": 2048,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "interpretation": {
+    "is_verdict_failure": false,
+    "is_false_positive": false,
+    "is_false_negative": false,
+    "is_transport_outage": false,
+    "is_content_contract_failure": true,
+    "reason": "The final compiler returned length-limited hidden thinking; the thinking filter produced empty visible text and the worker compact contract failed closed."
+  },
+  "next_action": "Preserve invalid trace, audit W3 contract/truncation behavior, and patch before any fresh attempt. Do not silently rerun."
+}

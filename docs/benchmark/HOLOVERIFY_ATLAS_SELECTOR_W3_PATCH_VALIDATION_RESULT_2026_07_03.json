@@ -1,0 +1,74 @@
+{
+  "classification": "HOLOVERIFY_ATLAS_SELECTOR_W3_PATCH_VALIDATION_RESULT_2026_07_03",
+  "status": "PATCH_VALIDATION_PASSED",
+  "created_at_utc": "2026-07-03T16:29:46Z",
+  "scope": "same-six mechanical patch validation only",
+  "not_fresh_benchmark_evidence": true,
+  "not_public_rate_claim": true,
+  "patch_commit": "495421bd168f275e5df7fa8601ed3e1ef8324819",
+  "selector_policy": {
+    "version": "SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03",
+    "sha256": "32663f8cd92298468ce3648ec57d9491f76ecf9a9ecb526eaf4bb0c8275118f6"
+  },
+  "worker_contract": {
+    "version": "WORKER_CONTRACT_V2_ARTIFACT_FIRST_2026_07_03",
+    "sha256": "d5fdea3133f2bcdea0a9c16f1261081a8fe5ca8264f2a2f0a7e43d41c69a0320"
+  },
+  "freeze_root_sha256": "d4e130d4598963b55e7cc6b708ff6b850a7e14df1a4b2d9bc2b24c3f08fbb7da",
+  "runtime_manifest_sha256": "0cd8ab98da5c6a4089279922cf644d3cbcb0820555be65d14f88b68b99f453f7",
+  "prior_runs": {
+    "pre_patch_completed": {
+      "run_dir": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T140931Z",
+      "correct_count": 11,
+      "incorrect_count": 1,
+      "failure_packet": "HV-ATLAS-DISC-033-B",
+      "failure_class": "FINAL_SELECTOR_CHOSE_WRONG_INTERMEDIATE_ARTIFACT_DESPITE_LATER_WORKER_REPAIR"
+    },
+    "invalid_patch_attempt": {
+      "run_dir": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T155734Z",
+      "scored": false,
+      "failure_class": "MINIMAX_W3_HIDDEN_THINKING_RUNAWAY_ON_AMBIGUOUS_SOURCE_SEAM",
+      "runtime_failure": "W3_empty_text_finish_reason_length"
+    }
+  },
+  "validated_run": {
+    "run_dir": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T162431Z",
+    "expected_provider_calls": 60,
+    "observed_provider_calls": 60,
+    "runtime_failure": null,
+    "passed_runtime_firewall": true,
+    "judges": 0,
+    "solo": 0,
+    "substitutions": 0,
+    "scoring_map_before_trace_freeze": false,
+    "posthoc_score_ref": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T162431Z/atlas_holo_rescue_posthoc_score_trace_bound_v1.json",
+    "packet_count": 12,
+    "pair_count": 6,
+    "correct_count": 12,
+    "incorrect_count": 0,
+    "pairs_both_siblings_correct": 6,
+    "token_totals": {
+      "input_tokens": 26875,
+      "output_tokens": 15561,
+      "total_tokens": 49912
+    },
+    "trace_binding": {
+      "trace_calls_sha256": "c736b4c608211f2a2bfa067f1a7abae63b0b19dd5c6a095e72f074bae2456d75",
+      "trace_provider_calls_sha256": "92b86bed2a4ba62e3e4c1c231e3201cc66f9ff19f3572ec330015536edef2bf6",
+      "runtime_results_sha256": "214ee06d915be6d274be319e7e76439bcf2cb1d0e802d30e33a473a2b706ac0a",
+      "live_summary_sha256": "8d1409722976c1db2ad97bab5a84f662ddf57d48d7cb91df0ee60edd47551938",
+      "scoring_map_sha256": "70ddcbcf5a32e4c1a75ebef563dd60c0514e3cc40eda90f5653ef80974661e19"
+    }
+  },
+  "narrow_conclusion": "The patched selector and W3 artifact-first contract corrected the known same-six Atlas selector/W3 failure pattern under fixed packet, model, prompt, and call conditions.",
+  "allowed_internal_language": "The patched selector and W3 artifact-first contract were rerun on the same six-pair Atlas rescue set. The replay completed 60/60 provider calls and scored 12/12 after trace freeze. This validates the patch against the known failure mode.",
+  "forbidden_language": [
+    "The patch improves benchmark performance from 11/12 to 12/12.",
+    "Atlas now achieves 12/12.",
+    "This is fresh benchmark evidence.",
+    "This proves HoloVerify is generally robust.",
+    "Consensus-first is globally better.",
+    "This result should be added to the public denominator."
+  ],
+  "recommended_next_step": "Run 2-3 held V5 pairs under a separate exploratory label if fresh signal is desired."
+}

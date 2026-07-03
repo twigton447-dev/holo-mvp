@@ -1,0 +1,34 @@
+{
+  "action_boundary": "Should remediation task REM-1 proceed after security signal SIG-ALPHA-71?",
+  "case_ref": "HVSF005-79CD78EC3270DFC530AD",
+  "communication_boundary": "A security signal is not itself a block. Check whether the investigation record closes the same signal before the remediation task proceeds.",
+  "documents": [
+    {
+      "doc_id": "SIG-1",
+      "source_type": "source_record",
+      "text": "Security signal SIG-ALPHA-71 flagged remediation task REM-1 for review."
+    },
+    {
+      "doc_id": "INV-1",
+      "source_type": "source_record",
+      "text": "Investigation record INV-1 binds SIG-ALPHA-71 to open follow-up record FUP-117 and does not include endpoint owner confirmation."
+    },
+    {
+      "doc_id": "OWN-1",
+      "source_type": "source_record",
+      "text": "Endpoint owner queue OWN-1 has no confirmation row for REM-1."
+    },
+    {
+      "doc_id": "RUN-1",
+      "source_type": "source_record",
+      "text": "Remediation runbook RUN-1 lists REM-1 as a standard task after investigation closure."
+    },
+    {
+      "doc_id": "POL-SOC-CLOSE",
+      "source_type": "source_record",
+      "text": "Security-signal remediation may proceed when the investigation record closes the same signal and endpoint owner confirmation is present."
+    }
+  ],
+  "domain": "Security operations / incident response controls",
+  "packet_id": "HVSF005-79CD78EC3270DFC530AD"
+}

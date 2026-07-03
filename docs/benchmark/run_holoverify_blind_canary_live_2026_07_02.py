@@ -40,6 +40,7 @@ EXPECTED_SCORING_MAP_SHA256 = "5bb6fea5c3f2d72ae0b092eb168aeebc6ab4dcd6bc897b784
 EXPECTED_PACKET_COUNT = 20
 EXPECTED_CALL_COUNT = 100
 MAX_OUTPUT_TOKENS = 1024
+GOV_MAX_OUTPUT_TOKENS = 512
 FINAL_COMPILER_MAX_OUTPUT_TOKENS = 2048
 PROVIDER_TIMEOUT_SECONDS = 240
 TRANSPORT_MAX_RETRIES = 2
@@ -169,6 +170,8 @@ def write_text(path: Path, value: str) -> None:
 def strip_thinking_blocks(text: str) -> str:
     text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S | re.I)
     text = re.sub(r"<thinking>.*?</thinking>", "", text, flags=re.S | re.I)
+    text = re.sub(r"^\s*<think>.*$", "", text, flags=re.S | re.I)
+    text = re.sub(r"^\s*<thinking>.*$", "", text, flags=re.S | re.I)
     return text.strip()
 
 
@@ -312,6 +315,8 @@ def call_with_transport_retry(call_once, provider: str, model: str) -> dict[str,
 
 
 def max_output_tokens_for_slot(slot: str) -> int:
+    if slot.startswith("G"):
+        return GOV_MAX_OUTPUT_TOKENS
     if slot == "W3":
         return FINAL_COMPILER_MAX_OUTPUT_TOKENS
     return MAX_OUTPUT_TOKENS
@@ -405,12 +410,12 @@ def expected_slot_for_index(index: int) -> str:
 
 
 def assert_message_matches_slot(messages: list[dict[str, str]], slot: str) -> None:
-    content = messages[0].get("content", "") if messages else ""
+    content = "\n".join(message.get("content", "") for message in messages)
     if slot.startswith("W"):
         if f"role={slot}" not in content:
             raise RuntimeError(f"slot_message_mismatch:{slot}")
     else:
-        if "blind Gov actuator" not in content:
+        if "blind Gov actuator" not in content or "SELECTED_GOV_BATON_LINES" not in content:
             raise RuntimeError(f"slot_message_mismatch:{slot}")
 
 

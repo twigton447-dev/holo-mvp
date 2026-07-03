@@ -112,7 +112,10 @@ def test_slot_order_enforced():
         "W1",
     )
     script.assert_message_matches_slot(
-        [{"role": "user", "content": "SYSTEM ROLE: HoloVerify blind Gov actuator."}],
+        [
+            {"role": "system", "content": "SYSTEM ROLE: HoloVerify blind Gov actuator."},
+            {"role": "user", "content": "SELECTED_GOV_BATON_LINES:"},
+        ],
         "G1",
     )
     with pytest.raises(RuntimeError, match="slot_message_mismatch"):
@@ -146,6 +149,17 @@ def test_gov_length_finish_is_fail_closed():
     )
 
 
+def test_unclosed_thinking_block_strips_to_empty_and_fails_closed():
+    script = load_script()
+    response = {
+        "text": script.strip_thinking_blocks("<think>\nI will reason until the model budget ends."),
+        "finish_reason": "stop",
+    }
+    assert response["text"] == ""
+    with pytest.raises(script.BLIND.BlindRunnerContentFailure, match="G2_empty_text"):
+        script.validate_live_output_contract("G2", response)
+
+
 def test_content_failure_is_not_retried_by_blind_runner():
     script = load_script()
     calls = {"count": 0}
@@ -164,9 +178,28 @@ def test_content_failure_is_not_retried_by_blind_runner():
 def test_final_compiler_uses_larger_output_budget():
     script = load_script()
     assert script.max_output_tokens_for_slot("W1") == script.MAX_OUTPUT_TOKENS
-    assert script.max_output_tokens_for_slot("G1") == script.MAX_OUTPUT_TOKENS
+    assert script.max_output_tokens_for_slot("G1") == script.GOV_MAX_OUTPUT_TOKENS
+    assert script.max_output_tokens_for_slot("G2") == script.GOV_MAX_OUTPUT_TOKENS
+    assert script.GOV_MAX_OUTPUT_TOKENS < script.MAX_OUTPUT_TOKENS
     assert script.max_output_tokens_for_slot("W3") == script.FINAL_COMPILER_MAX_OUTPUT_TOKENS
     assert script.FINAL_COMPILER_MAX_OUTPUT_TOKENS > script.MAX_OUTPUT_TOKENS
+
+
+def test_gov_prompt_is_truth_free_copy_contract():
+    script = load_script()
+    payload = {"packet_id": "BLIND-TEST", "documents": []}
+    worker_row = {"gate_result": {"passed": True, "failures": []}}
+    messages = script.BLIND._build_gov_messages(payload, worker_row, {"turns_completed": []})
+    joined = "\n".join(message["content"] for message in messages)
+
+    assert messages[0]["role"] == "system"
+    assert "SELECTED_GOV_BATON_LINES" in joined
+    assert "route_verdict=CONTINUE" in joined
+    assert "repair_target=preserve source-grounded reasoning" in joined
+    assert "blocked_move=do not invent source IDs" in joined
+    assert "ALLOW" not in joined
+    assert "ESCALATE" not in joined
+    assert "packet_truth" not in joined
 
 
 def test_valid_contract_passes():

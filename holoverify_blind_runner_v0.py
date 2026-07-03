@@ -41,6 +41,11 @@ REQUIRED_WORKER_KEYS = (
     "cited_evidence",
     "final_answer",
 )
+REQUIRED_GOV_KEYS = (
+    "route_verdict",
+    "repair_target",
+    "blocked_move",
+)
 
 
 class BlindRunnerTransportFailure(RuntimeError):
@@ -114,39 +119,61 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
     return [{"role": "user", "content": content}]
 
 
+def _selected_gov_baton_from_gate(gate: dict) -> dict:
+    if gate.get("passed"):
+        repair_target = "preserve source-grounded reasoning"
+    else:
+        repair_target = "repair blind structural gate failures"
+    return {
+        "route_verdict": "CONTINUE",
+        "repair_target": repair_target,
+        "blocked_move": "do not invent source IDs",
+    }
+
+
 def _build_gov_messages(payload: dict, worker_row: dict, state: dict) -> list[dict]:
-    content = "\n".join(
+    gate = worker_row.get("gate_result", {})
+    selected = _selected_gov_baton_from_gate(gate)
+    selected_lines = [f"{key}={selected[key]}" for key in REQUIRED_GOV_KEYS]
+    system_content = "\n".join(
         [
             "SYSTEM ROLE: HoloVerify blind Gov actuator.",
-            "Use only parse status, source support, dependency closure, and contradiction checks.",
-            f"RUN LOCK: packet={payload.get('packet_id')} role=GOV",
-            "GOV OUTPUT CONTRACT: return compact_key_value_v1 only. No Markdown. No prose. No bullets. No JSON.",
-            "REQUIRED GOV LINES EXACTLY:",
-            "route_verdict=<CONTINUE or FINALIZE>",
-            "repair_target=<short blind structural repair target>",
-            "blocked_move=<short blocked move>",
-            "Do not include answer-key direction, ALLOW/ESCALATE hints, or source truth guesses.",
-            "STATE BRIEF:",
-            json.dumps(state, sort_keys=True),
-            "PREVIOUS WORKER GATE:",
-            json.dumps(worker_row.get("gate_result", {}), sort_keys=True),
-            "CURRENT TURN COMMAND: create a compact baton for the next worker without answer-key direction.",
+            "Runtime firewall mode: copy the selected blind baton lines exactly.",
+            "Do not reason aloud. Do not emit hidden reasoning, analysis, <think> blocks, or explanations.",
+            "Your first output characters must be route_verdict=.",
         ]
     )
-    return [{"role": "user", "content": content}]
+    user_content = "\n".join(
+        [
+            "HoloGov-V blind micro-router v1.",
+            f"RUN LOCK: packet={payload.get('packet_id')} role=GOV",
+            "GOV OUTPUT CONTRACT: return compact_key_value_v1 only.",
+            "Exactly three key=value lines. No prose. No reasoning. No JSON. No Markdown. No braces. No quotes.",
+            "Copy SELECTED_GOV_BATON_LINES exactly, preserving order and spelling.",
+            "Required keys in order: route_verdict, repair_target, blocked_move.",
+            "Do not include answer-key direction or source truth guesses.",
+            "BLIND_GATE_SUMMARY:",
+            f"gate_passed={bool(gate.get('passed'))}",
+            f"failure_count={len(gate.get('failures', []))}",
+            "SELECTED_GOV_BATON_LINES:",
+            *selected_lines,
+            "CURRENT TURN COMMAND: output only the three selected baton lines now.",
+            *selected_lines,
+        ]
+    )
+    return [
+        {"role": "system", "content": system_content},
+        {"role": "user", "content": user_content},
+    ]
 
 
 def _parse_gov_baton(raw: str, fallback_gate: dict) -> dict:
     parsed = _parse_key_value(raw)
+    selected = _selected_gov_baton_from_gate(fallback_gate)
     return {
-        "route_verdict": parsed.get("route_verdict", "CONTINUE"),
-        "repair_target": parsed.get(
-            "repair_target",
-            "repair blind structural failures"
-            if not fallback_gate.get("passed")
-            else "preserve source-grounded reasoning",
-        ),
-        "blocked_move": parsed.get("blocked_move", "do not invent source IDs"),
+        "route_verdict": parsed.get("route_verdict", selected["route_verdict"]),
+        "repair_target": parsed.get("repair_target", selected["repair_target"]),
+        "blocked_move": parsed.get("blocked_move", selected["blocked_move"]),
     }
 
 

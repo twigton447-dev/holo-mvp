@@ -1,0 +1,63 @@
+{
+  "classification": "HOLOVERIFY_BLOCKER_PRESERVATION_PATCH_REPORT",
+  "created_at": "2026-07-04",
+  "status": "NO_PROVIDER_PATCH_COMPLETE",
+  "source_failure": {
+    "lane": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH016_HARD_AUTHORITY_HOLO_RESCUE",
+    "live_run_valid": true,
+    "packet_count": 28,
+    "pair_count": 14,
+    "final_correct_packets": 18,
+    "final_incorrect_packets": 10,
+    "pairs_both_siblings_correct": 4,
+    "miss_class": "FALSE_NEGATIVE_SOURCE_GROUNDED_BLOCKER_DROP",
+    "miss_summary": "All 10 misses were ESCALATE truth finalized as ALLOW; 6 had an earlier worker identify a blocker that was not preserved or explicitly resolved."
+  },
+  "selector_policy": {
+    "version": "SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04",
+    "sha256": "3ed2a01eb16a8ea84bd096e6c1cfd352e6b0f8f9eb7565a5327680f77fa7affe",
+    "criteria_added": [
+      "blocker_resolution_clean",
+      "blocker_resolution_complete",
+      "source_boundary_open_with_blocker"
+    ]
+  },
+  "worker_contract": {
+    "version": "WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04",
+    "sha256": "00b692a07b1036f70b0756e16458e811c7aee3afb62c1351893a4722aab9ad5a",
+    "required_field_added": "blocker_resolution"
+  },
+  "runtime_changes": [
+    "Create blocker_id values from source-grounded ESCALATE artifacts.",
+    "Inject active blocker ledger into subsequent worker prompts.",
+    "Require ALLOW after prior blockers to name each blocker_id and cite source IDs.",
+    "Route Gov repair toward unresolved blocker preservation before generic dependency repair.",
+    "Rank blocker preservation before simple verdict consensus in final selection."
+  ],
+  "fail_closed_conditions": [
+    "unresolved_prior_blocker",
+    "blocker_resolution_missing_source_id",
+    "allow_with_open_blockers",
+    "escalate_without_open_blockers"
+  ],
+  "validation": {
+    "provider_calls": 0,
+    "judge_calls": 0,
+    "py_compile": "PASS",
+    "focused_pytest": {
+      "status": "PASS",
+      "tests_passed": 53,
+      "tests_failed": 0
+    },
+    "commands": [
+      "python3 -m py_compile holoverify_blind_runner_v0.py docs/benchmark/run_holoverify_blind_canary_live_2026_07_02.py docs/benchmark/run_holoverify_blind_120_live_2026_07_03.py docs/benchmark/run_holoverify_atlas_holo_rescue_live_2026_07_03.py",
+      "python3 -m pytest tests/test_holoverify_blind_selector_repair_regression.py tests/test_holoverify_blind_canary_live_wrapper.py tests/test_holoverify_blind_120_live_wrapper.py tests/test_holoverify_atlas_holo_rescue_patch_validation_gate.py"
+    ]
+  },
+  "claim_boundary": {
+    "not_a_benchmark_result": true,
+    "does_not_repair_prior_runs": true,
+    "does_not_change_public_denominator": true,
+    "next_valid_move": "no-provider preflight of a fresh run lane using V4 selector and V3 worker contract"
+  }
+}

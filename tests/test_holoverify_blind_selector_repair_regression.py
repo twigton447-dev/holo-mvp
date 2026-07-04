@@ -53,7 +53,7 @@ def _cedar_payload():
     }
 
 
-def _worker_output(role, verdict, cited, blockers, final_answer):
+def _worker_output(role, verdict, cited, blockers, final_answer, blocker_resolution=""):
     binding = "SOURCE_BOUNDARY_CLOSED" if verdict == "ALLOW" else "SOURCE_BOUNDARY_OPEN"
     return "\n".join(
         [
@@ -63,6 +63,7 @@ def _worker_output(role, verdict, cited, blockers, final_answer):
             "action_boundary=goodwill credit against trailing spend cap",
             f"cited_evidence={cited}",
             f"open_blockers={blockers}",
+            f"blocker_resolution={blocker_resolution}",
             f"final_answer={final_answer}",
         ]
     )
@@ -150,10 +151,13 @@ def test_direct_selector_repair_consensus_is_truth_blind():
 def test_selector_policy_identity_is_stable_and_explicit():
     identity = runner.selector_policy_identity()
 
-    assert identity["selector_policy_version"] == "SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03"
-    assert "two-of-three structurally valid consensus" in identity["selector_policy_decision"]
+    assert identity["selector_policy_version"] == "SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04"
+    assert "explicit blocker resolution outranks simple verdict consensus" in identity["selector_policy_decision"]
     assert "Deterministic source-derived dependency checks" in identity["selector_policy_decision"]
     assert len(identity["selector_policy_sha256"]) == 64
+    assert "blocker_resolution_clean" in identity["selector_criteria"]
+    assert "blocker_resolution_complete" in identity["selector_criteria"]
+    assert "source_boundary_open_with_blocker" in identity["selector_criteria"]
     assert "verdict_consensus_count" in identity["selector_criteria"]
     assert "final_turn_consensus_repair" in identity["selector_criteria"]
     assert "deterministic_clean" in identity["selector_criteria"]
@@ -227,10 +231,115 @@ def test_runtime_result_stamps_selector_version_and_hash(tmp_path):
 
     result = runner.run_blind_fixture(_cedar_payload(), transcripts, str(tmp_path))
 
-    assert result["selector_policy"]["selector_policy_version"] == "SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03"
+    assert result["selector_policy"]["selector_policy_version"] == "SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04"
     assert len(result["selector_policy"]["selector_policy_sha256"]) == 64
-    assert result["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V2_ARTIFACT_FIRST_2026_07_03"
+    assert result["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04"
     assert len(result["worker_contract"]["worker_contract_sha256"]) == 64
+
+
+def test_prior_blocker_cannot_be_silently_dropped_by_later_allow(tmp_path):
+    cited_all = "REQ-CEDAR-033|SPEND-CEDAR-Q1|SPEND-CEDAR-Q2|SPEND-CEDAR-Q3|SPEND-CEDAR-Q4|STD-CEDAR-033-P"
+    transcripts = [
+        _worker_output(
+            "W1",
+            "ESCALATE",
+            cited_all,
+            "USD 5100 exceeds computed cap",
+            "ESCALATE because W1 identifies a cap blocker.",
+        ),
+        _worker_output(
+            "W2",
+            "ALLOW",
+            cited_all,
+            "",
+            "ALLOW because source records appear to close the boundary.",
+        ),
+        _worker_output(
+            "W3",
+            "ALLOW",
+            cited_all,
+            "",
+            "ALLOW because source records appear to close the boundary.",
+        ),
+    ]
+
+    result = runner.run_blind_fixture(_cedar_payload(), transcripts, str(tmp_path))
+
+    assert result["final"] == {"verdict": "ESCALATE", "artifact_id": "ART-001"}
+    gates = {row["artifact_id"]: row["gate_result"] for row in result["worker_rows"]}
+    blocker_id = gates["ART-001"]["blockers_found"][0]["blocker_id"]
+    assert f"unresolved_prior_blocker:{blocker_id}" in gates["ART-002"]["failures"]
+    assert f"unresolved_prior_blocker:{blocker_id}" in gates["ART-003"]["failures"]
+
+
+def test_later_allow_can_win_only_when_it_names_prior_blocker_and_source(tmp_path):
+    cited_all = "REQ-CEDAR-033|SPEND-CEDAR-Q1|SPEND-CEDAR-Q2|SPEND-CEDAR-Q3|SPEND-CEDAR-Q4|STD-CEDAR-033-P"
+    blocker_text = "USD 5100 exceeds computed cap"
+    blocker_id = runner._blocker_id("ART-001", blocker_text)
+    transcripts = [
+        _worker_output(
+            "W1",
+            "ESCALATE",
+            cited_all,
+            blocker_text,
+            "ESCALATE because W1 identifies a cap blocker.",
+        ),
+        _worker_output(
+            "W2",
+            "ALLOW",
+            cited_all,
+            "",
+            "ALLOW because W2 explicitly closes the prior blocker with source evidence.",
+            blocker_resolution=f"{blocker_id} closed by REQ-CEDAR-033 and STD-CEDAR-033-P",
+        ),
+        _worker_output(
+            "W3",
+            "ALLOW",
+            cited_all,
+            "",
+            "ALLOW because W3 preserves the blocker closure.",
+        ),
+    ]
+
+    result = runner.run_blind_fixture(_cedar_payload(), transcripts, str(tmp_path))
+
+    assert result["final"] == {"verdict": "ALLOW", "artifact_id": "ART-002"}
+    gates = {row["artifact_id"]: row["gate_result"] for row in result["worker_rows"]}
+    assert gates["ART-002"]["resolved_prior_blockers"][0]["blocker_id"] == blocker_id
+    assert gates["ART-002"]["passed"] is True
+
+
+def test_final_turn_new_blocker_defeats_prior_allow_consensus(tmp_path):
+    cited_all = "REQ-CEDAR-033|SPEND-CEDAR-Q1|SPEND-CEDAR-Q2|SPEND-CEDAR-Q3|SPEND-CEDAR-Q4|STD-CEDAR-033-P"
+    transcripts = [
+        _worker_output(
+            "W1",
+            "ALLOW",
+            cited_all,
+            "",
+            "ALLOW because initial worker sees enough source support.",
+        ),
+        _worker_output(
+            "W2",
+            "ALLOW",
+            cited_all,
+            "",
+            "ALLOW because middle worker agrees source support closes the boundary.",
+        ),
+        _worker_output(
+            "W3",
+            "ESCALATE",
+            cited_all,
+            "USD 5100 exceeds computed cap",
+            "ESCALATE because final worker identifies the unresolved computed cap blocker.",
+        ),
+    ]
+
+    result = runner.run_blind_fixture(_cedar_payload(), transcripts, str(tmp_path))
+
+    assert result["final"] == {"verdict": "ESCALATE", "artifact_id": "ART-003"}
+    trace = {row["artifact_id"]: row for row in result["selection"]["criteria_trace"]}
+    assert trace["ART-003"]["criteria"] > trace["ART-001"]["criteria"]
 
 
 def _refund_payload():

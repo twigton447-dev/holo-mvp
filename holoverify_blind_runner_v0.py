@@ -14,18 +14,19 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 
-SELECTOR_POLICY_VERSION = "SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03"
+SELECTOR_POLICY_VERSION = "SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04"
 SELECTOR_POLICY_DECISION = (
     "Truth-blind structural selector. Among structurally valid artifacts, "
-    "verdict consensus outranks citation volume. A final-turn artifact receives "
-    "a repair bonus only when it agrees with a prior structurally valid artifact "
-    "after an intervening contradiction. A lone final-turn dissenter does not "
-    "override a two-of-three structurally valid consensus. Deterministic "
-    "source-derived dependency checks can disqualify artifacts that contradict "
-    "computed source boundaries. Concise final answers are warnings, not sole "
-    "disqualifiers, when the artifact is otherwise complete. Within the same "
-    "consensus/repair tier, gate-failed corroboration from otherwise usable "
-    "artifacts is considered before citation count and earliest-turn tie-breaks."
+    "explicit blocker resolution outranks simple verdict consensus. A later "
+    "ALLOW cannot silently drop a prior SOURCE_BOUNDARY_OPEN blocker; it must "
+    "name each blocker_id it closes and cite source evidence. A source-grounded "
+    "ESCALATE blocker can defeat an ALLOW majority unless a later artifact "
+    "explicitly resolves it. Deterministic source-derived dependency checks can "
+    "disqualify artifacts that contradict computed source boundaries. Concise "
+    "final answers are warnings, not sole disqualifiers, when the artifact is "
+    "otherwise complete. Within the same blocker/consensus tier, gate-failed "
+    "corroboration from otherwise usable artifacts is considered before citation "
+    "count and earliest-turn tie-breaks."
 )
 SELECTOR_CRITERIA = (
     "gate_passed",
@@ -34,6 +35,9 @@ SELECTOR_CRITERIA = (
     "required_sections_present",
     "contradiction_free",
     "deterministic_clean",
+    "blocker_resolution_clean",
+    "blocker_resolution_complete",
+    "source_boundary_open_with_blocker",
     "verdict_consensus_count",
     "final_turn_consensus_repair",
     "verdict_corroboration_count",
@@ -42,12 +46,13 @@ SELECTOR_CRITERIA = (
     "earliest_turn",
 )
 
-WORKER_CONTRACT_VERSION = "WORKER_CONTRACT_V2_ARTIFACT_FIRST_2026_07_03"
+WORKER_CONTRACT_VERSION = "WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04"
 W3_ARTIFACT_FIRST_GUARD = (
-    "W3 ARTIFACT-FIRST CONTRACT V2.",
+    "W3 ARTIFACT-FIRST CONTRACT V3.",
     "Start immediately with worker_role=W3 before any reasoning.",
     "Never output <think>, hidden reasoning, analysis, or deliberation.",
-    "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, and final_answer.",
+    "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, blocker_resolution, and final_answer.",
+    "If any prior blocker exists, do not return ALLOW unless blocker_resolution names each blocker_id and cites source evidence.",
     "Do not debate competing interpretations outside the key=value fields.",
     "Emit exactly the required key=value artifact lines, then stop.",
 )
@@ -68,6 +73,7 @@ REQUIRED_WORKER_KEYS = (
     "binding_class",
     "cited_evidence",
     "final_answer",
+    "blocker_resolution",
 )
 REQUIRED_GOV_KEYS = (
     "route_verdict",
@@ -135,6 +141,60 @@ def _source_ids(payload: dict) -> set[str]:
 
 def _split_ids(value: str) -> list[str]:
     return [part.strip() for part in value.replace(",", "|").split("|") if part.strip()]
+
+
+def _split_pipe_values(value: str) -> list[str]:
+    return [part.strip() for part in str(value or "").split("|") if part.strip()]
+
+
+def _blocker_id(artifact_id: str, blocker_text: str) -> str:
+    digest = hashlib.sha256(f"{artifact_id}|{blocker_text}".encode("utf-8")).hexdigest()[:8].upper()
+    return f"{artifact_id}-BLK-{digest}"
+
+
+def _blockers_from_parsed(row: dict, parsed: dict) -> list[dict]:
+    verdict = parsed.get("verification_verdict")
+    binding = parsed.get("binding_class")
+    if verdict != "ESCALATE" or binding != "SOURCE_BOUNDARY_OPEN":
+        return []
+    blockers = _split_pipe_values(parsed.get("open_blockers", ""))
+    cited = _split_ids(parsed.get("cited_evidence", ""))
+    result: list[dict] = []
+    for blocker in blockers:
+        result.append(
+            {
+                "blocker_id": _blocker_id(str(row.get("artifact_id")), blocker),
+                "blocker_text": blocker,
+                "source_artifact_id": row.get("artifact_id"),
+                "source_role": row.get("role"),
+                "source_turn_index": row.get("turn_index"),
+                "cited_evidence": cited,
+            }
+        )
+    return result
+
+
+def _resolve_prior_blockers(active_blockers: list[dict], parsed: dict, cited: list[str]) -> tuple[list[dict], list[dict], list[str]]:
+    if not active_blockers:
+        return [], [], []
+    resolution = str(parsed.get("blocker_resolution") or "")
+    verdict = parsed.get("verification_verdict")
+    if verdict != "ALLOW":
+        return [], list(active_blockers), []
+    mentioned_sources = [source_id for source_id in cited if source_id and source_id in resolution]
+    resolved: list[dict] = []
+    unresolved: list[dict] = []
+    failures: list[str] = []
+    for blocker in active_blockers:
+        blocker_id = str(blocker.get("blocker_id") or "")
+        if blocker_id and blocker_id in resolution:
+            resolved.append(blocker)
+        else:
+            unresolved.append(blocker)
+            failures.append(f"unresolved_prior_blocker:{blocker_id}")
+    if resolved and not mentioned_sources:
+        failures.append("blocker_resolution_missing_source_id")
+    return resolved, unresolved, failures
 
 
 def _money_values(text: str) -> list[float]:
@@ -389,10 +449,12 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
                 "W3 ARTIFACT-FIRST GUARD:",
                 "Your first visible output line must be worker_role=W3.",
                 "If uncertain, still emit the compact artifact immediately.",
-                "Represent ambiguity only with verification_verdict, binding_class, open_blockers, and final_answer.",
+                "Represent ambiguity only with verification_verdict, binding_class, open_blockers, blocker_resolution, and final_answer.",
+                "If prior blockers exist, preserve ESCALATE or close every blocker_id in blocker_resolution.",
                 "Do not write explanatory analysis before or after the artifact.",
             ]
         )
+    active_blockers = state.get("unresolved_blockers") or []
     content_lines.extend(
         [
             "REQUIRED OUTPUT LINES EXACTLY:",
@@ -402,12 +464,16 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
             "action_boundary=<short source-grounded boundary statement; max 18 words>",
             "cited_evidence=<provided source IDs separated by |>",
             "open_blockers=<empty if ALLOW; blocker phrase if ESCALATE; max 12 words>",
+            "blocker_resolution=<empty if no prior blockers or ESCALATE; if ALLOW after blockers, list each blocker_id closed plus source IDs>",
             "final_answer=<one sentence using ALLOW or ESCALATE; max 24 words>",
             "Do not use alternate keys such as decision, boundary_closed, or action_boundary_closed.",
             "Do not omit verification_verdict.",
+            "If ACTIVE BLOCKER LEDGER is non-empty and you return ALLOW, blocker_resolution must name every blocker_id and source IDs that close it.",
             f"First visible output line must be worker_role={role}.",
             "SOURCE CONTEXT:",
             "\n".join(doc_lines),
+            "ACTIVE BLOCKER LEDGER:",
+            json.dumps(active_blockers, sort_keys=True),
             "DETERMINISTIC DEPENDENCY LEDGER:",
             json.dumps(baton.get("dependency_ledger", []), sort_keys=True),
             "STATE BRIEF:",
@@ -427,7 +493,17 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
 def _selected_gov_baton_from_gate(gate: dict) -> dict:
     dependency_checks = gate.get("deterministic_dependency_checks") or []
     dependency_failures = gate.get("deterministic_dependency_failures") or []
-    if dependency_failures:
+    prior_unresolved = gate.get("unresolved_prior_blockers") or []
+    blockers_found = gate.get("blockers_found") or []
+    if prior_unresolved:
+        ids = ",".join(str(blocker.get("blocker_id")) for blocker in prior_unresolved[:3])
+        repair_target = f"resolve prior blocker ids before ALLOW: {ids}"
+        blocked_move = "do not silently drop source-grounded blockers"
+    elif blockers_found:
+        ids = ",".join(str(blocker.get("blocker_id")) for blocker in blockers_found[:3])
+        repair_target = f"stress-test and preserve blocker ids: {ids}"
+        blocked_move = "do not override blocker with consensus unless sources close it"
+    elif dependency_failures:
         first = dependency_failures[0]
         repair_target = f"resolve dependency mismatch: {first.get('summary', first.get('check_id'))}"
         blocked_move = "do not collapse separate required controls into general approval"
@@ -442,6 +518,7 @@ def _selected_gov_baton_from_gate(gate: dict) -> dict:
         "repair_target": repair_target,
         "blocked_move": blocked_move,
         "dependency_ledger": dependency_checks,
+        "blocker_ledger": prior_unresolved or blockers_found,
     }
 
 
@@ -480,14 +557,16 @@ def _parse_gov_baton(raw: str, fallback_gate: dict) -> dict:
         "repair_target": parsed.get("repair_target", selected["repair_target"]),
         "blocked_move": parsed.get("blocked_move", selected["blocked_move"]),
         "dependency_ledger": selected.get("dependency_ledger", []),
+        "blocker_ledger": selected.get("blocker_ledger", []),
     }
 
 
-def _gate_worker_output(payload: dict, parsed: dict) -> dict:
+def _gate_worker_output(payload: dict, parsed: dict, active_blockers: list[dict] | None = None) -> dict:
+    active_blockers = list(active_blockers or [])
     failures: list[str] = []
     warnings: list[str] = []
     for key in REQUIRED_WORKER_KEYS:
-        if not parsed.get(key):
+        if key not in parsed or (key != "blocker_resolution" and not parsed.get(key)):
             failures.append(f"missing_{key}")
     if parsed.get("verification_verdict") not in {"ALLOW", "ESCALATE"}:
         failures.append("invalid_verification_verdict")
@@ -505,6 +584,8 @@ def _gate_worker_output(payload: dict, parsed: dict) -> dict:
         failures.append("allow_with_open_blockers")
     if parsed.get("verification_verdict") == "ESCALATE" and not open_blockers:
         failures.append("escalate_without_open_blockers")
+    resolved_prior, unresolved_prior, blocker_failures = _resolve_prior_blockers(active_blockers, parsed, cited)
+    failures.extend(blocker_failures)
     dependency_checks = _deterministic_dependency_checks(payload)
     dependency_failures = [
         check
@@ -523,6 +604,10 @@ def _gate_worker_output(payload: dict, parsed: dict) -> dict:
         "invented_source_ids": invented,
         "deterministic_dependency_checks": dependency_checks,
         "deterministic_dependency_failures": dependency_failures,
+        "prior_blockers_in": active_blockers,
+        "resolved_prior_blockers": resolved_prior,
+        "unresolved_prior_blockers": unresolved_prior,
+        "blockers_found": [],
     }
 
 
@@ -546,6 +631,21 @@ def _artifact_from_row(row: dict) -> dict:
             for f in failures
         ),
         "deterministic_clean": not any(failure.startswith("deterministic_dependency_mismatch:") for failure in failures),
+        "blocker_resolution_clean": not any(failure.startswith("unresolved_prior_blocker:") or failure == "blocker_resolution_missing_source_id" for failure in failures),
+        "prior_blocker_count": len(gate.get("prior_blockers_in") or []),
+        "resolved_prior_blocker_count": len(gate.get("resolved_prior_blockers") or []),
+        "unresolved_prior_blocker_count": len(gate.get("unresolved_prior_blockers") or []),
+        "blockers_found_count": len(gate.get("blockers_found") or []),
+        "source_boundary_open_with_blocker": bool(
+            parsed.get("verification_verdict") == "ESCALATE"
+            and parsed.get("binding_class") == "SOURCE_BOUNDARY_OPEN"
+            and gate.get("blockers_found")
+        ),
+        "blocker_resolution_complete": bool(
+            gate.get("prior_blockers_in")
+            and not gate.get("unresolved_prior_blockers")
+            and parsed.get("verification_verdict") == "ALLOW"
+        ),
         "soft_gate_valid": not any(failure not in SOFT_GATE_FAILURES for failure in failures),
         "turn_index": int(row.get("turn_index") or 0),
     }
@@ -559,6 +659,9 @@ def _criteria_tuple(artifact: dict) -> tuple:
         1 if artifact.get("required_sections_present") else 0,
         1 if artifact.get("contradiction_free") else 0,
         1 if artifact.get("deterministic_clean", True) else 0,
+        1 if artifact.get("blocker_resolution_clean", True) else 0,
+        1 if artifact.get("blocker_resolution_complete") else 0,
+        1 if artifact.get("source_boundary_open_with_blocker") else 0,
         int(artifact.get("verdict_consensus_count") or 0),
         1 if artifact.get("final_turn_consensus_repair") else 0,
         int(artifact.get("verdict_corroboration_count") or 0),
@@ -577,6 +680,7 @@ def _selector_structurally_valid(artifact: dict) -> bool:
             artifact.get("required_sections_present"),
             artifact.get("contradiction_free"),
             artifact.get("deterministic_clean", True),
+            artifact.get("blocker_resolution_clean", True),
         )
     )
 
@@ -589,6 +693,7 @@ def _selector_corroborative(artifact: dict) -> bool:
             artifact.get("required_sections_present"),
             artifact.get("contradiction_free"),
             artifact.get("deterministic_clean", True),
+            artifact.get("blocker_resolution_clean", True),
         )
     )
 
@@ -617,8 +722,9 @@ def _with_selector_derived_fields(artifacts: list[dict]) -> list[dict]:
         item["verdict_corroboration_count"] = corroboration_counts.get(verdict, 0)
         turn_index = int(item.get("turn_index") or 0)
         prior = [candidate for candidate in valid_artifacts if int(candidate.get("turn_index") or 0) < turn_index]
+        prior_any = [candidate for candidate in artifacts if int(candidate.get("turn_index") or 0) < turn_index]
         prior_same = any(candidate.get("verification_verdict") == verdict for candidate in prior)
-        prior_different = any(candidate.get("verification_verdict") != verdict for candidate in prior)
+        prior_different = any(candidate.get("verification_verdict") != verdict for candidate in prior_any)
         item["final_turn_consensus_repair"] = bool(
             _selector_structurally_valid(item)
             and turn_index > 0
@@ -702,6 +808,7 @@ def run_blind_fixture(
         "packet_id": packet_id,
         "turns_completed": [],
         "unresolved_dependencies": [],
+        "unresolved_blockers": [],
         "blocked_moves": [],
     }
     baton = {
@@ -722,7 +829,8 @@ def run_blind_fixture(
         _write_prompt(prompt_dir, f"{packet_id}_{role}.json", messages)
         raw = _call_transport(transport, messages, retry_log) if transport else _next_transcript(transcripts, idx)
         parsed = _parse_key_value(raw)
-        gate = _gate_worker_output(payload, parsed)
+        active_blockers = list(state.get("unresolved_blockers") or [])
+        gate = _gate_worker_output(payload, parsed, active_blockers)
         raw_hash = _sha256_text(raw)
         row = {
             "artifact_id": f"ART-{idx + 1:03d}",
@@ -737,6 +845,7 @@ def run_blind_fixture(
             "selector_input_sha256": raw_hash,
             "scorer_input_sha256": raw_hash,
         }
+        gate["blockers_found"] = _blockers_from_parsed(row, parsed)
         worker_rows.append(row)
         call_rows.append(
             {
@@ -750,11 +859,22 @@ def run_blind_fixture(
             }
         )
         artifacts.append(_artifact_from_row(row))
+        resolved_ids = {str(blocker.get("blocker_id")) for blocker in gate.get("resolved_prior_blockers") or []}
+        next_unresolved = [
+            blocker
+            for blocker in active_blockers
+            if str(blocker.get("blocker_id")) not in resolved_ids
+        ]
+        next_unresolved.extend(gate.get("blockers_found") or [])
+        state["unresolved_blockers"] = next_unresolved
         state["turns_completed"].append(
             {
                 "role": role,
                 "artifact_id": row["artifact_id"],
                 "gate_passed": gate["passed"],
+                "blockers_found": gate.get("blockers_found") or [],
+                "resolved_prior_blockers": gate.get("resolved_prior_blockers") or [],
+                "unresolved_blockers_after_turn": next_unresolved,
             }
         )
         if idx < len(GOV_ROLES):

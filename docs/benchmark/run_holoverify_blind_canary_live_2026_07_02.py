@@ -249,9 +249,10 @@ def validate_live_output_contract(slot: str, response: dict[str, Any]) -> None:
             "action_boundary",
             "binding_class",
             "cited_evidence",
+            "blocker_resolution",
             "final_answer",
         )
-        missing = [key for key in required if not parsed.get(key)]
+        missing = [key for key in required if key not in parsed or (key != "blocker_resolution" and not parsed.get(key))]
         if missing:
             raise BLIND.BlindRunnerContentFailure(f"{slot}_worker_contract_missing:{','.join(missing)}")
         if parsed.get("worker_role") != slot:
@@ -495,6 +496,7 @@ def make_mock_transport() -> Any:
                 "action_boundary=blind runtime firewall fixture boundary",
                 f"cited_evidence={cited}",
                 "open_blockers=fixture unresolved dependency",
+                "blocker_resolution=",
                 "final_answer=Fixture output for no-provider prompt leakage preflight only.",
             ]
         )

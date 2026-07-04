@@ -315,6 +315,22 @@ def _evidence_term_label(term: Any) -> str:
     return str(term)
 
 
+def _evidence_text(row: dict[str, Any]) -> str:
+    parsed = row.get("parsed_json") or {}
+    pieces: list[str] = []
+    rationale = parsed.get("rationale")
+    if rationale:
+        pieces.append(str(rationale))
+    cited = parsed.get("cited_artifacts")
+    if isinstance(cited, list):
+        pieces.extend(str(item) for item in cited)
+    elif cited:
+        pieces.append(str(cited))
+    if not pieces:
+        pieces.append(row.get("raw_text") or "")
+    return " ".join(pieces).lower()
+
+
 def _behavior_label(spec: dict[str, Any], suffix: str, row: dict[str, Any]) -> tuple[str, list[str]]:
     if not row.get("provider_call_ok"):
         return "PROVIDER_FAILURE", ["provider_call_failed"]
@@ -323,7 +339,7 @@ def _behavior_label(spec: dict[str, Any], suffix: str, row: dict[str, Any]) -> t
     expected = row["expected_for_local_audit_only"]
     if row.get("verdict") != expected:
         return "NOT_KNEW_WRONG_VERDICT", [f"expected_{expected}_got_{row.get('verdict')}"]
-    rationale = ((row.get("parsed_json") or {}).get("rationale") or row.get("raw_text") or "").lower()
+    rationale = _evidence_text(row)
     missing = [
         _evidence_term_label(term)
         for term in spec.get("knew_terms", {}).get(suffix, [])
@@ -369,14 +385,35 @@ def _candidate_summary(rows: list[dict[str, Any]], specs: list[dict[str, Any]], 
             r for r in completed
             if r.get("behavior_label") != "KNEW"
         ]
-        if len(completed_model_keys) >= model_count and non_knew:
+        wrong_verdicts = [
+            r for r in non_knew
+            if r.get("behavior_label") == "NOT_KNEW_WRONG_VERDICT"
+        ]
+        heavy_non_knew = [
+            r for r in non_knew
+            if r.get("behavior_label") in {"NOT_KNEW_UNPROVEN", "NOT_KNEW_MALFORMED"}
+        ]
+        heavy_siblings = {
+            str(r.get("packet_id", ""))[-1]
+            for r in heavy_non_knew
+            if str(r.get("packet_id", "")).endswith(("-A", "-B"))
+        }
+        heavy_split_signal = len(heavy_non_knew) >= model_count and {"A", "B"} <= heavy_siblings
+        candidate_reason = None
+        if wrong_verdicts:
+            candidate_reason = "wrong_verdict_signal"
+        elif heavy_split_signal:
+            candidate_reason = "heavy_non_knew_both_siblings_signal"
+        if len(completed_model_keys) >= model_count and candidate_reason:
             candidates.append(
                 {
                     "pair_id": spec["pair_id"],
                     "seam": spec.get("failure_class_notes") or spec.get("boundary"),
                     "failure_classes": spec.get("failure_classes", []),
                     "completed_model_count": len(completed_model_keys),
-                    "candidate_reason": "at_least_one_completed_mini_failed_local_knew_gate",
+                    "candidate_reason": candidate_reason,
+                    "wrong_verdict_count": len(wrong_verdicts),
+                    "heavy_non_knew_count": len(heavy_non_knew),
                     "failing_models": [
                         {
                             "packet_id": r.get("packet_id"),
@@ -405,6 +442,7 @@ def main() -> int:
     parser.add_argument("--min-models", type=int, default=3)
     parser.add_argument("--max-pairs", type=int, default=0, help="0 means all pairs")
     parser.add_argument("--stop-after-candidates", type=int, default=0, help="0 means do not stop early")
+    parser.add_argument("--out-root", default=str(ROOT), help="Output directory root for scout run artifacts")
     args = parser.parse_args()
 
     requested = [name.strip() for name in args.models.split(",") if name.strip()]
@@ -419,7 +457,7 @@ def main() -> int:
     if args.max_pairs:
         specs = specs[: args.max_pairs]
 
-    out_dir = ROOT / datetime.now(timezone.utc).strftime("run_%Y%m%dT%H%M%SZ")
+    out_dir = Path(args.out_root) / datetime.now(timezone.utc).strftime("run_%Y%m%dT%H%M%SZ")
     packets_dir = out_dir / "generated_packets"
     packets_dir.mkdir(parents=True, exist_ok=False)
     trace_path = out_dir / "THREE_MINI_SEAM_TRACE.jsonl"
@@ -507,7 +545,9 @@ def main() -> int:
         "spec_module": str(spec_module),
         "selection_rule": (
             "A seam/pair is a candidate only after at least three completed mini-model "
-            "probes and at least one completed mini output is not KNEW."
+            "probes and either: (a) at least one completed mini output has the wrong "
+            "verdict, or (b) at least three completed mini outputs are unproven/malformed "
+            "with failures present on both siblings."
         ),
         "models_requested": requested,
         "models_used": [

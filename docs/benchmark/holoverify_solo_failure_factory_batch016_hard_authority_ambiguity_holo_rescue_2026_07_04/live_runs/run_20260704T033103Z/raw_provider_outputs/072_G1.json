@@ -1,0 +1,27 @@
+{
+  "call_number": 72,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "26a1a74d7aea9d9cd6c0d25809fc4916acc48d293e3f54898f2d2e16c5dbaf7b",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to understand the instruction from system.\n\nSystem says: \"Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nUser says: \"packet_id=SFF16HA-9D9E2243F0B78DD9EC2D status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nThus the user wants the three-line status record with the fields and values.\n\nWe need to produce:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut we must not include any other text, headings, explanation, etc. The instruction says: \"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus we output exactly those three lines. Possibly we can include spaces around equals? The user used \"route_verdict=CONTINUE\" etc. So follow same. Should we include the packet_id? The instruction says \"Return the three-line status record.\" The user gave packet_id and status_values. The three lines are only the status values, not packet_id. Probably we should output only the three lines: route_verdict, repair_target, blocked_move. So final answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no trailing spaces, no extra newline after? The instruction doesn't say not to include newline at end. Typically it's okay. But we need not include extra blank line. So just three lines.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "fdba6f086e146382134aee5d91a4a110b3eb5bbcfea55a61eed15c612bed9a84",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 124,
+    "output_tokens": 434,
+    "raw_text": "<think>\nWe need to understand the instruction from system.\n\nSystem says: \"Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nUser says: \"packet_id=SFF16HA-9D9E2243F0B78DD9EC2D status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nThus the user wants the three-line status record with the fields and values.\n\nWe need to produce:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut we must not include any other text, headings, explanation, etc. The instruction says: \"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus we output exactly those three lines. Possibly we can include spaces around equals? The user used \"route_verdict=CONTINUE\" etc. So follow same. Should we include the packet_id? The instruction says \"Return the three-line status record.\" The user gave packet_id and status_values. The three lines are only the status values, not packet_id. Probably we should output only the three lines: route_verdict, repair_target, blocked_move. So final answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no trailing spaces, no extra newline after? The instruction doesn't say not to include newline at end. Typically it's okay. But we need not include extra blank line. So just three lines.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0697b346301f579122781ff35ba6654b",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 558,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

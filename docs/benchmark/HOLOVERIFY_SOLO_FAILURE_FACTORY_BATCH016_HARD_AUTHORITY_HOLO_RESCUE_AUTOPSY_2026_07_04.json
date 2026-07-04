@@ -1,0 +1,169 @@
+{
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH016_HARD_AUTHORITY_HOLO_RESCUE_AUTOPSY_V1",
+  "created_at_utc": "2026-07-04T03:55:00Z",
+  "status": "PRESERVED_DIAGNOSTIC_FAILURE",
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch016_hard_authority_ambiguity_holo_rescue_2026_07_04/live_runs/run_20260704T033103Z",
+  "execution_integrity": {
+    "expected_provider_calls": 140,
+    "observed_provider_calls": 140,
+    "provider_failures": 0,
+    "holo_packets": 28,
+    "holo_pairs": 14,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "scoring_map_loaded_before_trace_freeze": false,
+    "runtime_firewall_passed": true,
+    "posthoc_scorer_completed": true
+  },
+  "posthoc_score": {
+    "packet_count": 28,
+    "correct_count": 18,
+    "incorrect_count": 10,
+    "pair_count": 14,
+    "pairs_both_siblings_correct": 4,
+    "allow_siblings_correct": 14,
+    "allow_siblings_total": 14,
+    "escalate_siblings_correct": 4,
+    "escalate_siblings_total": 14,
+    "miss_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE_ONLY"
+  },
+  "token_totals": {
+    "input_tokens": 71796,
+    "output_tokens": 38173,
+    "total_tokens": 125284
+  },
+  "token_totals_by_slot": {
+    "W1": {
+      "input_tokens": 21509,
+      "output_tokens": 2636,
+      "total_tokens": 39460
+    },
+    "G1": {
+      "input_tokens": 3384,
+      "output_tokens": 7477,
+      "total_tokens": 10861
+    },
+    "W2": {
+      "input_tokens": 19278,
+      "output_tokens": 3042,
+      "total_tokens": 22320
+    },
+    "G2": {
+      "input_tokens": 3384,
+      "output_tokens": 6663,
+      "total_tokens": 10047
+    },
+    "W3": {
+      "input_tokens": 24241,
+      "output_tokens": 18355,
+      "total_tokens": 42596
+    }
+  },
+  "missed_packets": [
+    {
+      "pair_id": "HVSF-FACTORY16-001",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "domain": "Synthetic AP vendor master / payment rail controls",
+      "worker_pattern": ["ALLOW", "ALLOW", "ESCALATE"],
+      "blocker_found_by": ["W3"]
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-003",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "domain": "Synthetic AP exception threshold controls",
+      "worker_pattern": ["ALLOW", "ALLOW", "ALLOW"],
+      "blocker_found_by": []
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-004",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "domain": "Synthetic AP vendor callback / destination account controls",
+      "worker_pattern": ["ALLOW", "ALLOW", "ESCALATE"],
+      "blocker_found_by": ["W3"]
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-008",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "domain": "Synthetic Agentic commerce subscription controls",
+      "worker_pattern": ["ESCALATE", "ALLOW", "ALLOW"],
+      "blocker_found_by": ["W1"]
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-009",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "domain": "Synthetic Clinical treatment activation controls",
+      "worker_pattern": ["ALLOW", "ALLOW", "ALLOW"],
+      "blocker_found_by": []
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-010",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "domain": "Synthetic Banking relationship and transaction controls",
+      "worker_pattern": ["ALLOW", "ESCALATE", "ALLOW"],
+      "blocker_found_by": ["W2"]
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-012",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "domain": "Synthetic Privacy data-sharing controls",
+      "worker_pattern": ["ALLOW", "ALLOW", "ALLOW"],
+      "blocker_found_by": []
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-013",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "domain": "Synthetic Procurement amount exception controls",
+      "worker_pattern": ["ESCALATE", "ALLOW", "ALLOW"],
+      "blocker_found_by": ["W1"]
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-019",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "domain": "Synthetic Clinical protocol start controls",
+      "worker_pattern": ["ALLOW", "ALLOW", "ALLOW"],
+      "blocker_found_by": []
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-020",
+      "sibling": "B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "domain": "Synthetic Trade-finance payment release controls",
+      "worker_pattern": ["ESCALATE", "ALLOW", "ALLOW"],
+      "blocker_found_by": ["W1"]
+    }
+  ],
+  "autopsy_findings": [
+    "All clean A siblings were correctly ALLOW.",
+    "Only 4 of 14 hard ESCALATE B siblings were correctly ESCALATE.",
+    "Six missed B siblings had at least one worker identify an ESCALATE blocker, but the final selected verdict was ALLOW.",
+    "Gov did not force explicit reconciliation of concrete blockers before later ALLOW artifacts were accepted.",
+    "Selector consensus can bury source-grounded minority blockers on false-negative seams."
+  ],
+  "recommended_patch_direction": [
+    "Track source-grounded blocker IDs in the artifact registry.",
+    "Require Gov to force blocker reconciliation after any SOURCE_BOUNDARY_OPEN worker artifact.",
+    "Disqualify or penalize later ALLOW artifacts that silently drop unresolved prior blockers.",
+    "Require final ALLOW to cite exact source facts closing each prior blocker.",
+    "Do not alter packet truth or silently rerun this lane."
+  ],
+  "claim_boundary": "Diagnostic failure only. Not a Holo win, not public benchmark evidence, not an error-rate denominator."
+}

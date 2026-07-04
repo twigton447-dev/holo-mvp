@@ -1,0 +1,27 @@
+{
+  "call_number": 87,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "4c858f821523b32422c6a7256bcd3b296b0fd9fa7b1293e4ce66ceec8ce23110",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to output a plain text record with three key=value lines: route_verdict, repair_target, blocked_move.\n\nThe user gave:\n\npacket_id=SFF16HA-A89DB7B4F0F505E8113A\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut we need only three lines, the order is route_verdict, repair_target, blocked_move. So we output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must not add headings, explanations, JSON, Markdown, or extra lines. So just exactly those three lines.\n\nPotential pitfalls: Should we include packet_id? The instruction says return a plain text record with three key=value lines. They gave \"route_verdict, repair_target, blocked_move.\" So not include packet_id.\n\nThus answer is:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure to keep the spacing exactly? They gave key=value with no spaces around =? The example: \"route_verdict=CONTINUE\". So we will match that. Should there be spaces after =? They used no spaces. So we follow exactly.\n\nThus answer is just three lines.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "a192b87181161313597ae6e6271bed7f98e0e18862cd83a1d11d4252288dd785",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 122,
+    "output_tokens": 312,
+    "raw_text": "<think>\nWe need to output a plain text record with three key=value lines: route_verdict, repair_target, blocked_move.\n\nThe user gave:\n\npacket_id=SFF16HA-A89DB7B4F0F505E8113A\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut we need only three lines, the order is route_verdict, repair_target, blocked_move. So we output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must not add headings, explanations, JSON, Markdown, or extra lines. So just exactly those three lines.\n\nPotential pitfalls: Should we include packet_id? The instruction says return a plain text record with three key=value lines. They gave \"route_verdict, repair_target, blocked_move.\" So not include packet_id.\n\nThus answer is:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure to keep the spacing exactly? They gave key=value with no spaces around =? The example: \"route_verdict=CONTINUE\". So we will match that. Should there be spaces after =? They used no spaces. So we follow exactly.\n\nThus answer is just three lines.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0697b3bf9841fc48bd59169cfb4df11c",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 434,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

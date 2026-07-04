@@ -1,0 +1,27 @@
+{
+  "call_number": 99,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "ce94d06e86516a78bd823432e1fae71c30e86d824a5e8f39895b5634ebc8ab22",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe have a conversation. The user asks: \"packet_id=SFF16HA-BD5903856030893080A8 status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nThe system says: Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus we need to produce exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nPotentially the \"packet_id=SFF...\" maybe also included? The user asks to \"Return the three-line status record.\" The fields are defined: route_verdict, repair_target, blocked_move. The user gave values in status_values: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs. So the answer should be those three lines.\n\nAlso note we should not include any extra lines or headings or explanations. And start with route_verdict=. So we must produce:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nPotentially we need to preserve case? The user wrote \"CONTINUE\" uppercase, \"preserve source-grounded reasoning\" lower-case? That is fine.\n\nOne might wonder if we need to include the packet_id? The instruction says \"Return the three-line status record.\" The status record comprises three lines: route_verdict, repair_target, blocked_move. So we should not include packet_id.\n\nThus the answer is straightforward.\n\nPotential edge: The \"preserve source-grounded reasoning\" includes a hyphen. We need to keep exactly as given.\n\nThus final answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nNow we must ensure no extra whitespace at ends, no extra line breaks.\n\nWill produce that exactly.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "e5ef771c0ccdc4ec937c58bd8cd6d299aed80b16e6192d2d27a80e7dd6405774",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 118,
+    "output_tokens": 471,
+    "raw_text": "<think>\nWe have a conversation. The user asks: \"packet_id=SFF16HA-BD5903856030893080A8 status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nThe system says: Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus we need to produce exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nPotentially the \"packet_id=SFF...\" maybe also included? The user asks to \"Return the three-line status record.\" The fields are defined: route_verdict, repair_target, blocked_move. The user gave values in status_values: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs. So the answer should be those three lines.\n\nAlso note we should not include any extra lines or headings or explanations. And start with route_verdict=. So we must produce:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nPotentially we need to preserve case? The user wrote \"CONTINUE\" uppercase, \"preserve source-grounded reasoning\" lower-case? That is fine.\n\nOne might wonder if we need to include the packet_id? The instruction says \"Return the three-line status record.\" The status record comprises three lines: route_verdict, repair_target, blocked_move. So we should not include packet_id.\n\nThus the answer is straightforward.\n\nPotential edge: The \"preserve source-grounded reasoning\" includes a hyphen. We need to keep exactly as given.\n\nThus final answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nNow we must ensure no extra whitespace at ends, no extra line breaks.\n\nWill produce that exactly.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0697b40307c47ca07b95a5e493bad971",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 589,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

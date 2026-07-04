@@ -1,0 +1,27 @@
+{
+  "call_number": 122,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "46f5690e4adf3f392db93169b46e92605235e78eb0646f7f426fd2e77c3040e9",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to understand the task. The user says:\n\n\"packet_id=SFF16HA-E56C7C3A23ED64E80365\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThe system says: \"Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus we should output exactly three lines, each \"key=value\". The order is route_verdict, repair_target, blocked_move. So lines:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe need to be careful about any extra whitespace, line breaks. The user says \"Return the three-line status record.\" The instructions are straightforward. The user includes the packet_id but we only need to output the three lines. The system says do not add headings etc.\n\nThus the output should be exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra spaces at line ends, no blank lines. Also note that \"preserve source-grounded reasoning\" is given. There is no trailing period. The user wrote \"preserve source-grounded reasoning\" as a phrase. It's okay.\n\nThus answer accordingly.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "59aedc58b1e77c2122b5ce5341b30e89ee64a07807f1e197f40dba4c34f0762d",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 121,
+    "output_tokens": 350,
+    "raw_text": "<think>\nWe need to understand the task. The user says:\n\n\"packet_id=SFF16HA-E56C7C3A23ED64E80365\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThe system says: \"Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus we should output exactly three lines, each \"key=value\". The order is route_verdict, repair_target, blocked_move. So lines:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe need to be careful about any extra whitespace, line breaks. The user says \"Return the three-line status record.\" The instructions are straightforward. The user includes the packet_id but we only need to output the three lines. The system says do not add headings etc.\n\nThus the output should be exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra spaces at line ends, no blank lines. Also note that \"preserve source-grounded reasoning\" is given. There is no trailing period. The user wrote \"preserve source-grounded reasoning\" as a phrase. It's okay.\n\nThus answer accordingly.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0697b489470baa41db3383a57aa65a77",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 471,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

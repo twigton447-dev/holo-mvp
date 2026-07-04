@@ -1,0 +1,138 @@
+{
+  "architecture_head": "742024ed08efd2a401b63b6605111911db54a5fa",
+  "classification": "HOLOVERIFY_V5_BLOCKER_CLOSURE_TIER1_PREFLIGHT_V0",
+  "created_at_utc": "2026-07-04T06:00:02Z",
+  "status": "PREFLIGHT_PASS_NO_PROVIDER",
+  "lane": "HOLOVERIFY_V5_BLOCKER_CLOSURE_TIER1_PATCH_VALIDATION_V0",
+  "scope": {
+    "patch_validation_only": true,
+    "benchmark_evidence": false,
+    "pair_level_evidence": false,
+    "public_claim_material": false,
+    "providers_run": 0,
+    "holo_live_runs": 0,
+    "solo_runs": 0,
+    "judge_runs": 0,
+    "scoring_map_loaded_before_trace_freeze": false
+  },
+  "selected_packets": [
+    {
+      "legacy_packet_id": "HVSF-FACTORY16-010-B",
+      "opaque_runtime_id": "SFF16HA-EAAD2AFD82C919B7ECCB",
+      "use": "V5 false-closure patch-validation target"
+    },
+    {
+      "legacy_packet_id": "HVSF-FACTORY16-020-B",
+      "opaque_runtime_id": "SFF16HA-B1376D9F72BE680784D1",
+      "use": "V5 false-closure patch-validation target"
+    }
+  ],
+  "runtime_manifest": {
+    "path": "docs/benchmark/HOLOVERIFY_V5_BLOCKER_CLOSURE_TIER1_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json",
+    "sha256": "edd7ed59e0647c7695c62cf76ecb2f27b6d0b9b8ac8c25a21977607130c63a8d",
+    "packet_count": 2,
+    "runtime_consumable": true,
+    "top_level_keys": [
+      "classification",
+      "packet_count",
+      "packets",
+      "runtime_consumable"
+    ],
+    "packet_row_keys": [
+      "opaque_runtime_id",
+      "runtime_payload_ref",
+      "runtime_payload_sha256"
+    ],
+    "runtime_input_leakage_hits": []
+  },
+  "selector_policy": {
+    "version": "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+    "sha256": "939c1ffbba74e9a526d454979b52980513d952eae4077cc817283380e596a1ec"
+  },
+  "worker_contract": {
+    "version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+    "sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37"
+  },
+  "posthoc_scoring": {
+    "script": "docs/benchmark/score_holoverify_solo_failure_factory_batch016_hard_authority_ambiguity_holo_rescue_posthoc_2026_07_04.py",
+    "expected_scoring_map_sha256": "8afbd63c792d12c26deb781b1de16d3db0c94e0414091e05e2cc4338975407be",
+    "required_after_trace_freeze": true
+  },
+  "expected_live_provider_calls_if_approved": {
+    "total": 10,
+    "call_sequence_per_packet": [
+      "W1",
+      "G1",
+      "W2",
+      "G2",
+      "W3"
+    ],
+    "worker_calls": 6,
+    "gov_calls": 4,
+    "by_slot": {
+      "W1": {
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "calls": 2
+      },
+      "G1": {
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "calls": 2
+      },
+      "W2": {
+        "provider": "openai",
+        "model": "gpt-5.4-mini",
+        "calls": 2
+      },
+      "G2": {
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "calls": 2
+      },
+      "W3": {
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "calls": 2
+      }
+    }
+  },
+  "local_validation": {
+    "runtime_manifest_json_parses": true,
+    "runtime_manifest_hash_matches_wrapper_lock": true,
+    "runtime_manifest_has_no_truth_or_scoring_fields": true,
+    "payloads_present": true,
+    "prompt_probe_leakage_hits": [],
+    "v5_selector_active": true,
+    "v4_worker_contract_active": true,
+    "expected_call_count_10": true,
+    "solo_calls_disabled": true,
+    "judge_calls_disabled": true,
+    "scoring_map_path_absent_from_live_wrapper": true,
+    "posthoc_scoring_script_present": true,
+    "provider_calls_made_during_preflight": 0,
+    "tests": [
+      {
+        "command": "python3 -m pytest tests/test_holoverify_v5_blocker_closure_validation.py -q",
+        "status": "passed",
+        "passed": 9
+      },
+      {
+        "command": "python3 -m pytest tests/test_holoverify_blind_selector_repair_regression.py -q",
+        "status": "passed",
+        "passed": 16
+      },
+      {
+        "command": "python3 -m py_compile holoverify_blind_runner_v0.py docs/benchmark/run_holoverify_blind_canary_live_2026_07_02.py docs/benchmark/run_holoverify_atlas_holo_rescue_live_2026_07_03.py docs/benchmark/run_holoverify_v5_blocker_closure_tier1_live_2026_07_04.py",
+        "status": "passed"
+      }
+    ]
+  },
+  "wrapper": {
+    "path": "docs/benchmark/run_holoverify_v5_blocker_closure_tier1_live_2026_07_04.py",
+    "preflight_artifact": "docs/benchmark/holoverify_v5_blocker_closure_tier1_2026_07_04/live_runs/preflight_20260704T060002Z/v5_blocker_closure_tier1_live_preflight.json",
+    "live_command": "python3 docs/benchmark/run_holoverify_v5_blocker_closure_tier1_live_2026_07_04.py --run-live --approval-statement \"$APPROVAL\""
+  },
+  "exact_approval_sentence": "I approve live provider execution for HOLOVERIFY_V5_BLOCKER_CLOSURE_TIER1_PATCH_VALIDATION_V0 using only runtime-only manifest docs/benchmark/HOLOVERIFY_V5_BLOCKER_CLOSURE_TIER1_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json with SHA-256 edd7ed59e0647c7695c62cf76ecb2f27b6d0b9b8ac8c25a21977607130c63a8d, selector SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04 hash 939c1ffbba74e9a526d454979b52980513d952eae4077cc817283380e596a1ec, worker contract WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04 hash 5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37, and exactly 10 provider calls: W1 xai/grok-3-mini x2, G1 minimax/MiniMax-M2.5-highspeed x2, W2 openai/gpt-5.4-mini x2, G2 minimax/MiniMax-M2.5-highspeed x2, W3 minimax/MiniMax-M2.5-highspeed x2. PATCH VALIDATION ONLY for V5 blocker closure validation on two Batch016 false-closure packets; not benchmark evidence, not pair-level evidence, and not public claim material. No solo, no judges, no scoring map before trace freeze, no mixed registration JSON before trace freeze, no substitutions, no public claims.",
+  "stop_rule": "Stop unless Taylor explicitly approves the live Tier 1 patch-validation run using the exact approval sentence."
+}

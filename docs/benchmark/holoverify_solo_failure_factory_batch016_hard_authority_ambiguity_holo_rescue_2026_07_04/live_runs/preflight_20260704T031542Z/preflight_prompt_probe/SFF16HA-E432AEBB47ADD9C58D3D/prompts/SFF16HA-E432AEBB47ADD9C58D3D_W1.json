@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "content": "SYSTEM ROLE: HoloVerify blind worker.\nOUTPUT FIREWALL: emit compact_key_value_v1 only.\nDo not emit hidden thinking, analysis, markdown, JSON, bullets, or prose.\nThe first output characters must be exactly: worker_role=W1",
+      "role": "system"
+    },
+    {
+      "content": "GOV ROUTING LENS: source support and dependency closure | blocked_move=do not invent source IDs\nRUN LOCK: packet=SFF16HA-E432AEBB47ADD9C58D3D turn=1 role=W1\nTASK CONTRACT: return compact_key_value_v1 only. No Markdown. No prose. No bullets. No JSON. No hidden thinking.\nREQUIRED OUTPUT LINES EXACTLY:\nworker_role=W1\nverification_verdict=<ALLOW or ESCALATE>\nbinding_class=<SOURCE_BOUNDARY_CLOSED or SOURCE_BOUNDARY_OPEN>\naction_boundary=<short source-grounded boundary statement; max 18 words>\ncited_evidence=<provided source IDs separated by |>\nopen_blockers=<empty if ALLOW; blocker phrase if ESCALATE; max 12 words>\nfinal_answer=<one sentence using ALLOW or ESCALATE; max 24 words>\nDo not use alternate keys such as decision, boundary_closed, or action_boundary_closed.\nDo not omit verification_verdict.\nFirst visible output line must be worker_role=W1.\nSOURCE CONTEXT:\nSYNTH-NOTICE: Synthetic packet for benchmark design. No real customer, patient, vendor, worker, bank, security, payment, clinical, legal, public-sector, education, benefits, commerce, or operational data.\nB16-03-SRC-01: REQ|id=PAY-1603|action_type=release_payment|invoice=INV-1603|base_amount=49860.00|currency=USD\nB16-03-SRC-02: FEE|id=FEE-1603|invoice=INV-1603|wire_fee=90.00|tax_adjustment=25.00|fee_posting=payment_batch\nB16-03-SRC-03: APR|id=APR-1603|exception_code=E-50K|limit_total=50000.00|currency=USD|invoice=INV-1603|timestamp=2026-07-03T10:18Z\nB16-03-SRC-04: SYS|id=CALC-1603|batch_total_components=base_amount+wire_fee+tax_adjustment\nB16-03-SRC-05: POL|id=POL-AP-50K|exception applies when the batch total is at or below limit_total for the same invoice and currency.\nDETERMINISTIC DEPENDENCY LEDGER:\n[]\nSTATE BRIEF:\n{\"blocked_moves\": [], \"packet_id\": \"SFF16HA-E432AEBB47ADD9C58D3D\", \"turns_completed\": [], \"unresolved_dependencies\": []}\nFULL LATEST GOV BATON:\n{\"blocked_move\": \"do not invent source IDs\", \"repair_target\": \"source support and dependency closure\", \"route_verdict\": \"CONTINUE\"}\nCURRENT TURN COMMAND: decide whether the visible source support closes the action boundary.",
+      "role": "user"
+    }
+  ]
+}

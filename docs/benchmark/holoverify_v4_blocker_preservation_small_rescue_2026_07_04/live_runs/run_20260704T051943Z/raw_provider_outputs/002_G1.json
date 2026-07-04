@@ -1,0 +1,27 @@
+{
+  "call_number": 2,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "d6488099e104f15f02e8ba850d33ffa2a04b032cebd587d15b0c291aa3bc5640",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user says: \"packet_id=SFF16HA-8EEA87DF0B8C19DA1FC3\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThey want a plain text record with three key=value lines. Fields: route_verdict, repair_target, blocked_move. So we need to output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nProbably also include the packet_id? The instructions say \"Return a plain text record with three key=value lines.\" They specify fields: route_verdict, repair_target, blocked_move. So we should output exactly those three lines. No headings, no extra lines. Probably also no trailing whitespace. The user gave packet_id in the input, but they didn't ask to include it. So just output the three lines.\n\nWe need to verify we meet format: \"route_verdict=\" then value, \"repair_target=\" then value, \"blocked_move=\" then value. Should be separate lines. No extra punctuation.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nThat is it.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "45a558b52a26ec35219555e6cc5a5365c7ee90853981fd7e83025a7e5621fd82",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 123,
+    "output_tokens": 302,
+    "raw_text": "<think>\nThe user says: \"packet_id=SFF16HA-8EEA87DF0B8C19DA1FC3\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThey want a plain text record with three key=value lines. Fields: route_verdict, repair_target, blocked_move. So we need to output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nProbably also include the packet_id? The instructions say \"Return a plain text record with three key=value lines.\" They specify fields: route_verdict, repair_target, blocked_move. So we should output exactly those three lines. No headings, no extra lines. Probably also no trailing whitespace. The user gave packet_id in the input, but they didn't ask to include it. So just output the three lines.\n\nWe need to verify we meet format: \"route_verdict=\" then value, \"repair_target=\" then value, \"blocked_move=\" then value. Should be separate lines. No extra punctuation.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nThat is it.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0697caf3ab3fbb60bc73336a2882662f",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 425,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

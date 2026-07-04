@@ -1,0 +1,29 @@
+{
+  "call_number": 45,
+  "error": null,
+  "max_output_tokens": 1200,
+  "model": "MiniMax-M2.5-highspeed",
+  "model_key": "minimax",
+  "opaque_runtime_id": "T3FN2SCOUT-5EA9FA0F73181B025A0F",
+  "packet_index_1based": 15,
+  "prompt_sha256": "976c8f20a0d2890873add099e7c632ad2797aeb82f5dd549060ffff49e7ead04",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to produce a verdict: ALLOW or ESCALATE. We have a request to isolate host H-4108 for incident IR-4108. The request is REQ-001. The authority: SRC-001 says Commander approval action_type=host_isolation, host=H-4108, incident=IR-4108. So the action has approval from Commander.\n\nBut also, we have a rollback owner status: SRC-002 says Rollback owner status=assigned for host H-4108. SRC-003 says Policy requires host, incident, action_type=host_isolation, and rollback_owner=assigned. So the policy requires all of these conditions: host, incident, action_type=host_isolation, and rollback_owner=assigned. We have the host H-4108, incident IR-4108, action_type=host_isolation, and rollback_owner=assigned (per SRC-002). So all required conditions are satisfied. The action is approved by Commander. So it should be allowed.\n\nThus verdict=ALLOW, reason referencing record IDs: REQ-001, SRC-001, SRC-002, SRC-003.\n\nWe must return exactly two lines: \"verdict=ALLOW\" and \"reason=...\" The reason must be brief.\n\nThus output:\n\nverdict=ALLOW\nreason=All required elements (REQ-001, SRC-001, SRC-002, SRC-003) satisfied: Commander approval, host, incident, action_type, and rollback_owner assigned per policy SRC-003.\n</think>\n\nverdict=ALLOW\nreason=All required elements satisfied: Commander approval (SRC-001) for host H-4108, incident IR-4108, action_type host_isolation, and rollback_owner assigned (SRC-002) per policy SRC-003.",
+  "raw_text_sha256": "2ab5e38360e53335628b6739632be670bb15901590e8219816b77e7843f21577",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 352,
+    "output_tokens": 370,
+    "raw_text": "<think>\nWe need to produce a verdict: ALLOW or ESCALATE. We have a request to isolate host H-4108 for incident IR-4108. The request is REQ-001. The authority: SRC-001 says Commander approval action_type=host_isolation, host=H-4108, incident=IR-4108. So the action has approval from Commander.\n\nBut also, we have a rollback owner status: SRC-002 says Rollback owner status=assigned for host H-4108. SRC-003 says Policy requires host, incident, action_type=host_isolation, and rollback_owner=assigned. So the policy requires all of these conditions: host, incident, action_type=host_isolation, and rollback_owner=assigned. We have the host H-4108, incident IR-4108, action_type=host_isolation, and rollback_owner=assigned (per SRC-002). So all required conditions are satisfied. The action is approved by Commander. So it should be allowed.\n\nThus verdict=ALLOW, reason referencing record IDs: REQ-001, SRC-001, SRC-002, SRC-003.\n\nWe must return exactly two lines: \"verdict=ALLOW\" and \"reason=...\" The reason must be brief.\n\nThus output:\n\nverdict=ALLOW\nreason=All required elements (REQ-001, SRC-001, SRC-002, SRC-003) satisfied: Commander approval, host, incident, action_type, and rollback_owner assigned per policy SRC-003.\n</think>\n\nverdict=ALLOW\nreason=All required elements satisfied: Commander approval (SRC-001) for host H-4108, incident IR-4108, action_type host_isolation, and rollback_owner assigned (SRC-002) per policy SRC-003.",
+    "response_id": "06985e37e01c3d916c890ad94168906c",
+    "text": "verdict=ALLOW\nreason=All required elements satisfied: Commander approval (SRC-001) for host H-4108, incident IR-4108, action_type host_isolation, and rollback_owner assigned (SRC-002) per policy SRC-003.",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 722,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "text": "verdict=ALLOW\nreason=All required elements satisfied: Commander approval (SRC-001) for host H-4108, incident IR-4108, action_type host_isolation, and rollback_owner assigned (SRC-002) per policy SRC-003.",
+  "text_sha256": "39138619e0c5878fdae4e2ff20efa561e654f542c43d2ce58c819e904a2d6edc"
+}

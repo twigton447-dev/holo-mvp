@@ -1,0 +1,66 @@
+{
+  "checks": {
+    "env_keys_present": true,
+    "expected_call_count_60": true,
+    "idealized_verifier_prompt_absent": true,
+    "judge_calls_disabled": true,
+    "no_gov": true,
+    "no_holo": true,
+    "packet_count_20": true,
+    "payloads_present": true,
+    "posthoc_scoring_script_present": true,
+    "prompt_probe_leakage": true,
+    "provider_calls_not_yet_made": true,
+    "runtime_consumable": true,
+    "runtime_input_leakage": true,
+    "runtime_manifest_hash_matches_approval": true,
+    "runtime_manifest_only_live_input": true,
+    "solo_models_declared": true
+  },
+  "classification": "HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_PREFLIGHT_V0",
+  "created_at_utc": "2026-07-04T15:44:37.543793+00:00",
+  "env_presence": {
+    "MINIMAX_API_KEY": "PRESENT",
+    "OPENAI_API_KEY": "PRESENT",
+    "XAI_API_KEY": "PRESENT"
+  },
+  "expected_provider_calls": 60,
+  "expected_runtime_manifest_sha256": "1c9b3b48fe25c36992509281c0f354229dbb5b9cc9f1fc8f965cca2df1f3ffb5",
+  "lane_label": "HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_V0",
+  "missing_payloads": [],
+  "model_order": [
+    "xai",
+    "openai",
+    "minimax"
+  ],
+  "packet_count": 20,
+  "passed": true,
+  "prompt_probe_leakage_hits": [],
+  "roster": {
+    "minimax": {
+      "kind": "openai_compatible",
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "url": "https://api.minimax.io/v1/chat/completions"
+    },
+    "openai": {
+      "kind": "openai_responses",
+      "model": "gpt-5.4-mini",
+      "provider": "openai",
+      "url": "https://api.openai.com/v1/responses"
+    },
+    "xai": {
+      "kind": "openai_compatible",
+      "model": "grok-3-mini",
+      "provider": "xai",
+      "url": "https://api.x.ai/v1/chat/completions"
+    }
+  },
+  "runtime_input_leakage_hits": [],
+  "runtime_manifest": "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+  "runtime_manifest_sha256": "1c9b3b48fe25c36992509281c0f354229dbb5b9cc9f1fc8f965cca2df1f3ffb5",
+  "scoring_map_access_control": {
+    "live_runner_has_scoring_map_path": false,
+    "posthoc_scorer_owns_scoring_map_path": "docs/benchmark/score_holoverify_tier3_fn_targeted_mining_scout2_solo_2026_07_05.py"
+  }
+}

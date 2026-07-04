@@ -1,0 +1,92 @@
+{
+  "attempt_budget_policy": {
+    "content_failures_are_not_retried": true,
+    "manual_rerun_requires_new_approval_and_preserved_invalid_trace": true,
+    "max_content_contract_attempts_per_packet": 1,
+    "max_live_run_attempts_per_packet": 1,
+    "transport_retries_per_call": 2,
+    "version": "BLIND_RUNTIME_ATTEMPT_BUDGET_V1_2026_07_03"
+  },
+  "classification": "HOLOVERIFY_TIER3_FN_HOLO_RESCUE_LIVE_RUN_SUMMARY_V0",
+  "created_at_utc": "2026-07-04T19:58:41.365319+00:00",
+  "current_head": "3b8cc0ee225021abce5c7040b7eba839fd3c26a5",
+  "evidence_scope": "SELECTED CLEAN FN_FALSE_ALLOW HOLO RESCUE ONLY across seven selected sibling pairs; not public benchmark evidence, not a global FNR claim, and not FP precision evidence.",
+  "expected_provider_calls": 70,
+  "failure": null,
+  "final_verdicts_valid": true,
+  "lane_label": "HOLOVERIFY_TIER3_FN_HOLO_RESCUE_V0",
+  "mixed_registration_json_loaded_before_trace_freeze": false,
+  "observed_provider_calls": 70,
+  "packet_index": null,
+  "packet_limit": null,
+  "passed_runtime_firewall": true,
+  "posthoc_score_ref": null,
+  "posthoc_scoring_command": "python3 -B docs/benchmark/score_holoverify_tier3_fn_holo_rescue_posthoc_2026_07_05.py --run-dir docs/benchmark/holoverify_tier3_fn_holo_rescue_2026_07_05/live_runs/run_20260704T195236Z",
+  "posthoc_scoring_required_after_trace_freeze": true,
+  "provider_failures": [],
+  "provider_trace_ref": "TRACE_PROVIDER_CALLS.jsonl",
+  "run_dir": "docs/benchmark/holoverify_tier3_fn_holo_rescue_2026_07_05/live_runs/run_20260704T195236Z",
+  "runtime_manifest": "docs/benchmark/HOLOVERIFY_TIER3_FN_HOLO_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+  "runtime_manifest_sha256": "d570c6f6d8f55d36da7401eb32f8c7531c58d7fdd71274addf917edef5646de5",
+  "runtime_only_manifest": "docs/benchmark/HOLOVERIFY_TIER3_FN_HOLO_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+  "runtime_result_ref": "blind_canary_runtime_results.json",
+  "scoring_map_access_control": {
+    "live_wrapper_has_scoring_map_path": false,
+    "live_wrapper_scoring_split_enforced_by": "manual_no_provider_preflight:tier3_fn_holo_rescue_live_wrapper_does_not_keep_mixed_registration_json_path",
+    "posthoc_scorer_owns_scoring_map_path": "docs/benchmark/score_holoverify_tier3_fn_holo_rescue_posthoc_2026_07_05.py",
+    "preflight_read_guard_enforced_by": "manual_no_provider_preflight:tier3_fn_holo_rescue_live_wrapper_uses_runtime_only_manifest_and_does_not_read_scoring_map"
+  },
+  "selected_fn_rescue_only": true,
+  "selector_policy": {
+    "selector_criteria": [
+      "gate_passed",
+      "parse_valid",
+      "source_ids_valid",
+      "required_sections_present",
+      "contradiction_free",
+      "deterministic_clean",
+      "blocker_resolution_clean",
+      "blocker_resolution_complete",
+      "closure_validation_clean",
+      "all_prior_blockers_source_closed",
+      "invalid_closure_count",
+      "unresolved_blocker_count",
+      "source_boundary_open_with_blocker",
+      "verdict_consensus_count",
+      "final_turn_consensus_repair",
+      "verdict_corroboration_count",
+      "sections_present",
+      "cited_evidence_count",
+      "earliest_turn"
+    ],
+    "selector_policy_decision": "Truth-blind structural selector. Among structurally valid artifacts, explicit blocker resolution is only eligible when local closure validation proves the cited source fields close the exact blocker_type. A later ALLOW cannot silently drop a prior SOURCE_BOUNDARY_OPEN blocker, and it also cannot win by textually naming a blocker_id unless deterministic code confirms the closure. A source-grounded ESCALATE blocker can defeat an ALLOW majority unless a later artifact source-closes it. Deterministic source-derived dependency and blocker-closure checks can disqualify artifacts that contradict computed source boundaries. Concise final answers are warnings, not sole disqualifiers, when the artifact is otherwise complete. Within the same blocker/consensus tier, gate-failed corroboration from otherwise usable artifacts is considered before citation count and earliest-turn tie-breaks.",
+    "selector_policy_sha256": "939c1ffbba74e9a526d454979b52980513d952eae4077cc817283380e596a1ec",
+    "selector_policy_version": "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+  },
+  "source_runtime_manifest_sha256": "d570c6f6d8f55d36da7401eb32f8c7531c58d7fdd71274addf917edef5646de5",
+  "trace_frozen_before_scoring": true,
+  "worker_contract": {
+    "required_worker_keys": [
+      "worker_role",
+      "verification_verdict",
+      "action_boundary",
+      "binding_class",
+      "cited_evidence",
+      "final_answer",
+      "blocker_type",
+      "blocker_resolution",
+      "structured_blocker_resolution"
+    ],
+    "w3_artifact_first_guard": [
+      "W3 ARTIFACT-FIRST CONTRACT V4.",
+      "Start immediately with worker_role=W3 before any reasoning.",
+      "Never output <think>, hidden reasoning, analysis, or deliberation.",
+      "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, blocker_type, blocker_resolution, structured_blocker_resolution, and final_answer.",
+      "If any prior blocker exists, do not return ALLOW unless blocker_resolution names each blocker_id, structured_blocker_resolution cites source evidence, and the source fields close the blocker_type.",
+      "Do not debate competing interpretations outside the key=value fields.",
+      "Emit exactly the required key=value artifact lines, then stop."
+    ],
+    "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+    "worker_contract_version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+  }
+}

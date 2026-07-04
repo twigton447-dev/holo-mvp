@@ -129,11 +129,11 @@ Tier 3 FN eligibility audit:
 
 | Metric | Count |
 |---|---:|
-| Clean promoted FN pairs currently eligible | 5 |
+| Clean promoted FN pairs currently eligible | 6 |
 | Tier 3 target clean FN pairs | 7 |
-| Deficit | 2 |
+| Deficit | 1 |
 
-Tier 3 is blocked because the current eligible clean FN pool is below the 7-pair target. The next allowed move is no-provider packet/key audit and seam promotion, or new seam mining, not live Tier 3 execution.
+Tier 3 Holo rescue remains blocked because the current eligible clean FN pool is below the 7-pair target. The next allowed move is no-provider packet/key audit and seam promotion, or new seam mining, not live Tier 3 execution.
 
 Tier 3 targeted-mining solo scout:
 
@@ -152,6 +152,23 @@ New useful FN pairs from targeted mining:
 - `T3FN-MINE-010`
 
 This scout updates the internal clean FN pool from 3 pairs to 5 pairs. It remains internal directional mining only; it is not public benchmark evidence and does not create a global FNR claim.
+
+Tier 3 targeted-mining solo scout 2:
+
+| Metric | Count |
+|---|---:|
+| Solo provider calls completed | 60/60 |
+| Provider failures | 0 |
+| KNEW_ADMISSIBLE | 59/60 |
+| FALSE_NEGATIVE_ALLOW_ON_ESCALATE | 1/60 |
+| False positives | 0 |
+| Parse/admissibility failures | 0 |
+
+New useful FN pair from Scout 2:
+
+- `T3FN2-MINE-003`
+
+Scout 2 updates the internal clean FN pool from 5 pairs to 6 pairs. Tier 3 target remains 7 clean FN pairs, leaving a deficit of 1. This remains internal directional mining only; it is not public benchmark evidence and does not create a global FNR claim.
 
 ## 5. Quarantine Register
 
@@ -196,8 +213,9 @@ Internal-only claims:
 - V5 Tier 1 patch-validation pass.
 - V5 Tier 2 raw 13/14, quarantine, replacement supplement, and merged clean internal gate.
 - Tier 2 internal gate restoration after replacement pair.
-- Tier 3 FN status is blocked pending 2 additional clean promoted FN pairs.
+- Tier 3 FN status is blocked pending 1 additional clean promoted FN pair.
 - Tier 3 targeted-mining solo scout found 2 useful FN pairs, `T3FN-MINE-006` and `T3FN-MINE-010`, for internal directional mining only.
+- Tier 3 targeted-mining solo Scout 2 found 1 useful FN pair, `T3FN2-MINE-003`, for internal directional mining only.
 
 Forbidden claims:
 
@@ -217,6 +235,9 @@ Forbidden claims:
 - "Five clean promoted FN pairs satisfy the seven-pair Tier 3 target."
 - "The targeted-mining solo scout is public benchmark evidence."
 - "The targeted-mining solo scout proves global FNR."
+- "Scout 2 is public benchmark evidence."
+- "Scout 2 proves global FNR."
+- "Six clean promoted FN pairs satisfy the seven-pair Tier 3 target."
 
 ## Source Map
 
@@ -233,3 +254,5 @@ Forbidden claims:
 - Tier 3 FN readiness audit: `docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_CANDIDATE_READINESS_2026_07_05.json`
 - Tier 3 targeted-mining solo scout rollup: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_SOLO_ROLLUP_2026_07_05.json`
 - Tier 3 targeted-mining solo scout rollup memo: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_SOLO_ROLLUP_2026_07_05.md`
+- Tier 3 targeted-mining Scout 2 solo rollup: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.json`
+- Tier 3 targeted-mining Scout 2 solo rollup memo: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.md`

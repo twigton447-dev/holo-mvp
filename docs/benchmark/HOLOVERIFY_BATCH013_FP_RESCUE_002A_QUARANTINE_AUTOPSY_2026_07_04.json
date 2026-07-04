@@ -1,0 +1,95 @@
+{
+  "adjusted_view_if_quarantined": {
+    "correct_packets": 8,
+    "evaluable_packets": 8,
+    "evaluable_pairs": 4,
+    "fully_correct_pairs": 4,
+    "internal_triage_only": true
+  },
+  "autopsy_calls": {
+    "gov_calls": 0,
+    "holo_calls": 0,
+    "judge_calls": 0,
+    "provider_calls": 0,
+    "solo_calls": 0
+  },
+  "classification": "HOLOVERIFY_BATCH013_FP_RESCUE_002A_QUARANTINE_AUTOPSY_NO_PROVIDER",
+  "claim_boundary": {
+    "allowed_internal_wording": "The Batch013 FP rescue run completed 50/50 provider calls with no provider failures. One scored miss appears to be a packet/key defect: the ALLOW sibling required a clinician order that was not present in the visible sources. After quarantining that pair, the remaining four pairs were clean.",
+    "not_allowed": [
+      "public benchmark evidence",
+      "public error-rate denominator",
+      "claim that Holo achieved 5/5 pairs",
+      "claim that the original 9/10 score should be silently changed",
+      "patching Holo before packet/key review"
+    ]
+  },
+  "created_at": "2026-07-04",
+  "finding": "LIKELY_PACKET_KEY_DEFECT_ALLOW_UNSUPPORTED_BY_VISIBLE_SOURCES",
+  "gov_baton_summary": {
+    "blocked_move": "do not invent source IDs",
+    "repair_target": "preserve source-grounded reasoning",
+    "route_verdict": "CONTINUE"
+  },
+  "packet": {
+    "legacy_packet_id": "HVSF-FACTORY13X-002-A",
+    "opaque_runtime_id": "SFF13FP-948125C8E4C58F5375D7",
+    "pair_id": "HVSF-FACTORY13X-002",
+    "scoring_map_truth": "ALLOW",
+    "source_domain": "Synthetic Clinical medication activation controls"
+  },
+  "raw_scored_result_before_quarantine": {
+    "correct_packets": 9,
+    "fully_correct_pairs": 4,
+    "incorrect_packets": 1,
+    "packets": 10,
+    "pairs": 5
+  },
+  "recommendation": {
+    "do_not_patch_holo_from_this_result": true,
+    "preserve_live_run_as_is": true,
+    "quarantine_packet": "HVSF-FACTORY13X-002-A",
+    "retire_pair_unless_regenerated": "HVSF-FACTORY13X-002",
+    "replacement_requirement": "Either add explicit clinician order support to the ALLOW sibling or change the visible policy so clinician order is not required."
+  },
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch013_fp_rescue_2026_07_04/live_runs/run_20260704T010056Z",
+  "selector_result": {
+    "selected_artifact_id": "ART-003",
+    "selected_verdict": "ESCALATE",
+    "selector_policy": "SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03"
+  },
+  "source_policy_required_fields": [
+    "case",
+    "dose plan",
+    "pharmacy review",
+    "clinician order",
+    "interaction disposition"
+  ],
+  "source_support_observed": {
+    "case": true,
+    "clinician_order": false,
+    "dose_plan": true,
+    "interaction_disposition": true,
+    "pharmacy_review": true
+  },
+  "worker_trace": [
+    {
+      "artifact_id": "ART-001",
+      "open_blocker": "missing clinician order reference",
+      "role": "W1",
+      "verdict": "ESCALATE"
+    },
+    {
+      "artifact_id": "ART-002",
+      "open_blocker": "",
+      "role": "W2",
+      "verdict": "ALLOW"
+    },
+    {
+      "artifact_id": "ART-003",
+      "open_blocker": "Clinician order missing from source scope",
+      "role": "W3",
+      "verdict": "ESCALATE"
+    }
+  ]
+}

@@ -104,15 +104,19 @@ def posthoc_score(run_dir: Path) -> dict[str, Any]:
         pair_results[str(truth_meta.get("pair_id"))].append(scored)
 
     pair_rows: list[dict[str, Any]] = []
+    complete_pair_count = 0
     both_siblings_correct = 0
     for pair_id, rows in sorted(pair_results.items()):
-        pair_correct = len(rows) == 2 and all(row["correct"] for row in rows)
+        pair_complete = len(rows) == 2
+        complete_pair_count += 1 if pair_complete else 0
+        pair_correct = pair_complete and all(row["correct"] for row in rows)
         both_siblings_correct += 1 if pair_correct else 0
         pair_rows.append(
             {
                 "pair_id": pair_id,
                 "packet_count": len(rows),
-                "both_siblings_correct": pair_correct,
+                "pair_group_complete": pair_complete,
+                "complete_pair_correct": pair_correct,
                 "rows": sorted(rows, key=lambda item: str(item.get("sibling"))),
             }
         )
@@ -147,7 +151,14 @@ def posthoc_score(run_dir: Path) -> dict[str, Any]:
         "packet_count": len(scored_rows),
         "correct_count": correct,
         "incorrect_count": len(scored_rows) - correct,
-        "pair_count": len(pair_rows),
+        "pair_count": complete_pair_count,
+        "complete_pair_count": complete_pair_count,
+        "legacy_pair_group_count": len(pair_rows),
+        "partial_pair_group_count": len(pair_rows) - complete_pair_count,
+        "pair_count_note": (
+            "pair_count means complete sibling pairs only. Legacy pair groups with only one sibling "
+            "are reported in legacy_pair_group_count and do not create pair-level evidence."
+        ),
         "pairs_both_siblings_correct": both_siblings_correct,
         "score_rows": sorted(scored_rows, key=lambda item: str(item.get("legacy_packet_id"))),
         "pair_rows": pair_rows,
@@ -156,10 +167,16 @@ def posthoc_score(run_dir: Path) -> dict[str, Any]:
         "token_totals_by_provider": dict(token_totals_by_provider),
         "role_counts": dict(role_counts),
         "claim_boundary": {
-            "allowed_internal_claim_if_clean": "Holo solved both siblings for the selected Batch016 hard-authority wrong-verdict rescue pairs after blind runtime execution and post-freeze scoring.",
+            "allowed_internal_claim_if_clean": (
+                "V5 Tier 1 patch validation passed on 2/2 selected ESCALATE-side false-closure "
+                "packets after blind runtime execution and post-freeze scoring."
+            ),
             "not_allowed": [
                 "public error-rate claim",
                 "general model superiority claim",
+                "complete-pair claim unless complete_pair_count is greater than zero",
+                "both-siblings claim for Tier 1 B-side-only patch validation",
+                "FPR/FNR claim from this selected patch-validation denominator",
                 "rate claim from 14 selected seam pairs",
                 "claim before independent audit reviews trace and scorer",
             ],

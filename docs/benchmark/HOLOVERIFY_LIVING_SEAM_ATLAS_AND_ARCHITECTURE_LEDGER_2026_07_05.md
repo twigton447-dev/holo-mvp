@@ -56,7 +56,7 @@ Phase 1 workstreams:
 | Workstream | Purpose | Denominator treatment | Provider approval status |
 |---|---|---|---|
 | Strict public denominator work | Build clean balanced ALLOW/ESCALATE packets toward 762 total | Public denominator only after freeze, clean runtime controls, and trace-bound scoring | Requires separate explicit approval per run |
-| Internal directional rescue work | Validate V5 behavior on selected solo-failure rescue seams | Internal-only; not public FPR/FNR or benchmark denominator | No Tier 3 approval allowed until eligibility gate clears |
+| Internal directional rescue work | Validate V5 behavior on selected solo-failure rescue seams | Internal-only; not public FPR/FNR or benchmark denominator | Tier 3 FN package build is accounting-safe after Scout 3 promotion review; live providers require separate explicit approval |
 | Seam mining work | Find and audit new FN_FALSE_ALLOW / FP_OVERBLOCK candidates | Candidate discovery only; no denominator credit by itself | No provider approval from mining artifacts alone |
 
 ## 3. Solo Failure Factory
@@ -122,18 +122,33 @@ Merged clean internal gate:
 - Replacement supplement: 2/2 packets, 1/1 pair.
 - Merged clean internal gate: 15/15 score-valid packet diagnostic and 7/7 clean internal pair gate.
 - Tier 2 gate result: unlocked only as an internal directional FN_FALSE_ALLOW rescue expansion gate.
-- Tier 3 FN live status: `BLOCKED_PENDING_ADDITIONAL_CLEAN_FN_PAIRS`.
-- No Tier 3 provider approval is allowed yet.
+- Tier 3 FN build status: `UNLOCKED_ACCOUNTING_SAFE_TO_BUILD_RUNTIME_PACKAGE`.
+- Tier 3 live provider approval status: not granted by this ledger update.
 
 Tier 3 FN eligibility audit:
 
 | Metric | Count |
 |---|---:|
-| Clean promoted FN pairs currently eligible | 6 |
+| Clean promoted FN pairs currently eligible | 8 |
 | Tier 3 target clean FN pairs | 7 |
-| Deficit | 1 |
+| Deficit | 0 |
 
-Tier 3 Holo rescue remains blocked because the current eligible clean FN pool is below the 7-pair target. The next allowed move is no-provider packet/key audit and seam promotion, or new seam mining, not live Tier 3 execution.
+Tier 3 FN Holo rescue is unlocked for runtime-package build because the eligible clean FN pool now meets or exceeds the 7-pair target. A live run still requires separate explicit provider approval.
+
+Expected full HoloGov call count for a 7-pair Tier 3 FN package:
+
+| Route slot | Calls |
+|---|---:|
+| W1 | 14 |
+| G1 | 14 |
+| W2 | 14 |
+| G2 | 14 |
+| W3 | 14 |
+| Worker calls | 42 |
+| Gov calls | 28 |
+| Total provider calls | 70 |
+
+Accounting rule: build exactly 7 clean FN pairs / 14 packets unless a separate plan updates the denominator and provider-call math. An 8-pair run would require a new accounting plan.
 
 Tier 3 targeted-mining solo scout:
 
@@ -169,6 +184,24 @@ New useful FN pair from Scout 2:
 - `T3FN2-MINE-003`
 
 Scout 2 updates the internal clean FN pool from 5 pairs to 6 pairs. Tier 3 target remains 7 clean FN pairs, leaving a deficit of 1. This remains internal directional mining only; it is not public benchmark evidence and does not create a global FNR claim.
+
+Tier 3 targeted-mining solo Scout 3:
+
+| Metric | Count |
+|---|---:|
+| Solo provider calls completed | 60/60 |
+| Provider failures | 0 |
+| KNEW_ADMISSIBLE | 58/60 |
+| FALSE_NEGATIVE_ALLOW_ON_ESCALATE | 2/60 |
+| False positives | 0 |
+| Parse/admissibility failures | 0 |
+
+Promoted Scout 3 FN candidates:
+
+- `T3FN3-MINE-003`
+- `T3FN3-MINE-009`
+
+Scout 3 promotion updates the internal clean FN pool from 6 pairs to 8 pairs. Tier 3 target remains 7 clean FN pairs, leaving a deficit of 0. This unlocks Tier 3 FN Holo rescue for runtime-package build only; it remains internal directional FN rescue, not public benchmark evidence and not a global FNR claim.
 
 ## 5. Quarantine Register
 
@@ -213,9 +246,11 @@ Internal-only claims:
 - V5 Tier 1 patch-validation pass.
 - V5 Tier 2 raw 13/14, quarantine, replacement supplement, and merged clean internal gate.
 - Tier 2 internal gate restoration after replacement pair.
-- Tier 3 FN status is blocked pending 1 additional clean promoted FN pair.
+- Tier 3 FN status is accounting-safe to build as a 7-pair / 14-packet runtime package after Scout 3 promotion review.
 - Tier 3 targeted-mining solo scout found 2 useful FN pairs, `T3FN-MINE-006` and `T3FN-MINE-010`, for internal directional mining only.
 - Tier 3 targeted-mining solo Scout 2 found 1 useful FN pair, `T3FN2-MINE-003`, for internal directional mining only.
+- Tier 3 targeted-mining solo Scout 3 promoted 2 FN candidates, `T3FN3-MINE-003` and `T3FN3-MINE-009`, for internal directional mining only.
+- A 7-pair / 14-packet full HoloGov Tier 3 FN package expects 70 provider calls: W1 x14, G1 x14, W2 x14, G2 x14, W3 x14.
 
 Forbidden claims:
 
@@ -231,6 +266,10 @@ Forbidden claims:
 - "Parse/admissibility-only failures are wrong-verdict failures."
 - "Quarantined packet/key defects can stay in clean denominators."
 - "Tier 3 FN provider approval is allowed now."
+- "Tier 3 FN Holo rescue may run live without separate explicit approval."
+- "Tier 3 FN rescue is public benchmark evidence."
+- "Tier 3 FN rescue proves global FNR."
+- "An 8-pair Tier 3 FN run can use the 70-call plan."
 - "The Tier 2 replacement supplement creates a fresh Tier 3 candidate."
 - "Five clean promoted FN pairs satisfy the seven-pair Tier 3 target."
 - "The targeted-mining solo scout is public benchmark evidence."
@@ -238,6 +277,8 @@ Forbidden claims:
 - "Scout 2 is public benchmark evidence."
 - "Scout 2 proves global FNR."
 - "Six clean promoted FN pairs satisfy the seven-pair Tier 3 target."
+- "Scout 3 is public benchmark evidence."
+- "Scout 3 proves global FNR."
 
 ## Source Map
 
@@ -256,3 +297,7 @@ Forbidden claims:
 - Tier 3 targeted-mining solo scout rollup memo: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_SOLO_ROLLUP_2026_07_05.md`
 - Tier 3 targeted-mining Scout 2 solo rollup: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.json`
 - Tier 3 targeted-mining Scout 2 solo rollup memo: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.md`
+- Tier 3 FN rescue eligibility audit: `docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_ELIGIBILITY_AUDIT_2026_07_05.json`
+- Tier 3 FN rescue eligibility audit memo: `docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_ELIGIBILITY_AUDIT_2026_07_05.md`
+- Tier 3 targeted-mining Scout 3 solo rollup: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.json`
+- Tier 3 targeted-mining Scout 3 solo rollup memo: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.md`

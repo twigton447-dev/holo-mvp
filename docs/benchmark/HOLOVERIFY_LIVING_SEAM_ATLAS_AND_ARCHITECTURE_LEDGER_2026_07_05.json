@@ -49,7 +49,7 @@
       "internal_directional_rescue_work": {
         "purpose": "Validate V5 behavior on selected solo-failure rescue seams.",
         "denominator_treatment": "Internal-only; not public FPR/FNR or benchmark denominator.",
-        "provider_approval_status": "No Tier 3 approval allowed until eligibility gate clears."
+        "provider_approval_status": "Tier 3 FN package build is accounting-safe after Scout 3 promotion review; live providers require separate explicit approval."
       },
       "seam_mining_work": {
         "purpose": "Find and audit new FN_FALSE_ALLOW / FP_OVERBLOCK candidates.",
@@ -124,7 +124,7 @@
       "merged_score_valid_packet_diagnostic": "15/15",
       "merged_clean_internal_pair_gate": "7/7",
       "tier2_gate_result": "UNLOCKED_INTERNAL_DIRECTIONAL_FN_RESCUE_ONLY",
-      "tier3_readiness": "BLOCKED_PENDING_ADDITIONAL_CLEAN_FN_PAIRS",
+      "tier3_readiness": "UNLOCKED_ACCOUNTING_SAFE_TO_BUILD_RUNTIME_PACKAGE",
       "tier3_conditions": [
         "separate preflight",
         "exact approval",
@@ -134,11 +134,33 @@
       ]
     },
     "tier3_fn_eligibility_audit": {
-      "clean_promoted_fn_pairs_currently_eligible": 6,
+      "clean_promoted_fn_pairs_currently_eligible": 8,
       "tier3_target_clean_fn_pairs": 7,
-      "deficit_clean_fn_pairs": 1,
-      "status": "BLOCKED_PENDING_ADDITIONAL_CLEAN_FN_PAIRS",
+      "deficit_clean_fn_pairs": 0,
+      "status": "UNLOCKED_ACCOUNTING_SAFE_TO_BUILD_RUNTIME_PACKAGE",
+      "tier3_fn_holo_rescue_unlocked_for_package_build": true,
+      "tier3_fn_holo_rescue_live_provider_approval_granted": false,
       "provider_approval_allowed": false,
+      "expected_full_hologov_calls_for_7_pair_package": {
+        "pair_count": 7,
+        "packet_count": 14,
+        "route": [
+          "W1",
+          "G1",
+          "W2",
+          "G2",
+          "W3"
+        ],
+        "W1_calls": 14,
+        "G1_calls": 14,
+        "W2_calls": 14,
+        "G2_calls": 14,
+        "W3_calls": 14,
+        "worker_calls": 42,
+        "gov_calls": 28,
+        "total_provider_calls": 70,
+        "accounting_rule": "Build exactly 7 clean FN pairs / 14 packets unless a separate plan updates the denominator and provider-call math. An 8-pair run requires a new accounting plan."
+      },
       "latest_targeted_mining_solo_scout": {
         "commit": "bef1da778 benchmark: preserve tier3 fn solo scout results",
         "artifacts": [
@@ -178,15 +200,38 @@
         "clean_fn_pool_after_scout": 6,
         "claim_boundary": "Internal directional mining only; not public benchmark evidence and not a global FNR claim."
       },
+      "latest_targeted_mining_solo_scout3": {
+        "commit": null,
+        "artifacts": [
+          "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.json",
+          "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.md"
+        ],
+        "solo_provider_calls_completed": "60/60",
+        "provider_failures": 0,
+        "KNEW_ADMISSIBLE": "58/60",
+        "FALSE_NEGATIVE_ALLOW_ON_ESCALATE": "2/60",
+        "false_positives": 0,
+        "parse_admissibility_failures": 0,
+        "promoted_scout3_fn_candidates": [
+          "T3FN3-MINE-003",
+          "T3FN3-MINE-009"
+        ],
+        "clean_fn_pool_before_scout3_promotion": 6,
+        "clean_fn_pool_after_scout3_promotion": 8,
+        "tier3_target_clean_fn_pairs": 7,
+        "deficit_after_scout3_promotion": 0,
+        "claim_boundary": "Internal directional FN rescue only; not public benchmark evidence and not a global FNR claim."
+      },
       "next_allowed_moves": [
-        "no-provider packet/key audit over reviewable FN candidates",
-        "promote only candidates whose visible sources fully support the key",
-        "mine new FN_FALSE_ALLOW seams if the reviewable pool is insufficient"
+        "build a 7-pair / 14-packet Tier 3 FN runtime-only package",
+        "preflight the runtime-only manifest with no truth, no expected verdict, and no scoring map",
+        "seek separate explicit live provider approval before any Tier 3 Holo run"
       ],
       "not_allowed": [
-        "Tier 3 live provider approval",
-        "Tier 3 Holo rescue approval from current 6-pair pool",
-        "using quarantined packet/key defects in the clean FN denominator"
+        "running Tier 3 live without separate explicit provider approval",
+        "using quarantined packet/key defects in the clean FN denominator",
+        "using the 70-call plan for an 8-pair / 16-packet run",
+        "making public benchmark or global FNR claims from Tier 3 FN rescue"
       ]
     }
   },
@@ -262,9 +307,11 @@
       "V5 Tier 1 patch-validation pass.",
       "V5 Tier 2 raw 13/14, quarantine, replacement supplement, and merged clean internal gate.",
       "Tier 2 internal gate restoration after the replacement pair.",
-      "Tier 3 FN status is blocked pending 1 additional clean promoted FN pair.",
+      "Tier 3 FN status is accounting-safe to build as a 7-pair / 14-packet runtime package after Scout 3 promotion review.",
       "Tier 3 targeted-mining solo scout found 2 useful FN pairs, T3FN-MINE-006 and T3FN-MINE-010, for internal directional mining only.",
-      "Tier 3 targeted-mining solo Scout 2 found 1 useful FN pair, T3FN2-MINE-003, for internal directional mining only."
+      "Tier 3 targeted-mining solo Scout 2 found 1 useful FN pair, T3FN2-MINE-003, for internal directional mining only.",
+      "Tier 3 targeted-mining solo Scout 3 promoted 2 FN candidates, T3FN3-MINE-003 and T3FN3-MINE-009, for internal directional mining only.",
+      "A 7-pair / 14-packet full HoloGov Tier 3 FN package expects 70 provider calls: W1 x14, G1 x14, W2 x14, G2 x14, W3 x14."
     ],
     "forbidden_claims": [
       "The current public denominator is 614.",
@@ -279,13 +326,19 @@
       "Parse/admissibility-only failures are wrong-verdict failures.",
       "Quarantined packet/key defects can stay in clean denominators.",
       "Tier 3 FN provider approval is allowed now.",
+      "Tier 3 FN Holo rescue may run live without separate explicit approval.",
+      "Tier 3 FN rescue is public benchmark evidence.",
+      "Tier 3 FN rescue proves global FNR.",
+      "An 8-pair Tier 3 FN run can use the 70-call plan.",
       "The Tier 2 replacement supplement creates a fresh Tier 3 candidate.",
       "Five clean promoted FN pairs satisfy the seven-pair Tier 3 target.",
       "The targeted-mining solo scout is public benchmark evidence.",
       "The targeted-mining solo scout proves global FNR.",
       "Scout 2 is public benchmark evidence.",
       "Scout 2 proves global FNR.",
-      "Six clean promoted FN pairs satisfy the seven-pair Tier 3 target."
+      "Six clean promoted FN pairs satisfy the seven-pair Tier 3 target.",
+      "Scout 3 is public benchmark evidence.",
+      "Scout 3 proves global FNR."
     ]
   },
   "source_map": [
@@ -303,6 +356,10 @@
     "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_SOLO_ROLLUP_2026_07_05.json",
     "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_SOLO_ROLLUP_2026_07_05.md",
     "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.json",
-    "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.md"
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_ELIGIBILITY_AUDIT_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_ELIGIBILITY_AUDIT_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.md"
   ]
 }

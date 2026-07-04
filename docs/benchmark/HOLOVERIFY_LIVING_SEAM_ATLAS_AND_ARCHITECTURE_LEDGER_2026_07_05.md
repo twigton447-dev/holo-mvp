@@ -51,6 +51,14 @@ Current strict blind-120 status:
 - Current side-specific sample size is 60 per side, so the side-specific Wilson upper bound is still above the Phase 1 target band.
 - Phase 1 needs 321 more clean ALLOW packets and 321 more clean ESCALATE packets.
 
+Phase 1 workstreams:
+
+| Workstream | Purpose | Denominator treatment | Provider approval status |
+|---|---|---|---|
+| Strict public denominator work | Build clean balanced ALLOW/ESCALATE packets toward 762 total | Public denominator only after freeze, clean runtime controls, and trace-bound scoring | Requires separate explicit approval per run |
+| Internal directional rescue work | Validate V5 behavior on selected solo-failure rescue seams | Internal-only; not public FPR/FNR or benchmark denominator | No Tier 3 approval allowed until eligibility gate clears |
+| Seam mining work | Find and audit new FN_FALSE_ALLOW / FP_OVERBLOCK candidates | Candidate discovery only; no denominator credit by itself | No provider approval from mining artifacts alone |
+
 ## 3. Solo Failure Factory
 
 Solo Failure Factory scoreboard totals:
@@ -113,7 +121,19 @@ Merged clean internal gate:
 - Clean diagnostic after quarantine: 13/13 packets, 6/6 pairs.
 - Replacement supplement: 2/2 packets, 1/1 pair.
 - Merged clean internal gate: 15/15 score-valid packet diagnostic and 7/7 clean internal pair gate.
-- Tier 3 readiness: unlocked only as an internal directional FN_FALSE_ALLOW rescue expansion gate, subject to separate preflight, approval, runtime-only manifest, trace freeze, and post-hoc scoring.
+- Tier 2 gate result: unlocked only as an internal directional FN_FALSE_ALLOW rescue expansion gate.
+- Tier 3 FN live status: `BLOCKED_PENDING_ADDITIONAL_CLEAN_FN_PAIRS`.
+- No Tier 3 provider approval is allowed yet.
+
+Tier 3 FN eligibility audit:
+
+| Metric | Count |
+|---|---:|
+| Clean promoted FN pairs currently eligible | 3 |
+| Tier 3 target clean FN pairs | 7 |
+| Deficit | 4 |
+
+Tier 3 is blocked because the current eligible clean FN pool is below the 7-pair target. The next allowed move is no-provider packet/key audit and seam promotion, or new seam mining, not live Tier 3 execution.
 
 ## 5. Quarantine Register
 
@@ -123,6 +143,12 @@ Packet/key defects:
 |---|---|---|---|
 | `HVSF-FACTORY14F-017-B` | `PACKET_KEY_DEFECT_CANDIDATE` | Runtime-visible sources omitted explicit `current_cycle=2026-Q3` needed by key | Excluded from clean packet denominator; entire pair excluded from clean pair denominator |
 | `HVSF-FACTORY13X-002` / `HVSF-FACTORY13X-002-A` | quarantine recommended | Likely packet/key defect: ALLOW unsupported by visible sources | Exclude pending review |
+
+Tier 3 FN exclusions:
+
+- `HVSF-FACTORY14F-017`: excluded from the clean Tier 3 FN pool because the original B packet is a packet/key defect candidate; the replacement pair is Tier 2 supplement accounting, not a fresh Tier 3 candidate.
+- `HVSF-FACTORY13X-002`: excluded pending quarantine review because the ALLOW key appears unsupported by visible sources.
+- `HVSF-FACTORY-001`: excluded from fresh Tier 3 FN rescue because the current readiness audit treats it as patch-validation-only, not fresh rescue evidence.
 
 Underspecified packets:
 
@@ -151,7 +177,8 @@ Internal-only claims:
 - Solo Failure Factory totals and seam counts.
 - V5 Tier 1 patch-validation pass.
 - V5 Tier 2 raw 13/14, quarantine, replacement supplement, and merged clean internal gate.
-- Tier 3 internal readiness after the replacement pair, subject to its own controls.
+- Tier 2 internal gate restoration after replacement pair.
+- Tier 3 FN status is blocked pending 4 additional clean promoted FN pairs.
 
 Forbidden claims:
 
@@ -166,6 +193,9 @@ Forbidden claims:
 - "HoloVerify beats all models."
 - "Parse/admissibility-only failures are wrong-verdict failures."
 - "Quarantined packet/key defects can stay in clean denominators."
+- "Tier 3 FN provider approval is allowed now."
+- "The Tier 2 replacement supplement creates a fresh Tier 3 candidate."
+- "Three clean promoted FN pairs satisfy the seven-pair Tier 3 target."
 
 ## Source Map
 
@@ -179,3 +209,4 @@ Forbidden claims:
 - Tier 2 replacement rollup: `docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_REPLACEMENT_PAIR_LIVE_ROLLUP_2026_07_04.json`
 - Tier 2 merged gate update: `docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_MERGED_GATE_UPDATE_2026_07_04.json`
 - Tier 2 replacement accounting rule: `docs/benchmark/HOLOVERIFY_V5_TIER2_REPLACEMENT_PAIR_ACCOUNTING_RULE_2026_07_04.json`
+- Tier 3 FN readiness audit: `docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_CANDIDATE_READINESS_2026_07_05.json`

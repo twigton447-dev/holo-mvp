@@ -39,7 +39,24 @@
     "remaining_packets": 642,
     "remaining_allow_packets": 321,
     "remaining_escalate_packets": 321,
-    "plain_english": "If Holo has zero observed misses, the Wilson 95% upper bound asks how high the true error rate could still plausibly be. With 381 clean packets on one side, the side-specific Wilson 95% upper bound is just under 1%, which is why Phase 1 targets 381 ALLOW and 381 ESCALATE packets."
+    "plain_english": "If Holo has zero observed misses, the Wilson 95% upper bound asks how high the true error rate could still plausibly be. With 381 clean packets on one side, the side-specific Wilson 95% upper bound is just under 1%, which is why Phase 1 targets 381 ALLOW and 381 ESCALATE packets.",
+    "workstreams": {
+      "strict_public_denominator_work": {
+        "purpose": "Build clean balanced ALLOW/ESCALATE packets toward 762 total.",
+        "denominator_treatment": "Public denominator only after freeze, clean runtime controls, and trace-bound scoring.",
+        "provider_approval_status": "Requires separate explicit approval per run."
+      },
+      "internal_directional_rescue_work": {
+        "purpose": "Validate V5 behavior on selected solo-failure rescue seams.",
+        "denominator_treatment": "Internal-only; not public FPR/FNR or benchmark denominator.",
+        "provider_approval_status": "No Tier 3 approval allowed until eligibility gate clears."
+      },
+      "seam_mining_work": {
+        "purpose": "Find and audit new FN_FALSE_ALLOW / FP_OVERBLOCK candidates.",
+        "denominator_treatment": "Candidate discovery only; no denominator credit by itself.",
+        "provider_approval_status": "No provider approval from mining artifacts alone."
+      }
+    }
   },
   "solo_failure_factory": {
     "pairs_inspected": 210,
@@ -106,13 +123,31 @@
       },
       "merged_score_valid_packet_diagnostic": "15/15",
       "merged_clean_internal_pair_gate": "7/7",
-      "tier3_readiness": "UNLOCKED_INTERNAL_DIRECTIONAL_FN_RESCUE_ONLY",
+      "tier2_gate_result": "UNLOCKED_INTERNAL_DIRECTIONAL_FN_RESCUE_ONLY",
+      "tier3_readiness": "BLOCKED_PENDING_ADDITIONAL_CLEAN_FN_PAIRS",
       "tier3_conditions": [
         "separate preflight",
         "exact approval",
         "runtime-only manifest",
         "trace freeze",
         "post-hoc scoring"
+      ]
+    },
+    "tier3_fn_eligibility_audit": {
+      "clean_promoted_fn_pairs_currently_eligible": 3,
+      "tier3_target_clean_fn_pairs": 7,
+      "deficit_clean_fn_pairs": 4,
+      "status": "BLOCKED_PENDING_ADDITIONAL_CLEAN_FN_PAIRS",
+      "provider_approval_allowed": false,
+      "next_allowed_moves": [
+        "no-provider packet/key audit over reviewable FN candidates",
+        "promote only candidates whose visible sources fully support the key",
+        "mine new FN_FALSE_ALLOW seams if the reviewable pool is insufficient"
+      ],
+      "not_allowed": [
+        "Tier 3 live provider approval",
+        "Tier 3 runtime package approval from current 3-pair pool",
+        "using quarantined packet/key defects in the clean FN denominator"
       ]
     }
   },
@@ -136,6 +171,20 @@
       {
         "item": "HVSF-FACTORY14F-017-B",
         "reason": "Stale-current-cycle trap underspecified because the packet did not expose the current cycle required to score the B-side ESCALATE key cleanly."
+      }
+    ],
+    "tier3_fn_exclusions": [
+      {
+        "item": "HVSF-FACTORY14F-017",
+        "reason": "Original B packet is a PACKET_KEY_DEFECT_CANDIDATE; replacement pair is Tier 2 supplement accounting, not a fresh Tier 3 candidate."
+      },
+      {
+        "item": "HVSF-FACTORY13X-002 / HVSF-FACTORY13X-002-A",
+        "reason": "Quarantine recommended because the ALLOW key appears unsupported by visible sources."
+      },
+      {
+        "item": "HVSF-FACTORY-001",
+        "reason": "Excluded from fresh Tier 3 FN rescue because readiness audit treats it as patch-validation-only, not fresh rescue evidence."
       }
     ],
     "stale_or_invalid_lanes": [
@@ -173,7 +222,8 @@
       "Solo Failure Factory totals and seam counts.",
       "V5 Tier 1 patch-validation pass.",
       "V5 Tier 2 raw 13/14, quarantine, replacement supplement, and merged clean internal gate.",
-      "Tier 3 internal readiness after the replacement pair, subject to its own controls."
+      "Tier 2 internal gate restoration after the replacement pair.",
+      "Tier 3 FN status is blocked pending 4 additional clean promoted FN pairs."
     ],
     "forbidden_claims": [
       "The current public denominator is 614.",
@@ -186,7 +236,10 @@
       "HoloVerify has zero true error rate.",
       "HoloVerify beats all models.",
       "Parse/admissibility-only failures are wrong-verdict failures.",
-      "Quarantined packet/key defects can stay in clean denominators."
+      "Quarantined packet/key defects can stay in clean denominators.",
+      "Tier 3 FN provider approval is allowed now.",
+      "The Tier 2 replacement supplement creates a fresh Tier 3 candidate.",
+      "Three clean promoted FN pairs satisfy the seven-pair Tier 3 target."
     ]
   },
   "source_map": [
@@ -199,6 +252,7 @@
     "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_PACKET_DEFECT_REVIEW_2026_07_04.json",
     "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_REPLACEMENT_PAIR_LIVE_ROLLUP_2026_07_04.json",
     "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_MERGED_GATE_UPDATE_2026_07_04.json",
-    "docs/benchmark/HOLOVERIFY_V5_TIER2_REPLACEMENT_PAIR_ACCOUNTING_RULE_2026_07_04.json"
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_REPLACEMENT_PAIR_ACCOUNTING_RULE_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_CANDIDATE_READINESS_2026_07_05.json"
   ]
 }

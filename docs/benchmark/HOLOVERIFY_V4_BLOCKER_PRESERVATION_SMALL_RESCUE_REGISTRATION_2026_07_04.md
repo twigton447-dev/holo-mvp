@@ -58,13 +58,19 @@ A packet was eligible only if:
 | `HVSF-FACTORY16-010` | `B` | `SFF16HA-EAAD2AFD82C919B7ECCB` | `ALLOW / ESCALATE / ALLOW` | `W2` | Banking relationship and transaction controls | Middle-turn blocker washed out by final ALLOW. |
 | `HVSF-FACTORY16-020` | `B` | `SFF16HA-B1376D9F72BE680784D1` | `ESCALATE / ALLOW / ALLOW` | `W1` | Trade-finance payment release controls | Second early-blocker washout case in a different domain. |
 
-## Runtime Manifest
+## Runtime-Only Manifest
 
-The registration JSON contains an embedded no-truth runtime manifest:
+The live runner must not use this registration file. This registration file contains audit context and post-hoc selection rationale.
 
-`runtime_manifest_no_truth_sha256 = 5dbc251615490d9c94ec136c594b0ea1024a759d2918f8e8f8a5e42be34a433e`
+The live runner must use the separate runtime-only manifest:
 
-The embedded runtime manifest contains only:
+`docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json`
+
+Runtime-only manifest SHA-256:
+
+`4f8ec7a398b4b98be98695882ee90554884b2ffd939c6af2a1db41efc2553f60`
+
+That file contains only:
 
 - opaque runtime IDs
 - runtime payload refs
@@ -88,6 +94,8 @@ No providers were called during registration.
 
 No solo, Holo live, Gov live, or judges ran during registration.
 
-## Exact Approval Sentence
+## Live Approval Ownership
 
-`I approve live provider execution for HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_PATCH_VALIDATION_V0 using only the five opaque Batch016 runtime payloads registered in docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_REGISTRATION_2026_07_04.json with runtime_manifest_no_truth_sha256 5dbc251615490d9c94ec136c594b0ea1024a759d2918f8e8f8a5e42be34a433e, current selector SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04, current worker contract WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04, and exactly 25 provider calls: W1 xai/grok-3-mini x5, G1 minimax/MiniMax-M2.5-highspeed x5, W2 openai/gpt-5.4-mini x5, G2 minimax/MiniMax-M2.5-highspeed x5, W3 minimax/MiniMax-M2.5-highspeed x5. No solo, no judges, no scoring map before trace freeze, no substitutions, no public claims.`
+The exact approval sentence lives in the preflight file, not in this registration file.
+
+The registration JSON is audit/scoring context only and is not live runner input.

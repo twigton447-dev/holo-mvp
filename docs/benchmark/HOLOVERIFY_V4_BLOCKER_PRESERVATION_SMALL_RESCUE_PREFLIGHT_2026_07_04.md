@@ -38,7 +38,27 @@ Selected packets:
 
 Runtime manifest hash:
 
-`5dbc251615490d9c94ec136c594b0ea1024a759d2918f8e8f8a5e42be34a433e`
+`4f8ec7a398b4b98be98695882ee90554884b2ffd939c6af2a1db41efc2553f60`
+
+Runtime-only manifest path:
+
+`docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json`
+
+Exact live wrapper path:
+
+`docs/benchmark/run_holoverify_v4_blocker_preservation_small_rescue_live_2026_07_04.py`
+
+Exact live command:
+
+```bash
+python3 docs/benchmark/run_holoverify_v4_blocker_preservation_small_rescue_live_2026_07_04.py --run-live --approval-statement "$APPROVAL"
+```
+
+Wrapper preflight artifact:
+
+`docs/benchmark/holoverify_v4_blocker_preservation_small_rescue_2026_07_04/live_runs/preflight_20260704T045851Z/v4_blocker_preservation_small_rescue_live_preflight.json`
+
+The wrapper preflight passed with `provider_calls_not_yet_made=true`, `registration_json_live_input=false`, `runtime_input_leakage_hits=[]`, and `prompt_probe_leakage_hits=[]`.
 
 ## Preflight Checks
 
@@ -50,7 +70,9 @@ Runtime manifest hash:
 | Worker required fields include blocker resolution | `PASS` | Prompt probe requires `blocker_resolution=...`. |
 | Gov baton can carry blocker ledger | `PASS` | Probe baton includes `blocker_ledger` with `ART-001-BLK-PREFLIGHT`. |
 | Selector criteria include blocker fields | `PASS` | `blocker_resolution_clean`, `blocker_resolution_complete`, `source_boundary_open_with_blocker`. |
-| No scoring map before trace freeze | `PASS` | Future live input must use only `runtime_manifest_no_truth`. |
+| Runtime-only manifest schema | `PASS` | Top level has only `classification`, `packet_count`, `runtime_consumable`, `packets`; packet rows have only opaque ID, payload ref, payload hash. |
+| Live command uses runtime-only manifest | `PASS` | Wrapper path points to the separate runtime-only manifest, not registration JSON. |
+| No scoring map before trace freeze | `PASS` | Future live input must use only the separate runtime-only manifest. |
 | No providers called | `PASS` | `0` provider calls. |
 | No Holo live run | `PASS` | `0` live Holo calls. |
 | No solo called | `PASS` | `0` solo calls. |
@@ -98,7 +120,7 @@ Expected provider calls: `25`
 
 ## Exact Approval Sentence
 
-`I approve live provider execution for HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_PATCH_VALIDATION_V0 using only the five opaque Batch016 runtime payloads registered in docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_REGISTRATION_2026_07_04.json with runtime_manifest_no_truth_sha256 5dbc251615490d9c94ec136c594b0ea1024a759d2918f8e8f8a5e42be34a433e, current selector SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04, current worker contract WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04, and exactly 25 provider calls: W1 xai/grok-3-mini x5, G1 minimax/MiniMax-M2.5-highspeed x5, W2 openai/gpt-5.4-mini x5, G2 minimax/MiniMax-M2.5-highspeed x5, W3 minimax/MiniMax-M2.5-highspeed x5. No solo, no judges, no scoring map before trace freeze, no substitutions, no public claims.`
+`I approve live provider execution for HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_PATCH_VALIDATION_V0 using only runtime-only manifest docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json with SHA-256 4f8ec7a398b4b98be98695882ee90554884b2ffd939c6af2a1db41efc2553f60, selector SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04 hash 3ed2a01eb16a8ea84bd096e6c1cfd352e6b0f8f9eb7565a5327680f77fa7affe, worker contract WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04 hash 00b692a07b1036f70b0756e16458e811c7aee3afb62c1351893a4722aab9ad5a, and exactly 25 provider calls: W1 xai/grok-3-mini x5, G1 minimax/MiniMax-M2.5-highspeed x5, W2 openai/gpt-5.4-mini x5, G2 minimax/MiniMax-M2.5-highspeed x5, W3 minimax/MiniMax-M2.5-highspeed x5. PATCH VALIDATION ONLY for V4 blocker preservation on five Batch016 blocker-drop misses; not benchmark evidence and not public claim material. No solo, no judges, no scoring map before trace freeze, no mixed registration JSON before trace freeze, no substitutions, no public claims.`
 
 ## Stop Rule
 

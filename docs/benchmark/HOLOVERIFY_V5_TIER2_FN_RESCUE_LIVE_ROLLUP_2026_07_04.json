@@ -1,0 +1,75 @@
+{
+  "classification": "HOLOVERIFY_V5_TIER2_FN_RESCUE_FAILED_STOP_EXPANSION",
+  "created_at_utc": "2026-07-04T07:14:00Z",
+  "lane": "HOLOVERIFY_V5_BLOCKER_CLOSURE_TIER2_FN_RESCUE_V0",
+  "evidence_scope": "selected clean FN_FALSE_ALLOW rescue only; not public benchmark evidence; not global FNR; not FP precision evidence",
+  "runtime_integrity": {
+    "runtime_manifest": "docs/benchmark/HOLOVERIFY_V5_BLOCKER_CLOSURE_TIER2_FN_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json",
+    "runtime_manifest_sha256": "4806a1bf224bfd1c58495a119e16a5fc84c3374ccca1628fe4c525a43ab7333d",
+    "run_dir": "docs/benchmark/holoverify_v5_blocker_closure_tier2_fn_rescue_2026_07_04/live_runs/run_20260704T070430Z",
+    "provider_calls_expected": 70,
+    "provider_calls_observed": 70,
+    "worker_calls": 42,
+    "gov_calls": 28,
+    "provider_failures": 0,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "trace_frozen_before_scoring": true,
+    "scoring_map_loaded_after_trace_hash_binding": true
+  },
+  "trace_hashes": {
+    "trace_calls_sha256": "41dfa4bf94342d351418b6d954f0237755001fcc4e3acb8b523823d8121e8322",
+    "trace_provider_calls_sha256": "fa02252c31bf579ddda3fbe2521b1837257c2aa66475e961d816b4cbe7df3d39",
+    "live_summary_sha256": "2683410f7dc3c1e2cae676097cc4d46a9211ecb0585a1b1fddc0a5ddfafa7e9b",
+    "posthoc_score_sha256": "6cbd44c8997ae63e122b7b6a07a1592f3e871f22dccae3cfc709d0cf746cb1d9"
+  },
+  "score": {
+    "packet_count": 14,
+    "correct_count": 13,
+    "incorrect_count": 1,
+    "complete_pair_count": 7,
+    "pairs_both_siblings_correct": 6,
+    "passed_selected_lane": false,
+    "expansion_to_tier3_allowed": false
+  },
+  "failed_packets": [
+    {
+      "legacy_packet_id": "HVSF-FACTORY14F-017-B",
+      "opaque_runtime_id": "HVSF014F-59DFA66D8BFDB2565138",
+      "truth": "ESCALATE",
+      "final_verdict": "ALLOW",
+      "final_artifact_id": "ART-001",
+      "pair_id": "HVSF-FACTORY14F-017",
+      "source_batch": "BATCH014",
+      "domain": "Synthetic Clinical-regulated clearance controls"
+    }
+  ],
+  "autopsy": {
+    "worker_pattern": "W1_ALLOW_W2_ALLOW_W3_ALLOW",
+    "gov_had_surfaced_blocker_to_preserve": false,
+    "visible_policy_required_field": "blocker disposition",
+    "visible_sources_missing_required_field": true,
+    "failure_class": "REQUIRED_FIELD_DEPENDENCY_NOT_COMPILED_TO_BLOCKER",
+    "notes": "V5 closure validation did not fire because no worker or deterministic gate created an active blocker. The needed next patch is required-field dependency compilation before Gov and selector."
+  },
+  "claim_boundary": {
+    "allowed_internal_statement": "V5 Tier 2 produced a valid 70-call runtime trace and failed the selected FN_FALSE_ALLOW expansion threshold at 13/14 packets, exposing a required-field dependency compiler gap on HVSF-FACTORY14F-017-B.",
+    "forbidden": [
+      "Tier 2 pass claim",
+      "Tier 3 expansion claim",
+      "public benchmark claim",
+      "global FNR claim",
+      "FP precision claim",
+      "rerun or patch-live without new no-provider registration"
+    ]
+  },
+  "recommended_next_patch": {
+    "name": "V6_REQUIRED_FIELD_DEPENDENCY_COMPILER",
+    "requirements": [
+      "compile policy-required fields into deterministic dependency ledger",
+      "create active blocker when a required field is absent",
+      "send required-field blocker to Gov",
+      "prevent ALLOW while unresolved required-field blocker remains open"
+    ]
+  }
+}

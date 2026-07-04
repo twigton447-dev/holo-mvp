@@ -1,0 +1,27 @@
+{
+  "call_number": 67,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "96ed6fd0d524efa7ecbe352227cc471c8178e74cc12ef642fe97eccd2bfec2a5",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user wants a plain text record with three key=value lines. They gave us the fields: route_verdict, repair_target, blocked_move. We need to output exactly three lines, each with the key and value. The values should be taken from the given data: route_verdict=CONTINUE, repair_target=stress-test and preserve blocker ids: ART-001-BLK-C1E2EEF8, blocked_move=do not override blocker with consensus unless sources close it.\n\nWe need to ensure formatting: each line \"key=value\". The order: route_verdict, repair_target, blocked_move. No extra lines, no headings, no JSON. The prompt says \"Return the three-line status record.\" So we output:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-C1E2EEF8\nblocked_move=do not override blocker with consensus unless sources close it\n\nWe need to be careful about quoting and spaces. The user gave colon after \"repair_target:\" but we must use \"=\". The \"repair_target\" value includes colon. That's okay.\n\nPotential edge: They wrote \"repair_target=stress-test and preserve blocker ids: ART-001-BLK-C1E2EEF8\". That includes colon after \"ids\". So we need to preserve that. Just copy exactly.\n\nThus final answer is those three lines.\n\nMake sure no extra spaces at ends. Possibly include trailing newline after third line. Should be fine.\n\nThus output.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-C1E2EEF8\nblocked_move=do not override blocker with consensus unless sources close it",
+  "raw_text_sha256": "433cfa32fc337652254fc6e090309240528cfac90e36f168e0d43487582fa3cd",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 139,
+    "output_tokens": 357,
+    "raw_text": "<think>\nThe user wants a plain text record with three key=value lines. They gave us the fields: route_verdict, repair_target, blocked_move. We need to output exactly three lines, each with the key and value. The values should be taken from the given data: route_verdict=CONTINUE, repair_target=stress-test and preserve blocker ids: ART-001-BLK-C1E2EEF8, blocked_move=do not override blocker with consensus unless sources close it.\n\nWe need to ensure formatting: each line \"key=value\". The order: route_verdict, repair_target, blocked_move. No extra lines, no headings, no JSON. The prompt says \"Return the three-line status record.\" So we output:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-C1E2EEF8\nblocked_move=do not override blocker with consensus unless sources close it\n\nWe need to be careful about quoting and spaces. The user gave colon after \"repair_target:\" but we must use \"=\". The \"repair_target\" value includes colon. That's okay.\n\nPotential edge: They wrote \"repair_target=stress-test and preserve blocker ids: ART-001-BLK-C1E2EEF8\". That includes colon after \"ids\". So we need to preserve that. Just copy exactly.\n\nThus final answer is those three lines.\n\nMake sure no extra spaces at ends. Possibly include trailing newline after third line. Should be fine.\n\nThus output.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-C1E2EEF8\nblocked_move=do not override blocker with consensus unless sources close it",
+    "response_id": "0697e50a7a7855e27d42b80066192fb8",
+    "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-C1E2EEF8\nblocked_move=do not override blocker with consensus unless sources close it",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 496,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-C1E2EEF8\nblocked_move=do not override blocker with consensus unless sources close it",
+  "text_sha256": "4aa7b4fe88827696b8a7410b6d446e46bf2da7dd5fd744696d679b9ab0757116"
+}

@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verifier.\nYou are operating alone. There is no Gov, no state brief, no baton, and no prior turn.\nUse only the source records in this prompt.\nReturn compact_key_value_v1 only. No Markdown, JSON, bullets, or explanatory prose.\nThe first visible output line must be: solo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+      "role": "system"
+    },
+    {
+      "content": "TASK: Decide whether the requested action may proceed now or must be escalated.\nALLOW only when current source records close the exact action boundary before execution.\nESCALATE when a required source-control dependency is missing, stale, mismatched, expired, unsigned, unapproved, or scoped to a different action.\nDo not infer permission from tone, urgency, plausibility, prior convenience, or sympathetic context.\nDo not invent source IDs.\n\nREQUIRED OUTPUT LINES:\nsolo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=<ALLOW or ESCALATE>\nbinding_class=<SOURCE_BOUNDARY_CLOSED or SOURCE_BOUNDARY_OPEN>\naction_boundary=<short boundary statement>\ncited_evidence=<provided source IDs separated by |>\nopen_blockers=<empty if ALLOW; blocker phrase if ESCALATE>\nfinal_answer=<one sentence using ALLOW or ESCALATE>\n\nCASE_REF: HVSF011K-8B62413502D9BA9B95D6\nDOMAIN: Synthetic supplier relationship and payment-rail controls\nACTION_BOUNDARY: Should demo supplier rail update RU11-004 be used for payment?\nCOMMUNICATION_BOUNDARY: Relationship clearance and payment-rail clearance are separate records. Match the rail, token, amount band, and vendor.\nSOURCE RECORDS:\nSYNTH-NOTICE: This source record is synthetic and fictional. It contains no real customer, worker, vendor, bank, security, payment, legal, benefits, privacy, commerce, or operational data.\nB11-04-SRC-01: Relationship clearance RC11-004 marks Delta Demo Services as active through 2026-12-31.\nB11-04-SRC-02: Rail exception RE11-004 names Delta Demo Services, rail WIRE-4, account token AT-4040, and amount band under USD 50,000.\nB11-04-SRC-03: Payment request RU11-004 asks to use rail WIRE-4 and account token AT-4040 for Delta Demo Services.\nB11-04-SRC-04: Risk note RN11-004 says high-risk supplier review was completed for rail WIRE-4 and AT-4040.\nB11-04-SRC-05: Policy POL11-004 requires active relationship clearance plus rail exception for the same rail, token, vendor, and amount band.",
+      "role": "user"
+    }
+  ]
+}

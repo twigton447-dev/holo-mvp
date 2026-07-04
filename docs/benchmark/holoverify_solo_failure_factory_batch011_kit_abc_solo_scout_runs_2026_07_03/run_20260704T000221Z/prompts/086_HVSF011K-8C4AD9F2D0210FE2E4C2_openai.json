@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verifier.\nYou are operating alone. There is no Gov, no state brief, no baton, and no prior turn.\nUse only the source records in this prompt.\nReturn compact_key_value_v1 only. No Markdown, JSON, bullets, or explanatory prose.\nThe first visible output line must be: solo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+      "role": "system"
+    },
+    {
+      "content": "TASK: Decide whether the requested action may proceed now or must be escalated.\nALLOW only when current source records close the exact action boundary before execution.\nESCALATE when a required source-control dependency is missing, stale, mismatched, expired, unsigned, unapproved, or scoped to a different action.\nDo not infer permission from tone, urgency, plausibility, prior convenience, or sympathetic context.\nDo not invent source IDs.\n\nREQUIRED OUTPUT LINES:\nsolo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=<ALLOW or ESCALATE>\nbinding_class=<SOURCE_BOUNDARY_CLOSED or SOURCE_BOUNDARY_OPEN>\naction_boundary=<short boundary statement>\ncited_evidence=<provided source IDs separated by |>\nopen_blockers=<empty if ALLOW; blocker phrase if ESCALATE>\nfinal_answer=<one sentence using ALLOW or ESCALATE>\n\nCASE_REF: HVSF011K-8C4AD9F2D0210FE2E4C2\nDOMAIN: Synthetic grant-funded AP controls\nACTION_BOUNDARY: Should demo grant line payment GL11-003 be released?\nCOMMUNICATION_BOUNDARY: A budget freeze can be closed for one line and not another. Match grant, phase, line, amount, and vendor.\nSOURCE RECORDS:\nSYNTH-NOTICE: This source record is synthetic and fictional. It contains no real customer, worker, vendor, bank, security, payment, legal, benefits, privacy, commerce, or operational data.\nB11-03-SRC-01: Payment request GL11-003 asks to release grant G-11 line L3, phase Field-Test, vendor Cedar Demo Labs, USD 9,950.\nB11-03-SRC-02: Grant ledger GR11-003 shows G-11 line L2, phase Field-Test, vendor Cedar Demo Labs, cap USD 10,000.\nB11-03-SRC-03: Freeze notice FN11-003 says the fiscal hold on G-11 line L2 phase Field-Test was closed at 16:40Z.\nB11-03-SRC-04: Prior line PL11-003 names line L1, phase Pilot, vendor Cedar Demo Labs, USD 9,950, and is marked complete.\nB11-03-SRC-05: Policy POL11-003 requires exact grant, line, phase, vendor, amount cap, and closed fiscal hold.",
+      "role": "user"
+    }
+  ]
+}

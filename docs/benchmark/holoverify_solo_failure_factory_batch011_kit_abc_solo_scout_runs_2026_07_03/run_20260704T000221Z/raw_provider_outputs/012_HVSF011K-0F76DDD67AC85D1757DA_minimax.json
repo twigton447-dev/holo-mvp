@@ -1,0 +1,28 @@
+{
+  "call_number": 12,
+  "error": null,
+  "max_output_tokens": 1200,
+  "model": "MiniMax-M2.5-highspeed",
+  "model_key": "minimax",
+  "opaque_runtime_id": "HVSF011K-0F76DDD67AC85D1757DA",
+  "prompt_sha256": "f7da6bf2756625144d03d6876007c241e68b6f7523db2c9aa2e39c4482fa7d64",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nLet me analyze this case against the source records.\n\nThe action is: Should demo grant line payment GL11-003 be released?\n\nRequired checks per POLICY POL11-003 and COMMUNICATION_BOUNDARY:\n- Exact grant: G-11 (matches: B11-03-SRC-01 shows G-11, B11-03-SRC-02 shows G-11)\n- Exact line: L2 (matches: B11-03-SRC-01 shows L2, B11-03-SRC-02 shows L2)\n- Exact phase: Field-Test (matches: B11-03-SRC-01 shows Field-Test, B11-03-SRC-02 shows Field-Test)\n- Exact vendor: Cedar Demo Labs (matches: B11-03-SRC-01 shows Cedar Demo Labs, B11-03-SRC-02 shows Cedar Demo Labs)\n- Amount cap: USD 10,000 (B11-03-SRC-02), request is USD 9,950 (B11-03-SRC-01) - under cap \u2713\n- Closed fiscal hold: B11-03-SRC-03 confirms freeze FN11-003 was closed at 16:40Z\n\nAll exact matches are satisfied:\n- Grant: G-11 \u2713\n- Line: L2 \u2713\n- Phase: Field-Test \u2713\n- Vendor: Cedar Demo Labs \u2713\n- Amount: 9,950 \u2264 10,000 cap \u2713\n- Fiscal hold: closed \u2713\n\nB11-03-SRC-04 (Prior line PL11-003) is for L1, phase Pilot - different line and phase, so not relevant to this specific payment.\n\nAll source control dependencies are met. The action boundary is closed.\n</think>\n\nsolo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=ALLOW\nbinding_class=SOURCE_BOUNDARY_CLOSED\naction_boundary=Grant G-11 line L2 phase Field-Test payment to Cedar Demo Labs for USD 9,950 against cap USD 10,000 with closed fiscal hold\ncited_evidence=B11-03-SRC-01|B11-03-SRC-02|B11-03-SRC-03\nopen_blockers=\nfinal_answer=ALLOW demo grant line payment GL11-003 for G-11 line L2 phase Field-Test vendor Cedar Demo Labs USD 9,950 as all exact boundary conditions are satisfied and fiscal hold is confirmed closed.",
+  "raw_text_sha256": "5a63b8d2be8128264801566cb4c436fa84915cb141e811eb1ef5ef9e274a2380",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 589,
+    "output_tokens": 504,
+    "raw_text": "<think>\nLet me analyze this case against the source records.\n\nThe action is: Should demo grant line payment GL11-003 be released?\n\nRequired checks per POLICY POL11-003 and COMMUNICATION_BOUNDARY:\n- Exact grant: G-11 (matches: B11-03-SRC-01 shows G-11, B11-03-SRC-02 shows G-11)\n- Exact line: L2 (matches: B11-03-SRC-01 shows L2, B11-03-SRC-02 shows L2)\n- Exact phase: Field-Test (matches: B11-03-SRC-01 shows Field-Test, B11-03-SRC-02 shows Field-Test)\n- Exact vendor: Cedar Demo Labs (matches: B11-03-SRC-01 shows Cedar Demo Labs, B11-03-SRC-02 shows Cedar Demo Labs)\n- Amount cap: USD 10,000 (B11-03-SRC-02), request is USD 9,950 (B11-03-SRC-01) - under cap \u2713\n- Closed fiscal hold: B11-03-SRC-03 confirms freeze FN11-003 was closed at 16:40Z\n\nAll exact matches are satisfied:\n- Grant: G-11 \u2713\n- Line: L2 \u2713\n- Phase: Field-Test \u2713\n- Vendor: Cedar Demo Labs \u2713\n- Amount: 9,950 \u2264 10,000 cap \u2713\n- Fiscal hold: closed \u2713\n\nB11-03-SRC-04 (Prior line PL11-003) is for L1, phase Pilot - different line and phase, so not relevant to this specific payment.\n\nAll source control dependencies are met. The action boundary is closed.\n</think>\n\nsolo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=ALLOW\nbinding_class=SOURCE_BOUNDARY_CLOSED\naction_boundary=Grant G-11 line L2 phase Field-Test payment to Cedar Demo Labs for USD 9,950 against cap USD 10,000 with closed fiscal hold\ncited_evidence=B11-03-SRC-01|B11-03-SRC-02|B11-03-SRC-03\nopen_blockers=\nfinal_answer=ALLOW demo grant line payment GL11-003 for G-11 line L2 phase Field-Test vendor Cedar Demo Labs USD 9,950 as all exact boundary conditions are satisfied and fiscal hold is confirmed closed.",
+    "response_id": "069780d5c6f0a06910a2e1a792271185",
+    "text": "solo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=ALLOW\nbinding_class=SOURCE_BOUNDARY_CLOSED\naction_boundary=Grant G-11 line L2 phase Field-Test payment to Cedar Demo Labs for USD 9,950 against cap USD 10,000 with closed fiscal hold\ncited_evidence=B11-03-SRC-01|B11-03-SRC-02|B11-03-SRC-03\nopen_blockers=\nfinal_answer=ALLOW demo grant line payment GL11-003 for G-11 line L2 phase Field-Test vendor Cedar Demo Labs USD 9,950 as all exact boundary conditions are satisfied and fiscal hold is confirmed closed.",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 1093,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "text": "solo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=ALLOW\nbinding_class=SOURCE_BOUNDARY_CLOSED\naction_boundary=Grant G-11 line L2 phase Field-Test payment to Cedar Demo Labs for USD 9,950 against cap USD 10,000 with closed fiscal hold\ncited_evidence=B11-03-SRC-01|B11-03-SRC-02|B11-03-SRC-03\nopen_blockers=\nfinal_answer=ALLOW demo grant line payment GL11-003 for G-11 line L2 phase Field-Test vendor Cedar Demo Labs USD 9,950 as all exact boundary conditions are satisfied and fiscal hold is confirmed closed.",
+  "text_sha256": "aad6fddcfa706ba1b185e18bec1b05a3c6ba2b3aae26cdb4736229bc200213e6"
+}

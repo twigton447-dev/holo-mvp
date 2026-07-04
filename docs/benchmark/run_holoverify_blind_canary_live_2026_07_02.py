@@ -321,6 +321,8 @@ def _classify_transport_exception(exc: BaseException) -> dict[str, Any] | None:
             return {"class": "read_timeout", "status": None, "body": ""}
         if "connection reset" in reason or "temporar" in reason:
             return {"class": "transient_network_error", "status": None, "body": ""}
+        if "nodename nor servname" in reason or "name or service not known" in reason:
+            return {"class": "transient_network_error", "status": None, "body": ""}
     return None
 
 

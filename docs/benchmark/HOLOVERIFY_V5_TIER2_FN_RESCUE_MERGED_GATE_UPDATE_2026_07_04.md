@@ -29,12 +29,11 @@ Replacement supplement:
 
 Merged clean internal gate:
 
-- Packet-equivalent score: `15/15`
-- Pair score: `7/7`
+- Score-valid packet diagnostic: `15/15`
+- Clean internal pair gate: `7/7`
 
 ## Boundary
 
 This unlocks Tier 3 only as an internal directional FN rescue expansion gate. It does not create public benchmark evidence, a global FNR claim, or a production reliability claim.
 
 Tier 3 remains subject to separate preflight, exact approval, runtime-only manifest checks, trace freeze, and post-hoc scoring.
-

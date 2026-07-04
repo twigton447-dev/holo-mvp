@@ -1,0 +1,823 @@
+{
+  "title": "HoloBuild Action Boundary Test Spec",
+  "date": "2026-07-05",
+  "source_documents": [
+    "docs/product/HOLOBUILD_ACTION_BOUNDARY_PRESSURE_TEST_PLAN_2026_07_05.md",
+    "docs/product/HOLOBUILD_ACTION_BOUNDARY_PRESSURE_TEST_PLAN_2026_07_05.json"
+  ],
+  "status": "concrete_gate_test_spec",
+  "constraints": {
+    "provider_calls": false,
+    "live_product_actions": false,
+    "production_behavior_modified": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "test_status_labels": {
+    "MUST_PASS_NOW": "Repo should already support this invariant or the test should be fixture-backed.",
+    "EXPECTED_FAIL_UNTIL_FIXED": "Pressure-test plan identified a current gap; test should fail until fixed or explicitly blocked.",
+    "SPEC_ONLY_NEW_GATE": "New gate expected for product readiness; implementation may not exist yet.",
+    "NO_PROVIDER": "Use fixtures, monkeypatching, static inspection, stored traces, or pure functions only.",
+    "NO_PRODUCTION_ACTION": "Do not call deploy, publish, freeze real artifacts, providers, judges, or ledger-mutating commands."
+  },
+  "fixture_contract": {
+    "recommended_roots": [
+      "tests/fixtures/holobuild/action_boundary/",
+      "tests/fixtures/holobuild/product_surface/",
+      "docs/product/fixtures/holobuild_action_boundary/"
+    ],
+    "minimum_fixture_files": [
+      "action_boundary_allow_packet.json",
+      "payment_email_packet.json",
+      "qa_clean_to_freeze.json",
+      "qa_needs_repair.json",
+      "human_approval_valid.json",
+      "human_approval_missing.json",
+      "run_manifest_complete.json",
+      "run_manifest_incomplete.json",
+      "failure_run_manifest.json"
+    ],
+    "fixture_prohibitions": [
+      "secrets",
+      "provider_credentials",
+      "live_customer_data",
+      "real_deploy_targets"
+    ]
+  },
+  "gates": [
+    {
+      "gate_id": "HB-GATE-001",
+      "name": "Artifact-build vs execution boundary",
+      "required_by_user_item": 1,
+      "status": "SPEC_ONLY_NEW_GATE",
+      "goal": "Prove HoloBuild outputs are candidate artifacts and evidence packages, not autonomous actions.",
+      "tests": [
+        {
+          "test_id": "HB-ABT-001",
+          "name": "test_holobuild_packet_terminal_status_does_not_execute_action",
+          "fixture": "run_manifest_complete.json",
+          "procedure": "Validate terminal_status and release_state.",
+          "pass_conditions": [
+            "terminal_status is one of NEEDS_REPAIR, BLOCKED, SHADOW_READY, FROZEN_PENDING_HUMAN, HUMAN_RELEASED",
+            "no status implies payment release, deploy, publish, send, account update, vendor-master update, or policy mutation"
+          ],
+          "fail_conditions": [
+            "manifest contains EXECUTED, DEPLOYED, SENT, PAYMENT_RELEASED, PUBLISHED, AUTO_RELEASED, or equivalent"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-002",
+          "name": "test_holobuild_artifact_manifest_forbids_execution_targets",
+          "fixture": "candidate artifact manifest",
+          "procedure": "Scan declared actions and destinations.",
+          "pass_conditions": [
+            "manifest has artifact_kind, candidate_path, review_mode, and release_state",
+            "manifest has no callable deploy target, payment endpoint, email-send target, or production mutation target"
+          ],
+          "fail_conditions": [
+            "artifact includes runnable production endpoint, deployment command, direct send command, or auto-execute flag"
+          ]
+        }
+      ]
+    },
+    {
+      "gate_id": "HB-GATE-002",
+      "name": "Freeze requires explicit human approval",
+      "required_by_user_item": 2,
+      "status": "SPEC_ONLY_NEW_GATE",
+      "goal": "Freeze cannot occur solely because QA says CLEAN_TO_FREEZE.",
+      "required_approval_fields": [
+        "approved_by",
+        "approved_at",
+        "approval_scope",
+        "artifact_hash",
+        "packet_id",
+        "provider_scope",
+        "data_sharing_scope",
+        "non_execution_disclaimer_acknowledged"
+      ],
+      "tests": [
+        {
+          "test_id": "HB-ABT-003",
+          "name": "test_freeze_blocked_without_human_approval",
+          "fixture": "action_boundary_allow_packet.json + qa_clean_to_freeze.json + no approval",
+          "procedure": "Call proposed freeze preflight validator only.",
+          "pass_conditions": [
+            "validator returns FREEZE_BLOCKED_HUMAN_APPROVAL_REQUIRED",
+            "no ledger or frozen file is written"
+          ],
+          "fail_conditions": [
+            "freeze preflight returns ready",
+            "frozen artifact or ledger entry is written"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-004",
+          "name": "test_freeze_blocked_with_incomplete_approval",
+          "fixture": "human_approval_missing.json",
+          "procedure": "Validate required approval fields.",
+          "pass_conditions": [
+            "missing field blocks freeze with specific reason"
+          ],
+          "fail_conditions": [
+            "incomplete approval is accepted"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-005",
+          "name": "test_freeze_preflight_allows_valid_approval_without_writing_ledger",
+          "fixture": "human_approval_valid.json",
+          "procedure": "Run preflight without invoking ledger-mutating freeze.",
+          "pass_conditions": [
+            "preflight returns FREEZE_PREFLIGHT_READY",
+            "no ledger or frozen file is written"
+          ],
+          "fail_conditions": [
+            "preflight mutates holo_builder/outputs/ledger.jsonl",
+            "preflight writes holo_builder/outputs/frozen/"
+          ]
+        }
+      ]
+    },
+    {
+      "gate_id": "HB-GATE-003",
+      "name": "No autonomous deploy/release",
+      "required_by_user_item": 3,
+      "status": "MUST_PASS_NOW",
+      "goal": "Product surface cannot deploy, release, publish, send, or start live HoloBuild runs without explicit enablement and approval.",
+      "tests": [
+        {
+          "test_id": "HB-ABT-006",
+          "name": "test_holobuild_live_runs_disabled_by_default",
+          "fixture": "monkeypatched env without HOLOBUILD_LIVE_RUNS",
+          "procedure": "Call /v1/holo-build/runs with fake auth.",
+          "pass_conditions": [
+            "response status is 403",
+            "detail is HoloBuild live runs are disabled."
+          ],
+          "fail_conditions": [
+            "run starts when env flag is unset"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-007",
+          "name": "test_holobuild_dashboard_mode_read_only_by_default",
+          "fixture": "monkeypatched env without HOLOBUILD_LIVE_RUNS",
+          "procedure": "Build dashboard payload.",
+          "pass_conditions": [
+            "mode equals read_only",
+            "live_runs_enabled is false"
+          ],
+          "fail_conditions": [
+            "dashboard reports live_watch by default"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-008",
+          "name": "test_no_release_keywords_in_safe_review_payload",
+          "fixture": "safe review payload",
+          "procedure": "Scan command/action fields for release verbs.",
+          "pass_conditions": [
+            "no command/action named deploy, publish, send, release_payment, update_vendor_master, merge, push, or execute"
+          ],
+          "fail_conditions": [
+            "safe review payload exposes autonomous release command"
+          ]
+        }
+      ]
+    },
+    {
+      "gate_id": "HB-GATE-004",
+      "name": "Packet hash and freeze hash correctness",
+      "required_by_user_item": 4,
+      "status": "EXPECTED_FAIL_UNTIL_FIXED for top-level action_boundary; MUST_PASS_NOW for legacy payment_email",
+      "goal": "Freeze hash must cover exactly model-visible content for the packet format.",
+      "canonical_model_visible_content": {
+        "payment_email": "packet.payload.action + packet.payload.context",
+        "action_boundary": "packet.action + packet.context"
+      },
+      "tests": [
+        {
+          "test_id": "HB-ABT-009",
+          "name": "test_payment_email_freeze_hash_uses_payload_action_context",
+          "fixture": "payment_email_packet.json",
+          "procedure": "Compute canonical hash of packet.payload.action/context.",
+          "pass_conditions": [
+            "computed hash equals freeze preflight hash"
+          ],
+          "fail_conditions": [
+            "hash includes hidden metadata or ignores model-visible payload"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-010",
+          "name": "test_action_boundary_freeze_hash_uses_top_level_action_context",
+          "fixture": "action_boundary_allow_packet.json",
+          "procedure": "Compute canonical hash of packet.action/context.",
+          "expected_current_status": "EXPECTED_FAIL_UNTIL_FIXED",
+          "pass_conditions": [
+            "computed hash is non-empty",
+            "hash changes when top-level action or context changes",
+            "hash does not depend on absent payload wrapper"
+          ],
+          "fail_conditions": [
+            "hash is SHA-256 of empty action/context",
+            "hash ignores top-level action/context",
+            "hash changes when builder-only metadata changes"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-011",
+          "name": "test_freeze_hash_excludes_builder_metadata",
+          "fixture": "same packet with modified _builder, _internal, builder_approval",
+          "procedure": "Compare hashes before and after hidden metadata mutation.",
+          "pass_conditions": [
+            "hash remains unchanged when non-model-visible metadata changes"
+          ],
+          "fail_conditions": [
+            "metadata changes alter model-visible payload hash"
+          ]
+        }
+      ]
+    },
+    {
+      "gate_id": "HB-GATE-005",
+      "name": "Top-level action_boundary packet format support",
+      "required_by_user_item": 5,
+      "status": "MUST_PASS_NOW for lint; EXPECTED_FAIL_UNTIL_FIXED for freeze",
+      "goal": "Action-boundary packets using top-level action and context.documents are first-class across lint, preflight, freeze, and review packets.",
+      "tests": [
+        {
+          "test_id": "HB-ABT-012",
+          "name": "test_lint_accepts_valid_action_boundary_packet",
+          "fixture": "action_boundary_allow_packet.json",
+          "procedure": "Call holo_builder.lint.check.",
+          "pass_conditions": [
+            "lint result has no errors"
+          ],
+          "fail_conditions": [
+            "valid top-level action_boundary packet is treated as legacy payload wrapper only"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-013",
+          "name": "test_lint_rejects_action_boundary_metadata_leak",
+          "fixture": "action_boundary packet with leaky model-visible fields",
+          "procedure": "Call holo_builder.lint.check.",
+          "pass_conditions": [
+            "lint errors identify leaky model-visible field"
+          ],
+          "fail_conditions": [
+            "expected_verdict, hypothesized_verdict, builder_approval, or builder_notes pass inside action/context"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-014",
+          "name": "test_action_boundary_requires_context_documents",
+          "fixture": "action_boundary packet with fewer than four context.documents",
+          "procedure": "Call holo_builder.lint.check.",
+          "pass_conditions": [
+            "lint fails with document-count error"
+          ],
+          "fail_conditions": [
+            "underspecified context.documents passes"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-015",
+          "name": "test_action_boundary_freeze_preflight_uses_top_level_shape",
+          "fixture": "valid action-boundary packet and approval",
+          "procedure": "Call packet-format-aware freeze preflight.",
+          "expected_current_status": "EXPECTED_FAIL_UNTIL_FIXED",
+          "pass_conditions": [
+            "freeze preflight sees top-level action/context"
+          ],
+          "fail_conditions": [
+            "freeze preflight requires payload.action/payload.context"
+          ]
+        }
+      ]
+    },
+    {
+      "gate_id": "HB-GATE-006",
+      "name": "Missing holo_builder.assert_packet gap",
+      "required_by_user_item": 6,
+      "status": "EXPECTED_FAIL_UNTIL_FIXED or explicit known-gap state",
+      "goal": "System cannot claim active assertion-repair coverage when assertion module is absent.",
+      "allowed_assertion_gate_statuses": [
+        "active",
+        "known_gap_disabled",
+        "blocked_missing_module",
+        "replaced_by_equivalent_validator"
+      ],
+      "tests": [
+        {
+          "test_id": "HB-ABT-016",
+          "name": "test_assert_packet_module_available_or_known_gap_declared",
+          "fixture": "readiness manifest",
+          "procedure": "Check importlib.util.find_spec('holo_builder.assert_packet') and readiness status.",
+          "expected_current_status": "EXPECTED_FAIL_UNTIL_FIXED unless known-gap manifest exists",
+          "pass_conditions": [
+            "module exists and exposes run_assertions",
+            "or readiness manifest declares assertion_gate_status known_gap_disabled and blocks live/release readiness"
+          ],
+          "fail_conditions": [
+            "module missing while readiness claims assertion_gate_status active"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-017",
+          "name": "test_no_live_readiness_when_assert_packet_missing",
+          "fixture": "readiness manifest",
+          "procedure": "Evaluate readiness against module availability.",
+          "pass_conditions": [
+            "if module missing, live_readiness is BLOCKED_ASSERT_PACKET_MISSING"
+          ],
+          "fail_conditions": [
+            "live readiness is READY, PASS, or release_approved while module missing"
+          ]
+        }
+      ]
+    },
+    {
+      "gate_id": "HB-GATE-007",
+      "name": "Human reliance disclosure",
+      "required_by_user_item": 7,
+      "status": "SPEC_ONLY_NEW_GATE",
+      "goal": "Every review packet and design-partner display says what the user can and cannot rely on.",
+      "required_disclosure_fields": [
+        "mode_label",
+        "not_autonomous_execution",
+        "human_review_required_before_reliance",
+        "not_legal_financial_security_or_compliance_advice_without_review",
+        "missing_evidence_visible"
+      ],
+      "tests": [
+        {
+          "test_id": "HB-ABT-018",
+          "name": "test_review_packet_contains_non_execution_disclosure",
+          "fixture": "design partner review packet",
+          "procedure": "Validate disclosure fields.",
+          "pass_conditions": [
+            "all required fields are present and true or non-empty"
+          ],
+          "fail_conditions": [
+            "review packet omits non-execution or human-review disclosure"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-019",
+          "name": "test_human_reliance_disclosure_blocks_release_when_missing",
+          "fixture": "packet missing disclosure",
+          "procedure": "Run release gate.",
+          "pass_conditions": [
+            "release gate returns BLOCKED_RELIANCE_DISCLOSURE_MISSING"
+          ],
+          "fail_conditions": [
+            "release gate passes without disclosure"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-020",
+          "name": "test_disclosure_matches_mode",
+          "fixture": "review packets across modes",
+          "procedure": "Compare mode_label and release_state.",
+          "pass_conditions": [
+            "shadow_only says no reliance",
+            "approved_for_review says human review still required",
+            "human_released names approving human and exact scope"
+          ],
+          "fail_conditions": [
+            "mode label implies release without approval"
+          ]
+        }
+      ]
+    },
+    {
+      "gate_id": "HB-GATE-008",
+      "name": "Design partner safe review mode",
+      "required_by_user_item": 8,
+      "status": "MUST_PASS_NOW for read-only/sanitized dashboard; SPEC_ONLY_NEW_GATE for full partner packet",
+      "goal": "Design partners can inspect HoloBuild safely without raw provider prompts, secrets, answer keys, draft bodies, or implied release status.",
+      "tests": [
+        {
+          "test_id": "HB-ABT-021",
+          "name": "test_holobuild_dashboard_sanitizes_raw_drafts",
+          "fixture": "dashboard payload with raw draft in source result",
+          "procedure": "Build sanitized dashboard payload.",
+          "pass_conditions": [
+            "serialized payload contains no raw draft body",
+            "serialized payload contains no _internal",
+            "serialized payload contains no builder answer key",
+            "serialized payload contains no provider credential shape"
+          ],
+          "fail_conditions": [
+            "draft or final_draft appears in design partner payload"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-022",
+          "name": "test_safe_review_mode_includes_trace_summary_not_raw_trace",
+          "fixture": "full run trace and safe review projection",
+          "procedure": "Compare source trace to safe projection.",
+          "pass_conditions": [
+            "safe projection includes turn numbers, providers, model ids, token counts, elapsed ms, status, high-risk categories, and redacted findings",
+            "safe projection excludes raw prompt bodies and final candidate body unless approved for review"
+          ],
+          "fail_conditions": [
+            "safe projection leaks raw prompts, secrets, answer keys, or unapproved candidate body"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-023",
+          "name": "test_safe_review_mode_labels_shadow_state",
+          "fixture": "safe review payload",
+          "procedure": "Validate mode label.",
+          "pass_conditions": [
+            "mode label is one of read_only, shadow_only, candidate, approved_for_review, human_released"
+          ],
+          "fail_conditions": [
+            "label says or implies production_ready, autonomous_ready, or released without human approval"
+          ]
+        }
+      ]
+    },
+    {
+      "gate_id": "HB-GATE-009",
+      "name": "Trace and accounting requirements",
+      "required_by_user_item": 9,
+      "status": "SPEC_ONLY_NEW_GATE",
+      "goal": "Every HoloBuild packet has enough trace material to audit the run.",
+      "required_trace_files": [
+        "input_manifest.json",
+        "source_manifest.json",
+        "canonical_thread.jsonl",
+        "turn_inputs.jsonl",
+        "turn_outputs.jsonl",
+        "governor_briefs.jsonl",
+        "qa_attack.json",
+        "deterministic_gates.json",
+        "policy_checks.jsonl",
+        "final_candidate_artifact.json",
+        "claim_source_map.json",
+        "missing_evidence.json",
+        "run_manifest.json"
+      ],
+      "required_accounting_fields": [
+        "run_id",
+        "branch_commit",
+        "mode",
+        "domain",
+        "adapter",
+        "risk_class",
+        "provider_model_ids_per_turn",
+        "hologov_provider",
+        "worker_pool",
+        "input_tokens",
+        "output_tokens",
+        "elapsed_ms",
+        "retry_count",
+        "fallback_events",
+        "parse_errors",
+        "canonical_thread_hash_before_after_each_turn",
+        "source_budget_used",
+        "material_claim_count",
+        "sourced_claim_count",
+        "missing_evidence_count",
+        "gate_results",
+        "human_approvals",
+        "release_state"
+      ],
+      "tests": [
+        {
+          "test_id": "HB-ABT-024",
+          "name": "test_run_manifest_has_required_trace_inventory",
+          "fixture": "run_manifest_complete.json and run_manifest_incomplete.json",
+          "procedure": "Validate trace inventory entries.",
+          "pass_conditions": [
+            "manifest lists every required file with path, sha256, required flag, and visibility classification"
+          ],
+          "fail_conditions": [
+            "missing required file",
+            "missing hash",
+            "missing visibility classification"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-025",
+          "name": "test_runtime_accounting_complete",
+          "fixture": "run_manifest_complete.json and run_manifest_incomplete.json",
+          "procedure": "Validate accounting fields and types.",
+          "pass_conditions": [
+            "required fields are present",
+            "numeric counts are integers",
+            "fallback_events and parse_errors are explicit lists even when empty"
+          ],
+          "fail_conditions": [
+            "required field absent",
+            "count has ambiguous type",
+            "fallback or parse error accounting omitted"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-026",
+          "name": "test_trace_inventory_hashes_match_files",
+          "fixture": "run directory with trace inventory",
+          "procedure": "Recompute sha256 for every required trace file.",
+          "pass_conditions": [
+            "all hashes match"
+          ],
+          "fail_conditions": [
+            "missing file",
+            "hash mismatch",
+            "unclassified visibility"
+          ]
+        }
+      ]
+    },
+    {
+      "gate_id": "HB-GATE-010",
+      "name": "Failure preservation and regression-packet creation",
+      "required_by_user_item": 10,
+      "status": "SPEC_ONLY_NEW_GATE",
+      "goal": "Failures become durable evidence and regression work, not deleted noise.",
+      "required_failed_run_files": [
+        "run_manifest.json",
+        "failure_summary.json",
+        "deterministic_gates.json",
+        "redacted trace snippets or trace hashes",
+        "regression_packet_request.json"
+      ],
+      "regression_packet_shape": {
+        "regression_id": "HB-REG-<GATE>-<YYYYMMDD>-<NNN>",
+        "source_failure_id": "string",
+        "gate_id": "HB-GATE-004",
+        "minimal_repro_fixture": "path",
+        "expected_failure_reason": "string",
+        "proof_credit": false,
+        "release_state": "blocked",
+        "promotion_blocked_until": "test_passes_and_human_review",
+        "created_from_failed_run": true
+      },
+      "tests": [
+        {
+          "test_id": "HB-ABT-027",
+          "name": "test_failed_run_preserves_failure_artifacts",
+          "fixture": "failed run directory",
+          "procedure": "Validate failure preservation manifest.",
+          "pass_conditions": [
+            "required failed-run files are present",
+            "proof_credit is false",
+            "release_state is blocked",
+            "all failure reasons are explicit"
+          ],
+          "fail_conditions": [
+            "failure missing",
+            "failure hidden by success summary",
+            "proof_credit granted to failed run"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-028",
+          "name": "test_regression_packet_created_for_gate_failure",
+          "fixture": "failed gate result",
+          "procedure": "Feed failed gate result into proposed regression-packet builder.",
+          "pass_conditions": [
+            "output includes regression_id, source_failure_id, gate_id, minimal_repro_fixture, expected_failure_reason, owner or assignee, and promotion_blocked_until"
+          ],
+          "fail_conditions": [
+            "failed gate creates no regression work item"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-029",
+          "name": "test_failure_preservation_does_not_freeze_or_judge",
+          "fixture": "failed run manifest",
+          "procedure": "Validate action counters.",
+          "pass_conditions": [
+            "provider_calls is 0 for preservation pass",
+            "freeze is false",
+            "judge is false",
+            "benchmark_credit is false",
+            "production_release is false"
+          ],
+          "fail_conditions": [
+            "failure preservation invokes provider, freeze, judge, leaderboard movement, or release"
+          ]
+        },
+        {
+          "test_id": "HB-ABT-030",
+          "name": "test_failure_cannot_be_overwritten_by_later_success",
+          "fixture": "failed run followed by repaired run",
+          "procedure": "Validate linkage and preservation.",
+          "pass_conditions": [
+            "repaired run links back to failure id",
+            "original failure remains intact and visible"
+          ],
+          "fail_conditions": [
+            "later success overwrites or removes original failure evidence"
+          ]
+        }
+      ]
+    }
+  ],
+  "concrete_test_inventory": [
+    {
+      "test_id": "HB-ABT-001",
+      "name": "test_holobuild_packet_terminal_status_does_not_execute_action",
+      "gate_id": "HB-GATE-001",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-002",
+      "name": "test_holobuild_artifact_manifest_forbids_execution_targets",
+      "gate_id": "HB-GATE-001",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-003",
+      "name": "test_freeze_blocked_without_human_approval",
+      "gate_id": "HB-GATE-002",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-004",
+      "name": "test_freeze_blocked_with_incomplete_approval",
+      "gate_id": "HB-GATE-002",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-005",
+      "name": "test_freeze_preflight_allows_valid_approval_without_writing_ledger",
+      "gate_id": "HB-GATE-002",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-006",
+      "name": "test_holobuild_live_runs_disabled_by_default",
+      "gate_id": "HB-GATE-003",
+      "status": "MUST_PASS_NOW"
+    },
+    {
+      "test_id": "HB-ABT-007",
+      "name": "test_holobuild_dashboard_mode_read_only_by_default",
+      "gate_id": "HB-GATE-003",
+      "status": "MUST_PASS_NOW"
+    },
+    {
+      "test_id": "HB-ABT-008",
+      "name": "test_no_release_keywords_in_safe_review_payload",
+      "gate_id": "HB-GATE-003",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-009",
+      "name": "test_payment_email_freeze_hash_uses_payload_action_context",
+      "gate_id": "HB-GATE-004",
+      "status": "MUST_PASS_NOW"
+    },
+    {
+      "test_id": "HB-ABT-010",
+      "name": "test_action_boundary_freeze_hash_uses_top_level_action_context",
+      "gate_id": "HB-GATE-004",
+      "status": "EXPECTED_FAIL_UNTIL_FIXED"
+    },
+    {
+      "test_id": "HB-ABT-011",
+      "name": "test_freeze_hash_excludes_builder_metadata",
+      "gate_id": "HB-GATE-004",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-012",
+      "name": "test_lint_accepts_valid_action_boundary_packet",
+      "gate_id": "HB-GATE-005",
+      "status": "MUST_PASS_NOW"
+    },
+    {
+      "test_id": "HB-ABT-013",
+      "name": "test_lint_rejects_action_boundary_metadata_leak",
+      "gate_id": "HB-GATE-005",
+      "status": "MUST_PASS_NOW"
+    },
+    {
+      "test_id": "HB-ABT-014",
+      "name": "test_action_boundary_requires_context_documents",
+      "gate_id": "HB-GATE-005",
+      "status": "MUST_PASS_NOW"
+    },
+    {
+      "test_id": "HB-ABT-015",
+      "name": "test_action_boundary_freeze_preflight_uses_top_level_shape",
+      "gate_id": "HB-GATE-005",
+      "status": "EXPECTED_FAIL_UNTIL_FIXED"
+    },
+    {
+      "test_id": "HB-ABT-016",
+      "name": "test_assert_packet_module_available_or_known_gap_declared",
+      "gate_id": "HB-GATE-006",
+      "status": "EXPECTED_FAIL_UNTIL_FIXED"
+    },
+    {
+      "test_id": "HB-ABT-017",
+      "name": "test_no_live_readiness_when_assert_packet_missing",
+      "gate_id": "HB-GATE-006",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-018",
+      "name": "test_review_packet_contains_non_execution_disclosure",
+      "gate_id": "HB-GATE-007",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-019",
+      "name": "test_human_reliance_disclosure_blocks_release_when_missing",
+      "gate_id": "HB-GATE-007",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-020",
+      "name": "test_disclosure_matches_mode",
+      "gate_id": "HB-GATE-007",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-021",
+      "name": "test_holobuild_dashboard_sanitizes_raw_drafts",
+      "gate_id": "HB-GATE-008",
+      "status": "MUST_PASS_NOW"
+    },
+    {
+      "test_id": "HB-ABT-022",
+      "name": "test_safe_review_mode_includes_trace_summary_not_raw_trace",
+      "gate_id": "HB-GATE-008",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-023",
+      "name": "test_safe_review_mode_labels_shadow_state",
+      "gate_id": "HB-GATE-008",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-024",
+      "name": "test_run_manifest_has_required_trace_inventory",
+      "gate_id": "HB-GATE-009",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-025",
+      "name": "test_runtime_accounting_complete",
+      "gate_id": "HB-GATE-009",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-026",
+      "name": "test_trace_inventory_hashes_match_files",
+      "gate_id": "HB-GATE-009",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-027",
+      "name": "test_failed_run_preserves_failure_artifacts",
+      "gate_id": "HB-GATE-010",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-028",
+      "name": "test_regression_packet_created_for_gate_failure",
+      "gate_id": "HB-GATE-010",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-029",
+      "name": "test_failure_preservation_does_not_freeze_or_judge",
+      "gate_id": "HB-GATE-010",
+      "status": "SPEC_ONLY_NEW_GATE"
+    },
+    {
+      "test_id": "HB-ABT-030",
+      "name": "test_failure_cannot_be_overwritten_by_later_success",
+      "gate_id": "HB-GATE-010",
+      "status": "SPEC_ONLY_NEW_GATE"
+    }
+  ],
+  "non_execution_rules": [
+    "Use fixture JSON and monkeypatched functions only.",
+    "Do not call run_builder, run_qa_attack, provider adapters, live web research, judges, deploy commands, or push commands.",
+    "Do not run holo_builder/builder.py freeze unless redirected to a temporary directory and unable to touch the real ledger.",
+    "Prefer a pure freeze_preflight validator before allowing any ledger-mutating freeze path.",
+    "Any test that intentionally models failure must set proof_credit=false.",
+    "Any test that creates a regression packet must write it to a test temp directory, not product or benchmark ledgers."
+  ],
+  "promotion_criteria": [
+    "All MUST_PASS_NOW tests pass provider-free.",
+    "EXPECTED_FAIL_UNTIL_FIXED tests either pass after fixes or are explicitly blocked in readiness output.",
+    "Freeze preflight requires human approval and is packet-format-aware.",
+    "Missing assert_packet is resolved or the assertion gate is truthfully disabled and blocks live readiness.",
+    "Safe review mode shows trace/accounting and disclosure without raw secrets, answer keys, or implied release authority.",
+    "Failure preservation produces regression packets and never grants proof credit by itself."
+  ]
+}

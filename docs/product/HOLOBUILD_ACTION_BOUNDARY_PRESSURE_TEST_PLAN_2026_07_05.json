@@ -1,0 +1,394 @@
+{
+  "title": "HoloBuild Action Boundary Pressure Test Plan",
+  "date": "2026-07-05",
+  "status": "repo_only_inspection",
+  "constraints": {
+    "provider_calls": false,
+    "live_product_actions": false,
+    "production_behavior_modified": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "executive_finding": {
+    "summary": "HoloBuild is the early product surface for producing high-stakes work products that people may rely on. It may draft, critique, trace, classify, and package candidate artifacts, but it must not release, publish, execute, freeze, claim proof, or authorize downstream business action without deterministic gates and explicit human approval.",
+    "current_surfaces": [
+      "AP/BEC benchmark packet builder under holo_builder/",
+      "newer action_boundary packet format inside builder/lint loop",
+      "staged product-style VeSync creative fixture that inherits the HoloBuild architecture contract but requires a dedicated adapter before execution"
+    ],
+    "default_boundary": "read_only_or_shadow_only"
+  },
+  "repo_evidence": [
+    {
+      "claim": "HoloBuild works early on high-stakes work products people may rely on.",
+      "evidence": "docs/whitepaper.md:129-153"
+    },
+    {
+      "claim": "HoloBuild is distinct from HoloVerify: build reliable artifacts before late action execution.",
+      "evidence": "docs/whitepaper.md:467-493"
+    },
+    {
+      "claim": "HoloBuild requires lossless canonical-thread access and blocks silent truncation.",
+      "evidence": "holo_builder/ARCHITECTURE.md:6-17"
+    },
+    {
+      "claim": "HoloBuild requires research budgets, source records, missing-evidence visibility, and trace artifacts.",
+      "evidence": "holo_builder/ARCHITECTURE.md:19-57"
+    },
+    {
+      "claim": "The CLI separates build, static lint, blind QA attack, freeze, and final authorization.",
+      "evidence": "holo_builder/builder.py:6-39"
+    },
+    {
+      "claim": "Action-boundary lint blocks verdict/build metadata from model-visible action/context and requires context documents.",
+      "evidence": "holo_builder/lint.py:212-291"
+    },
+    {
+      "claim": "Convergence requires lint, QA, structural high-category, and Governor promotion gates.",
+      "evidence": "holo_builder/loop.py:1478-1597"
+    },
+    {
+      "claim": "Full HoloBuild architecture requires one fixed HoloGov and at least two worker DNA families.",
+      "evidence": "holo_builder/loop.py:665-690"
+    },
+    {
+      "claim": "Builder run output records status, trace events, architecture invariant, provider pools, coverage, briefs, and accounting.",
+      "evidence": "holo_builder/loop.py:2440-2530"
+    },
+    {
+      "claim": "QA Attacker is independent and blind to target verdict, builder notes, revision history, and metadata.",
+      "evidence": "holo_builder/qa_attacker.py:1-32, holo_builder/qa_attacker.py:464-498"
+    },
+    {
+      "claim": "Freeze requires CLEAN_TO_FREEZE and writes frozen packet evidence.",
+      "evidence": "holo_builder/freeze.py:1-16, holo_builder/freeze.py:44-89"
+    },
+    {
+      "claim": "Policy bridge writes request, envelope, ingest record, policy check, manifest, and final artifact only when allowed.",
+      "evidence": "holo_builder/policy_bridge.py:212-353"
+    },
+    {
+      "claim": "Policy bridge validation fails missing or inconsistent terminal evidence and override mutation.",
+      "evidence": "holo_builder/policy_bridge.py:371-430"
+    },
+    {
+      "claim": "HoloBuild dashboard is read-only by default and live watched runs require HOLOBUILD_LIVE_RUNS.",
+      "evidence": "main.py:1415, main.py:1731-1745, main.py:1933-1992"
+    },
+    {
+      "claim": "Dashboard sanitizes logs and run traces before display.",
+      "evidence": "main.py:1423-1433, main.py:1495-1571"
+    },
+    {
+      "claim": "VeSync fixture must not be run through the current AP/BEC runtime without a creative adapter or prompt surface.",
+      "evidence": "holo_builder/projects/vesync_cosori_levoit_copywriter_exercise_001/README.md:21-32"
+    },
+    {
+      "claim": "VeSync fixture requires source classes, budgets, source storage, lossless canonical thread, and trace artifacts.",
+      "evidence": "holo_builder/projects/vesync_cosori_levoit_copywriter_exercise_001/03_holobuild_run_plan.json:24-72"
+    }
+  ],
+  "answers": {
+    "1_what_holobuild_is_supposed_to_do": [
+      "Produce high-stakes candidate work products that are safer to rely on.",
+      "Preserve full build history and canonical context across turns.",
+      "Ingest or gather source evidence inside declared budgets.",
+      "Convert inputs into structured candidate artifacts.",
+      "Attack candidates for unsupported claims, missing artifacts, contradictions, tells, overfit construction, single-document reliance, schema failures, and unclear limits.",
+      "Use Governor checks to enforce non-negotiable constraints and decide whether repair can continue.",
+      "Mark unresolved evidence gaps plainly instead of making the artifact sound ready.",
+      "For AP/BEC benchmark packets, construct and harden action-boundary cases before blind adjudication."
+    ],
+    "2_risky_decisions_or_actions": [
+      {
+        "action": "start_provider_backed_build_or_qa",
+        "risk": "external data sharing, cost, privacy exposure, and evidence implications",
+        "boundary": "human_approval_required"
+      },
+      {
+        "action": "live_web_research",
+        "risk": "stale or weak sources can be laundered into confident claims",
+        "boundary": "explicit_research_budget_and_source_storage"
+      },
+      {
+        "action": "change_target_or_hypothesized_verdict",
+        "risk": "answer-key drift",
+        "boundary": "deterministic_lock"
+      },
+      {
+        "action": "provider_fallback_or_model_substitution",
+        "risk": "changes lane conditions and proof comparability",
+        "boundary": "predeclared_fallback_policy"
+      },
+      {
+        "action": "mark_builder_converged",
+        "risk": "moves candidate toward freeze or release",
+        "boundary": "lint_qa_structural_and_governor_promotion_gates"
+      },
+      {
+        "action": "builder_approval_approved_for_freeze",
+        "risk": "creates a readiness claim",
+        "boundary": "advisory_until_deterministic_and_human_review_pass"
+      },
+      {
+        "action": "freeze",
+        "risk": "writes frozen evidence and ledger state",
+        "boundary": "clean_to_freeze_correct_hash_human_approval"
+      },
+      {
+        "action": "authorize_final",
+        "risk": "moves toward blind adjudication or final use",
+        "boundary": "explicit_human_approval"
+      },
+      {
+        "action": "publish_or_use_final_artifact",
+        "risk": "external reliance begins",
+        "boundary": "human_release_only"
+      },
+      {
+        "action": "promote_result_to_public_proof",
+        "risk": "blurs product demo and benchmark proof",
+        "boundary": "root_package_lock_manifest_and_evidence_label_required"
+      }
+    ],
+    "3_shadow_only": [
+      "product dashboard watched runs",
+      "provider-backed build turns",
+      "provider-backed QA turns",
+      "provider-backed Governor turns",
+      "live research passes",
+      "builder approval results",
+      "readiness or trust scores",
+      "source reliability classifications",
+      "solo/model comparisons",
+      "non-AP/BEC adapters such as creative/legal/compliance until tested",
+      "generated high-stakes artifacts before approval",
+      "freeze packages before hash/source/QA validation",
+      "policy bridge outputs before evidence-chain validation"
+    ],
+    "4_human_approval_required": [
+      "enable HOLOBUILD_LIVE_RUNS",
+      "run provider-backed HoloBuild job",
+      "run live web research",
+      "send customer or task data to providers",
+      "use fallback providers or change model roster",
+      "accept BUILDER_CONVERGED as ready for review",
+      "accept CLEAN_TO_FREEZE",
+      "freeze artifact",
+      "authorize final adjudication",
+      "publish or submit artifact externally",
+      "promote product run into benchmark evidence",
+      "use HoloBuild output for payment, contract, procurement, compliance, security, hiring, or customer-facing decisions"
+    ],
+    "5_likely_failure_modes": [
+      {
+        "id": "source_laundering",
+        "impact": "weak or missing evidence becomes confident artifact language",
+        "mitigation": "source-before-claim gate and missing-evidence ledger"
+      },
+      {
+        "id": "context_truncation",
+        "impact": "later turns lose accepted repairs or constraints",
+        "mitigation": "canonical-thread completeness hash and block on overflow"
+      },
+      {
+        "id": "verdict_drift",
+        "impact": "build target changes to fit draft",
+        "mitigation": "target lock and drift events"
+      },
+      {
+        "id": "metadata_leak",
+        "impact": "model-visible content contains answer-key or builder metadata",
+        "mitigation": "action/context metadata gate"
+      },
+      {
+        "id": "action_boundary_freeze_hash_gap",
+        "impact": "freeze hash may not cover top-level action-boundary model-visible content",
+        "mitigation": "packet-format-aware hash gate"
+      },
+      {
+        "id": "missing_assert_packet_module",
+        "impact": "legacy assertion-repair path cannot be treated as active in this checkout",
+        "mitigation": "restore, replace, or remove assertion claims before live use"
+      },
+      {
+        "id": "provider_fallback_lane_change",
+        "impact": "fallback changes model family and proof conditions",
+        "mitigation": "predeclared fallback policy and accounting"
+      },
+      {
+        "id": "qa_blind_leak",
+        "impact": "QA no longer independent",
+        "mitigation": "test only action/context crosses QA boundary"
+      },
+      {
+        "id": "overfit_artifact",
+        "impact": "candidate is too easy or answer-key shaped",
+        "mitigation": "single-doc reliance and overfit/tell checks"
+      },
+      {
+        "id": "product_adapter_mismatch",
+        "impact": "AP/BEC prompts mis-handle non-AP/BEC product work",
+        "mitigation": "domain adapter gate"
+      },
+      {
+        "id": "dashboard_overtrust",
+        "impact": "design partner mistakes shadow trace for production approval",
+        "mitigation": "plain mode labels and human approval state"
+      },
+      {
+        "id": "policy_bypass",
+        "impact": "downstream stage releases or mutates artifact after block",
+        "mitigation": "terminal release invariant and negative-path tests"
+      }
+    ],
+    "6_holoverify_style_packet": {
+      "principle": "A HoloBuild proof packet is a run-level evidence package, not just the final artifact.",
+      "minimum_shape": {
+        "packet_type": "HOLOBUILD_ACTION_BOUNDARY_PACKET",
+        "packet_version": "0.1",
+        "packet_id": "HB-<DOMAIN>-<YYYYMMDD>-<RUN>",
+        "mode": "shadow_only | approval_required | release_approved",
+        "domain": "contract | compliance | finance | diligence | procurement | payment_release | creative | other",
+        "task_summary": "string",
+        "input_manifest": [],
+        "source_manifest": [],
+        "canonical_thread": {
+          "policy": "lossless",
+          "turn_count": 0,
+          "canonical_thread_hash": "sha256:...",
+          "overflow_status": "ok | blocked_context_overflow"
+        },
+        "model_roster": {
+          "hologov": {},
+          "workers": [],
+          "fallback_policy": "none | declared",
+          "fallback_events": []
+        },
+        "artifact": {
+          "candidate_path": "string",
+          "candidate_hash": "sha256:...",
+          "claim_source_map_path": "string",
+          "missing_evidence_path": "string"
+        },
+        "deterministic_gates": [],
+        "governor_decisions": [],
+        "qa_attacker": {},
+        "policy_bridge": {},
+        "freeze_lock": {},
+        "human_approvals": [],
+        "runtime_accounting": {},
+        "trace_inventory": [],
+        "terminal_status": "NEEDS_REPAIR | BLOCKED | SHADOW_READY | FROZEN_PENDING_HUMAN | HUMAN_RELEASED"
+      },
+      "required_files": [
+        "input_manifest.json",
+        "source_manifest.json",
+        "canonical_thread.jsonl",
+        "turn_inputs.jsonl",
+        "turn_outputs.jsonl",
+        "governor_briefs.jsonl",
+        "qa_attack.json",
+        "deterministic_gates.json",
+        "policy_checks.jsonl",
+        "final_candidate_artifact.json",
+        "claim_source_map.json",
+        "missing_evidence.json",
+        "run_manifest.json"
+      ]
+    },
+    "7_deterministic_gates": [
+      "mode_gate",
+      "spec_gate",
+      "adapter_gate",
+      "provider_scope_gate",
+      "roster_gate",
+      "fallback_gate",
+      "canonical_thread_gate",
+      "source_before_claim_gate",
+      "missing_evidence_gate",
+      "schema_gate",
+      "action_boundary_metadata_gate",
+      "target_lock_gate",
+      "contradiction_gate",
+      "single_document_reliance_gate",
+      "overfit_tell_gate",
+      "qa_gate",
+      "policy_gate",
+      "freeze_hash_gate",
+      "trace_inventory_gate",
+      "human_approval_gate"
+    ],
+    "8_runtime_trace_accounting": [
+      "run_id",
+      "branch_commit",
+      "mode_domain_adapter_risk_class",
+      "provider_model_ids_per_turn",
+      "hologov_provider_and_worker_pool",
+      "system_prompt_hash",
+      "user_prompt_hash",
+      "input_hash",
+      "output_hash",
+      "input_output_tokens",
+      "elapsed_ms",
+      "retry_count",
+      "fallback_events",
+      "parse_errors",
+      "canonical_thread_hash_before_after_each_turn",
+      "source_records_and_budget_used",
+      "material_claim_count",
+      "sourced_claim_count",
+      "missing_evidence_count",
+      "qa_classifications_and_category_severities",
+      "repair_ticket",
+      "governor_briefs",
+      "promotion_decisions",
+      "policy_checkpoints",
+      "terminal_status",
+      "deterministic_gate_results",
+      "human_approvals",
+      "final_candidate_hash",
+      "freeze_hash",
+      "ledger_entry",
+      "release_state"
+    ],
+    "9_design_partner_trust_requirements": [
+      "plain mode labels",
+      "statement that HoloBuild does not execute actions or publish autonomously",
+      "final artifact plus claim-source map",
+      "missing-evidence notes visible",
+      "Builder QA Gov replay",
+      "deterministic gate report",
+      "source reliability and source budget accounting",
+      "provider/model roster and fallback accounting",
+      "negative examples where HoloBuild blocks itself",
+      "human approval log",
+      "data-handling and redaction scope",
+      "evidence labels separating demo, shadow trace, frozen proof, and public package",
+      "external scoring or review protocol for performance claims"
+    ]
+  },
+  "known_gate_gaps": [
+    {
+      "id": "missing_assert_packet",
+      "finding": "holo_builder.loop imports holo_builder.assert_packet.run_assertions, but importlib.util.find_spec('holo_builder.assert_packet') returned None in this checkout.",
+      "required_resolution": "Restore the module, replace it with an equivalent deterministic validator, or remove assertion-gate claims before live use."
+    },
+    {
+      "id": "action_boundary_freeze_hash",
+      "finding": "holo_builder.freeze hashes packet.payload.action/context, while action_boundary lint uses top-level action/context.",
+      "required_resolution": "Make freeze hashing packet-format-aware before freezing action_boundary packets."
+    }
+  ],
+  "acceptance_criteria": [
+    "HOLOBUILD_LIVE_RUNS remains off by default.",
+    "Non-AP/BEC domains have explicit adapters and fixture tests.",
+    "Action-boundary freeze hashing is packet-format-aware.",
+    "Missing assert_packet gate is resolved or excluded from readiness claims.",
+    "Product dashboard labels cannot be mistaken for production authorization.",
+    "HoloBuild packet generator emits run-level evidence package.",
+    "Deterministic gates can be run provider-free against stored traces.",
+    "Human approval is required for freeze, final adjudication, publication, and downstream reliance."
+  ]
+}

@@ -1,0 +1,479 @@
+{
+  "title": "HoloChat Governed Shadow No-Provider Test Spec",
+  "date": "2026-07-05",
+  "status": "test_specification_only",
+  "source_documents": [
+    "docs/product/HOLOCHAT_GOVERNED_SHADOW_PRESSURE_TEST_PLAN_2026_07_05.md",
+    "docs/product/HOLOCHAT_GOVERNED_SHADOW_PRESSURE_TEST_PLAN_2026_07_05.json"
+  ],
+  "constraints": {
+    "provider_calls": false,
+    "production_behavior_changes": false,
+    "stage_commit_push": false,
+    "network_calls": false
+  },
+  "harness_rules": [
+    "Use fake adapters with deterministic chat_call and stream_chat methods.",
+    "Use fake Gov and fake HoloBrain objects.",
+    "Monkeypatch env flags and model keys.",
+    "Do not instantiate vendor SDK clients with real keys.",
+    "Do not call load_adapters unless monkeypatched.",
+    "Do not call web_search.search unless monkeypatched.",
+    "Assert no raw prompts, raw memory, provider bodies, secrets, capsule ids, auth headers, or private identifiers appear in returned metadata.",
+    "Assert visible answer text is stable when testing runtime or shadow metadata."
+  ],
+  "recommended_test_files": [
+    "tests/test_holochat_governed_shadow_product_contract.py",
+    "tests/test_holochat_runtime_dashboard_modes.py"
+  ],
+  "shared_fixtures": {
+    "fake_analyst_adapter": {
+      "purpose": "Produce deterministic visible answers and capture system prompt, history, user message, temperature, and images.",
+      "fields": [
+        "provider",
+        "model_id",
+        "visible_text",
+        "last_system_prompt",
+        "last_history",
+        "calls",
+        "fail"
+      ],
+      "behavior": [
+        "chat_call appends safe call metadata and returns visible_text plus fake token counts.",
+        "When fail is true, raise RuntimeError('provider raw body should not surface')."
+      ]
+    },
+    "fake_shadow_adapter": {
+      "purpose": "Run governed shadow roster without providers.",
+      "behavior": [
+        "Return deterministic worker text for worker prompts.",
+        "Return deterministic Gov baton text for Gov prompts.",
+        "Capture prompts for safety assertions.",
+        "Never call real provider clients."
+      ]
+    },
+    "fake_governor": {
+      "purpose": "Exercise HoloChat controller surfaces without provider calls.",
+      "behavior": [
+        "assess_chat_temperature returns fixed value.",
+        "should_search returns None unless deterministic web routing is being tested.",
+        "surface_thought returns None.",
+        "assess_tenor returns a fixed directive when personality diagnostics need it.",
+        "verify_claims returns response_text and empty flagged claim list.",
+        "extract_context_updates returns empty dict unless memory-write metadata is under test.",
+        "generate_conversation_paths returns three deterministic paths."
+      ]
+    },
+    "fake_holobrain": {
+      "purpose": "Provide bounded capsule context and life context without DB access.",
+      "trap_values": [
+        "api_key=must-not-leak",
+        "raw_memory=SHOULD_NOT_APPEAR",
+        "raw_prompt=SHOULD_NOT_APPEAR",
+        "authorization=Bearer SHOULD_NOT_APPEAR",
+        "capsule_id=raw-capsule-id",
+        "private_note=hidden provider prompt should not surface"
+      ]
+    }
+  },
+  "tests": [
+    {
+      "id": "HC-GS-NP-001",
+      "name": "Normal chat path unchanged when shadow is off",
+      "requirement": "Normal chat must remain the base serial analyst path when HOLOCHAT_GOVERNED_SHADOW is off.",
+      "target_surfaces": [
+        "HoloChatEngine.send_message",
+        "_turn_runtime_metadata",
+        "run_governed_shadow"
+      ],
+      "setup": [
+        "Delete HOLOCHAT_GOVERNED_SHADOW.",
+        "Delete HOLOCHAT_4DNA_SHADOW.",
+        "Build engine with fake analyst adapters, fake Gov, and fake HoloBrain."
+      ],
+      "steps": [
+        "Send prompt: Give me a simple plan for the day.",
+        "Capture response, runtime metadata, adapter call count, and session history."
+      ],
+      "assertions": [
+        "Response equals selected fake analyst visible text.",
+        "Exactly one visible analyst call occurs.",
+        "runtime.serial_call is true.",
+        "runtime.parallel_fanout is false.",
+        "runtime.analyst_call_mode equals serial_one_per_turn.",
+        "runtime.selection_mode equals round_robin.",
+        "runtime.selected_provider and runtime.selected_model match selected analyst.",
+        "runtime.governor_role equals controller_check_layer.",
+        "runtime.holo4dna_mode equals off.",
+        "If runtime.governed_shadow exists, status is off or skipped, call_count is 0, and visible_answer_replaced is false.",
+        "No shadow worker calls occur."
+      ],
+      "current_coverage": "partial",
+      "repo_evidence": [
+        "tests/test_holochat_runtime_routing.py::test_browser_chat_path_remains_serial_and_reports_runtime",
+        "holo_governed_shadow.py::safe_skip_metadata"
+      ]
+    },
+    {
+      "id": "HC-GS-NP-002",
+      "name": "Hard-chat trigger fires for risk, strategy, and multi-part prompts",
+      "requirement": "Shadow trigger must fire for hard prompts and stay off for small talk.",
+      "target_surfaces": [
+        "holo_governed_shadow.governed_shadow_trigger"
+      ],
+      "cases": [
+        {
+          "prompt": "Please verify this decision and risk.",
+          "should_run": true,
+          "reason_prefix": "hard_chat_term"
+        },
+        {
+          "prompt": "Stress test this strategy before I act.",
+          "should_run": true,
+          "reason_prefix": "hard_chat_term"
+        },
+        {
+          "prompt": "What should we do about this?",
+          "should_run": true,
+          "reason_prefix": "hard_chat_term"
+        },
+        {
+          "prompt": "1. Map the risk\n2. Find the weak assumption\n3. Give me the tradeoff",
+          "should_run": true,
+          "reason": "multi_part_prompt"
+        },
+        {
+          "prompt": "Question one? Question two? Question three?",
+          "should_run": true,
+          "reason": "multi_part_prompt"
+        },
+        {
+          "prompt": "hello",
+          "should_run": false,
+          "reason": "not_hard_chat"
+        },
+        {
+          "prompt": "",
+          "should_run": false,
+          "reason": "empty_message"
+        },
+        {
+          "prompt": "short",
+          "thread_health_level": "RED",
+          "should_run": true,
+          "reason": "thread_health_red"
+        },
+        {
+          "prompt": "compact",
+          "context_token_estimate": 12000,
+          "should_run": true,
+          "reason": "context_window_stress"
+        }
+      ],
+      "assertions": [
+        "ShadowTrigger.should_run matches each case.",
+        "Reason is stable enough for runtime/debug labels."
+      ],
+      "current_coverage": "partial",
+      "repo_evidence": [
+        "tests/test_holochat_governed_shadow.py::test_governed_shadow_trigger_targets_hard_chats_only"
+      ]
+    },
+    {
+      "id": "HC-GS-NP-003",
+      "name": "Governed shadow metadata is safe",
+      "requirement": "Governed shadow result must expose safe metadata only.",
+      "target_surfaces": [
+        "run_governed_shadow",
+        "build_worker_prompt",
+        "build_gov_prompt",
+        "_summary"
+      ],
+      "setup": [
+        "Set HOLOCHAT_GOVERNED_SHADOW=1.",
+        "Use fake roster adapters for xai/grok-3-mini, openai/gpt-5.4-mini, and minimax/MiniMax-M2.5-highspeed.",
+        "Create HoloState with rolling summary and continuity ledger.",
+        "Pass capsule context with trap values."
+      ],
+      "assertions": [
+        "Result status is complete.",
+        "safe_metadata_only is true.",
+        "visible_answer_replaced is false.",
+        "Public result JSON omits must-not-leak, authorization, bearer, raw_prompt, raw_memory, private_note, hidden provider prompt, raw-capsule-id, and provider raw body.",
+        "Public result JSON does not include full worker system prompts or Gov system prompts.",
+        "Captured worker prompt may include sanitized selected memory summaries, but not raw trap values.",
+        "token_totals and call_sequence are present.",
+        "call_sequence includes only safe row fields."
+      ],
+      "current_coverage": "partial",
+      "repo_evidence": [
+        "tests/test_holochat_governed_shadow.py::test_governed_shadow_runs_exact_five_call_sequence_with_gov_sandwich",
+        "tests/test_holochat_governed_shadow.py::test_holochat_runtime_reports_governed_shadow_without_replacing_answer"
+      ]
+    },
+    {
+      "id": "HC-GS-NP-004",
+      "name": "Gov cannot choose models",
+      "requirement": "Gov baton must fail closed if it tries to select a model or provider.",
+      "target_surfaces": [
+        "holo_governed_shadow.parse_gov_baton"
+      ],
+      "forbidden_keys": [
+        "selected_model",
+        "worker_model",
+        "model_choice",
+        "provider_choice",
+        "next_model"
+      ],
+      "assertions": [
+        "Every forbidden key raises ValueError.",
+        "Error string contains gov_model_selection_forbidden.",
+        "No partial baton object is returned.",
+        "A positive control baton with only allowed control fields parses successfully."
+      ],
+      "current_coverage": "covered_narrow",
+      "repo_evidence": [
+        "tests/test_holochat_governed_shadow.py::test_gov_baton_rejects_model_selection_fields"
+      ]
+    },
+    {
+      "id": "HC-GS-NP-005",
+      "name": "Shadow result cannot replace visible answer without explicit product gate",
+      "requirement": "Shadow artifacts must not modify the user-visible answer unless a future explicit product gate exists and is enabled.",
+      "target_surfaces": [
+        "HoloChatEngine.send_message",
+        "run_governed_shadow",
+        "select_best_artifact"
+      ],
+      "setup": [
+        "Set HOLOCHAT_GOVERNED_SHADOW=1.",
+        "Fake visible analyst returns VISIBLE_BASE_ANSWER.",
+        "Fake final shadow worker returns SHADOW_BETTER_ANSWER.",
+        "No product gate env var exists in current runtime."
+      ],
+      "assertions": [
+        "API response equals VISIBLE_BASE_ANSWER.",
+        "Shadow metadata may select the final artifact, but visible_answer_replaced is false.",
+        "API response does not replace, append, or blend SHADOW_BETTER_ANSWER.",
+        "Runtime may expose final_selector.selection_reason, but not raw full shadow answer.",
+        "If a future product gate is added, this test must fail until updated to assert explicit opt-in semantics."
+      ],
+      "current_coverage": "partial",
+      "repo_evidence": [
+        "tests/test_holochat_governed_shadow.py::test_holochat_runtime_reports_governed_shadow_without_replacing_answer",
+        "holo_governed_shadow.py::_summary"
+      ]
+    },
+    {
+      "id": "HC-GS-NP-006",
+      "name": "Runtime dashboard labels base, shadow, and full governed modes",
+      "requirement": "Dashboard and runtime metadata must clearly distinguish base runtime, shadow-enabled runtime, and all-cylinders/full-governed-ready state.",
+      "target_surfaces": [
+        "main._holochat_all_cylinders_status",
+        "HoloChatEngine.runtime_status",
+        "frontend/runtime.html",
+        "frontend/chat.html"
+      ],
+      "cases": [
+        "Base initialized and shadow disabled.",
+        "Base initialized and shadow enabled.",
+        "Base missing required checks.",
+        "Per-turn runtime has governed_shadow.status complete.",
+        "Per-turn runtime has governed_shadow.status invalid."
+      ],
+      "assertions": [
+        "Base initialized plus shadow disabled returns status base_ready_shadow_off, base_runtime_ready true, hard_chat_shadow_ready false, and attention includes governed_shadow_disabled.",
+        "Base initialized plus shadow enabled returns status ok, all_cylinders true, and hard_chat_shadow_ready true.",
+        "Missing required checks returns status attention with failed check names.",
+        "/runtime source includes All Cylinders, Base runtime, Hard-chat shadow, Visible Chat Lane, Governor, State And Memory, Safety, and Governed Shadow Sequence.",
+        "Chat runtime panel includes Runtime, This turn, Mode, Governor, Full memory to analyst, Memory delivery, Continuity ledger, Holo4DNA, and Governed shadow.",
+        "No UI copy claims 4DNA active, four models answered this turn, or full governed answer unless an explicit runtime field supports it."
+      ],
+      "current_coverage": "partial",
+      "repo_evidence": [
+        "main.py::_holochat_all_cylinders_status",
+        "frontend/runtime.html",
+        "frontend/chat.html::buildRuntimeRows"
+      ]
+    },
+    {
+      "id": "HC-GS-NP-007",
+      "name": "Continuity pressure test",
+      "requirement": "Long-thread continuity must survive bounded history through state, rolling summary, Gov Arc State, and continuity ledger.",
+      "target_surfaces": [
+        "HoloChatEngine.send_message",
+        "_bounded_adapter_history",
+        "_update_rolling_summary_after_turn",
+        "_update_continuity_ledger_after_turn",
+        "_holo_voice_diagnostics"
+      ],
+      "setup": [
+        "Set HOLOCHAT_ADAPTER_HISTORY_MESSAGES=4.",
+        "Set HOLOCHAT_ADAPTER_HISTORY_CHARS=2000.",
+        "Set HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS=500.",
+        "Seed session history with at least 40 messages.",
+        "Seed early constraint: Do not optimize for speed; optimize for trust.",
+        "Seed Gov Arc State with user_goal, current_tension, and settled_decisions."
+      ],
+      "assertions": [
+        "Adapter receives no more than configured raw history limits.",
+        "Runtime reports omitted history count.",
+        "System prompt includes HOLO STATE OBJECT, ROLLING_SUMMARY, GOV ARC STATE, and CONTINUITY_LEDGER.",
+        "Early constraint is preserved in rolling summary, continuity ledger, or Gov Arc State.",
+        "Runtime reports memory_delivery_mode rolling_summary_selected_context.",
+        "Runtime reports continuity_ledger_mode active_prompt_structured_private.",
+        "Runtime reports structured_state_object_mode active_prompt.",
+        "Runtime reports baton_pass_mode active_prompt.",
+        "Runtime reports analyst_receives_full_memory false.",
+        "No full-memory or perfect-continuity claim appears in runtime text."
+      ],
+      "current_coverage": "partial",
+      "repo_evidence": [
+        "tests/test_holochat_runtime_routing.py::test_second_turn_prompt_includes_private_continuity_ledger",
+        "tests/test_holochat_runtime_routing.py long-thread bounded-history tests"
+      ]
+    },
+    {
+      "id": "HC-GS-NP-008",
+      "name": "Holo feels lobotomized diagnostic regression test",
+      "requirement": "If Holo feels flattened, runtime should make model, route, context, and personality regressions diagnosable without providers.",
+      "target_surfaces": [
+        "HoloChatEngine.send_message",
+        "_holo_voice_diagnostics",
+        "_turn_runtime_metadata",
+        "build_runtime_identity_block",
+        "HOLO_CHAT_SYSTEM_PROMPT"
+      ],
+      "setup": [
+        "Use fake capturing adapter returning DIAGNOSTIC_VISIBLE_ANSWER.",
+        "Fake Gov returns tenor directive: Be direct, concrete, non-generic, and preserve the trust-over-speed constraint.",
+        "Fake HoloBrain returns capsule context, life context, and last consolidation.",
+        "Run one signed-in turn and one incognito turn."
+      ],
+      "diagnostic_fields": [
+        "selected provider/model",
+        "runtime profile",
+        "serial vs shadow mode",
+        "capsule attached",
+        "capsule context count",
+        "selected Gov context count",
+        "life context count",
+        "rolling summary present",
+        "captain brief present",
+        "runtime identity in prompt",
+        "Holo state object in prompt",
+        "Gov Arc State in prompt",
+        "governed shadow status",
+        "adapter history omitted count",
+        "web search attempted/status",
+        "voice diagnostic risk flags"
+      ],
+      "assertions": [
+        "Signed-in runtime identifies selected provider/model and profile.",
+        "holo_voice_diagnostics.status is ok or attention with explicit flags.",
+        "Signed-in risk flags do not include capsule_not_attached, runtime_identity_missing, or holo_state_object_missing.",
+        "Captured system prompt includes Canonical HoloChat Doctrine, HoloChat is not omniscient, Sound human, and generic AI demo rewrite guidance.",
+        "Captured system prompt includes fake Gov tenor directive.",
+        "Incognito turn explicitly marks stripped memory through risk flags or incognito metadata.",
+        "Incognito turn has no capsule context.",
+        "Memory claims remain honest."
+      ],
+      "failure_meaning": [
+        "Missing runtime identity means route/context regression.",
+        "Missing capsule counts mean memory attachment regression.",
+        "Missing Gov directive means personality/tenor regression.",
+        "Missing selected provider/model means model-route observability regression.",
+        "governed_shadow off or skipped explains why shadow did not improve the visible answer."
+      ],
+      "current_coverage": "new",
+      "repo_evidence": [
+        "tests/test_holochat_runtime_routing.py::test_browser_chat_prompt_includes_runtime_identity_and_capped_memory",
+        "tests/test_holochat_runtime_routing.py::test_prompt_assembly_loads_canonical_doctrine_docs",
+        "chat_engine.py::_holo_voice_diagnostics"
+      ]
+    },
+    {
+      "id": "HC-GS-NP-009",
+      "name": "No raw HoloBrain memory dump to workers",
+      "requirement": "Shadow workers may receive selected, sanitized memory summaries only, never raw HoloBrain dumps.",
+      "target_surfaces": [
+        "holo_governed_shadow.build_state_brief",
+        "holo_governed_shadow._safe_memory_items",
+        "holo_governed_shadow.build_worker_prompt",
+        "HoloContextBuilder.build"
+      ],
+      "setup": [
+        "Capsule context has at least 20 rows with nested objects, long values, and trap values.",
+        "Set HOLOCHAT_GOVERNED_SHADOW=1.",
+        "Use capturing shadow adapters."
+      ],
+      "assertions": [
+        "Worker prompt includes selected_memory_only or equivalent selected-memory section.",
+        "Worker prompt does not include raw dictionary dump syntax for full capsule context.",
+        "Worker prompt does not include more than configured safe item limit.",
+        "Worker prompt and metadata omit must-not-leak, SHOULD_NOT_APPEAR, Bearer, raw-capsule-id, and private_note.",
+        "Memory rows are compacted and sanitized.",
+        "Public metadata does not include raw memory rows."
+      ],
+      "current_coverage": "partial",
+      "repo_evidence": [
+        "tests/test_holo_context.py::test_context_memory_blocks_are_capped_and_do_not_include_sensitive_keys",
+        "tests/test_holo_context.py::test_context_budget_rows_do_not_expose_raw_memory_or_search_text",
+        "tests/test_holochat_governed_shadow.py safe metadata tests"
+      ]
+    },
+    {
+      "id": "HC-GS-NP-010",
+      "name": "Failure preservation if shadow run fails",
+      "requirement": "A failed shadow run must preserve safe invalid metadata and leave the visible answer untouched.",
+      "target_surfaces": [
+        "run_governed_shadow",
+        "_run_governed_shadow_for_turn",
+        "HoloChatEngine.send_message"
+      ],
+      "setup": [
+        "Set HOLOCHAT_GOVERNED_SHADOW=1.",
+        "Fake visible analyst returns VISIBLE_BASE_ANSWER.",
+        "One shadow worker raises RuntimeError('provider raw body should not surface').",
+        "Include second case where exact roster is missing."
+      ],
+      "assertions": [
+        "Provider failure returns runtime.governed_shadow.status invalid.",
+        "invalidation_reason identifies WORKER_FAILURE or GOV_FAILURE.",
+        "root_failure.error equals {'type': 'RuntimeError'}.",
+        "Raw provider body is not exposed.",
+        "Visible response remains VISIBLE_BASE_ANSWER.",
+        "visible_answer_replaced is false.",
+        "Partial call_sequence is preserved up to failed slot.",
+        "Token totals remain present and safe.",
+        "Missing roster returns status skipped and lists missing provider/model identities.",
+        "Missing roster leaves visible answer unchanged."
+      ],
+      "current_coverage": "covered_narrow",
+      "repo_evidence": [
+        "tests/test_holochat_governed_shadow.py::test_provider_failure_preserves_invalid_shadow_without_raw_error",
+        "tests/test_holochat_governed_shadow.py::test_holochat_shadow_skips_when_exact_roster_missing"
+      ]
+    }
+  ],
+  "execution_order": [
+    "Add or extend governed-shadow pure function tests: HC-GS-NP-002 and HC-GS-NP-004.",
+    "Add or extend shadow run tests: HC-GS-NP-003, HC-GS-NP-005, HC-GS-NP-009, HC-GS-NP-010.",
+    "Add or extend engine runtime tests: HC-GS-NP-001, HC-GS-NP-007, HC-GS-NP-008.",
+    "Add runtime dashboard/static label tests: HC-GS-NP-006."
+  ],
+  "stop_rules": [
+    "Stop if any test path would require real provider keys.",
+    "Stop if a test tries to call OpenAI, Anthropic, Google, xAI, MiniMax, Mistral, DeepSeek, Tavily, Supabase, Stripe, Resend, or external network.",
+    "Stop if a proposed assertion requires changing production behavior before this test spec is accepted.",
+    "Stop if a test cannot be made deterministic with fake adapters and fake Gov/HoloBrain objects."
+  ],
+  "acceptance_standard": [
+    "All ten IDs are implemented as deterministic tests or intentionally marked as static/source tests.",
+    "No provider or network calls occur.",
+    "Normal visible answer behavior remains unchanged when shadow is off.",
+    "Governed shadow can be enabled, triggered, validated, failed, and inspected without leaking hidden prompts or memory.",
+    "Runtime/UI labeling makes base vs shadow vs all-cylinders state obvious.",
+    "The Holo feels lobotomized diagnostic identifies whether the issue is model route, missing context, missing Gov directive, shadow off/skipped, or persona/doctrine regression."
+  ]
+}

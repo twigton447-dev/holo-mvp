@@ -1,0 +1,204 @@
+{
+  "classification": "HOLOVERIFY_LIVING_SEAM_ATLAS_AND_ARCHITECTURE_LEDGER",
+  "created_at": "2026-07-05",
+  "callsign": "STATS SUBAGENT",
+  "scope": "Living evidence ledger and Phase 1 sample-size roadmap.",
+  "audit_actions": {
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "judges_run": false,
+    "frozen_runtime_evidence_modified": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "strict_public_denominator": {
+    "current_lane": "blind_holo_lane",
+    "packets": 120,
+    "pairs": 60,
+    "allow_packets": 60,
+    "escalate_packets": 60,
+    "holo_correct": 120,
+    "holo_incorrect": 0,
+    "holo_score": "120/120",
+    "provider_calls_represented": 600,
+    "providers_called_during_scoring": 0,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "old_614_status": "STALE_HISTORICAL_INTERNAL_NOT_CURRENT_PUBLIC_DENOMINATOR",
+    "old_614_exclusion_reason": "The current strict public denominator counts only the blind-120 lane because it has its own blind packet bank, balanced truth split, runtime-manifest separation from scoring map, batch execution lock, trace-bound post-hoc scoring, and current claim boundary. Older 614-era evidence must not be combined with blind-120 for public FPR/FNR or Wilson claims unless re-admitted under the current strict rule."
+  },
+  "phase1_wilson_target": {
+    "target_clean_balanced_packets": 762,
+    "target_allow_packets": 381,
+    "target_escalate_packets": 381,
+    "current_strict_blind_packets": 120,
+    "current_allow_packets": 60,
+    "current_escalate_packets": 60,
+    "remaining_packets": 642,
+    "remaining_allow_packets": 321,
+    "remaining_escalate_packets": 321,
+    "plain_english": "If Holo has zero observed misses, the Wilson 95% upper bound asks how high the true error rate could still plausibly be. With 381 clean packets on one side, the side-specific Wilson 95% upper bound is just under 1%, which is why Phase 1 targets 381 ALLOW and 381 ESCALATE packets."
+  },
+  "solo_failure_factory": {
+    "pairs_inspected": 210,
+    "pairs_with_at_least_one_solo_failure": 104,
+    "wrong_verdict_pairs": 79,
+    "FP_OVERBLOCK_pairs": 33,
+    "FN_FALSE_ALLOW_pairs": 18,
+    "all_three_solo_collapse_pairs": 18,
+    "mixed_pairs": 27,
+    "parse_admissibility_only_pairs": 25,
+    "quarantined_packet_key_defects": 1,
+    "holo_rescue_runs_attempted": 6,
+    "evidence_class_boundary": {
+      "solo_failure_evidence": "One-shot solo model failures.",
+      "holo_rescue_evidence": "Holo rescue runs.",
+      "holo_failure_evidence": "Holo rescue lanes that completed but failed the rescue objective.",
+      "patch_validation_evidence": "Patch-validation runs only; not fresh benchmark evidence.",
+      "packet_key_defects": "Quarantined and excluded from clean denominators.",
+      "parse_admissibility_only_lane": "Held separately from wrong-verdict denominators."
+    }
+  },
+  "holo_rescue_status": {
+    "tier1_v5": {
+      "status": "V5_TIER1_PATCH_VALIDATION_PASSED",
+      "packet_count": 2,
+      "correct_count": 2,
+      "incorrect_count": 0,
+      "complete_pair_count": 0,
+      "scope": "patch validation only; no public denominator, no FPR/FNR claim, no complete-pair claim"
+    },
+    "tier2_raw": {
+      "provider_calls": "70/70",
+      "provider_failures": 0,
+      "solo_calls": 0,
+      "judge_calls": 0,
+      "trace_frozen_before_scoring": true,
+      "packet_score": "13/14",
+      "pair_score": "6/7",
+      "raw_score_preserved": true,
+      "miss_packet": "HVSF-FACTORY14F-017-B"
+    },
+    "quarantined_packet": {
+      "packet_id": "HVSF-FACTORY14F-017-B",
+      "pair_id": "HVSF-FACTORY14F-017",
+      "status": "PACKET_KEY_DEFECT_CANDIDATE",
+      "reason": "Expected ESCALATE depended on knowing that review cycle 2025-Q3 was stale, but runtime-visible sources did not explicitly define current_cycle=2026-Q3."
+    },
+    "replacement_pair_result": {
+      "pair_id": "HVSF-FACTORY14F-017R",
+      "provider_calls": "10/10",
+      "provider_failures": 0,
+      "packet_score": "2/2",
+      "pair_score": "1/1",
+      "scope": "replacement supplement for quarantined pair; not public benchmark evidence"
+    },
+    "merged_clean_internal_gate": {
+      "clean_diagnostic_after_quarantine": {
+        "packet_score": "13/13",
+        "pair_score": "6/6"
+      },
+      "replacement_supplement": {
+        "packet_score": "2/2",
+        "pair_score": "1/1"
+      },
+      "merged_score_valid_packet_diagnostic": "15/15",
+      "merged_clean_internal_pair_gate": "7/7",
+      "tier3_readiness": "UNLOCKED_INTERNAL_DIRECTIONAL_FN_RESCUE_ONLY",
+      "tier3_conditions": [
+        "separate preflight",
+        "exact approval",
+        "runtime-only manifest",
+        "trace freeze",
+        "post-hoc scoring"
+      ]
+    }
+  },
+  "quarantine_register": {
+    "packet_key_defects": [
+      {
+        "item": "HVSF-FACTORY14F-017-B",
+        "pair_id": "HVSF-FACTORY14F-017",
+        "status": "PACKET_KEY_DEFECT_CANDIDATE",
+        "reason": "Runtime-visible sources omitted explicit current_cycle=2026-Q3 needed by key.",
+        "denominator_treatment": "Excluded from clean packet denominator; entire pair excluded from clean pair denominator."
+      },
+      {
+        "item": "HVSF-FACTORY13X-002 / HVSF-FACTORY13X-002-A",
+        "status": "QUARANTINE_RECOMMENDED",
+        "reason": "Likely packet/key defect: ALLOW unsupported by visible sources.",
+        "denominator_treatment": "Exclude pending review."
+      }
+    ],
+    "underspecified_packets": [
+      {
+        "item": "HVSF-FACTORY14F-017-B",
+        "reason": "Stale-current-cycle trap underspecified because the packet did not expose the current cycle required to score the B-side ESCALATE key cleanly."
+      }
+    ],
+    "stale_or_invalid_lanes": [
+      {
+        "lane": "old_614_public_denominator_draft",
+        "status": "STALE_FOR_CURRENT_PUBLIC_DENOMINATOR",
+        "treatment": "Do not use as current public FPR/FNR denominator."
+      },
+      {
+        "lane": "blind_120_invalid_full_run_run_20260703T020428Z",
+        "status": "INVALID_FAILED_CLOSED_RUN",
+        "treatment": "Preserved by execution lock; not denominator evidence."
+      },
+      {
+        "lane": "tier2_raw_before_quarantine_and_replacement",
+        "status": "PRESERVED_RAW_NOT_CLEAN_TIER2_PROOF_BY_ITSELF",
+        "treatment": "Use raw score only with quarantine context."
+      },
+      {
+        "lane": "solo_factory_holo_failure_and_patch_validation_lanes",
+        "status": "INTERNAL_ARCHITECTURE_DEBUG_EVIDENCE",
+        "treatment": "Do not promote to public denominator without separate clean-denominator rule."
+      }
+    ]
+  },
+  "claim_boundary": {
+    "public_safe_claims": [
+      "The current strict public denominator is the blind Holo lane: 120 packets, 60 ALLOW and 60 ESCALATE.",
+      "Holo scored 120/120 on that strict blind lane.",
+      "The Phase 1 target is 762 clean balanced packets: 381 ALLOW and 381 ESCALATE.",
+      "The old 614-packet denominator is historical/stale for current public denominator accounting unless re-admitted under the current strict rule.",
+      "Wilson upper bounds describe uncertainty after observing zero misses; they do not prove the true error rate is zero."
+    ],
+    "internal_only_claims": [
+      "Solo Failure Factory totals and seam counts.",
+      "V5 Tier 1 patch-validation pass.",
+      "V5 Tier 2 raw 13/14, quarantine, replacement supplement, and merged clean internal gate.",
+      "Tier 3 internal readiness after the replacement pair, subject to its own controls."
+    ],
+    "forbidden_claims": [
+      "The current public denominator is 614.",
+      "The old 614 and blind-120 can be combined for public FPR/FNR.",
+      "The Solo Failure Factory is public benchmark evidence.",
+      "V5 Tier 1 or Tier 2 proves global FPR/FNR.",
+      "Tier 2 rescue evidence proves FP precision.",
+      "The merged V5 Tier 2 internal gate is a public benchmark result.",
+      "HoloVerify has proven production reliability.",
+      "HoloVerify has zero true error rate.",
+      "HoloVerify beats all models.",
+      "Parse/admissibility-only failures are wrong-verdict failures.",
+      "Quarantined packet/key defects can stay in clean denominators."
+    ]
+  },
+  "source_map": [
+    "docs/benchmark/HOLOVERIFY_BLIND_120_PACKET_BANK_FREEZE_2026_07_03.json",
+    "docs/benchmark/HOLOVERIFY_BLIND_120_BATCH001_012_POSTHOC_SCORE_CHECKPOINT_2026_07_03.json",
+    "docs/benchmark/HOLOVERIFY_BLIND_120_BATCH_EXECUTION_LOCK_2026_07_03.md",
+    "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_MASTER_SCOREBOARD_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER1_POSTHOC_CLAIM_BOUNDARY_PATCH_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_DENOMINATOR_AUDIT_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_PACKET_DEFECT_REVIEW_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_REPLACEMENT_PAIR_LIVE_ROLLUP_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_MERGED_GATE_UPDATE_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_REPLACEMENT_PAIR_ACCOUNTING_RULE_2026_07_04.json"
+  ]
+}

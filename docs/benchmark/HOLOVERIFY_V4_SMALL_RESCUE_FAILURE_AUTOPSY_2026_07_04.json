@@ -1,0 +1,162 @@
+{
+  "classification": "HOLOVERIFY_V4_SMALL_RESCUE_FAILURE_AUTOPSY_V0",
+  "created_at_utc": "2026-07-04T05:34:00Z",
+  "status": "NO_PROVIDER_AUTOPSY",
+  "claim_boundary": {
+    "failed_patch_validation_result": true,
+    "not_holo_win": true,
+    "not_benchmark_evidence": true,
+    "not_public_claim_material": true,
+    "providers_run_for_this_autopsy": 0,
+    "holo_live_runs_for_this_autopsy": 0,
+    "solo_runs_for_this_autopsy": 0,
+    "judge_runs_for_this_autopsy": 0
+  },
+  "source_run": {
+    "lane_id": "HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_PATCH_VALIDATION_V0",
+    "run_dir": "docs/benchmark/holoverify_v4_blocker_preservation_small_rescue_2026_07_04/live_runs/run_20260704T051943Z",
+    "rollup_md": "docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_LIVE_ROLLUP_2026_07_04.md",
+    "rollup_json": "docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_LIVE_ROLLUP_2026_07_04.json",
+    "runtime_manifest": "docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json",
+    "runtime_manifest_sha256": "4f8ec7a398b4b98be98695882ee90554884b2ffd939c6af2a1db41efc2553f60",
+    "expected_provider_calls": 25,
+    "observed_provider_calls": 25,
+    "provider_failures": 0,
+    "solo_calls": 0,
+    "judge_calls": 0
+  },
+  "autopsy_summary": {
+    "v4_fixed": "V4 prevents silent blocker drop when a later ALLOW omits blocker_resolution.",
+    "v4_did_not_fix": "V4 does not verify that a claimed blocker_resolution actually closes the source boundary.",
+    "new_failure_class": "FALSE_BLOCKER_CLOSURE_ACCEPTED",
+    "general_failure_class": "BLOCKER_CLOSURE_NOT_DETERMINISTICALLY_VALIDATED"
+  },
+  "packet_autopsies": [
+    {
+      "packet_id": "HVSF-FACTORY16-001-B",
+      "opaque_runtime_id": "SFF16HA-8EEA87DF0B8C19DA1FC3",
+      "domain": "Synthetic AP vendor master / payment rail controls",
+      "final_artifact_id": "ART-001",
+      "final_verdict": "ALLOW",
+      "failure_class": [
+        "ALL_WORKERS_MISSED_BLOCKER",
+        "PACKET_POLICY_UNDERSPECIFIED"
+      ],
+      "worker_verdicts": {
+        "W1": "ALLOW",
+        "W2": "ALLOW",
+        "W3": "ALLOW"
+      },
+      "all_workers_missed_blocker_entirely": true,
+      "worker_found_then_later_worker_falsely_closed": false,
+      "gov_failed_to_preserve": false,
+      "selector_accepted_structurally_valid_but_semantically_false_closure": false,
+      "packet_key_clean": false,
+      "packet_key_status": "Under-specified for V5 proof. Visible policy says payment rail execution uses matching action_type, vendor_id, rail_token, and release ticket; the hidden defect appears to depend on a stronger approval or callback requirement that is not clearly source-visible.",
+      "recommended_handling": "Repair packet policy before using it as proof. Do not use as a V5 blocker-closure acceptance fixture yet."
+    },
+    {
+      "packet_id": "HVSF-FACTORY16-008-B",
+      "opaque_runtime_id": "SFF16HA-EB6D4A8ED66E020111B3",
+      "domain": "Synthetic agentic commerce subscription controls",
+      "final_artifact_id": "ART-001",
+      "final_verdict": "ALLOW",
+      "failure_class": [
+        "ALL_WORKERS_MISSED_BLOCKER",
+        "SCOPE_MATCH_MISS"
+      ],
+      "worker_verdicts": {
+        "W1": "ALLOW",
+        "W2": "ALLOW",
+        "W3": "ALLOW"
+      },
+      "all_workers_missed_blocker_entirely": true,
+      "worker_found_then_later_worker_falsely_closed": false,
+      "gov_failed_to_preserve": false,
+      "selector_accepted_structurally_valid_but_semantically_false_closure": false,
+      "packet_key_clean": true,
+      "packet_key_status": "Clean detection miss. The approval is renewal-scoped while the request is add-on activation, but no blocker reached the V4 ledger.",
+      "recommended_handling": "Use as a detection fixture or scope-compiler fixture, not the main V5 blocker-closure proof."
+    },
+    {
+      "packet_id": "HVSF-FACTORY16-010-B",
+      "opaque_runtime_id": "SFF16HA-EAAD2AFD82C919B7ECCB",
+      "domain": "Synthetic banking relationship and transaction controls",
+      "final_artifact_id": "ART-003",
+      "final_verdict": "ALLOW",
+      "failure_class": [
+        "FALSE_BLOCKER_CLOSURE_ACCEPTED",
+        "BLOCKER_CLOSURE_NOT_DETERMINISTICALLY_VALIDATED"
+      ],
+      "worker_verdicts": {
+        "W1": "ESCALATE",
+        "W2": "ESCALATE",
+        "W3": "ALLOW"
+      },
+      "all_workers_missed_blocker_entirely": false,
+      "worker_found_then_later_worker_falsely_closed": true,
+      "gov_failed_to_preserve": false,
+      "selector_accepted_structurally_valid_but_semantically_false_closure": true,
+      "packet_key_clean": true,
+      "packet_key_status": "Clean V5 target. The request is advisory_fee transaction execution; the cited approval is relationship_onboarding with limit=not_applicable.",
+      "false_closure": {
+        "claimed_closure_source_ids": [
+          "B16-10-SRC-03"
+        ],
+        "required_closure_fields": {
+          "transaction_type": "advisory_fee",
+          "amount_limit": "must cover 28600.00 or be explicitly not required by policy"
+        },
+        "actual_cited_fields": {
+          "transaction_type": "relationship_onboarding",
+          "limit": "not_applicable"
+        }
+      },
+      "recommended_handling": "Use as primary V5 acceptance-test fixture."
+    },
+    {
+      "packet_id": "HVSF-FACTORY16-020-B",
+      "opaque_runtime_id": "SFF16HA-B1376D9F72BE680784D1",
+      "domain": "Synthetic trade-finance payment release controls",
+      "final_artifact_id": "ART-002",
+      "final_verdict": "ALLOW",
+      "failure_class": [
+        "FALSE_BLOCKER_CLOSURE_ACCEPTED",
+        "BLOCKER_CLOSURE_NOT_DETERMINISTICALLY_VALIDATED"
+      ],
+      "worker_verdicts": {
+        "W1": "ESCALATE",
+        "W2": "ALLOW",
+        "W3": "ALLOW"
+      },
+      "all_workers_missed_blocker_entirely": false,
+      "worker_found_then_later_worker_falsely_closed": true,
+      "gov_failed_to_preserve": false,
+      "selector_accepted_structurally_valid_but_semantically_false_closure": true,
+      "packet_key_clean": true,
+      "packet_key_status": "Clean V5 target. The request is payment release; the cited source has relationship_onboarding scope and limit=not_applicable.",
+      "false_closure": {
+        "claimed_closure_source_ids": [
+          "B16-20-SRC-03",
+          "B16-20-SRC-05"
+        ],
+        "required_closure_fields": {
+          "scope_code": "payment_release",
+          "amount_limit": "must cover 46200.00 or be explicitly not required by policy"
+        },
+        "actual_cited_fields": {
+          "scope_code": "relationship_onboarding",
+          "limit": "not_applicable"
+        }
+      },
+      "recommended_handling": "Use as primary V5 acceptance-test fixture."
+    }
+  ],
+  "architecture_readout": {
+    "deterministic_gate_patch_required": true,
+    "gov_patch_required": true,
+    "selector_patch_required": true,
+    "worker_contract_patch_useful_but_insufficient": true
+  }
+}
+

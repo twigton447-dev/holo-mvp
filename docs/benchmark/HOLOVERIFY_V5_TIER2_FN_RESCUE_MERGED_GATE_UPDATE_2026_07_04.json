@@ -1,0 +1,41 @@
+{
+  "classification": "HOLOVERIFY_V5_TIER2_FN_RESCUE_MERGED_GATE_UPDATE",
+  "created_at_utc": "2026-07-04T07:42:33Z",
+  "raw_tier2": {
+    "packet_score": "13/14",
+    "pair_score": "6/7",
+    "preserved_unchanged": true
+  },
+  "quarantined_pair": {
+    "pair_id": "HVSF-FACTORY14F-017",
+    "packet_id": "HVSF-FACTORY14F-017-B",
+    "classification": "PACKET_KEY_DEFECT_CANDIDATE",
+    "reason": "The original B packet required knowing that 2025-Q3 was stale, but the runtime-visible sources did not explicitly define current_cycle=2026-Q3."
+  },
+  "clean_diagnostic_after_quarantine": {
+    "packet_score": "13/13",
+    "pair_score": "6/6"
+  },
+  "replacement_supplement": {
+    "pair_id": "HVSF-FACTORY14F-017R",
+    "packet_score": "2/2",
+    "pair_score": "1/1",
+    "run_dir": "docs/benchmark/holoverify_v5_tier2_fn_rescue_replacement_pair_2026_07_04/live_runs/run_20260704T074130Z",
+    "score_ref": "docs/benchmark/holoverify_v5_tier2_fn_rescue_replacement_pair_2026_07_04/live_runs/run_20260704T074130Z/v5_tier2_fn_rescue_replacement_pair_posthoc_score_trace_bound_v1.json"
+  },
+  "merged_clean_internal_gate": {
+    "packet_equivalent_score": "15/15",
+    "pair_score": "7/7",
+    "tier3_internal_directional_expansion_unlocked": true
+  },
+  "claim_boundary": {
+    "allowed_internal_claim": "After quarantining one packet-key defect candidate and passing a two-packet replacement pair, the V5 Tier 2 FN rescue clean internal gate is 15/15 packet-equivalent and 7/7 pairs.",
+    "not_allowed": [
+      "public benchmark claim",
+      "global false-negative-rate claim",
+      "false-positive precision claim",
+      "production reliability claim"
+    ]
+  }
+}
+

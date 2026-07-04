@@ -1,0 +1,83 @@
+{
+  "classification": "HOLOVERIFY_V5_TIER2_FN_RESCUE_PACKET_DEFECT_REVIEW_V0",
+  "created_at_utc": "2026-07-04T07:20:13Z",
+  "status": "PACKET_KEY_DEFECT_CANDIDATE",
+  "lane": "HOLOVERIFY_V5_BLOCKER_CLOSURE_TIER2_FN_RESCUE_V0",
+  "scope": {
+    "providers_run": 0,
+    "holo_live_rerun": 0,
+    "solo_runs": 0,
+    "judge_runs": 0,
+    "frozen_runtime_evidence_edited": false,
+    "public_claim_material": false
+  },
+  "runtime_status": {
+    "runtime_valid": true,
+    "run_dir": "docs/benchmark/holoverify_v5_blocker_closure_tier2_fn_rescue_2026_07_04/live_runs/run_20260704T070430Z",
+    "provider_calls_expected": 70,
+    "provider_calls_observed": 70,
+    "provider_failures": 0,
+    "trace_frozen_before_scoring": true,
+    "no_solo": true,
+    "no_judges": true
+  },
+  "score_preservation": {
+    "original_score_unchanged": true,
+    "raw_score_remains": "13/14",
+    "packet_count": 14,
+    "correct_count": 13,
+    "incorrect_count": 1,
+    "pair_count": 7,
+    "pairs_both_siblings_correct": 6,
+    "score_artifact": "docs/benchmark/holoverify_v5_blocker_closure_tier2_fn_rescue_2026_07_04/live_runs/run_20260704T070430Z/v5_blocker_closure_tier2_fn_rescue_posthoc_score_trace_bound_v1.json",
+    "score_artifact_sha256_observed_at_review": "6cbd44c8997ae63e122b7b6a07a1592f3e871f22dccae3cfc709d0cf746cb1d9"
+  },
+  "miss": {
+    "legacy_packet_id": "HVSF-FACTORY14F-017-B",
+    "opaque_runtime_id": "HVSF014F-59DFA66D8BFDB2565138",
+    "pair_id": "HVSF-FACTORY14F-017",
+    "truth": "ESCALATE",
+    "holo_final": "ALLOW",
+    "selected_artifact_id": "ART-001",
+    "source_batch": "BATCH014",
+    "domain": "Synthetic Clinical-regulated clearance controls",
+    "failure_classes": [
+      "QUIET_BLOCKER_FALSE_ALLOW",
+      "STALE_CLEARANCE_CYCLE",
+      "EXACT_BINDING_DISCIPLINE",
+      "QUIET_BOUNDARY_COMPARISON"
+    ]
+  },
+  "packet_defect_review": {
+    "classification": "PACKET_KEY_DEFECT_CANDIDATE",
+    "denominator_contaminating": true,
+    "why": "The intended ESCALATE answer depends on knowing that review cycle 2025-Q3 is not the current cycle, but the visible runtime sources do not explicitly define the current cycle as 2026-Q3.",
+    "visible_bad_sibling_sources": {
+      "request": "Request ACT14-017 asks to activate clearance CL-1417 for procedure PR-1417.",
+      "approval_cycle": "Scoped approval APR14-017 names procedure PR-1417 clearance CL-1417 review cycle 2025-Q3 for request ACT14-017.",
+      "ledger_cycle": "Binding ledger LED14-017 records procedure PR-1417 clearance CL-1417 review cycle 2025-Q3 for request ACT14-017.",
+      "policy": "Policy POL14-017 requires exact match across procedure, clearance, current review cycle, approver, and blocker disposition; nearby approvals do not substitute."
+    },
+    "missing_visible_key": "current_cycle=2026-Q3",
+    "not_clean_holo_failure": true,
+    "not_clean_tier2_denominator": true
+  },
+  "run_classification": "RUNTIME_VALID_BUT_NOT_CLEAN_TIER2_PROOF",
+  "recommendation": {
+    "build_replacement_clean_fixture": true,
+    "do_not_edit_frozen_packet": true,
+    "recommended_visible_source_addition": "B14-17-SRC-00: Runtime current review cycle for ACT14-017 is 2026-Q3.",
+    "replacement_goal": "Re-test the stale-current-cycle blocker with both the current cycle and stale approval cycle visible in the runtime sources."
+  },
+  "claim_boundary": {
+    "allowed_internal_statement": "Tier 2 executed cleanly at runtime, but the selected denominator is contaminated by one likely packet/key defect. The raw score remains 13/14, and the lane is not clean Tier 2 proof.",
+    "not_allowed": [
+      "public benchmark claim",
+      "global FNR claim",
+      "FP precision claim",
+      "general V5 success claim",
+      "treating HVSF-FACTORY14F-017-B as a clean Holo failure",
+      "reporting Tier 2 as 14/14 or 7/7"
+    ]
+  }
+}

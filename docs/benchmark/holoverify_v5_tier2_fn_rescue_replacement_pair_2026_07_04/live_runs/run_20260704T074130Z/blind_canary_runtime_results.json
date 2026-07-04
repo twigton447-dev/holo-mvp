@@ -1,0 +1,336 @@
+{
+  "classification": "HOLOVERIFY_BLIND_CANARY_RUNTIME_RESULT_V0",
+  "expected_call_count": 10,
+  "observed_call_count": 10,
+  "packet_count": 2,
+  "results": [
+    {
+      "final": {
+        "artifact_id": "ART-001",
+        "verdict": "ALLOW"
+      },
+      "packet_id": "T2FNREP-6C3EAD91F7B420A5",
+      "retry_log": [],
+      "selection": {
+        "criteria_trace": [
+          {
+            "artifact_id": "ART-001",
+            "criteria": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              0,
+              1,
+              1,
+              0,
+              0,
+              0,
+              3,
+              0,
+              3,
+              6,
+              6,
+              -1
+            ],
+            "verification_verdict": "ALLOW"
+          },
+          {
+            "artifact_id": "ART-002",
+            "criteria": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              0,
+              1,
+              1,
+              0,
+              0,
+              0,
+              3,
+              0,
+              3,
+              6,
+              6,
+              -2
+            ],
+            "verification_verdict": "ALLOW"
+          },
+          {
+            "artifact_id": "ART-003",
+            "criteria": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              0,
+              1,
+              1,
+              0,
+              0,
+              0,
+              3,
+              0,
+              3,
+              6,
+              6,
+              -3
+            ],
+            "verification_verdict": "ALLOW"
+          }
+        ],
+        "selected_artifact_id": "ART-001"
+      },
+      "selector_policy": {
+        "selector_criteria": [
+          "gate_passed",
+          "parse_valid",
+          "source_ids_valid",
+          "required_sections_present",
+          "contradiction_free",
+          "deterministic_clean",
+          "blocker_resolution_clean",
+          "blocker_resolution_complete",
+          "closure_validation_clean",
+          "all_prior_blockers_source_closed",
+          "invalid_closure_count",
+          "unresolved_blocker_count",
+          "source_boundary_open_with_blocker",
+          "verdict_consensus_count",
+          "final_turn_consensus_repair",
+          "verdict_corroboration_count",
+          "sections_present",
+          "cited_evidence_count",
+          "earliest_turn"
+        ],
+        "selector_policy_decision": "Truth-blind structural selector. Among structurally valid artifacts, explicit blocker resolution is only eligible when local closure validation proves the cited source fields close the exact blocker_type. A later ALLOW cannot silently drop a prior SOURCE_BOUNDARY_OPEN blocker, and it also cannot win by textually naming a blocker_id unless deterministic code confirms the closure. A source-grounded ESCALATE blocker can defeat an ALLOW majority unless a later artifact source-closes it. Deterministic source-derived dependency and blocker-closure checks can disqualify artifacts that contradict computed source boundaries. Concise final answers are warnings, not sole disqualifiers, when the artifact is otherwise complete. Within the same blocker/consensus tier, gate-failed corroboration from otherwise usable artifacts is considered before citation count and earliest-turn tie-breaks.",
+        "selector_policy_sha256": "939c1ffbba74e9a526d454979b52980513d952eae4077cc817283380e596a1ec",
+        "selector_policy_version": "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+      },
+      "worker_contract": {
+        "required_worker_keys": [
+          "worker_role",
+          "verification_verdict",
+          "action_boundary",
+          "binding_class",
+          "cited_evidence",
+          "final_answer",
+          "blocker_type",
+          "blocker_resolution",
+          "structured_blocker_resolution"
+        ],
+        "w3_artifact_first_guard": [
+          "W3 ARTIFACT-FIRST CONTRACT V4.",
+          "Start immediately with worker_role=W3 before any reasoning.",
+          "Never output <think>, hidden reasoning, analysis, or deliberation.",
+          "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, blocker_type, blocker_resolution, structured_blocker_resolution, and final_answer.",
+          "If any prior blocker exists, do not return ALLOW unless blocker_resolution names each blocker_id, structured_blocker_resolution cites source evidence, and the source fields close the blocker_type.",
+          "Do not debate competing interpretations outside the key=value fields.",
+          "Emit exactly the required key=value artifact lines, then stop."
+        ],
+        "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+        "worker_contract_version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+      }
+    },
+    {
+      "final": {
+        "artifact_id": "ART-003",
+        "verdict": "ESCALATE"
+      },
+      "packet_id": "T2FNREP-BD48A2F0C9317E6A",
+      "retry_log": [],
+      "selection": {
+        "criteria_trace": [
+          {
+            "artifact_id": "ART-001",
+            "criteria": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              0,
+              1,
+              1,
+              0,
+              0,
+              1,
+              3,
+              0,
+              3,
+              7,
+              3,
+              -1
+            ],
+            "verification_verdict": "ESCALATE"
+          },
+          {
+            "artifact_id": "ART-002",
+            "criteria": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              0,
+              1,
+              1,
+              0,
+              0,
+              1,
+              3,
+              0,
+              3,
+              7,
+              3,
+              -2
+            ],
+            "verification_verdict": "ESCALATE"
+          },
+          {
+            "artifact_id": "ART-003",
+            "criteria": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              0,
+              1,
+              1,
+              0,
+              0,
+              1,
+              3,
+              0,
+              3,
+              7,
+              4,
+              -3
+            ],
+            "verification_verdict": "ESCALATE"
+          }
+        ],
+        "selected_artifact_id": "ART-003"
+      },
+      "selector_policy": {
+        "selector_criteria": [
+          "gate_passed",
+          "parse_valid",
+          "source_ids_valid",
+          "required_sections_present",
+          "contradiction_free",
+          "deterministic_clean",
+          "blocker_resolution_clean",
+          "blocker_resolution_complete",
+          "closure_validation_clean",
+          "all_prior_blockers_source_closed",
+          "invalid_closure_count",
+          "unresolved_blocker_count",
+          "source_boundary_open_with_blocker",
+          "verdict_consensus_count",
+          "final_turn_consensus_repair",
+          "verdict_corroboration_count",
+          "sections_present",
+          "cited_evidence_count",
+          "earliest_turn"
+        ],
+        "selector_policy_decision": "Truth-blind structural selector. Among structurally valid artifacts, explicit blocker resolution is only eligible when local closure validation proves the cited source fields close the exact blocker_type. A later ALLOW cannot silently drop a prior SOURCE_BOUNDARY_OPEN blocker, and it also cannot win by textually naming a blocker_id unless deterministic code confirms the closure. A source-grounded ESCALATE blocker can defeat an ALLOW majority unless a later artifact source-closes it. Deterministic source-derived dependency and blocker-closure checks can disqualify artifacts that contradict computed source boundaries. Concise final answers are warnings, not sole disqualifiers, when the artifact is otherwise complete. Within the same blocker/consensus tier, gate-failed corroboration from otherwise usable artifacts is considered before citation count and earliest-turn tie-breaks.",
+        "selector_policy_sha256": "939c1ffbba74e9a526d454979b52980513d952eae4077cc817283380e596a1ec",
+        "selector_policy_version": "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+      },
+      "worker_contract": {
+        "required_worker_keys": [
+          "worker_role",
+          "verification_verdict",
+          "action_boundary",
+          "binding_class",
+          "cited_evidence",
+          "final_answer",
+          "blocker_type",
+          "blocker_resolution",
+          "structured_blocker_resolution"
+        ],
+        "w3_artifact_first_guard": [
+          "W3 ARTIFACT-FIRST CONTRACT V4.",
+          "Start immediately with worker_role=W3 before any reasoning.",
+          "Never output <think>, hidden reasoning, analysis, or deliberation.",
+          "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, blocker_type, blocker_resolution, structured_blocker_resolution, and final_answer.",
+          "If any prior blocker exists, do not return ALLOW unless blocker_resolution names each blocker_id, structured_blocker_resolution cites source evidence, and the source fields close the blocker_type.",
+          "Do not debate competing interpretations outside the key=value fields.",
+          "Emit exactly the required key=value artifact lines, then stop."
+        ],
+        "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+        "worker_contract_version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+      }
+    }
+  ],
+  "runtime_manifest": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_REPLACEMENT_PAIR_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json",
+  "selector_policy": {
+    "selector_criteria": [
+      "gate_passed",
+      "parse_valid",
+      "source_ids_valid",
+      "required_sections_present",
+      "contradiction_free",
+      "deterministic_clean",
+      "blocker_resolution_clean",
+      "blocker_resolution_complete",
+      "closure_validation_clean",
+      "all_prior_blockers_source_closed",
+      "invalid_closure_count",
+      "unresolved_blocker_count",
+      "source_boundary_open_with_blocker",
+      "verdict_consensus_count",
+      "final_turn_consensus_repair",
+      "verdict_corroboration_count",
+      "sections_present",
+      "cited_evidence_count",
+      "earliest_turn"
+    ],
+    "selector_policy_decision": "Truth-blind structural selector. Among structurally valid artifacts, explicit blocker resolution is only eligible when local closure validation proves the cited source fields close the exact blocker_type. A later ALLOW cannot silently drop a prior SOURCE_BOUNDARY_OPEN blocker, and it also cannot win by textually naming a blocker_id unless deterministic code confirms the closure. A source-grounded ESCALATE blocker can defeat an ALLOW majority unless a later artifact source-closes it. Deterministic source-derived dependency and blocker-closure checks can disqualify artifacts that contradict computed source boundaries. Concise final answers are warnings, not sole disqualifiers, when the artifact is otherwise complete. Within the same blocker/consensus tier, gate-failed corroboration from otherwise usable artifacts is considered before citation count and earliest-turn tie-breaks.",
+    "selector_policy_sha256": "939c1ffbba74e9a526d454979b52980513d952eae4077cc817283380e596a1ec",
+    "selector_policy_version": "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+  },
+  "trace_ref": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_v5_tier2_fn_rescue_replacement_pair_2026_07_04/live_runs/run_20260704T074130Z/TRACE_CALLS.jsonl",
+  "worker_contract": {
+    "required_worker_keys": [
+      "worker_role",
+      "verification_verdict",
+      "action_boundary",
+      "binding_class",
+      "cited_evidence",
+      "final_answer",
+      "blocker_type",
+      "blocker_resolution",
+      "structured_blocker_resolution"
+    ],
+    "w3_artifact_first_guard": [
+      "W3 ARTIFACT-FIRST CONTRACT V4.",
+      "Start immediately with worker_role=W3 before any reasoning.",
+      "Never output <think>, hidden reasoning, analysis, or deliberation.",
+      "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, blocker_type, blocker_resolution, structured_blocker_resolution, and final_answer.",
+      "If any prior blocker exists, do not return ALLOW unless blocker_resolution names each blocker_id, structured_blocker_resolution cites source evidence, and the source fields close the blocker_type.",
+      "Do not debate competing interpretations outside the key=value fields.",
+      "Emit exactly the required key=value artifact lines, then stop."
+    ],
+    "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+    "worker_contract_version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+  }
+}

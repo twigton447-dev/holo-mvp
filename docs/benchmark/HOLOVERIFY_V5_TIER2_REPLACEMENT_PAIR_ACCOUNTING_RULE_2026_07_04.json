@@ -1,0 +1,188 @@
+{
+  "classification": "HOLOVERIFY_V5_TIER2_REPLACEMENT_PAIR_ACCOUNTING_RULE_NO_PROVIDER",
+  "created_at": "2026-07-04",
+  "callsign": "STATS SUBAGENT",
+  "scope": "Accounting rule for a Tier 2 replacement sibling-pair supplement after HVSF-FACTORY14F-017 is excluded from the clean pair denominator due to PACKET_KEY_DEFECT_CANDIDATE.",
+  "audit_actions": {
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "judges_run": false,
+    "frozen_runtime_evidence_modified": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "starting_denominators": {
+    "immutable_raw_tier2": {
+      "packet_correct": 13,
+      "packet_total": 14,
+      "pair_correct": 6,
+      "pair_total": 7,
+      "status": "RAW_TRACE_BOUND_SCORE_MUST_NOT_BE_REWRITTEN"
+    },
+    "current_clean_diagnostic": {
+      "packet_correct": 13,
+      "packet_total": 13,
+      "packet_exclusion": [
+        "HVSF-FACTORY14F-017-B"
+      ],
+      "pair_correct": 6,
+      "pair_total": 6,
+      "pair_exclusion": [
+        "HVSF-FACTORY14F-017"
+      ]
+    }
+  },
+  "replacement_supplement_shape": {
+    "packet_count": 2,
+    "pair_count": 1,
+    "lane": "FN_FALSE_ALLOW_RESCUE_ONLY",
+    "required_runtime_visible_current_cycle_evidence": true,
+    "route": [
+      "W1",
+      "G1",
+      "W2",
+      "G2",
+      "W3"
+    ],
+    "full_hologov_provider_backed": true,
+    "solo_calls_allowed": 0,
+    "judge_calls_allowed": 0,
+    "trace_frozen_before_scoring_required": true,
+    "scoring_map_after_trace_freeze_required": true
+  },
+  "expected_call_count": {
+    "formula": "2 packets x 5 provider calls per packet = 10 provider calls",
+    "W1": 2,
+    "G1": 2,
+    "W2": 2,
+    "G2": 2,
+    "W3": 2,
+    "worker_calls": 6,
+    "gov_calls": 4,
+    "total_provider_calls": 10,
+    "gov_calls_count_as_provider_calls": true,
+    "deterministic_gov_rule": "If Gov is deterministic or local, the run is a separate ablation or patch-validation lane and must not be merged into the full-HoloGov Tier 2 supplement."
+  },
+  "control_validity_requirements": [
+    "Exactly 10 provider calls.",
+    "Slot counts are W1 x2, G1 x2, W2 x2, G2 x2, W3 x2.",
+    "Role counts are 6 worker calls and 4 Gov calls.",
+    "0 provider failures.",
+    "0 solo calls.",
+    "0 judge calls.",
+    "Trace frozen before scoring.",
+    "Scoring map loaded after trace freeze.",
+    "Packet hashes, prompt hashes, run IDs, and lock manifests validate.",
+    "No packet/key defect is identified in either replacement sibling."
+  ],
+  "merge_rule_if_both_replacement_siblings_pass": {
+    "packet_diagnostic": {
+      "formula": "13/13 + 2/2 = 15/15",
+      "correct": 15,
+      "total": 15,
+      "meaning": "All score-valid packets across original Tier 2 plus supplement, including the valid A sibling from the excluded original pair."
+    },
+    "pair_gate": {
+      "formula": "6/6 + 1/1 = 7/7",
+      "correct": 7,
+      "total": 7,
+      "meaning": "Clean complete-pair expansion gate restored."
+    },
+    "pair_equivalent_packets": {
+      "formula": "12/12 + 2/2 = 14/14",
+      "correct": 14,
+      "total": 14,
+      "meaning": "Packets belonging only to the seven clean complete pairs; excludes both original HVSF-FACTORY14F-017 siblings."
+    },
+    "tier3_gate_status": "UNLOCKED_INTERNAL_DIRECTIONAL_FN_RESCUE"
+  },
+  "pass_fail_rule_for_tier3": {
+    "pass_conditions": [
+      "Supplement run is control-valid.",
+      "Both replacement sibling packets are score-valid.",
+      "Both replacement sibling packets are correct.",
+      "Replacement pair has no packet/key defect.",
+      "Merged clean pair gate is 7/7."
+    ],
+    "if_both_siblings_pass": {
+      "classification": "TIER2_SUPPLEMENTED_CLEAN_PAIR_GATE_PASSED_DIRECTIONAL_FN_RESCUE",
+      "tier3_status": "UNLOCKED_INTERNAL_DIRECTIONAL_FN_RESCUE"
+    },
+    "if_one_sibling_passes": {
+      "replacement_packet_score": "1/2",
+      "replacement_pair_score": "0/1",
+      "merged_packet_diagnostic": "14/15",
+      "merged_pair_gate": "6/7",
+      "tier3_status": "BLOCKED",
+      "classification": "VALID_SUPPLEMENT_FAILED_IF_BOTH_PACKETS_ARE_SCORE_VALID_AND_CONTROLS_ARE_VALID"
+    },
+    "if_zero_siblings_pass": {
+      "replacement_packet_score": "0/2",
+      "replacement_pair_score": "0/1",
+      "merged_packet_diagnostic": "13/15",
+      "merged_pair_gate": "6/7",
+      "tier3_status": "BLOCKED",
+      "classification": "VALID_SUPPLEMENT_FAILED_IF_BOTH_PACKETS_ARE_SCORE_VALID_AND_CONTROLS_ARE_VALID"
+    },
+    "if_packet_key_defect": {
+      "classification": "SUPPLEMENT_INCONCLUSIVE_PACKET_KEY_DEFECT",
+      "merge_allowed": false,
+      "tier3_status": "BLOCKED"
+    },
+    "if_control_failure": {
+      "classification": "INVALID_RUN_CONTROL_FAILURE",
+      "merge_allowed": false,
+      "tier3_status": "BLOCKED"
+    }
+  },
+  "allowed_internal_language_if_replacement_passes": [
+    "The original Tier 2 raw score remains 13/14 packets and 6/7 pairs.",
+    "After excluding HVSF-FACTORY14F-017 from the pair gate and adding the passing replacement sibling pair, the supplemented clean pair gate is 7/7.",
+    "The score-valid packet diagnostic across original Tier 2 plus supplement is 15/15.",
+    "The pair-equivalent packet count for the seven clean complete pairs is 14/14.",
+    "Tier 3 is unlocked as an internal directional FN_FALSE_ALLOW rescue expansion gate.",
+    "This remains patch-validation / directional rescue evidence, not public benchmark evidence."
+  ],
+  "forbidden_language": [
+    "The original Tier 2 run passed 7/7 pairs.",
+    "The original Tier 2 raw score was 14/14.",
+    "HoloVerify achieved public benchmark 100% on Tier 2.",
+    "This proves global FNR.",
+    "This proves FP precision.",
+    "This is public benchmark evidence.",
+    "The quarantined packet was solved by replacement.",
+    "The replacement run rewrites the frozen Tier 2 trace.",
+    "The clean denominator is 14/14 without specifying that this is the pair-equivalent packet count excluding both original HVSF-FACTORY14F-017 siblings.",
+    "Tier 3 is unlocked if one replacement sibling passes.",
+    "A deterministic-Gov supplement is equivalent to the full HoloGov Tier 2 lane."
+  ],
+  "evidence_class": {
+    "remains": "PATCH_VALIDATION_DIRECTIONAL_FN_RESCUE_ONLY",
+    "does_not_become": [
+      "PUBLIC_BENCHMARK_EVIDENCE",
+      "GLOBAL_FNR_EVIDENCE",
+      "FP_PRECISION_EVIDENCE",
+      "STATISTICAL_SUPERIORITY_EVIDENCE",
+      "PARSE_ADMISSIBILITY_ONLY_EVIDENCE"
+    ]
+  },
+  "final_accounting_rule": {
+    "merge_only_if_control_valid": true,
+    "if_replacement_pair_passes_2_of_2": {
+      "packet_diagnostic": "13/13 + 2/2 = 15/15",
+      "pair_gate": "6/6 + 1/1 = 7/7",
+      "pair_equivalent_packets": "12/12 + 2/2 = 14/14",
+      "tier3_status": "UNLOCKED_INTERNAL_DIRECTIONAL_FN_RESCUE"
+    },
+    "if_replacement_pair_scores_1_of_2_or_0_of_2": {
+      "merge_as_failed_valid_supplement": true,
+      "tier3_status": "BLOCKED"
+    },
+    "if_control_failure_or_packet_key_defect": {
+      "merge_allowed": false,
+      "tier3_status": "BLOCKED"
+    }
+  }
+}

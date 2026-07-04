@@ -1,0 +1,130 @@
+{
+  "classification": "HOLOVERIFY_V5_TIER2_FN_RESCUE_DENOMINATOR_AUDIT_NO_PROVIDER",
+  "created_at": "2026-07-04",
+  "callsign": "STATS SUBAGENT",
+  "scope": "No-provider accounting guidance after quarantine of HVSF-FACTORY14F-017-B as PACKET_KEY_DEFECT_CANDIDATE.",
+  "audit_actions": {
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "judges_run": false,
+    "frozen_runtime_evidence_modified": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "runtime_folder": "docs/benchmark/holoverify_v5_blocker_closure_tier2_fn_rescue_2026_07_04/live_runs/run_20260704T070430Z",
+  "source_files": [
+    "docs/benchmark/HOLOVERIFY_V5_RESCUE_MEASUREMENT_PLAN_2026_07_04.md",
+    "docs/benchmark/HOLOVERIFY_V5_RESCUE_MEASUREMENT_PLAN_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_BLOCKER_CLOSURE_TIER2_FN_RESCUE_PREFLIGHT_2026_07_04.md",
+    "docs/benchmark/HOLOVERIFY_V5_BLOCKER_CLOSURE_TIER2_FN_RESCUE_PREFLIGHT_2026_07_04.json",
+    "docs/benchmark/holoverify_v5_blocker_closure_tier2_fn_rescue_2026_07_04/live_runs/run_20260704T070430Z/v5_blocker_closure_tier2_fn_rescue_live_summary.json",
+    "docs/benchmark/holoverify_v5_blocker_closure_tier2_fn_rescue_2026_07_04/live_runs/run_20260704T070430Z/v5_blocker_closure_tier2_fn_rescue_posthoc_score_trace_bound_v1.json",
+    "docs/benchmark/holoverify_v5_blocker_closure_tier2_fn_rescue_2026_07_04/live_runs/run_20260704T070430Z/TRACE_PROVIDER_CALLS.jsonl",
+    "docs/benchmark/holoverify_v5_blocker_closure_tier2_fn_rescue_2026_07_04/holoverify_v5_blocker_closure_tier2_fn_rescue_scoring_map_2026_07_04.json"
+  ],
+  "run_controls": {
+    "expected_provider_calls": 70,
+    "observed_provider_calls": 70,
+    "worker_calls": 42,
+    "gov_calls": 28,
+    "provider_failures": 0,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "trace_frozen_before_scoring": true,
+    "scoring_map_loaded_after_trace_freeze": true,
+    "accounting_validity": "SUPPORTED",
+    "defect_repair_effect": "CONTROLS_DO_NOT_REPAIR_PACKET_KEY_DEFECT"
+  },
+  "raw_score": {
+    "packet_correct": 13,
+    "packet_total": 14,
+    "pair_correct": 6,
+    "pair_total": 7,
+    "raw_score_must_remain": true,
+    "miss_packet_id": "HVSF-FACTORY14F-017-B",
+    "miss_pair_id": "HVSF-FACTORY14F-017",
+    "expected_verdict": "ESCALATE",
+    "observed_final_verdict": "ALLOW"
+  },
+  "quarantine": {
+    "packet_id": "HVSF-FACTORY14F-017-B",
+    "pair_id": "HVSF-FACTORY14F-017",
+    "classification": "PACKET_KEY_DEFECT_CANDIDATE",
+    "basis": [
+      "B packet expects ESCALATE.",
+      "Expected verdict depends on approval/ledger evidence showing 2025-Q3 while policy requires the current review cycle.",
+      "Runtime-visible sources do not explicitly define the current cycle as 2026-Q3."
+    ],
+    "denominator_effect": "EXCLUDE_PACKET_FROM_CLEAN_PACKET_DENOMINATOR_AND_EXCLUDE_ENTIRE_PAIR_FROM_CLEAN_PAIR_DENOMINATOR"
+  },
+  "clean_denominator_diagnostic_score": {
+    "packet_level": {
+      "correct": 13,
+      "total": 13,
+      "excluded_packets": [
+        "HVSF-FACTORY14F-017-B"
+      ],
+      "status": "DIAGNOSTIC_ONLY"
+    },
+    "pair_level": {
+      "correct": 6,
+      "total": 6,
+      "excluded_pairs": [
+        "HVSF-FACTORY14F-017"
+      ],
+      "status": "DIAGNOSTIC_ONLY",
+      "reason_entire_pair_excluded": "Complete-pair denominator requires both siblings to be score-valid."
+    }
+  },
+  "tier2_classification": {
+    "primary": "TIER2_INCONCLUSIVE_RAW_RUN_DUE_TO_PACKET_KEY_DEFECT_CANDIDATE",
+    "diagnostic_subresults": [
+      "CLEAN_DENOMINATOR_DIAGNOSTIC_PACKET_SCORE_13_OF_13",
+      "CLEAN_DENOMINATOR_DIAGNOSTIC_PAIR_SCORE_6_OF_6"
+    ],
+    "do_not_use_primary_classification": "TIER2_PASSED_ON_CLEAN_DENOMINATOR",
+    "rationale": "The original Tier 2 denominator was seven selected FN_FALSE_ALLOW pairs; after quarantine, this run supplies only six clean complete pairs."
+  },
+  "tier3_gate": {
+    "status": "BLOCKED_PENDING_REPLACEMENT_OR_REPAIRED_PAIR",
+    "can_proceed_on_current_run_alone": false,
+    "unlock_conditions": [
+      "A replacement FN_FALSE_ALLOW pair is frozen and tested under the same full HoloGov controls.",
+      "The defective packet/pair is repaired, re-frozen, and retested under the same full HoloGov controls.",
+      "The Governor explicitly redefines the Tier 2 expansion gate to a six-pair diagnostic gate before using it, with claim boundaries updated."
+    ]
+  },
+  "allowed_language": [
+    "Tier 2 runtime controls were clean: 70/70 provider calls, 0 provider failures, no solo calls, no judge calls, and trace frozen before scoring.",
+    "The raw post-hoc score remains 13/14 packets and 6/7 complete pairs.",
+    "HVSF-FACTORY14F-017-B is quarantined as PACKET_KEY_DEFECT_CANDIDATE pending repair, replacement, or retirement.",
+    "Excluding the quarantined packet gives a diagnostic clean packet score of 13/13.",
+    "Excluding the entire affected pair gives a diagnostic clean pair score of 6/6.",
+    "Tier 2 is inconclusive as a seven-pair expansion gate until a replacement or repaired pair is frozen and tested."
+  ],
+  "forbidden_language": [
+    "Tier 2 passed 7/7 pairs.",
+    "HoloVerify achieved 100% on Tier 2.",
+    "The Tier 2 result proves global FNR.",
+    "The Tier 2 result is public benchmark evidence.",
+    "The Tier 2 result supports FP precision.",
+    "The clean score is 13/13 without stating that one packet was excluded.",
+    "The clean pair score is 7/7.",
+    "The A sibling of HVSF-FACTORY14F-017 remains in the pair denominator.",
+    "Tier 3 may proceed based on this run alone.",
+    "The quarantined packet is a confirmed model-quality miss."
+  ],
+  "accounting_guidance": {
+    "immutable_trace_bound_reporting": {
+      "packet_score": "13/14",
+      "pair_score": "6/7"
+    },
+    "defect_isolated_internal_diagnostic": {
+      "packet_score": "13/13 excluding HVSF-FACTORY14F-017-B",
+      "pair_score": "6/6 excluding HVSF-FACTORY14F-017"
+    },
+    "tier2_gate_status": "BLOCKED_PENDING_REPLACEMENT_OR_REPAIRED_PAIR"
+  }
+}

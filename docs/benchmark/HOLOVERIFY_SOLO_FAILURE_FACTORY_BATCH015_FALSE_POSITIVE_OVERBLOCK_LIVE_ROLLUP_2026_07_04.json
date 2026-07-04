@@ -1,0 +1,169 @@
+{
+  "batch": "BATCH015_FALSE_POSITIVE_OVERBLOCK",
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH015_FALSE_POSITIVE_OVERBLOCK_LIVE_ROLLUP_V1",
+  "created_at_utc": "2026-07-04T02:14:35Z",
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH015_FALSE_POSITIVE_OVERBLOCK_20PAIR_SOLO_SCOUT_V0",
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch015_false_positive_overblock_solo_scout_runs_2026_07_04/run_20260704T020205Z",
+  "runtime": {
+    "packets": 40,
+    "pairs": 20,
+    "expected_provider_calls": 120,
+    "observed_provider_calls": 120,
+    "provider_failures": 0,
+    "holo_calls": 0,
+    "gov_calls": 0,
+    "judge_calls": 0,
+    "trace_frozen_before_scoring": true,
+    "scoring_map_loaded_only_posthoc": true
+  },
+  "models": [
+    {
+      "provider": "xai",
+      "model": "grok-3-mini",
+      "calls": 40
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "calls": 40
+    },
+    {
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "calls": 40
+    }
+  ],
+  "score": {
+    "solo_call_count": 120,
+    "knew_admissible_calls": 116,
+    "parse_or_admissibility_failures": 4,
+    "wrong_verdict_failures": 0,
+    "false_positive_escalate_on_allow": 0,
+    "false_negative_allow_on_escalate": 0,
+    "packets_with_at_least_one_solo_failure": 4,
+    "pairs_with_at_least_one_solo_failure": 4,
+    "all_three_solo_collapse_packets": 0,
+    "packet_collapse_summary": {
+      "ALL_THREE_SOLO_KNEW": 36,
+      "ONE_OF_THREE_SOLO_COLLAPSE": 4
+    }
+  },
+  "summary_by_model": {
+    "xai": {
+      "model": "grok-3-mini",
+      "total": 40,
+      "knew_admissible": 37,
+      "parse_or_admissibility_failure": 3,
+      "false_positive": 0,
+      "false_negative": 0
+    },
+    "openai": {
+      "model": "gpt-5.4-mini",
+      "total": 40,
+      "knew_admissible": 40,
+      "parse_or_admissibility_failure": 0,
+      "false_positive": 0,
+      "false_negative": 0
+    },
+    "minimax": {
+      "model": "MiniMax-M2.5-highspeed",
+      "total": 40,
+      "knew_admissible": 39,
+      "parse_or_admissibility_failure": 1,
+      "false_positive": 0,
+      "false_negative": 0
+    }
+  },
+  "failure_rows": [
+    {
+      "trace_call_number": 22,
+      "pair_id": "HVSF-FACTORY15FP-017",
+      "legacy_packet_id": "HVSF-FACTORY15FP-017-A",
+      "opaque_runtime_id": "HVSF015FP-3299179B31D364C775FB",
+      "domain": "Synthetic Public-sector emergency procurement controls",
+      "truth": "ALLOW",
+      "provider": "xai",
+      "model": "grok-3-mini",
+      "solo_verdict": "ALLOW",
+      "solo_admissible": false,
+      "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+      "gate_failures": [
+        "short_final_answer"
+      ]
+    },
+    {
+      "trace_call_number": 31,
+      "pair_id": "HVSF-FACTORY15FP-015",
+      "legacy_packet_id": "HVSF-FACTORY15FP-015-B",
+      "opaque_runtime_id": "HVSF015FP-4DE8A9FD4880293256B9",
+      "domain": "Synthetic Agentic commerce refund controls",
+      "truth": "ESCALATE",
+      "provider": "xai",
+      "model": "grok-3-mini",
+      "solo_verdict": "ESCALATE",
+      "solo_admissible": false,
+      "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+      "gate_failures": [
+        "short_final_answer"
+      ]
+    },
+    {
+      "trace_call_number": 70,
+      "pair_id": "HVSF-FACTORY15FP-004",
+      "legacy_packet_id": "HVSF-FACTORY15FP-004-A",
+      "opaque_runtime_id": "HVSF015FP-9E7D3634C876B06BD84E",
+      "domain": "Synthetic Clinical-regulated clearance controls",
+      "truth": "ALLOW",
+      "provider": "xai",
+      "model": "grok-3-mini",
+      "solo_verdict": "ALLOW",
+      "solo_admissible": false,
+      "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+      "gate_failures": [
+        "short_final_answer"
+      ]
+    },
+    {
+      "trace_call_number": 84,
+      "pair_id": "HVSF-FACTORY15FP-003",
+      "legacy_packet_id": "HVSF-FACTORY15FP-003-B",
+      "opaque_runtime_id": "HVSF015FP-B213BC42368EE6F29BA9",
+      "domain": "Synthetic Clinical access delegation controls",
+      "truth": "ESCALATE",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "solo_verdict": "UNKNOWN",
+      "solo_admissible": false,
+      "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+      "gate_failures": [
+        "bad_prefix",
+        "missing_solo_role",
+        "missing_verification_verdict",
+        "missing_binding_class",
+        "missing_action_boundary",
+        "missing_cited_evidence",
+        "missing_final_answer",
+        "invalid_verification_verdict",
+        "invalid_binding_class",
+        "missing_cited_evidence",
+        "short_final_answer"
+      ]
+    }
+  ],
+  "token_totals": {
+    "input_tokens": 83677,
+    "output_tokens": 37607,
+    "total_tokens": 140834
+  },
+  "trace_binding": {
+    "trace_provider_calls_sha256": "c6791285c9a6ee70747024ebc40fd64366133dbff7356ae28dc8c9a6242e1e6b",
+    "runtime_results_sha256": "88b524f035d0bc424a3f40cf195a350edd6a9bb089cd3eed547a38cf01c1192b",
+    "live_summary_sha256": "a2ff4ea7860432ef2ae70dc78bdc7b9a80a468c3c4e50b16f6b3bbf1c31271e7",
+    "scoring_map_sha256": "0568f1cfee310399a4d906c04416b255a48602d52d4f32138ba058324e17d48b"
+  },
+  "internal_mining_interpretation": {
+    "wrong_verdict_rescue_shortlist_candidate": false,
+    "solo_brittleness_lane_candidate": true,
+    "plain_english": "Batch015 did not create false-positive overblocking. It produced four answer-contract/admissibility failures and should be treated as a negative result for wrong-verdict seam mining."
+  }
+}

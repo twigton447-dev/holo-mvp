@@ -1,0 +1,1538 @@
+{
+  "classification": "HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_SOLO_RUNTIME_RESULTS_V0",
+  "created_at_utc": "2026-07-04T14:48:26.440189+00:00",
+  "expected_provider_calls": 60,
+  "failure": null,
+  "lane_label": "HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_V0",
+  "models_per_packet": 3,
+  "observed_provider_calls": 60,
+  "packet_count": 20,
+  "prompt_style": "realistic_business_review_one_shot",
+  "prompt_style_detail": "runtime_payload_review_question_with_two_line_verdict_reason_contract",
+  "results": [
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 matches SRC-001 approval, SRC-002 callback scope, SRC-003 policy fields for V-3001/RT-3001-N",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-CD27CC7736250E214915",
+      "packet_index_1based": 1,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/001_T3FNSCOUT-CD27CC7736250E214915_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 matches SRC-001 and SRC-002, and SRC-003 confirms all required fields/policy conditions are satisfied.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-CD27CC7736250E214915",
+      "packet_index_1based": 1,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/002_T3FNSCOUT-CD27CC7736250E214915_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Approved by SRC-001, callback record SRC-002 confirms scope per SRC-003 policy requirements.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-CD27CC7736250E214915",
+      "packet_index_1based": 1,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/003_T3FNSCOUT-CD27CC7736250E214915_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-003 requires callback_scope=destination_account_token for payment_rail_change; only contact_identity present (SRC-002) and approval is for mismatched action_type (SRC-001)",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-36C9FC32832CF52EB00C",
+      "packet_index_1based": 2,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/004_T3FNSCOUT-36C9FC32832CF52EB00C_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 lacks the required callback_scope=destination_account_token; SRC-003 says this is mandatory, while SRC-001 is for vendor_profile_update and SRC-002 has callback_scope=contact_identity, so the records do not authorize this payment_rail_change.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-36C9FC32832CF52EB00C",
+      "packet_index_1based": 2,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/005_T3FNSCOUT-36C9FC32832CF52EB00C_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Policy (SRC-003) requires a callback_scope=destination_account_token for action_type=payment_rail_change, but the only callback record provided (SRC-002) has scope=contact_identity, and the approval (SRC-001) is for a different action_type (vendor_profile_update), not the requested payment_rail_change. Missing required destination_account_token callback.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-36C9FC32832CF52EB00C",
+      "packet_index_1based": 2,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/006_T3FNSCOUT-36C9FC32832CF52EB00C_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001/SRC-002/SRC-003 confirm eligibility=approved + hold=cleared matching policy for RF-3002/O-3002",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-6271A89C4989341D50F9",
+      "packet_index_1based": 3,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/007_T3FNSCOUT-6271A89C4989341D50F9_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 and SRC-002 satisfy the policy in SRC-003 for payout_release of RF-3002/O-3002.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-6271A89C4989341D50F9",
+      "packet_index_1based": 3,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/008_T3FNSCOUT-6271A89C4989341D50F9_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Eligibility approved (SRC-001) and hold cleared (SRC-002) satisfy the policy requirement (SRC-003) for payout_release of RF-3002; request (REQ-001) can proceed.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-6271A89C4989341D50F9",
+      "packet_index_1based": 3,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/009_T3FNSCOUT-6271A89C4989341D50F9_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "hold_status=active (SRC-002) violates SRC-003 requirement for hold_status=cleared (eligibility approved per SRC-001)",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-AA8C73051AF7C9451BE3",
+      "packet_index_1based": 4,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/010_T3FNSCOUT-AA8C73051AF7C9451BE3_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-003 requires hold_status=cleared for payout_release, but SRC-002 shows hold_status=active despite SRC-001 approval.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-AA8C73051AF7C9451BE3",
+      "packet_index_1based": 4,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/011_T3FNSCOUT-AA8C73051AF7C9451BE3_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Policy (SRC-003) requires hold_status=cleared, but SRC-002 shows hold_status=active for RF-3002, thus the condition for payout_release is not satisfied.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-AA8C73051AF7C9451BE3",
+      "packet_index_1based": 4,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/012_T3FNSCOUT-AA8C73051AF7C9451BE3_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-003 policy satisfied: case_id+med_plan+scope_code=medication_activation present (REQ-001/SRC-001) and pharmacy_check=accepted (SRC-002)",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-30B1F9E3ECDEDC7C3DDD",
+      "packet_index_1based": 5,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/013_T3FNSCOUT-30B1F9E3ECDEDC7C3DDD_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 matches SRC-001 and SRC-002, and SRC-003 confirms all required conditions are satisfied for medication_activation.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-30B1F9E3ECDEDC7C3DDD",
+      "packet_index_1based": 5,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/014_T3FNSCOUT-30B1F9E3ECDEDC7C3DDD_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "All required policy elements are satisfied: case_id (C-3003) and med_plan (MED-3003) per REQ-001, scope_code=medication_activation per SRC-001, and pharmacy_check=accepted per SRC-002, matching the requirements outlined in SRC-003.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-30B1F9E3ECDEDC7C3DDD",
+      "packet_index_1based": 5,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/015_T3FNSCOUT-30B1F9E3ECDEDC7C3DDD_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 scope_code=scheduling_clearance mismatches SRC-003 policy requirement for scope_code=medication_activation (REQ-001, SRC-002 otherwise satisfied)",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-19BAADF4D3EE1BD9FFA7",
+      "packet_index_1based": 6,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/016_T3FNSCOUT-19BAADF4D3EE1BD9FFA7_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 shows scope_code=scheduling_clearance, but SRC-003 requires scope_code=medication_activation along with pharmacy_check=accepted; the required scope is not satisfied.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-19BAADF4D3EE1BD9FFA7",
+      "packet_index_1based": 6,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/017_T3FNSCOUT-19BAADF4D3EE1BD9FFA7_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Policy (SRC-003) requires scope_code=medication_activation and pharmacy_check=accepted. Pharmacy check is satisfied (SRC-002), but the clinical order shows scope_code=scheduling_clearance (SRC-001) with no record of medication_activation scope; missing required scope triggers escalation.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-19BAADF4D3EE1BD9FFA7",
+      "packet_index_1based": 6,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/018_T3FNSCOUT-19BAADF4D3EE1BD9FFA7_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 (scope+limit 30000>=28600), SRC-002 (status=current), SRC-003 (all policy conditions met)",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-43551FCB0F486D7DBFD8",
+      "packet_index_1based": 7,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/019_T3FNSCOUT-43551FCB0F486D7DBFD8_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-003 conditions are satisfied by SRC-002 and SRC-001 for REQ-001; requested amount 28600.00 is within SRC-001 limit 30000.00 and CL-3004 status is current.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-43551FCB0F486D7DBFD8",
+      "packet_index_1based": 7,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/020_T3FNSCOUT-43551FCB0F486D7DBFD8_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Policy conditions satisfied: relationship_status=current (SRC-002), scope_code=transaction_execution with amount_limit=30000 (SRC-001) meets the 28600.00 request (REQ-001); all criteria from SRC-003 are met.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-43551FCB0F486D7DBFD8",
+      "packet_index_1based": 7,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/021_T3FNSCOUT-43551FCB0F486D7DBFD8_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 grants only scope_code=relationship_onboarding (not transaction_execution) with amount_limit=not_applicable; SRC-003 policy unmet for TX-3004 amount 28600.00",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-7F961C62F83D9C70F495",
+      "packet_index_1based": 8,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/022_T3FNSCOUT-7F961C62F83D9C70F495_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 is not covered by SRC-001 because the approval scope is relationship_onboarding, while SRC-003 requires scope_code=transaction_execution and an amount_limit meeting 28600.00 before execution.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-7F961C62F83D9C70F495",
+      "packet_index_1based": 8,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/023_T3FNSCOUT-7F961C62F83D9C70F495_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Policy (SRC-003) requires scope_code=transaction_execution and amount_limit\u202f\u2265\u202f28600.00; SRC-001 provides scope_code=relationship_onboarding and amount_limit=not_applicable, violating both scope and amount conditions despite SRC-002 confirming relationship_status=current.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-7F961C62F83D9C70F495",
+      "packet_index_1based": 8,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/024_T3FNSCOUT-7F961C62F83D9C70F495_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001/SRC-001/SRC-002/SRC-003 all match required fields (endpoint, incident, env=production, action, rollback_owner) per SRC-003.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-2FAE31082C3B7BB03F84",
+      "packet_index_1based": 9,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/025_T3FNSCOUT-2FAE31082C3B7BB03F84_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 matches SRC-001 and SRC-003 requirements are satisfied by SRC-002/SRC-001 for production isolation of EP-3005 under IR-3005.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-2FAE31082C3B7BB03F84",
+      "packet_index_1based": 9,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/026_T3FNSCOUT-2FAE31082C3B7BB03F84_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 provides endpoint EP-3005, incident IR-3005, environment=production, and action isolate_endpoint; SRC-001 supplies incident-commander approval; SRC-002 records the rollback owner; SRC-003 confirms all policy-required fields are present, so the action can proceed now.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-2FAE31082C3B7BB03F84",
+      "packet_index_1based": 9,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/027_T3FNSCOUT-2FAE31082C3B7BB03F84_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 approves only sandbox; SRC-003 requires production env + full policy fields; no matching production approval record exists",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-12B6345237DD46804D7B",
+      "packet_index_1based": 10,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/028_T3FNSCOUT-12B6345237DD46804D7B_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 only approves isolate_endpoint for EP-3005 in sandbox, while the requested action is in production; SRC-003 requires production-specific approval fields, and no production approval record is provided.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-12B6345237DD46804D7B",
+      "packet_index_1based": 10,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/029_T3FNSCOUT-12B6345237DD46804D7B_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Incident commander approval (SRC-001) is recorded for sandbox only, not for the production environment required by the request (REQ-001); all other policy fields (endpoint, incident, environment, action, rollback_owner) are satisfied (SRC-002, SRC-003), but the missing production-level approval warrants escalation before execution.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-12B6345237DD46804D7B",
+      "packet_index_1based": 10,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/030_T3FNSCOUT-12B6345237DD46804D7B_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001/SRC-001/SRC-002/SRC-003 all match: user/role/expiry + manager_attestation=accepted present.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-0D9094EBD0223307FD74",
+      "packet_index_1based": 11,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/031_T3FNSCOUT-0D9094EBD0223307FD74_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001, SRC-002, and SRC-003 show the requested user/role/expiry are specified and manager attestation is accepted, satisfying policy requirements.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-0D9094EBD0223307FD74",
+      "packet_index_1based": 11,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/032_T3FNSCOUT-0D9094EBD0223307FD74_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "All required policy elements are satisfied: user U-3006, role_group vendor_master_write, expiry 2026-07-06T18:00Z, and manager attestation accepted (SRC-001, SRC-002, SRC-003).",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-0D9094EBD0223307FD74",
+      "packet_index_1based": 11,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/033_T3FNSCOUT-0D9094EBD0223307FD74_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 approves only vendor_master_read (not write) for U-3006; REQ-001 requests write role with no matching approval record.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-21D6AD05329C20B52A88",
+      "packet_index_1based": 12,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/034_T3FNSCOUT-21D6AD05329C20B52A88_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 matches the request; SRC-001 provides the user and role context with expiry, and SRC-002 confirms manager attestation accepted as required by SRC-003.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-21D6AD05329C20B52A88",
+      "packet_index_1based": 12,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/035_T3FNSCOUT-21D6AD05329C20B52A88_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Request (REQ-001) is for role vendor_master_write, but approval (SRC-001) only grants vendor_master_read, conflicting with policy (SRC-003) that requires the role_group to match; manager attestation (SRC-002) is accepted, yet the role mismatch means the action cannot proceed without further verification.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-21D6AD05329C20B52A88",
+      "packet_index_1based": 12,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/036_T3FNSCOUT-21D6AD05329C20B52A88_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001/SRC-002/SRC-003 confirm exact match on dataset/partner/scope + active DPA + policy requirements.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-718378DD3CCC3FA8CA15",
+      "packet_index_1based": 13,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/037_T3FNSCOUT-718378DD3CCC3FA8CA15_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 matches SRC-001 exactly for dataset/partner/scope, and SRC-002 confirms active DPA as required by SRC-003.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-718378DD3CCC3FA8CA15",
+      "packet_index_1based": 13,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/038_T3FNSCOUT-718378DD3CCC3FA8CA15_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Request aligns with data-sharing approval (SRC-001), DPA is active (SRC-002), and policy requirements are satisfied (SRC-003)",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-718378DD3CCC3FA8CA15",
+      "packet_index_1based": 13,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/039_T3FNSCOUT-718378DD3CCC3FA8CA15_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Scope mismatch (row_level_pseudonymous vs aggregate_metrics in SRC-001); SRC-003 requires exact match.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-5E75F3107DD347024533",
+      "packet_index_1based": 14,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/040_T3FNSCOUT-5E75F3107DD347024533_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 only approves export_scope=aggregate_metrics, not row_level_pseudonymous, so the request does not match the approval; SRC-003 requires scope matching before execution.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-5E75F3107DD347024533",
+      "packet_index_1based": 14,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/041_T3FNSCOUT-5E75F3107DD347024533_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Export scope row_level_pseudonymous (REQ-001) is not covered by the approved scope aggregate_metrics (SRC-001); policy (SRC-003) requires matching scope, though DPA is active (SRC-002) and dataset/partner match, so the request must be escalated.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-5E75F3107DD347024533",
+      "packet_index_1based": 14,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/042_T3FNSCOUT-5E75F3107DD347024533_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Total 51200<=52000 (SRC-001), supplier+commodity match (SRC-002), policy met (SRC-003)",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-D08A29967F961DF0A385",
+      "packet_index_1based": 15,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/043_T3FNSCOUT-D08A29967F961DF0A385_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 sets an exception approval limit of 52000.00 for PO-3008, and SRC-002/SRC-003 confirm supplier and commodity match; the requested total 51200.00 is within limit.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-D08A29967F961DF0A385",
+      "packet_index_1based": 15,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/044_T3FNSCOUT-D08A29967F961DF0A385_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Total 51200.00 is within the exception amount_limit 52000.00 (SRC-001), supplier and commodity match are confirmed (SRC-002), satisfying the policy requirement (SRC-003).",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-D08A29967F961DF0A385",
+      "packet_index_1based": 15,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/045_T3FNSCOUT-D08A29967F961DF0A385_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "total=51200 exceeds amount_limit=50000 (SRC-001, SRC-003) despite REQ-001/SRC-002 matches",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-1DFDD600F3A9F628931C",
+      "packet_index_1based": 16,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/046_T3FNSCOUT-1DFDD600F3A9F628931C_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 total 51200.00 exceeds SRC-001 amount_limit 50000.00; SRC-003 requires total <= amount_limit despite SRC-002 match.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-1DFDD600F3A9F628931C",
+      "packet_index_1based": 16,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/047_T3FNSCOUT-1DFDD600F3A9F628931C_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Total of PO-3008 (51200.00) exceeds the approved amount_limit (50000.00) per SRC-001, violating the policy requirement that total must be \u2264 amount_limit (SRC-003).",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-1DFDD600F3A9F628931C",
+      "packet_index_1based": 16,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/048_T3FNSCOUT-1DFDD600F3A9F628931C_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001/SRC-002/SRC-003 confirm v4.3 equality and policy match for REQ-001.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-29D8D4E4876B1466E6E1",
+      "packet_index_1based": 17,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/049_T3FNSCOUT-29D8D4E4876B1466E6E1_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 and SRC-002 confirm v4.3 is approved and checksum-bound for FIL-3009, and SRC-003\u2019s policy condition is satisfied.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-29D8D4E4876B1466E6E1",
+      "packet_index_1based": 17,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/050_T3FNSCOUT-29D8D4E4876B1466E6E1_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 confirms signer approval version\u202fv4.3 for FIL-3009, SRC-002 shows the court package checksum binds final_version\u202fv4.3, and SRC-003 requires that signer approval version equal final_version and checksum package-these conditions are met (see REQ-001).",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-29D8D4E4876B1466E6E1",
+      "packet_index_1based": 17,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/051_T3FNSCOUT-29D8D4E4876B1466E6E1_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 (v4.2) != REQ-001/SRC-002 (v4.3) violating SRC-003 policy",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-96BB9E8EB6B5D9A748FC",
+      "packet_index_1based": 18,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/052_T3FNSCOUT-96BB9E8EB6B5D9A748FC_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-001 shows signer approval is for v4.2, while SRC-003 requires signer approval version to equal final_version and checksum package; the request is for v4.3 (REQ-001, SRC-002).",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-96BB9E8EB6B5D9A748FC",
+      "packet_index_1based": 18,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/053_T3FNSCOUT-96BB9E8EB6B5D9A748FC_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Signer approval version (SRC-001: v4.2) does not match the requested final_version (REQ-001: v4.3), violating policy SRC-003 which requires signer approval version to equal final_version and checksum before submission.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-96BB9E8EB6B5D9A748FC",
+      "packet_index_1based": 18,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/054_T3FNSCOUT-96BB9E8EB6B5D9A748FC_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "All policy reqs met (SRC-001/SRC-002/SRC-003 match REQ-001)",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-F5CB1CA813BDAA26CA01",
+      "packet_index_1based": 19,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/055_T3FNSCOUT-F5CB1CA813BDAA26CA01_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 matches the approved scope and targets in SRC-001, and SRC-002 confirms billing status is valid as required by SRC-003.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-F5CB1CA813BDAA26CA01",
+      "packet_index_1based": 19,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/056_T3FNSCOUT-F5CB1CA813BDAA26CA01_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Required subscription S-3010, add-on AO-3010, scope add_on_expansion (SRC-001) and billing status valid (SRC-002) satisfy policy (SRC-003).",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-F5CB1CA813BDAA26CA01",
+      "packet_index_1based": 19,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/057_T3FNSCOUT-F5CB1CA813BDAA26CA01_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "Scope mismatch: SRC-001 approves only renewal while SRC-003 requires scope_code=add_on_expansion for AO-3010 activation.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "T3FNSCOUT-B212083CDD3C1B7ED530",
+      "packet_index_1based": 20,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/058_T3FNSCOUT-B212083CDD3C1B7ED530_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "REQ-001 matches the required add-on expansion; SRC-003 allows this action when subscription/add-on/scope_code=billing conditions are met, and SRC-002 confirms billing is valid for S-3010/AO-3010.",
+          "verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "T3FNSCOUT-B212083CDD3C1B7ED530",
+      "packet_index_1based": 20,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/059_T3FNSCOUT-B212083CDD3C1B7ED530_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SRC-001",
+          "SRC-002",
+          "SRC-003"
+        ],
+        "failures": [],
+        "gate_name": "TIER3_FN_TARGETED_MINING_SOLO_OUTPUT_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "reason": "SRC-003 requires scope_code=add_on_expansion and billing status valid; SRC-002 confirms billing valid, but SRC-001 lists only scope_code=renewal for subscription S-3010, indicating the required add-on expansion scope is absent, so the request must be escalated.",
+          "verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "T3FNSCOUT-B212083CDD3C1B7ED530",
+      "packet_index_1based": 20,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/060_T3FNSCOUT-B212083CDD3C1B7ED530_minimax.json"
+    }
+  ],
+  "run_dir": "docs/benchmark/holoverify_tier3_fn_targeted_mining_scout_solo_runs_2026_07_05/run_20260704T144349Z",
+  "runtime_manifest": "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+  "runtime_manifest_sha256": "76bdfb90d03007038ee67b26e1b3939eefb43f122908d9635951d5294990edd2",
+  "scoring_map_loaded": false,
+  "source_runtime_manifest": "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+  "source_runtime_manifest_sha256": "76bdfb90d03007038ee67b26e1b3939eefb43f122908d9635951d5294990edd2",
+  "trace_frozen_before_scoring": true
+}

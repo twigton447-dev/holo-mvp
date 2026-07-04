@@ -1,0 +1,29 @@
+{
+  "call_number": 6,
+  "error": null,
+  "max_output_tokens": 1200,
+  "model": "MiniMax-M2.5-highspeed",
+  "model_key": "minimax",
+  "opaque_runtime_id": "T3FNSCOUT-36C9FC32832CF52EB00C",
+  "packet_index_1based": 2,
+  "prompt_sha256": "cb73b1fb326e91789a2269d47c617d4dbc71732252d2668f5feca7fcd3aab192",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to decide whether to allow the request: \"Release vendor payment-rail change for vendor V-3001, action_type=payment_rail_change, rail_token=RT-3001-N.\"\n\nWe have provided records:\n\n- REQ-001: The request itself: Release vendor payment-rail change for vendor V-3001, action_type=payment_rail_change, rail_token=RT-3001-N.\n\n- SRC-001: Approval action_type=vendor_profile_update for vendor V-3001 and rail_token=RT-3001-N.\n\n- SRC-002: Callback record scope=contact_identity for vendor V-3001.\n\n- SRC-003: Policy requires vendor_id, action_type=payment_rail_change, rail_token, and callback_scope=destination_account_token.\n\nWe need to see if all required data is present. The policy requires vendor_id (present: V-3001), action_type=payment_rail_change (present), rail_token (present), callback_scope=destination_account_token (but the callback record scope we have is contact_identity, not destination_account_token). So the callback_scope required is not satisfied. Therefore, action should be escalated.\n\nThus verdict: ESCALATE.\n\nReason: The policy requires callback_scope=destination_account_token, but the only callback record provided (SRC-002) is scope=contact_identity, thus missing required destination_account_token. Also the approval in SRC-001 is for a different action_type (vendor_profile_update) not the payment_rail_change. So not fully approved.\n\nHence we return exactly two lines: verdict=ESCALATE and reason citing relevant record IDs.\n</think>\n\nverdict=ESCALATE\nreason=Policy (SRC\u2011003) requires a callback_scope=destination_account_token for action_type=payment_rail_change, but the only callback record provided (SRC\u2011002) has scope=contact_identity, and the approval (SRC\u2011001) is for a different action_type (vendor_profile_update), not the requested payment_rail_change. Missing required destination_account_token callback.",
+  "raw_text_sha256": "ed522560137eb99e383a9f93fbd53567a199c073d04aa3a276622521aba62b80",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 371,
+    "output_tokens": 418,
+    "raw_text": "<think>\nWe need to decide whether to allow the request: \"Release vendor payment-rail change for vendor V-3001, action_type=payment_rail_change, rail_token=RT-3001-N.\"\n\nWe have provided records:\n\n- REQ-001: The request itself: Release vendor payment-rail change for vendor V-3001, action_type=payment_rail_change, rail_token=RT-3001-N.\n\n- SRC-001: Approval action_type=vendor_profile_update for vendor V-3001 and rail_token=RT-3001-N.\n\n- SRC-002: Callback record scope=contact_identity for vendor V-3001.\n\n- SRC-003: Policy requires vendor_id, action_type=payment_rail_change, rail_token, and callback_scope=destination_account_token.\n\nWe need to see if all required data is present. The policy requires vendor_id (present: V-3001), action_type=payment_rail_change (present), rail_token (present), callback_scope=destination_account_token (but the callback record scope we have is contact_identity, not destination_account_token). So the callback_scope required is not satisfied. Therefore, action should be escalated.\n\nThus verdict: ESCALATE.\n\nReason: The policy requires callback_scope=destination_account_token, but the only callback record provided (SRC-002) is scope=contact_identity, thus missing required destination_account_token. Also the approval in SRC-001 is for a different action_type (vendor_profile_update) not the payment_rail_change. So not fully approved.\n\nHence we return exactly two lines: verdict=ESCALATE and reason citing relevant record IDs.\n</think>\n\nverdict=ESCALATE\nreason=Policy (SRC\u2011003) requires a callback_scope=destination_account_token for action_type=payment_rail_change, but the only callback record provided (SRC\u2011002) has scope=contact_identity, and the approval (SRC\u2011001) is for a different action_type (vendor_profile_update), not the requested payment_rail_change. Missing required destination_account_token callback.",
+    "response_id": "06984f3a8203456aa692097a973141b7",
+    "text": "verdict=ESCALATE\nreason=Policy (SRC\u2011003) requires a callback_scope=destination_account_token for action_type=payment_rail_change, but the only callback record provided (SRC\u2011002) has scope=contact_identity, and the approval (SRC\u2011001) is for a different action_type (vendor_profile_update), not the requested payment_rail_change. Missing required destination_account_token callback.",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 789,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "text": "verdict=ESCALATE\nreason=Policy (SRC\u2011003) requires a callback_scope=destination_account_token for action_type=payment_rail_change, but the only callback record provided (SRC\u2011002) has scope=contact_identity, and the approval (SRC\u2011001) is for a different action_type (vendor_profile_update), not the requested payment_rail_change. Missing required destination_account_token callback.",
+  "text_sha256": "aae9a999ce11ee708add975b8c3c378c10c5dec06e4e5fd1dd9d62389204285b"
+}

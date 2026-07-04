@@ -47,7 +47,7 @@ def test_atlas_preflight_stamps_patch_validation_falsifier(tmp_path, monkeypatch
     assert report["expected_provider_calls"] == 60
     assert report["patch_validation_scope"] == script.PATCH_VALIDATION_SCOPE
     assert "does not correct the known failed packet" in report["patch_validation_falsifier"]
-    assert report["selector_policy"]["selector_policy_version"] == "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+    assert report["selector_policy"]["selector_policy_version"] == "SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05"
     assert len(report["selector_policy"]["selector_policy_sha256"]) == 64
     assert report["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
     assert len(report["worker_contract"]["worker_contract_sha256"]) == 64

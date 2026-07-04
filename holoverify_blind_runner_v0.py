@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 
-SELECTOR_POLICY_VERSION = "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+SELECTOR_POLICY_VERSION = "SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05"
 SELECTOR_POLICY_DECISION = (
     "Truth-blind structural selector. Among structurally valid artifacts, "
     "explicit blocker resolution is only eligible when local closure validation "
@@ -23,12 +23,13 @@ SELECTOR_POLICY_DECISION = (
     "cannot win by textually naming a blocker_id unless deterministic code "
     "confirms the closure. A source-grounded ESCALATE blocker can defeat an "
     "ALLOW majority unless a later artifact source-closes it. Deterministic "
-    "source-derived dependency and blocker-closure checks can disqualify "
-    "artifacts that contradict computed source boundaries. Concise final answers "
-    "are warnings, not sole disqualifiers, when the artifact is otherwise "
-    "complete. Within the same blocker/consensus tier, gate-failed corroboration "
-    "from otherwise usable artifacts is considered before citation count and "
-    "earliest-turn tie-breaks."
+    "source-derived dependency, authority-scope, and blocker-closure checks can "
+    "emit blockers and disqualify artifacts that contradict computed source "
+    "boundaries before worker prose, Gov baton text, or selector consensus can "
+    "miss them. Concise final answers are warnings, not sole disqualifiers, when "
+    "the artifact is otherwise complete. Within the same blocker/consensus tier, "
+    "gate-failed corroboration from otherwise usable artifacts is considered "
+    "before citation count and earliest-turn tie-breaks."
 )
 SELECTOR_CRITERIA = (
     "gate_passed",
@@ -499,6 +500,185 @@ def _dependency_check(
     }
 
 
+def _records_of_type(payload: dict, record_type: str) -> list[dict]:
+    normalized_type = _normalize_value(record_type).upper()
+    return [
+        fields
+        for fields in _source_record_fields(payload).values()
+        if _normalize_value(fields.get("_record_type")).upper() == normalized_type
+    ]
+
+
+def _records_matching_fields(records: list[dict], req: dict, fields: Iterable[str]) -> list[dict]:
+    matches: list[dict] = []
+    for record in records:
+        if all(
+            _normalize_value(req.get(field))
+            and _normalize_value(record.get(field)) == _normalize_value(req.get(field))
+            for field in fields
+        ):
+            matches.append(record)
+    return matches
+
+
+def _authority_scope_dependency_checks(payload: dict) -> list[dict]:
+    req = _request_fields(payload)
+    action_type = _normalize_value(req.get("action_type"))
+    checks: list[dict] = []
+
+    if action_type == "activate_add_on":
+        app_records = _records_matching_fields(
+            _records_of_type(payload, "APP"),
+            req,
+            ("subscription", "customer"),
+        )
+        required_scopes = {"add_on_expansion", "add_on_activation", "activate_add_on"}
+        matching_authorities = [
+            record
+            for record in app_records
+            if _normalize_value(record.get("scope_code")) in required_scopes
+            and _normalize_value(record.get("add_on")) == _normalize_value(req.get("add_on"))
+        ]
+        required = "ALLOW" if matching_authorities else "ESCALATE"
+        observed = [
+            {
+                "doc_id": record.get("_doc_id"),
+                "scope_code": record.get("scope_code", ""),
+                "add_on": record.get("add_on", ""),
+            }
+            for record in app_records
+        ]
+        summary = (
+            "add-on activation authority matched requested add_on and scope"
+            if matching_authorities
+            else "requested add-on activation lacks matching add_on authority scope"
+        )
+        checks.append(
+            _dependency_check(
+                "authority_scope_add_on_activation",
+                required,
+                summary,
+                [req.get("_doc_id", ""), *[str(record.get("_doc_id")) for record in app_records]],
+                {
+                    "action_type": req.get("action_type"),
+                    "required_scope_codes": sorted(required_scopes),
+                    "required_add_on": req.get("add_on"),
+                    "observed_authority_records": observed,
+                    "matched_authority_source_ids": [
+                        str(record.get("_doc_id")) for record in matching_authorities
+                    ],
+                },
+            )
+        )
+
+    if action_type == "protocol_start":
+        clearance_records = _records_matching_fields(
+            _records_of_type(payload, "CLR"),
+            req,
+            ("patient_ref", "protocol"),
+        )
+        lab_records = _records_matching_fields(
+            _records_of_type(payload, "LAB"),
+            req,
+            ("patient_ref", "protocol"),
+        )
+        matching_clearances = [
+            record
+            for record in clearance_records
+            if _normalize_value(record.get("scope_code")) == "protocol_start"
+            and bool(str(record.get("clinician") or "").strip())
+        ]
+        accepted_labs = [
+            record
+            for record in lab_records
+            if _normalize_value(record.get("lab_review")) == "accepted"
+        ]
+        required = "ALLOW" if matching_clearances and accepted_labs else "ESCALATE"
+        summary = (
+            "protocol_start clearance and accepted lab review are source-matched"
+            if required == "ALLOW"
+            else "protocol_start lacks matching clearance scope or accepted lab review"
+        )
+        checks.append(
+            _dependency_check(
+                "authority_scope_protocol_start",
+                required,
+                summary,
+                [
+                    req.get("_doc_id", ""),
+                    *[str(record.get("_doc_id")) for record in clearance_records],
+                    *[str(record.get("_doc_id")) for record in lab_records],
+                ],
+                {
+                    "action_type": req.get("action_type"),
+                    "required_scope_code": "protocol_start",
+                    "observed_clearance_records": [
+                        {
+                            "doc_id": record.get("_doc_id"),
+                            "scope_code": record.get("scope_code", ""),
+                            "clinician": record.get("clinician", ""),
+                        }
+                        for record in clearance_records
+                    ],
+                    "accepted_lab_source_ids": [
+                        str(record.get("_doc_id")) for record in accepted_labs
+                    ],
+                    "matched_clearance_source_ids": [
+                        str(record.get("_doc_id")) for record in matching_clearances
+                    ],
+                },
+            )
+        )
+
+    return checks
+
+
+def _deterministic_blockers_from_dependency_failures(row: dict, gate: dict) -> list[dict]:
+    blockers: list[dict] = []
+    for check in gate.get("deterministic_dependency_failures") or []:
+        check_id = str(check.get("check_id") or "")
+        if not check_id.startswith("authority_scope_") or check.get("required_verdict") != "ESCALATE":
+            continue
+        blocker_text = str(check.get("summary") or check_id)
+        computed = dict(check.get("computed") or {})
+        if check_id == "authority_scope_add_on_activation":
+            blocker_type = "ADD_ON_SCOPE_MISMATCH"
+            required_fields = {
+                "action_type": computed.get("action_type"),
+                "scope_code_one_of": computed.get("required_scope_codes"),
+                "add_on": computed.get("required_add_on"),
+            }
+        elif check_id == "authority_scope_protocol_start":
+            blocker_type = "SCOPE_MISMATCH"
+            required_fields = {
+                "action_type": computed.get("action_type"),
+                "scope_code": computed.get("required_scope_code"),
+            }
+        else:
+            blocker_type = "DETERMINISTIC_SCOPE_DEPENDENCY"
+            required_fields = {"action_type": computed.get("action_type")}
+        required_fields = {
+            key: value
+            for key, value in required_fields.items()
+            if value not in (None, "", [])
+        }
+        blockers.append(
+            {
+                "blocker_id": _blocker_id(str(row.get("artifact_id")), f"{check_id}:{blocker_text}"),
+                "blocker_text": blocker_text,
+                "blocker_type": blocker_type,
+                "deterministic_check_id": check_id,
+                "required_closure_fields": required_fields,
+                "source_artifact_id": row.get("artifact_id"),
+                "source_role": row.get("role"),
+                "source_turn_index": row.get("turn_index"),
+                "cited_evidence": check.get("evidence") or [],
+                "source": "deterministic_scope_dependency_gate",
+            }
+        )
+    return blockers
+
+
 def _deterministic_dependency_checks(payload: dict) -> list[dict]:
     """Source-derived checks for computable action-boundary seams.
 
@@ -507,6 +687,7 @@ def _deterministic_dependency_checks(payload: dict) -> list[dict]:
     """
     docs = _source_documents(payload)
     checks: list[dict] = []
+    checks.extend(_authority_scope_dependency_checks(payload))
 
     refund_request = next(
         (
@@ -763,14 +944,14 @@ def _selected_gov_baton_from_gate(gate: dict) -> dict:
         ids = ",".join(str(blocker.get("blocker_id")) for blocker in prior_unresolved[:3])
         repair_target = f"resolve prior blocker ids before ALLOW: {ids}"
         blocked_move = "do not silently drop source-grounded blockers"
-    elif blockers_found:
-        ids = ",".join(str(blocker.get("blocker_id")) for blocker in blockers_found[:3])
-        repair_target = f"stress-test and preserve blocker ids: {ids}"
-        blocked_move = "do not override blocker with consensus unless sources close it"
     elif dependency_failures:
         first = dependency_failures[0]
         repair_target = f"resolve dependency mismatch: {first.get('summary', first.get('check_id'))}"
         blocked_move = "do not collapse separate required controls into general approval"
+    elif blockers_found:
+        ids = ",".join(str(blocker.get("blocker_id")) for blocker in blockers_found[:3])
+        repair_target = f"stress-test and preserve blocker ids: {ids}"
+        blocked_move = "do not override blocker with consensus unless sources close it"
     elif gate.get("passed"):
         repair_target = "preserve source-grounded reasoning"
         blocked_move = "do not invent source IDs"
@@ -881,6 +1062,7 @@ def _gate_worker_output(payload: dict, parsed: dict, active_blockers: list[dict]
         "invented_source_ids": invented,
         "deterministic_dependency_checks": dependency_checks,
         "deterministic_dependency_failures": dependency_failures,
+        "deterministic_dependency_blockers": [],
         "prior_blockers_in": active_blockers,
         "resolved_prior_blockers": resolved_prior,
         "unresolved_prior_blockers": unresolved_prior,
@@ -1150,7 +1332,9 @@ def run_blind_fixture(
             "selector_input_sha256": raw_hash,
             "scorer_input_sha256": raw_hash,
         }
-        gate["blockers_found"] = _blockers_from_parsed(row, parsed, payload)
+        deterministic_blockers = _deterministic_blockers_from_dependency_failures(row, gate)
+        gate["deterministic_dependency_blockers"] = deterministic_blockers
+        gate["blockers_found"] = _blockers_from_parsed(row, parsed, payload) + deterministic_blockers
         worker_rows.append(row)
         call_rows.append(
             {

@@ -53,8 +53,18 @@ def _cedar_payload():
     }
 
 
-def _worker_output(role, verdict, cited, blockers, final_answer, blocker_resolution=""):
+def _worker_output(
+    role,
+    verdict,
+    cited,
+    blockers,
+    final_answer,
+    blocker_resolution="",
+    blocker_type="SOURCE_BOUNDARY_OPEN",
+    structured_blocker_resolution="",
+):
     binding = "SOURCE_BOUNDARY_CLOSED" if verdict == "ALLOW" else "SOURCE_BOUNDARY_OPEN"
+    emitted_blocker_type = blocker_type if blockers else ""
     return "\n".join(
         [
             f"worker_role={role}",
@@ -63,7 +73,9 @@ def _worker_output(role, verdict, cited, blockers, final_answer, blocker_resolut
             "action_boundary=goodwill credit against trailing spend cap",
             f"cited_evidence={cited}",
             f"open_blockers={blockers}",
+            f"blocker_type={emitted_blocker_type}",
             f"blocker_resolution={blocker_resolution}",
+            f"structured_blocker_resolution={structured_blocker_resolution}",
             f"final_answer={final_answer}",
         ]
     )
@@ -151,12 +163,14 @@ def test_direct_selector_repair_consensus_is_truth_blind():
 def test_selector_policy_identity_is_stable_and_explicit():
     identity = runner.selector_policy_identity()
 
-    assert identity["selector_policy_version"] == "SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04"
-    assert "explicit blocker resolution outranks simple verdict consensus" in identity["selector_policy_decision"]
-    assert "Deterministic source-derived dependency checks" in identity["selector_policy_decision"]
+    assert identity["selector_policy_version"] == "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+    assert "deterministic code confirms the closure" in identity["selector_policy_decision"]
+    assert "blocker-closure checks" in identity["selector_policy_decision"]
     assert len(identity["selector_policy_sha256"]) == 64
     assert "blocker_resolution_clean" in identity["selector_criteria"]
     assert "blocker_resolution_complete" in identity["selector_criteria"]
+    assert "closure_validation_clean" in identity["selector_criteria"]
+    assert "all_prior_blockers_source_closed" in identity["selector_criteria"]
     assert "source_boundary_open_with_blocker" in identity["selector_criteria"]
     assert "verdict_consensus_count" in identity["selector_criteria"]
     assert "final_turn_consensus_repair" in identity["selector_criteria"]
@@ -231,9 +245,9 @@ def test_runtime_result_stamps_selector_version_and_hash(tmp_path):
 
     result = runner.run_blind_fixture(_cedar_payload(), transcripts, str(tmp_path))
 
-    assert result["selector_policy"]["selector_policy_version"] == "SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04"
+    assert result["selector_policy"]["selector_policy_version"] == "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
     assert len(result["selector_policy"]["selector_policy_sha256"]) == 64
-    assert result["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04"
+    assert result["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
     assert len(result["worker_contract"]["worker_contract_sha256"]) == 64
 
 

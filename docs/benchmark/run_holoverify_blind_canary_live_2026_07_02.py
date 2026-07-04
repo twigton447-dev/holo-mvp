@@ -243,16 +243,12 @@ def validate_live_output_contract(slot: str, response: dict[str, Any]) -> None:
         expected_first_line = f"worker_role={slot}"
         if not text.lstrip().startswith(expected_first_line):
             raise BLIND.BlindRunnerContentFailure(f"{slot}_worker_contract_bad_prefix")
-        required = (
-            "worker_role",
-            "verification_verdict",
-            "action_boundary",
-            "binding_class",
-            "cited_evidence",
-            "blocker_resolution",
-            "final_answer",
-        )
-        missing = [key for key in required if key not in parsed or (key != "blocker_resolution" and not parsed.get(key))]
+        optional_empty = {"blocker_resolution", "structured_blocker_resolution", "blocker_type"}
+        missing = [
+            key
+            for key in BLIND.REQUIRED_WORKER_KEYS
+            if key not in parsed or (key not in optional_empty and not parsed.get(key))
+        ]
         if missing:
             raise BLIND.BlindRunnerContentFailure(f"{slot}_worker_contract_missing:{','.join(missing)}")
         if parsed.get("worker_role") != slot:
@@ -496,7 +492,9 @@ def make_mock_transport() -> Any:
                 "action_boundary=blind runtime firewall fixture boundary",
                 f"cited_evidence={cited}",
                 "open_blockers=fixture unresolved dependency",
+                "blocker_type=SOURCE_BOUNDARY_OPEN",
                 "blocker_resolution=",
+                "structured_blocker_resolution=",
                 "final_answer=Fixture output for no-provider prompt leakage preflight only.",
             ]
         )

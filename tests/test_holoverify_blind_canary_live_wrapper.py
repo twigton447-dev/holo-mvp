@@ -52,9 +52,9 @@ def test_preflight_passes_without_provider_calls(tmp_path, monkeypatch):
     assert report["scoring_map_access_control"]["live_wrapper_has_scoring_map_path"] is False
     assert "test_preflight_does_not_read_scoring_map_bytes" in report["scoring_map_access_control"]["preflight_read_guard_enforced_by"]
     assert report["posthoc_scoring_required_after_trace_freeze"] is True
-    assert report["selector_policy"]["selector_policy_version"] == "SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04"
+    assert report["selector_policy"]["selector_policy_version"] == "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
     assert len(report["selector_policy"]["selector_policy_sha256"]) == 64
-    assert report["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04"
+    assert report["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
     assert len(report["worker_contract"]["worker_contract_sha256"]) == 64
 
 
@@ -202,7 +202,9 @@ def test_worker_output_must_start_with_worker_role():
                         "binding_class=SOURCE_BOUNDARY_CLOSED",
                         "action_boundary=closed by current source",
                         "cited_evidence=SRC-1",
+                        "blocker_type=",
                         "blocker_resolution=",
+                        "structured_blocker_resolution=",
                         "final_answer=ALLOW because the cited source closes the current action boundary.",
                     ]
                 ),
@@ -225,7 +227,9 @@ def test_worker_output_role_must_match_slot():
                         "binding_class=SOURCE_BOUNDARY_CLOSED",
                         "action_boundary=closed by current source",
                         "cited_evidence=SRC-1",
+                        "blocker_type=",
                         "blocker_resolution=",
+                        "structured_blocker_resolution=",
                         "final_answer=ALLOW because the cited source closes the current action boundary.",
                     ]
                 ),
@@ -281,7 +285,9 @@ def test_w3_hidden_thinking_plus_valid_artifact_passes_after_strip():
             "action_boundary=invoice ID link remains unresolved",
             "cited_evidence=SRC-1|SRC-2",
             "open_blockers=invoice ID link missing",
+            "blocker_type=SOURCE_BOUNDARY_OPEN",
             "blocker_resolution=",
+            "structured_blocker_resolution=",
             "final_answer=ESCALATE because the visible source support leaves the action boundary open.",
         ]
     )
@@ -354,14 +360,16 @@ def test_w3_prompt_uses_final_compiler_output_firewall():
     joined = "\n".join(message["content"] for message in messages)
 
     assert messages[0]["role"] == "system"
-    assert "W3 ARTIFACT-FIRST CONTRACT V3" in joined
+    assert "W3 ARTIFACT-FIRST CONTRACT V4" in joined
     assert "W3 ARTIFACT-FIRST GUARD" in joined
     assert "The first output characters must be exactly: worker_role=W3" in joined
     assert "Do not emit hidden thinking" in joined
     assert "If uncertain, still emit the compact artifact immediately." in joined
-    assert "Represent ambiguity only with verification_verdict, binding_class, open_blockers, blocker_resolution, and final_answer." in joined
+    assert "Represent ambiguity only with verification_verdict, binding_class, open_blockers, blocker_type, blocker_resolution, structured_blocker_resolution, and final_answer." in joined
     assert "ACTIVE BLOCKER LEDGER" in joined
+    assert "INVALID CLOSURE LEDGER" in joined
     assert "blocker_resolution=<empty if no prior blockers or ESCALATE" in joined
+    assert "structured_blocker_resolution=<empty if no prior blockers or ESCALATE" in joined
     assert "First visible output line must be worker_role=W3" in joined
     assert "packet_truth" not in joined
 
@@ -378,7 +386,9 @@ def test_valid_contract_passes():
                     "action_boundary=closed by current source",
                     "binding_class=SOURCE_BOUNDARY_CLOSED",
                     "cited_evidence=SRC-1",
+                    "blocker_type=",
                     "blocker_resolution=",
+                    "structured_blocker_resolution=",
                     "final_answer=The current source closes the exact requested action boundary.",
                 ]
             ),

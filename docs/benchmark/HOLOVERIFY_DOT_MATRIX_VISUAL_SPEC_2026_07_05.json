@@ -1,0 +1,290 @@
+{
+  "artifact_id": "HOLOVERIFY_DOT_MATRIX_VISUAL_SPEC_2026_07_05",
+  "date": "2026-07-05",
+  "callsign": "HoloAtlas",
+  "status": "PASS_NO_PROVIDER_VISUAL_SPEC_RECOMMENDATION",
+  "audience": [
+    "Taylor",
+    "HoloOps"
+  ],
+  "constraints_observed": {
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "gov_run": false,
+    "judges_run": false,
+    "public_site_files_edited": false,
+    "frozen_runtime_evidence_edited": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "core_recommendation": {
+    "square_represents": "sibling_pair",
+    "dot_represents": "one solo model opportunity on one sibling packet",
+    "dots_per_square": 6,
+    "dot_grid": {
+      "rows": [
+        "solo_model_1",
+        "solo_model_2",
+        "solo_model_3"
+      ],
+      "columns": [
+        "allow_sibling",
+        "escalate_sibling"
+      ]
+    },
+    "domain_role": "row_or_filter",
+    "failure_class_role": "badge_outline_filter_and_tooltip_label",
+    "reasoning": "The sibling pair is the visual unit that preserves the ALLOW versus ESCALATE boundary while each dot remains traceable to a concrete model verdict opportunity."
+  },
+  "legend": [
+    {
+      "mark": "green_dot",
+      "meaning": "correct_and_admissible",
+      "count_rule": "count only inside the explicitly selected lane"
+    },
+    {
+      "mark": "red_dot",
+      "meaning": "wrong_verdict",
+      "count_rule": "count only inside the explicitly selected lane"
+    },
+    {
+      "mark": "amber_dot",
+      "meaning": "parse_or_admissibility_failure",
+      "count_rule": "track separately from semantic wrong verdicts"
+    },
+    {
+      "mark": "gray_dot",
+      "meaning": "quarantined_packet_packet_key_defect_or_excluded_evidence",
+      "count_rule": "excluded from numerator and denominator"
+    },
+    {
+      "mark": "green_ring_over_red",
+      "meaning": "HoloVerify rescued a solo failure in an internal hardening lane",
+      "count_rule": "not public denominator evidence unless separately admitted"
+    },
+    {
+      "mark": "red_ring_or_outline",
+      "meaning": "HoloVerify failed or failure class remains unpatched",
+      "count_rule": "link to failure class patch and rerun status"
+    }
+  ],
+  "evidence_modes": [
+    {
+      "id": "public_blind_120",
+      "label": "Public blind-120",
+      "description": "Only admitted public denominator evidence.",
+      "warning": "This is the only public benchmark denominator."
+    },
+    {
+      "id": "solo_stress_lane",
+      "label": "Solo stress lane",
+      "description": "Selected solo failure material and seam discovery.",
+      "warning": "Selected for pressure testing; not representative public denominator evidence."
+    },
+    {
+      "id": "holo_rescue_internal",
+      "label": "Holo rescue / hardening",
+      "description": "Internal HoloVerify repair and rerun evidence.",
+      "warning": "Internal hardening evidence only unless separately admitted."
+    },
+    {
+      "id": "quarantine",
+      "label": "Quarantine",
+      "description": "Packet/key defects invalid runs and excluded evidence.",
+      "warning": "Excluded from scores and denominator claims."
+    }
+  ],
+  "domain_layout": {
+    "default": "domain_rows_with_pair_squares_across_each_row",
+    "domains": [
+      "AP / procurement",
+      "Legal / contracts",
+      "Clinical",
+      "Banking / finance",
+      "Security / IAM",
+      "Agentic commerce",
+      "Public sector",
+      "Infrastructure / operations"
+    ],
+    "filters": [
+      "failure_class",
+      "evidence_mode",
+      "verdict_type",
+      "patch_status",
+      "quarantine_status"
+    ],
+    "candidate_or_quarantine_rule": "Mark candidate-only or quarantined material separately and do not mix it into public-denominator counts."
+  },
+  "toggle_behavior": {
+    "solo_view": "Show all six solo dots per sibling-pair square.",
+    "holo_view": "Keep solo dot positions fixed and add a HoloVerify overlay so rescued red dots and unresolved red dots remain visually traceable.",
+    "holo_rescued_dot": "Convert to green or add a green rescue ring, with internal-only claim boundary.",
+    "holo_failed_dot": "Keep red and link to failure class patch status rerun status and regression fixture status.",
+    "parse_failure_dot": "Keep amber unless the selected lane has a clean admissible rerun; do not silently convert parse failure into semantic correctness.",
+    "quarantined_dot": "Keep gray in every view and suppress score aggregation."
+  },
+  "failure_class_taxonomy": [
+    {
+      "display_label": "FN false allow",
+      "atlas_class": "SOLO_FN_FALSE_ALLOW",
+      "definition": "Source-open ESCALATE packet is incorrectly allowed."
+    },
+    {
+      "display_label": "FP overblock",
+      "atlas_class": "SOLO_FP_OVERBLOCK",
+      "definition": "Source-closed ALLOW packet is incorrectly blocked."
+    },
+    {
+      "display_label": "Parse/admissibility",
+      "atlas_class": "SOLO_PARSE_ADMISSIBILITY_FAILURE",
+      "definition": "Output cannot be scored as a clean verdict."
+    },
+    {
+      "display_label": "Blocker closure failure",
+      "atlas_class": "FALSE_BLOCKER_CLOSURE_ACCEPTED",
+      "definition": "A claimed closure does not actually close the source-visible blocker."
+    },
+    {
+      "display_label": "Scope dependency non-detection",
+      "atlas_class": "V5_SCOPE_DEPENDENCY_NON_DETECTION",
+      "related_classes": [
+        "BLOCKER_NOT_DETECTED_BY_ANY_WORKER"
+      ],
+      "definition": "No worker or gate detects the required source-field dependency."
+    },
+    {
+      "display_label": "Packet/key defect quarantine",
+      "atlas_class": "PACKET_KEY_DEFECT",
+      "definition": "Expected answer depends on source-invisible or defective packet/key material."
+    }
+  ],
+  "tooltip_schema": [
+    {
+      "field": "dataset_mode",
+      "type": "enum",
+      "values": [
+        "public_blind_120",
+        "solo_stress_lane",
+        "holo_rescue_internal",
+        "quarantine"
+      ]
+    },
+    {
+      "field": "denominator_status",
+      "type": "enum",
+      "values": [
+        "included",
+        "internal_only",
+        "candidate_only",
+        "excluded"
+      ]
+    },
+    {
+      "field": "pair_id",
+      "type": "string",
+      "public_safe": true
+    },
+    {
+      "field": "packet_id",
+      "type": "string",
+      "public_safe": true
+    },
+    {
+      "field": "sibling_side",
+      "type": "enum",
+      "values": [
+        "ALLOW",
+        "ESCALATE"
+      ]
+    },
+    {
+      "field": "model",
+      "type": "string_or_anonymized_model_slot"
+    },
+    {
+      "field": "verdict",
+      "type": "string"
+    },
+    {
+      "field": "truth",
+      "type": "string",
+      "boundary": "Internal audit truth or expected source-visible verdict; public views should label this as expected verdict and must not expose hidden labels."
+    },
+    {
+      "field": "failure_class",
+      "type": "atlas_failure_class"
+    },
+    {
+      "field": "packet_domain",
+      "type": "domain"
+    },
+    {
+      "field": "holo_rescued",
+      "type": "enum",
+      "values": [
+        "true",
+        "false",
+        "not_run",
+        "not_applicable"
+      ]
+    },
+    {
+      "field": "holo_result",
+      "type": "string"
+    },
+    {
+      "field": "patch_version",
+      "type": "enum",
+      "values": [
+        "V4",
+        "V5",
+        "V6",
+        "none"
+      ]
+    },
+    {
+      "field": "rerun_status",
+      "type": "enum",
+      "values": [
+        "pending",
+        "passed",
+        "failed",
+        "partial",
+        "not_applicable"
+      ]
+    },
+    {
+      "field": "regression_fixture",
+      "type": "boolean"
+    },
+    {
+      "field": "quarantine_reason",
+      "type": "enum_or_none",
+      "values": [
+        "packet_key_defect",
+        "invalid_run",
+        "provider_transport_failure",
+        "parse_only",
+        "none"
+      ]
+    },
+    {
+      "field": "evidence_ref",
+      "type": "file_backed_reference"
+    }
+  ],
+  "misleading_claim_controls": [
+    "Never aggregate public blind-120 solo stress Holo rescue and quarantine lanes into one score.",
+    "Never hide unresolved Holo failures behind a green aggregate.",
+    "Never display answer keys sibling truth shortcuts scoring-map contents or prompt-visible hidden labels.",
+    "Keep packet/key defects gray and excluded even if visually useful as cautionary examples.",
+    "Use explicit lane labels and denominator badges in every exported image."
+  ],
+  "claim_boundary_warning_text": "This matrix is a failure atlas, not one blended benchmark score. The public denominator is blind-120 only. Solo stress lanes are selected to expose execution-boundary failures. Holo rescue and rerun lanes are internal hardening evidence unless separately admitted. Gray quarantined packets are excluded. Red dots do not mean AI is useless; they show scattered wrong or unusable decisions that are unacceptable at high-stakes execution boundaries.",
+  "source_map": [
+    "docs/benchmark/HOLOVERIFY_BLINDSPOT_ATLAS_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_BLINDSPOT_ATLAS_2026_07_05.json"
+  ]
+}

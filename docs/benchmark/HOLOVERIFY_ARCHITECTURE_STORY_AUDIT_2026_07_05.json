@@ -1,0 +1,120 @@
+{
+  "artifact_id": "HOLOVERIFY_ARCHITECTURE_STORY_AUDIT_2026_07_05",
+  "callsign": "HoloArchitecture",
+  "date": "2026-07-05",
+  "status": "RECOMMENDATION_ARTIFACT_NO_PROVIDER",
+  "audience": [
+    "Taylor",
+    "HoloOps"
+  ],
+  "constraints_observed": {
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "gov_run": false,
+    "judges_run": false,
+    "public_site_files_edited": false
+  },
+  "core_thesis": "Models are useful for analysis, extraction, summarization, and option generation, but too brittle to trust as the final execution gate for high-stakes action-boundary decisions.",
+  "what_holoverify_is": {
+    "plain_english": "HoloVerify is a governed decision architecture that asks whether a high-stakes action may proceed now using only visible source records.",
+    "not": [
+      "not just a better prompt",
+      "not just more models voting",
+      "not a claim that models stop being fallible"
+    ],
+    "adds": [
+      "structured worker/Gov turns",
+      "source-boundary discipline",
+      "deterministic gates",
+      "blocker ledgers",
+      "post-hoc traceability",
+      "failure preservation and patch regression"
+    ]
+  },
+  "action_boundary_definitions": {
+    "procurement": "May the organization create, change, approve, or pay this vendor, purchase order, payment rail, or release request now?",
+    "legal": "May the organization sign, release, settle, disclose, waive, or rely on this legal authority now?",
+    "finance": "May the organization move money, recognize revenue, change bank details, approve an expense, or close a financial control now?",
+    "clinical": "May the organization activate treatment, start a protocol, administer medication, release a result, or rely on clinical clearance now?",
+    "security": "May the organization grant access, change a privileged role, disable a control, execute containment, or act on an incident now?",
+    "contracts": "May the organization bind itself to this clause, renewal, amendment, order, discount, termination, or approval now?"
+  },
+  "solo_model_failure_modes": [
+    {
+      "name": "false_allow_underblock",
+      "plain_english": "The model says go ahead when a required approval, scope, amount, identity, timing, or authority field is missing."
+    },
+    {
+      "name": "false_escalation_overblock",
+      "plain_english": "The model blocks a valid action because it sounds sensitive even though visible records close the boundary."
+    },
+    {
+      "name": "parse_admissibility_brittleness",
+      "plain_english": "The model answers in the wrong shape, omits required fields, or produces prose that cannot be safely consumed."
+    },
+    {
+      "name": "vendor_inconsistency",
+      "plain_english": "Different model families reach different answers or rely on different facts for the same packet."
+    },
+    {
+      "name": "equal_verdicts_unequal_reasons",
+      "plain_english": "Two models may give the same verdict while one is source-grounded and the other is guessing from tone or adjacent authority."
+    }
+  ],
+  "why_90_to_96_percent_is_not_enough": {
+    "plain_english": "At an action boundary, a 4-10 percent miss rate can mean several serious errors per 100 high-stakes decisions.",
+    "examples": [
+      "payments released to the wrong account or without payment-rail authority",
+      "vendor-master changes approved from a plausible request instead of current source records",
+      "treatment or protocol activation started from scheduling or triage evidence that does not authorize treatment",
+      "contract changes treated as binding without the required clause, signer, scope, or approval",
+      "privileged access granted without the right tenant, environment, asset, or approval"
+    ]
+  },
+  "what_changes_when_holo_is_added": {
+    "structured_worker_gov_turns": "Workers produce constrained artifacts and Gov carries bounded state forward.",
+    "source_boundary_discipline": "The system keeps asking whether visible sources close the exact requested action boundary.",
+    "deterministic_gates": "Known source-field checks can fail closed before prose or consensus can hide the mistake.",
+    "blocker_ledgers": "Once a source-grounded blocker appears, later turns must preserve it or close it with specific source fields.",
+    "posthoc_traceability": "Prompts, outputs, trace files, provider calls, and scoring are preserved for audit.",
+    "failure_preservation_and_patch_regression": "Failed runs are preserved, failure classes are named, mechanism-level gates are added, and bounded lanes are rerun."
+  },
+  "analogy": {
+    "name": "surgical_timeout",
+    "text": "A skilled surgeon matters, but surgery also needs patient identity checks, site marking, allergy checks, instrument counts, role separation, and a written record. HoloVerify treats the model as one participant inside a controlled procedure, not as the whole safety system."
+  },
+  "patching_language": {
+    "safe": "We discovered failure classes, converted them into mechanism-level gates, preserved the failed evidence, and reran bounded validation lanes to check whether the mechanism repaired that class.",
+    "unsafe": "We tuned to the test.",
+    "principle": "A mechanism patch learns a general control rule; it does not memorize packet answers. The claim remains bounded to the lane tested."
+  },
+  "unsafe_language": [
+    "HoloVerify is production-safe.",
+    "HoloVerify is universally superior to solo models.",
+    "HoloVerify has solved all action-boundary risk.",
+    "HoloVerify proves global FNR or FPR reduction from internal selected lanes.",
+    "V6 proves FP precision or broad benchmark superiority.",
+    "The old 614 and current blind-120 evidence can be combined into one public denominator.",
+    "Patch-validation evidence is public benchmark evidence."
+  ],
+  "claim_boundary": {
+    "safe_framing": "HoloVerify is an architecture for testing whether governed, source-bound, traceable AI procedures can reduce known solo-model failure classes at high-stakes action boundaries.",
+    "strict_public_denominator": "blind-120 only",
+    "old_614": "stale/historical unless re-admitted under current rules",
+    "v6_tier3_and_broader_v6": "internal selected-lane or internal validation evidence only",
+    "not_claims": [
+      "not public benchmark claims",
+      "not global FNR/FPR claims",
+      "not FP precision evidence",
+      "not general model-superiority evidence",
+      "not production safety certification"
+    ]
+  },
+  "recommendation": [
+    "Use this story for HoloOps and Taylor alignment before editing public pages.",
+    "Keep public copy centered on the action-boundary question, not on model-vs-model spectacle.",
+    "Keep patch language mechanism-level and bounded.",
+    "Keep public claims conservative until a separate public-claim audit approves stronger language."
+  ]
+}

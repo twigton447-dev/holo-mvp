@@ -1,0 +1,175 @@
+{
+  "classification": "HOLOVERIFY_BENCHMARK_STORY_AND_STRESS_MATRIX_RECOMMENDATION_V0",
+  "date": "2026-07-05",
+  "callsign": "HoloStats",
+  "scope": {
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "gov_run": false,
+    "judges_run": false,
+    "public_site_files_edited": false,
+    "frozen_runtime_evidence_edited": false
+  },
+  "benchmark_lanes": [
+    {
+      "lane": "strict_public_blind_denominator",
+      "selection_rule": "Frozen blind packets with balanced truth split and clean runtime controls.",
+      "denominator_treatment": "Current public denominator.",
+      "current_status": "blind-120, 120/120, 60 ALLOW / 60 ESCALATE"
+    },
+    {
+      "lane": "solo_failure_stress_discovery",
+      "selection_rule": "Selected for at least one solo failure across 3 models x 2 siblings.",
+      "denominator_treatment": "Stress inventory only; not natural population FPR/FNR.",
+      "current_status": "Useful for finding seams and adversarial examples."
+    },
+    {
+      "lane": "holo_rescue_internal_hardening",
+      "selection_rule": "Selected from known stress/failure seams.",
+      "denominator_treatment": "Internal repair evidence only.",
+      "current_status": "V5 found miss class; V6 selected-lane repair passed."
+    },
+    {
+      "lane": "future_design_partner_shadow_evidence",
+      "selection_rule": "Future real-world shadow lane under preregistered controls.",
+      "denominator_treatment": "Separate shadow lane unless admitted under public rules.",
+      "current_status": "Future evidence class."
+    }
+  ],
+  "public_numbers_current": {
+    "denominator": "blind-120 only",
+    "packets": 120,
+    "pairs": 60,
+    "allow_packets": 60,
+    "escalate_packets": 60,
+    "holo_correct": 120,
+    "holo_incorrect": 0,
+    "observed_fp": {
+      "count": 0,
+      "denominator": 60,
+      "rate": 0.0,
+      "exact_one_sided_clopper_pearson_95_upper": 0.04870,
+      "wilson_95_upper": 0.06017
+    },
+    "observed_fn": {
+      "count": 0,
+      "denominator": 60,
+      "rate": 0.0,
+      "exact_one_sided_clopper_pearson_95_upper": 0.04870,
+      "wilson_95_upper": 0.06017
+    },
+    "overall_miss": {
+      "count": 0,
+      "denominator": 120,
+      "rate": 0.0,
+      "exact_one_sided_clopper_pearson_95_upper": 0.02466,
+      "wilson_95_upper": 0.03102
+    }
+  },
+  "solo_failure_factory_description": {
+    "description": "A valid stress-test lane selected for at least one solo failure across 3 models x 2 siblings.",
+    "valid_for": [
+      "adversarial seam discovery",
+      "architecture hardening",
+      "red/green stress matrix examples"
+    ],
+    "not_valid_for": [
+      "natural population FPR/FNR",
+      "public denominator expansion",
+      "global model-superiority claims"
+    ],
+    "reason": "The lane is conditioned on observing at least one solo failure, so its failure rate is not an unbiased estimate of natural-world prevalence."
+  },
+  "public_milestones": [
+    {
+      "label": "current",
+      "allow_packets": 60,
+      "escalate_packets": 60,
+      "total_packets": 120,
+      "additional_packets_from_current": 0,
+      "overall_wilson_95_upper": 0.03102,
+      "side_specific_wilson_95_upper": 0.06017
+    },
+    {
+      "label": "small_public_checkpoint",
+      "allow_packets": 75,
+      "escalate_packets": 75,
+      "total_packets": 150,
+      "additional_packets_from_current": 30,
+      "overall_wilson_95_upper": 0.02497,
+      "side_specific_wilson_95_upper": 0.04872
+    },
+    {
+      "label": "recommended_next_clean_milestone",
+      "allow_packets": 150,
+      "escalate_packets": 150,
+      "total_packets": 300,
+      "additional_packets_from_current": 180,
+      "overall_wilson_95_upper": 0.01264,
+      "side_specific_wilson_95_upper": 0.02497
+    },
+    {
+      "label": "phase1_side_specific_under_1pct",
+      "allow_packets": 381,
+      "escalate_packets": 381,
+      "total_packets": 762,
+      "additional_packets_from_current": 642,
+      "overall_wilson_95_upper": 0.00502,
+      "side_specific_wilson_95_upper": 0.00998
+    }
+  ],
+  "red_green_matrix_labeling_scheme": {
+    "dots": [
+      {
+        "dot": "green",
+        "label": "PASS_IN_LANE",
+        "meaning": "Passed the predeclared lane rule with valid controls.",
+        "denominator_effect": "Counts only inside that lane."
+      },
+      {
+        "dot": "red",
+        "label": "FAIL_IN_LANE",
+        "meaning": "Failed the predeclared lane rule with valid controls.",
+        "denominator_effect": "Counts only inside that lane."
+      },
+      {
+        "dot": "yellow",
+        "label": "QUARANTINE_OR_HELD_OUT",
+        "meaning": "Packet/key defect, parse/admissibility, or transport/control issue.",
+        "denominator_effect": "Excluded from wrong-verdict denominator."
+      },
+      {
+        "dot": "gray",
+        "label": "NOT_RUN_OR_PREFLIGHT_ONLY",
+        "meaning": "Built or planned but no valid live/scored run.",
+        "denominator_effect": "No denominator credit."
+      }
+    ],
+    "recommended_columns": [
+      "lane",
+      "selection_type",
+      "result_dot",
+      "packet_count",
+      "pair_count",
+      "claim_class",
+      "public_copy_allowed"
+    ]
+  },
+  "forbidden_language": [
+    "global FPR/FNR from selected solo-failure cases",
+    "Holo beats all models",
+    "mixing blind-120 with old 614",
+    "stress-selected packets represent natural-world prevalence",
+    "internal rescue wins are public denominator evidence",
+    "parse/admissibility held-out or packet-key quarantine lanes are wrong-verdict denominators",
+    "red/green stress matrix totals are public reliability rates unless the lane was predeclared as a public denominator"
+  ],
+  "source_map": [
+    "docs/benchmark/HOLOVERIFY_LIVING_SEAM_ATLAS_AND_ARCHITECTURE_LEDGER_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_BLIND_120_BATCH001_012_POSTHOC_SCORE_CHECKPOINT_2026_07_03.json",
+    "docs/benchmark/HOLOVERIFY_BLIND_120_PACKET_BANK_FREEZE_2026_07_03.json",
+    "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_MASTER_SCOREBOARD_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V6_BROADER_VALIDATION_PLAN_2026_07_05.json"
+  ]
+}

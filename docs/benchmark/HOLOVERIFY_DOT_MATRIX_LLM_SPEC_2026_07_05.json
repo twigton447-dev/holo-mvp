@@ -1,0 +1,339 @@
+{
+  "artifact": "HOLOVERIFY_DOT_MATRIX_LLM_SPEC_2026_07_05",
+  "status": "draft_visual_generation_spec",
+  "purpose": "Give another LLM or designer enough structure to create a wide red/green dot matrix showing solo-model brittleness and HoloVerify coverage without confusing the public denominator.",
+  "audience": [
+    "design partner",
+    "technical reviewer",
+    "non-expert executive"
+  ],
+  "primary_message": "Solo AI is often right, but scattered failures remain across high-stakes action boundaries. HoloVerify is tested as a governed layer that should cover those failures without hiding misses.",
+  "claim_boundary": {
+    "public_denominator": "blind-120 only",
+    "solo_matrix_status": "internal stress evidence, not public FPR/FNR denominator",
+    "holo_overlay_status": "internal rescue or hardening evidence unless separately admitted",
+    "forbidden_claims": [
+      "HoloVerify proves zero risk",
+      "HoloVerify beats all models globally",
+      "The stress matrix is the public error-rate denominator",
+      "The old 614 result is combined with blind-120",
+      "Internal V5/V6 repair lanes are public benchmark proof"
+    ]
+  },
+  "visual_layout": {
+    "format": "wide_matrix_with_zoom",
+    "default_view": "wide",
+    "wide_view_goal": "Show a large field of mostly green dots with scattered red/yellow failures across domains.",
+    "zoom_view_goal": "When a user clicks or zooms into one square, show the six solo dots and the HoloVerify coverage result clearly.",
+    "rows": "domains",
+    "columns": "packet pairs or grouped test cases",
+    "cell_represents": "one sibling pair",
+    "cell_contains": "six solo opportunity dots plus optional HoloVerify overlay",
+    "recommended_orientation": "wide horizontal matrix, domains stacked vertically, pairs running left to right",
+    "mobile_behavior": "show domain filters first, then horizontally scrollable rows, then tap-to-expand cell detail",
+    "desktop_behavior": "show the wide matrix, hover tooltip, click to open zoom panel"
+  },
+  "domain_rows": [
+    {
+      "domain_id": "ap_procurement",
+      "label": "AP / procurement",
+      "examples": [
+        "vendor bank change",
+        "payment release",
+        "invoice approval scope"
+      ]
+    },
+    {
+      "domain_id": "legal_contracts",
+      "label": "Legal / contracts",
+      "examples": [
+        "filing approval",
+        "contract amendment",
+        "signature authority"
+      ]
+    },
+    {
+      "domain_id": "clinical",
+      "label": "Clinical",
+      "examples": [
+        "treatment activation",
+        "medication workflow",
+        "triage versus treatment"
+      ]
+    },
+    {
+      "domain_id": "finance_banking",
+      "label": "Finance / banking",
+      "examples": [
+        "wire release",
+        "relationship review",
+        "account control"
+      ]
+    },
+    {
+      "domain_id": "security_iam",
+      "label": "Security / IAM",
+      "examples": [
+        "privileged access",
+        "role scope",
+        "tenant boundary"
+      ]
+    },
+    {
+      "domain_id": "agentic_commerce",
+      "label": "Agentic commerce",
+      "examples": [
+        "refund",
+        "subscription add-on",
+        "order execution"
+      ]
+    },
+    {
+      "domain_id": "public_sector",
+      "label": "Public sector",
+      "examples": [
+        "citizen records",
+        "benefits release",
+        "case status"
+      ]
+    },
+    {
+      "domain_id": "infrastructure_ops",
+      "label": "Infrastructure / operations",
+      "examples": [
+        "cloud change",
+        "utility control",
+        "incident response"
+      ]
+    }
+  ],
+  "legend": {
+    "dot_colors": {
+      "green": {
+        "label": "Correct",
+        "meaning": "Solo model gave the correct and admissible action-boundary verdict."
+      },
+      "red": {
+        "label": "Wrong call",
+        "meaning": "Solo model made the wrong action-boundary verdict."
+      },
+      "yellow": {
+        "label": "Format failure",
+        "meaning": "Solo model failed parse or admissibility rules."
+      },
+      "gray": {
+        "label": "Quarantined",
+        "meaning": "Packet or key defect. Do not count."
+      }
+    },
+    "holo_overlay": {
+      "green_ring": "HoloVerify covered a solo failure in an internal rescue or hardening lane.",
+      "red_ring": "HoloVerify also failed or the failure is still unresolved.",
+      "blue_outline": "Public blind-120 counted packet.",
+      "gray_slash": "Excluded or quarantined."
+    }
+  },
+  "six_dot_cell_model": {
+    "cell_label": "one sibling pair",
+    "dot_order": [
+      "xai_allow",
+      "openai_allow",
+      "minimax_allow",
+      "xai_escalate",
+      "openai_escalate",
+      "minimax_escalate"
+    ],
+    "dot_layout": "two rows of three dots",
+    "top_row": "ALLOW sibling",
+    "bottom_row": "ESCALATE sibling",
+    "columns": [
+      "xAI",
+      "OpenAI",
+      "MiniMax"
+    ]
+  },
+  "data_schema": {
+    "matrix": {
+      "version": "string",
+      "claim_boundary": "string",
+      "domains": "array<domain>",
+      "pairs": "array<pair>"
+    },
+    "pair": {
+      "pair_id": "string",
+      "domain_id": "string",
+      "domain_label": "string",
+      "lane": "public_blind | solo_stress | holo_rescue | internal_hardening | quarantine",
+      "failure_class": "string",
+      "counting_status": "public_counted | internal_only | quarantined | historical",
+      "allow_packet_id": "string",
+      "escalate_packet_id": "string",
+      "solo_dots": "array<solo_dot>",
+      "holo_result": "holo_result",
+      "tooltip": "tooltip"
+    },
+    "solo_dot": {
+      "dot_id": "string",
+      "model": "xai/grok-3-mini | openai/gpt-5.4-mini | minimax/MiniMax-M2.5-highspeed",
+      "sibling": "ALLOW | ESCALATE",
+      "status": "green | red | yellow | gray",
+      "solo_verdict": "ALLOW | ESCALATE | PARSE_FAIL | ADMISSIBILITY_FAIL | UNKNOWN",
+      "expected_verdict_display": "ALLOW | ESCALATE | hidden_in_runtime_posthoc_only",
+      "failure_class": "none | false_positive_overblock | false_negative_allow | parse_admissibility | packet_key_defect",
+      "public_counted": "boolean"
+    },
+    "holo_result": {
+      "status": "covered | failed | not_run | quarantined | public_counted_clean",
+      "display_overlay": "green_ring | red_ring | none | gray_slash | blue_outline",
+      "lane": "public_blind | internal_rescue | internal_repair | not_applicable",
+      "score": "string",
+      "claim_boundary": "string"
+    },
+    "tooltip": {
+      "headline": "string",
+      "plain_language_summary": "string",
+      "domain": "string",
+      "action_type": "string",
+      "why_it_is_hard": "string",
+      "solo_failure_summary": "string",
+      "holo_summary": "string",
+      "counting_status": "string",
+      "evidence_link": "string"
+    }
+  },
+  "sample_pair_records": [
+    {
+      "pair_id": "EXAMPLE-AP-001",
+      "domain_id": "ap_procurement",
+      "domain_label": "AP / procurement",
+      "lane": "solo_stress",
+      "failure_class": "false_negative_allow",
+      "counting_status": "internal_only",
+      "allow_packet_id": "EXAMPLE-AP-001-A",
+      "escalate_packet_id": "EXAMPLE-AP-001-B",
+      "solo_dots": [
+        {
+          "dot_id": "EXAMPLE-AP-001-xai-A",
+          "model": "xai/grok-3-mini",
+          "sibling": "ALLOW",
+          "status": "green",
+          "solo_verdict": "ALLOW",
+          "expected_verdict_display": "hidden_in_runtime_posthoc_only",
+          "failure_class": "none",
+          "public_counted": false
+        },
+        {
+          "dot_id": "EXAMPLE-AP-001-openai-A",
+          "model": "openai/gpt-5.4-mini",
+          "sibling": "ALLOW",
+          "status": "green",
+          "solo_verdict": "ALLOW",
+          "expected_verdict_display": "hidden_in_runtime_posthoc_only",
+          "failure_class": "none",
+          "public_counted": false
+        },
+        {
+          "dot_id": "EXAMPLE-AP-001-minimax-A",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "sibling": "ALLOW",
+          "status": "green",
+          "solo_verdict": "ALLOW",
+          "expected_verdict_display": "hidden_in_runtime_posthoc_only",
+          "failure_class": "none",
+          "public_counted": false
+        },
+        {
+          "dot_id": "EXAMPLE-AP-001-xai-B",
+          "model": "xai/grok-3-mini",
+          "sibling": "ESCALATE",
+          "status": "green",
+          "solo_verdict": "ESCALATE",
+          "expected_verdict_display": "hidden_in_runtime_posthoc_only",
+          "failure_class": "none",
+          "public_counted": false
+        },
+        {
+          "dot_id": "EXAMPLE-AP-001-openai-B",
+          "model": "openai/gpt-5.4-mini",
+          "sibling": "ESCALATE",
+          "status": "red",
+          "solo_verdict": "ALLOW",
+          "expected_verdict_display": "hidden_in_runtime_posthoc_only",
+          "failure_class": "false_negative_allow",
+          "public_counted": false
+        },
+        {
+          "dot_id": "EXAMPLE-AP-001-minimax-B",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "sibling": "ESCALATE",
+          "status": "green",
+          "solo_verdict": "ESCALATE",
+          "expected_verdict_display": "hidden_in_runtime_posthoc_only",
+          "failure_class": "none",
+          "public_counted": false
+        }
+      ],
+      "holo_result": {
+        "status": "covered",
+        "display_overlay": "green_ring",
+        "lane": "internal_rescue",
+        "score": "covered in internal Holo rescue lane",
+        "claim_boundary": "internal hardening evidence only"
+      },
+      "tooltip": {
+        "headline": "Solo model allowed an action that should have escalated.",
+        "plain_language_summary": "The packet looked close, but the evidence did not authorize the requested action.",
+        "domain": "AP / procurement",
+        "action_type": "payment or vendor-control action",
+        "why_it_is_hard": "The allow and escalate siblings differ by a narrow authority or scope detail.",
+        "solo_failure_summary": "One of six solo opportunities failed.",
+        "holo_summary": "HoloVerify covered this failure in an internal hardening lane.",
+        "counting_status": "internal stress evidence, not public denominator",
+        "evidence_link": "replace_with_artifact_path"
+      }
+    }
+  ],
+  "generation_instructions_for_llm": [
+    "Create a wide visual matrix with domains as rows and sibling pairs as columns.",
+    "Each cell must contain exactly six dots arranged as two rows of three.",
+    "Use short plain-English labels. Avoid jargon in the visible UI.",
+    "Include a toggle with three states: Solo view, Holo overlay, Counting status.",
+    "In Solo view, show only the six solo dots.",
+    "In Holo overlay, preserve the solo dots and add rings or overlays to show whether Holo covered the failure.",
+    "In Counting status, shade cells by public counted, internal only, quarantined, or historical.",
+    "Make the first view wide enough to show the pattern: mostly green, scattered red/yellow.",
+    "Make zoom view explain one square in plain English.",
+    "Never label the stress matrix as the public FPR/FNR denominator."
+  ],
+  "copy_blocks": {
+    "short_intro": "Solo AI is often right. The problem is the scattered misses. In high-stakes work, scattered red dots are enough to require a governed action-boundary layer.",
+    "matrix_warning": "This matrix is a failure atlas, not one blended benchmark score. The public denominator is blind-120 only.",
+    "zoom_caption": "Each square is one paired test. The six dots are three solo models across the Allow and Escalate sibling cases.",
+    "holo_overlay_caption": "The Holo overlay shows whether HoloVerify covered the solo failure, failed too, or excluded the packet."
+  },
+  "style_guidance": {
+    "tone": "plain, short, factual",
+    "avoid_words": [
+      "denominator in intro",
+      "action-boundary proof discipline",
+      "governed-runtime counted lane",
+      "admissibility in first screen",
+      "Wilson before basic result"
+    ],
+    "preferred_words": [
+      "counted test set",
+      "safe to act",
+      "wrong call",
+      "format failure",
+      "hard-case test set",
+      "flawed test case"
+    ],
+    "colors": {
+      "green": "#1f9d55",
+      "red": "#d93025",
+      "yellow": "#f4b400",
+      "gray": "#8a8f98",
+      "blue_outline": "#2563eb"
+    }
+  }
+}
